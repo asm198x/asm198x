@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.70](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.69...asm198x-v0.0.70) - 2026-10-16
+
+### Fixed
+
+- Pasmo programs that cross `$FFFF`, including negative `DEFS` counts, now
+  produce the native wrapped memory image with correct labels, entry points
+  and debug addresses. Tape output rejects images that cannot fit a block
+  before replacing an existing file. ([#710](https://github.com/asm198x/asm198x/pull/710))
+- SjASMPlus accepts uppercase and lowercase word expression operators with its
+  native precedence and logical `NOT`, while preserving Pasmo's distinct rules.
+  ([#711](https://github.com/asm198x/asm198x/pull/711))
+- SjASMPlus double-quoted data decodes native backslash escapes and preserves
+  escaped delimiters, packed word/wide values and marked or terminated strings.
+  Formatting retains the same bytes; malformed input preserves prior output.
+  ([#713](https://github.com/asm198x/asm198x/pull/713))
+
 ## [0.0.69](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.68...asm198x-v0.0.69) - 2026-10-16
 
 Native archive publication for 0.0.68 was stopped after finding the regression
