@@ -1,0 +1,7 @@
+{
+  "kind": "candidate",
+  "target": "x86_64-pc-windows-msvc",
+  "qualified": false,
+  "results": [],
+  "error": "SHA-256 mismatch for asm198x-x86_64-pc-windows-msvc.zip"
+}

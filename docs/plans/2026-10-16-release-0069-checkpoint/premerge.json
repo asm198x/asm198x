@@ -1,0 +1,200 @@
+{
+  "head": "267d7c06327f22ab88644f1bf9d7eff84c4b508d",
+  "checks": [
+    {
+      "name": "Build (macos-latest)",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "Replay",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "Coverage",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "Docs",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "Build (windows-latest)",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "Qualify archive (aarch64-apple-darwin)",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "Qualify archive (aarch64-unknown-linux-gnu)",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "Qualify archive (x86_64-apple-darwin)",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "Qualify archive (x86_64-unknown-linux-gnu)",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "Qualify archive (x86_64-pc-windows-msvc)",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "Lua (macos-latest)",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "Format",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "Clippy",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "Web shell (wasm-bindgen)",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "CodeQL",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "Analyze (python)",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "Install release (ubuntu-latest)",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "Install release (windows-latest)",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "Analyze (csharp)",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "Install release (macos-15-intel)",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "host",
+      "state": "SKIPPED"
+    },
+    {
+      "name": "publish-homebrew-formula",
+      "state": "SKIPPED"
+    },
+    {
+      "name": "custom-notify-discord",
+      "state": "SKIPPED"
+    },
+    {
+      "name": "build-local-artifacts (${{ join(matrix.targets, ', ') }})",
+      "state": "SKIPPED"
+    },
+    {
+      "name": "announce",
+      "state": "SKIPPED"
+    },
+    {
+      "name": "custom-test-linux-packages",
+      "state": "SKIPPED"
+    },
+    {
+      "name": "build-global-artifacts",
+      "state": "SKIPPED"
+    },
+    {
+      "name": "Analyze (javascript-typescript)",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "Analyze (actions)",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "Released versions have changelog entries",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "Analyze (rust)",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "Analyze (c-cpp)",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "Lua (ubuntu-latest)",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "Install release (macos-latest)",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "Lua (windows-latest)",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "plan",
+      "state": "SUCCESS"
+    }
+  ],
+  "runs": [
+    {
+      "conclusion": "success",
+      "databaseId": 38907438547,
+      "headSha": "267d7c06327f22ab88644f1bf9d7eff84c4b508d",
+      "status": "completed",
+      "workflowName": "Release PR"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 38907437509,
+      "headSha": "267d7c06327f22ab88644f1bf9d7eff84c4b508d",
+      "status": "completed",
+      "workflowName": "Release PR"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 38907437028,
+      "headSha": "267d7c06327f22ab88644f1bf9d7eff84c4b508d",
+      "status": "completed",
+      "workflowName": "Release"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 38907437084,
+      "headSha": "267d7c06327f22ab88644f1bf9d7eff84c4b508d",
+      "status": "completed",
+      "workflowName": "Setup action"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 38907437010,
+      "headSha": "267d7c06327f22ab88644f1bf9d7eff84c4b508d",
+      "status": "completed",
+      "workflowName": "Candidate packages"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 38907437566,
+      "headSha": "267d7c06327f22ab88644f1bf9d7eff84c4b508d",
+      "status": "completed",
+      "workflowName": "CI"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 38907431261,
+      "headSha": "267d7c06327f22ab88644f1bf9d7eff84c4b508d",
+      "status": "completed",
+      "workflowName": "CodeQL"
+    }
+  ]
+}
