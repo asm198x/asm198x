@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.67](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.66...asm198x-v0.0.67) - 2026-10-16
+
+### Fixed
+
+- *(sjasmplus)* preserve quoted comment delimiters ([#697](https://github.com/asm198x/asm198x/pull/697))
+- *(z80)* preserve character literals in data lists ([#694](https://github.com/asm198x/asm198x/pull/694))
+- *(convert)* explain single-source file resolution limits ([#692](https://github.com/asm198x/asm198x/pull/692))
+- *(pasmo)* preserve semicolons inside quoted data ([#691](https://github.com/asm198x/asm198x/pull/691))
+- *(pasmo)* preserve repetitions inside macro bodies ([#689](https://github.com/asm198x/asm198x/pull/689))
+- *(docs)* describe implemented CLI operation coverage ([#685](https://github.com/asm198x/asm198x/pull/685))
+- *(cli)* preserve wider 68000 disassembly origins ([#683](https://github.com/asm198x/asm198x/pull/683))
+- *(cli)* reject unsupported ordinary disassembly options ([#682](https://github.com/asm198x/asm198x/pull/682))
+- *(packaging)* describe the implemented multi-CPU toolchain ([#676](https://github.com/asm198x/asm198x/pull/676))
+
 ## [0.0.66](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.65...asm198x-v0.0.66) - 2026-10-15
 
 ### Fixed
