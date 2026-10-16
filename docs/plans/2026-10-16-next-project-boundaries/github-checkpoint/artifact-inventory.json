@@ -1,0 +1,425 @@
+{
+  "run": 38945646806,
+  "files": [
+    {
+      "path": "book-ecosystem.md",
+      "length": 4688,
+      "sha256": "1c5c6f9b124e3a7c3e9e7bd8c75e5d646070828bcac391a0c8246af4075c4809"
+    },
+    {
+      "path": "ecosystem-corpus.md",
+      "length": 6217,
+      "sha256": "7c9dce2b1b5f195b62b566dc9c233e31cc8081a4fb1ac07969b4c9e2c125ece6"
+    },
+    {
+      "path": "logs/assembler-version.stderr",
+      "length": 16,
+      "sha256": "86a94f18dcdcf13045a4b30c19427d634411647eac8899c7932e72cf3a57b31a"
+    },
+    {
+      "path": "logs/assembler-version.stdout",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/bradsmith-nes-ca65-example--example-assembler-0.stderr",
+      "length": 48,
+      "sha256": "47bd4f2f7365db76611657d8913f965dde21640f4012bbfc89e5898d3df25c9c"
+    },
+    {
+      "path": "logs/bradsmith-nes-ca65-example--example-assembler-0.stdout",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/bradsmith-nes-ca65-example--example-reference-0.stderr",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/bradsmith-nes-ca65-example--example-reference-0.stdout",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/bradsmith-nes-ca65-example--example-reference-1.stderr",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/bradsmith-nes-ca65-example--example-reference-1.stdout",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/bradsmith-nes-ca65-example--example-version-ca65.stderr",
+      "length": 17,
+      "sha256": "5c22de95322cb1d858e9690b5e3c6e83984c27c5120ff12c49f8dc9679ed2dbc"
+    },
+    {
+      "path": "logs/bradsmith-nes-ca65-example--example-version-ca65.stdout",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/bradsmith-nes-ca65-example--example-version-ld65.stderr",
+      "length": 17,
+      "sha256": "acf0ea5dbac2ff34c3733f092c38a357dd02d80c0d1edf0e05e8a36b92b62445"
+    },
+    {
+      "path": "logs/bradsmith-nes-ca65-example--example-version-ld65.stdout",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/build-assembler.stderr",
+      "length": 1903,
+      "sha256": "004ac0930820d29f6b715dbca1f18570b7326af40900309cbdda488b9b432026"
+    },
+    {
+      "path": "logs/build-assembler.stdout",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/cc65-4510-opcodes--opcode-space-assembler-0.stderr",
+      "length": 66,
+      "sha256": "6a7bb45bab78c751c14f3d3cdb1aaa8d42d3dd179180c91c22b54fc87569dbae"
+    },
+    {
+      "path": "logs/cc65-4510-opcodes--opcode-space-assembler-0.stdout",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/cc65-4510-opcodes--opcode-space-reference-0.stderr",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/cc65-4510-opcodes--opcode-space-reference-0.stdout",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/cc65-4510-opcodes--opcode-space-reference-1.stderr",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/cc65-4510-opcodes--opcode-space-reference-1.stdout",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/cc65-4510-opcodes--opcode-space-version-ca65.stderr",
+      "length": 17,
+      "sha256": "5c22de95322cb1d858e9690b5e3c6e83984c27c5120ff12c49f8dc9679ed2dbc"
+    },
+    {
+      "path": "logs/cc65-4510-opcodes--opcode-space-version-ca65.stdout",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/cc65-4510-opcodes--opcode-space-version-ld65.stderr",
+      "length": 17,
+      "sha256": "acf0ea5dbac2ff34c3733f092c38a357dd02d80c0d1edf0e05e8a36b92b62445"
+    },
+    {
+      "path": "logs/cc65-4510-opcodes--opcode-space-version-ld65.stdout",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/cc65-6502dtv-opcodes--opcode-space-reference-0.stderr",
+      "length": 29,
+      "sha256": "3f1a72723839e0a0fb1338aa6ebde0f9540cc51b2c4911ed6a4b716f1f993b71"
+    },
+    {
+      "path": "logs/cc65-6502dtv-opcodes--opcode-space-reference-0.stdout",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/cc65-6502dtv-opcodes--opcode-space-version-ca65.stderr",
+      "length": 17,
+      "sha256": "5c22de95322cb1d858e9690b5e3c6e83984c27c5120ff12c49f8dc9679ed2dbc"
+    },
+    {
+      "path": "logs/cc65-6502dtv-opcodes--opcode-space-version-ca65.stdout",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/cc65-6502dtv-opcodes--opcode-space-version-ld65.stderr",
+      "length": 17,
+      "sha256": "acf0ea5dbac2ff34c3733f092c38a357dd02d80c0d1edf0e05e8a36b92b62445"
+    },
+    {
+      "path": "logs/cc65-6502dtv-opcodes--opcode-space-version-ld65.stdout",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/cc65-65ce02-opcodes--opcode-space-reference-0.stderr",
+      "length": 28,
+      "sha256": "846e05722d99fb731e93698872d2d21cbba9f17fc6e842619cc54cd211b04b40"
+    },
+    {
+      "path": "logs/cc65-65ce02-opcodes--opcode-space-reference-0.stdout",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/cc65-65ce02-opcodes--opcode-space-version-ca65.stderr",
+      "length": 17,
+      "sha256": "5c22de95322cb1d858e9690b5e3c6e83984c27c5120ff12c49f8dc9679ed2dbc"
+    },
+    {
+      "path": "logs/cc65-65ce02-opcodes--opcode-space-version-ca65.stdout",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/cc65-65ce02-opcodes--opcode-space-version-ld65.stderr",
+      "length": 17,
+      "sha256": "acf0ea5dbac2ff34c3733f092c38a357dd02d80c0d1edf0e05e8a36b92b62445"
+    },
+    {
+      "path": "logs/cc65-65ce02-opcodes--opcode-space-version-ld65.stdout",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/gbdev-gb-asm-tutorial--unbricked-assembler-0.stderr",
+      "length": 67,
+      "sha256": "3fa1c5b2c07df14a59ee260ee00ede1778169dfa4f43ba02f86cacc0e305cce2"
+    },
+    {
+      "path": "logs/gbdev-gb-asm-tutorial--unbricked-assembler-0.stdout",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/gbdev-gb-asm-tutorial--unbricked-reference-0.stderr",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/gbdev-gb-asm-tutorial--unbricked-reference-0.stdout",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/gbdev-gb-asm-tutorial--unbricked-reference-1.stderr",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/gbdev-gb-asm-tutorial--unbricked-reference-1.stdout",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/gbdev-gb-asm-tutorial--unbricked-reference-2.stderr",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/gbdev-gb-asm-tutorial--unbricked-reference-2.stdout",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/gbdev-gb-asm-tutorial--unbricked-version-rgbasm.stderr",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/gbdev-gb-asm-tutorial--unbricked-version-rgbasm.stdout",
+      "length": 14,
+      "sha256": "097b3dfbed894b21a9b69b253b56f772d29163bdef3c43934e9df9de491e10d6"
+    },
+    {
+      "path": "logs/gbdev-gb-asm-tutorial--unbricked-version-rgbfix.stderr",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/gbdev-gb-asm-tutorial--unbricked-version-rgbfix.stdout",
+      "length": 14,
+      "sha256": "3bbf4f837e35b3792ea108e45bf232fb019c8d2e2b2665064e4187ecd8c08f50"
+    },
+    {
+      "path": "logs/gbdev-gb-asm-tutorial--unbricked-version-rgblink.stderr",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/gbdev-gb-asm-tutorial--unbricked-version-rgblink.stdout",
+      "length": 15,
+      "sha256": "32d76f22c8ccfeb81cbf61fa0ffaca348b8f1833ec698859405236c4dd65ff94"
+    },
+    {
+      "path": "logs/howprice-specnext-invaders--game-assembler-0.stderr",
+      "length": 169,
+      "sha256": "54c005c8a041d14ec7d88b363dccd4c44b0c3364a366ef4beaf622aa7b90e2da"
+    },
+    {
+      "path": "logs/howprice-specnext-invaders--game-assembler-0.stdout",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/howprice-specnext-invaders--game-reference-0.stderr",
+      "length": 511,
+      "sha256": "eb5135377abc905b2df9003cebb1941719ef933ad4a8eb0c2486d350c6a37982"
+    },
+    {
+      "path": "logs/howprice-specnext-invaders--game-reference-0.stdout",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/howprice-specnext-invaders--game-version-sjasmplus.stderr",
+      "length": 77,
+      "sha256": "153a2313d13d4e2a772e730aca3bfcb357b40c903fb17a84d08e04066d27e3e8"
+    },
+    {
+      "path": "logs/howprice-specnext-invaders--game-version-sjasmplus.stdout",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/kindjie-6502assembly--charset-assembler-0.stderr",
+      "length": 55,
+      "sha256": "3cb0c5ee43242c6811f54e7e025ecc4a23e54e7d1c66e3adac348ef9346c279b"
+    },
+    {
+      "path": "logs/kindjie-6502assembly--charset-assembler-0.stdout",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/kindjie-6502assembly--charset-reference-0.stderr",
+      "length": 13963,
+      "sha256": "b187b2ffd55ed36c3047c026dd486ea14826840ae5707ad98c57f4102b04d274"
+    },
+    {
+      "path": "logs/kindjie-6502assembly--charset-reference-0.stdout",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/kindjie-6502assembly--charset-version-acme.stderr",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/kindjie-6502assembly--charset-version-acme.stdout",
+      "length": 81,
+      "sha256": "0f84f62796dc8f5077c6b0cc2245f8cb48bcd6ada92bf8675927cc32553761c2"
+    },
+    {
+      "path": "logs/kindjie-6502assembly--hello-world-assembler-0.stderr",
+      "length": 54,
+      "sha256": "e240b71dc6203c0b55e3c8989da4d3ea218152d49fb3538d24d6db8cffba24ba"
+    },
+    {
+      "path": "logs/kindjie-6502assembly--hello-world-assembler-0.stdout",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/kindjie-6502assembly--hello-world-reference-0.stderr",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/kindjie-6502assembly--hello-world-reference-0.stdout",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/kindjie-6502assembly--hello-world-version-acme.stderr",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/kindjie-6502assembly--hello-world-version-acme.stdout",
+      "length": 81,
+      "sha256": "0f84f62796dc8f5077c6b0cc2245f8cb48bcd6ada92bf8675927cc32553761c2"
+    },
+    {
+      "path": "logs/kindjie-6502assembly--interrupts-assembler-0.stderr",
+      "length": 57,
+      "sha256": "253b6d83233b89c388cbcdfd96d3df93e275a574c848c69226d9067e15e46687"
+    },
+    {
+      "path": "logs/kindjie-6502assembly--interrupts-assembler-0.stdout",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/kindjie-6502assembly--interrupts-reference-0.stderr",
+      "length": 178,
+      "sha256": "25d01683ed9cfa6d5185baa371babcb14e2e199dae359be96979ddf8c847d540"
+    },
+    {
+      "path": "logs/kindjie-6502assembly--interrupts-reference-0.stdout",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/kindjie-6502assembly--interrupts-version-acme.stderr",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/kindjie-6502assembly--interrupts-version-acme.stdout",
+      "length": 81,
+      "sha256": "0f84f62796dc8f5077c6b0cc2245f8cb48bcd6ada92bf8675927cc32553761c2"
+    },
+    {
+      "path": "logs/nicodex-helloami--hello-ami-assembler-0.stderr",
+      "length": 34,
+      "sha256": "a96cc30749ae9338164ff1644edb83547918bee7424f8dd4978f7aa1ca285a81"
+    },
+    {
+      "path": "logs/nicodex-helloami--hello-ami-assembler-0.stdout",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/nicodex-helloami--hello-ami-reference-0.stderr",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/nicodex-helloami--hello-ami-reference-0.stdout",
+      "length": 44,
+      "sha256": "7d562248b1788fcf6b9e32b586cca78e4c981433417eee088d43e5f8d2ed48a4"
+    },
+    {
+      "path": "logs/nicodex-helloami--hello-ami-version-vasmm68k_mot.stderr",
+      "length": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "logs/nicodex-helloami--hello-ami-version-vasmm68k_mot.stdout",
+      "length": 231,
+      "sha256": "4527bb7208bdb6b6f7482853e1a1a048cef2911e052f78adc8da288155dbc3d2"
+    },
+    {
+      "path": "report.json",
+      "length": 927508,
+      "sha256": "c7f01df202bf2207dbb3a484d65dde4601dfa371f0c45463827376ecb0c19e46"
+    },
+    {
+      "path": "sjasmplus-shift-native.json",
+      "length": 235994,
+      "sha256": "777b92ecfd99d3b8ab7ea6f3959aa71e43ccbd06632e88469adc18132c6ebd47"
+    }
+  ]
+}

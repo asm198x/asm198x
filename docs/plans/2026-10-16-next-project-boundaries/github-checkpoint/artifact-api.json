@@ -1,0 +1,20 @@
+{
+  "id": 12065561919,
+  "node_id": "MDg6QXJ0aWZhY3QxMjA2NTU2MTkxOQ==",
+  "name": "ecosystem-build-results",
+  "size_in_bytes": 66220,
+  "url": "https://api.github.com/repos/asm198x/asm198x/actions/artifacts/12065561919",
+  "archive_download_url": "https://api.github.com/repos/asm198x/asm198x/actions/artifacts/12065561919/zip",
+  "expired": false,
+  "digest": "sha256:6a5bc0c8e80b8b06737a762f22821a992c1382c3d261c344296b7cb90514cf76",
+  "created_at": "2026-10-16T18:16:47Z",
+  "updated_at": "2026-10-16T18:16:47Z",
+  "expires_at": "2027-01-14T18:13:14Z",
+  "workflow_run": {
+    "id": 38945646806,
+    "repository_id": 1254221926,
+    "head_repository_id": 1254221926,
+    "head_branch": "main",
+    "head_sha": "c85d1ddf0608013a52b3a3d072e68892d658e255"
+  }
+}

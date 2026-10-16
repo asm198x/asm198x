@@ -53,7 +53,7 @@ successes. Object files and final ROMs are distinct build boundaries.
 
 <!-- generated: xtask ecosystem --markdown -->
 
-Captured at **2026-10-16 16:31:16 UTC**. Asm198x revision `21464e98864f673fd586c46260c4046c03662fcd`; executable SHA-256 `57ddfcbb9650b51c6d213bf18bb0cc60ce4c8239c6c057cfc27766c4dcb772fd`.
+Captured at **2026-10-16 18:15:50 UTC**. Asm198x revision `c85d1ddf0608013a52b3a3d072e68892d658e255`; executable SHA-256 `0ecb53e2cee965c5d5b921100c929f4d147d86b9fb5d49034513779670b0edf6`.
 
 Manifest SHA-256 `a853f20bf150f97a3238c3c92bbd12e68f9a63363ce189aa42abb52e3892a8ef`. These results measure assembly artifact equivalence; emulator execution and real hardware are separate checks. Unrun targets remain unknown.
 
@@ -65,9 +65,9 @@ Manifest SHA-256 `a853f20bf150f97a3238c3c92bbd12e68f9a63363ce189aa42abb52e3892a8
 | NES-ca65-example / `example` | ca65 | equivalent | `example.nes` (40976 bytes, `3ea01a6d817c9be12bacf7459acf07bdd018eb43f7b5d4bc8da77c48bfac0cd1`) |
 | cc65 6502DTV opcode test / `opcode-space` | ca65 | reference_failure | reference assemble step 1 failed: ca65: Invalid CPU: '6502dtv' [issue](https://github.com/asm198x/asm198x/issues/718) |
 | cc65 65CE02 opcode test / `opcode-space` | ca65 | reference_failure | reference assemble step 1 failed: ca65: Invalid CPU: '65ce02' [issue](https://github.com/asm198x/asm198x/issues/718) |
-| cc65 CSG 4510 opcode test / `opcode-space` | ca65 | assembler_rejected | assembler assemble step 1 failed: asm198x: 4510-opcodes.s: config: file area `MAIN` without `fill = yes` writes a partial extent, which is outside this bounded reader [issue](https://github.com/asm198x/asm198x/issues/716) |
+| cc65 CSG 4510 opcode test / `opcode-space` | ca65 | assembler_rejected | assembler assemble step 1 failed: asm198x: 4510-opcodes.s:22: error: `ORA` has no (indirect),z form [issue](https://github.com/asm198x/asm198x/issues/722) |
 | GB ASM Tutorial — Unbricked / `unbricked` | rgbasm | equivalent | `unbricked/bricks/unbricked.gb` (32768 bytes, `c235cb25c228259c80d2c2930cdefc2c22abd48a1e9affeedeabc5e3e570fb85`) |
-| SpecNext Invaders / `game` | sjasmplus | assembler_rejected | assembler assemble step 1 failed: asm198x: src/ayfxplay.asm:345: error: expected a value [issue](https://github.com/asm198x/asm198x/issues/717) |
+| SpecNext Invaders / `game` | sjasmplus | assembler_rejected | assembler assemble step 1 failed: asm198x: src/audio.asm:11: error: malformed character literal [issue](https://github.com/asm198x/asm198x/issues/725) |
 | HelloAmi / `hello-ami` | vasm | equivalent | `HelloAmi` (244 bytes, `826d98fbcae710038965fb94e5366acf8bbf4af1ab11a61c3e2aad5945c32dab`) |
 <!-- /generated -->
 

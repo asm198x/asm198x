@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.71](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.70...asm198x-v0.0.71) - 2026-10-16
+
+### Fixed
+
+- ca65 configurations with unfilled MEMORY areas now emit their used file extents, preserving internal gaps and CPU addresses without appending unused capacity. Filled empty areas and omitted `.res`/`.align` fill bytes also follow native ld65 output. ([#723](https://github.com/asm198x/asm198x/pull/723))
+- SjASMPlus logical expressions now work consistently in ASSERT, EQU, data and IF, with native comparison precedence, -1/zero truth values and eager operand evaluation. ([#726](https://github.com/asm198x/asm198x/pull/726))
+- SjASMPlus shifts now use signed 32-bit operands and intermediate results with native count masking, so expressions such as `1<<32` and `(1<<31)>>31` emit the correct bytes. Oversized numeric literals are rejected. ([#727](https://github.com/asm198x/asm198x/pull/727))
+- Native ecosystem audit uploads now require the complete report, process logs and generated tables, so a partial upload cannot look like a complete capture. ([#729](https://github.com/asm198x/asm198x/pull/729))
+
 ## [0.0.70](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.69...asm198x-v0.0.70) - 2026-10-16
 
 ### Fixed
