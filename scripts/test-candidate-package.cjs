@@ -3,10 +3,10 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const assert = require('node:assert/strict');
-const { createHash } = require('node:crypto');
 const { spawnSync } = require('node:child_process');
-const { versionOf, verifyChecksum, runChecked } = require('../.github/actions/setup/index.cjs');
-const targets = ['aarch64-apple-darwin', 'x86_64-apple-darwin', 'x86_64-pc-windows-msvc', 'x86_64-unknown-linux-gnu', 'aarch64-unknown-linux-gnu'];
+const { verifyChecksum, runChecked } = require('../.github/actions/setup/index.cjs');
+const { targets, sha, packageIdentity, nativeTarget, binaryTarget, archiveIdentity } = require('./package-identity.cjs');
+const { verifyReceipt, sourceIdentity } = require('./build-locked-package.cjs');
 const requiredCases = ['archive_identity', 'version', 'reference_bytes', 'determinism', 'structured_success', 'structured_failure', 'preserve_previous_outputs', 'missing_input_json', 'unknown_cpu', 'incompatible_cpu', 'hardlink_source', 'hardlink_sidecar', 'formatter_container', 'formatter_origin', 'lua', 'upstream_project'];
 const sourceFiles = {
   'LICENSE': '62cd567bc9270c722abcaa6ad88b6a1fe861698d63890f787cc557d2395be203',
@@ -15,45 +15,11 @@ const sourceFiles = {
   'libs/screen.asm': 'd33fbb4f0d549567438138efa38adbb4eb154aa17d6e1c0dee496f065cf469c6',
 };
 const upstreamCommit = '35b4968be3bdd26804a5d195557d1225497a0358';
-const sha = data => createHash('sha256').update(data).digest('hex');
-const archiveName = target => `asm198x-${target}.${target.includes('windows') ? 'zip' : 'tar.xz'}`;
-function packageIdentity(plan, target) {
-  assert(targets.includes(target), 'unsupported target');
-  assert.equal(plan.releases?.length, 1, 'expected one release');
-  const release = plan.releases[0];
-  assert.equal(release.app_name, 'asm198x');
-  const version = versionOf(release.app_version);
-  for (const expected of targets) {
-    const name = archiveName(expected);
-    assert(release.artifacts.includes(name), `plan omits ${expected}`);
-    assert.deepEqual(plan.artifacts[name]?.target_triples, [expected], `wrong planned target ${expected}`);
-    assert.equal(plan.artifacts[name]?.checksum, name + '.sha256');
-  }
-  return { version, archive: archiveName(target), target };
-}
-function nativeTarget(platform = process.platform, arch = process.arch) {
-  const target = { 'darwin-arm64': targets[0], 'darwin-x64': targets[1], 'win32-x64': targets[2], 'linux-x64': targets[3], 'linux-arm64': targets[4] }[`${platform}-${arch}`];
-  assert(target, `unsupported native runner ${platform}/${arch}`);
-  return target;
-}
-function binaryTarget(data) {
-  if (data.subarray(0, 4).equals(Buffer.from([0x7f, 0x45, 0x4c, 0x46]))) {
-    assert.equal(data[4], 2); assert.equal(data[5], 1);
-    return { 62: targets[3], 183: targets[4] }[data.readUInt16LE(18)];
-  }
-  if (data.readUInt32LE(0) === 0xfeedfacf) return { 0x100000c: targets[0], 0x1000007: targets[1] }[data.readUInt32LE(4)];
-  if (data.subarray(0, 2).toString() === 'MZ') {
-    const offset = data.readUInt32LE(0x3c);
-    assert.equal(data.subarray(offset, offset + 4).toString(), 'PE\0\0');
-    if (data.readUInt16LE(offset + 4) === 0x8664) return targets[2];
-  }
-  throw new Error('unknown or unsupported executable architecture');
-}
 function qualifies(results) {
   return results.length === requiredCases.length && new Set(results.map(r => r.name)).size === requiredCases.length &&
     requiredCases.every(name => results.some(r => r.name === name && r.status === 'pass'));
 }
-async function audit(plan, target, dist, { corruptOutput = false, corruptArchive = false } = {}) {
+async function audit(plan, target, dist, { corruptOutput = false, corruptArchive = false, requireSourceLock = false, source = null } = {}) {
   const identity = packageIdentity(plan, target);
   assert.equal(nativeTarget(), target, 'candidate must execute on its native runner');
   const archivePath = path.join(dist, identity.archive);
@@ -62,12 +28,16 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
   const checksum = fs.readFileSync(archivePath + '.sha256', 'utf8');
   verifyChecksum(archive, checksum, identity.archive);
   assert.throws(() => verifyChecksum(Buffer.concat([archive, Buffer.from('corrupt')]), checksum, identity.archive), /SHA-256 mismatch/);
-  const member = target.includes('windows') ? 'asm198x.exe' : `asm198x-${target}/asm198x`;
-  // Git Bash exposes GNU tar, which cannot read ZIP. Windows supplies
-  // libarchive tar in System32, the same extractor used by the setup action.
-  const tar = process.platform === 'win32' ? path.join(process.env.SystemRoot, 'System32', 'tar.exe') : 'tar';
-  const executable = runChecked(tar, ['-xOf', path.basename(archivePath), member], { cwd: path.dirname(archivePath), timeout: 30000, maxBuffer: 128 * 1024 * 1024 });
-  assert.equal(binaryTarget(executable), target, 'archive contains wrong architecture');
+  const artifact = archiveIdentity(plan, target, dist);
+  const executable = artifact.executable;
+  const receiptPath = path.join(dist, `asm198x-${target}-source-lock.json`);
+  let sourceLock = null;
+  if (requireSourceLock || fs.existsSync(receiptPath)) {
+    const receipt = JSON.parse(fs.readFileSync(receiptPath, 'utf8'));
+    const expected = source || sourceIdentity(path.resolve(__dirname, '..'));
+    verifyReceipt(receipt, artifact, expected, source ? null : process.env);
+    sourceLock = receipt;
+  }
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'asm198x-candidate-'));
   const results = [];
   const program = path.join(root, target.includes('windows') ? 'asm198x.exe' : 'asm198x');
@@ -170,7 +140,7 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
         assert.equal(sha(bytes), '16e5a63289e474e84706517c592c0ba7f2ae86b5278d7d1e6eeb9a0c5ef205fc');
       });
     } catch (error) { results.push({ name: 'upstream_project', status: 'unavailable', reason: error.message }); }
-    return { kind: 'candidate', version: identity.version, parsed_plan_sha256: sha(Buffer.from(JSON.stringify(plan))), checkout_commit: process.env.GITHUB_SHA || runChecked('git', ['rev-parse', 'HEAD'], { encoding: 'utf8', timeout: 10000 }).trim(),
+    return { source_lock: sourceLock, source_lock_scope: sourceLock ? 'verified-producer-lock' : 'artifact-only', kind: 'candidate', version: identity.version, parsed_plan_sha256: sha(Buffer.from(JSON.stringify(plan))), checkout_commit: process.env.GITHUB_SHA || runChecked('git', ['rev-parse', 'HEAD'], { encoding: 'utf8', timeout: 10000 }).trim(),
       target, host: { platform: process.platform, arch: process.arch, release: os.release(), node: process.version, github_run: process.env.GITHUB_RUN_ID, github_attempt: process.env.GITHUB_RUN_ATTEMPT },
       archive: identity.archive, archive_sha256: sha(archive), executable_sha256: sha(executable), checksum_mutation_rejected: true,
       fixture: { commit: upstreamCommit, files: sourceFiles }, qualified: qualifies(results), results };
@@ -178,10 +148,11 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
 }
 module.exports = { audit, packageIdentity, nativeTarget, binaryTarget, qualifies, requiredCases, targets };
 if (require.main === module) {
-  const [plan, target, dist, output, control] = process.argv.slice(2);
+  const [plan, target, dist, output, ...flags] = process.argv.slice(2);
+  const control = flags.find(f => f.startsWith('--control-'));
   (async () => {
     assert(plan && target && dist && output, 'usage: node test-candidate-package.cjs <plan.json> <target> <distrib> <report.json> [--control-wrong-bytes]');
-    const report = await audit(JSON.parse(fs.readFileSync(plan, 'utf8')), target, path.resolve(dist), { corruptOutput: control === '--control-wrong-bytes', corruptArchive: control === '--control-corrupt-archive' });
+    const report = await audit(JSON.parse(fs.readFileSync(plan, 'utf8')), target, path.resolve(dist), { corruptOutput: control === '--control-wrong-bytes', corruptArchive: control === '--control-corrupt-archive', requireSourceLock: flags.includes('--require-source-lock'), source: flags.includes('--published-source') && fs.existsSync(path.join(dist, 'published-source.json')) ? JSON.parse(fs.readFileSync(path.join(dist, 'published-source.json'), 'utf8')) : null });
     fs.mkdirSync(path.dirname(path.resolve(output)), { recursive: true }); fs.writeFileSync(output, JSON.stringify(report, null, 2) + '\n');
     console.log(JSON.stringify({ target, qualified: report.qualified, cases: report.results.length, failures: report.results.filter(r => r.status !== 'pass').map(r => r.name) }));
     if (!report.qualified) process.exitCode = 1;

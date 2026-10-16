@@ -74,7 +74,7 @@ jobs:
         run: |
           set -euo pipefail
           node scripts/generate-release-workflow.cjs --check
-          node --test scripts/candidate-package.test.cjs .github/actions/setup/index.test.cjs
+          node --test scripts/candidate-package.test.cjs scripts/source-lock.test.cjs .github/actions/setup/index.test.cjs
       - name: Cache Rust artifacts
         if: inputs.plan == '' && inputs.published-version == ''
         uses: Swatinem/rust-cache@v2
@@ -85,7 +85,7 @@ jobs:
           set -euo pipefail
           mkdir -p target
           dist plan --output-format=json > target/candidate-plan.json
-          dist build --artifacts=all --target "$PACKAGE_TARGET" --output-format=json > target/package-test-manifest.json
+          node scripts/build-locked-package.cjs "$PACKAGE_TARGET" target/package-test-manifest.json target/distrib -- dist build --artifacts=all --target "$PACKAGE_TARGET" --output-format=json
       - name: Download published archives for post-release reconciliation
         if: inputs.published-version != ''
         shell: bash
@@ -111,13 +111,17 @@ jobs:
           mkdir -p "$RUNNER_TEMP/qualification"
           cp target/candidate-plan.json "$RUNNER_TEMP/qualification/plan.json"
           node -e "require('node:fs').writeFileSync(process.argv[1],JSON.stringify({kind:process.env.PUBLISHED_VERSION?'published-release':'candidate',published_version:process.env.PUBLISHED_VERSION||null,checkout_commit:process.env.GITHUB_SHA,run:process.env.GITHUB_RUN_ID}))" "$RUNNER_TEMP/qualification/acquisition.json"
-          node scripts/test-candidate-package.cjs target/candidate-plan.json "$PACKAGE_TARGET" target/distrib "$RUNNER_TEMP/qualification/report.json"
-          if node scripts/test-candidate-package.cjs target/candidate-plan.json "$PACKAGE_TARGET" target/distrib "$RUNNER_TEMP/qualification/wrong-bytes.json" --control-wrong-bytes; then
+          receipt_flags=(--require-source-lock)
+          if [ -n "$PUBLISHED_VERSION" ]; then
+            receipt_flags=(--published-source)
+          fi
+          node scripts/test-candidate-package.cjs target/candidate-plan.json "$PACKAGE_TARGET" target/distrib "$RUNNER_TEMP/qualification/report.json" "${receipt_flags[@]}"
+          if node scripts/test-candidate-package.cjs target/candidate-plan.json "$PACKAGE_TARGET" target/distrib "$RUNNER_TEMP/qualification/wrong-bytes.json" --control-wrong-bytes "${receipt_flags[@]}"; then
             echo 'Wrong bytes unexpectedly qualified' >&2
             exit 1
           fi
           node -e "const r=require(process.argv[1]);if(r.qualified!==false||!r.results.some(x=>x.name==='reference_bytes'&&x.status==='fail'))process.exit(1)" "$RUNNER_TEMP/qualification/wrong-bytes.json"
-          if node scripts/test-candidate-package.cjs target/candidate-plan.json "$PACKAGE_TARGET" target/distrib "$RUNNER_TEMP/qualification/corrupt-archive.json" --control-corrupt-archive; then
+          if node scripts/test-candidate-package.cjs target/candidate-plan.json "$PACKAGE_TARGET" target/distrib "$RUNNER_TEMP/qualification/corrupt-archive.json" --control-corrupt-archive "${receipt_flags[@]}"; then
             echo 'Corrupted archive unexpectedly qualified' >&2
             exit 1
           fi
