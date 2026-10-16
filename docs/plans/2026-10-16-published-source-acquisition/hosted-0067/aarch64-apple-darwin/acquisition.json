@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "kind": "published-release",
+  "published_version": "0.0.67",
+  "target": "aarch64-apple-darwin",
+  "checkout_commit": "3f36f70eba002868202ea222dd2f24a49ccf6734",
+  "run": "38916453960",
+  "status": "acquired",
+  "stage": "complete",
+  "receipt": "present"
+}

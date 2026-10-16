@@ -32,3 +32,35 @@ acquisition record, without weakening archive validation or adding broad retries
 
 Workspace: `/private/tmp/asm198x-published-source-acquisition`.
 Lane: Asm198x package-acquisition reliability; no emulator or ISA changes.
+
+## Local verification and hosted comparison
+
+Five regressions fail before the implementation; 44 scoped package/setup/source-
+lock tests pass after it. Pinned cargo-dist 0.32.0 generation and prose checks
+pass. The authenticated API refuses redirects; public asset/raw requests receive
+no token. HTTP failure diagnostics retain only bounded approved headers.
+
+Run 38916453960 uses the patched acquisition with old 0.0.67: all five hosts
+acquire successfully, then reject four later-added Pasmo/ca65 regression cases.
+Those failures remain version-specific evidence, not a green qualification.
+Run 38916705512 separately reconciles 0.0.69 against the current gate. Retain
+both outcomes; do not change old artefacts or relax the newer gate for 0.0.67.
+
+## Outcome
+
+Run 38916705512 succeeds on all five native hosts with the exact 0.0.69
+publication: each acquisition is retained as acquired, all 28 qualification
+cases pass, and wrong-byte/corrupt-archive controls reject. The 0.0.67 run stays
+failed with its four later-added regression failures. No archive, receipt or
+source check was relaxed. This validates Asm package acquisition/qualification;
+it does not qualify the remaining Windows Build/Emu journey.
+
+Run `node docs/plans/2026-10-16-published-source-acquisition/verify-evidence.cjs`
+to check retained hashes, both five-host outcomes and a rejecting missing-case
+control. Firmware, credentials and downloaded executables are absent. Native
+tested code commit: 3f36f70eba002868202ea222dd2f24a49ccf6734. Subsequent changes
+retain documentation/evidence only.
+
+All local reproduction directories and generation scratch were removed by their
+bounded runners. Remove this linked worktree after remote retention verification.
+No merge, release, installed-tool change or new CI workflow was performed.
