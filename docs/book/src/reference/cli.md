@@ -53,13 +53,15 @@ the input's name with a `.bin` extension.
 ### `disasm` — disassemble
 
 ```
-asm198x disasm [-d <dialect>] [--org <addr>] <input.bin>
+asm198x disasm [-d <dialect>] [--cpu <target>] [--org <addr>] <input.bin>
 ```
 
-Writes a listing to stdout. The CPU follows the dialect: a 6502 dialect
-disassembles as 6502, otherwise Z80 — so pass `-d` when the default is wrong.
-`--org` sets the address the first byte is placed at, which changes how branch
-and absolute operands render.
+Writes a linear listing to stdout. The decoder follows `--cpu`, or the default
+CPU of `--dialect` when no target is given; see [Targets](#targets) for compatible
+selections. With neither option, the default is the 6502. See
+[Dialects](#dialects) for the implemented front-ends and aliases.
+`--org` sets the address of the first byte, which changes how branch operands
+render.
 
 <!-- sample: acme, file: fill.a -->
 ```asm
@@ -81,10 +83,26 @@ The origin is not in the binary — a flat binary is bytes and nothing else — 
 `--org` is how you tell the disassembler where they were meant to live. Leave it
 out and the same bytes read as if they sat at `$0000`.
 
+For a 68000 binary `branch.bin` containing bytes `60 02`, this command places the
+branch at `$10000`:
+
+```sh
+asm198x disasm --dialect vasm --org 0x10000 branch.bin
+```
+
+Its listing is:
+
+```text
+    bra.s $10004
+```
+
+For code/data ranges, labels and source verified by reassembly, use the separate
+opt-in [6502 recovery workflow](#verified-6502-recovery).
+
 ### `fmt` — reformat
 
 ```
-asm198x fmt [--cpu <target>] <input.asm> [-o <out.asm>]
+asm198x fmt [-d <dialect>] [--cpu <target>] <input.asm> [-o <out.asm>]
 ```
 
 Canonical layout: labels at column 0, operations indented, own-line comments on
@@ -94,6 +112,17 @@ idempotent, and formatted source reassembles to the same bytes.
 
 Writes to **stdout** unless `-o` is given; it never rewrites the input in place.
 To format a file over itself, write to a new path and move it.
+
+Choose the source syntax with `--dialect`, or its initial CPU with `--cpu`, using
+the same [dialect and target guidance](#dialects). For the ACME `fill.a` example
+above:
+
+```sh
+asm198x fmt --dialect acme fill.a -o formatted.a
+asm198x --dialect acme formatted.a -o formatted.bin
+```
+
+The rebuilt binary contains the same `A9 51 60` bytes as the original source.
 
 <!-- sample: pasmo, file: border.asm -->
 ```asm

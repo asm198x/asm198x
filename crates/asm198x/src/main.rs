@@ -812,7 +812,7 @@ fn run(args: &[String]) -> Result<String, String> {
             u32::from(narrow_origin.clone()?)
         };
         let bytes = std::fs::read(input).map_err(|e| format!("cannot read {input}: {e}"))?;
-        // A 6502 dialect disassembles to 6502 syntax; otherwise Z80.
+        // Use the decoder for the resolved dialect and CPU.
         match assembler {
             Assembler::Acme | Assembler::Ca65 => {
                 print!("{}", asm198x::listing_6502(&bytes, narrow_origin?));
@@ -2053,8 +2053,8 @@ fn usage() -> String {
      \x20            [--label ADDRESS:NAME]... <input.bin> [-o <new-source.a>]\n\
      \x20            (raw 6502, end-exclusive CPU ranges; unmarked bytes are data;\n\
      \x20             data overrides code; output is verified by reassembly)\n\
-     format:      asm198x fmt [--cpu <pasmo|sjasmplus|8080|6800|1802|scmp|rgbasm|6809>] <input.asm> [-o <out.asm>]\n\
-     \x20            (canonical layout, comments + operand spelling preserved; Z80/8080/6800/1802/scmp/rgbasm/6809)\n\
+     format:      asm198x fmt [-d <dialect>] [--cpu <target>] <input.asm> [-o <out.asm>]\n\
+     \x20            (canonical layout, comments + operand spelling preserved; see dialects below)\n\
      explain:     asm198x --explain <code>\n\
      version:     asm198x --version (also -V, or `asm198x version`)\n\n\
      targets (--cpu):   z80 (default for pasmo), z80n (Spectrum Next; default\n\
