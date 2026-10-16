@@ -1,0 +1,1525 @@
+{
+  "host": {
+    "platform": "macOS-27.0-arm64-arm-64bit-Mach-O",
+    "machine": "arm64",
+    "python": "3.14.3"
+  },
+  "versions": [
+    {
+      "argv": [
+        "/private/tmp/198x-acme-602-603-scratch/asm198x",
+        "--version"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "asm198x v0.0.67\n"
+    },
+    {
+      "argv": [
+        "/opt/homebrew/Cellar/acme/0.97/bin/acme",
+        "--version"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+      "exit": 0,
+      "stdout": "This is ACME, release 0.97 (\"Zem\"), 28 June 2020\n  Platform independent version.\n",
+      "stderr": ""
+    }
+  ],
+  "executables": {
+    "/private/tmp/198x-acme-602-603-scratch/asm198x": "cf169ea78f9000867dd08dc5e25b4017badbb2e8f2d60df46e6dae398548b941",
+    "/opt/homebrew/Cellar/acme/0.97/bin/acme": "7be6afb147f75c974a48a0540cdb8affc0760ed94bed4d822d95c7e8ee4bb35c"
+  },
+  "records": [
+    {
+      "case": "602_exact",
+      "source": "!cpu 6502\n* = $1001\n        lda #1\n",
+      "format": "plain",
+      "mode": "human",
+      "native": {
+        "argv": [
+          "/opt/homebrew/Cellar/acme/0.97/bin/acme",
+          "-f",
+          "plain",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/native.bin",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "asm198x": {
+        "argv": [
+          "/private/tmp/198x-acme-602-603-scratch/asm198x",
+          "--dialect",
+          "acme",
+          "--message-format",
+          "human",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/result.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 2 byte(s) at $1001 -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/result.bin\n"
+      },
+      "hex": "a901",
+      "status": "pass"
+    },
+    {
+      "case": "602_exact",
+      "source": "!cpu 6502\n* = $1001\n        lda #1\n",
+      "format": "plain",
+      "mode": "json",
+      "native": {
+        "argv": [
+          "/opt/homebrew/Cellar/acme/0.97/bin/acme",
+          "-f",
+          "plain",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/native.bin",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "asm198x": {
+        "argv": [
+          "/private/tmp/198x-acme-602-603-scratch/asm198x",
+          "--dialect",
+          "acme",
+          "--message-format",
+          "json",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/result.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[169,1],\"origin\":4097,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":3,\"offset\":0,\"length\":2}],\"cycles\":[{\"line\":3,\"offset\":0,\"base\":2,\"page_cross\":0,\"branch_taken\":0}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":2,\"free\":65534,\"largest_free\":61437}],\"diagnostics\":[],\"files\":[\"/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a\"]}\n",
+        "stderr": ""
+      },
+      "hex": "a901",
+      "status": "pass"
+    },
+    {
+      "case": "602_exact",
+      "source": "!cpu 6502\n* = $1001\n        lda #1\n",
+      "format": "cbm",
+      "mode": "human",
+      "native": {
+        "argv": [
+          "/opt/homebrew/Cellar/acme/0.97/bin/acme",
+          "-f",
+          "cbm",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/native.bin",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "asm198x": {
+        "argv": [
+          "/private/tmp/198x-acme-602-603-scratch/asm198x",
+          "--dialect",
+          "acme",
+          "--prg",
+          "--message-format",
+          "human",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/result.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 4 byte(s) -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/result.bin (load $1001)\n"
+      },
+      "hex": "0110a901",
+      "status": "pass"
+    },
+    {
+      "case": "602_exact",
+      "source": "!cpu 6502\n* = $1001\n        lda #1\n",
+      "format": "cbm",
+      "mode": "json",
+      "native": {
+        "argv": [
+          "/opt/homebrew/Cellar/acme/0.97/bin/acme",
+          "-f",
+          "cbm",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/native.bin",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "asm198x": {
+        "argv": [
+          "/private/tmp/198x-acme-602-603-scratch/asm198x",
+          "--dialect",
+          "acme",
+          "--prg",
+          "--message-format",
+          "json",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/result.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[169,1],\"origin\":4097,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":3,\"offset\":0,\"length\":2}],\"cycles\":[{\"line\":3,\"offset\":0,\"base\":2,\"page_cross\":0,\"branch_taken\":0}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":2,\"free\":65534,\"largest_free\":61437}],\"diagnostics\":[],\"files\":[\"/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a\"]}\n",
+        "stderr": ""
+      },
+      "hex": "0110a901",
+      "status": "pass"
+    },
+    {
+      "case": "602_exact",
+      "source": "!cpu 6502\n* = $1001\n        lda #1\n",
+      "format": "formatted",
+      "formatter": {
+        "argv": [
+          "/private/tmp/198x-acme-602-603-scratch/asm198x",
+          "fmt",
+          "--dialect",
+          "acme",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/formatted.a"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "formatted /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/formatted.a\n"
+      },
+      "formatted_source": "        !cpu 6502\n        *= $1001\n        lda #1\n",
+      "asm198x": {
+        "argv": [
+          "/private/tmp/198x-acme-602-603-scratch/asm198x",
+          "--dialect",
+          "acme",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/formatted.a",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/formatted.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 2 byte(s) at $1001 -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/formatted.bin\n"
+      },
+      "hex": "a901",
+      "status": "pass"
+    },
+    {
+      "case": "602_selected_cpu",
+      "source": "!cpu 65c02\n* = $1001\n        stz $12\n",
+      "format": "plain",
+      "mode": "human",
+      "native": {
+        "argv": [
+          "/opt/homebrew/Cellar/acme/0.97/bin/acme",
+          "-f",
+          "plain",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/native.bin",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "asm198x": {
+        "argv": [
+          "/private/tmp/198x-acme-602-603-scratch/asm198x",
+          "--dialect",
+          "acme",
+          "--message-format",
+          "human",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/result.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 2 byte(s) at $1001 -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/result.bin\n"
+      },
+      "hex": "6412",
+      "status": "pass"
+    },
+    {
+      "case": "602_selected_cpu",
+      "source": "!cpu 65c02\n* = $1001\n        stz $12\n",
+      "format": "plain",
+      "mode": "json",
+      "native": {
+        "argv": [
+          "/opt/homebrew/Cellar/acme/0.97/bin/acme",
+          "-f",
+          "plain",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/native.bin",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "asm198x": {
+        "argv": [
+          "/private/tmp/198x-acme-602-603-scratch/asm198x",
+          "--dialect",
+          "acme",
+          "--message-format",
+          "json",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/result.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[100,18],\"origin\":4097,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":3,\"offset\":0,\"length\":2}],\"cycles\":[{\"line\":3,\"offset\":0,\"base\":3,\"page_cross\":0,\"branch_taken\":0}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":2,\"free\":65534,\"largest_free\":61437}],\"diagnostics\":[],\"files\":[\"/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a\"]}\n",
+        "stderr": ""
+      },
+      "hex": "6412",
+      "status": "pass"
+    },
+    {
+      "case": "602_selected_cpu",
+      "source": "!cpu 65c02\n* = $1001\n        stz $12\n",
+      "format": "cbm",
+      "mode": "human",
+      "native": {
+        "argv": [
+          "/opt/homebrew/Cellar/acme/0.97/bin/acme",
+          "-f",
+          "cbm",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/native.bin",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "asm198x": {
+        "argv": [
+          "/private/tmp/198x-acme-602-603-scratch/asm198x",
+          "--dialect",
+          "acme",
+          "--prg",
+          "--message-format",
+          "human",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/result.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 4 byte(s) -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/result.bin (load $1001)\n"
+      },
+      "hex": "01106412",
+      "status": "pass"
+    },
+    {
+      "case": "602_selected_cpu",
+      "source": "!cpu 65c02\n* = $1001\n        stz $12\n",
+      "format": "cbm",
+      "mode": "json",
+      "native": {
+        "argv": [
+          "/opt/homebrew/Cellar/acme/0.97/bin/acme",
+          "-f",
+          "cbm",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/native.bin",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "asm198x": {
+        "argv": [
+          "/private/tmp/198x-acme-602-603-scratch/asm198x",
+          "--dialect",
+          "acme",
+          "--prg",
+          "--message-format",
+          "json",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/result.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[100,18],\"origin\":4097,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":3,\"offset\":0,\"length\":2}],\"cycles\":[{\"line\":3,\"offset\":0,\"base\":3,\"page_cross\":0,\"branch_taken\":0}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":2,\"free\":65534,\"largest_free\":61437}],\"diagnostics\":[],\"files\":[\"/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a\"]}\n",
+        "stderr": ""
+      },
+      "hex": "01106412",
+      "status": "pass"
+    },
+    {
+      "case": "602_selected_cpu",
+      "source": "!cpu 65c02\n* = $1001\n        stz $12\n",
+      "format": "formatted",
+      "formatter": {
+        "argv": [
+          "/private/tmp/198x-acme-602-603-scratch/asm198x",
+          "fmt",
+          "--dialect",
+          "acme",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/formatted.a"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "formatted /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/formatted.a\n"
+      },
+      "formatted_source": "        !cpu 65c02\n        *= $1001\n        stz $12\n",
+      "asm198x": {
+        "argv": [
+          "/private/tmp/198x-acme-602-603-scratch/asm198x",
+          "--dialect",
+          "acme",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/formatted.a",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/formatted.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 2 byte(s) at $1001 -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/formatted.bin\n"
+      },
+      "hex": "6412",
+      "status": "pass"
+    },
+    {
+      "case": "603_exact",
+      "source": "        * = $1000\n        nop\n!if * > $0fff {\n        nop\n}\n",
+      "format": "plain",
+      "mode": "human",
+      "native": {
+        "argv": [
+          "/opt/homebrew/Cellar/acme/0.97/bin/acme",
+          "-f",
+          "plain",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/native.bin",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "asm198x": {
+        "argv": [
+          "/private/tmp/198x-acme-602-603-scratch/asm198x",
+          "--dialect",
+          "acme",
+          "--message-format",
+          "human",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/result.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 2 byte(s) at $1000 -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/result.bin\n"
+      },
+      "hex": "eaea",
+      "status": "pass"
+    },
+    {
+      "case": "603_exact",
+      "source": "        * = $1000\n        nop\n!if * > $0fff {\n        nop\n}\n",
+      "format": "plain",
+      "mode": "json",
+      "native": {
+        "argv": [
+          "/opt/homebrew/Cellar/acme/0.97/bin/acme",
+          "-f",
+          "plain",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/native.bin",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "asm198x": {
+        "argv": [
+          "/private/tmp/198x-acme-602-603-scratch/asm198x",
+          "--dialect",
+          "acme",
+          "--message-format",
+          "json",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/result.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[234,234],\"origin\":4096,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":1},{\"line\":4,\"offset\":1,\"length\":1}],\"cycles\":[{\"line\":2,\"offset\":0,\"base\":2,\"page_cross\":0,\"branch_taken\":0},{\"line\":4,\"offset\":1,\"base\":2,\"page_cross\":0,\"branch_taken\":0}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":2,\"free\":65534,\"largest_free\":61438}],\"diagnostics\":[],\"files\":[\"/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a\"]}\n",
+        "stderr": ""
+      },
+      "hex": "eaea",
+      "status": "pass"
+    },
+    {
+      "case": "603_exact",
+      "source": "        * = $1000\n        nop\n!if * > $0fff {\n        nop\n}\n",
+      "format": "cbm",
+      "mode": "human",
+      "native": {
+        "argv": [
+          "/opt/homebrew/Cellar/acme/0.97/bin/acme",
+          "-f",
+          "cbm",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/native.bin",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "asm198x": {
+        "argv": [
+          "/private/tmp/198x-acme-602-603-scratch/asm198x",
+          "--dialect",
+          "acme",
+          "--prg",
+          "--message-format",
+          "human",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/result.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 4 byte(s) -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/result.bin (load $1000)\n"
+      },
+      "hex": "0010eaea",
+      "status": "pass"
+    },
+    {
+      "case": "603_exact",
+      "source": "        * = $1000\n        nop\n!if * > $0fff {\n        nop\n}\n",
+      "format": "cbm",
+      "mode": "json",
+      "native": {
+        "argv": [
+          "/opt/homebrew/Cellar/acme/0.97/bin/acme",
+          "-f",
+          "cbm",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/native.bin",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "asm198x": {
+        "argv": [
+          "/private/tmp/198x-acme-602-603-scratch/asm198x",
+          "--dialect",
+          "acme",
+          "--prg",
+          "--message-format",
+          "json",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/result.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[234,234],\"origin\":4096,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":1},{\"line\":4,\"offset\":1,\"length\":1}],\"cycles\":[{\"line\":2,\"offset\":0,\"base\":2,\"page_cross\":0,\"branch_taken\":0},{\"line\":4,\"offset\":1,\"base\":2,\"page_cross\":0,\"branch_taken\":0}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":2,\"free\":65534,\"largest_free\":61438}],\"diagnostics\":[],\"files\":[\"/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a\"]}\n",
+        "stderr": ""
+      },
+      "hex": "0010eaea",
+      "status": "pass"
+    },
+    {
+      "case": "603_exact",
+      "source": "        * = $1000\n        nop\n!if * > $0fff {\n        nop\n}\n",
+      "format": "formatted",
+      "formatter": {
+        "argv": [
+          "/private/tmp/198x-acme-602-603-scratch/asm198x",
+          "fmt",
+          "--dialect",
+          "acme",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/formatted.a"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "formatted /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/formatted.a\n"
+      },
+      "formatted_source": "        *= $1000\n        nop\n!if * > $0fff {\n        nop\n}\n",
+      "asm198x": {
+        "argv": [
+          "/private/tmp/198x-acme-602-603-scratch/asm198x",
+          "--dialect",
+          "acme",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/formatted.a",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/formatted.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 2 byte(s) at $1000 -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/formatted.bin\n"
+      },
+      "hex": "eaea",
+      "status": "pass"
+    },
+    {
+      "case": "603_false_else",
+      "source": "*=$1000\nnop\n!if * = $1000 { !byte 1 } else { !byte 2 }\n",
+      "format": "plain",
+      "mode": "human",
+      "native": {
+        "argv": [
+          "/opt/homebrew/Cellar/acme/0.97/bin/acme",
+          "-f",
+          "plain",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/native.bin",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "asm198x": {
+        "argv": [
+          "/private/tmp/198x-acme-602-603-scratch/asm198x",
+          "--dialect",
+          "acme",
+          "--message-format",
+          "human",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/result.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 2 byte(s) at $1000 -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/result.bin\n"
+      },
+      "hex": "ea02",
+      "status": "pass"
+    },
+    {
+      "case": "603_false_else",
+      "source": "*=$1000\nnop\n!if * = $1000 { !byte 1 } else { !byte 2 }\n",
+      "format": "plain",
+      "mode": "json",
+      "native": {
+        "argv": [
+          "/opt/homebrew/Cellar/acme/0.97/bin/acme",
+          "-f",
+          "plain",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/native.bin",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "asm198x": {
+        "argv": [
+          "/private/tmp/198x-acme-602-603-scratch/asm198x",
+          "--dialect",
+          "acme",
+          "--message-format",
+          "json",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/result.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[234,2],\"origin\":4096,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":1},{\"line\":3,\"offset\":1,\"length\":1}],\"cycles\":[{\"line\":2,\"offset\":0,\"base\":2,\"page_cross\":0,\"branch_taken\":0}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":2,\"free\":65534,\"largest_free\":61438}],\"diagnostics\":[],\"files\":[\"/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a\"]}\n",
+        "stderr": ""
+      },
+      "hex": "ea02",
+      "status": "pass"
+    },
+    {
+      "case": "603_false_else",
+      "source": "*=$1000\nnop\n!if * = $1000 { !byte 1 } else { !byte 2 }\n",
+      "format": "cbm",
+      "mode": "human",
+      "native": {
+        "argv": [
+          "/opt/homebrew/Cellar/acme/0.97/bin/acme",
+          "-f",
+          "cbm",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/native.bin",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "asm198x": {
+        "argv": [
+          "/private/tmp/198x-acme-602-603-scratch/asm198x",
+          "--dialect",
+          "acme",
+          "--prg",
+          "--message-format",
+          "human",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/result.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 4 byte(s) -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/result.bin (load $1000)\n"
+      },
+      "hex": "0010ea02",
+      "status": "pass"
+    },
+    {
+      "case": "603_false_else",
+      "source": "*=$1000\nnop\n!if * = $1000 { !byte 1 } else { !byte 2 }\n",
+      "format": "cbm",
+      "mode": "json",
+      "native": {
+        "argv": [
+          "/opt/homebrew/Cellar/acme/0.97/bin/acme",
+          "-f",
+          "cbm",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/native.bin",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "asm198x": {
+        "argv": [
+          "/private/tmp/198x-acme-602-603-scratch/asm198x",
+          "--dialect",
+          "acme",
+          "--prg",
+          "--message-format",
+          "json",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/result.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[234,2],\"origin\":4096,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":1},{\"line\":3,\"offset\":1,\"length\":1}],\"cycles\":[{\"line\":2,\"offset\":0,\"base\":2,\"page_cross\":0,\"branch_taken\":0}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":2,\"free\":65534,\"largest_free\":61438}],\"diagnostics\":[],\"files\":[\"/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a\"]}\n",
+        "stderr": ""
+      },
+      "hex": "0010ea02",
+      "status": "pass"
+    },
+    {
+      "case": "603_false_else",
+      "source": "*=$1000\nnop\n!if * = $1000 { !byte 1 } else { !byte 2 }\n",
+      "format": "formatted",
+      "formatter": {
+        "argv": [
+          "/private/tmp/198x-acme-602-603-scratch/asm198x",
+          "fmt",
+          "--dialect",
+          "acme",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/formatted.a"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "formatted /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/formatted.a\n"
+      },
+      "formatted_source": "        *= $1000\n        nop\n!if * = $1000 {\n        !byte 1\n} else {\n        !byte 2\n}\n",
+      "asm198x": {
+        "argv": [
+          "/private/tmp/198x-acme-602-603-scratch/asm198x",
+          "--dialect",
+          "acme",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/formatted.a",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/formatted.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 2 byte(s) at $1000 -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/formatted.bin\n"
+      },
+      "hex": "ea02",
+      "status": "pass"
+    },
+    {
+      "case": "603_advances",
+      "source": "*=$1000\n!if * = $1000 { !byte $11 }\n!if * = $1001 { !byte $22 }\n",
+      "format": "plain",
+      "mode": "human",
+      "native": {
+        "argv": [
+          "/opt/homebrew/Cellar/acme/0.97/bin/acme",
+          "-f",
+          "plain",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/native.bin",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "asm198x": {
+        "argv": [
+          "/private/tmp/198x-acme-602-603-scratch/asm198x",
+          "--dialect",
+          "acme",
+          "--message-format",
+          "human",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/result.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 2 byte(s) at $1000 -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/result.bin\n"
+      },
+      "hex": "1122",
+      "status": "pass"
+    },
+    {
+      "case": "603_advances",
+      "source": "*=$1000\n!if * = $1000 { !byte $11 }\n!if * = $1001 { !byte $22 }\n",
+      "format": "plain",
+      "mode": "json",
+      "native": {
+        "argv": [
+          "/opt/homebrew/Cellar/acme/0.97/bin/acme",
+          "-f",
+          "plain",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/native.bin",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "asm198x": {
+        "argv": [
+          "/private/tmp/198x-acme-602-603-scratch/asm198x",
+          "--dialect",
+          "acme",
+          "--message-format",
+          "json",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/result.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[17,34],\"origin\":4096,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":1},{\"line\":3,\"offset\":1,\"length\":1}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":2,\"free\":65534,\"largest_free\":61438}],\"diagnostics\":[],\"files\":[\"/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a\"]}\n",
+        "stderr": ""
+      },
+      "hex": "1122",
+      "status": "pass"
+    },
+    {
+      "case": "603_advances",
+      "source": "*=$1000\n!if * = $1000 { !byte $11 }\n!if * = $1001 { !byte $22 }\n",
+      "format": "cbm",
+      "mode": "human",
+      "native": {
+        "argv": [
+          "/opt/homebrew/Cellar/acme/0.97/bin/acme",
+          "-f",
+          "cbm",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/native.bin",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "asm198x": {
+        "argv": [
+          "/private/tmp/198x-acme-602-603-scratch/asm198x",
+          "--dialect",
+          "acme",
+          "--prg",
+          "--message-format",
+          "human",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/result.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 4 byte(s) -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/result.bin (load $1000)\n"
+      },
+      "hex": "00101122",
+      "status": "pass"
+    },
+    {
+      "case": "603_advances",
+      "source": "*=$1000\n!if * = $1000 { !byte $11 }\n!if * = $1001 { !byte $22 }\n",
+      "format": "cbm",
+      "mode": "json",
+      "native": {
+        "argv": [
+          "/opt/homebrew/Cellar/acme/0.97/bin/acme",
+          "-f",
+          "cbm",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/native.bin",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "asm198x": {
+        "argv": [
+          "/private/tmp/198x-acme-602-603-scratch/asm198x",
+          "--dialect",
+          "acme",
+          "--prg",
+          "--message-format",
+          "json",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/result.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[17,34],\"origin\":4096,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":1},{\"line\":3,\"offset\":1,\"length\":1}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":2,\"free\":65534,\"largest_free\":61438}],\"diagnostics\":[],\"files\":[\"/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a\"]}\n",
+        "stderr": ""
+      },
+      "hex": "00101122",
+      "status": "pass"
+    },
+    {
+      "case": "603_advances",
+      "source": "*=$1000\n!if * = $1000 { !byte $11 }\n!if * = $1001 { !byte $22 }\n",
+      "format": "formatted",
+      "formatter": {
+        "argv": [
+          "/private/tmp/198x-acme-602-603-scratch/asm198x",
+          "fmt",
+          "--dialect",
+          "acme",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/formatted.a"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "formatted /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/formatted.a\n"
+      },
+      "formatted_source": "        *= $1000\n!if * = $1000 { !byte $11 }\n!if * = $1001 { !byte $22 }\n",
+      "asm198x": {
+        "argv": [
+          "/private/tmp/198x-acme-602-603-scratch/asm198x",
+          "--dialect",
+          "acme",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/formatted.a",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/formatted.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 2 byte(s) at $1000 -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/formatted.bin\n"
+      },
+      "hex": "1122",
+      "status": "pass"
+    },
+    {
+      "case": "603_logical_pc",
+      "source": "*=$1000\n!pseudopc $2000 {\nnop\n!if * = $2001 { !byte 11 } else { !byte 12 }\n}\n!if * = $1002 { !byte 13 }\n",
+      "format": "plain",
+      "mode": "human",
+      "native": {
+        "argv": [
+          "/opt/homebrew/Cellar/acme/0.97/bin/acme",
+          "-f",
+          "plain",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/native.bin",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "asm198x": {
+        "argv": [
+          "/private/tmp/198x-acme-602-603-scratch/asm198x",
+          "--dialect",
+          "acme",
+          "--message-format",
+          "human",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/result.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 3 byte(s) at $1000 -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/result.bin\n"
+      },
+      "hex": "ea0b0d",
+      "status": "pass"
+    },
+    {
+      "case": "603_logical_pc",
+      "source": "*=$1000\n!pseudopc $2000 {\nnop\n!if * = $2001 { !byte 11 } else { !byte 12 }\n}\n!if * = $1002 { !byte 13 }\n",
+      "format": "plain",
+      "mode": "json",
+      "native": {
+        "argv": [
+          "/opt/homebrew/Cellar/acme/0.97/bin/acme",
+          "-f",
+          "plain",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/native.bin",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "asm198x": {
+        "argv": [
+          "/private/tmp/198x-acme-602-603-scratch/asm198x",
+          "--dialect",
+          "acme",
+          "--message-format",
+          "json",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/result.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[234,11,13],\"origin\":4096,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":3,\"offset\":4096,\"length\":1},{\"line\":4,\"offset\":4097,\"length\":1},{\"line\":6,\"offset\":2,\"length\":1}],\"cycles\":[{\"line\":3,\"offset\":4096,\"base\":2,\"page_cross\":0,\"branch_taken\":0}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":3,\"free\":65533,\"largest_free\":61437}],\"diagnostics\":[],\"files\":[\"/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a\"]}\n",
+        "stderr": ""
+      },
+      "hex": "ea0b0d",
+      "status": "pass"
+    },
+    {
+      "case": "603_logical_pc",
+      "source": "*=$1000\n!pseudopc $2000 {\nnop\n!if * = $2001 { !byte 11 } else { !byte 12 }\n}\n!if * = $1002 { !byte 13 }\n",
+      "format": "cbm",
+      "mode": "human",
+      "native": {
+        "argv": [
+          "/opt/homebrew/Cellar/acme/0.97/bin/acme",
+          "-f",
+          "cbm",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/native.bin",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "asm198x": {
+        "argv": [
+          "/private/tmp/198x-acme-602-603-scratch/asm198x",
+          "--dialect",
+          "acme",
+          "--prg",
+          "--message-format",
+          "human",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/result.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 5 byte(s) -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/result.bin (load $1000)\n"
+      },
+      "hex": "0010ea0b0d",
+      "status": "pass"
+    },
+    {
+      "case": "603_logical_pc",
+      "source": "*=$1000\n!pseudopc $2000 {\nnop\n!if * = $2001 { !byte 11 } else { !byte 12 }\n}\n!if * = $1002 { !byte 13 }\n",
+      "format": "cbm",
+      "mode": "json",
+      "native": {
+        "argv": [
+          "/opt/homebrew/Cellar/acme/0.97/bin/acme",
+          "-f",
+          "cbm",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/native.bin",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "asm198x": {
+        "argv": [
+          "/private/tmp/198x-acme-602-603-scratch/asm198x",
+          "--dialect",
+          "acme",
+          "--prg",
+          "--message-format",
+          "json",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/result.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[234,11,13],\"origin\":4096,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":3,\"offset\":4096,\"length\":1},{\"line\":4,\"offset\":4097,\"length\":1},{\"line\":6,\"offset\":2,\"length\":1}],\"cycles\":[{\"line\":3,\"offset\":4096,\"base\":2,\"page_cross\":0,\"branch_taken\":0}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":3,\"free\":65533,\"largest_free\":61437}],\"diagnostics\":[],\"files\":[\"/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a\"]}\n",
+        "stderr": ""
+      },
+      "hex": "0010ea0b0d",
+      "status": "pass"
+    },
+    {
+      "case": "603_logical_pc",
+      "source": "*=$1000\n!pseudopc $2000 {\nnop\n!if * = $2001 { !byte 11 } else { !byte 12 }\n}\n!if * = $1002 { !byte 13 }\n",
+      "format": "formatted",
+      "formatter": {
+        "argv": [
+          "/private/tmp/198x-acme-602-603-scratch/asm198x",
+          "fmt",
+          "--dialect",
+          "acme",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/formatted.a"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "formatted /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/formatted.a\n"
+      },
+      "formatted_source": "        *= $1000\n        !pseudopc $2000 {\n        nop\n!if * = $2001 {\n        !byte 11\n} else {\n        !byte 12\n}\n        }\n!if * = $1002 { !byte 13 }\n",
+      "asm198x": {
+        "argv": [
+          "/private/tmp/198x-acme-602-603-scratch/asm198x",
+          "--dialect",
+          "acme",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/formatted.a",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/formatted.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 3 byte(s) at $1000 -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/formatted.bin\n"
+      },
+      "hex": "ea0b0d",
+      "status": "pass"
+    },
+    {
+      "case": "603_multiply_prefix",
+      "source": "*=$1000\n!if 2 * >$1234 = $24 { !byte 6 }\n",
+      "format": "plain",
+      "mode": "human",
+      "native": {
+        "argv": [
+          "/opt/homebrew/Cellar/acme/0.97/bin/acme",
+          "-f",
+          "plain",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/native.bin",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "asm198x": {
+        "argv": [
+          "/private/tmp/198x-acme-602-603-scratch/asm198x",
+          "--dialect",
+          "acme",
+          "--message-format",
+          "human",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/result.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 1 byte(s) at $1000 -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/result.bin\n"
+      },
+      "hex": "06",
+      "status": "pass"
+    },
+    {
+      "case": "603_multiply_prefix",
+      "source": "*=$1000\n!if 2 * >$1234 = $24 { !byte 6 }\n",
+      "format": "plain",
+      "mode": "json",
+      "native": {
+        "argv": [
+          "/opt/homebrew/Cellar/acme/0.97/bin/acme",
+          "-f",
+          "plain",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/native.bin",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "asm198x": {
+        "argv": [
+          "/private/tmp/198x-acme-602-603-scratch/asm198x",
+          "--dialect",
+          "acme",
+          "--message-format",
+          "json",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/result.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[6],\"origin\":4096,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":1,\"free\":65535,\"largest_free\":61439}],\"diagnostics\":[],\"files\":[\"/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a\"]}\n",
+        "stderr": ""
+      },
+      "hex": "06",
+      "status": "pass"
+    },
+    {
+      "case": "603_multiply_prefix",
+      "source": "*=$1000\n!if 2 * >$1234 = $24 { !byte 6 }\n",
+      "format": "cbm",
+      "mode": "human",
+      "native": {
+        "argv": [
+          "/opt/homebrew/Cellar/acme/0.97/bin/acme",
+          "-f",
+          "cbm",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/native.bin",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "asm198x": {
+        "argv": [
+          "/private/tmp/198x-acme-602-603-scratch/asm198x",
+          "--dialect",
+          "acme",
+          "--prg",
+          "--message-format",
+          "human",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/result.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 3 byte(s) -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/result.bin (load $1000)\n"
+      },
+      "hex": "001006",
+      "status": "pass"
+    },
+    {
+      "case": "603_multiply_prefix",
+      "source": "*=$1000\n!if 2 * >$1234 = $24 { !byte 6 }\n",
+      "format": "cbm",
+      "mode": "json",
+      "native": {
+        "argv": [
+          "/opt/homebrew/Cellar/acme/0.97/bin/acme",
+          "-f",
+          "cbm",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/native.bin",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "asm198x": {
+        "argv": [
+          "/private/tmp/198x-acme-602-603-scratch/asm198x",
+          "--dialect",
+          "acme",
+          "--prg",
+          "--message-format",
+          "json",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/result.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[6],\"origin\":4096,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":1,\"free\":65535,\"largest_free\":61439}],\"diagnostics\":[],\"files\":[\"/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a\"]}\n",
+        "stderr": ""
+      },
+      "hex": "001006",
+      "status": "pass"
+    },
+    {
+      "case": "603_multiply_prefix",
+      "source": "*=$1000\n!if 2 * >$1234 = $24 { !byte 6 }\n",
+      "format": "formatted",
+      "formatter": {
+        "argv": [
+          "/private/tmp/198x-acme-602-603-scratch/asm198x",
+          "fmt",
+          "--dialect",
+          "acme",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/formatted.a"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "formatted /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/formatted.a\n"
+      },
+      "formatted_source": "        *= $1000\n!if 2 * >$1234 = $24 { !byte 6 }\n",
+      "asm198x": {
+        "argv": [
+          "/private/tmp/198x-acme-602-603-scratch/asm198x",
+          "--dialect",
+          "acme",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/formatted.a",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/formatted.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 1 byte(s) at $1000 -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/formatted.bin\n"
+      },
+      "hex": "06",
+      "status": "pass"
+    },
+    {
+      "case": "602_code_without_origin",
+      "source": "!cpu 6502\n lda #1\n",
+      "mode": "human",
+      "native": {
+        "argv": [
+          "/opt/homebrew/Cellar/acme/0.97/bin/acme",
+          "-f",
+          "plain",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/invalid-native.bin",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 1,
+        "stdout": "",
+        "stderr": "Error - File /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a, line 2 (Zone <untitled>): Program counter undefined.\n"
+      },
+      "asm198x": {
+        "argv": [
+          "/private/tmp/198x-acme-602-603-scratch/asm198x",
+          "--dialect",
+          "acme",
+          "--message-format",
+          "human",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/invalid.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a:2: error: program counter undefined \u2014 set an origin (`*=`) before any code or data\n"
+      },
+      "previous_hex": "70726576696f757320696d616765",
+      "after_hex": "70726576696f757320696d616765",
+      "status": "pass"
+    },
+    {
+      "case": "602_code_without_origin",
+      "source": "!cpu 6502\n lda #1\n",
+      "mode": "json",
+      "native": {
+        "argv": [
+          "/opt/homebrew/Cellar/acme/0.97/bin/acme",
+          "-f",
+          "plain",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/invalid-native.bin",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 1,
+        "stdout": "",
+        "stderr": "Error - File /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a, line 2 (Zone <untitled>): Program counter undefined.\n"
+      },
+      "asm198x": {
+        "argv": [
+          "/private/tmp/198x-acme-602-603-scratch/asm198x",
+          "--dialect",
+          "acme",
+          "--message-format",
+          "json",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/invalid.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 1,
+        "stdout": "[{\"span\":{\"file\":0,\"line\":2,\"col\":0,\"expansion_frames\":[],\"path\":\"/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"program counter undefined \u2014 set an origin (`*=`) before any code or data\",\"fix\":null}]\n",
+        "stderr": ""
+      },
+      "previous_hex": "70726576696f757320696d616765",
+      "after_hex": "70726576696f757320696d616765",
+      "status": "pass"
+    },
+    {
+      "case": "603_condition_without_origin",
+      "source": "!if * > 0 { !byte 1 }\n",
+      "mode": "human",
+      "native": {
+        "argv": [
+          "/opt/homebrew/Cellar/acme/0.97/bin/acme",
+          "-f",
+          "plain",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/invalid-native.bin",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 1,
+        "stdout": "",
+        "stderr": "Error - File /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a, line 1 (Zone <untitled>): Value not defined (*).\n"
+      },
+      "asm198x": {
+        "argv": [
+          "/private/tmp/198x-acme-602-603-scratch/asm198x",
+          "--dialect",
+          "acme",
+          "--message-format",
+          "human",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/invalid.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a:1: error: `*` cannot be used here\n"
+      },
+      "previous_hex": "70726576696f757320696d616765",
+      "after_hex": "70726576696f757320696d616765",
+      "status": "pass"
+    },
+    {
+      "case": "603_condition_without_origin",
+      "source": "!if * > 0 { !byte 1 }\n",
+      "mode": "json",
+      "native": {
+        "argv": [
+          "/opt/homebrew/Cellar/acme/0.97/bin/acme",
+          "-f",
+          "plain",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/invalid-native.bin",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 1,
+        "stdout": "",
+        "stderr": "Error - File /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a, line 1 (Zone <untitled>): Value not defined (*).\n"
+      },
+      "asm198x": {
+        "argv": [
+          "/private/tmp/198x-acme-602-603-scratch/asm198x",
+          "--dialect",
+          "acme",
+          "--message-format",
+          "json",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a",
+          "-o",
+          "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/invalid.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc",
+        "exit": 1,
+        "stdout": "[{\"span\":{\"file\":0,\"line\":1,\"col\":0,\"expansion_frames\":[],\"path\":\"/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acme-recheck-sqn5x6cc/input.a\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"`*` cannot be used here\",\"fix\":null}]\n",
+        "stderr": ""
+      },
+      "previous_hex": "70726576696f757320696d616765",
+      "after_hex": "70726576696f757320696d616765",
+      "status": "pass"
+    }
+  ],
+  "qualified": true
+}

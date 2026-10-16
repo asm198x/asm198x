@@ -1,0 +1,42 @@
+{
+  "artifact": {
+    "version": "0.0.67",
+    "archive": "asm198x-aarch64-apple-darwin.tar.xz",
+    "target": "aarch64-apple-darwin",
+    "archive_sha256": "edc7a74b7394ea00c47a4109b3bb8f0e492244006d91025a4e22cf5720e5fb51",
+    "executable_sha256": "cf169ea78f9000867dd08dc5e25b4017badbb2e8f2d60df46e6dae398548b941"
+  },
+  "source": {
+    "commit": "46cedb445a01f8fefd9d2a96d63961414036fcf4",
+    "cargo_lock_sha256": "a249badd5d4855f1071caf88b54ab8faaeb739fa5605de256319c534903009de"
+  },
+  "receipt": {
+    "schema_version": 1,
+    "kind": "producer-source-lock",
+    "signed": false,
+    "source_commit": "46cedb445a01f8fefd9d2a96d63961414036fcf4",
+    "committed_lock_sha256": "a249badd5d4855f1071caf88b54ab8faaeb739fa5605de256319c534903009de",
+    "before_lock_sha256": "a249badd5d4855f1071caf88b54ab8faaeb739fa5605de256319c534903009de",
+    "after_lock_sha256": "a249badd5d4855f1071caf88b54ab8faaeb739fa5605de256319c534903009de",
+    "target": "aarch64-apple-darwin",
+    "archive": "asm198x-aarch64-apple-darwin.tar.xz",
+    "archive_sha256": "edc7a74b7394ea00c47a4109b3bb8f0e492244006d91025a4e22cf5720e5fb51",
+    "executable_sha256": "cf169ea78f9000867dd08dc5e25b4017badbb2e8f2d60df46e6dae398548b941",
+    "version": "0.0.67",
+    "build": {
+      "job": "build-local-artifacts",
+      "run_id": "38887216141",
+      "run_attempt": "1"
+    },
+    "command": [
+      "dist",
+      "build",
+      "--tag=asm198x-v0.0.67",
+      "--print=linkage",
+      "--output-format=json",
+      "--artifacts=local",
+      "--target=aarch64-apple-darwin"
+    ],
+    "compiled_dependency_graph": "unknown"
+  }
+}
