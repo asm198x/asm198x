@@ -226,6 +226,51 @@ impl Layout {
             from_config: self.from_config,
         })
     }
+
+    /// Check actual occupied extents before emission or the memory account.
+    /// A following configured segment reserves its start even when empty,
+    /// preserving the default NROM vector slot without assigning meaning to
+    /// any particular name or address. Separate memory areas may share CPU
+    /// addresses (banks); the shared placement pass checks file extents.
+    pub(crate) fn validate_extents(
+        &self,
+        resolved: &ResolvedLayout,
+        lengths: &std::collections::BTreeMap<String, u32>,
+    ) -> Result<(), AsmError> {
+        for (index, def) in self.segments.iter().enumerate() {
+            let segment = &resolved.segs[index];
+            let length = lengths.get(&def.name).copied().unwrap_or(0);
+            let end = u64::from(segment.base) + u64::from(length);
+            let area = &self.areas[def.area];
+            let area_end = u64::from(area.start) + u64::from(area.size);
+            if u64::from(segment.base) < u64::from(area.start) || end > area_end {
+                return Err(AsmError::new(
+                    0,
+                    format!(
+                        "segment `{}` ({} bytes at ${:04X}) exceeds memory area `{}` (${:04X}..${:04X})",
+                        def.name, length, segment.base, area.name, area.start, area_end
+                    ),
+                ));
+            }
+            if let Some((next_index, next)) = self
+                .segments
+                .iter()
+                .enumerate()
+                .skip(index + 1)
+                .find(|(_, next)| next.area == def.area)
+                && end > u64::from(resolved.segs[next_index].base)
+            {
+                return Err(AsmError::new(
+                    0,
+                    format!(
+                        "segment `{}` ({} bytes) overlaps `{}` at ${:04X} in memory area `{}`",
+                        def.name, length, next.name, resolved.segs[next_index].base, area.name
+                    ),
+                ));
+            }
+        }
+        Ok(())
+    }
 }
 
 /// Parse a bounded ld65 `.cfg`: the `MEMORY` and `SEGMENTS` blocks, with the

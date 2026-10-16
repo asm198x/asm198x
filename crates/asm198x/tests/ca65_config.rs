@@ -129,4 +129,150 @@ SEGMENTS {
         .expect("assembles")
         .bytes;
     assert_eq!(ours, reference, "byte-identical under the project config");
+    std::fs::remove_dir_all(dir).expect("remove native scratch");
+}
+
+// #609: names and the NROM vector address do not impose limits on a supplied
+// layout. Expected payloads are independently checked against ca65 + ld65.
+fn extent_cases() -> Vec<(&'static str, String, String, Option<Vec<u8>>)> {
+    let full = "MEMORY { PRG: start=$8000, size=$8000, file=%O, fill=yes; }";
+    let mut cases = Vec::new();
+    for name in ["CODE", "PROGRAM"] {
+        let cfg = format!("{full}\nSEGMENTS {{ {name}: load=PRG, type=ro; }}");
+        cases.push((
+            "full_area",
+            cfg.clone(),
+            format!(".segment \"{name}\"\n.res $8000,$ea\n"),
+            Some(vec![0xea; 0x8000]),
+        ));
+        let mut embedded = vec![0xea; 0x7ffa];
+        embedded.extend([0x00, 0x80, 0x01, 0x80, 0x02, 0x80]);
+        cases.push((
+            "embedded_vectors",
+            cfg.clone(),
+            format!(".segment \"{name}\"\n.res $7ffa,$ea\n.word $8000,$8001,$8002\n"),
+            Some(embedded),
+        ));
+        cases.push((
+            "area_overflow",
+            cfg,
+            format!(".segment \"{name}\"\n.res $8001,$ea\n"),
+            None,
+        ));
+    }
+    let pinned = format!(
+        "{full}\nSEGMENTS {{ PROGRAM: load=PRG, type=ro; TABLE: load=PRG, type=ro, start=$fffa; }}"
+    );
+    let mut split = vec![0xea; 0x7ffa];
+    split.extend([0x00, 0x80, 0x01, 0x80, 0x02, 0x80]);
+    cases.push((
+        "pinned_boundary",
+        pinned.clone(),
+        ".segment \"PROGRAM\"\n.res $7ffa,$ea\n.segment \"TABLE\"\n.word $8000,$8001,$8002\n"
+            .into(),
+        Some(split),
+    ));
+    cases.push((
+        "pinned_overlap",
+        pinned,
+        ".segment \"PROGRAM\"\n.res $7ffb,$ea\n.segment \"TABLE\"\n.word $8000,$8001,$8002\n"
+            .into(),
+        None,
+    ));
+    let adjacent = "MEMORY { A: start=$8000, size=4, file=%O, fill=yes; B: start=$9000, size=4, file=%O, fill=yes; } SEGMENTS { CODE: load=A, type=ro; NEXT: load=B, type=ro; }";
+    cases.push((
+        "area_spill_into_file_neighbor",
+        adjacent.into(),
+        ".segment \"CODE\"\n.res 5,$ea\n.segment \"NEXT\"\n.byte $aa\n".into(),
+        None,
+    ));
+    let banks = "MEMORY { A: start=$8000, size=4, file=%O, fill=yes; B: start=$8000, size=4, file=%O, fill=yes; } SEGMENTS { FIRST: load=A, type=ro; SECOND: load=B, type=ro; }";
+    cases.push((
+        "separate_file_banks_share_cpu_addresses",
+        banks.into(),
+        ".segment \"FIRST\"\n.res 4,$ea\n.segment \"SECOND\"\n.res 4,$bb\n".into(),
+        Some(vec![0xea, 0xea, 0xea, 0xea, 0xbb, 0xbb, 0xbb, 0xbb]),
+    ));
+    let ram = "MEMORY { RAM: start=$200, size=4, file=\"\"; PRG: start=$8000, size=4, file=%O, fill=yes; } SEGMENTS { BSS: load=RAM, type=bss; CODE: load=PRG, type=ro; }";
+    cases.push((
+        "ram_overflow",
+        ram.into(),
+        ".segment \"BSS\"\n.res 5\n.segment \"CODE\"\nrts\n".into(),
+        None,
+    ));
+    cases
+}
+
+#[test]
+fn segment_extents_follow_the_active_layout() {
+    for (name, cfg, src, expected) in extent_cases() {
+        let result = assemble_ca65_files_with_config(&src, "t.s", &MemoryLoader::new(), &cfg);
+        match expected {
+            Some(bytes) => assert_eq!(result.expect(name).bytes, bytes, "{name}"),
+            None => {
+                let error = result.expect_err(name);
+                assert!(error.error.message.contains("segment"), "{name}: {error}");
+            }
+        }
+    }
+}
+
+#[test]
+#[ignore = "needs ca65 + ld65 on PATH"]
+fn segment_extents_match_native_linking() {
+    let dir = std::env::temp_dir().join(format!("asm198x-ca65-extents-{}", std::process::id()));
+    std::fs::create_dir_all(&dir).expect("temp dir");
+    for (name, cfg, src, expected) in extent_cases() {
+        std::fs::write(dir.join("t.cfg"), &cfg).expect("cfg");
+        std::fs::write(dir.join("t.s"), &src).expect("src");
+        let assembled = std::process::Command::new("ca65")
+            .args(["t.s", "-o", "t.o"])
+            .current_dir(&dir)
+            .output()
+            .expect("ca65");
+        assert!(
+            assembled.status.success(),
+            "{name}: {}",
+            String::from_utf8_lossy(&assembled.stderr)
+        );
+        let linked = std::process::Command::new("ld65")
+            .args(["-C", "t.cfg", "t.o", "-o", "ref.bin"])
+            .current_dir(&dir)
+            .output()
+            .expect("ld65");
+        assert_eq!(
+            linked.status.success(),
+            expected.is_some(),
+            "{name}: {}",
+            String::from_utf8_lossy(&linked.stderr)
+        );
+        println!(
+            "{name}: ca65={}, ld65={}, accepted={}",
+            assembled.status,
+            linked.status,
+            expected.is_some()
+        );
+        if let Some(bytes) = expected {
+            assert_eq!(
+                std::fs::read(dir.join("ref.bin")).expect("native bytes"),
+                bytes,
+                "{name}"
+            );
+        }
+    }
+    std::fs::remove_dir_all(dir).expect("remove native scratch");
+}
+
+#[test]
+fn default_vectors_keep_their_reserved_slot_and_helpful_error() {
+    let fits = ".segment \"CODE\"\n.res $7ffa,$ea\n.segment \"VECTORS\"\n.word $8000,$8001,$8002\n";
+    let rom = asm198x::assemble_ca65(fits).expect("ends at vector boundary");
+    assert_eq!(
+        &rom.bytes[16 + 0x7ffa..16 + 0x8000],
+        &[0, 0x80, 1, 0x80, 2, 0x80]
+    );
+    let error = asm198x::assemble_ca65(&fits.replace("$7ffa", "$7ffb")).expect_err("real overlap");
+    for detail in ["CODE", "VECTORS", "$FFFA", "PRG"] {
+        assert!(error.message.contains(detail), "{error}");
+    }
 }

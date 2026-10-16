@@ -79,3 +79,10 @@ test('the older public qualification is not sufficient for this release cohort',
   assert.equal(old.qualified, true);
   assert(!qualifies(old.results));
 });
+
+test('0.0.67 evidence cannot qualify the arithmetic and layout fixes', () => {
+  const old = JSON.parse(fs.readFileSync(path.join(__dirname, '../docs/plans/2026-10-16-release-0067-checkpoint/published/aarch64-apple-darwin/report.json'), 'utf8'));
+  assert.equal(old.qualified, true);
+  assert.equal(qualifies(old.results), false);
+  for (const name of ['pasmo_word_arithmetic', 'ca65_configured_extent', 'ca65_extent_refusal']) assert(requiredCases.includes(name));
+});

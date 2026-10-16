@@ -595,6 +595,8 @@ fn assemble_program(
         }
     }
 
+    layout_def.validate_extents(layout, &offsets)?;
+
     // The section table: every segment the program touched (placed bytes or
     // just labels/reservations), in config order. CPU-addressed segments carry
     // their absolute base; HEADER (file metadata) and CHARS (PPU address space)

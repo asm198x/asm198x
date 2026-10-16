@@ -10,11 +10,6 @@ use std::collections::BTreeMap;
 use super::super::mos6502;
 use super::{AsmError, DiagSeverity, Expr, FileId, Kind, Warning, WarningKind, display_label};
 
-/// PRG ROM occupies the upper 32K of the CPU address space — kept for the
-/// default layout's CODE/VECTORS overlap message below; every other shape
-/// number now lives in the layout value.
-const PRG_BASE: u32 = 0x8000;
-
 /// The layout's memory account (#499): each area's capacity against the
 /// segments the program placed or reserved in it, in address order. `free` is
 /// the total unoccupied span; `largest_free` merges the placed intervals and
@@ -89,22 +84,6 @@ pub(super) fn link(
             })
         })
         .collect();
-
-    // CODE running into the vector table would be silently overwritten, giving
-    // corrupted code and a debug record describing bytes that did not survive.
-    // `lay_out` refuses the overlap, but names only the second segment; ld65
-    // names the area that filled, and so does this.
-    if let Some(code) = seg_bytes.get("CODE")
-        && code.len() > (0xFFFA - PRG_BASE) as usize
-    {
-        return Err(AsmError::new(
-            0,
-            format!(
-                "segment `CODE` ({} bytes) overlaps `VECTORS` at $FFFA",
-                code.len()
-            ),
-        ));
-    }
 
     // The image is the layout's shape: its file areas stacked and filled.
     let size = layout.image_size;
