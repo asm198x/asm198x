@@ -1,0 +1,15 @@
+SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)
+> Code start:           0x8000
+> Code end:             0x9B46
+> Code size:            0x1B46
+> Code free bytes:      0x1CB9
+> Stack bottom:         0xB800
+> Stack size (bytes):   0x0800
+> Pattern data start:   0xC000
+> Pattern data end:     0xDD1A
+> Pattern data size:    0x1D1A
+> AYFX bank start:      0xDD1A
+> AYFX bank end:        0xDFAE
+> AYFX bank size:       0x0294
+> Data free bytes:      0x1D4D
+> Program size:         0x7F01
