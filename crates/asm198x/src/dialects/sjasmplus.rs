@@ -942,25 +942,7 @@ impl Z80Syntax for SjasmplusSyntax {
             )?)));
         }
         if word.eq_ignore_ascii_case("display") {
-            // sjasmplus prints values as `0x0005`, and prefixes the line with
-            // `> `; the prefix is its own chrome, so only the text is kept.
-            let mut text = String::new();
-            for part in args.split(',') {
-                let part = part.trim();
-                match part.strip_prefix('"').and_then(|t| t.strip_suffix('"')) {
-                    Some(lit) => text.push_str(lit),
-                    None => {
-                        match z80::literal(&z80::parse_value(self, part, line)?, consts, line) {
-                            Ok(v) => text.push_str(&format!("0x{v:04X}")),
-                            Err(_) => text.push_str(part),
-                        }
-                    }
-                }
-            }
-            return Ok(Some(Operation::Diagnose {
-                severity: crate::engine::DiagSeverity::Note,
-                message: text,
-            }));
+            return display(args, line, |expr| z80::literal(&expr, consts, line));
         }
         if word.eq_ignore_ascii_case("savebin") {
             return self.parse_savebin(args, line, consts).map(Some);
@@ -1198,6 +1180,119 @@ fn data_items(rest: &str, line: usize) -> Result<Vec<DataItem>, AsmError> {
             }
         })
         .collect()
+}
+
+/// DISPLAY options affect the next numeric value only; strings leave the
+/// selected mode intact. The live keyword walker supplies scoped, pass-aware
+/// evaluation, while standalone directive parsing uses its constant table.
+pub(crate) fn display(
+    args: &str,
+    line: usize,
+    mut value: impl FnMut(Expr) -> Result<i64, AsmError>,
+) -> Result<Option<Operation>, AsmError> {
+    use std::fmt::Write;
+    let mut pieces = Vec::new();
+    let mut start = 0;
+    let mut quote = None;
+    let mut escaped = false;
+    let mut previous = None;
+    for (i, ch) in args.char_indices() {
+        if escaped {
+            escaped = false;
+        } else {
+            match quote {
+                Some('"') if ch == '\\' => escaped = true,
+                Some(q) if q == ch => quote = None,
+                Some(_) => {}
+                None if ch == '"'
+                    || (ch == '\''
+                        && !previous.is_some_and(|c: char| c.is_ascii_alphanumeric())) =>
+                {
+                    quote = Some(ch)
+                }
+                None if ch == ',' => {
+                    pieces.push(args[start..i].trim());
+                    start = i + 1;
+                }
+                None => {}
+            }
+        }
+        previous = Some(ch);
+    }
+    if quote.is_some() {
+        return Err(AsmError::new(line, "unterminated DISPLAY string"));
+    }
+    pieces.push(args[start..].trim());
+    let mut mode = b'H';
+    let mut text = String::new();
+    for piece in pieces {
+        if piece.is_empty() {
+            return Err(AsmError::new(line, "[DISPLAY] Expression expected"));
+        }
+        if piece.starts_with('/') {
+            match piece.as_bytes() {
+                [b'/', option] => match option.to_ascii_uppercase() {
+                    option @ (b'H' | b'D' | b'A' | b'B' | b'C') => mode = option,
+                    b'L' | b'T' => {}
+                    _ => return Err(AsmError::new(line, "[DISPLAY] unknown option")),
+                },
+                _ => return Err(AsmError::new(line, "[DISPLAY] invalid option")),
+            }
+            continue;
+        }
+        if piece.starts_with('"') {
+            text.push_str(&String::from_utf8_lossy(&decoded_string(piece, line)?));
+            continue;
+        }
+        if let Some(literal) = piece.strip_prefix('\'') {
+            let literal = literal
+                .strip_suffix('\'')
+                .ok_or_else(|| AsmError::new(line, "unterminated DISPLAY string"))?;
+            let mut chars = literal.chars();
+            while let Some(ch) = chars.next() {
+                if ch == '\'' && chars.next() != Some('\'') {
+                    return Err(AsmError::new(
+                        line,
+                        "unexpected tokens after DISPLAY string",
+                    ));
+                }
+                text.push(ch);
+            }
+            continue;
+        }
+        let v = value(z80::parse_value(&SjasmplusSyntax, piece, line)?)? as u32;
+        match mode {
+            b'H' => {
+                let _ = write!(text, "0x{v:04X}");
+            }
+            b'D' => {
+                let _ = write!(text, "{v}");
+            }
+            b'A' => {
+                let _ = write!(text, "0x{v:04X}, {v}");
+            }
+            b'B' => {
+                let _ = write!(text, "%{:04b}'{:04b}", (v >> 4) & 15, v & 15);
+            }
+            b'C' if (32..127).contains(&(v & 255)) => {
+                let _ = write!(text, "'{}'", (v as u8) as char);
+            }
+            b'C' => {
+                let _ = write!(text, "'\\x{:02X}'", v & 255);
+            }
+            _ => unreachable!("validated DISPLAY mode"),
+        }
+        mode = b'H';
+    }
+    // Native output uses a NUL-terminated buffer; bytes after its first NUL
+    // are parsed and validated but never printed.
+    if let Some(nul) = text.find('\0') {
+        text.truncate(nul);
+    }
+    Ok((!text.is_empty()).then_some(Operation::Diagnose {
+        severity: crate::engine::DiagSeverity::Note,
+        message: text,
+    }))
 }
 
 /// Native SjASMPlus decodes these pairs only in double quotes. Unknown pairs

@@ -17,6 +17,7 @@ requiredCases.push('sjasmplus_shift_widths');
 requiredCases.push('sjasmplus_digit_separators');
 requiredCases.push('sjasmplus_remainder');
 requiredCases.push('sjasmplus_define_numbers');
+requiredCases.push('sjasmplus_display_format');
 const sourceFiles = {
   'LICENSE': '62cd567bc9270c722abcaa6ad88b6a1fe861698d63890f787cc557d2395be203',
   'helloworld.asm': '9e57c82435c0cf35e56089d56d6b83991c61624c2b3448ab6c66fb13a884a0a5',
@@ -294,6 +295,23 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
           assert.deepEqual(read('defines.bin'), Buffer.from(fact.hex, 'hex'), fact.name);
         } else {
           reject(p); assert.equal(read('defines.bin').toString(), 'previous image', fact.name);
+        }
+      }
+    });
+    test('sjasmplus_display_format', () => {
+      const facts = require('../crates/asm198x/tests/fixtures/sjasmplus-display-format.json');
+      assert.equal(facts.cases.length, 132);
+      for (const fact of facts.cases) {
+        write('display.asm', fact.source); write('display.bin', 'previous image');
+        const p = run(['--dialect', 'sjasmplus', '--message-format', 'json', 'display.asm', '-o', 'display.bin']);
+        if (fact.exit === 0) {
+          assert.equal(p.status, 0, fact.name + ': ' + p.stderr);
+          assert.deepEqual(read('display.bin'), Buffer.from(fact.hex, 'hex'), fact.name);
+          const expected = fact.stderr === '' ? [] : fact.stderr.slice(2, -1).split('\n> ');
+          const notes = JSON.parse(p.stdout).warnings.filter(w => w.kind === 'Note').map(w => w.message);
+          assert.deepEqual(notes, expected, fact.name + ': DISPLAY text');
+        } else {
+          reject(p); assert.equal(read('display.bin').toString(), 'previous image', fact.name);
         }
       }
     });

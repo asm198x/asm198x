@@ -1,0 +1,1067 @@
+{
+  "tool": "/usr/local/bin/sjasmplus",
+  "sha256": "454bfa33058d5a0f5323db1ee65bbdd2b5871f7d697c328e2ee1f1a950f0d78b",
+  "version": {
+    "exit": 0,
+    "stdout": "",
+    "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\n"
+  },
+  "cases": [
+    {
+      "name": "mode_default_0",
+      "source": " DISPLAY 0\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0x0000\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_default_1",
+      "source": " DISPLAY 1\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0x0001\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_default_255",
+      "source": " DISPLAY 255\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0x00FF\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_default_256",
+      "source": " DISPLAY 256\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0x0100\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_default_$FFFF",
+      "source": " DISPLAY $FFFF\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0xFFFF\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_default_$10000",
+      "source": " DISPLAY $10000\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0x10000\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_default_$12345678",
+      "source": " DISPLAY $12345678\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0x12345678\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_default_-1",
+      "source": " DISPLAY -1\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0xFFFFFFFF\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_default_-2147483648",
+      "source": " DISPLAY -2147483648\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0x80000000\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_default_$FFFFFFFF",
+      "source": " DISPLAY $FFFFFFFF\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0xFFFFFFFF\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/H,_0",
+      "source": " DISPLAY /H,0\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0x0000\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/H,_1",
+      "source": " DISPLAY /H,1\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0x0001\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/H,_255",
+      "source": " DISPLAY /H,255\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0x00FF\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/H,_256",
+      "source": " DISPLAY /H,256\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0x0100\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/H,_$FFFF",
+      "source": " DISPLAY /H,$FFFF\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0xFFFF\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/H,_$10000",
+      "source": " DISPLAY /H,$10000\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0x10000\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/H,_$12345678",
+      "source": " DISPLAY /H,$12345678\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0x12345678\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/H,_-1",
+      "source": " DISPLAY /H,-1\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0xFFFFFFFF\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/H,_-2147483648",
+      "source": " DISPLAY /H,-2147483648\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0x80000000\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/H,_$FFFFFFFF",
+      "source": " DISPLAY /H,$FFFFFFFF\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0xFFFFFFFF\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/h,_0",
+      "source": " DISPLAY /h,0\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0x0000\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/h,_1",
+      "source": " DISPLAY /h,1\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0x0001\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/h,_255",
+      "source": " DISPLAY /h,255\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0x00FF\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/h,_256",
+      "source": " DISPLAY /h,256\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0x0100\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/h,_$FFFF",
+      "source": " DISPLAY /h,$FFFF\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0xFFFF\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/h,_$10000",
+      "source": " DISPLAY /h,$10000\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0x10000\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/h,_$12345678",
+      "source": " DISPLAY /h,$12345678\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0x12345678\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/h,_-1",
+      "source": " DISPLAY /h,-1\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0xFFFFFFFF\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/h,_-2147483648",
+      "source": " DISPLAY /h,-2147483648\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0x80000000\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/h,_$FFFFFFFF",
+      "source": " DISPLAY /h,$FFFFFFFF\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0xFFFFFFFF\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/D,_0",
+      "source": " DISPLAY /D,0\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/D,_1",
+      "source": " DISPLAY /D,1\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 1\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/D,_255",
+      "source": " DISPLAY /D,255\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 255\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/D,_256",
+      "source": " DISPLAY /D,256\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 256\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/D,_$FFFF",
+      "source": " DISPLAY /D,$FFFF\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 65535\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/D,_$10000",
+      "source": " DISPLAY /D,$10000\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 65536\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/D,_$12345678",
+      "source": " DISPLAY /D,$12345678\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 305419896\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/D,_-1",
+      "source": " DISPLAY /D,-1\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 4294967295\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/D,_-2147483648",
+      "source": " DISPLAY /D,-2147483648\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 2147483648\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/D,_$FFFFFFFF",
+      "source": " DISPLAY /D,$FFFFFFFF\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 4294967295\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/d,_0",
+      "source": " DISPLAY /d,0\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/d,_1",
+      "source": " DISPLAY /d,1\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 1\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/d,_255",
+      "source": " DISPLAY /d,255\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 255\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/d,_256",
+      "source": " DISPLAY /d,256\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 256\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/d,_$FFFF",
+      "source": " DISPLAY /d,$FFFF\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 65535\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/d,_$10000",
+      "source": " DISPLAY /d,$10000\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 65536\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/d,_$12345678",
+      "source": " DISPLAY /d,$12345678\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 305419896\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/d,_-1",
+      "source": " DISPLAY /d,-1\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 4294967295\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/d,_-2147483648",
+      "source": " DISPLAY /d,-2147483648\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 2147483648\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/d,_$FFFFFFFF",
+      "source": " DISPLAY /d,$FFFFFFFF\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 4294967295\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/A,_0",
+      "source": " DISPLAY /A,0\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0x0000, 0\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/A,_1",
+      "source": " DISPLAY /A,1\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0x0001, 1\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/A,_255",
+      "source": " DISPLAY /A,255\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0x00FF, 255\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/A,_256",
+      "source": " DISPLAY /A,256\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0x0100, 256\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/A,_$FFFF",
+      "source": " DISPLAY /A,$FFFF\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0xFFFF, 65535\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/A,_$10000",
+      "source": " DISPLAY /A,$10000\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0x10000, 65536\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/A,_$12345678",
+      "source": " DISPLAY /A,$12345678\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0x12345678, 305419896\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/A,_-1",
+      "source": " DISPLAY /A,-1\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0xFFFFFFFF, 4294967295\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/A,_-2147483648",
+      "source": " DISPLAY /A,-2147483648\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0x80000000, 2147483648\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/A,_$FFFFFFFF",
+      "source": " DISPLAY /A,$FFFFFFFF\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0xFFFFFFFF, 4294967295\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/B,_0",
+      "source": " DISPLAY /B,0\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> %0000'0000\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/B,_1",
+      "source": " DISPLAY /B,1\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> %0000'0001\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/B,_255",
+      "source": " DISPLAY /B,255\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> %1111'1111\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/B,_256",
+      "source": " DISPLAY /B,256\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> %0000'0000\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/B,_$FFFF",
+      "source": " DISPLAY /B,$FFFF\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> %1111'1111\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/B,_$10000",
+      "source": " DISPLAY /B,$10000\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> %0000'0000\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/B,_$12345678",
+      "source": " DISPLAY /B,$12345678\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> %0111'1000\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/B,_-1",
+      "source": " DISPLAY /B,-1\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> %1111'1111\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/B,_-2147483648",
+      "source": " DISPLAY /B,-2147483648\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> %0000'0000\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/B,_$FFFFFFFF",
+      "source": " DISPLAY /B,$FFFFFFFF\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> %1111'1111\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/C,_0",
+      "source": " DISPLAY /C,0\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> '\\x00'\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/C,_1",
+      "source": " DISPLAY /C,1\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> '\\x01'\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/C,_255",
+      "source": " DISPLAY /C,255\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> '\\xFF'\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/C,_256",
+      "source": " DISPLAY /C,256\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> '\\x00'\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/C,_$FFFF",
+      "source": " DISPLAY /C,$FFFF\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> '\\xFF'\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/C,_$10000",
+      "source": " DISPLAY /C,$10000\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> '\\x00'\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/C,_$12345678",
+      "source": " DISPLAY /C,$12345678\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 'x'\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/C,_-1",
+      "source": " DISPLAY /C,-1\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> '\\xFF'\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/C,_-2147483648",
+      "source": " DISPLAY /C,-2147483648\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> '\\x00'\n",
+      "hex": "01"
+    },
+    {
+      "name": "mode_/C,_$FFFFFFFF",
+      "source": " DISPLAY /C,$FFFFFFFF\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> '\\xFF'\n",
+      "hex": "01"
+    },
+    {
+      "name": "args_0",
+      "source": " DISPLAY \"Code start: \",/H,$8000\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> Code start: 0x8000\n",
+      "hex": "01"
+    },
+    {
+      "name": "args_1",
+      "source": " DISPLAY /D,1,2\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 10x0002\n",
+      "hex": "01"
+    },
+    {
+      "name": "args_2",
+      "source": " DISPLAY /D,\"str,;://\",10,11\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> str,;://100x000B\n",
+      "hex": "01"
+    },
+    {
+      "name": "args_3",
+      "source": " DISPLAY /D,/L,/T,10,11\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 100x000B\n",
+      "hex": "01"
+    },
+    {
+      "name": "args_4",
+      "source": " DISPLAY /A,1,/B,2,/C,65,3\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0x0001, 1%0000'0010'A'0x0003\n",
+      "hex": "01"
+    },
+    {
+      "name": "args_5",
+      "source": " DISPLAY /L,5\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0x0005\n",
+      "hex": "01"
+    },
+    {
+      "name": "args_6",
+      "source": " DISPLAY /T,5\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0x0005\n",
+      "hex": "01"
+    },
+    {
+      "name": "args_7",
+      "source": " DISPLAY /D\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "01"
+    },
+    {
+      "name": "args_8",
+      "source": " DISPLAY /H,\n db 1\n",
+      "exit": 1,
+      "stdout": "",
+      "stderr": "input.asm(1): error: [DISPLAY] Expression expected\n",
+      "hex": "01"
+    },
+    {
+      "name": "args_9",
+      "source": " DISPLAY \n db 1\n",
+      "exit": 1,
+      "stdout": "",
+      "stderr": "input.asm(1): error: [DISPLAY] Expression expected\n",
+      "hex": "01"
+    },
+    {
+      "name": "args_10",
+      "source": " DISPLAY \"\"\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "01"
+    },
+    {
+      "name": "args_11",
+      "source": " DISPLAY \"hello\"\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> hello\n",
+      "hex": "01"
+    },
+    {
+      "name": "args_12",
+      "source": " DISPLAY 'ab,cd'\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> ab,cd\n",
+      "hex": "01"
+    },
+    {
+      "name": "args_13",
+      "source": " DISPLAY \"a\\\"b,c\"\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> a\"b,c\n",
+      "hex": "01"
+    },
+    {
+      "name": "args_14",
+      "source": " DISPLAY \"a\\tb\"\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> a\tb\n",
+      "hex": "01"
+    },
+    {
+      "name": "args_15",
+      "source": " DISPLAY \"a\\nB\"\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> a\nB\n",
+      "hex": "01"
+    },
+    {
+      "name": "args_16",
+      "source": " DISPLAY \"a\\0B\"\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> a\n",
+      "hex": "01"
+    },
+    {
+      "name": "args_17",
+      "source": " DISPLAY \"\u00a3\"\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> \u00a3\n",
+      "hex": "01"
+    },
+    {
+      "name": "args_18",
+      "source": " DISPLAY /X,1\n db 1\n",
+      "exit": 1,
+      "stdout": "",
+      "stderr": "input.asm(1): error: [DISPLAY] Syntax error, unknown option: /X,1\n",
+      "hex": "01"
+    },
+    {
+      "name": "args_19",
+      "source": " DISPLAY /,1\n db 1\n",
+      "exit": 1,
+      "stdout": "",
+      "stderr": "input.asm(1): error: [DISPLAY] Syntax error, unknown option: /,1\n",
+      "hex": "01"
+    },
+    {
+      "name": "args_20",
+      "source": " DISPLAY /HH,1\n db 1\n",
+      "exit": 1,
+      "stdout": "",
+      "stderr": "input.asm(1): error: Unexpected: H,1\n",
+      "hex": "01"
+    },
+    {
+      "name": "args_21",
+      "source": " DISPLAY /H 1\n db 1\n",
+      "exit": 1,
+      "stdout": "",
+      "stderr": "input.asm(1): error: Unexpected: 1\n",
+      "hex": "01"
+    },
+    {
+      "name": "args_22",
+      "source": " DISPLAY / H,1\n db 1\n",
+      "exit": 1,
+      "stdout": "",
+      "stderr": "input.asm(1): error: [DISPLAY] Syntax error, unknown option: / H,1\n",
+      "hex": "01"
+    },
+    {
+      "name": "args_23",
+      "source": " DISPLAY 1,,2\n db 1\n",
+      "exit": 1,
+      "stdout": "",
+      "stderr": "> 0x0001\ninput.asm(1): error: Unexpected: ,,2\n",
+      "hex": "01"
+    },
+    {
+      "name": "args_24",
+      "source": " DISPLAY 1,\n db 1\n",
+      "exit": 1,
+      "stdout": "",
+      "stderr": "input.asm(1): error: [DISPLAY] Expression expected\n> 0x0001\n",
+      "hex": "01"
+    },
+    {
+      "name": "args_25",
+      "source": " DISPLAY \"a\"+1\n db 1\n",
+      "exit": 1,
+      "stdout": "",
+      "stderr": "> a\ninput.asm(1): error: Unexpected: +1\n",
+      "hex": "01"
+    },
+    {
+      "name": "args_26",
+      "source": " DISPLAY \"a\",(8/2)\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> a0x0004\n",
+      "hex": "01"
+    },
+    {
+      "name": "args_27",
+      "source": " DISPLAY /B,$1234\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> %0011'0100\n",
+      "hex": "01"
+    },
+    {
+      "name": "args_28",
+      "source": " DISPLAY /C,127\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> '\\x7F'\n",
+      "hex": "01"
+    },
+    {
+      "name": "args_29",
+      "source": " DISPLAY /C,10\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> '\\x0A'\n",
+      "hex": "01"
+    },
+    {
+      "name": "args_30",
+      "source": " DISPLAY /C,39\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> '''\n",
+      "hex": "01"
+    },
+    {
+      "name": "args_31",
+      "source": " DISPLAY /C,92\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> '\\'\n",
+      "hex": "01"
+    },
+    {
+      "name": "args_32",
+      "source": " DISPLAY 1/0\n db 1\n",
+      "exit": 1,
+      "stdout": "",
+      "stderr": "input.asm(1): error: Division by zero\n> 0x0000\n",
+      "hex": "01"
+    },
+    {
+      "name": "args_33",
+      "source": " DISPLAY missing\n db 1\n",
+      "exit": 1,
+      "stdout": "",
+      "stderr": "input.asm(1): error: Label not found: missing\n> 0x0000\n",
+      "hex": "01"
+    },
+    {
+      "name": "args_34",
+      "source": " DISPLAY /D,$\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0\n",
+      "hex": "01"
+    },
+    {
+      "name": "forward",
+      "source": " DISPLAY /D,end-start\nstart: db 1,2\nend:\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 2\n",
+      "hex": "0102"
+    },
+    {
+      "name": "forward_division",
+      "source": " DISPLAY /D,10/N\nN equ 2\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 5\n",
+      "hex": "01"
+    },
+    {
+      "name": "forward_division_zero",
+      "source": " DISPLAY /D,10/N\nN equ 0\n db 1\n",
+      "exit": 1,
+      "stdout": "",
+      "stderr": "input.asm(1): error: Division by zero\n> 0\n",
+      "hex": "01"
+    },
+    {
+      "name": "temporary_anchor",
+      "source": "1: DISPLAY /D,1\n jr 1B\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 1\n",
+      "hex": "18fe"
+    },
+    {
+      "name": "forward_equ",
+      "source": " DISPLAY /D,N\nN equ 37\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 37\n",
+      "hex": "01"
+    },
+    {
+      "name": "local",
+      "source": " org $8000\nmain: db 1\n.local: DISPLAY /H,.local\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0x8001\n",
+      "hex": "01"
+    },
+    {
+      "name": "pc",
+      "source": " org $8000\n db 1\n DISPLAY /H,$\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0x8001\n",
+      "hex": "01"
+    },
+    {
+      "name": "inactive",
+      "source": " IF 0\n DISPLAY /X,missing\n ENDIF\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "01"
+    },
+    {
+      "name": "macro",
+      "source": " MACRO show value\n DISPLAY /D,value\n ENDM\n show 42\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 42\n",
+      "hex": "01"
+    },
+    {
+      "name": "reset_line",
+      "source": " DISPLAY /D,10\n DISPLAY 10\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 10\n> 0x000A\n",
+      "hex": "01"
+    },
+    {
+      "name": "module_fallback",
+      "source": "N equ 37\n MODULE inner\n DISPLAY /D,N\n ENDMODULE\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 37\n",
+      "hex": "01"
+    },
+    {
+      "name": "module_forward",
+      "source": " MODULE inner\n DISPLAY /D,N\nN equ 37\n ENDMODULE\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 37\n",
+      "hex": "01"
+    },
+    {
+      "name": "local_forward",
+      "source": "main: DISPLAY /H,.end\n db 1\n.end:\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 0x0001\n",
+      "hex": "01"
+    },
+    {
+      "name": "quoted_single_pair",
+      "source": " DISPLAY 'a''b'\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> a'b\n",
+      "hex": "01"
+    },
+    {
+      "name": "quoted_double_pair",
+      "source": " DISPLAY \"a\"\"b\"\n db 1\n",
+      "exit": 1,
+      "stdout": "",
+      "stderr": "> a\ninput.asm(1): error: Unexpected: \"b\"\n",
+      "hex": "01"
+    },
+    {
+      "name": "single_backslash",
+      "source": " DISPLAY 'a\\nb'\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> a\\nb\n",
+      "hex": "01"
+    },
+    {
+      "name": "quoted_expression",
+      "source": " DISPLAY /D,('A'+1)\n db 1\n",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 66\n",
+      "hex": "01"
+    }
+  ]
+}

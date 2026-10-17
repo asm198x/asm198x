@@ -2120,11 +2120,67 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
             .map(|args| format!("{rest_word} {args}"));
         let rest = rewritten_rest.as_deref().unwrap_or(rest);
 
+        let is_display = self.syntax.sjasmplus_expressions()
+            && rest_word
+                .trim_start_matches('.')
+                .eq_ignore_ascii_case("display");
+        // A global on the DISPLAY line is already the anchor for its local
+        // references. Other operations keep their existing lowering order.
+        let display_label = if is_display && resolved_temporary_label.is_none() {
+            node.label
+                .as_ref()
+                .map(|sym| self.resolve_label(&sym.name, line))
+                .transpose()?
+        } else {
+            None
+        };
         let mut op = if self.cspect && word.eq_ignore_ascii_case("break") && args.trim().is_empty()
         {
             Some(Operation::Bytes(vec![Expr::Num(0xFD), Expr::Num(0x00)]))
         } else if self.cspect && word.eq_ignore_ascii_case("exit") && args.trim().is_empty() {
             Some(Operation::Bytes(vec![Expr::Num(0xDD), Expr::Num(0x00)]))
+        } else if is_display {
+            crate::dialects::sjasmplus::display(rest_args, line, |expr| {
+                // Reuse the operation-level scope rules, including a module's
+                // bare-global fallback, before the existing pass evaluator.
+                let op = self.scopes.qualify_op(
+                    Operation::Equ(expr),
+                    self.syntax.scopes_locals(),
+                    self.syntax.scopes_modules(),
+                );
+                let mut known: std::collections::BTreeSet<String> =
+                    self.consts.keys().cloned().collect();
+                if let Some(forward) = &self.forward {
+                    known.extend(forward.seed.keys().cloned());
+                }
+                let repair = self.scopes.alias_repair(&known);
+                let op = crate::ast::map_syms(op, &mut |name| {
+                    Expr::Sym(
+                        repair
+                            .get(name.as_str())
+                            .copied()
+                            .unwrap_or(&name)
+                            .to_string(),
+                    )
+                });
+                let Operation::Equ(expr) = op else {
+                    unreachable!("qualified expression")
+                };
+                match self.fold_count(&expr, line) {
+                    // An early pass may divide by an unresolved value's
+                    // provisional zero. The forward read forces all three
+                    // passes; only the final pass can diagnose the value.
+                    Err(_)
+                        if self
+                            .forward
+                            .as_ref()
+                            .is_some_and(|f| !f.last && f.used.get()) =>
+                    {
+                        Ok(0)
+                    }
+                    result => result,
+                }
+            })?
         } else if rest.is_empty() {
             None
         } else if self.syntax.is_reserve(word) {
@@ -2144,6 +2200,7 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
         }
         let label = match (&resolved_temporary_label, &node.label) {
             (Some(name), _) => Some(name.clone()),
+            (None, Some(_)) if is_display => display_label,
             (None, Some(sym)) => Some(self.resolve_label(&sym.name, line)?),
             (None, None) => None,
         };
