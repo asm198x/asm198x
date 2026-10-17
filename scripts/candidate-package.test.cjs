@@ -121,3 +121,11 @@ test('0.0.71 evidence cannot qualify DEFINE numeric substitution', () => {
   assert.equal(old.qualified, true); assert.equal(qualifies(old.results), false);
   assert(requiredCases.includes('sjasmplus_define_numbers'));
 });
+
+
+test('removing DISPLAY replay cannot satisfy current qualification', () => {
+  const complete = requiredCases.map(name => ({ name, status: 'pass' }));
+  assert.equal(qualifies(complete), true);
+  assert(requiredCases.includes('sjasmplus_display_format'));
+  assert.equal(qualifies(complete.filter(r => r.name !== 'sjasmplus_display_format')), false);
+});
