@@ -187,6 +187,7 @@ enum Kind {
     Insn {
         operand: mos6502::OperandSyntax,
         mnemonic: String,
+        extension: Option<&'static isa::InstructionSet>,
     },
 }
 
@@ -813,7 +814,7 @@ pub(crate) fn parse_program(
     // Macros expand before parsing (#93), but only for assembly: the formatter
     // asks with `Expand::No`, because laying source out must not replace a
     // definition with its expansions.
-    let expanded = ca65_flat::expand_ca65(source, mode, ca65_flat::Target::Mos6502)?;
+    let expanded = ca65_flat::expand_ca65_macros(source, mode)?;
     let text = macros::expanded_text(&expanded, source);
     let origins = macros::line_origins(&expanded);
     // Assembly parses structure only (#481): blocks group, lines stay unread
@@ -881,6 +882,10 @@ pub(crate) fn parse_program_multi(
 /// *through* include boundaries in both directions (KTD1, probe-pinned).
 struct Walker {
     set: &'static isa::InstructionSet,
+    extension: Option<&'static isa::InstructionSet>,
+    cpu_stack: Vec<Option<&'static isa::InstructionSet>>,
+    repeat_registers: Option<bool>,
+    text_names: BTreeSet<String>,
     anons: AnonCtx,
     /// The scoped symbol environment (#484): the cheap-local anchor — the
     /// current global that `@cheap` labels key under, re-anchored by plain
@@ -984,6 +989,10 @@ impl Walker {
     fn new(set: &'static isa::InstructionSet, expand_text_defines: bool) -> Self {
         Self {
             set,
+            extension: None,
+            cpu_stack: Vec::new(),
+            repeat_registers: None,
+            text_names: BTreeSet::new(),
             anons: AnonCtx::default(),
             scope_env: crate::scopes::ScopeEnv::new(),
             consts: BTreeMap::new(),
@@ -1012,6 +1021,42 @@ impl Walker {
     /// Close the walk: flush trailing comments (a trailing block or a
     /// comment-only file), then fail any forward anonymous reference whose
     /// definition never arrived.
+    /// CPU selection belongs to the live reader, including across includes
+    /// and selected branches. Each instruction retains its selection (#722).
+    fn select_cpu(&mut self, rest: &str, line: usize) -> Result<bool, AsmError> {
+        let (word, args) = split_first_word(rest);
+        let word = word.to_ascii_lowercase();
+        let selected = match word.as_str() {
+            ".setcpu" => string_literal(args.trim()).map(|name| name.to_ascii_lowercase()),
+            ".p02" => Some("6502".to_string()),
+            ".p4510" => Some("4510".to_string()),
+            ".pushcpu" | ".popcpu" => {
+                if !args.trim().is_empty() {
+                    return Err(AsmError::new(
+                        line,
+                        "unexpected arguments after processor stack directive",
+                    ));
+                }
+                if word == ".pushcpu" {
+                    self.cpu_stack.push(self.extension);
+                } else {
+                    self.extension = self
+                        .cpu_stack
+                        .pop()
+                        .ok_or_else(|| AsmError::new(line, "CPU stack is empty"))?;
+                }
+                return Ok(true);
+            }
+            _ => None,
+        };
+        match selected.as_deref() {
+            Some("6502") => self.extension = None,
+            Some("4510") => self.extension = Some(&isa::csg65ce02::CSG4502_SET),
+            _ => return Ok(false), // Existing validation diagnoses other profiles.
+        }
+        Ok(true)
+    }
+
     fn finish(mut self, last_line: u32) -> Result<crate::ast::Program, AsmError> {
         use crate::ast::{Node, Program, Span, Trivia};
         if !self.pending_leading.is_empty() {
@@ -1568,10 +1613,8 @@ impl FlatWalk for Walker {
         Some(match word.as_str() {
             ".if" | ".ifdef" | ".ifndef" | ".ifblank" | ".ifnblank" | ".ifconst" | ".ifnconst"
             | ".ifref" | ".ifnref" => BlockKw::CondOpen,
-            // The CPU tests. This leg assembles for one CPU and refuses
-            // `.setcpu`, so which of them is true is fixed before the file is
-            // read — but they still open a block, and the dead branch still
-            // has to be skipped rather than parsed.
+            // Processor tests open ordinary conditional blocks. Their live
+            // value is read by the projection sweep, not this structural parse.
             ".ifp02" | ".ifp4510" | ".ifp816" | ".ifpc02" | ".ifpsc02" => BlockKw::CondOpen,
             ".elseif" => BlockKw::ElseIf,
             ".else" => BlockKw::Else,
@@ -1615,7 +1658,7 @@ impl FlatWalk for Walker {
     /// The multi-file walk expands too, or macros would work when a file is
     /// assembled alone and vanish the moment it is included from another.
     fn expand_source(&self, source: &str) -> Result<macros::Expansion, AsmError> {
-        ca65_flat::expand_ca65(source, macros::Expand::Yes, ca65_flat::Target::Mos6502)
+        ca65_flat::expand_ca65_macros(source, macros::Expand::Yes)
     }
 
     fn walk_line(
@@ -1831,23 +1874,67 @@ impl FlatWalk for Walker {
                 },
             }));
         }
-        let kind = match self.tag_statement(rest, line)? {
-            Some(kind) => kind,
-            None => match parse_op(
-                self.set,
-                &self.anons,
-                self.scope_env.anchor_str(),
-                &self.consts,
-                rest,
-                line,
+        // Processor selectors are source, even when they emit no bytes.
+        // In particular, dropping a .p02 or .popcpu changes later instructions
+        // when the formatted file is assembled again.
+        if !self.expand_text_defines
+            && matches!(
+                split_first_word(rest).0.to_ascii_lowercase().as_str(),
+                ".setcpu" | ".p02" | ".p4510" | ".pushcpu" | ".popcpu"
+            )
+        {
+            self.nodes.push(Node {
+                operand_span: None,
+                label: symbol,
+                item: Some(Item::Verbatim),
+                source: rest.trim().to_string(),
+                span,
+                trivia: Trivia {
+                    leading: std::mem::take(&mut self.pending_leading),
+                    trailing,
+                },
+            });
+            return Ok(None);
+        }
+        let kind = if self.expand_text_defines && self.select_cpu(rest, line)? {
+            Kind::Empty
+        } else {
+            match self.tag_statement(rest, line)? {
+                Some(kind) => kind,
+                None => match parse_op(
+                    self.set,
+                    self.extension,
+                    &self.anons,
+                    self.scope_env.anchor_str(),
+                    &self.consts,
+                    rest,
+                    line,
+                ) {
+                    Ok(kind) => kind,
+                    // ca65 skips an untaken conditional branch lexically. Keep a
+                    // parse failure as a fatal statement until projection chooses
+                    // the live branch: reached source still reports the original
+                    // diagnostic, while dead source is never required to parse.
+                    Err(error) => Kind::Message(DiagSeverity::Error, error.message),
+                },
+            }
+        };
+        let kind = if self.repeat_registers == Some(false)
+            && matches!(
+                &kind,
+                Kind::Insn {
+                    operand: mos6502::OperandSyntax::IndirectIndexedZ(_)
+                        | mos6502::OperandSyntax::StackIndirectIndexedY(_),
+                    ..
+                }
             ) {
-                Ok(kind) => kind,
-                // ca65 skips an untaken conditional branch lexically. Keep a
-                // parse failure as a fatal statement until projection chooses
-                // the live branch: reached source still reports the original
-                // diagnostic, while dead source is never required to parse.
-                Err(error) => Kind::Message(DiagSeverity::Error, error.message),
-            },
+            // ca65 tokenises a repeat body before executing its selectors.
+            Kind::Message(
+                DiagSeverity::Error,
+                "register was not available when the repeat body was tokenised".to_string(),
+            )
+        } else {
+            kind
         };
         // Every name the statement mentions, as the key it resolves under.
         let kind = self.scope_syms(&kind, line)?;
@@ -2049,6 +2136,7 @@ fn split_label_symbol<'a>(
 
 fn parse_op(
     set: &'static isa::InstructionSet,
+    extension: Option<&'static isa::InstructionSet>,
     anons: &AnonCtx,
     anchor: &str,
     consts: &BTreeMap<String, i64>,
@@ -2066,13 +2154,19 @@ fn parse_op(
     let mnemonic = mnemonic.to_ascii_uppercase();
     let operand =
         mos6502::parse_operand(operand_text, line, &|s, l| parse_value(anons, anchor, s, l))?;
-    if set.instruction(&mnemonic).is_none() {
+    if set.instruction(&mnemonic).is_none()
+        && extension.is_none_or(|set| set.instruction(&mnemonic).is_none())
+    {
         return Err(AsmError::new(
             line,
             format!("unknown instruction `{mnemonic}`"),
         ));
     }
-    Ok(Kind::Insn { operand, mnemonic })
+    Ok(Kind::Insn {
+        operand,
+        mnemonic,
+        extension,
+    })
 }
 
 /// What this dialect accepts beyond the 6502 instruction set.
@@ -2578,14 +2672,9 @@ pub const DIRECTIVES: &[Directive] = &[
         },
         category: Category::ExpressionWord,
     },
-    // CPU selection. `.setcpu "6502"` and `.p02` name the processor this leg
-    // already assembles, so they change nothing; every other name selects a
-    // different opcode set and is refused by name, the way ACME's `!cpu` is
-    // (`decisions/reference-parity-goal.md`, asm198x#302).
-    //
-    // `.pushcpu`/`.popcpu` save and restore a selection that cannot change
-    // here, and `.smart` decides how ca65 tracks the 65816's register widths
-    // across `jsr`/`rts` — probed inert on a 6502.
+    // The live reader handles 6502/4510 selectors and the CPU stack.
+    // Other known processors keep their explicit unsupported-profile error.
+    // `.smart` remains inert on these fixed-width processors.
     Directive {
         id: "cpu",
         pattern: Pattern::Sigilled {
@@ -4784,7 +4873,7 @@ two:\n\
         };
         // ca65's other processors: each a different opcode set, so taking one
         // silently would assemble the wrong instructions.
-        for src in [".setcpu \"65C02\"", ".pc02", ".p816", ".p4510", ".psc02"] {
+        for src in [".setcpu \"65C02\"", ".pc02", ".p816", ".psc02"] {
             assert!(
                 err(src).contains("the gap is ours"),
                 "`{src}` should read as our gap: {}",

@@ -40,6 +40,9 @@
 //! negative size as the unspecified sentinel); size 0 is empty; a size past
 //! the remaining bytes is an error.
 
+use std::borrow::Cow;
+use std::collections::BTreeMap;
+
 use crate::ast::{Node, Span, Symbol, Trivia};
 use crate::dialects::macros;
 use crate::dialects::text;
@@ -1274,12 +1277,45 @@ pub(crate) fn expand_ca65(
         let expanded = macros::expand(&Ca65Macros, s)?;
         let text = Ca65Text {
             target,
-            defined: defined_names(&expanded.text),
+            defined: Cow::Owned(defined_names(&expanded.text)),
             ..Ca65Text::default()
         };
         let resolved = text::expand(&text, &expanded.text)?;
         Ok(Some((resolved, expanded.origins)))
     })
+}
+
+/// The linked ca65 reader resolves text under its live CPU in the sweep.
+/// Keep macro origin mapping while leaving those calls intact for that reader.
+pub(crate) fn expand_ca65_macros(
+    source: &str,
+    mode: macros::Expand,
+) -> Result<macros::Expansion, AsmError> {
+    macros::expansion(mode, source, |s| {
+        let expanded = macros::expand(&Ca65Macros, s)?;
+        Ok(Some((expanded.text, expanded.origins)))
+    })
+}
+
+pub(crate) fn expand_ca65_line(
+    source: &str,
+    target: Target,
+    numbers: &BTreeMap<String, i64>,
+    defined: &std::collections::BTreeSet<String>,
+    token_target: Option<Target>,
+    depth: usize,
+    line: usize,
+) -> Result<String, AsmError> {
+    let syntax = Ca65Text {
+        target,
+        token_target,
+        depth: std::cell::Cell::new(depth),
+        numbers: Cow::Borrowed(numbers),
+        defined: Cow::Borrowed(defined),
+    };
+    text::expand(&syntax, source)
+        .map(|text| text.trim_end_matches('\n').to_string())
+        .map_err(|error| AsmError::new(line, error.message))
 }
 
 /// Which CPU a ca65 parse is for.
@@ -1296,13 +1332,17 @@ pub(crate) fn expand_ca65(
 pub(crate) enum Target {
     #[default]
     Mos6502,
+    Csg4510,
     Wdc65816,
     HuC6280,
 }
 
 impl Target {
     fn holds_register(self, name: &str) -> bool {
-        matches!((self, name), (_, "a" | "x" | "y") | (Target::Wdc65816, "s"))
+        matches!(
+            (self, name),
+            (_, "a" | "x" | "y") | (Target::Wdc65816, "s") | (Target::Csg4510, "s" | "z")
+        )
     }
 
     /// Whether the CPU has this mnemonic. ca65 reads the name
@@ -1313,6 +1353,7 @@ impl Target {
         isa::mos6502::SET.has_mnemonic(&upper)
             || match self {
                 Target::Mos6502 => false,
+                Target::Csg4510 => isa::csg65ce02::CSG4502_SET.has_mnemonic(&upper),
                 Target::Wdc65816 => isa::mos65816::SET.has_mnemonic(&upper),
                 Target::HuC6280 => isa::huc6280::SET.has_mnemonic(&upper),
             }
@@ -1326,7 +1367,7 @@ impl Target {
 /// would most likely guess wrong is `.string`, which stringifies its argument's
 /// **token** rather than its value: with `N = 7`, `.string(N)` is `"N"`.
 #[derive(Default)]
-struct Ca65Text {
+struct Ca65Text<'a> {
     /// How many `.proc`/`.scope` blocks are open around the line being read.
     ///
     /// The pass has no scope stack, so a constant defined inside one is not
@@ -1338,6 +1379,9 @@ struct Ca65Text {
     /// The CPU, which decides both the register names a token list holds and
     /// which mnemonics `.ismnem` knows.
     target: Target,
+    token_target: Option<Target>,
+    /// Constants visible to a line read by the linked ca65 sweep.
+    numbers: Cow<'a, BTreeMap<String, i64>>,
     /// Every name defined anywhere in the source.
     ///
     /// `.const` needs it: ca65 answers 0 for a symbol that is defined but not
@@ -1345,7 +1389,7 @@ struct Ca65Text {
     /// **errors** for one that is not defined at all. Telling those apart needs
     /// the whole file, which is why this is collected before the walk rather
     /// than accumulated during it.
-    defined: std::collections::BTreeSet<String>,
+    defined: Cow<'a, std::collections::BTreeSet<String>>,
 }
 
 /// Every name the source defines, wherever it defines it.
@@ -1353,7 +1397,7 @@ struct Ca65Text {
 /// Deliberately generous about what counts and deliberately blind to scope: a
 /// name it misses makes `.const` refuse rather than answer, which is the safe
 /// direction.
-fn defined_names(source: &str) -> std::collections::BTreeSet<String> {
+pub(crate) fn defined_names(source: &str) -> std::collections::BTreeSet<String> {
     let mut out = std::collections::BTreeSet::new();
     for raw in source.lines() {
         let code = macros::without_comment(raw);
@@ -1403,7 +1447,7 @@ fn defined_names(source: &str) -> std::collections::BTreeSet<String> {
     out
 }
 
-impl Ca65Text {
+impl Ca65Text<'_> {
     /// Answer `.const`: 1 if the expression folds here, 0 if every name in it
     /// is defined somewhere but not to a value this pass can reach.
     ///
@@ -1459,7 +1503,7 @@ impl Ca65Text {
     }
 }
 
-impl text::TextSyntax for Ca65Text {
+impl text::TextSyntax for Ca65Text<'_> {
     fn definition(&self, _line: &str) -> Option<(String, String)> {
         None
     }
@@ -1513,7 +1557,15 @@ impl text::TextSyntax for Ca65Text {
         line: usize,
     ) -> Option<i64> {
         let expr = super::ca65::constant_value(text, line).ok()?;
-        super::mos6502::fold_const(&expr, numbers, line).ok()
+        if self.numbers.is_empty() {
+            return super::mos6502::fold_const(&expr, numbers, line).ok();
+        }
+        if numbers.is_empty() {
+            return super::mos6502::fold_const(&expr, &self.numbers, line).ok();
+        }
+        let mut visible = self.numbers.as_ref().clone();
+        visible.extend(numbers.iter().map(|(name, value)| (name.clone(), *value)));
+        super::mos6502::fold_const(&expr, &visible, line).ok()
     }
 
     fn function(
@@ -1575,12 +1627,22 @@ impl text::TextSyntax for Ca65Text {
             // re-rendering tokens that would have to be spaced back together.
             ".tcount" => {
                 one(args)?;
-                Folded::Number(tokens(token_list(&args[0], name, line)?, self.target).len() as i64)
+                Folded::Number(
+                    tokens(
+                        token_list(&args[0], name, line)?,
+                        self.token_target.unwrap_or(self.target),
+                    )
+                    .len() as i64,
+                )
             }
             ".blank" => {
                 one(args)?;
                 Folded::Number(i64::from(
-                    tokens(token_list(&args[0], name, line)?, self.target).is_empty(),
+                    tokens(
+                        token_list(&args[0], name, line)?,
+                        self.token_target.unwrap_or(self.target),
+                    )
+                    .is_empty(),
                 ))
             }
             // `.match` compares what each token *is*; `.xmatch` compares what it
@@ -1594,7 +1656,10 @@ impl text::TextSyntax for Ca65Text {
                     token_list(&args[0], name, line)?,
                     token_list(&args[1], name, line)?,
                 );
-                let (a, b) = (tokens(a, self.target), tokens(b, self.target));
+                let (a, b) = (
+                    tokens(a, self.token_target.unwrap_or(self.target)),
+                    tokens(b, self.token_target.unwrap_or(self.target)),
+                );
                 let same = a.len() == b.len()
                     && a.iter().zip(&b).all(|(x, y)| {
                         x.kind == y.kind && (!exact || token_value(x) == token_value(y))
@@ -1605,7 +1670,7 @@ impl text::TextSyntax for Ca65Text {
                 arity(args, 2, name, line)?;
                 let count = scope.number(&args[0], name, line)?.max(0) as usize;
                 let list = token_list(&args[1], name, line)?;
-                let all = tokens(list, self.target);
+                let all = tokens(list, self.token_target.unwrap_or(self.target));
                 let (from, to) = if lower == ".left" {
                     (0, count)
                 } else {
@@ -1645,7 +1710,7 @@ impl text::TextSyntax for Ca65Text {
                 let start = scope.number(&args[0], name, line)?.max(0) as usize;
                 let count = scope.number(&args[1], name, line)?.max(0) as usize;
                 let list = token_list(&args[2], name, line)?;
-                let all = tokens(list, self.target);
+                let all = tokens(list, self.token_target.unwrap_or(self.target));
                 Folded::Bare(
                     token_slice(list, &all, start, start.saturating_add(count)).to_string(),
                 )

@@ -200,16 +200,42 @@ pub(super) fn resolve(
             define: _,
         } => (Resolved::Visible(rule, zero_page, names), 0),
         Kind::Assert(cond, fatal, message) => (Resolved::Assert(cond, fatal, message), 0),
-        Kind::Insn { operand, mnemonic } => {
-            let insn = set
-                .instruction(&mnemonic)
-                .ok_or_else(|| AsmError::new(line, format!("unknown instruction `{mnemonic}`")))?;
-            // ca65 sizes by value (and an explicit `a:` we don't yet need); the
-            // ACME-style hex-width rule does not apply.
-            let (mode, operand) = mos6502::resolve_mode(insn, operand, size_env, false, line)?;
-            let form = insn
-                .form(mode)
+        Kind::Insn {
+            operand,
+            mnemonic,
+            extension,
+        } => {
+            let (mode, mut operand) = if let Some(extension) = extension {
+                mos6502::resolve_mode_in_sets(
+                    set,
+                    Some(extension),
+                    &mnemonic,
+                    operand,
+                    size_env,
+                    false,
+                    line,
+                )?
+            } else {
+                let insn = set.instruction(&mnemonic).ok_or_else(|| {
+                    AsmError::new(line, format!("unknown instruction `{mnemonic}`"))
+                })?;
+                mos6502::resolve_mode(insn, operand, size_env, false, line)?
+            };
+            let form = extension
+                .and_then(|set| set.find_form(&mnemonic, mode))
+                .or_else(|| set.find_form(&mnemonic, mode))
                 .ok_or_else(|| AsmError::new(line, format!("`{mnemonic}` has no {mode} form")))?;
+            // 65CE02/4510 long branches measure from opcode+2, rather
+            // than from the three-byte instruction's end (as in ACME).
+            if mode == "relative16" && extension.is_some() {
+                operand = operand.map(|value| {
+                    Expr::Bin(
+                        crate::engine::BinOp::Add,
+                        Box::new(value),
+                        Box::new(Expr::Num(1)),
+                    )
+                });
+            }
             let operands: Vec<Expr> = operand.into_iter().collect();
             let size = form.len();
             (Resolved::Insn { form, operands }, size)
@@ -360,14 +386,19 @@ pub(super) fn emit(
                     },
                     isa::OperandKind::RelativePc => {
                         let offset = v - next;
-                        if !(-128..=127).contains(&offset) {
-                            return Err(AsmError::new(
-                                line_for_errors,
-                                format!("branch target out of range ({offset} bytes)"),
-                            )
-                            .with_code(crate::contract::Code::BranchOutOfRange));
+                        match slot.bytes {
+                            1 if (-128..=127).contains(&offset) => out.push(offset as i8 as u8),
+                            2 if (-32768..=32767).contains(&offset) => {
+                                out.extend_from_slice(&(offset as i16).to_le_bytes())
+                            }
+                            _ => {
+                                return Err(AsmError::new(
+                                    line_for_errors,
+                                    format!("branch target out of range ({offset} bytes)"),
+                                )
+                                .with_code(crate::contract::Code::BranchOutOfRange));
+                            }
                         }
-                        out.push(offset as i8 as u8);
                     }
                     isa::OperandKind::Displacement => {
                         return Err(AsmError::new(

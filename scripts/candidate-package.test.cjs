@@ -143,3 +143,10 @@ test('forward EQU replay is required for qualification', () => {
   assert(qualifies(good)); assert(requiredCases.includes('sjasmplus_forward_equ'));
   assert.equal(qualifies(good.filter(r => r.name !== 'sjasmplus_forward_equ')), false);
 });
+
+
+test('4510 replay cannot be omitted from candidate qualification', () => {
+  const complete = requiredCases.map(name => ({ name, status: 'pass' }));
+  assert(qualifies(complete)); assert(requiredCases.includes('ca65_4510'));
+  assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_4510')), false);
+});

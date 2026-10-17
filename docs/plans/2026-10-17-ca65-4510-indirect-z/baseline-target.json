@@ -1,0 +1,67 @@
+{
+  "source_commit": "e11fb5c39371046ebe25485f984f644c5a0d65d3",
+  "assembler_source_commit": "0b1911d8329a63903e7eaeb3681d3dfb8545943a",
+  "assembler_source_note": "fresh debug build with uncommitted new tests/plans only; no production changes",
+  "executables": {
+    "/opt/homebrew/bin/ca65": {
+      "sha256": "1a57997819fd98814e4601b5160df589e7a1a24e1888a80fee51ae450d8fd0ea"
+    },
+    "/opt/homebrew/bin/ld65": {
+      "sha256": "36bb196207a6b2c90a4aa991b419d6113885303951b14b60b455f51c777b3339"
+    },
+    "/private/tmp/asm198x-4510-build/debug/asm198x": {
+      "sha256": "f51cd0bbacc9315763b7d4a0022b242313858cce5735e85160e5827be641fe40"
+    }
+  },
+  "source_sha256": "2eba43181117dd95ef63c22531f2426884eeb7a0009cd1f9e51f53c20fa256fd",
+  "config": "# Byte-only opcode targets use none.cfg's $1000 load address and $7000 room.\n# The pinned upstream Makefile uses ca65 -t none then ld65 -t none / none.lib.\n# These sources define only CODE and import no runtime; this reviewed adapter\n# supplies that same placement without relying on a host cc65 data directory.\nMEMORY { MAIN: start = $1000, size = $7000, file = %O; }\nSEGMENTS { CODE: load = MAIN, type = ro; }\n",
+  "native_length": 564,
+  "native_sha256": "8a5fcde630e55dd49403f7c6ffed25d8786e65e3d0a2723531b7ca3e2c0509ec",
+  "native_hex": "000105020304020502060207020809010a0b0c34120d34120e34120f02331030110612071331311402150316031702181956141a1b1c34121d45131e45131f0233203412210522452323562424022502260227022829012a2b2c34122d34122e34122f02333030310632073331313403350336033702383956143a3b3c45133d45133e45133f0233404105424344024502460247024849014a4b4c34124d34124e34124f02335030510652075331315403550356035702585956145a5b5c5d45135e45135f0233606105620963313164026502660267026869016a6b6c45236d34126e34126f02337030710672077331317403750376037702787956147a7b7c56247d45137e45137f023380308105820f820f83313184028502860287028889018a8b45138c34128d34128e34128f02339030910692079331319403950396049702989956149a9b56149c34129d45139e45139f0233a001a105a201a301a402a502a602a702a8a901aaab3412ac3412ad3412ae3412af0233b030b106b207b33131b403b503b604b702b8b95614babb4513bc4513bd4513be5614bf0233c001c105c201c302c402c502c602c702c8c901cacb3412cc3412cd3412ce3412cf0233d030d106d207d33131d402d503d603d702d8d95614dadbdc3412dd4513de4513df0233e001e105e20fe20fe302e402e502e602e702e8e901eaeaeb3412ec3412ed3412ee3412ef0233f030f106f207f33131f49a08f49a08f503f603f702f8f95614fafbfc3412fc3412fd4513fe4513ff0233",
+  "runs": [
+    {
+      "argv": [
+        "/opt/homebrew/bin/ca65",
+        "--cpu",
+        "4510",
+        "4510-opcodes.s",
+        "-o",
+        "native.o"
+      ],
+      "cwd": "/private/tmp/asm198x-4510-native-target",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/opt/homebrew/bin/ld65",
+        "-C",
+        "input.cfg",
+        "native.o",
+        "-o",
+        "native.bin"
+      ],
+      "cwd": "/private/tmp/asm198x-4510-native-target",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/private/tmp/asm198x-4510-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "4510-opcodes.s",
+        "-o",
+        "asm.bin"
+      ],
+      "cwd": "/private/tmp/asm198x-4510-native-target",
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: 4510-opcodes.s:22: error: `ORA` has no (indirect),z form\n"
+    }
+  ]
+}
