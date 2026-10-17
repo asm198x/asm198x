@@ -1746,6 +1746,20 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
             });
     }
 
+    /// Generated structure members and binary inclusions bypass `lower_line`.
+    /// Keep SjASMPlus's live labels and PC aligned with those emitted bytes too.
+    fn advance_generated(&mut self, statements: &[Statement]) {
+        if self.forward.is_none() {
+            return;
+        }
+        for statement in statements {
+            if let (Some(name), Some(pc)) = (&statement.label, self.pc) {
+                self.consts.insert(name.clone(), pc);
+            }
+            self.advance(statement.op.as_ref(), statement.line);
+        }
+    }
+
     /// The forward-resolution state paired with the file a condition is being
     /// read in, so an advisory names the right one.
     fn fwd(&self) -> Option<(&Forward, FileId)> {
@@ -2410,6 +2424,7 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
             instruction_set: None,
             extension_set: None,
         });
+        self.advance_generated(&out[out.len() - 1..]);
         Ok(())
     }
 }
@@ -2713,6 +2728,7 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
         items: Vec<InitItem>,
         out: &mut Vec<Statement>,
     ) -> Result<(), AsmError> {
+        let start = out.len();
         let def = self
             .lookup_struct(word)
             .expect("caller matched a structure");
@@ -2848,6 +2864,7 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
                 "closing } missing on the `STRUCT` initialiser list",
             ));
         }
+        self.advance_generated(&out[start..]);
         Ok(())
     }
 }

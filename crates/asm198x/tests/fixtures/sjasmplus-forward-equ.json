@@ -6,10 +6,16 @@
       "/usr/local/bin/sjasmplus",
       "--version"
     ],
-    "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+    "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
     "exit": 0,
     "stdout": "",
     "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\n"
+  },
+  "binary_files": {
+    "payload.bin": "0102030405"
+  },
+  "text_files": {
+    "values.inc": "COUNT EQU 2\n db 8\n"
   },
   "cases": [
     {
@@ -23,7 +29,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -40,7 +46,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -57,7 +63,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -74,7 +80,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 1,
       "stdout": "",
       "stderr": "input.asm(1): error: Label not found: missing\n",
@@ -91,7 +97,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -108,7 +114,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -125,7 +131,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -142,7 +148,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 1,
       "stdout": "",
       "stderr": "input.asm(1): error: Division by zero\n",
@@ -159,7 +165,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -176,7 +182,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -193,7 +199,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -210,7 +216,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -227,7 +233,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -244,7 +250,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -261,7 +267,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -278,7 +284,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -295,7 +301,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -312,7 +318,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 1,
       "stdout": "",
       "stderr": "input.asm(2): error: Duplicate label: TOTAL\n",
@@ -329,7 +335,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -346,7 +352,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -363,7 +369,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -380,7 +386,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -397,7 +403,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 1,
       "stdout": "",
       "stderr": "input.asm(1): error: Label not found: missing\n",
@@ -414,7 +420,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 1,
       "stdout": "",
       "stderr": "input.asm(1): error: Division by zero\n",
@@ -431,7 +437,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -448,7 +454,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "> 6\n",
@@ -465,7 +471,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -482,11 +488,147 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
       "hex": "0600"
+    },
+    {
+      "name": "struct_pc",
+      "source": " STRUCT Pair\na DB 1\nb DW 2\n ENDS\n org $8000\nx Pair\nTOTAL EQU $-2\n dw TOTAL\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "0102000180"
+    },
+    {
+      "name": "struct_label",
+      "source": " STRUCT Pair\na DB 1\nb DW 2\n ENDS\n org $8000\nx Pair\nTOTAL EQU x.b-x.a\n dw TOTAL\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "0102000100"
+    },
+    {
+      "name": "struct_forward_pc",
+      "source": " STRUCT Pair\na DB 1\nb DW 2\n ENDS\n org $8000\nx Pair\nTOTAL EQU later-$\n db 9\nlater: dw TOTAL\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "010200090100"
+    },
+    {
+      "name": "struct_repeat_pc",
+      "source": " STRUCT Pair\na DB 1\nb DW 2\n ENDS\n org $8000\n DUP 3\n Pair\n EDUP\nTOTAL EQU $\n dw TOTAL\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "0102000102000102000980"
+    },
+    {
+      "name": "incbin_pc",
+      "source": " org $8000\n incbin \"payload.bin\"\nTOTAL EQU $-2\n dw TOTAL\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "01020304050380"
+    },
+    {
+      "name": "incbin_label",
+      "source": " org $8000\nx incbin \"payload.bin\"\ny:\nTOTAL EQU y-x\n dw TOTAL\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "01020304050500"
+    },
+    {
+      "name": "include_forward_equ",
+      "source": "TOTAL EQU COUNT*3\n db TOTAL\n include \"values.inc\"\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "0608"
+    },
+    {
+      "name": "include_after_struct",
+      "source": " STRUCT Pair\na DB 1\nb DW 2\n ENDS\n org $8000\nx Pair\n include \"values.inc\"\nTOTAL EQU $\n dw TOTAL\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "010200080480"
     },
     {
       "name": "chain_1",
@@ -499,7 +641,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -516,7 +658,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -533,7 +675,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -550,7 +692,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -567,7 +709,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -584,7 +726,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -601,7 +743,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -618,7 +760,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -635,7 +777,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -652,7 +794,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -669,7 +811,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -686,7 +828,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -703,7 +845,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -720,7 +862,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -737,7 +879,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -754,7 +896,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -771,7 +913,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -788,7 +930,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -805,7 +947,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -822,7 +964,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -839,7 +981,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -856,7 +998,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -873,7 +1015,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -890,7 +1032,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -907,7 +1049,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -924,7 +1066,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -941,7 +1083,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -958,7 +1100,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -975,7 +1117,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -992,7 +1134,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -1009,7 +1151,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -1026,7 +1168,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -1043,7 +1185,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -1060,7 +1202,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -1077,7 +1219,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -1094,7 +1236,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -1111,7 +1253,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -1128,7 +1270,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -1145,7 +1287,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -1162,7 +1304,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -1179,7 +1321,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -1196,7 +1338,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -1213,7 +1355,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -1230,7 +1372,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -1247,7 +1389,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -1264,7 +1406,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -1281,7 +1423,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -1298,7 +1440,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -1315,7 +1457,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",
@@ -1332,7 +1474,7 @@
         "--raw=native.bin",
         "input.asm"
       ],
-      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-j0_5wm0v",
       "exit": 0,
       "stdout": "",
       "stderr": "",

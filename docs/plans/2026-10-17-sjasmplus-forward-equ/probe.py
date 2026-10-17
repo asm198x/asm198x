@@ -43,6 +43,18 @@ def cases() -> dict[str, str]:
             "forward_word": " dw TOTAL\nTOTAL EQU COUNT*3\nCOUNT EQU 2\n",
         }
     )
+    out.update(
+        {
+            "struct_pc": " STRUCT Pair\na DB 1\nb DW 2\n ENDS\n org $8000\nx Pair\nTOTAL EQU $-2\n dw TOTAL\n",
+            "struct_label": " STRUCT Pair\na DB 1\nb DW 2\n ENDS\n org $8000\nx Pair\nTOTAL EQU x.b-x.a\n dw TOTAL\n",
+            "struct_forward_pc": " STRUCT Pair\na DB 1\nb DW 2\n ENDS\n org $8000\nx Pair\nTOTAL EQU later-$\n db 9\nlater: dw TOTAL\n",
+            "struct_repeat_pc": " STRUCT Pair\na DB 1\nb DW 2\n ENDS\n org $8000\n DUP 3\n Pair\n EDUP\nTOTAL EQU $\n dw TOTAL\n",
+            "incbin_pc": ' org $8000\n incbin "payload.bin"\nTOTAL EQU $-2\n dw TOTAL\n',
+            "incbin_label": ' org $8000\nx incbin "payload.bin"\ny:\nTOTAL EQU y-x\n dw TOTAL\n',
+            "include_forward_equ": 'TOTAL EQU COUNT*3\n db TOTAL\n include "values.inc"\n',
+            "include_after_struct": ' STRUCT Pair\na DB 1\nb DW 2\n ENDS\n org $8000\nx Pair\n include "values.inc"\nTOTAL EQU $\n dw TOTAL\n',
+        }
+    )
     for depth in range(1, 7):
         out[f"chain_{depth}"] = (
             "".join(f"C{i} EQU C{i + 1}+1\n" for i in range(depth))
@@ -74,8 +86,14 @@ def main() -> None:
     args = parser.parse_args()
     tool = Path("/usr/local/bin/sjasmplus")
     records = []
+    binary_files = {"payload.bin": "0102030405"}
+    text_files = {"values.inc": "COUNT EQU 2\n db 8\n"}
     with tempfile.TemporaryDirectory(prefix="asm198x-forward-equ-probe-") as temp:
         root = Path(temp)
+        for name, data in binary_files.items():
+            (root / name).write_bytes(bytes.fromhex(data))
+        for name, text in text_files.items():
+            (root / name).write_text(text)
 
         def run(argv: list[str]) -> dict:
             r = subprocess.run(
@@ -119,6 +137,8 @@ def main() -> None:
                 "tool": str(tool),
                 "sha256": hashlib.sha256(tool.read_bytes()).hexdigest(),
                 "version": version,
+                "binary_files": binary_files,
+                "text_files": text_files,
                 "cases": records,
             },
             indent=2,

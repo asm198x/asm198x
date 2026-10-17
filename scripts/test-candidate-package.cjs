@@ -288,7 +288,9 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
     });
     test('sjasmplus_forward_equ', () => {
       const facts = require('../crates/asm198x/tests/fixtures/sjasmplus-forward-equ.json');
-      assert.equal(facts.cases.length, 78);
+      assert.equal(facts.cases.length, 86);
+      for (const [name, hex] of Object.entries(facts.binary_files)) write(name, Buffer.from(hex, 'hex'));
+      for (const [name, text] of Object.entries(facts.text_files)) write(name, text);
       for (const fact of facts.cases) for (const cpu of ['z80', 'z80n']) {
         write('equ.asm', fact.source); write('equ.bin', 'previous image');
         const p = run(['--dialect', 'sjasmplus', '--cpu', cpu, 'equ.asm', '-o', 'equ.bin']);

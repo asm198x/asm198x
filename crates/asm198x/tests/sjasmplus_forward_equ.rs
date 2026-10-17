@@ -6,15 +6,27 @@ fn native_forward_equ_matches_both_frontends() {
     let facts: Value = serde_json::from_str(include_str!("fixtures/sjasmplus-forward-equ.json"))
         .expect("native facts");
     let cases = facts["cases"].as_array().expect("cases");
-    assert_eq!(cases.len(), 78);
+    assert_eq!(cases.len(), 86);
+    let mut loader = asm198x::source::MemoryLoader::new();
+    for (name, text) in facts["text_files"].as_object().expect("text fixtures") {
+        loader = loader.text(name, text.as_str().expect("text"));
+    }
+    for (name, hex) in facts["binary_files"].as_object().expect("binary fixtures") {
+        let hex = hex.as_str().expect("binary hex");
+        let bytes = (0..hex.len())
+            .step_by(2)
+            .map(|i| u8::from_str_radix(&hex[i..i + 2], 16).expect("hex byte"))
+            .collect();
+        loader = loader.binary(name, bytes);
+    }
     for case in cases {
         let source = case["source"].as_str().expect("source");
         let name = case["name"].as_str().expect("name");
         for assemble in [
-            asm198x::assemble_sjasmplus,
-            asm198x::assemble_sjasmplus_next,
+            asm198x::assemble_sjasmplus_files,
+            asm198x::assemble_sjasmplus_next_files,
         ] {
-            let result = assemble(source);
+            let result = assemble(source, "input.asm", &loader);
             if case["exit"] != 0 {
                 assert!(result.is_err(), "{name}: native refusal");
                 continue;
@@ -28,7 +40,8 @@ fn native_forward_equ_matches_both_frontends() {
                 formatted,
                 "{name}"
             );
-            let roundtrip = assemble(&formatted).expect("reassemble formatted source");
+            let roundtrip =
+                assemble(&formatted, "input.asm", &loader).expect("reassemble formatted source");
             assert_eq!(roundtrip.bytes, result.bytes, "{name}: formatted bytes");
             assert_eq!(
                 roundtrip.symbols, result.symbols,
