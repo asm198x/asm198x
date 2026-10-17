@@ -44,3 +44,22 @@ The retained forward-red log shows that early division wrongly refused native
 accepted `10/N` with a later `N equ 2`. DISPLAY now defers provisional evaluation
 errors when a forward read requires more passes, and always propagates final
 errors. A later `N equ 0` still refuses, as does a permanently undefined value.
+
+## Clean whole-project control
+
+Producer `4f58a38f9b8d8d802ee395c8b3b7988625362ed6` was built clean by the
+explicit ecosystem runner against unchanged SpecNext pin
+`e3211ea8ad2e83aca4d07d70bd8e09b7b51a9a1d`. DISPLAY no longer blocks the
+project. The next boundary is `src/main.asm:289`, `SAVENEX OPEN`; this directive
+is explicitly reported as unsupported. No whole-project byte match is claimed.
+Native still emits 33,280 bytes, SHA-256
+`5fbed92a7d60dab47de8b22162c9227df051eaf67c26e85e618b24f6429dd07f`.
+The report retains that complete image and all ten raw process streams; each
+stream was checked against its process record, and the image hash/length were
+recomputed. No upstream build script ran. This focused one-target capture does
+not replace the complete-cohort ecosystem ledger.
+
+Local validation: 1,503 workspace tests passed, 38 explicitly ignored. The last
+temporary-label guard and 132-case fixture also passed the focused suite.
+All-target/Lua Clippy with warnings denied, formatting, docs, Ruff and 52 Node
+checks passed. Logs are retained alongside this report.
