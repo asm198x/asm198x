@@ -1,0 +1,18 @@
+asm198x: /private/tmp/asm198x-forward-equ-audit-final/work/howprice-specnext-invaders--game/assembler/src/input.asm: line 91: warning: value -129 truncated to a byte
+asm198x: src/main.asm: line 272: note: Code start:           0x8000
+asm198x: src/main.asm: line 273: note: Code end:             0x9B46
+asm198x: src/main.asm: line 274: note: Code size:            0x1B46
+asm198x: src/main.asm: line 275: note: Code free bytes:      0x1CB9
+asm198x: src/main.asm: line 276: note: Stack bottom:         0xB800
+asm198x: src/main.asm: line 277: note: Stack size (bytes):   0x0800
+asm198x: src/main.asm: line 278: note: Pattern data start:   0xC000
+asm198x: src/main.asm: line 279: note: Pattern data end:     0xDD1A
+asm198x: src/main.asm: line 280: note: Pattern data size:    0x1D1A
+asm198x: src/main.asm: line 281: note: AYFX bank start:      0xDD1A
+asm198x: src/main.asm: line 282: note: AYFX bank end:        0xDFAE
+asm198x: src/main.asm: line 283: note: AYFX bank size:       0x0294
+asm198x: src/main.asm: line 284: note: Data free bytes:      0x1D4D
+asm198x: src/main.asm: line 285: note: Program size:         0x7F01
+assembled 17442 byte(s) at $8000 -> asm198x.raw
+wrote 33280 byte(s) -> bin/invaders.nex
+wrote 38879 byte(s) -> bin/invaders.map
