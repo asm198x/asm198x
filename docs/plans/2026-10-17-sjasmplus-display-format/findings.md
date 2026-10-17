@@ -63,3 +63,6 @@ Local validation: 1,503 workspace tests passed, 38 explicitly ignored. The last
 temporary-label guard and 132-case fixture also passed the focused suite.
 All-target/Lua Clippy with warnings denied, formatting, docs, Ruff and 52 Node
 checks passed. Logs are retained alongside this report.
+
+The measured SAVENEX boundary is tracked in [#739](https://github.com/asm198x/asm198x/issues/739),
+a concrete slice of the existing #275 vocabulary backlog.
