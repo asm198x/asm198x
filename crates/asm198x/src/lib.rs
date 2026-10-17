@@ -49,6 +49,7 @@ pub mod includes;
 // Debug-record renderings: the `.debug198x` sidecar builder + `--sym` /
 // `--listing` text views of the same captured record (Debug198x U3, KTD2).
 mod listing;
+mod nex;
 mod prg;
 mod recover;
 #[cfg(test)]

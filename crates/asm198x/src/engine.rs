@@ -83,6 +83,8 @@ pub enum ArtifactFormat {
     Tap,
     /// An Amstrad Plus cartridge: RIFF `AMS!` with one `cbNN` chunk per bank.
     Cpr,
+    /// A ZX Spectrum Next NEX V1.2 executable.
+    Nex,
     /// SjASMPlus's CSpect logical/physical symbol map.
     CspectMap,
     /// SjASMPlus's UnrealSpeccy label list.
@@ -699,6 +701,29 @@ pub(crate) fn eval_binop(op: BinOp, a: i64, b: i64, line: usize) -> Result<i64, 
 // The generic statement stream a dialect produces
 // ---------------------------------------------------------------------------
 
+/// The bounded native SAVENEX command stream, evaluated in the emit pass.
+#[derive(Clone)]
+pub(crate) enum NexCommand {
+    Open { name: String, values: Vec<Expr> },
+    Core([Expr; 3]),
+    Auto(Vec<Expr>),
+    Close,
+}
+
+impl NexCommand {
+    pub(crate) fn map(self, f: impl FnMut(Expr) -> Expr) -> Self {
+        match self {
+            Self::Open { name, values } => Self::Open {
+                name,
+                values: values.into_iter().map(f).collect(),
+            },
+            Self::Core(values) => Self::Core(values.map(f)),
+            Self::Auto(values) => Self::Auto(values.into_iter().map(f).collect()),
+            Self::Close => Self::Close,
+        }
+    }
+}
+
 /// One operation, with its addressing mode already resolved by the dialect.
 #[derive(Clone)]
 pub(crate) enum Operation {
@@ -736,6 +761,7 @@ pub(crate) enum Operation {
     /// Map a page into the current slot and start a new raw-output run.
     DevicePage(Expr),
     /// Save the first `pages` of an Amstrad Plus device as a CPR cartridge.
+    SaveNex(NexCommand),
     SaveCpr {
         name: String,
         pages: Expr,
@@ -1119,6 +1145,7 @@ pub(crate) fn next_pc(
         | Operation::Set(_)
         | Operation::DefineSymbols(_)
         | Operation::SaveRaw { .. }
+        | Operation::SaveNex(_)
         | Operation::SaveTape { .. }
         | Operation::Device(_)
         | Operation::DeviceSlot(_)
@@ -1442,6 +1469,7 @@ pub(crate) fn lua_memory_snapshot(
                     s.op,
                     Some(
                         Operation::SaveRaw { .. }
+                            | Operation::SaveNex(_)
                             | Operation::SaveTape { .. }
                             | Operation::SaveCpr { .. }
                             | Operation::SymbolMap { .. }
@@ -1511,6 +1539,7 @@ fn assemble_statements(
     // label or `equ` over the top of one is not.
     let mut redefinable: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
     let mut pc: i64 = 0;
+    let mut nex_end = None;
     // ACME's `!pseudopc`: what to add to the real counter to get the address
     // the code claims. Zero outside any such block; a stack, because they
     // nest and each restores the one it opened inside.
@@ -1521,6 +1550,10 @@ fn assemble_statements(
     let mut os9_module_start: Option<usize> = None;
     let mut origin: Option<i64> = None;
     for s in &mut statements {
+        if let Some(Operation::Entry(expr)) = &s.op {
+            nex_end = Some((expr.clone(), pc, s.line, s.file));
+        }
+
         let (set, ext) = match s.instruction_set {
             Some(set) => (set, s.extension_set),
             None => (default_set, default_ext),
@@ -1689,6 +1722,20 @@ fn assemble_statements(
         }
     }
     let mut origin = origin.unwrap_or(0);
+    let has_nex = statements
+        .iter()
+        .any(|s| matches!(s.op, Some(Operation::SaveNex(_))));
+    let nex_start = if has_nex {
+        nex_end
+            .map(|(expr, pc, line, file)| {
+                expr.eval(&symbols, pc, line)
+                    .map(|v| v as u16)
+                    .map_err(|err| AsmError::at(Span::in_file(file, line as u32, 0), err.message))
+            })
+            .transpose()?
+    } else {
+        None
+    };
 
     // Pass 2 — emit.
     let byte_policy = dialect.oversized_byte_policy();
@@ -1730,6 +1777,7 @@ fn assemble_statements(
     let mut requested_symbols: Option<String> = None;
     // Source-requested files, captured and retained in source order.
     let mut artifacts: Vec<Artifact> = Vec::new();
+    let mut nex_session: Option<NexSession> = None;
     let mut device_memory: Option<DeviceMemory> = None;
     let mut inactive_devices: BTreeMap<String, DeviceMemory> = BTreeMap::new();
     let mut export_symbols = BTreeMap::new();
@@ -1982,6 +2030,19 @@ fn assemble_statements(
                 wrote_any = false;
                 section_name = format!("page {page}");
                 section_at = Place::Next;
+            }
+            Some(Operation::SaveNex(command)) => {
+                apply_nex(
+                    command,
+                    s,
+                    device_memory.as_ref(),
+                    &symbols,
+                    pc,
+                    nex_start,
+                    &mut nex_session,
+                    &mut artifacts,
+                    &mut warnings,
+                )?;
             }
             Some(Operation::SaveCpr { name, pages }) => {
                 let pages = pages
@@ -2704,6 +2765,18 @@ fn assemble_statements(
         }
     }
 
+    if let Some(session) = nex_session {
+        let bytes = session
+            .image
+            .finish()
+            .map_err(|e| AsmError::at(session.span, e.to_string()))?;
+        artifacts.push(Artifact {
+            name: session.name,
+            format: ArtifactFormat::Nex,
+            bytes,
+        });
+    }
+
     for (name, format, virtual_labels, page_size) in symbol_maps {
         let text = match format {
             ArtifactFormat::CspectMap => crate::sjasm_symbols::cspect(&export_symbols, page_size),
@@ -2877,6 +2950,146 @@ fn flat_space_usage(start: u32, used: u32) -> Vec<AreaUsage> {
 }
 
 /// SjASMPlus's live device memory, distinct from its raw emission log.
+struct NexSession {
+    name: String,
+    image: crate::nex::Image,
+    span: Span,
+}
+
+#[allow(clippy::too_many_arguments)]
+fn apply_nex(
+    command: &NexCommand,
+    s: &Statement,
+    memory: Option<&DeviceMemory>,
+    symbols: &BTreeMap<String, i64>,
+    pc: i64,
+    start: Option<u16>,
+    session: &mut Option<NexSession>,
+    artifacts: &mut Vec<Artifact>,
+    warnings: &mut Vec<Warning>,
+) -> Result<(), AsmError> {
+    let memory = memory
+        .filter(|m| m.spec.name == "ZXSPECTRUMNEXT")
+        .ok_or_else(|| s.err("[SAVENEX] is allowed only in ZXSPECTRUMNEXT device mode"))?;
+    let eval = |e: &Expr| e.eval(symbols, pc, s.line).map_err(|e| s.stamp(e));
+    let warn = |warnings: &mut Vec<Warning>, message: String| {
+        warnings.push(Warning {
+            line: s.line,
+            file: s.file,
+            kind: WarningKind::Advisory,
+            message,
+        })
+    };
+    match command {
+        NexCommand::Open { name, values } => {
+            if session.is_some() {
+                return Err(s.err("[SAVENEX] NEX file is already open"));
+            }
+            let v = values.iter().map(eval).collect::<Result<Vec<_>, _>>()?;
+            let entry_pc = v.first().copied().unwrap_or(i64::from(start.unwrap_or(0)));
+            let stack = v.get(1).copied().unwrap_or(0xfffe);
+            let entry = v.get(2).copied().unwrap_or(0);
+            let version = v.get(3).copied().unwrap_or(0);
+            match version {
+                0 | 2 => {}
+                3 => {
+                    return Err(s
+                        .err("SAVENEX V1.3 output is not implemented")
+                        .with_code(crate::contract::Code::UnsupportedFeature));
+                }
+                _ => return Err(s.err("[SAVENEX] only file version 2 or 3 can be enforced")),
+            }
+            let entry = usize::try_from(entry)
+                .ok()
+                .filter(|v| *v < 112)
+                .ok_or_else(|| s.err("[SAVENEX] entry bank must be in 0..111"))?;
+            for value in [entry_pc, stack] {
+                if !(-32768..=65535).contains(&value) {
+                    warn(
+                        warnings,
+                        format!(
+                            "value {value} is truncated to 16bit value: 0x{:04X}",
+                            value as u16
+                        ),
+                    );
+                }
+            }
+            if start.is_some_and(|start| i64::from(start) != entry_pc) {
+                warn(
+                    warnings,
+                    "[SAVENEX] Start address was also defined by END, OPEN argument used instead"
+                        .into(),
+                );
+            }
+            let sp = stack as u16;
+            if 0 < sp && sp < 0x400a {
+                warn(
+                    warnings,
+                    "[SAVENEX] stackAddress is too close to ROM area".into(),
+                );
+            } else {
+                let pages = [0, 0, 10, 11, 4, 5, entry * 2, entry * 2 + 1];
+                if (1..=10u16).any(|n| {
+                    let at = sp.wrapping_sub(n) as usize;
+                    memory.pages[pages[at / 8192]][at % 8192] != 0
+                }) {
+                    warn(
+                        warnings,
+                        "[SAVENEX] stack will overwrite nonzero memory".into(),
+                    );
+                }
+            }
+            *session = Some(NexSession {
+                name: name.clone(),
+                image: crate::nex::Image::new(entry_pc as u16, sp, entry)
+                    .map_err(|e| s.err(e.to_string()))?,
+                span: Span::in_file(s.file, s.line as u32, 0),
+            });
+        }
+        NexCommand::Core(values) => {
+            let active = session
+                .as_mut()
+                .ok_or_else(|| s.err("[SAVENEX] NEX file is not open"))?;
+            let v = [eval(&values[0])?, eval(&values[1])?, eval(&values[2])?];
+            if !(0..=15).contains(&v[0]) || !(0..=15).contains(&v[1]) || !(0..=255).contains(&v[2])
+            {
+                warn(
+                    warnings,
+                    "[SAVENEX] values are not within 0..15,0..15,0..255 ranges".into(),
+                );
+            }
+            active.image.core(v.map(|v| v as u8));
+        }
+        NexCommand::Auto(values) => {
+            let active = session
+                .as_mut()
+                .ok_or_else(|| s.err("[SAVENEX] NEX file is not open"))?;
+            let v = values
+                .iter()
+                .map(|e| {
+                    usize::try_from(eval(e)?).map_err(|_| s.err("[SAVENEX] bank must be in 0..111"))
+                })
+                .collect::<Result<Vec<_>, _>>()?;
+            active
+                .image
+                .auto(v.first().copied(), v.get(1).copied(), &memory.pages)
+                .map_err(|e| s.err(e.to_string()))?;
+        }
+        NexCommand::Close => {
+            let active = session
+                .take()
+                .ok_or_else(|| s.err("[SAVENEX] NEX file is not open"))?;
+            let bytes = active.image.finish().map_err(|e| s.err(e.to_string()))?;
+            artifacts.push(Artifact {
+                name: active.name,
+                format: ArtifactFormat::Nex,
+                bytes,
+            });
+        }
+    }
+    Ok(())
+}
+
 struct DeviceMemory {
     spec: DeviceSpec,
     slots: Vec<usize>,

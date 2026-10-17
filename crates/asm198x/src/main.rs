@@ -1632,11 +1632,29 @@ fn preflight_outputs(
     }
     let default_image = Path::new(input).with_extension("bin");
     for artifact in &assembly.artifacts {
-        preflight_destination(&artifact_destination(
-            &artifact.name,
-            image.unwrap_or(&default_image),
-            outprefix,
-        ))?;
+        let destination =
+            artifact_destination(&artifact.name, image.unwrap_or(&default_image), outprefix);
+        preflight_destination(&destination)?;
+        for source in
+            std::iter::once(Path::new(input)).chain(consumed_inputs.iter().map(PathBuf::as_path))
+        {
+            if output_collides(&destination, source)? {
+                return Err(format!(
+                    "refusing to overwrite input {} with the output artifact at {}",
+                    source.display(),
+                    destination.display()
+                ));
+            }
+        }
+        if let Some(image) = image
+            && output_collides(&destination, image)?
+        {
+            return Err(format!(
+                "refusing to overwrite the primary image {} with the output artifact at {}",
+                image.display(),
+                destination.display()
+            ));
+        }
     }
     let requested_sym = match (sym, &assembly.requested_symbols) {
         (None, Some(named)) => Some(Some(source_named_path(input, named)?)),

@@ -85,6 +85,43 @@ def cases() -> dict[str, str]:
             + open_
             + " SAVENEX AUTO\n SAVENEX CLOSE\n"
         )
+    ordered = device + "".join(
+        f" SLOT 6\n PAGE {bank * 2}\n org $c000\n db {bank + 1}\n"
+        for bank in [0, 1, 2, 3, 4, 5, 6]
+    )
+    out["bank_order"] = ordered + open_ + " SAVENEX AUTO\n SAVENEX CLOSE\n"
+    for i, tail in enumerate(
+        [
+            "AUTO 5,2",
+            "AUTO 0,4",
+            "AUTO 5,5\n SAVENEX AUTO 2,4",
+            "AUTO 0,4\n SAVENEX AUTO 5,5",
+        ]
+    ):
+        out[f"range_{i}"] = ordered + open_ + " SAVENEX " + tail + "\n SAVENEX CLOSE\n"
+    out.update(
+        {
+            "end_default": device
+            + ' SAVENEX OPEN "out.nex"\n SAVENEX CLOSE\n END $8123\n',
+            "end_override": device + open_ + " SAVENEX CLOSE\n END $8123\n",
+            "module": device
+            + ' MODULE inner\nentry: db 1\n.stack equ $b000\n SAVENEX OPEN "out.nex",entry,.stack\n SAVENEX AUTO\n SAVENEX CLOSE\n ENDMODULE\n',
+            "duplicate_name": device
+            + open_
+            + ' SAVENEX CLOSE\n SAVENEX OPEN "out.nex",$9000\n SAVENEX CLOSE\n',
+            "error_after_save": device + open_ + " SAVENEX CLOSE\n ASSERT 0\n",
+            "core_after_auto": device
+            + open_
+            + " SAVENEX AUTO\n SAVENEX CORE 3,1,2\n SAVENEX CLOSE\n",
+            "version_forward": device
+            + ' SAVENEX OPEN "out.nex",$8000,$b000,0,V\n SAVENEX CLOSE\nV equ 2\n',
+            "close_extra": device + open_ + ' SAVENEX CLOSE "missing.bin"\n',
+            "open_missing_name": device + " SAVENEX OPEN\n",
+            "open_unquoted_name": device + " SAVENEX OPEN out.nex\n SAVENEX CLOSE\n",
+            "core_missing": device + open_ + " SAVENEX CORE\n SAVENEX CLOSE\n",
+            "unknown": device + " SAVENEX BOGUS\n",
+        }
+    )
     return out
 
 

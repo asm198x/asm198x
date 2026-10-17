@@ -33,7 +33,7 @@ bounded path gives a complete native output for the concrete target first.
   No family NEX consumer was identified to require graduation in this slice.
 - Raw `AssemblyResult.bytes` remains assembled code. NEX is a separate
   `Artifact` with `ArtifactFormat::Nex`, serialized as `"nex"`. Reuse the CLI's
-  existing artifact path resolution, --outprefix, --no-save, JSON/human notes
+  existing artifact path resolution, --outprefix, JSON/human notes
   and collision/preservation controls. Do not route it through primary-output
   `RequestedOutput` or reinterpret -o as the NEX destination.
 - Preserve the CLI's existing all-output preflight and refusal behavior rather
@@ -88,7 +88,7 @@ forward expressions, default END interaction, duplicate targets, path controls,
 missing/extra operands, inactive branches and an error after a completed save.
 Tests compare complete reconstructed native images, header fields and bank data;
 formatter round trips preserve raw bytes, artifacts and symbols. CLI checks cover
-human/JSON include spans, no-save/outprefix, collision preflight and retention
+human/JSON include spans, outprefix, collision preflight and retention
 of all previous outputs on failure. Mandatory packaged-executable replay includes
 wrong-byte/corrupt-archive controls on all five hosts.
 
@@ -98,3 +98,14 @@ next concrete boundary with complete streams. Never bypass another unsupported
 operation to claim whole-project parity. Run appropriate workspace/Lua tests,
 Clippy, formatting, docs, Ruff and Node checks, then exact-head PR workflows and
 actual host receipts before squash merge. A public release is a separate step.
+
+## Agreed correction during implementation
+
+The CLI does not implement --no-save, despite that control being named by the
+multi-artifact decision. The user approved finishing NEX with current controls
+and tracking that missing flag separately. The earlier claim that it existed
+was incorrect. Implement input/primary-image artifact collision checks using the
+existing file-identity helper; preserve native ordered overwrites between repeated
+artifact destinations. Do not add --no-save in this slice.
+
+The missing CLI control is tracked in [#741](https://github.com/asm198x/asm198x/issues/741).

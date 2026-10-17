@@ -3,14 +3,14 @@
 1. [done] Inspect decisions, artifact/AST/device seams and pinned native writer.
    Capture 53 bounded native cases with every image retained and independently
    verify image hashes/lengths. Record the concrete design in design.md.
-2. [pending agreement] Agree the bounded V1.2 scope and public Nex enum extension.
-3. [pending] Add primary writer provenance/layout facts in the reference library
+2. [done] User approved the public Nex enum extension; proceed with the documented V1.2 slice.
+3. [done] Add primary writer provenance/layout facts in the reference library
    before implementing layout bytes. Extend probe.py and retained native facts
    for the edge cases listed in design.md.
-4. [pending] Add red differential, formatter, in-memory I/O and CLI preservation
+4. [done] Add red differential, formatter, in-memory I/O and CLI preservation
    tests in crates/asm198x/tests/sjasmplus_savenex.rs. Reproduce current explicit
    UnsupportedFeature failure; compare full images, not just header fields.
-5. [pending] Add typed internal command lowering in dialects/sjasmplus.rs,
+5. [done] Add typed internal command lowering in dialects/sjasmplus.rs,
    operation/AST expression handling in engine.rs / ast.rs, standard-library-only
    layout helper nex.rs and module declaration lib.rs. Add Nex artifact format
    and source-ordered emit-session handling using existing device memory.

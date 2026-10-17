@@ -444,6 +444,18 @@ resolved destination; these informational notes are not advisory warnings.
 request writes no file. A failed write returns a non-zero exit status; files
 written earlier in that invocation can remain.
 
+SjASMPlus `SAVENEX OPEN`, `CORE`, `AUTO` and `CLOSE` produce a separate NEX
+V1.2 executable from `DEVICE ZXSPECTRUMNEXT` memory. `AUTO` saves nonzero banks
+as they stand when that command is reached; `CLOSE` finalizes the header.
+The library describes this file as an artifact with format `nex`, while `bytes`
+continues to hold the raw assembled code. Loading screens, appended files,
+other SAVENEX commands and explicit V1.3 output remain unsupported.
+
+Artifact destinations are checked against source files, the primary image and
+sidecars before writing. This includes existing hard links and symbolic links.
+Repeated artifact names are written in source order, as in the reference.
+
+
 <!-- sample: acme, file: fill.a, refuses: does not fit in a byte -->
 ```asm
 * = $c000
