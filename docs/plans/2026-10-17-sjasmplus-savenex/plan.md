@@ -14,10 +14,10 @@
    operation/AST expression handling in engine.rs / ast.rs, standard-library-only
    layout helper nex.rs and module declaration lib.rs. Add Nex artifact format
    and source-ordered emit-session handling using existing device memory.
-6. [pending] Add mandatory package replay to scripts/test-candidate-package.cjs
+6. [done] Add mandatory package replay to scripts/test-candidate-package.cjs
    and a missing-case rejection control to scripts/candidate-package.test.cjs.
    Run scoped tests, workspace Lua tests, Clippy, fmt, docs, Ruff and Node.
-7. [pending] Commit clean producer, audit unchanged pinned SpecNext target,
+7. [done] Commit clean producer, audit unchanged pinned SpecNext target,
    retain full report/image/streams and either exact NEX parity or next issue.
 8. [pending] Push PR, inspect every final-head check/workflow and five actual
    package reports/receipts/negative controls, squash merge, update #739 and

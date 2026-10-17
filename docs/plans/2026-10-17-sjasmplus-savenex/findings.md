@@ -77,3 +77,5 @@ boundary: `TOTAL EQU MAX_PLAYERS*3` before the later `MAX_PLAYERS EQU 2` emits
 06 natively and refuses here on line 1. Defining MAX_PLAYERS first emits 06
 in both tools; direct `db MAX_PLAYERS` before its later definition emits 02
 in both. The six complete executions, tool identities and build log are retained.
+
+The derived forward-EQU boundary is tracked in [#742](https://github.com/asm198x/asm198x/issues/742).
