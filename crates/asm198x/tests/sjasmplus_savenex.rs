@@ -42,7 +42,25 @@ fn native_nex_images_and_refusals_match_both_targets_and_formatter() {
             let expected: Vec<_> = outputs.iter().filter(|o| o["name"] != "raw.bin").collect();
             // Native overwrites repeated names in order. The library retains
             // both requests; the CLI writes the last image to that path.
-            if name != "duplicate_name" {
+            if name == "duplicate_name" {
+                assert_eq!(result.artifacts.len(), 2);
+                let first = cases
+                    .iter()
+                    .find(|c| c["name"] == "implicit_close")
+                    .expect("native first save")["outputs"]
+                    .as_array()
+                    .expect("outputs")
+                    .iter()
+                    .find(|o| o["name"] == "out.nex")
+                    .expect("first image")["hex"]
+                    .as_str()
+                    .expect("first bytes");
+                assert_eq!(hex(&result.artifacts[0].bytes), first);
+                assert_eq!(
+                    hex(&result.artifacts[1].bytes),
+                    expected[0]["hex"].as_str().expect("last bytes")
+                );
+            } else {
                 assert_eq!(result.artifacts.len(), expected.len(), "{name}");
                 for (artifact, native) in result.artifacts.iter().zip(expected) {
                     assert_eq!(

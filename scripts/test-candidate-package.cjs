@@ -332,6 +332,10 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
           }
           const result = JSON.parse(p.stdout);
           assert.equal((result.artifacts || []).length, fact.name === 'duplicate_name' ? 2 : fact.outputs.filter(o => o.name !== 'raw.bin').length);
+          if (fact.name === 'duplicate_name') {
+            const first = facts.cases.find(c => c.name === 'implicit_close').outputs.find(o => o.name === 'out.nex');
+            assert.deepEqual(Buffer.from(result.artifacts[0].bytes), Buffer.from(first.hex, 'hex'), 'first ordered save');
+          }
           for (const artifact of fact.name === 'duplicate_name' ? result.artifacts.slice(-1) : (result.artifacts || [])) {
             assert.equal(artifact.format, 'nex');
             const expected = fact.outputs.find(o => o.name === artifact.name);

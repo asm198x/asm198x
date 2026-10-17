@@ -50,3 +50,30 @@ The declaration invariant caught the invalid subcommand diagnostic being
 misclassified as an unknown directive; that diagnostic now names the expected
 commands. The test remains unchanged and passes. All implemented subcommands
 are declared; the generated vocabulary docs were regenerated.
+
+Local workspace verification completed with 1,506 passed and 38 explicitly
+ignored. All-target/Lua Clippy with warnings denied, formatting, generated docs,
+Ruff and 53 Node package/workflow checks passed. A separate local 70-case CLI
+replay matched all mandatory package expectations for files and JSON artifact
+bytes, including the omitted empty-artifact field. Logs are retained.
+
+## Clean whole-project control
+
+Producer `3d916010e0b6bcb9a30de4287815577de360c382` was built from a clean
+checkout by the explicit ecosystem runner against unchanged SpecNext pin
+`e3211ea8ad2e83aca4d07d70bd8e09b7b51a9a1d`. SAVENEX is no longer refused
+by the parser. The engine reaches a separate error at `src/sprite.asm:34`:
+`undefined symbol MAX_PLAYERS` in a derived EQU, before MAX_PLAYERS is defined
+in later included player.asm. Whole-project NEX equivalence is not claimed.
+Native still emits 33,280 bytes with SHA-256
+`5fbed92a7d60dab47de8b22162c9227df051eaf67c26e85e618b24f6429dd07f`.
+The full native image and ten raw process streams are retained; every stream
+was compared against its process record and the image hash/length recomputed.
+No upstream build script ran. This focused result does not replace the
+complete-cohort compatibility ledger.
+
+A fresh debug build from that same clean commit independently reproduces the
+boundary: `TOTAL EQU MAX_PLAYERS*3` before the later `MAX_PLAYERS EQU 2` emits
+06 natively and refuses here on line 1. Defining MAX_PLAYERS first emits 06
+in both tools; direct `db MAX_PLAYERS` before its later definition emits 02
+in both. The six complete executions, tool identities and build log are retained.

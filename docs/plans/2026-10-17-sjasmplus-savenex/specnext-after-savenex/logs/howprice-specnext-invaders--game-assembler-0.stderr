@@ -1,0 +1,2 @@
+asm198x: /private/tmp/asm198x-savenex-audit/work/howprice-specnext-invaders--game/assembler/src/sprite.asm:34: error: undefined symbol `MAX_PLAYERS`
+included from src/main.asm:34

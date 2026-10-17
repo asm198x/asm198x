@@ -1,0 +1,117 @@
+{
+  "source_commit": "3d916010e0b6bcb9a30de4287815577de360c382",
+  "executables": {
+    "native": {
+      "path": "/usr/local/bin/sjasmplus",
+      "sha256": "454bfa33058d5a0f5323db1ee65bbdd2b5871f7d697c328e2ee1f1a950f0d78b"
+    },
+    "asm": {
+      "path": "/private/tmp/asm198x-savenex-build/debug/asm198x",
+      "sha256": "cd9d8d3890755db8bb16e1b0955df6e866e426dc56efdc9b3119e68b4b50ca81"
+    }
+  },
+  "runs": [
+    {
+      "case": "forward",
+      "source": "TOTAL EQU MAX_PLAYERS*3\n db TOTAL\nMAX_PLAYERS EQU 2\n",
+      "tool": "native",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=out.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "06"
+    },
+    {
+      "case": "forward",
+      "source": "TOTAL EQU MAX_PLAYERS*3\n db TOTAL\nMAX_PLAYERS EQU 2\n",
+      "tool": "asm",
+      "argv": [
+        "/private/tmp/asm198x-savenex-build/debug/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: undefined symbol `MAX_PLAYERS`\n",
+      "hex": null
+    },
+    {
+      "case": "ordered",
+      "source": "MAX_PLAYERS EQU 2\nTOTAL EQU MAX_PLAYERS*3\n db TOTAL\n",
+      "tool": "native",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=out.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "06"
+    },
+    {
+      "case": "ordered",
+      "source": "MAX_PLAYERS EQU 2\nTOTAL EQU MAX_PLAYERS*3\n db TOTAL\n",
+      "tool": "asm",
+      "argv": [
+        "/private/tmp/asm198x-savenex-build/debug/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "06"
+    },
+    {
+      "case": "direct_forward",
+      "source": " db MAX_PLAYERS\nMAX_PLAYERS EQU 2\n",
+      "tool": "native",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=out.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "02"
+    },
+    {
+      "case": "direct_forward",
+      "source": " db MAX_PLAYERS\nMAX_PLAYERS EQU 2\n",
+      "tool": "asm",
+      "argv": [
+        "/private/tmp/asm198x-savenex-build/debug/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "02"
+    }
+  ]
+}
