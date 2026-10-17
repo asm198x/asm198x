@@ -20,6 +20,7 @@ requiredCases.push('sjasmplus_define_numbers');
 requiredCases.push('sjasmplus_display_format');
 requiredCases.push('sjasmplus_savenex');
 requiredCases.push('sjasmplus_forward_equ');
+requiredCases.push('ca65_4510');
 const sourceFiles = {
   'LICENSE': '62cd567bc9270c722abcaa6ad88b6a1fe861698d63890f787cc557d2395be203',
   'helloworld.asm': '9e57c82435c0cf35e56089d56d6b83991c61624c2b3448ab6c66fb13a884a0a5',
@@ -361,6 +362,22 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
           }
         } else {
           reject(p); assert.equal(read('nex.bin').toString(), 'previous image', fact.name);
+        }
+      }
+    });
+    test('ca65_4510', () => {
+      const facts = require('../crates/asm198x/tests/fixtures/ca65-4510.json');
+      assert.equal(facts.cases.length, 139);
+      for (const [name, text] of Object.entries(facts.files)) write(name, text);
+      for (const fact of facts.cases) {
+        write('cpu.cfg', fact.config); write('cpu.s', fact.source);
+        write('cpu.bin', 'previous image');
+        const p = run(['--dialect', 'ca65', '-C', 'cpu.cfg', 'cpu.s', '-o', 'cpu.bin']);
+        if (fact.native.at(-1).exit === 0) {
+          assert.equal(p.status, 0, fact.name + ': ' + p.stderr);
+          assert.deepEqual(read('cpu.bin'), Buffer.from(fact.native_hex, 'hex'), fact.name);
+        } else {
+          reject(p); assert.equal(read('cpu.bin').toString(), 'previous image', fact.name);
         }
       }
     });

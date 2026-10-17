@@ -143,12 +143,67 @@ impl Projection {
 /// No layout state is consulted because a ca65 condition cannot reach any: the
 /// reference refuses `*` and even a backward label in one, since a ca65 label is
 /// relocatable until `ld65` links it and so is never a constant expression.
+fn remember_text_names(nodes: &[crate::ast::Node], names: &mut BTreeSet<String>) {
+    use crate::ast::Item;
+    for node in nodes {
+        names.extend(ca65_flat::defined_names(&node.source));
+        match &node.item {
+            Some(Item::Conditional {
+                then_body,
+                else_body,
+                ..
+            }) => {
+                remember_text_names(then_body, names);
+                if let Some(body) = else_body {
+                    remember_text_names(body, names);
+                }
+            }
+            Some(Item::Repeat { body, .. }) => remember_text_names(body, names),
+            _ => {}
+        }
+    }
+}
+
+fn live_text(
+    source: &str,
+    st: &Projection,
+    reader: &Walker,
+    line: usize,
+) -> Result<String, AsmError> {
+    let target = if reader.extension.is_some() {
+        ca65_flat::Target::Csg4510
+    } else {
+        ca65_flat::Target::Mos6502
+    };
+    let numbers = if st.loop_vars.is_empty() {
+        std::borrow::Cow::Borrowed(&st.consts)
+    } else {
+        std::borrow::Cow::Owned(st.env())
+    };
+    ca65_flat::expand_ca65_line(
+        source,
+        target,
+        &numbers,
+        &reader.text_names,
+        reader.repeat_registers.map(|selected| {
+            if selected {
+                ca65_flat::Target::Csg4510
+            } else {
+                ca65_flat::Target::Mos6502
+            }
+        }),
+        reader.scopes.len().saturating_sub(reader.records.len()),
+        line,
+    )
+}
+
 fn project_nodes(
     nodes: &[crate::ast::Node],
     st: &mut Projection,
     sw: &mut Sweep<'_>,
 ) -> Result<(), AsmError> {
     use crate::ast::Item;
+    remember_text_names(nodes, &mut sw.reader.text_names);
     for node in nodes {
         // `.end` stopped the reader: nothing after it is read, so nothing
         // after it is projected — a block head included.
@@ -170,7 +225,7 @@ fn project_nodes(
             }) => {
                 let line = node.span.line as usize;
                 let head = read_block_head(node, head, st, sw)?;
-                if fold_condition(&head, st, line)? {
+                if fold_condition(&head, st, sw.reader.extension, line)? {
                     project_nodes(then_body, st, sw)?;
                 } else if let Some(body) = else_body {
                     project_nodes(body, st, sw)?;
@@ -191,12 +246,16 @@ fn project_nodes(
                 let line = node.span.line as usize;
                 let head = read_block_head(node, head, st, sw)?;
                 let (count, var) = fold_repeat(&head, st, line)?;
+                let previous_registers = sw.reader.repeat_registers;
+                let registers = previous_registers.or(Some(sw.reader.extension.is_some()));
                 for i in 0..count {
+                    sw.reader.repeat_registers = registers;
                     if let Some(name) = &var {
                         st.loop_vars.push((name.clone(), i));
                     }
                     let first = st.stmts.len();
                     let out = project_nodes(body, st, sw);
+                    sw.reader.repeat_registers = previous_registers;
                     if var.is_some() {
                         // Bake this pass's value into everything the body just
                         // produced, then drop the binding: ca65 scopes a loop
@@ -247,6 +306,8 @@ fn read_block_head(
         // Only a `.define`/`.undefine` line is consumed whole, and a block
         // head is neither.
         .unwrap_or_default();
+    let processed =
+        live_text(&processed, st, &sw.reader, line).map_err(|e| ca65_flat::stamp_file(e, file))?;
     let (symbol, rest) = sw
         .reader
         .block_open(&processed, line)
@@ -288,6 +349,8 @@ fn sweep_line(
     else {
         return Ok(());
     };
+    let processed =
+        live_text(&processed, st, &sw.reader, line).map_err(|e| ca65_flat::stamp_file(e, file))?;
     let start = sw.reader.nodes.len();
     let walked = sw
         .reader
@@ -425,7 +488,12 @@ fn resolve_at_sweep(
 }
 
 /// Fold a `.if` / `.ifdef` / `.ifndef` / `.elseif` head.
-fn fold_condition(head: &str, st: &Projection, line: usize) -> Result<bool, AsmError> {
+fn fold_condition(
+    head: &str,
+    st: &Projection,
+    extension: Option<&'static isa::InstructionSet>,
+    line: usize,
+) -> Result<bool, AsmError> {
     let (word, args) = split_first_word(head.trim());
     let word = word.to_ascii_lowercase();
     let args = args.trim();
@@ -453,8 +521,7 @@ fn fold_condition(head: &str, st: &Projection, line: usize) -> Result<bool, AsmE
         // expansion being textual. ca65 counts tokens, not characters, so
         // whitespace alone is still blank.
         ".ifblank" | ".ifnblank" => Ok((word == ".ifblank") == args.is_empty()),
-        // The CPU tests. This leg is a 6502 and refuses `.setcpu`, so no
-        // reachable source can make one of the others true.
+        // Processor tests follow the live reader's selection.
         // `.ifref` asks the same question `.ref` does, from the same set.
         ".ifref" | ".ifnref" => {
             let name = args
@@ -463,8 +530,9 @@ fn fold_condition(head: &str, st: &Projection, line: usize) -> Result<bool, AsmE
                 .ok_or_else(|| AsmError::new(line, format!("`{word}` needs a name")))?;
             Ok((word == ".ifref") == st.referenced.contains(name))
         }
-        ".ifp02" => Ok(true),
-        ".ifp4510" | ".ifp816" | ".ifpc02" | ".ifpsc02" => Ok(false),
+        ".ifp02" => Ok(extension.is_none()),
+        ".ifp4510" => Ok(extension.is_some()),
+        ".ifp816" | ".ifpc02" | ".ifpsc02" => Ok(false),
         // `.ifconst` is not `.if`: it asks whether the expression *is* a
         // constant, not what it comes to, and answers rather than failing when
         // it is not. ca65's rule is the linker's — probed against V2.18:
@@ -686,9 +754,14 @@ pub(super) fn map_kind_syms(k: &Kind, f: &dyn Fn(&str) -> Option<Expr>) -> Kind 
         Kind::Words(es) => Kind::Words(list(es)),
         Kind::DBytes(es) => Kind::DBytes(list(es)),
         Kind::DWords(es) => Kind::DWords(list(es)),
-        Kind::Insn { operand, mnemonic } => Kind::Insn {
+        Kind::Insn {
+            operand,
+            mnemonic,
+            extension,
+        } => Kind::Insn {
             operand: map_operand_syms(operand, f),
             mnemonic: mnemonic.clone(),
+            extension: *extension,
         },
         Kind::Empty => Kind::Empty,
         Kind::Res(n, f) => Kind::Res(*n, *f),
