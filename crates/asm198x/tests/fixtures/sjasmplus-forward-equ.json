@@ -1,0 +1,1342 @@
+{
+  "tool": "/usr/local/bin/sjasmplus",
+  "sha256": "454bfa33058d5a0f5323db1ee65bbdd2b5871f7d697c328e2ee1f1a950f0d78b",
+  "version": {
+    "argv": [
+      "/usr/local/bin/sjasmplus",
+      "--version"
+    ],
+    "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+    "exit": 0,
+    "stdout": "",
+    "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\n"
+  },
+  "cases": [
+    {
+      "name": "original",
+      "source": "TOTAL EQU MAX_PLAYERS*3\n db TOTAL\nMAX_PLAYERS EQU 2\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "06"
+    },
+    {
+      "name": "ordered",
+      "source": "MAX_PLAYERS EQU 2\nTOTAL EQU MAX_PLAYERS*3\n db TOTAL\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "06"
+    },
+    {
+      "name": "direct",
+      "source": " db MAX_PLAYERS\nMAX_PLAYERS EQU 2\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "02"
+    },
+    {
+      "name": "missing",
+      "source": "TOTAL EQU missing*3\n db TOTAL\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 1,
+      "stdout": "",
+      "stderr": "input.asm(1): error: Label not found: missing\n",
+      "hex": "00"
+    },
+    {
+      "name": "self_cycle",
+      "source": "TOTAL EQU TOTAL+1\n dd TOTAL\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "03000000"
+    },
+    {
+      "name": "pair_cycle",
+      "source": "A EQU B+1\nB EQU A+1\n dd A,B\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "0500000006000000"
+    },
+    {
+      "name": "division",
+      "source": "TOTAL EQU 12/N\n db TOTAL\nN EQU 3\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "04"
+    },
+    {
+      "name": "division_zero",
+      "source": "TOTAL EQU 12/N\n db TOTAL\nN EQU 0\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 1,
+      "stdout": "",
+      "stderr": "input.asm(1): error: Division by zero\n",
+      "hex": "00"
+    },
+    {
+      "name": "pc",
+      "source": " org $8000\nTOTAL EQU later-$\n db 1,2,3\nlater: dw TOTAL\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "0102030300"
+    },
+    {
+      "name": "forward_address",
+      "source": "TOTAL EQU later+1\n dw TOTAL\nlater: db 7\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "030007"
+    },
+    {
+      "name": "local",
+      "source": "main: \n.total EQU .count*3\n db .total\n.count EQU 2\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "06"
+    },
+    {
+      "name": "module",
+      "source": " MODULE inner\nTOTAL EQU COUNT*3\n db TOTAL\nCOUNT EQU 2\n ENDMODULE\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "06"
+    },
+    {
+      "name": "module_fallback",
+      "source": " MODULE inner\nTOTAL EQU COUNT*3\n db TOTAL\n ENDMODULE\nCOUNT EQU 2\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "06"
+    },
+    {
+      "name": "module_shadow",
+      "source": "COUNT EQU 5\n MODULE inner\nTOTAL EQU COUNT*3\n db TOTAL\nCOUNT EQU 2\n ENDMODULE\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "06"
+    },
+    {
+      "name": "conditional",
+      "source": "TOTAL EQU COUNT*3\n IF TOTAL=6\n db 9\n ENDIF\nCOUNT EQU 2\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "09"
+    },
+    {
+      "name": "reserve",
+      "source": "TOTAL EQU COUNT*3\n ds TOTAL,7\nCOUNT EQU 2\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "070707070707"
+    },
+    {
+      "name": "inactive",
+      "source": " IF 0\nTOTAL EQU missing*3\n ENDIF\n db 7\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "07"
+    },
+    {
+      "name": "duplicate",
+      "source": "TOTAL EQU COUNT*3\nTOTAL EQU 4\n db TOTAL\nCOUNT EQU 2\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 1,
+      "stdout": "",
+      "stderr": "input.asm(2): error: Duplicate label: TOTAL\n",
+      "hex": "04"
+    },
+    {
+      "name": "pc_backward",
+      "source": " org $8000\nstart: db 1,2\nTOTAL EQU $-start\n dw TOTAL\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "01020200"
+    },
+    {
+      "name": "nested_module",
+      "source": " MODULE outer\n MODULE inner\nTOTAL EQU COUNT*3\n db TOTAL\nCOUNT EQU 2\n ENDMODULE\n ENDMODULE\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "06"
+    },
+    {
+      "name": "macro",
+      "source": " MACRO derive name,value\nname EQU value*3\n ENDM\n derive TOTAL,COUNT\n db TOTAL\nCOUNT EQU 2\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "06"
+    },
+    {
+      "name": "local_pc",
+      "source": " org $8000\nmain: \n.total EQU .end-$\n db 1,2\n.end: dw .total\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "01020200"
+    },
+    {
+      "name": "unused_missing",
+      "source": "TOTAL EQU missing*3\n db 7\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 1,
+      "stdout": "",
+      "stderr": "input.asm(1): error: Label not found: missing\n",
+      "hex": "07"
+    },
+    {
+      "name": "unused_division_zero",
+      "source": "TOTAL EQU 12/N\n db 7\nN EQU 0\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 1,
+      "stdout": "",
+      "stderr": "input.asm(1): error: Division by zero\n",
+      "hex": "07"
+    },
+    {
+      "name": "org",
+      "source": "TOTAL EQU COUNT*3\n org TOTAL\n dw $\nCOUNT EQU 2\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "0600"
+    },
+    {
+      "name": "display",
+      "source": "TOTAL EQU COUNT*3\n DISPLAY /D,TOTAL\n db TOTAL\nCOUNT EQU 2\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "> 6\n",
+      "hex": "06"
+    },
+    {
+      "name": "equ_case",
+      "source": "TOTAL equ COUNT*3\n db TOTAL\nCOUNT equ 2\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "06"
+    },
+    {
+      "name": "forward_word",
+      "source": " dw TOTAL\nTOTAL EQU COUNT*3\nCOUNT EQU 2\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "0600"
+    },
+    {
+      "name": "chain_1",
+      "source": "C0 EQU C1+1\nC1 EQU 2\n dd C0\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "03000000"
+    },
+    {
+      "name": "chain_2",
+      "source": "C0 EQU C1+1\nC1 EQU C2+1\nC2 EQU 2\n dd C0\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "04000000"
+    },
+    {
+      "name": "chain_3",
+      "source": "C0 EQU C1+1\nC1 EQU C2+1\nC2 EQU C3+1\nC3 EQU 2\n dd C0\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "03000000"
+    },
+    {
+      "name": "chain_4",
+      "source": "C0 EQU C1+1\nC1 EQU C2+1\nC2 EQU C3+1\nC3 EQU C4+1\nC4 EQU 2\n dd C0\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "03000000"
+    },
+    {
+      "name": "chain_5",
+      "source": "C0 EQU C1+1\nC1 EQU C2+1\nC2 EQU C3+1\nC3 EQU C4+1\nC4 EQU C5+1\nC5 EQU 2\n dd C0\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "03000000"
+    },
+    {
+      "name": "chain_6",
+      "source": "C0 EQU C1+1\nC1 EQU C2+1\nC2 EQU C3+1\nC3 EQU C4+1\nC4 EQU C5+1\nC5 EQU C6+1\nC6 EQU 2\n dd C0\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "03000000"
+    },
+    {
+      "name": "arithmetic_N+1_0",
+      "source": "TOTAL EQU N+1\n dd TOTAL\nN EQU 0\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "01000000"
+    },
+    {
+      "name": "arithmetic_N+1_2",
+      "source": "TOTAL EQU N+1\n dd TOTAL\nN EQU 2\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "03000000"
+    },
+    {
+      "name": "arithmetic_N+1_255",
+      "source": "TOTAL EQU N+1\n dd TOTAL\nN EQU 255\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "00010000"
+    },
+    {
+      "name": "arithmetic_N+1_2147483647",
+      "source": "TOTAL EQU N+1\n dd TOTAL\nN EQU 2147483647\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "00000080"
+    },
+    {
+      "name": "arithmetic_N-1_0",
+      "source": "TOTAL EQU N-1\n dd TOTAL\nN EQU 0\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "ffffffff"
+    },
+    {
+      "name": "arithmetic_N-1_2",
+      "source": "TOTAL EQU N-1\n dd TOTAL\nN EQU 2\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "01000000"
+    },
+    {
+      "name": "arithmetic_N-1_255",
+      "source": "TOTAL EQU N-1\n dd TOTAL\nN EQU 255\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "fe000000"
+    },
+    {
+      "name": "arithmetic_N-1_2147483647",
+      "source": "TOTAL EQU N-1\n dd TOTAL\nN EQU 2147483647\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "feffff7f"
+    },
+    {
+      "name": "arithmetic_N*3_0",
+      "source": "TOTAL EQU N*3\n dd TOTAL\nN EQU 0\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "00000000"
+    },
+    {
+      "name": "arithmetic_N*3_2",
+      "source": "TOTAL EQU N*3\n dd TOTAL\nN EQU 2\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "06000000"
+    },
+    {
+      "name": "arithmetic_N*3_255",
+      "source": "TOTAL EQU N*3\n dd TOTAL\nN EQU 255\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "fd020000"
+    },
+    {
+      "name": "arithmetic_N*3_2147483647",
+      "source": "TOTAL EQU N*3\n dd TOTAL\nN EQU 2147483647\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "fdffff7f"
+    },
+    {
+      "name": "arithmetic_N/3_0",
+      "source": "TOTAL EQU N/3\n dd TOTAL\nN EQU 0\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "00000000"
+    },
+    {
+      "name": "arithmetic_N/3_2",
+      "source": "TOTAL EQU N/3\n dd TOTAL\nN EQU 2\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "00000000"
+    },
+    {
+      "name": "arithmetic_N/3_255",
+      "source": "TOTAL EQU N/3\n dd TOTAL\nN EQU 255\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "55000000"
+    },
+    {
+      "name": "arithmetic_N/3_2147483647",
+      "source": "TOTAL EQU N/3\n dd TOTAL\nN EQU 2147483647\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "aaaaaa2a"
+    },
+    {
+      "name": "arithmetic_N%3_0",
+      "source": "TOTAL EQU N%3\n dd TOTAL\nN EQU 0\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "00000000"
+    },
+    {
+      "name": "arithmetic_N%3_2",
+      "source": "TOTAL EQU N%3\n dd TOTAL\nN EQU 2\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "02000000"
+    },
+    {
+      "name": "arithmetic_N%3_255",
+      "source": "TOTAL EQU N%3\n dd TOTAL\nN EQU 255\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "00000000"
+    },
+    {
+      "name": "arithmetic_N%3_2147483647",
+      "source": "TOTAL EQU N%3\n dd TOTAL\nN EQU 2147483647\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "01000000"
+    },
+    {
+      "name": "arithmetic_N<<4_0",
+      "source": "TOTAL EQU N<<4\n dd TOTAL\nN EQU 0\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "00000000"
+    },
+    {
+      "name": "arithmetic_N<<4_2",
+      "source": "TOTAL EQU N<<4\n dd TOTAL\nN EQU 2\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "20000000"
+    },
+    {
+      "name": "arithmetic_N<<4_255",
+      "source": "TOTAL EQU N<<4\n dd TOTAL\nN EQU 255\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "f00f0000"
+    },
+    {
+      "name": "arithmetic_N<<4_2147483647",
+      "source": "TOTAL EQU N<<4\n dd TOTAL\nN EQU 2147483647\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "f0ffffff"
+    },
+    {
+      "name": "arithmetic_N>>4_0",
+      "source": "TOTAL EQU N>>4\n dd TOTAL\nN EQU 0\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "00000000"
+    },
+    {
+      "name": "arithmetic_N>>4_2",
+      "source": "TOTAL EQU N>>4\n dd TOTAL\nN EQU 2\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "00000000"
+    },
+    {
+      "name": "arithmetic_N>>4_255",
+      "source": "TOTAL EQU N>>4\n dd TOTAL\nN EQU 255\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "0f000000"
+    },
+    {
+      "name": "arithmetic_N>>4_2147483647",
+      "source": "TOTAL EQU N>>4\n dd TOTAL\nN EQU 2147483647\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "ffffff07"
+    },
+    {
+      "name": "arithmetic_~N_0",
+      "source": "TOTAL EQU ~N\n dd TOTAL\nN EQU 0\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "ffffffff"
+    },
+    {
+      "name": "arithmetic_~N_2",
+      "source": "TOTAL EQU ~N\n dd TOTAL\nN EQU 2\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "fdffffff"
+    },
+    {
+      "name": "arithmetic_~N_255",
+      "source": "TOTAL EQU ~N\n dd TOTAL\nN EQU 255\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "00ffffff"
+    },
+    {
+      "name": "arithmetic_~N_2147483647",
+      "source": "TOTAL EQU ~N\n dd TOTAL\nN EQU 2147483647\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "00000080"
+    },
+    {
+      "name": "arithmetic_-N_0",
+      "source": "TOTAL EQU -N\n dd TOTAL\nN EQU 0\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "00000000"
+    },
+    {
+      "name": "arithmetic_-N_2",
+      "source": "TOTAL EQU -N\n dd TOTAL\nN EQU 2\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "feffffff"
+    },
+    {
+      "name": "arithmetic_-N_255",
+      "source": "TOTAL EQU -N\n dd TOTAL\nN EQU 255\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "01ffffff"
+    },
+    {
+      "name": "arithmetic_-N_2147483647",
+      "source": "TOTAL EQU -N\n dd TOTAL\nN EQU 2147483647\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "01000080"
+    },
+    {
+      "name": "arithmetic_N+2147483647_0",
+      "source": "TOTAL EQU N+2147483647\n dd TOTAL\nN EQU 0\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "ffffff7f"
+    },
+    {
+      "name": "arithmetic_N+2147483647_2",
+      "source": "TOTAL EQU N+2147483647\n dd TOTAL\nN EQU 2\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "01000080"
+    },
+    {
+      "name": "arithmetic_N+2147483647_255",
+      "source": "TOTAL EQU N+2147483647\n dd TOTAL\nN EQU 255\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "fe000080"
+    },
+    {
+      "name": "arithmetic_N+2147483647_2147483647",
+      "source": "TOTAL EQU N+2147483647\n dd TOTAL\nN EQU 2147483647\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "feffffff"
+    },
+    {
+      "name": "arithmetic_N*$7FFFFFFF_0",
+      "source": "TOTAL EQU N*$7FFFFFFF\n dd TOTAL\nN EQU 0\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "00000000"
+    },
+    {
+      "name": "arithmetic_N*$7FFFFFFF_2",
+      "source": "TOTAL EQU N*$7FFFFFFF\n dd TOTAL\nN EQU 2\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "feffffff"
+    },
+    {
+      "name": "arithmetic_N*$7FFFFFFF_255",
+      "source": "TOTAL EQU N*$7FFFFFFF\n dd TOTAL\nN EQU 255\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "01ffff7f"
+    },
+    {
+      "name": "arithmetic_N*$7FFFFFFF_2147483647",
+      "source": "TOTAL EQU N*$7FFFFFFF\n dd TOTAL\nN EQU 2147483647\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--nologo",
+        "--color=off",
+        "--msg=err",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-forward-equ-probe-vlur5jt0",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hex": "01000000"
+    }
+  ]
+}

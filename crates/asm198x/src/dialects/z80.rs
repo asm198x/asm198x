@@ -2211,6 +2211,51 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
             self.scopes
                 .qualify_op(o, self.syntax.scopes_locals(), self.syntax.scopes_modules())
         });
+        // SjASMPlus evaluates EQU on each of its three passes, at the
+        // definition's PC. Leaving the expression to the shared engine would
+        // require every dependency during its first address pass (#742).
+        if self.forward.is_some()
+            && let Some(Operation::Equ(expr)) = op.take_if(|op| matches!(op, Operation::Equ(_)))
+        {
+            let mut known: std::collections::BTreeSet<String> =
+                self.consts.keys().cloned().collect();
+            if let Some(forward) = &self.forward {
+                known.extend(forward.seed.keys().cloned());
+            }
+            let repair = self.scopes.alias_repair(&known);
+            // A bare-global fallback can be superseded by a definition later
+            // in the current module. Give the next pass its complete names.
+            if !repair.is_empty()
+                && let Some(forward) = &self.forward
+            {
+                forward.used.set(true);
+            }
+            let Operation::Equ(expr) = crate::ast::map_syms(Operation::Equ(expr), &mut |name| {
+                Expr::Sym(
+                    repair
+                        .get(name.as_str())
+                        .copied()
+                        .unwrap_or(&name)
+                        .to_string(),
+                )
+            }) else {
+                unreachable!("qualified EQU")
+            };
+            let value = match self.fold_count(&expr, line) {
+                // A provisional forward zero can make arithmetic fail on an
+                // early pass. The last pass must evaluate it successfully.
+                Err(_)
+                    if self
+                        .forward
+                        .as_ref()
+                        .is_some_and(|f| !f.last && f.used.get()) =>
+                {
+                    0
+                }
+                result => result?,
+            };
+            op = Some(Operation::Equ(Expr::Num(value)));
+        }
         // `equ` binds its (qualified) label to a parse-time constant.
         if let (Some(q), Some(Operation::Equ(e))) = (&label, &op)
             && let Some(v) = eval_const(e, &self.consts)

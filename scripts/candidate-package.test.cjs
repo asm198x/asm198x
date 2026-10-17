@@ -136,3 +136,10 @@ test('NEX replay cannot be omitted from current qualification', () => {
   assert(qualifies(good)); assert(requiredCases.includes('sjasmplus_savenex'));
   assert.equal(qualifies(good.filter(r => r.name !== 'sjasmplus_savenex')), false);
 });
+
+
+test('forward EQU replay is required for qualification', () => {
+  const good = requiredCases.map(name => ({ name, status: 'pass' }));
+  assert(qualifies(good)); assert(requiredCases.includes('sjasmplus_forward_equ'));
+  assert.equal(qualifies(good.filter(r => r.name !== 'sjasmplus_forward_equ')), false);
+});
