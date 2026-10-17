@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.72](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.71...asm198x-v0.0.72) - 2026-10-17
+
+### Added
+
+- *(sjasmplus)* emit native NEX V1.2 artifacts ([#743](https://github.com/asm198x/asm198x/pull/743))
+
+### Fixed
+
+- *(sjasmplus)* honor DISPLAY formats and resolved expressions ([#740](https://github.com/asm198x/asm198x/pull/740))
+- *(sjasmplus)* expand DEFINE names inside numeric spellings ([#738](https://github.com/asm198x/asm198x/pull/738))
+- *(sjasmplus)* evaluate signed remainder expressions ([#736](https://github.com/asm198x/asm198x/pull/736))
+- *(sjasmplus)* accept numeric digit separators ([#732](https://github.com/asm198x/asm198x/pull/732))
+
 ## [0.0.71](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.70...asm198x-v0.0.71) - 2026-10-16
 
 ### Fixed
