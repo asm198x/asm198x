@@ -265,6 +265,15 @@ pub const DIRECTIVES: &[Directive] = &[
         category: Category::Operation,
     },
     Directive {
+        id: "savenex",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["savenex"],
+            required: false,
+        },
+        category: Category::Operation,
+    },
+    Directive {
         id: "display",
         pattern: Pattern::Sigilled {
             sigil: '.',
@@ -332,7 +341,6 @@ pub const DIRECTIVES: &[Directive] = &[
                 "savecpcsna",
                 "savedev",
                 "savehob",
-                "savenex",
                 "savesna",
                 "savetrd",
                 "setbp",
@@ -785,6 +793,7 @@ impl Z80Syntax for SjasmplusSyntax {
             || word.eq_ignore_ascii_case("savebin")
             || word.eq_ignore_ascii_case("savetap")
             || word.eq_ignore_ascii_case("savecpr")
+            || word.eq_ignore_ascii_case("savenex")
             // The data directives beyond the shared set — see the
             // `sjasmplus-data` declaration.
             || SJASMPLUS_DATA.iter().any(|d| word.eq_ignore_ascii_case(d))
@@ -943,6 +952,9 @@ impl Z80Syntax for SjasmplusSyntax {
         }
         if word.eq_ignore_ascii_case("display") {
             return display(args, line, |expr| z80::literal(&expr, consts, line));
+        }
+        if word.eq_ignore_ascii_case("savenex") {
+            return parse_savenex(args, line).map(Some);
         }
         if word.eq_ignore_ascii_case("savebin") {
             return self.parse_savebin(args, line, consts).map(Some);
@@ -1180,6 +1192,78 @@ fn data_items(rest: &str, line: usize) -> Result<Vec<DataItem>, AsmError> {
             }
         })
         .collect()
+}
+
+fn parse_savenex(args: &str, line: usize) -> Result<Operation, AsmError> {
+    use crate::engine::NexCommand;
+    let args = args.trim();
+    let (command, tail) = args.split_once(char::is_whitespace).unwrap_or((args, ""));
+    let parts = crate::dialects::mos6502::split_top_level(tail.trim(), ',');
+    let parse = |part: &str| z80::parse_value(&SjasmplusSyntax, part.trim(), line);
+    let values = |parts: &[&str]| {
+        parts
+            .iter()
+            .map(|p| parse(p))
+            .collect::<Result<Vec<_>, _>>()
+    };
+    let command = match command.to_ascii_lowercase().as_str() {
+        "open" => {
+            let Some(name) = parts.first() else {
+                return Err(AsmError::new(line, "[SAVENEX] OPEN needs a file name"));
+            };
+            let name = name.trim();
+            let name = if name.starts_with('"') {
+                name.strip_prefix('"')
+                    .and_then(|n| n.strip_suffix('"'))
+                    .ok_or_else(|| AsmError::new(line, "[SAVENEX] malformed file name"))?
+            } else {
+                name
+            };
+            if name.is_empty() || parts.len() > 5 {
+                return Err(AsmError::new(line, "[SAVENEX] invalid OPEN arguments"));
+            }
+            NexCommand::Open {
+                name: name.to_string(),
+                values: values(&parts[1..])?,
+            }
+        }
+        "core" => {
+            let values = values(&parts)?;
+            NexCommand::Core(
+                values
+                    .try_into()
+                    .map_err(|_| AsmError::new(line, "[SAVENEX] CORE needs three values"))?,
+            )
+        }
+        "auto" => {
+            let values = if tail.trim().is_empty() {
+                vec![]
+            } else {
+                values(&parts)?
+            };
+            if values.len() > 2 {
+                return Err(AsmError::new(
+                    line,
+                    "[SAVENEX] AUTO takes at most two banks",
+                ));
+            }
+            NexCommand::Auto(values)
+        }
+        "close" if tail.trim().is_empty() => NexCommand::Close,
+        "close" | "cfg" | "cfg3" | "bank" | "bar" | "palette" | "screen" | "copper" => {
+            return Err(AsmError::unsupported(
+                line,
+                "this SAVENEX form is not implemented by the V1.2 slice",
+            ));
+        }
+        _ => {
+            return Err(AsmError::new(
+                line,
+                "[SAVENEX] expected an OPEN, CORE, AUTO or CLOSE command",
+            ));
+        }
+    };
+    Ok(Operation::SaveNex(command))
 }
 
 /// DISPLAY options affect the next numeric value only; strings leave the

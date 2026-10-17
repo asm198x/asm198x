@@ -18,6 +18,7 @@ requiredCases.push('sjasmplus_digit_separators');
 requiredCases.push('sjasmplus_remainder');
 requiredCases.push('sjasmplus_define_numbers');
 requiredCases.push('sjasmplus_display_format');
+requiredCases.push('sjasmplus_savenex');
 const sourceFiles = {
   'LICENSE': '62cd567bc9270c722abcaa6ad88b6a1fe861698d63890f787cc557d2395be203',
   'helloworld.asm': '9e57c82435c0cf35e56089d56d6b83991c61624c2b3448ab6c66fb13a884a0a5',
@@ -312,6 +313,37 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
           assert.deepEqual(notes, expected, fact.name + ': DISPLAY text');
         } else {
           reject(p); assert.equal(read('display.bin').toString(), 'previous image', fact.name);
+        }
+      }
+    });
+    test('sjasmplus_savenex', () => {
+      const facts = require('../crates/asm198x/tests/fixtures/sjasmplus-savenex.json');
+      assert.equal(facts.cases.length, 70);
+      for (const fact of facts.cases) {
+        for (const name of ['out.nex', 'other.nex']) {
+          const file = path.join(root, name); if (fs.existsSync(file)) fs.unlinkSync(file);
+        }
+        write('nex.asm', fact.source); write('nex.bin', 'previous image');
+        const p = run(['--dialect', 'sjasmplus', '--message-format', 'json', 'nex.asm', '-o', 'nex.bin']);
+        if (fact.exit === 0 && fact.name !== 'open_8') {
+          assert.equal(p.status, 0, fact.name + ': ' + p.stderr);
+          for (const output of fact.outputs) {
+            assert.deepEqual(read(output.name === 'raw.bin' ? 'nex.bin' : output.name), Buffer.from(output.hex, 'hex'), fact.name + ': ' + output.name);
+          }
+          const result = JSON.parse(p.stdout);
+          assert.equal((result.artifacts || []).length, fact.name === 'duplicate_name' ? 2 : fact.outputs.filter(o => o.name !== 'raw.bin').length);
+          if (fact.name === 'duplicate_name') {
+            const first = facts.cases.find(c => c.name === 'implicit_close').outputs.find(o => o.name === 'out.nex');
+            assert.deepEqual(Buffer.from(result.artifacts[0].bytes), Buffer.from(first.hex, 'hex'), 'first ordered save');
+          }
+          for (const artifact of fact.name === 'duplicate_name' ? result.artifacts.slice(-1) : (result.artifacts || [])) {
+            assert.equal(artifact.format, 'nex');
+            const expected = fact.outputs.find(o => o.name === artifact.name);
+            assert(expected, fact.name + ': unexpected artifact');
+            assert.deepEqual(Buffer.from(artifact.bytes), Buffer.from(expected.hex, 'hex'), fact.name + ': JSON artifact');
+          }
+        } else {
+          reject(p); assert.equal(read('nex.bin').toString(), 'previous image', fact.name);
         }
       }
     });

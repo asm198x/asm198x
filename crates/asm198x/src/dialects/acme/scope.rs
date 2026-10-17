@@ -144,6 +144,8 @@ pub(super) fn substitute_anon_refs(
             start: subst(start)?,
             length: subst(length)?,
         },
+        // ACME never produces the SjASMPlus NEX command stream.
+        Operation::SaveNex(command) => Operation::SaveNex(command),
         Operation::Device(spec) => Operation::Device(spec),
         Operation::DeviceSlot(slot) => Operation::DeviceSlot(subst(slot)?),
         Operation::DevicePage(page) => Operation::DevicePage(subst(page)?),

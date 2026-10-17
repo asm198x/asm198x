@@ -129,3 +129,10 @@ test('removing DISPLAY replay cannot satisfy current qualification', () => {
   assert(requiredCases.includes('sjasmplus_display_format'));
   assert.equal(qualifies(complete.filter(r => r.name !== 'sjasmplus_display_format')), false);
 });
+
+
+test('NEX replay cannot be omitted from current qualification', () => {
+  const good = requiredCases.map(name => ({ name, status: 'pass' }));
+  assert(qualifies(good)); assert(requiredCases.includes('sjasmplus_savenex'));
+  assert.equal(qualifies(good.filter(r => r.name !== 'sjasmplus_savenex')), false);
+});
