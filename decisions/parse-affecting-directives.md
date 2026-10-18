@@ -118,3 +118,23 @@ untaken branches still open nothing. Path lookup includes suspended files;
 recursive-cycle checks use actual caller ancestry, so repeated pending siblings
 are not mistaken for recursion. Native controls and retained process streams
 live in `docs/plans/2026-10-18-ca65-include-streams/`.
+
+
+## ca65 text capture at native token boundaries (2026-10-19, #768)
+
+Meaning stays selected and lazy, but already active text symbols become tokens
+when a macro definition or repeat body is captured. Preserve those lexical
+values before executing later directives; leave previously unknown names for
+live lookup. Macro arguments use invocation-time text state. A macro body and
+an included character source do not inherit a caller repeat's token counter.
+Counters are substitutions in their owning source stream, not numeric symbols:
+`.ident("I")` cannot manufacture a reference to an active counter.
+
+The linked reader keeps definitions and calls unread in the source tree and
+uses the existing live macro namespace/one-layer expansion mechanism in the
+selected sweep. Private capture frames carry text snapshots and source/macro
+provenance; they do not clone or reshape the AST. Complete macro bodies are
+opaque to structural block grouping, while an unclosed definition inside an
+untaken branch does not hide that branch's closing directive. Existing macro
+frames continue through private statement placement into backend diagnostics.
+Native controls live in `docs/plans/2026-10-18-ca65-text-capture/`.

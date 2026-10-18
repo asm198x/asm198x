@@ -189,3 +189,10 @@ test('include-stream ordering cannot be omitted from package qualification', () 
   assert(qualifies(complete)); assert(requiredCases.includes('ca65_include_streams'));
   assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_include_streams')), false);
 });
+
+
+test('definition-time macro capture is mandatory package evidence', () => {
+  const complete = requiredCases.map(name => ({ name, status: 'pass' }));
+  assert(qualifies(complete)); assert(requiredCases.includes('ca65_text_capture'));
+  assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_text_capture')), false);
+});
