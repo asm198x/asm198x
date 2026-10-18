@@ -49,3 +49,10 @@ Further probes show valid macro source emits `0102` natively but `0202` in Asm:
 the body captures at definition while arguments read at invocation. That is the
 next slice, using the existing live macro-state/one-layer expansion pattern.
 The unsupported .set/:= spellings remain tracked as #761/#762.
+
+Clean producer `7490952df90974a92e388dce7dcfeabe6afd4f3b` still matches all
+564 native/upstream bytes of the unchanged pinned 4510 opcode target, SHA-256
+`8a5fcde630e55dd49403f7c6ffed25d8786e65e3d0a2723531b7ca3e2c0509ec`.
+`4510-after-include-streams/` retains complete comparison bodies and fourteen
+raw process streams. The verifier checks identity, completion and content and
+rejects a changed byte; the complete ecosystem report remains untouched.
