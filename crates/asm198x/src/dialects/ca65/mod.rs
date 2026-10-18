@@ -184,6 +184,11 @@ enum Kind {
     /// native node — the multi-file walk resolves the directive into a shared
     /// [`Item::Binary`](crate::ast::Item) and the projection carries it here.
     Raw(Vec<u8>),
+    BitBranch {
+        form: &'static isa::Form,
+        zero_page: Expr,
+        target: Expr,
+    },
     Insn {
         operand: mos6502::OperandSyntax,
         mnemonic: String,
@@ -449,6 +454,7 @@ fn assemble_program(
     // measured from where the bytes are actually going, which only the layout
     // knows.
     let mut pseudo: i64 = 0;
+    let mut absolute_mode = false;
     let mut placed: Vec<(String, u32, usize, FileId, Resolved)> = Vec::new(); // (segment, addr, line, file, item)
     // The debug read-out (U4): symbols and line spans fall out of the layout
     // values already in hand — `(section, offset)` is `(seg, addr - base)`.
@@ -518,8 +524,12 @@ fn assemble_program(
                     .eval(&addr_env, i64::from(addr) + pseudo, stmt.line)
                     .map_err(|e| ca65_flat::stamp_file(e, stmt.file))?;
                 pseudo = target - i64::from(addr);
+                absolute_mode = true;
             }
-            Kind::Reloc => pseudo = 0,
+            Kind::Reloc => {
+                pseudo = 0;
+                absolute_mode = false;
+            }
             _ => {}
         }
         if let Some(label) = &stmt.label {
@@ -563,6 +573,21 @@ fn assemble_program(
                     },
                 });
             }
+        }
+        // A constant-only bit-branch target has no segment base to cancel
+        // ca65's relocatable PC. Native ca65 refuses it before linking; `.org`
+        // makes the PC absolute, including when its bias happens to be zero.
+        if !absolute_mode
+            && let Kind::BitBranch { target, .. } = &stmt.kind
+            && fold_const(target, &parsed.consts, stmt.line).is_ok()
+        {
+            return Err(ca65_flat::stamp_file(
+                AsmError::new(
+                    stmt.line,
+                    "constant bit-branch target requires absolute mode (`.org`)",
+                ),
+                stmt.file,
+            ));
         }
         let (resolved, size) = resolve(set, stmt.kind, &size_env, off, stmt.line, layout_def.fill)
             .map_err(|e| ca65_flat::stamp_file(e, stmt.file))?;
@@ -2152,6 +2177,23 @@ fn parse_op(
     }
     let (mnemonic, operand_text) = split_first_word(rest);
     let mnemonic = mnemonic.to_ascii_uppercase();
+    if let Some(form) = extension
+        .and_then(|set| set.find_form(&mnemonic, "zeropage,relative"))
+        .or_else(|| set.find_form(&mnemonic, "zeropage,relative"))
+    {
+        let parts = split_top_level(operand_text, ',');
+        if parts.len() != 2 {
+            return Err(AsmError::new(
+                line,
+                format!("`{mnemonic}` needs a zero-page byte and a branch target"),
+            ));
+        }
+        return Ok(Kind::BitBranch {
+            form,
+            zero_page: parse_value(anons, anchor, parts[0], line)?,
+            target: parse_value(anons, anchor, parts[1], line)?,
+        });
+    }
     let operand =
         mos6502::parse_operand(operand_text, line, &|s, l| parse_value(anons, anchor, s, l))?;
     if set.instruction(&mnemonic).is_none()

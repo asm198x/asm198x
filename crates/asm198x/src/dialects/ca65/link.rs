@@ -200,6 +200,17 @@ pub(super) fn resolve(
             define: _,
         } => (Resolved::Visible(rule, zero_page, names), 0),
         Kind::Assert(cond, fatal, message) => (Resolved::Assert(cond, fatal, message), 0),
+        Kind::BitBranch {
+            form,
+            zero_page,
+            target,
+        } => (
+            Resolved::Insn {
+                form,
+                operands: vec![zero_page, target],
+            },
+            form.len(),
+        ),
         Kind::Insn {
             operand,
             mnemonic,
@@ -365,8 +376,18 @@ pub(super) fn emit(
         Resolved::Insn { form, operands } => {
             let next = pc + form.len() as i64;
             out.extend_from_slice(form.opcode);
+            let mut operand_pc = pc + form.opcode.len() as i64;
             for (slot, e) in form.operands.iter().zip(operands.iter()) {
-                let v = e.eval(env, pc, line_for_errors)?;
+                // ca65 reads each bit-branch operand after emitting the bytes
+                // before it: `*` is opcode+1 for zp and opcode+2 for target.
+                // Labels still use the ordinary end-of-instruction baseline.
+                let eval_pc = if form.mode == "zeropage,relative" {
+                    operand_pc
+                } else {
+                    pc
+                };
+                let v = e.eval(env, eval_pc, line_for_errors)?;
+                operand_pc += i64::from(slot.bytes);
                 match slot.kind {
                     // `ImmediateBe` is Z80N-only; ca65 is 6502/NES, so it never
                     // reaches here, but the match must stay exhaustive.
