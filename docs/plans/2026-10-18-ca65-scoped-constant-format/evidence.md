@@ -53,3 +53,9 @@ Clean producer `cd8284a992523e8020047f32db0a0a3a70677e45` still matches all
 raw streams. `verify_replay.py` checks content, source and producer identities,
 process completion, metadata agreement and changed-byte rejection. The complete
 ecosystem cohort report remains untouched.
+
+The first candidate run (39171568365) failed closed before the older extent
+cohort ran: its explicit count had accidentally changed from 51 to 49 during
+fixture-count editing. The package report is retained as `candidate-count-red.json`.
+The original count is restored; the new scope cohort remains 49. This correction
+changes qualification only; the clean assembler producer/replay remains valid.

@@ -468,7 +468,7 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
     });
     test('ca65_used_extents', () => {
       const facts = require('../crates/asm198x/tests/fixtures/ca65-used-extents.json');
-      assert.equal(facts.cases.length, 49);
+      assert.equal(facts.cases.length, 51);
       for (const fact of facts.cases) {
         write('used.cfg', fact.config); write('used.s', fact.source);
         write('used.bin', 'previous image');
