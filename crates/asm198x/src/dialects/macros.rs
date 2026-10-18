@@ -336,6 +336,12 @@ pub(crate) fn substitute<S: MacroSyntax>(
     let mut i = 0;
     while i < bytes.len() {
         let c = bytes[i];
+        if !c.is_ascii() {
+            let ch = line[i..].chars().next().expect("valid UTF-8 boundary");
+            out.push(ch);
+            i += ch.len_utf8();
+            continue;
+        }
         if let Some(q) = quote {
             out.push(c as char);
             if c == q {

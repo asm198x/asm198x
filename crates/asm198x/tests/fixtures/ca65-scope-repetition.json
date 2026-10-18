@@ -1,0 +1,1033 @@
+{
+  "tools": {
+    "ca65": {
+      "path": "/opt/homebrew/bin/ca65",
+      "sha256": "1a57997819fd98814e4601b5160df589e7a1a24e1888a80fee51ae450d8fd0ea",
+      "version": {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "--version"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "ca65 V2.18 - N/A\n"
+      }
+    },
+    "ld65": {
+      "path": "/opt/homebrew/bin/ld65",
+      "sha256": "36bb196207a6b2c90a4aa991b419d6113885303951b14b60b455f51c777b3339",
+      "version": {
+        "argv": [
+          "/opt/homebrew/bin/ld65",
+          "--version"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "ld65 V2.18 - N/A\n"
+      }
+    }
+  },
+  "files": {
+    "constants.inc": "VALUE=7\n",
+    "counter.inc": ".byte I\n",
+    "wrapped.inc": ".scope inner\nVALUE=7\n nop\n.endscope\n"
+  },
+  "cases": [
+    {
+      "name": "unnamed_proc_scope_close",
+      "source": ".proc\nVALUE=7\n.byte VALUE\n.endscope\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "input.s(1): Warning: Unnamed .PROCs are deprecated, please use .SCOPE\n"
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "unnamed_proc_proc_close",
+      "source": ".proc\nVALUE=7\n.byte VALUE\n.endproc\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Warning: Unnamed .PROCs are deprecated, please use .SCOPE\ninput.s(4): Error: No open .PROC\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "named_proc_proc_close",
+      "source": ".proc main\nVALUE=7\n.byte VALUE\n.endproc\n.word main\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070010"
+    },
+    {
+      "name": "named_proc_scope_close",
+      "source": ".proc main\n.byte 7\n.endscope\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: No open .SCOPE\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "unnamed_scope_proc_close",
+      "source": ".scope\n.byte 7\n.endproc\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: No open .PROC\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "unnamed_proc_nested",
+      "source": ".proc outer\n.proc\nVALUE=7\n.byte VALUE\n.endscope\n.endproc\n.word outer\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "input.s(2): Warning: Unnamed .PROCs are deprecated, please use .SCOPE\n"
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070010"
+    },
+    {
+      "name": "unnamed_proc_repeat",
+      "source": ".repeat 2,I\n.proc\nVALUE=I\n.byte VALUE\n.endscope\n.endrepeat\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "input.s(6): Warning: Unnamed .PROCs are deprecated, please use .SCOPE\ninput.s(2): Note: Expanded from here\ninput.s(6): Warning: Unnamed .PROCs are deprecated, please use .SCOPE\ninput.s(2): Note: Expanded from here\n"
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0001"
+    },
+    {
+      "name": "repeat_define_counter",
+      "source": ".repeat 2,I\n.scope\nI=7\n.byte I\n.endscope\n.endrepeat\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(6): Error: Unexpected trailing garbage characters\ninput.s(3): Note: Expanded from here\ninput.s(6): Error: Unexpected trailing garbage characters\ninput.s(3): Note: Expanded from here\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "repeat_define_other",
+      "source": ".repeat 2,I\n.scope\nVALUE=I\n.byte VALUE\n.endscope\n.endrepeat\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0001"
+    },
+    {
+      "name": "repeat_label_counter",
+      "source": ".repeat 1,I\nI: nop\n.endrepeat\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Unexpected trailing garbage characters\ninput.s(2): Note: Expanded from here\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "repeat_scope_counter",
+      "source": ".repeat 1,I\n.scope I\n.byte I\n.endscope\n.endrepeat\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(5): Error: Unexpected trailing garbage characters\ninput.s(2): Note: Expanded from here\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "repeat_proc_counter",
+      "source": ".repeat 1,I\n.proc I\n.byte I\n.endproc\n.endrepeat\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(5): Warning: Unnamed .PROCs are deprecated, please use .SCOPE\ninput.s(2): Note: Expanded from here\ninput.s(5): Error: Unexpected trailing garbage characters\ninput.s(2): Note: Expanded from here\ninput.s(5): Error: No open .PROC\ninput.s(4): Note: Expanded from here\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "repeat_qualified_counter",
+      "source": ".scope inner\n.endscope\n.repeat 1,I\ninner::I=7\n.endrepeat\n.byte inner::I\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(5): Error: Identifier expected\ninput.s(4): Note: Expanded from here\ninput.s(5): Error: ':' expected\ninput.s(4): Note: Expanded from here\ninput.s(5): Error: Unexpected trailing garbage characters\ninput.s(4): Note: Expanded from here\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "repeat_prefix_counter",
+      "source": ".repeat 2,I\n.scope\nIVALUE=7\n.byte IVALUE,I\n.endscope\n.endrepeat\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07000701"
+    },
+    {
+      "name": "repeat_quoted_counter",
+      "source": ".repeat 2,I\n.byte \"I\",I ; I\n.endrepeat\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "49004901"
+    },
+    {
+      "name": "repeat_nested_counter",
+      "source": ".repeat 2,I\n.repeat 2,J\n.byte I,J\n.endrepeat\n.endrepeat\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0000000101000101"
+    },
+    {
+      "name": "repeat_nested_shadow",
+      "source": ".repeat 2,I\n.repeat 2,I\n.byte I\n.endrepeat\n.byte I\n.endrepeat\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(6): Error: Identifier expected\ninput.s(2): Note: Expanded from here\ninput.s(6): Error: Identifier expected\ninput.s(2): Note: Expanded from here\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "repeat_zero_invalid",
+      "source": ".repeat 0,I\nI=7\n.endrepeat\nnop\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "ea"
+    },
+    {
+      "name": "repeat_cheap_local",
+      "source": ".repeat 1,I\n.scope\nmain: nop\n@I: nop\nbne @I\n.byte I\n.endscope\n.endrepeat\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "eaead0fd00"
+    },
+    {
+      "name": "repeat_hex_token",
+      "source": ".repeat 2,B\n.byte $B,B\n.endrepeat\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0b000b01"
+    },
+    {
+      "name": "repeat_bad_hex",
+      "source": ".repeat 2,I\n.byte $I\n.endrepeat\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Hexadecimal digit expected\ninput.s(3): Error: Unexpected trailing garbage characters\ninput.s(2): Note: Expanded from here\ninput.s(3): Error: Unexpected trailing garbage characters\ninput.s(2): Note: Expanded from here\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "repeat_bad_binary",
+      "source": ".repeat 2,I\n.byte %I\n.endrepeat\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Binary digit expected\ninput.s(3): Error: Unexpected trailing garbage characters\ninput.s(2): Note: Expanded from here\ninput.s(3): Error: Unexpected trailing garbage characters\ninput.s(2): Note: Expanded from here\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "repeat_word_boundaries",
+      "source": ".repeat 2,I\n.scope\n_I=7\nI_=8\n.byte _I,I_,I\n.endscope\n.endrepeat\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070800070801"
+    },
+    {
+      "name": "repeat_unicode_string",
+      "source": ".repeat 2,I\n.byte \"\u00e9I\",I\n.endrepeat\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "c3a94900c3a94901"
+    },
+    {
+      "name": "repeat_unicode_comment",
+      "source": ".repeat 2,I\n.byte I ; \u00e9I\n.endrepeat\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0001"
+    },
+    {
+      "name": "repeat_define_text",
+      "source": ".repeat 2,I\n.define V I\n.byte V\n.undefine V\n.endrepeat\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0001"
+    },
+    {
+      "name": "repeat_conditional",
+      "source": ".repeat 2,I\n.if I\n.byte 7\n.else\n.byte 8\n.endif\n.endrepeat\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0807"
+    },
+    {
+      "name": "repeat_dead_define",
+      "source": ".repeat 2,I\n.if 0\nI=7\n.endif\n.byte I\n.endrepeat\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0001"
+    },
+    {
+      "name": "repeat_include",
+      "source": ".repeat 2,I\n.include \"counter.inc\"\n.endrepeat\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "counter.inc(1): Error: Symbol 'I' is undefined\ncounter.inc(1): Note: Expanded from here\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "repeat_case_sensitive",
+      "source": ".repeat 2,I\n.scope\ni=7\n.byte I,i\n.endscope\n.endrepeat\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "00070107"
+    },
+    {
+      "name": "repeat_empty_name",
+      "source": ".repeat 2,\n.byte 7\n.endrepeat\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Identifier expected\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "repeat_bad_name",
+      "source": ".repeat 2,1\n.byte 7\n.endrepeat\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Identifier expected\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "macro_unicode_string",
+      "source": ".macro emit value\n.byte \"\u00e9\",value\n.endmacro\nemit 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "c3a907"
+    },
+    {
+      "name": "repeat_outer_define",
+      "source": ".define V I\n.repeat 2,I\n.byte V\n.endrepeat\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0001"
+    },
+    {
+      "name": "include_debug",
+      "source": "before: nop\n.include \"constants.inc\"\n.byte VALUE\nafter: nop\n.word before,after\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-k6d7ttb1",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "ea07ea00100210"
+    }
+  ]
+}

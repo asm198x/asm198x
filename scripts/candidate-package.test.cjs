@@ -175,3 +175,10 @@ test('scoped constants cannot be omitted from package qualification', () => {
   assert(qualifies(complete)); assert(requiredCases.includes('ca65_scoped_constants'));
   assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_scoped_constants')), false);
 });
+
+
+test('procedure and repeat-token native cases are required package evidence', () => {
+  const complete = requiredCases.map(name => ({ name, status: 'pass' }));
+  assert(qualifies(complete)); assert(requiredCases.includes('ca65_scope_repetition'));
+  assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_scope_repetition')), false);
+});

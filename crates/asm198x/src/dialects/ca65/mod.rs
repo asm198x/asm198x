@@ -936,7 +936,7 @@ struct Walker {
     /// (`Duplicate scope 'sa'`), and a `sa::v` reference may only name a scope
     /// already opened above it (`No such scope: 'sa'`) — both positional.
     opened: BTreeSet<String>,
-    /// Counts the unnamed `.proc`s, so each gets a path segment of its own.
+    /// Counts unnamed scopes, so each gets a path segment of its own.
     unnamed: usize,
     /// Set by `.end`, which stops the assembler reading: every line after it
     /// is ignored, including one that would not parse.
@@ -1166,7 +1166,9 @@ impl Walker {
             }
         }
         let is_proc = match word.as_str() {
-            ".proc" => true,
+            // Native ca65 treats an unnamed .proc as deprecated .scope,
+            // including its closer: .endscope, rather than .endproc.
+            ".proc" => !rest.is_empty(),
             ".scope" => false,
             _ => return Ok(None),
         };
