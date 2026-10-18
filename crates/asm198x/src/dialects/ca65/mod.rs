@@ -1170,14 +1170,10 @@ impl Walker {
             ".scope" => false,
             _ => return Ok(None),
         };
-        // An unnamed `.proc` is real ca65 — deprecated, and it still opens a
-        // scope. The synthetic segment cannot be named from source, which is
-        // exactly what an unnamed scope means. (ca65 also warns; a parse-time
-        // warning has nowhere to go here, and the bytes are what this claims.)
+        // Both directives can open an unnamed scope. Its unique synthetic
+        // segment cannot be named from source, and each expansion gets a fresh
+        // identity. ca65 deprecates unnamed `.proc` but accepts unnamed `.scope`.
         let name = if rest.is_empty() {
-            if !is_proc {
-                return Err(AsmError::new(line, "`.scope` needs a name"));
-            }
             self.unnamed += 1;
             format!("{LABEL_SEP}proc#{}", self.unnamed)
         } else {
@@ -1488,6 +1484,11 @@ impl Walker {
     /// `sa::v` — the scope named must already be open or closed above this
     /// line, searched outward from here, which is ca65's `No such scope`.
     fn resolve_qualified(&self, text: &str, line: usize) -> Result<String, AsmError> {
+        // Formatting preserves includes rather than opening them. A scope
+        // may be declared by one, so existence is an assembly-time question.
+        if !self.expand_text_defines {
+            return Ok(text.to_string());
+        }
         let (head, rest) = text.split_once("::").expect("caller checked");
         let mut segments = self.path();
         loop {
@@ -1500,6 +1501,34 @@ impl Walker {
             }
         }
         Err(AsmError::new(line, format!("no such scope `{head}`")))
+    }
+
+    /// A definition binds in its named scope, which must already exist. Keep
+    /// this separate from reference lookup: definitions never search outward
+    /// for an unqualified name, and a qualified target's entire parent must
+    /// exist (finding just its first component is insufficient).
+    fn constant_key(&self, name: &str, line: usize) -> Result<String, AsmError> {
+        let plain = name.strip_prefix("::").unwrap_or(name);
+        if !plain.split("::").all(is_ident) {
+            return Err(AsmError::new(
+                line,
+                format!("invalid constant name `{name}`"),
+            ));
+        }
+        let qualified = if name.starts_with("::") {
+            plain.to_string()
+        } else if name.contains("::") {
+            self.resolve_qualified(name, line)?
+        } else {
+            qualify(&self.path(), name)
+        };
+        if self.expand_text_defines
+            && let Some((parent, _)) = qualified.rsplit_once("::")
+            && !self.opened.contains(parent)
+        {
+            return Err(AsmError::new(line, format!("no such scope `{parent}`")));
+        }
+        Ok(qualified)
     }
 
     /// Rewrite every name in a statement to the key it resolves under. A no-op
@@ -1826,11 +1855,16 @@ impl FlatWalk for Walker {
         if let Some(label) = self.scope_directive(trimmed, line)? {
             self.nodes.push(Node {
                 operand_span: None,
-                label: label.map(|qualified| Symbol {
-                    name: qualified.rsplit("::").next().unwrap_or("").to_string(),
-                    scope: Scope::Global,
-                    qualified,
-                }),
+                // The directive already spells its implicit label. Only the
+                // assembly sweep needs a separate address binding; giving it
+                // to the formatter would emit a second definition.
+                label: label
+                    .filter(|_| self.expand_text_defines)
+                    .map(|qualified| Symbol {
+                        name: qualified.rsplit("::").next().unwrap_or("").to_string(),
+                        scope: Scope::Global,
+                        qualified,
+                    }),
                 item: None,
                 source: trimmed.to_string(),
                 span,
@@ -1846,12 +1880,7 @@ impl FlatWalk for Walker {
         // source order (later statements' size decisions see it).
         if let Some(eq) = assignment_split(trimmed) {
             let name = trimmed[..eq].trim();
-            if !is_ident(name) {
-                return Err(AsmError::new(
-                    line,
-                    format!("invalid constant name `{name}`"),
-                ));
-            }
+            let qualified = self.constant_key(name, line)?;
             let expr = parse_value(
                 &self.anons,
                 self.scope_env.anchor_str(),
@@ -1864,15 +1893,13 @@ impl FlatWalk for Walker {
             };
             // A constant inside a scope belongs to it: `v` in `.proc pa` is
             // `pa::v`, and `::v` outside is a different symbol.
-            let name = qualify(&self.path(), name);
-            let name = name.as_str();
             if let Ok(v) = fold_const(&expr, &self.consts, line) {
-                self.consts.insert(name.to_string(), v);
+                self.consts.insert(qualified.clone(), v);
             }
             self.nodes.push(Node {
                 operand_span: None,
                 label: Some(Symbol {
-                    qualified: name.to_string(),
+                    qualified,
                     scope: Scope::Global,
                     name: name.to_string(),
                 }),
@@ -3343,12 +3370,14 @@ fn qualify(path: &[String], name: &str) -> String {
 
 /// The reference key for `name` written inside `path`: the path, then the name.
 fn scope_ref(path: &[String], name: &str) -> String {
-    format!("{SCOPE_MARK}{}{LABEL_SEP}{name}", path.join("::"))
+    format!("{SCOPE_MARK}{}\u{2}{name}", path.join("::"))
 }
 
 /// Split a reference key back into the path it was written in and the name.
 fn split_scope_ref(key: &str) -> Option<(&str, &str)> {
-    key.strip_prefix(SCOPE_MARK)?.split_once(LABEL_SEP)
+    // Both synthetic scope segments and cheap-local names can contain
+    // LABEL_SEP. A distinct delimiter keeps either side unambiguous.
+    key.strip_prefix(SCOPE_MARK)?.split_once('\u{2}')
 }
 
 /// What each scoped reference resolves to, given everything the file defines.
