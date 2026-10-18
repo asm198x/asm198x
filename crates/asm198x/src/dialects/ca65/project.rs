@@ -39,6 +39,7 @@ pub(super) fn parsed_from_program(
         stmts: Vec::new(),
         label_seg: BTreeMap::new(),
         consts: BTreeMap::new(),
+        equ_definitions: BTreeSet::new(),
         referenced: BTreeSet::new(),
         loop_vars: Vec::new(),
     };
@@ -113,6 +114,9 @@ struct Projection {
     stmts: Vec<Stmt>,
     label_seg: BTreeMap<String, String>,
     consts: BTreeMap<String, i64>,
+    /// Immutable declarations, even when their RHS cannot fold yet. Populated
+    /// only by selected nodes, so alternate branches do not redefine a name.
+    equ_definitions: BTreeSet<String>,
     /// Every name the statements *above this point* have mentioned, which is
     /// what `.ref`/`.referenced` and `.ifref`/`.ifnref` ask about. Dead
     /// branches never reach here, so a use inside one does not count — probed
@@ -811,10 +815,27 @@ fn project_one(node: &crate::ast::Node, st: &mut Projection) -> Result<(), AsmEr
         let file = node.span.file;
         match &node.item {
             Some(Item::Equ(Operand::Expr { value, .. })) => {
-                if let Some(sym) = node.label.as_ref()
-                    && let Ok(v) = fold_const(value, consts, line)
-                {
-                    consts.insert(sym.qualified.clone(), v);
+                if let Some(sym) = node.label.as_ref() {
+                    if consts.contains_key(&sym.qualified)
+                        || label_seg.contains_key(&sym.qualified)
+                        || !st.equ_definitions.insert(sym.qualified.clone())
+                    {
+                        return Err(AsmError::at(
+                            node.span.clone(),
+                            format!("symbol `{}` is already defined", sym.name),
+                        ));
+                    }
+                    // Constants are folded now, before the repeat's ordinary
+                    // statement substitution. Resolve an unbound scoped name
+                    // against the current loop binding, preserving already
+                    // resolved constants in an inner scope.
+                    let value = map_expr_syms(value, &|name| {
+                        let name = super::split_scope_ref(name).map_or(name, |(_, name)| name);
+                        loop_var_sub(&st.loop_vars)(name)
+                    });
+                    if let Ok(v) = fold_const(&value, consts, line) {
+                        consts.insert(sym.qualified.clone(), v);
+                    }
                 }
             }
             // An unresolved include/incbin cannot assemble: it needs a loader,

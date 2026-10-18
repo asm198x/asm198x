@@ -28,12 +28,6 @@ fn native_4510_bit_branches_match_configured_link() {
             case["native_hex"].as_str().expect("native bytes"),
             "{name}"
         );
-        // #747 tracks the existing scoped-constant formatter boundary.
-        // Keep native assembly coverage here; ordinary scoped labels below
-        // still exercise bit-branch formatting without that independent bug.
-        if name == "scope" {
-            continue;
-        }
         let formatted = asm198x::format_ca65(source).expect("format native source");
         assert_eq!(
             asm198x::format_ca65(&formatted).expect("format twice"),
