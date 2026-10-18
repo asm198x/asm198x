@@ -32,3 +32,11 @@ Actual-package replay requires the complete cohort and rejects its omission.
 Local verification: 1,516 Rust tests pass (38 ignored); all 58 Node tests
 pass. Clippy with warnings denied, Rust/Python formatting, Ruff and generated
 docs checks pass. Adjacent compressed logs retain complete outputs.
+
+The clean producer `8a7ebd08311a31149f71f12397d59eb796ec2210` still matches all
+564 native/upstream reference bytes for the unchanged cc65 4510 opcode target,
+SHA-256 `8a5fcde630e55dd49403f7c6ffed25d8786e65e3d0a2723531b7ca3e2c0509ec`.
+`4510-after-address-size/` retains full comparison bodies and fourteen raw
+streams. `verify_replay.py` checks their process/step identities, pinned source
+and producer, and changed-byte rejection. The focused result does not replace
+the complete ecosystem cohort's current report.
