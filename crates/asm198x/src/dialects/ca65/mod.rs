@@ -2176,7 +2176,12 @@ fn parse_op(
         return parse_directive(anons, anchor, consts, directive, line);
     }
     let (mnemonic, operand_text) = split_first_word(rest);
-    let mnemonic = mnemonic.to_ascii_uppercase();
+    let mut mnemonic = mnemonic.to_ascii_uppercase();
+    // ca65's 4510 spelling PHD aliases PHW; 65816's implied PHD is
+    // handled by its own front-end and must keep its distinct opcode.
+    if extension.is_some() && mnemonic == "PHD" {
+        mnemonic = "PHW".to_string();
+    }
     if let Some(form) = extension
         .and_then(|set| set.find_form(&mnemonic, "zeropage,relative"))
         .or_else(|| set.find_form(&mnemonic, "zeropage,relative"))
