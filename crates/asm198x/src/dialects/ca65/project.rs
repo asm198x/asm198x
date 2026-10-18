@@ -42,6 +42,7 @@ pub(super) fn parsed_from_program(
         equ_definitions: BTreeSet::new(),
         referenced: BTreeSet::new(),
         loop_vars: Vec::new(),
+        token_depth: 0,
     };
     project_nodes(&program.nodes, &mut st, &mut sw)?;
     // The reader's end-of-source checks — an unclosed scope or record, a
@@ -79,6 +80,14 @@ struct IncludeCx<'a> {
     /// The active include chain, for the cycle and depth checks — the same
     /// discipline the eager walk applies, at sweep time.
     stack: Vec<FileId>,
+    /// Actual recursive callers, excluding suspended sibling character sources.
+    ancestry: Vec<FileId>,
+    pending: Vec<PendingInclude>,
+}
+
+struct PendingInclude {
+    id: FileId,
+    contents: String,
 }
 
 impl<'a> Sweep<'a> {
@@ -100,6 +109,8 @@ impl<'a> Sweep<'a> {
                 map,
                 loader,
                 stack: vec![FileId(0)],
+                ancestry: vec![FileId(0)],
+                pending: Vec::new(),
             }),
         }
     }
@@ -127,6 +138,8 @@ struct Projection {
     /// `.endrepeat` is `Symbol 'i' is undefined`, where acme's `!for` variable
     /// survives its block. Two dialects, two rules.
     loop_vars: Vec<(String, i64)>,
+    /// Native macro/repeat token sources outrank opened file character sources.
+    token_depth: usize,
 }
 
 impl Projection {
@@ -246,12 +259,33 @@ fn project_nodes(
 ) -> Result<(), AsmError> {
     use crate::ast::Item;
     remember_text_names(nodes, &mut sw.reader.text_names);
-    for node in nodes {
+    let mut index = 0;
+    while index < nodes.len() {
         // `.end` stopped the reader: nothing after it is read, so nothing
         // after it is projected — a block head included.
         if sw.reader.ended {
             break;
         }
+        let node = &nodes[index];
+        // Frames run from the innermost expansion out to the caller. The
+        // outermost invocation owns the active token source until it ends.
+        if st.token_depth == 0
+            && let Some(frame) = node.span.expansion_frames.last()
+        {
+            let mut end = index + 1;
+            while end < nodes.len() && nodes[end].span.expansion_frames.last() == Some(frame) {
+                end += 1;
+            }
+            let watermark = pending_len(sw);
+            st.token_depth += 1;
+            let out = project_nodes(&nodes[index..end], st, sw);
+            st.token_depth -= 1;
+            out?;
+            drain_includes(watermark, st, sw)?;
+            index = end;
+            continue;
+        }
+        index += 1;
         match &node.item {
             Some(Item::Native(payload))
                 if matches!(payload.as_any().downcast_ref::<Kind>(), Some(Kind::Unread)) =>
@@ -288,6 +322,8 @@ fn project_nodes(
                 let line = node.span.line as usize;
                 let head = read_block_head(node, head, st, sw)?;
                 let (count, var) = fold_repeat(&head, st, line)?;
+                let watermark = pending_len(sw);
+                st.token_depth += 1;
                 let previous_registers = sw.reader.repeat_registers;
                 let registers = previous_registers.or(Some(sw.reader.extension.is_some()));
                 for i in 0..count {
@@ -300,7 +336,14 @@ fn project_nodes(
                     if var.is_some() {
                         st.loop_vars.pop();
                     }
-                    out?;
+                    if let Err(error) = out {
+                        st.token_depth -= 1;
+                        return Err(error);
+                    }
+                }
+                st.token_depth -= 1;
+                if st.token_depth == 0 {
+                    drain_includes(watermark, st, sw)?;
                 }
                 if sw.reader.ended {
                     return Err(AsmError::at(
@@ -457,44 +500,27 @@ fn resolve_at_sweep(
                     kind: Kind::Empty,
                 });
             }
-            let set = sw.reader.set;
-            let (id, sub) = {
+            let opened = {
                 let cx = sw.includes.as_mut().expect("checked by the caller");
-                let (id, contents) = ca65_flat::open_include(
+                let (id, contents) = ca65_flat::open_include_in_stream(
                     request,
                     &at,
                     cx.map,
                     cx.loader,
                     &cx.stack,
+                    &cx.ancestry,
                     &ca65_flat::CA65_SEMANTICS,
                     span.line,
                 )?;
                 cx.stack.push(id);
-                // The target's structure, read the way the root's was: its
-                // macros expand (a file expands on its own, #93), its blocks
-                // group, its lines stay unread for this sweep.
-                let mut w = Walker::structural(set);
-                let walked = ca65_flat::walk_file(
-                    &mut w,
-                    &contents,
-                    id,
-                    cx.map,
-                    cx.loader,
-                    &mut cx.stack,
-                    &ca65_flat::CA65_SEMANTICS,
-                );
-                let sub = walked.and_then(|()| w.finish(contents.lines().count() as u32));
-                (id, sub)
+                PendingInclude { id, contents }
             };
-            // A repeat captures tokens from its own source file. A loaded
-            // include is read separately and cannot see the caller's counter.
-            let outer_vars = std::mem::take(&mut st.loop_vars);
-            let out = sub.and_then(|prog| project_nodes(&prog.nodes, st, sw));
-            st.loop_vars = outer_vars;
-            let cx = sw.includes.as_mut().expect("checked by the caller");
-            debug_assert_eq!(cx.stack.last(), Some(&id), "include stack is a stack");
-            cx.stack.pop();
-            out
+            if st.token_depth != 0 {
+                sw.includes.as_mut().expect("checked").pending.push(opened);
+                Ok(())
+            } else {
+                consume_include(opened, st, sw)
+            }
         }
         WalkDirective::Incbin {
             ref request,
@@ -503,6 +529,10 @@ fn resolve_at_sweep(
         } => {
             let payload = {
                 let cx = sw.includes.as_mut().expect("checked by the caller");
+                let mut search = cx.stack.clone();
+                if search.last() != cx.ancestry.last() {
+                    search.extend(cx.ancestry.last().copied());
+                }
                 ca65_flat::incbin_payload(
                     request,
                     offset,
@@ -510,7 +540,7 @@ fn resolve_at_sweep(
                     &at,
                     cx.map,
                     cx.loader,
-                    &cx.stack,
+                    &search,
                     &ca65_flat::CA65_SEMANTICS,
                 )?
             };
@@ -527,6 +557,63 @@ fn resolve_at_sweep(
             )
         }
     }
+}
+
+fn pending_len(sw: &Sweep<'_>) -> usize {
+    sw.includes.as_ref().map_or(0, |cx| cx.pending.len())
+}
+
+fn drain_includes(
+    watermark: usize,
+    st: &mut Projection,
+    sw: &mut Sweep<'_>,
+) -> Result<(), AsmError> {
+    while !sw.reader.ended && pending_len(sw) > watermark {
+        let opened = sw
+            .includes
+            .as_mut()
+            .expect("pending files need a loader")
+            .pending
+            .pop()
+            .expect("above the watermark");
+        consume_include(opened, st, sw)?;
+    }
+    Ok(())
+}
+
+fn consume_include(
+    opened: PendingInclude,
+    st: &mut Projection,
+    sw: &mut Sweep<'_>,
+) -> Result<(), AsmError> {
+    let PendingInclude { id, contents } = opened;
+    let set = sw.reader.set;
+    let sub = {
+        let cx = sw.includes.as_mut().expect("opened files need a loader");
+        debug_assert_eq!(cx.stack.last(), Some(&id), "character input is LIFO");
+        cx.ancestry.push(id);
+        let mut w = Walker::structural(set);
+        ca65_flat::walk_file(
+            &mut w,
+            &contents,
+            id,
+            cx.map,
+            cx.loader,
+            &mut cx.stack,
+            &ca65_flat::CA65_SEMANTICS,
+        )
+        .and_then(|()| w.finish(contents.lines().count() as u32))
+    };
+    let outer_vars = std::mem::take(&mut st.loop_vars);
+    let out = sub.and_then(|prog| project_nodes(&prog.nodes, st, sw));
+    st.loop_vars = outer_vars;
+    let cx = sw.includes.as_mut().expect("opened files need a loader");
+    if out.is_ok() && !sw.reader.ended {
+        debug_assert_eq!(cx.stack.last(), Some(&id), "file's pending streams drained");
+        cx.stack.pop();
+    }
+    cx.ancestry.pop();
+    out
 }
 
 /// Fold a `.if` / `.ifdef` / `.ifndef` / `.elseif` head.

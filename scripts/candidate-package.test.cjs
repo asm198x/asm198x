@@ -182,3 +182,10 @@ test('procedure and repeat-token native cases are required package evidence', ()
   assert(qualifies(complete)); assert(requiredCases.includes('ca65_scope_repetition'));
   assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_scope_repetition')), false);
 });
+
+
+test('include-stream ordering cannot be omitted from package qualification', () => {
+  const complete = requiredCases.map(name => ({ name, status: 'pass' }));
+  assert(qualifies(complete)); assert(requiredCases.includes('ca65_include_streams'));
+  assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_include_streams')), false);
+});

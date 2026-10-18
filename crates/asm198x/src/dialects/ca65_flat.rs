@@ -346,6 +346,17 @@ struct Cursor<'a, 'b> {
     origins: Option<&'a [macros::LineOrigin]>,
 }
 
+/// Block heads need the same authored origin as ordinary lines. In the
+/// multi-file walk, ordinary lines are placed as they are read, while block
+/// nodes are constructed only after their bodies have been collected.
+fn block_span(file: FileId, line: usize, origins: Option<&[macros::LineOrigin]>) -> Span {
+    let mut span = Span::in_file(file, line as u32, 1);
+    if let Some(origins) = origins {
+        macros::place(&mut span, origins);
+    }
+    span
+}
+
 /// Parse lines into `w` until this leg's closer or EOF, grouping any block a
 /// dialect declares into an [`Item::Conditional`](crate::ast::Item) or
 /// [`Item::Repeat`](crate::ast::Item).
@@ -495,7 +506,7 @@ fn parse_conditional<W: FlatWalk>(
                 BlockClose::Eof => {}
                 _ => {
                     return Err(AsmError::at(
-                        Span::in_file(file, line as u32, 1),
+                        block_span(file, line, origins),
                         "conditional block is never closed".to_string(),
                     ));
                 }
@@ -523,13 +534,13 @@ fn parse_conditional<W: FlatWalk>(
         }
         BlockClose::Eof => {
             return Err(AsmError::at(
-                Span::in_file(file, line as u32, 1),
+                block_span(file, line, origins),
                 "conditional block is never closed".to_string(),
             ));
         }
         BlockClose::RepeatClose(_) => {
             return Err(AsmError::at(
-                Span::in_file(file, line as u32, 1),
+                block_span(file, line, origins),
                 "a repetition closer ends a conditional block".to_string(),
             ));
         }
@@ -547,7 +558,7 @@ fn parse_conditional<W: FlatWalk>(
             style: crate::ast::CondStyle::Keyword,
         }),
         source: head,
-        span: Span::in_file(file, line as u32, 1),
+        span: block_span(file, line, origins),
         trivia: Trivia::default(),
     });
     Ok(())
@@ -583,7 +594,7 @@ fn parse_repeat<W: FlatWalk>(
     )?;
     let BlockClose::RepeatClose(close) = closed else {
         return Err(AsmError::at(
-            Span::in_file(file, line as u32, 1),
+            block_span(file, line, origins),
             "repetition block is never closed".to_string(),
         ));
     };
@@ -599,7 +610,7 @@ fn parse_repeat<W: FlatWalk>(
             style: crate::ast::CondStyle::Keyword,
         }),
         source: head,
-        span: Span::in_file(file, line as u32, 1),
+        span: block_span(file, line, origins),
         trivia: Trivia::default(),
     });
     Ok(())
@@ -723,20 +734,37 @@ pub(crate) fn open_include(
     sem: &WalkSemantics,
     line: u32,
 ) -> Result<(FileId, String), AsmError> {
-    if stack.len() >= MAX_INCLUDE_DEPTH {
+    open_include_in_stream(request, at, map, loader, stack, stack, sem, line)
+}
+
+/// Open a file whose search path may include suspended sibling files. Only
+/// actual recursive ancestry is a cycle: opening the same pending file twice
+/// from one repeated caller is valid native ca65 input.
+#[allow(clippy::too_many_arguments)]
+pub(crate) fn open_include_in_stream(
+    request: &str,
+    at: &Span,
+    map: &mut SourceMap,
+    loader: &dyn SourceLoader,
+    search_stack: &[FileId],
+    ancestry: &[FileId],
+    sem: &WalkSemantics,
+    line: u32,
+) -> Result<(FileId, String), AsmError> {
+    if ancestry.len() >= MAX_INCLUDE_DEPTH {
         return Err(AsmError::at(
             at.clone(),
             format!("includes nested more than {MAX_INCLUDE_DEPTH} levels deep"),
         ));
     }
-    let id = load_include_defaulted(map, loader, request, stack, line, sem)
+    let id = load_include_defaulted(map, loader, request, search_stack, line, sem)
         .map_err(|e| AsmError::at(at.clone(), e.to_string()))?;
     // Cycle detection is membership of the *active* stack: ca65
     // itself has none (a self-include dies on the OS's open-file
     // limit), so this diagnostic exceeds the reference — allowed,
     // diagnostics are not byte-compared (KTD5).
-    if stack.contains(&id) {
-        let chain = stack
+    if ancestry.contains(&id) {
+        let chain = ancestry
             .iter()
             .chain(std::iter::once(&id))
             .map(|f| map.path(*f).unwrap_or("?"))
