@@ -1,0 +1,595 @@
+{
+  "tools": {
+    "ca65": {
+      "path": "/opt/homebrew/bin/ca65",
+      "sha256": "1a57997819fd98814e4601b5160df589e7a1a24e1888a80fee51ae450d8fd0ea",
+      "version": {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "--version"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-probe-397_w7n4",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "ca65 V2.18 - N/A\n"
+      }
+    },
+    "ld65": {
+      "path": "/opt/homebrew/bin/ld65",
+      "sha256": "36bb196207a6b2c90a4aa991b419d6113885303951b14b60b455f51c777b3339",
+      "version": {
+        "argv": [
+          "/opt/homebrew/bin/ld65",
+          "--version"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-probe-397_w7n4",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "ld65 V2.18 - N/A\n"
+      }
+    }
+  },
+  "files": {},
+  "cases": [
+    {
+      "name": "phd_#$089a",
+      "source": ".p4510\n phd #$089a\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-probe-397_w7n4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-probe-397_w7n4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "assembler": {
+        "argv": [
+          "/private/tmp/asm198x-4510-bit-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-probe-397_w7n4",
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:2: error: unknown instruction `PHD`\n"
+      },
+      "assembler_hex": null,
+      "native_hex": "f49a08"
+    },
+    {
+      "name": "phd_$1234",
+      "source": ".p4510\n phd $1234\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-probe-397_w7n4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-probe-397_w7n4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "assembler": {
+        "argv": [
+          "/private/tmp/asm198x-4510-bit-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-probe-397_w7n4",
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:2: error: unknown instruction `PHD`\n"
+      },
+      "assembler_hex": null,
+      "native_hex": "fc3412"
+    },
+    {
+      "name": "phd_#$ffff",
+      "source": ".p4510\n phd #$ffff\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-probe-397_w7n4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-probe-397_w7n4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "assembler": {
+        "argv": [
+          "/private/tmp/asm198x-4510-bit-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-probe-397_w7n4",
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:2: error: unknown instruction `PHD`\n"
+      },
+      "assembler_hex": null,
+      "native_hex": "f4ffff"
+    },
+    {
+      "name": "phd_$ffff",
+      "source": ".p4510\n phd $ffff\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-probe-397_w7n4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-probe-397_w7n4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "assembler": {
+        "argv": [
+          "/private/tmp/asm198x-4510-bit-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-probe-397_w7n4",
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:2: error: unknown instruction `PHD`\n"
+      },
+      "assembler_hex": null,
+      "native_hex": "fcffff"
+    },
+    {
+      "name": "phd_#$10000",
+      "source": ".p4510\n phd #$10000\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-probe-397_w7n4",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Range error (65536 not in [0..65535])\n"
+        }
+      ],
+      "assembler": {
+        "argv": [
+          "/private/tmp/asm198x-4510-bit-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-probe-397_w7n4",
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:2: error: unknown instruction `PHD`\n"
+      },
+      "assembler_hex": null,
+      "native_hex": null
+    },
+    {
+      "name": "phd_$10000",
+      "source": ".p4510\n phd $10000\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-probe-397_w7n4",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Illegal addressing mode\n"
+        }
+      ],
+      "assembler": {
+        "argv": [
+          "/private/tmp/asm198x-4510-bit-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-probe-397_w7n4",
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:2: error: unknown instruction `PHD`\n"
+      },
+      "assembler_hex": null,
+      "native_hex": null
+    },
+    {
+      "name": "phw_#$089a",
+      "source": ".p4510\n phw #$089a\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-probe-397_w7n4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-probe-397_w7n4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "assembler": {
+        "argv": [
+          "/private/tmp/asm198x-4510-bit-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-probe-397_w7n4",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 3 byte(s) -> asm.bin\n"
+      },
+      "assembler_hex": "f49a08",
+      "native_hex": "f49a08"
+    },
+    {
+      "name": "phw_$1234",
+      "source": ".p4510\n phw $1234\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-probe-397_w7n4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-probe-397_w7n4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "assembler": {
+        "argv": [
+          "/private/tmp/asm198x-4510-bit-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-probe-397_w7n4",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 3 byte(s) -> asm.bin\n"
+      },
+      "assembler_hex": "fc3412",
+      "native_hex": "fc3412"
+    },
+    {
+      "name": "phw_#$ffff",
+      "source": ".p4510\n phw #$ffff\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-probe-397_w7n4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-probe-397_w7n4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "assembler": {
+        "argv": [
+          "/private/tmp/asm198x-4510-bit-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-probe-397_w7n4",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 3 byte(s) -> asm.bin\n"
+      },
+      "assembler_hex": "f4ffff",
+      "native_hex": "f4ffff"
+    },
+    {
+      "name": "phw_$ffff",
+      "source": ".p4510\n phw $ffff\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-probe-397_w7n4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-probe-397_w7n4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "assembler": {
+        "argv": [
+          "/private/tmp/asm198x-4510-bit-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-probe-397_w7n4",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 3 byte(s) -> asm.bin\n"
+      },
+      "assembler_hex": "fcffff",
+      "native_hex": "fcffff"
+    },
+    {
+      "name": "phw_#$10000",
+      "source": ".p4510\n phw #$10000\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-probe-397_w7n4",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Range error (65536 not in [0..65535])\n"
+        }
+      ],
+      "assembler": {
+        "argv": [
+          "/private/tmp/asm198x-4510-bit-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-probe-397_w7n4",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 3 byte(s) -> asm.bin\n"
+      },
+      "assembler_hex": "f40000",
+      "native_hex": null
+    },
+    {
+      "name": "phw_$10000",
+      "source": ".p4510\n phw $10000\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-probe-397_w7n4",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Illegal addressing mode\n"
+        }
+      ],
+      "assembler": {
+        "argv": [
+          "/private/tmp/asm198x-4510-bit-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-probe-397_w7n4",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 3 byte(s) -> asm.bin\n"
+      },
+      "assembler_hex": "fc0000",
+      "native_hex": null
+    }
+  ],
+  "producer": {
+    "source_commit": "968f1d1e407bc924efbc6eb32e1c7f037b856ee9",
+    "executable_sha256": "70b5df5475747ffab7b8f43288a150c115718f97ac8b16e1d8858ad39ed24e7b"
+  }
+}

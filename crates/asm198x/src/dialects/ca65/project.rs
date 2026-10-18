@@ -754,6 +754,15 @@ pub(super) fn map_kind_syms(k: &Kind, f: &dyn Fn(&str) -> Option<Expr>) -> Kind 
         Kind::Words(es) => Kind::Words(list(es)),
         Kind::DBytes(es) => Kind::DBytes(list(es)),
         Kind::DWords(es) => Kind::DWords(list(es)),
+        Kind::BitBranch {
+            form,
+            zero_page,
+            target,
+        } => Kind::BitBranch {
+            form,
+            zero_page: map_expr_syms(zero_page, f),
+            target: map_expr_syms(target, f),
+        },
         Kind::Insn {
             operand,
             mnemonic,

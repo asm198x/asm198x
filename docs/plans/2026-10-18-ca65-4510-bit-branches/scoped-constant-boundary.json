@@ -1,0 +1,76 @@
+{
+  "issue": 747,
+  "source": ".scope inner\nVALUE = 7\n nop\n.endscope\n",
+  "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+  "native_hex": "ea",
+  "processes": [
+    {
+      "argv": [
+        "/opt/homebrew/bin/ca65",
+        "input.s",
+        "-o",
+        "input.o"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-bit-scope-rybfa1o2",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/opt/homebrew/bin/ld65",
+        "-C",
+        "input.cfg",
+        "input.o",
+        "-o",
+        "native.bin"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-bit-scope-rybfa1o2",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/private/tmp/asm198x-4510-bit-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "asm.bin"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-bit-scope-rybfa1o2",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> asm.bin\n"
+    }
+  ],
+  "format": {
+    "argv": [
+      "/private/tmp/asm198x-4510-bit-build/debug/asm198x",
+      "fmt",
+      "--dialect",
+      "ca65",
+      "input.s"
+    ],
+    "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-bit-scope-rybfa1o2",
+    "exit": 0,
+    "stdout": "        .scope inner\ninner::VALUE = 7\n        nop\n        .endscope\n",
+    "stderr": "formatted input.s -> stdout\n"
+  },
+  "format_twice": {
+    "argv": [
+      "/private/tmp/asm198x-4510-bit-build/debug/asm198x",
+      "fmt",
+      "--dialect",
+      "ca65",
+      "formatted.s"
+    ],
+    "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-bit-scope-rybfa1o2",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: formatted.s:2: error: invalid constant name `inner::VALUE`\n"
+  }
+}

@@ -150,3 +150,9 @@ test('4510 replay cannot be omitted from candidate qualification', () => {
   assert(qualifies(complete)); assert(requiredCases.includes('ca65_4510'));
   assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_4510')), false);
 });
+
+test('4510 bit branches are mandatory package evidence', () => {
+  const complete = requiredCases.map(name => ({ name, status: 'pass' }));
+  assert(qualifies(complete)); assert(requiredCases.includes('ca65_4510_bit_branches'));
+  assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_4510_bit_branches')), false);
+});
