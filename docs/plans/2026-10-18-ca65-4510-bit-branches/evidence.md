@@ -35,3 +35,19 @@ successful formatter control. No formatter behavior changes in this fix.
 Local verification: 1,512 Rust tests pass (38 ignored), all 56 Node tests
 pass, Clippy with warnings denied, Rust/Python format checks, Ruff and generated
 docs checks pass. Adjacent compressed logs retain complete check output.
+
+The complete clean replay from producer
+`968f1d1e407bc924efbc6eb32e1c7f037b856ee9` now reaches line 265:
+`unknown instruction PHD` (#748). Native output remains exactly the pinned
+564-byte upstream reference (SHA-256
+`8a5fcde630e55dd49403f7c6ffed25d8786e65e3d0a2723531b7ca3e2c0509ec`).
+`4510-after-bit-branches/` retains the report and all fourteen raw streams;
+`verify_replay.py --producer <commit> <result-directory>` verifies their
+identity and rejects a changed native byte. The focused replay does not replace
+the full ecosystem cohort's current report or claim whole-target equivalence.
+
+`word-push-boundary.json` retains twelve paired PHD/PHW processes from the
+same producer. Four valid PHD cases fail while the paired PHW bytes match;
+native ca65 explicitly declares the alias. It also exposes native PHW overflow
+refusals that Asm currently truncates (#749). These independent word-push
+boundaries are retained for the next slice, without expanding this fix.
