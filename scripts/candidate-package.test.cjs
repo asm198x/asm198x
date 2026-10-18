@@ -196,3 +196,10 @@ test('definition-time macro capture is mandatory package evidence', () => {
   assert(qualifies(complete)); assert(requiredCases.includes('ca65_text_capture'));
   assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_text_capture')), false);
 });
+
+
+test('macro introspection token boundaries are mandatory package evidence', () => {
+  const complete = requiredCases.map(name => ({ name, status: 'pass' }));
+  assert(qualifies(complete)); assert(requiredCases.includes('ca65_macro_introspection'));
+  assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_macro_introspection')), false);
+});

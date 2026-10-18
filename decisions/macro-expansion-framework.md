@@ -244,6 +244,17 @@ fails rather than passes.
   65816/HuC6280 readers retain their existing path pending their own probes.
 
 
+- **2026-10-19 — ca65 introspection preserves lexical tokens** (#770/#771).
+  ca65 V2.18 treats `.paramcount`/`.definedmacro` as reserved tokens outside
+  strings/comments, with ASCII-insensitive keyword casing and case-sensitive
+  macro names. Generated-body queries observe live text alias expansion when
+  the selected reader reaches the body line. Shared private token rewriting
+  preserves that boundary; one-layer expansion defers generated queries until
+  the next live read. Recursive pre-pass consumers retain their existing
+  evaluation phase. Native controls are retained in
+  `docs/plans/2026-10-19-ca65-macro-introspection/`.
+
+
 ### Lua inside SjASMPlus macros (#532)
 
 SjASMPlus 1.21.0 leaves Lua identifiers untouched by macro substitution:
