@@ -1,0 +1,8 @@
+{
+  "crates": "8ab8bad1c873d97077a95fef8d7c72c0b6f14ba3",
+  "Cargo.toml": "33f76fe13fc6f769e57506b0eaa0db74cb65993c",
+  "Cargo.lock": "56659085ac64d328f8fc0d4c5003493fc5ecd8c9",
+  "rust-toolchain.toml": "3c4dda588c5ab491a82d5cb309a515621a53a571",
+  "scripts": "03061509096b18d6854507e71ac9ab3c40c7f1b4",
+  "xtask": "3ff53c5502a09e6a3e7c47d5deb45763814bde69"
+}

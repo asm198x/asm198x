@@ -10,8 +10,9 @@
    before parsing definitions and operands. Reuse the established macro token
    substitution mechanism if it preserves text correctly; retain original AST
    source for formatting. Do not pre-expand untaken branches or the whole file.
-3. Require package cohort and omission controls. Rebase onto the merged scoped
-   constant slice before final verification and a clean 4510 target replay.
+3. Require package cohort and omission controls. Align with the scoped-constant head for the full suite, then rebase onto its
+   squash and verify all tested source/config/fixture trees are identical before
+   the clean 4510 replay and exact-head CI.
    Run the Rust/Lua suite, Clippy, fmt, Ruff, docs and Node checks.
 4. Push a PR, inspect every exact-head workflow and all five actual package
    reports and negative controls, squash merge, clean finished worktrees, then
