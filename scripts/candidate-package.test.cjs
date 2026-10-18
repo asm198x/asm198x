@@ -162,3 +162,9 @@ test('4510 PHD alias is mandatory package evidence', () => {
   assert(qualifies(complete)); assert(requiredCases.includes('ca65_4510_phd'));
   assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_4510_phd')), false);
 });
+
+test('ca65 address-size parsing is mandatory package evidence', () => {
+  const complete = requiredCases.map(name => ({ name, status: 'pass' }));
+  assert(qualifies(complete)); assert(requiredCases.includes('ca65_address_size'));
+  assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_address_size')), false);
+});

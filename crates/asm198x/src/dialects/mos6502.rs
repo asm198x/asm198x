@@ -923,7 +923,7 @@ fn tokenize(
             l if l.is_ascii_alphabetic()
                 || l == '_'
                 || l == '.'
-                || (l == ':' && opts.scoped_names) =>
+                || (l == ':' && opts.scoped_names && chars.get(i + 1) == Some(&':')) =>
             {
                 let start = i;
                 while i < chars.len()

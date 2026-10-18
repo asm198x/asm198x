@@ -765,10 +765,12 @@ pub(super) fn map_kind_syms(k: &Kind, f: &dyn Fn(&str) -> Option<Expr>) -> Kind 
         },
         Kind::Insn {
             operand,
+            address_size,
             mnemonic,
             extension,
         } => Kind::Insn {
             operand: map_operand_syms(operand, f),
+            address_size: *address_size,
             mnemonic: mnemonic.clone(),
             extension: *extension,
         },
