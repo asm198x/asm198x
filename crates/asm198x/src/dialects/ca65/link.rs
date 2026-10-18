@@ -113,6 +113,8 @@ pub(super) enum Resolved {
     Insn {
         form: &'static isa::Form,
         operands: Vec<Expr>,
+        /// ca65's 4510 word pushes require unsigned 16-bit operands.
+        unsigned_word: bool,
     },
     /// Something to say, carrying no bytes.
     Message(DiagSeverity, String),
@@ -208,6 +210,7 @@ pub(super) fn resolve(
             Resolved::Insn {
                 form,
                 operands: vec![zero_page, target],
+                unsigned_word: false,
             },
             form.len(),
         ),
@@ -249,7 +252,14 @@ pub(super) fn resolve(
             }
             let operands: Vec<Expr> = operand.into_iter().collect();
             let size = form.len();
-            (Resolved::Insn { form, operands }, size)
+            (
+                Resolved::Insn {
+                    form,
+                    operands,
+                    unsigned_word: extension.is_some() && mnemonic == "PHW",
+                },
+                size,
+            )
         }
     })
 }
@@ -373,7 +383,11 @@ pub(super) fn emit(
                 out.extend_from_slice(&w.to_le_bytes());
             }
         }
-        Resolved::Insn { form, operands } => {
+        Resolved::Insn {
+            form,
+            operands,
+            unsigned_word,
+        } => {
             let next = pc + form.len() as i64;
             out.extend_from_slice(form.opcode);
             let mut operand_pc = pc + form.opcode.len() as i64;
@@ -395,9 +409,20 @@ pub(super) fn emit(
                     | isa::OperandKind::ImmediateBe
                     | isa::OperandKind::Address => match slot.bytes {
                         1 => out.push(to_byte(v, line_for_errors)?),
-                        2 => out.extend_from_slice(
-                            &u16::try_from(v & 0xFFFF).expect("masked").to_le_bytes(),
-                        ),
+                        2 => {
+                            // Check after all symbols and pseudo-PCs resolve:
+                            // masking a word push silently changes its value.
+                            let word = if unsigned_word {
+                                to_width(v, 0xFFFF, line_for_errors)?
+                            } else {
+                                v & 0xFFFF
+                            };
+                            out.extend_from_slice(
+                                &u16::try_from(word)
+                                    .expect("checked or masked")
+                                    .to_le_bytes(),
+                            );
+                        }
                         other => {
                             return Err(AsmError::new(
                                 line_for_errors,

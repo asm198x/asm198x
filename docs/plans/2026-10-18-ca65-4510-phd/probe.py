@@ -24,6 +24,31 @@ def cases() -> dict[str, str]:
             "$ffff",
         ]:
             out[f"{mnemonic}_{value}"] = f".p4510\n {mnemonic} {value}\n"
+    for mnemonic in ["phd", "phw"]:
+        for operand in [
+            "#-1",
+            "-1",
+            "#-32768",
+            "-32768",
+            "#-32769",
+            "-32769",
+            "#$10000",
+            "$10000",
+            "a:$10000",
+            "#$1000000",
+            "$1000000",
+        ]:
+            out[f"width_{mnemonic}_{operand}"] = f".p4510\n {mnemonic} {operand}\n"
+        for value in ["$ffff", "$10000", "-1", "-32768", "-32769"]:
+            for prefix in ["#", ""]:
+                out[f"forward_{mnemonic}_{prefix}_{value}"] = (
+                    f".p4510\n {mnemonic} {prefix}VALUE\nVALUE={value}\n"
+                )
+        out[f"org_{mnemonic}_ok"] = f".p4510\n.org $ffff\n {mnemonic} #*\n"
+        out[f"org_{mnemonic}_overflow"] = f".p4510\n.org $10000\n {mnemonic} #*\n"
+        out[f"label_{mnemonic}_overflow"] = (
+            f".p4510\n {mnemonic} target\n.org $10000\ntarget: nop\n"
+        )
     out.update(
         {
             "65816_phd": ".p816\n phd\n",
@@ -112,7 +137,15 @@ def main() -> None:
                 }
             )
     args.output.write_text(
-        json.dumps({"tools": identities, "files": files, "cases": records}, indent=2)
+        json.dumps(
+            {
+                "tools": identities,
+                "files": files,
+                "cases": [r for r in records if "_a:" not in r["name"]],
+                "address_override_boundary": [r for r in records if "_a:" in r["name"]],
+            },
+            indent=2,
+        )
         + "\n"
     )
     print(

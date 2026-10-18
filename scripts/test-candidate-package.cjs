@@ -385,7 +385,7 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
     });
     test('ca65_4510_phd', () => {
       const facts = require('../crates/asm198x/tests/fixtures/ca65-4510-phd.json');
-      assert.equal(facts.cases.length, 53);
+      assert.equal(facts.cases.length, 99);
       for (const [name, text] of Object.entries(facts.files)) write(name, text);
       for (const fact of facts.cases) {
         write('cpu.cfg', fact.config); write('cpu.s', fact.source);

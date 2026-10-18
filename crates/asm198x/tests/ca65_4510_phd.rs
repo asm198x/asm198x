@@ -5,7 +5,7 @@ fn native_4510_phd_alias_matches_configured_link() {
     let facts: serde_json::Value =
         serde_json::from_str(include_str!("fixtures/ca65-4510-phd.json")).expect("native facts");
     let cases = facts["cases"].as_array().expect("cases");
-    assert_eq!(cases.len(), 53);
+    assert_eq!(cases.len(), 99);
     let mut loader = MemoryLoader::new();
     for (name, text) in facts["files"].as_object().expect("include fixtures") {
         loader = loader.text(name, text.as_str().expect("include text"));
@@ -88,78 +88,86 @@ fn configured_cli_preserves_include_locations_and_previous_outputs() {
         "out.lst.json",
     ];
     for mode in ["human", "json"] {
-        std::fs::write(
-            dir.join("push.inc"),
-            facts["files"]["push.inc"].as_str().expect("include"),
-        )
-        .expect("include source");
-        let run = || {
-            std::process::Command::new(env!("CARGO_BIN_EXE_asm198x"))
-                .current_dir(&dir)
-                .args([
-                    "--dialect",
-                    "ca65",
-                    "-C",
-                    "input.cfg",
-                    "--message-format",
-                    mode,
-                    "--sym=out.sym",
-                    "--debug=out.debug198x",
-                    "--listing=out.lst",
-                    "--listing-json=out.lst.json",
-                    "input.s",
-                    "-o",
-                    "image.bin",
-                ])
-                .output()
-                .expect("CLI")
-        };
-        let success = run();
-        assert!(success.status.success(), "{success:?}");
-        let hex: String = std::fs::read(dir.join("image.bin"))
-            .expect("image")
-            .iter()
-            .map(|b| format!("{b:02x}"))
-            .collect();
-        assert_eq!(hex, fact["native_hex"].as_str().expect("native bytes"));
-        let originals: Vec<_> = names
-            .iter()
-            .map(|name| std::fs::read(dir.join(name)).expect("output"))
-            .collect();
-        let invalid = ".p4510\n.p02\n phd #$1234\n";
-        std::fs::write(dir.join("push.inc"), invalid).expect("failing include");
-        let failure = run();
-        assert!(!failure.status.success(), "{failure:?}");
-        if mode == "json" {
-            let errors: serde_json::Value =
-                serde_json::from_slice(&failure.stdout).expect("diagnostics");
-            assert_eq!(errors[0]["span"]["line"], 3);
-            assert!(
-                errors[0]["span"]["path"]
-                    .as_str()
-                    .expect("path")
-                    .ends_with("push.inc")
-            );
-        } else {
-            assert!(
-                String::from_utf8_lossy(&failure.stderr).contains("push.inc:3"),
-                "{failure:?}"
-            );
-        }
-        for (name, original) in names.iter().zip(originals) {
+        for invalid in [
+            ".p4510\n.p02\n phd #$1234\n",
+            ".p4510\n nop\n phd #$10000\n",
+            ".p4510\n nop\n phw $10000\n",
+            ".p4510\n nop\n phd #-1\n",
+            ".p4510\nVALUE=$10000\n phw #VALUE\n",
+            ".p4510\n.org $10000\n phd #*\n",
+        ] {
+            std::fs::write(
+                dir.join("push.inc"),
+                facts["files"]["push.inc"].as_str().expect("include"),
+            )
+            .expect("include source");
+            let run = || {
+                std::process::Command::new(env!("CARGO_BIN_EXE_asm198x"))
+                    .current_dir(&dir)
+                    .args([
+                        "--dialect",
+                        "ca65",
+                        "-C",
+                        "input.cfg",
+                        "--message-format",
+                        mode,
+                        "--sym=out.sym",
+                        "--debug=out.debug198x",
+                        "--listing=out.lst",
+                        "--listing-json=out.lst.json",
+                        "input.s",
+                        "-o",
+                        "image.bin",
+                    ])
+                    .output()
+                    .expect("CLI")
+            };
+            let success = run();
+            assert!(success.status.success(), "{success:?}");
+            let hex: String = std::fs::read(dir.join("image.bin"))
+                .expect("image")
+                .iter()
+                .map(|b| format!("{b:02x}"))
+                .collect();
+            assert_eq!(hex, fact["native_hex"].as_str().expect("native bytes"));
+            let originals: Vec<_> = names
+                .iter()
+                .map(|name| std::fs::read(dir.join(name)).expect("output"))
+                .collect();
+            std::fs::write(dir.join("push.inc"), invalid).expect("failing include");
+            let failure = run();
+            assert!(!failure.status.success(), "{failure:?}");
+            if mode == "json" {
+                let errors: serde_json::Value =
+                    serde_json::from_slice(&failure.stdout).expect("diagnostics");
+                assert_eq!(errors[0]["span"]["line"], 3);
+                assert!(
+                    errors[0]["span"]["path"]
+                        .as_str()
+                        .expect("path")
+                        .ends_with("push.inc")
+                );
+            } else {
+                assert!(
+                    String::from_utf8_lossy(&failure.stderr).contains("push.inc:3"),
+                    "{failure:?}"
+                );
+            }
+            for (name, original) in names.iter().zip(originals) {
+                assert_eq!(
+                    std::fs::read(dir.join(name)).expect("preserved output"),
+                    original,
+                    "{name}"
+                );
+            }
             assert_eq!(
-                std::fs::read(dir.join(name)).expect("preserved output"),
-                original,
-                "{name}"
+                std::fs::read_to_string(dir.join("input.s")).expect("root"),
+                source
+            );
+            assert_eq!(
+                std::fs::read_to_string(dir.join("push.inc")).expect("include"),
+                invalid
             );
         }
-        assert_eq!(
-            std::fs::read_to_string(dir.join("input.s")).expect("root"),
-            source
-        );
-        assert_eq!(
-            std::fs::read_to_string(dir.join("push.inc")).expect("include"),
-            invalid
-        );
     }
 }

@@ -12,3 +12,13 @@
    complete output to native and upstream reference, retaining all raw streams.
 5. Push PR, verify exact-head CI and all five actual-package reports and
    corruption controls, squash merge, retain evidence and remove task resources.
+
+# Word-width boundary included before landing
+
+The PHD alias would inherit #749's silent PHW truncation. Extend this slice
+to both spellings: measure native signed/unsigned limits, forward constants,
+PCs and labels; reproduce the width mismatch before changing emission. Apply
+checks only to the published 4510 PHW forms in `ca65/link.rs`, preserving other
+ca65 instruction forms and the 65816 front-end. Expand library/CLI/package
+captures, rerun verification, commit a new clean producer and repeat the full
+unchanged target replay. No new dependency, API or architectural pattern.
