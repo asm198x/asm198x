@@ -168,6 +168,44 @@ fn remember_text_names(nodes: &[crate::ast::Node], names: &mut BTreeSet<String>)
     }
 }
 
+/// Token boundaries for counter substitution. Unlike scope separators, cheap
+/// local markers and numeric prefixes are part of their tokens: @I and $B
+/// must not become @0 and $0 when I/B is the active counter.
+struct RepeatTokens;
+
+impl super::macros::MacroSyntax for RepeatTokens {
+    fn header(&self, line: &str) -> Option<(String, Vec<String>)> {
+        super::macros::MacroSyntax::header(&ca65_flat::Ca65Macros, line)
+    }
+
+    fn locals(&self, body: &[String]) -> Vec<String> {
+        super::macros::MacroSyntax::locals(&ca65_flat::Ca65Macros, body)
+    }
+
+    fn fit_arguments(
+        &self,
+        name: &str,
+        params: &[String],
+        args: Vec<String>,
+    ) -> Result<Vec<String>, String> {
+        super::macros::MacroSyntax::fit_arguments(&ca65_flat::Ca65Macros, name, params, args)
+    }
+
+    fn is_symbol_char(&self, c: u8) -> bool {
+        c.is_ascii_alphanumeric() || matches!(c, b'_' | b'.' | b'@' | b'$' | b'%')
+    }
+}
+
+fn repeat_text(source: &str, st: &Projection) -> String {
+    let (names, values): (Vec<_>, Vec<_>) = st
+        .loop_vars
+        .iter()
+        .rev()
+        .map(|(name, value)| (name.clone(), value.to_string()))
+        .unzip();
+    super::macros::substitute(&RepeatTokens, source, &names, &values)
+}
+
 fn live_text(
     source: &str,
     st: &Projection,
@@ -257,17 +295,9 @@ fn project_nodes(
                     if let Some(name) = &var {
                         st.loop_vars.push((name.clone(), i));
                     }
-                    let first = st.stmts.len();
                     let out = project_nodes(body, st, sw);
                     sw.reader.repeat_registers = previous_registers;
                     if var.is_some() {
-                        // Bake this pass's value into everything the body just
-                        // produced, then drop the binding: ca65 scopes a loop
-                        // variable to its loop.
-                        let vars = st.loop_vars.clone();
-                        for stmt in &mut st.stmts[first..] {
-                            stmt.kind = map_kind_syms(&stmt.kind, &loop_var_sub(&vars));
-                        }
                         st.loop_vars.pop();
                     }
                     out?;
@@ -303,13 +333,15 @@ fn read_block_head(
     let line = node.span.line as usize;
     let file = node.span.file;
     sw.reader.anons.file.set(file);
+    let head = repeat_text(head, st);
     let processed = sw
         .reader
-        .preprocess_line(head, line, file)
+        .preprocess_line(&head, line, file)
         .map_err(|e| ca65_flat::stamp_file(e, file))?
         // Only a `.define`/`.undefine` line is consumed whole, and a block
         // head is neither.
         .unwrap_or_default();
+    let processed = repeat_text(&processed, st);
     let processed =
         live_text(&processed, st, &sw.reader, line).map_err(|e| ca65_flat::stamp_file(e, file))?;
     let (symbol, rest) = sw
@@ -346,13 +378,15 @@ fn sweep_line(
 ) -> Result<(), AsmError> {
     let line = node.span.line as usize;
     let file = node.span.file;
+    let source = repeat_text(&node.source, st);
     let Some(processed) = sw
         .reader
-        .preprocess_line(&node.source, line, file)
+        .preprocess_line(&source, line, file)
         .map_err(|e| ca65_flat::stamp_file(e, file))?
     else {
         return Ok(());
     };
+    let processed = repeat_text(&processed, st);
     let processed =
         live_text(&processed, st, &sw.reader, line).map_err(|e| ca65_flat::stamp_file(e, file))?;
     let start = sw.reader.nodes.len();
@@ -452,7 +486,11 @@ fn resolve_at_sweep(
                 let sub = walked.and_then(|()| w.finish(contents.lines().count() as u32));
                 (id, sub)
             };
+            // A repeat captures tokens from its own source file. A loaded
+            // include is read separately and cannot see the caller's counter.
+            let outer_vars = std::mem::take(&mut st.loop_vars);
             let out = sub.and_then(|prog| project_nodes(&prog.nodes, st, sw));
+            st.loop_vars = outer_vars;
             let cx = sw.includes.as_mut().expect("checked by the caller");
             debug_assert_eq!(cx.stack.last(), Some(&id), "include stack is a stack");
             cx.stack.pop();
@@ -676,7 +714,15 @@ fn fold_repeat(
             format!("`.repeat {count}`: a repetition count may not be negative"),
         ));
     }
-    Ok((count, var.filter(|v| !v.is_empty())))
+    if let Some(name) = &var
+        && !is_ident(name)
+    {
+        return Err(AsmError::new(
+            line,
+            "`.repeat` needs an identifier after the comma",
+        ));
+    }
+    Ok((count, var))
 }
 
 /// Substitute a `.repeat`'s loop variables into an expression.
