@@ -156,3 +156,9 @@ test('4510 bit branches are mandatory package evidence', () => {
   assert(qualifies(complete)); assert(requiredCases.includes('ca65_4510_bit_branches'));
   assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_4510_bit_branches')), false);
 });
+
+test('4510 PHD alias is mandatory package evidence', () => {
+  const complete = requiredCases.map(name => ({ name, status: 'pass' }));
+  assert(qualifies(complete)); assert(requiredCases.includes('ca65_4510_phd'));
+  assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_4510_phd')), false);
+});

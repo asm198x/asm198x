@@ -1353,7 +1353,11 @@ impl Target {
         isa::mos6502::SET.has_mnemonic(&upper)
             || match self {
                 Target::Mos6502 => false,
-                Target::Csg4510 => isa::csg65ce02::CSG4502_SET.has_mnemonic(&upper),
+                Target::Csg4510 => isa::csg65ce02::CSG4502_SET.has_mnemonic(if upper == "PHD" {
+                    "PHW"
+                } else {
+                    &upper
+                }),
                 Target::Wdc65816 => isa::mos65816::SET.has_mnemonic(&upper),
                 Target::HuC6280 => isa::huc6280::SET.has_mnemonic(&upper),
             }
