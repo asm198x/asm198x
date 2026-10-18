@@ -39,3 +39,20 @@ pass, Clippy with warnings denied, Rust/Python formatting, Ruff and generated
 docs checks pass. Compressed logs retain complete output; alias and width
 red logs separately prove the original failures. The 99-case word-push cohort
 is mandatory on every actual-package host.
+
+The clean release/Lua replay from producer
+`2ad8129d98b743a73da2dfe0b81b9988aa578bc4` is fully equivalent for the unchanged
+pinned cc65 4510 opcode target. Complete native and Asm outputs both equal all
+564 bytes of upstream `4510-opcodes.ref`, SHA-256
+`8a5fcde630e55dd49403f7c6ffed25d8786e65e3d0a2723531b7ca3e2c0509ec`.
+`4510-after-word-pushes/` retains the report and fourteen raw process streams.
+`verify_replay.py` checks both complete comparison outputs against the step
+identities, source/producer pins, all process exits/streams, and a changed-byte
+rejection control. The focused replay does not replace the complete ecosystem
+cohort's current report.
+
+`address-override-boundary.json` retains five bounded processes from the same
+clean producer for #751. Valid native 6502 LDA emits `ad3412`, and 4510 word
+pushes emit `fc3412`; Asm times out for their `a:` spellings. All five timed-out
+children were killed and reaped. The word-push fix makes no parser change for
+that independent size-override boundary.

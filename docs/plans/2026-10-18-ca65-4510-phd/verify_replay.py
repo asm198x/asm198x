@@ -48,9 +48,16 @@ def main() -> None:
         assert process["failure"] is None
     artifact = record["reference_steps"][-1]["outputs"][0]
     data = verify_artifact(artifact)
-    assembled = record["assembler_steps"][-1]["outputs"][0]
-    assert verify_artifact(assembled) == data
-    assert record["comparisons"]
+    assert len(record["comparisons"]) == 1
+    comparison = record["comparisons"][0]
+    assert comparison["equal"] is True
+    assembled = comparison["assembler"]
+    assert (
+        verify_artifact(assembled) == verify_artifact(comparison["reference"]) == data
+    )
+    output = record["assembler_steps"][-1]["outputs"][0]
+    for key in ["path", "length", "sha256"]:
+        assert output[key] == assembled[key]
     # A changed byte must fail the same content identity check.
     changed = bytearray(data)
     changed[-1] ^= 1
