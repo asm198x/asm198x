@@ -49,3 +49,9 @@ The preservation test exposed a layout/emit provenance gap: native private
 statements retained file/line but dropped macro frames. Carry existing frame
 metadata through statement placement and stamp backend errors from it, without
 changing the diagnostic schema or fabricating source columns.
+
+A paired five-run density check (0/50/500 definitions, 10,000 instructions)
+found namespace copying on each live line: the 500-definition median increased
+from 0.11s to 1.17s. Keep only new fragment definition positions and query the
+existing namespace directly; preserve positional visibility and rerun native,
+archive, full-suite and density checks after removing the copies.

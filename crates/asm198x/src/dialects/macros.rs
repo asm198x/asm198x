@@ -416,18 +416,10 @@ fn split_args(text: &str, separator: impl Fn(usize) -> bool) -> Vec<String> {
 ///
 /// Two passes, because a macro may invoke one defined **later** in the file —
 /// the references resolve a name when they expand, not when they read.
-/// Answer every `word(name)` on one line with 1 or 0, against the macros
-/// defined above source line `at`.
-///
-/// A definition *below* the line does not count — ca65 answers 0 there — which
-/// is why this reads the source line the expansion recorded rather than the
-/// position in the output.
-fn fold_defined_macro(
-    word: &str,
-    line: &str,
-    defined_at: &std::collections::HashMap<String, usize>,
-    at: usize,
-) -> String {
+/// Answer every `word(name)` using the caller's visibility rule. The file
+/// expander accounts for source position; a live namespace also includes
+/// definitions registered by earlier fragments without copying their keys.
+fn fold_defined_macro(word: &str, line: &str, known: &dyn Fn(&str) -> bool) -> String {
     let mut out = String::with_capacity(line.len());
     let mut rest = line;
     while let Some(start) = rest.find(word) {
@@ -441,7 +433,7 @@ fn fold_defined_macro(
             break;
         };
         let name = after[open + 1..close].trim();
-        let known = defined_at.get(name).is_some_and(|line| *line < at);
+        let known = known(name);
         out.push_str(&rest[..start]);
         out.push(if known { '1' } else { '0' });
         rest = &after[close + 1..];
@@ -507,8 +499,7 @@ fn expand_at_inner<S: MacroSyntax>(
     // take. Where a dialect has only ever one, the group holds one.
     // The source line each name became defined on, for `.definedmacro`: a
     // definition below the line that asks does not count.
-    let mut defined_at: std::collections::HashMap<String, usize> =
-        state.macros.keys().cloned().map(|name| (name, 0)).collect();
+    let mut defined_at: std::collections::HashMap<String, usize> = std::collections::HashMap::new();
 
     // Pass 1 — take the definitions out, keep everything else with its origin.
     let mut body: Vec<(LineOrigin, String)> = Vec::with_capacity(lines.len());
@@ -522,7 +513,15 @@ fn expand_at_inner<S: MacroSyntax>(
                 def,
                 last_line,
             } = collected.map_err(|msg| AsmError::new(line_no, msg))?;
-            defined_at.entry(name.clone()).or_insert(last_line + 1);
+            // Existing live definitions are visible already. Only new
+            // fragment definitions need a positional boundary; an ordinary
+            // line never copies the whole live namespace.
+            let position = if state.defines(&name) {
+                0
+            } else {
+                first_line + last_line
+            };
+            defined_at.entry(name.clone()).or_insert(position);
             let mut def = def;
             def.defined_at = Some(Span::in_file(file, line_no as u32, 1));
             state.macros.entry(name).or_default().push(def);
@@ -651,7 +650,9 @@ fn expand_at_inner<S: MacroSyntax>(
     let mut origins = Vec::with_capacity(body.len());
     for (origin, line) in body {
         let line = match syntax.defined_macro_word() {
-            Some(word) => fold_defined_macro(word, &line, &defined_at, origin.line),
+            Some(word) => fold_defined_macro(word, &line, &|name| {
+                state.defines(name) && defined_at.get(name).is_none_or(|line| *line < origin.line)
+            }),
             None => line,
         };
         text.push_str(&line);

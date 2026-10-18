@@ -1,0 +1,92 @@
+{
+  "executables": {
+    "previous": {
+      "path": "/private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-macro-density-after-rwxj05hk/previous-asm198x",
+      "sha256": "af8c4f80162fb0ac2317974f2466af9c783330223f32c0b58e4e0747f31b7475"
+    },
+    "current": {
+      "path": "/private/tmp/asm198x-address-size-build/debug/asm198x",
+      "sha256": "17fce55588907898815ec83872b9df7942ec6a8b0bbc1651fa3a1e94355d9752"
+    }
+  },
+  "rows": [
+    {
+      "definitions": 0,
+      "instructions": 10000,
+      "source_sha256": "131e562f7d65ff7f6ed5ce42c2065141b76049004f62af05dede206c5eb87254",
+      "output_sha256": "df19a8f7fe5f5b75e6559def6f7c62052fed04be334a4868b659339ef1cdc622",
+      "samples_seconds": {
+        "previous": [
+          0.10986304190009832,
+          0.10560879181139171,
+          0.10567570803686976,
+          0.10705404100008309,
+          0.10976283298805356
+        ],
+        "current": [
+          0.12677887501195073,
+          0.1209127081092447,
+          0.12139637488871813,
+          0.12273654085583985,
+          0.12180116702802479
+        ]
+      },
+      "medians": {
+        "previous": 0.10705404100008309,
+        "current": 0.12180116702802479
+      }
+    },
+    {
+      "definitions": 50,
+      "instructions": 10000,
+      "source_sha256": "cad9c5773ab817dbb8cf9e26c98f3c28e58801dc74809ea770215110b320368d",
+      "output_sha256": "df19a8f7fe5f5b75e6559def6f7c62052fed04be334a4868b659339ef1cdc622",
+      "samples_seconds": {
+        "previous": [
+          0.1093972499947995,
+          0.10991470795124769,
+          0.10915095801465213,
+          0.1112572920974344,
+          0.10925912507809699
+        ],
+        "current": [
+          0.12999833305366337,
+          0.13007737509906292,
+          0.13021183316595852,
+          0.12962112482637167,
+          0.13003975013270974
+        ]
+      },
+      "medians": {
+        "previous": 0.1093972499947995,
+        "current": 0.13003975013270974
+      }
+    },
+    {
+      "definitions": 500,
+      "instructions": 10000,
+      "source_sha256": "fecf174b381ffa0d26bd6e9c923bb072253a572dac6d067d17b97be4c8b76572",
+      "output_sha256": "df19a8f7fe5f5b75e6559def6f7c62052fed04be334a4868b659339ef1cdc622",
+      "samples_seconds": {
+        "previous": [
+          0.10979191609658301,
+          0.11019037500955164,
+          0.11086170794442296,
+          0.10953937517479062,
+          0.11127637489698827
+        ],
+        "current": [
+          0.1351530000101775,
+          0.13584608305245638,
+          0.13628466706722975,
+          0.1353805409744382,
+          0.13643520791083574
+        ]
+      },
+      "medians": {
+        "previous": 0.11019037500955164,
+        "current": 0.13584608305245638
+      }
+    }
+  ]
+}
