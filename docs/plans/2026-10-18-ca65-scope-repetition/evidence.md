@@ -44,3 +44,10 @@ Compressed logs retain complete outputs.
 include binding gap (#765). Additional ordering probes show that native consumes
 macro/repeat token streams before include character streams; #765/#766 are the
 next bug slice. Conditional-only includes remain immediate in both tools.
+
+Clean producer `70751eb608d57db8e1c44c345deea6d1c7c65d43` still matches all
+564 bytes of the unchanged pinned cc65 4510 target (SHA-256
+`8a5fcde630e55dd49403f7c6ffed25d8786e65e3d0a2723531b7ca3e2c0509ec`).
+`4510-after-scope-repetition/` retains full bytes and fourteen raw streams.
+The verifier checks source/producer identity, process completion and content,
+and rejects a changed byte. The complete ecosystem report remains unchanged.
