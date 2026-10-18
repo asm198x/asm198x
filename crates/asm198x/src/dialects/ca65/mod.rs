@@ -28,7 +28,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use super::ca65_flat::{self, DirectiveLine, FlatWalk, WalkDirective};
 use super::ca65_layout;
-use super::macros;
+use super::macros::{self, MacroSyntax};
 use super::mos6502::{
     self, BytePrec, assignment_split, fold_const, is_ident, parse_number, split_data_items,
     split_first_word, split_top_level, string_literal,
@@ -209,9 +209,33 @@ struct Stmt {
     /// single-file assemble, an include's `FileId` otherwise. Layout/emit
     /// errors and debug line records are stamped with it.
     file: FileId,
+    expansion_frames: Vec<crate::span::ExpansionFrame>,
     seg: String,
     label: Option<String>,
     kind: Kind,
+}
+
+struct Placed {
+    seg: String,
+    addr: u32,
+    line: usize,
+    file: FileId,
+    expansion_frames: Vec<crate::span::ExpansionFrame>,
+    item: Resolved,
+}
+
+fn statement_error(
+    error: AsmError,
+    file: FileId,
+    frames: &[crate::span::ExpansionFrame],
+) -> AsmError {
+    let mut error = ca65_flat::stamp_file(error, file);
+    if let Some(span) = error.span.as_mut()
+        && span.expansion_frames.is_empty()
+    {
+        span.expansion_frames.extend_from_slice(frames);
+    }
+    error
 }
 
 // The ca65 statement kind is the family-owned native payload carried in the AST
@@ -389,12 +413,13 @@ fn assemble_program(
                     continue;
                 };
                 if !parsed.consts.contains_key(key) {
-                    return Err(ca65_flat::stamp_file(
+                    return Err(statement_error(
                         AsmError::new(
                             stmt.line,
                             format!("size of `{}` is unknown", display_label(name)),
                         ),
                         stmt.file,
+                        &stmt.expansion_frames,
                     ));
                 }
             }
@@ -435,7 +460,7 @@ fn assemble_program(
                 stmt.line,
                 layout_def.fill,
             )
-            .map_err(|e| ca65_flat::stamp_file(e, stmt.file))?;
+            .map_err(|e| statement_error(e, stmt.file, &stmt.expansion_frames))?;
             *lengths.get_mut(&stmt.seg).expect("segment length") += size as u32;
         }
         lengths
@@ -462,7 +487,7 @@ fn assemble_program(
     // knows.
     let mut pseudo: i64 = 0;
     let mut absolute_mode = false;
-    let mut placed: Vec<(String, u32, usize, FileId, Resolved)> = Vec::new(); // (segment, addr, line, file, item)
+    let mut placed: Vec<Placed> = Vec::new();
     // The debug read-out (U4): symbols and line spans fall out of the layout
     // values already in hand — `(section, offset)` is `(seg, addr - base)`.
     let mut dbg_symbols: Vec<debug198x::Symbol> = Vec::new();
@@ -497,7 +522,7 @@ fn assemble_program(
         let info = layout.seg(&stmt.seg).ok_or_else(|| {
             // Layout errors are stamped with the statement's file (U5), so a
             // failure inside an included file names that file.
-            ca65_flat::stamp_file(
+            statement_error(
                 AsmError::new(
                     stmt.line,
                     if layout.from_config {
@@ -519,6 +544,7 @@ fn assemble_program(
                     },
                 ),
                 stmt.file,
+                &stmt.expansion_frames,
             )
         })?;
         let off = *offsets.entry(stmt.seg.clone()).or_insert(0);
@@ -529,7 +555,7 @@ fn assemble_program(
             Kind::Org(e) => {
                 let target = e
                     .eval(&addr_env, i64::from(addr) + pseudo, stmt.line)
-                    .map_err(|e| ca65_flat::stamp_file(e, stmt.file))?;
+                    .map_err(|e| statement_error(e, stmt.file, &stmt.expansion_frames))?;
                 pseudo = target - i64::from(addr);
                 absolute_mode = true;
             }
@@ -546,24 +572,26 @@ fn assemble_program(
             // `addr_env` was seeded with the `=` constants, so this covers a
             // label colliding with a constant too.
             if imported.contains(label) {
-                return Err(ca65_flat::stamp_file(
+                return Err(statement_error(
                     AsmError::new(
                         stmt.line,
                         format!("symbol `{}` is already an import", display_label(label)),
                     ),
                     stmt.file,
+                    &stmt.expansion_frames,
                 ));
             }
             if addr_env
                 .insert(label.clone(), i64::from(addr) + pseudo)
                 .is_some()
             {
-                return Err(ca65_flat::stamp_file(
+                return Err(statement_error(
                     AsmError::new(
                         stmt.line,
                         format!("duplicate symbol `{}`", display_label(label)),
                     ),
                     stmt.file,
+                    &stmt.expansion_frames,
                 ));
             }
             // Anonymous (`:`) labels are positional, not names — a debugger
@@ -588,16 +616,17 @@ fn assemble_program(
             && let Kind::BitBranch { target, .. } = &stmt.kind
             && fold_const(target, &parsed.consts, stmt.line).is_ok()
         {
-            return Err(ca65_flat::stamp_file(
+            return Err(statement_error(
                 AsmError::new(
                     stmt.line,
                     "constant bit-branch target requires absolute mode (`.org`)",
                 ),
                 stmt.file,
+                &stmt.expansion_frames,
             ));
         }
         let (resolved, size) = resolve(set, stmt.kind, &size_env, off, stmt.line, layout_def.fill)
-            .map_err(|e| ca65_flat::stamp_file(e, stmt.file))?;
+            .map_err(|e| statement_error(e, stmt.file, &stmt.expansion_frames))?;
         *offsets.get_mut(&stmt.seg).expect("segment offset") += size as u32;
         // A line span per byte-emitting statement (address-space-only
         // reservations — ZEROPAGE/BSS `.res` — carry no bytes, so no span; the
@@ -631,15 +660,23 @@ fn assemble_program(
             // relative branch measures from. Where its bytes go is the
             // segment buffer's business, and that has not moved.
             let reported = u32::try_from(i64::from(addr) + pseudo).map_err(|_| {
-                ca65_flat::stamp_file(
+                statement_error(
                     AsmError::new(
                         stmt.line,
                         "`.org` puts this statement outside the address space",
                     ),
                     stmt.file,
+                    &stmt.expansion_frames,
                 )
             })?;
-            placed.push((stmt.seg, reported, stmt.line, stmt.file, resolved));
+            placed.push(Placed {
+                seg: stmt.seg,
+                addr: reported,
+                line: stmt.line,
+                file: stmt.file,
+                expansion_frames: stmt.expansion_frames,
+                item: resolved,
+            });
         }
     }
 
@@ -675,7 +712,15 @@ fn assemble_program(
     // they were written.
     let mut seg_bytes: BTreeMap<String, Vec<u8>> = BTreeMap::new();
     let mut warnings: Vec<Warning> = Vec::new();
-    for (seg, addr, line, file, item) in placed {
+    for Placed {
+        seg,
+        addr,
+        line,
+        file,
+        expansion_frames,
+        item,
+    } in placed
+    {
         // A diagnostic carries no bytes, so it is answered before the segment
         // filter: an `.out` written inside BSS still prints.
         let diagnostic = matches!(item, Resolved::Message(..) | Resolved::Assert(..));
@@ -695,7 +740,7 @@ fn assemble_program(
             buf,
             &mut warnings,
         )
-        .map_err(|e| ca65_flat::stamp_file(e, file))?;
+        .map_err(|e| statement_error(e, file, &expansion_frames))?;
     }
 
     let rom = link(&seg_bytes, layout)?;
@@ -843,28 +888,14 @@ pub(crate) fn parse_program(
     source: &str,
     mode: macros::Expand,
 ) -> Result<crate::ast::Program, AsmError> {
-    // Macros expand before parsing (#93), but only for assembly: the formatter
-    // asks with `Expand::No`, because laying source out must not replace a
-    // definition with its expansions.
-    let expanded = ca65_flat::expand_ca65_macros(source, mode)?;
-    let text = macros::expanded_text(&expanded, source);
-    let origins = macros::line_origins(&expanded);
-    // Assembly parses structure only (#481): blocks group, lines stay unread
-    // for the projection sweep. The formatter keeps the full eager parse — it
-    // renders both branches from source and applies no text environment.
+    // Assembly keeps definitions and calls unread for the selected sweep.
+    // Formatter parsing remains unexpanded and preserves authored source.
     let mut w = match mode {
-        macros::Expand::Yes => Walker::structural(set),
+        macros::Expand::Yes => Walker::structural_source(set, source),
         macros::Expand::No => Walker::new(set, false),
     };
-    // The shared cursor: it groups `.if`/`.repeat` blocks and keeps every
-    // include unresolved (KTD1), which is what `--fmt` needs — it renders the
-    // directive verbatim and works with a missing target. Macros expanded
-    // above, so this parse reads the expanded text.
-    ca65_flat::walk_source_expanded(&mut w, text, FileId(0))
-        .map_err(|e| macros::remap_lines(e, origins))?;
-    let mut program = w.finish(text.lines().count() as u32)?;
-    macros::place_nodes(&mut program.nodes, origins);
-    Ok(program)
+    ca65_flat::walk_source_expanded(&mut w, source, FileId(0))?;
+    w.finish(source.lines().count() as u32)
 }
 
 /// Parse a multi-file NES ca65 program (language-surface U5, KTD1): the
@@ -956,6 +987,9 @@ struct Walker {
     /// the projection sweep reads it under the environment in force at that
     /// point. `decisions/parse-affecting-directives.md`.
     structural: bool,
+    /// Complete macro ranges are opaque to the structural block cursor.
+    macro_lines: RefCell<BTreeSet<usize>>,
+    in_macro: Cell<bool>,
 }
 
 /// A `.struct`, `.union` or `.enum` being read.
@@ -1038,6 +1072,8 @@ impl Walker {
             text_defines: BTreeMap::new(),
             expand_text_defines,
             structural: false,
+            macro_lines: RefCell::new(BTreeSet::new()),
+            in_macro: Cell::new(false),
         }
     }
 
@@ -1055,6 +1091,30 @@ impl Walker {
     /// definition never arrived.
     /// CPU selection belongs to the live reader, including across includes
     /// and selected branches. Each instruction retains its selection (#722).
+    fn structural_source(set: &'static isa::InstructionSet, source: &str) -> Self {
+        let reader = Self::structural(set);
+        reader.prepare_macro_lines(source);
+        reader
+    }
+
+    fn prepare_macro_lines(&self, source: &str) {
+        let lines: Vec<_> = source.lines().collect();
+        let mut opaque = self.macro_lines.borrow_mut();
+        opaque.clear();
+        let syntax = ca65_flat::Ca65Macros;
+        let mut index = 0;
+        while index < lines.len() {
+            if syntax.header(lines[index]).is_some()
+                && let Some(end) = (index + 1..lines.len()).find(|&i| syntax.is_end(lines[i]))
+            {
+                opaque.extend(index + 1..=end + 1);
+                index = end + 1;
+            } else {
+                index += 1;
+            }
+        }
+    }
+
     fn select_cpu(&mut self, rest: &str, line: usize) -> Result<bool, AsmError> {
         let (word, args) = split_first_word(rest);
         let word = word.to_ascii_lowercase();
@@ -1604,7 +1664,11 @@ impl FlatWalk for Walker {
         line: usize,
         _file: FileId,
     ) -> Result<Option<String>, AsmError> {
-        if self.structural || !self.expand_text_defines {
+        if self.structural {
+            self.in_macro.set(self.macro_lines.borrow().contains(&line));
+            return Ok(Some(raw.to_string()));
+        }
+        if !self.expand_text_defines {
             return Ok(Some(raw.to_string()));
         }
         let code = strip_comment(raw);
@@ -1665,6 +1729,9 @@ impl FlatWalk for Walker {
     /// `.ifnref`, ask whether a symbol has been *used* above the line, which
     /// the projection now records as it goes.
     fn block_keyword(&self, code: &str) -> Option<ca65_flat::BlockKw> {
+        if self.structural && self.in_macro.get() {
+            return None;
+        }
         use ca65_flat::BlockKw;
         let (first, rest) = split_first_word(code.trim());
         let word = if first.ends_with(':') {
@@ -1721,7 +1788,12 @@ impl FlatWalk for Walker {
     /// The multi-file walk expands too, or macros would work when a file is
     /// assembled alone and vanish the moment it is included from another.
     fn expand_source(&self, source: &str) -> Result<macros::Expansion, AsmError> {
-        ca65_flat::expand_ca65_macros(source, macros::Expand::Yes)
+        if self.structural {
+            self.prepare_macro_lines(source);
+            Ok(None)
+        } else {
+            ca65_flat::expand_ca65_macros(source, macros::Expand::Yes)
+        }
     }
 
     fn walk_line(

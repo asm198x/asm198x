@@ -13,6 +13,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use super::super::ca65_flat::{self, FlatWalk};
 use super::super::mos6502;
+use super::macros::{self, MacroSyntax};
 use super::{
     AnonCtx, AsmError, Expr, FileId, Kind, Parsed, SegSwitch, SourceLoader, SourceMap, Stmt,
     Walker, fold_const, is_ident, parse_value, resolve_defined, resolve_ref, segment_switch,
@@ -43,6 +44,8 @@ pub(super) fn parsed_from_program(
         referenced: BTreeSet::new(),
         loop_vars: Vec::new(),
         token_depth: 0,
+        macro_state: macros::MacroState::default(),
+        token_captures: Vec::new(),
     };
     project_nodes(&program.nodes, &mut st, &mut sw)?;
     // The reader's end-of-source checks — an unclosed scope or record, a
@@ -133,25 +136,25 @@ struct Projection {
     /// branches never reach here, so a use inside one does not count — probed
     /// against V2.18, where `.if 0 / .word L / .endif` leaves `.ref(L)` at 0.
     referenced: BTreeSet<String>,
-    /// Loop variables bound by enclosing `.repeat`s, innermost last. Kept apart
-    /// from `consts` because ca65 **scopes one to its loop** — `lda #i` after
-    /// `.endrepeat` is `Symbol 'i' is undefined`, where acme's `!for` variable
-    /// survives its block. Two dialects, two rules.
-    loop_vars: Vec<(String, i64)>,
+    /// Counter tokens belong to their repeated source stream. They are not
+    /// numeric symbols: a macro body or a generated `.ident("I")` cannot see
+    /// the caller's counter, while an invocation argument can.
+    loop_vars: Vec<LoopToken>,
     /// Native macro/repeat token sources outrank opened file character sources.
     token_depth: usize,
+    macro_state: macros::MacroState,
+    token_captures: Vec<TokenCapture>,
 }
 
-impl Projection {
-    /// The constants a fold may see here: the file's, plus any enclosing loop
-    /// variables shadowing them.
-    fn env(&self) -> BTreeMap<String, i64> {
-        let mut env = self.consts.clone();
-        for (name, value) in &self.loop_vars {
-            env.insert(name.clone(), *value);
-        }
-        env
-    }
+struct TokenCapture {
+    at: crate::span::Span,
+    defines: BTreeMap<String, String>,
+}
+
+struct LoopToken {
+    name: String,
+    value: i64,
+    at: crate::span::Span,
 }
 
 /// Project a run of nodes, folding any conditional or repetition **once, in
@@ -209,12 +212,15 @@ impl super::macros::MacroSyntax for RepeatTokens {
     }
 }
 
-fn repeat_text(source: &str, st: &Projection) -> String {
+fn repeat_text(source: &str, at: &crate::span::Span, st: &Projection) -> String {
     let (names, values): (Vec<_>, Vec<_>) = st
         .loop_vars
         .iter()
         .rev()
-        .map(|(name, value)| (name.clone(), value.to_string()))
+        .filter(|binding| {
+            binding.at.file == at.file && binding.at.expansion_frames == at.expansion_frames
+        })
+        .map(|binding| (binding.name.clone(), binding.value.to_string()))
         .unzip();
     super::macros::substitute(&RepeatTokens, source, &names, &values)
 }
@@ -230,15 +236,10 @@ fn live_text(
     } else {
         ca65_flat::Target::Mos6502
     };
-    let numbers = if st.loop_vars.is_empty() {
-        std::borrow::Cow::Borrowed(&st.consts)
-    } else {
-        std::borrow::Cow::Owned(st.env())
-    };
     ca65_flat::expand_ca65_line(
         source,
         target,
-        &numbers,
+        &st.consts,
         &reader.text_names,
         reader.repeat_registers.map(|selected| {
             if selected {
@@ -267,6 +268,16 @@ fn project_nodes(
             break;
         }
         let node = &nodes[index];
+        if ca65_flat::Ca65Macros.header(&node.source).is_some() {
+            let end = (index + 1..nodes.len())
+                .find(|&i| ca65_flat::Ca65Macros.is_end(&nodes[i].source))
+                .ok_or_else(|| {
+                    AsmError::at(node.span.clone(), "macro definition is never closed")
+                })?;
+            register_macro(node, &nodes[index + 1..end], st, sw)?;
+            index = end + 1;
+            continue;
+        }
         // Frames run from the innermost expansion out to the caller. The
         // outermost invocation owns the active token source until it ends.
         if st.token_depth == 0
@@ -301,7 +312,9 @@ fn project_nodes(
             }) => {
                 let line = node.span.line as usize;
                 let head = read_block_head(node, head, st, sw)?;
-                if fold_condition(&head, st, sw.reader.extension, line)? {
+                if fold_condition(&head, st, sw.reader.extension, line).map_err(|e| {
+                    super::statement_error(e, node.span.file, &node.span.expansion_frames)
+                })? {
                     project_nodes(then_body, st, sw)?;
                 } else if let Some(body) = else_body {
                     project_nodes(body, st, sw)?;
@@ -321,15 +334,25 @@ fn project_nodes(
             Some(Item::Repeat { head, body, .. }) => {
                 let line = node.span.line as usize;
                 let head = read_block_head(node, head, st, sw)?;
-                let (count, var) = fold_repeat(&head, st, line)?;
+                let (count, var) = fold_repeat(&head, st, line).map_err(|e| {
+                    super::statement_error(e, node.span.file, &node.span.expansion_frames)
+                })?;
                 let watermark = pending_len(sw);
+                st.token_captures.push(TokenCapture {
+                    at: node.span.clone(),
+                    defines: sw.reader.text_defines.clone(),
+                });
                 st.token_depth += 1;
                 let previous_registers = sw.reader.repeat_registers;
                 let registers = previous_registers.or(Some(sw.reader.extension.is_some()));
                 for i in 0..count {
                     sw.reader.repeat_registers = registers;
                     if let Some(name) = &var {
-                        st.loop_vars.push((name.clone(), i));
+                        st.loop_vars.push(LoopToken {
+                            name: name.clone(),
+                            value: i,
+                            at: node.span.clone(),
+                        });
                     }
                     let out = project_nodes(body, st, sw);
                     sw.reader.repeat_registers = previous_registers;
@@ -337,10 +360,12 @@ fn project_nodes(
                         st.loop_vars.pop();
                     }
                     if let Err(error) = out {
+                        st.token_captures.pop();
                         st.token_depth -= 1;
                         return Err(error);
                     }
                 }
+                st.token_captures.pop();
                 st.token_depth -= 1;
                 if st.token_depth == 0 {
                     drain_includes(watermark, st, sw)?;
@@ -376,27 +401,37 @@ fn read_block_head(
     let line = node.span.line as usize;
     let file = node.span.file;
     sw.reader.anons.file.set(file);
-    let head = repeat_text(head, st);
+    let head = capture_text(head, &node.span, st)?;
+    let head = repeat_text(&head, &node.span, st);
     let processed = sw
         .reader
         .preprocess_line(&head, line, file)
-        .map_err(|e| ca65_flat::stamp_file(e, file))?
+        .map_err(|e| super::statement_error(e, file, &node.span.expansion_frames))?
         // Only a `.define`/`.undefine` line is consumed whole, and a block
         // head is neither.
         .unwrap_or_default();
-    let processed = repeat_text(&processed, st);
-    let processed =
-        live_text(&processed, st, &sw.reader, line).map_err(|e| ca65_flat::stamp_file(e, file))?;
+    let processed = repeat_text(&processed, &node.span, st);
+    let processed = macros::expand_one_at(
+        &ca65_flat::Ca65Macros,
+        &processed,
+        file,
+        line,
+        &mut st.macro_state,
+    )?
+    .text;
+    let processed = live_text(&processed, st, &sw.reader, line)
+        .map_err(|e| super::statement_error(e, file, &node.span.expansion_frames))?;
     let (symbol, rest) = sw
         .reader
         .block_open(&processed, line)
-        .map_err(|e| ca65_flat::stamp_file(e, file))?;
+        .map_err(|e| super::statement_error(e, file, &node.span.expansion_frames))?;
     if let Some(symbol) = symbol {
         st.label_seg
             .insert(symbol.qualified.clone(), st.seg.clone());
         st.stmts.push(Stmt {
             line,
             file,
+            expansion_frames: node.span.expansion_frames.clone(),
             seg: st.seg.clone(),
             label: Some(symbol.qualified.clone()),
             kind: Kind::Empty,
@@ -421,22 +456,68 @@ fn sweep_line(
 ) -> Result<(), AsmError> {
     let line = node.span.line as usize;
     let file = node.span.file;
-    let source = repeat_text(&node.source, st);
+    let source = capture_text(&node.source, &node.span, st)?;
+    let source = repeat_text(&source, &node.span, st);
     let Some(processed) = sw
         .reader
         .preprocess_line(&source, line, file)
-        .map_err(|e| ca65_flat::stamp_file(e, file))?
+        .map_err(|e| super::statement_error(e, file, &node.span.expansion_frames))?
     else {
         return Ok(());
     };
-    let processed = repeat_text(&processed, st);
-    let processed =
-        live_text(&processed, st, &sw.reader, line).map_err(|e| ca65_flat::stamp_file(e, file))?;
+    let processed = repeat_text(&processed, &node.span, st);
+    let invokes = matches!(
+        macros::macro_line(&ca65_flat::Ca65Macros, &processed, &|name| st
+            .macro_state
+            .defines(name),),
+        macros::MacroLine::Invokes
+    );
+    if invokes && node.span.expansion_frames.len() >= 64 {
+        let name = &node.span.expansion_frames[0].macro_name;
+        return Err(AsmError::at(
+            node.span.clone(),
+            format!("macro `{name}` is still expanding after 64 levels — is it recursive?"),
+        ));
+    }
+    let mut expanded = macros::expand_one_at(
+        &ca65_flat::Ca65Macros,
+        &processed,
+        file,
+        line,
+        &mut st.macro_state,
+    )
+    .map_err(|mut error| {
+        if error.span.is_none() {
+            error.span = Some(node.span.clone());
+        }
+        error
+    })?;
+    if invokes {
+        for origin in &mut expanded.origins {
+            origin
+                .frames
+                .extend(node.span.expansion_frames.iter().cloned());
+        }
+        let mut reader = Walker::structural_source(sw.reader.set, &expanded.text);
+        ca65_flat::walk_source_expanded(&mut reader, &expanded.text, file).map_err(|e| {
+            ca65_flat::stamp_file(macros::remap_lines(e, Some(&expanded.origins)), file)
+        })?;
+        let mut program = reader.finish(expanded.text.lines().count() as u32)?;
+        macros::place_nodes(&mut program.nodes, Some(&expanded.origins));
+        return project_nodes(&program.nodes, st, sw);
+    }
+    let processed = expanded.text.trim_end_matches('\n');
+    let processed = live_text(processed, st, &sw.reader, line)
+        .map_err(|e| super::statement_error(e, file, &node.span.expansion_frames))?;
     let start = sw.reader.nodes.len();
-    let walked = sw
-        .reader
-        .walk_line(&processed, line, file)
-        .map_err(|e| ca65_flat::stamp_file(e, file));
+    let walked = sw.reader.walk_line(&processed, line, file).map_err(|e| {
+        let mut error = super::statement_error(e, file, &node.span.expansion_frames);
+        if let Some(span) = error.span.as_mut() {
+            span.expansion_frames
+                .clone_from(&node.span.expansion_frames);
+        }
+        error
+    });
     let mut drained: Vec<crate::ast::Node> = sw.reader.nodes.split_off(start);
     let walked = walked?;
     // A macro-expanded line carries its author's frames on the structural
@@ -495,6 +576,7 @@ fn resolve_at_sweep(
                 st.stmts.push(Stmt {
                     line: span.line as usize,
                     file: span.file,
+                    expansion_frames: span.expansion_frames.clone(),
                     seg: st.seg.clone(),
                     label: Some(symbol.qualified),
                     kind: Kind::Empty,
@@ -557,6 +639,60 @@ fn resolve_at_sweep(
             )
         }
     }
+}
+
+fn capture_text(source: &str, at: &crate::span::Span, st: &Projection) -> Result<String, AsmError> {
+    let mut text = source.to_string();
+    for capture in &st.token_captures {
+        if capture.at.file == at.file && capture.at.expansion_frames == at.expansion_frames {
+            text = super::substitute_text_defines(&text, &capture.defines, at.line as usize)?;
+        }
+    }
+    Ok(text)
+}
+
+fn register_macro(
+    node: &crate::ast::Node,
+    body: &[crate::ast::Node],
+    st: &mut Projection,
+    sw: &Sweep<'_>,
+) -> Result<(), AsmError> {
+    let capture = |raw: &str, at: &crate::span::Span| -> Result<String, AsmError> {
+        let raw = capture_text(raw, at, st)?;
+        let raw = repeat_text(&raw, at, st);
+        let raw = super::substitute_text_defines(&raw, &sw.reader.text_defines, at.line as usize)
+            .map_err(|e| super::statement_error(e, at.file, &at.expansion_frames))?;
+        Ok(repeat_text(&raw, at, st))
+    };
+    let head = capture(&node.source, &node.span)?;
+    let (name, params) = ca65_flat::Ca65Macros
+        .header(&head)
+        .ok_or_else(|| AsmError::at(node.span.clone(), "invalid macro definition"))?;
+    if !is_ident(&name) || params.iter().any(|name| !is_ident(name)) {
+        return Err(AsmError::at(
+            node.span.clone(),
+            "macro names and parameters must be identifiers",
+        ));
+    }
+    if st.macro_state.defines(&name) {
+        return Err(AsmError::at(
+            node.span.clone(),
+            format!("macro `{name}` is already defined"),
+        ));
+    }
+    let body = body
+        .iter()
+        .map(|n| capture(&n.source, &n.span))
+        .collect::<Result<Vec<_>, _>>()?;
+    st.macro_state.register(
+        name,
+        macros::MacroDef {
+            params,
+            body,
+            defined_at: Some(node.span.clone()),
+        },
+    );
+    Ok(())
 }
 
 fn pending_len(sw: &Sweep<'_>) -> usize {
@@ -626,7 +762,7 @@ fn fold_condition(
     let (word, args) = split_first_word(head.trim());
     let word = word.to_ascii_lowercase();
     let args = args.trim();
-    let env = st.env();
+    let env = &st.consts;
     match word.as_str() {
         ".ifdef" | ".ifndef" => {
             let name = args
@@ -691,7 +827,7 @@ fn fold_condition(
             let expr = map_expr_syms(&expr, &resolve_defined(&st.consts, &st.label_seg));
             // ca65: `Constant expression expected` — a condition may not reach
             // forward, and a ca65 label is never constant.
-            let value = fold_const(&expr, &env, line).map_err(|_| {
+            let value = fold_const(&expr, env, line).map_err(|_| {
                 AsmError::new(
                     line,
                     format!(
@@ -793,7 +929,7 @@ fn fold_repeat(
         return Err(AsmError::new(line, "`.repeat` needs a count"));
     }
     let expr = parse_value(&AnonCtx::default(), "", count_text, line)?;
-    let count = fold_const(&expr, &st.env(), line)?;
+    let count = fold_const(&expr, &st.consts, line)?;
     // ca65: a negative count is `Range error`, where zero is no iterations.
     if count < 0 {
         return Err(AsmError::new(
@@ -835,17 +971,6 @@ fn map_expr_syms(e: &Expr, f: &dyn Fn(&str) -> Option<Expr>) -> Expr {
             Box::new(map_expr_syms(r, f)),
         ),
         Expr::Num(_) | Expr::Pc => e.clone(),
-    }
-}
-
-/// Substitute the enclosing `.repeat` loop variables. Innermost wins, so a
-/// nested `.repeat` may shadow an outer name.
-fn loop_var_sub(vars: &[(String, i64)]) -> impl Fn(&str) -> Option<Expr> + '_ {
-    move |name| {
-        vars.iter()
-            .rev()
-            .find(|(n, _)| n == name)
-            .map(|(_, v)| Expr::Num(*v))
     }
 }
 
@@ -958,15 +1083,7 @@ fn project_one(node: &crate::ast::Node, st: &mut Projection) -> Result<(), AsmEr
                             format!("symbol `{}` is already defined", sym.name),
                         ));
                     }
-                    // Constants are folded now, before the repeat's ordinary
-                    // statement substitution. Resolve an unbound scoped name
-                    // against the current loop binding, preserving already
-                    // resolved constants in an inner scope.
-                    let value = map_expr_syms(value, &|name| {
-                        let name = super::split_scope_ref(name).map_or(name, |(_, name)| name);
-                        loop_var_sub(&st.loop_vars)(name)
-                    });
-                    if let Ok(v) = fold_const(&value, consts, line) {
+                    if let Ok(v) = fold_const(value, consts, line) {
                         consts.insert(sym.qualified.clone(), v);
                     }
                 }
@@ -1006,6 +1123,7 @@ fn project_one(node: &crate::ast::Node, st: &mut Projection) -> Result<(), AsmEr
                 stmts.push(Stmt {
                     line,
                     file,
+                    expansion_frames: node.span.expansion_frames.clone(),
                     seg: seg.clone(),
                     label,
                     kind: Kind::Raw(payload.clone()),
@@ -1052,6 +1170,7 @@ fn project_one(node: &crate::ast::Node, st: &mut Projection) -> Result<(), AsmEr
                 stmts.push(Stmt {
                     line,
                     file,
+                    expansion_frames: node.span.expansion_frames.clone(),
                     seg: seg.clone(),
                     label,
                     kind,
@@ -1081,6 +1200,7 @@ fn project_one(node: &crate::ast::Node, st: &mut Projection) -> Result<(), AsmEr
                     stmts.push(Stmt {
                         line,
                         file,
+                        expansion_frames: node.span.expansion_frames.clone(),
                         seg: seg.clone(),
                         label: Some(sym.qualified.clone()),
                         kind: Kind::Empty,

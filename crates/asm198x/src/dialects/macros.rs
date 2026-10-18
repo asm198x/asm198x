@@ -270,6 +270,12 @@ impl MacroState {
     pub(crate) fn defines(&self, name: &str) -> bool {
         self.macros.contains_key(name)
     }
+
+    /// Register a definition captured by a live dialect reader. The dialect
+    /// owns duplicate-name policy and the definition's authored provenance.
+    pub(crate) fn register(&mut self, name: String, def: MacroDef) {
+        self.macros.entry(name).or_default().push(def);
+    }
 }
 
 /// A definition the pre-pass lifted out of the source.
@@ -501,7 +507,8 @@ fn expand_at_inner<S: MacroSyntax>(
     // take. Where a dialect has only ever one, the group holds one.
     // The source line each name became defined on, for `.definedmacro`: a
     // definition below the line that asks does not count.
-    let mut defined_at: std::collections::HashMap<String, usize> = std::collections::HashMap::new();
+    let mut defined_at: std::collections::HashMap<String, usize> =
+        state.macros.keys().cloned().map(|name| (name, 0)).collect();
 
     // Pass 1 — take the definitions out, keep everything else with its origin.
     let mut body: Vec<(LineOrigin, String)> = Vec::with_capacity(lines.len());

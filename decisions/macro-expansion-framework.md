@@ -232,6 +232,18 @@ fails rather than passes.
   new `Z80Syntax::expand_live` hook; pasmo keeps the per-file default. The
   pinned SpecNext Invaders corpus advances to temporary labels (`1F`).
 
+- **2026-10-19 — linked ca65 captures text tokens live** (#768). Native ca65
+  V2.18 captures an already defined text symbol in a macro body at definition,
+  while invocation arguments read their current value. A body/argument control
+  emits `0102`; the per-file pre-pass emitted `0202`. Conditional definition,
+  nested call, fresh-local, textual include and refusal controls confirm the
+  ordering. The linked 6502/4510 reader therefore registers selected definitions
+  and expands one layer in its existing projection sweep, through the shared
+  `MacroState`/`expand_one_at` pattern already used by ACME and SjASMPlus. The
+  formatter remains unexpanded; no AST or public contract shape changes. Flat
+  65816/HuC6280 readers retain their existing path pending their own probes.
+
+
 ### Lua inside SjASMPlus macros (#532)
 
 SjASMPlus 1.21.0 leaves Lua identifiers untouched by macro substitution:
