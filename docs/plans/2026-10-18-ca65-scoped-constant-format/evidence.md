@@ -45,3 +45,11 @@ Separate native findings #759 and #760 are retained in `deferred-native.json`
 and are not qualifying cases in this slice. They concern unnamed `.proc`
 closers and token substitution on repeat definition lines; the next slice
 addresses them. Further measured `.set` and `:=` gaps are tracked as #761/#762.
+
+Clean producer `cd8284a992523e8020047f32db0a0a3a70677e45` still matches all
+564 bytes of the unchanged pinned cc65 4510 target, SHA-256
+`8a5fcde630e55dd49403f7c6ffed25d8786e65e3d0a2723531b7ca3e2c0509ec`.
+`4510-after-scoped-constants/` retains complete native/Asm bytes and fourteen
+raw streams. `verify_replay.py` checks content, source and producer identities,
+process completion, metadata agreement and changed-byte rejection. The complete
+ecosystem cohort report remains untouched.
