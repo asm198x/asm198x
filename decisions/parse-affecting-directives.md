@@ -99,3 +99,22 @@ depends on order.
 - [`conditional-assembly-framework.md`](conditional-assembly-framework.md) — the tree-not-preprocessor contract
 - [`macro-expansion-framework.md`](macro-expansion-framework.md) — the expansion machinery `.define` borrows from
 - [`syntax-stance.md`](syntax-stance.md)
+
+
+## Native input priority inside token streams (2026-10-18, #765/#766)
+
+Opening a selected include and reading its contents are distinct events. Native
+ca65 V2.18 consumes an active macro/repeat token stream before file characters,
+so `.include` opens its file at the selected directive, but reads its contents
+after the outer token stream completes. Multiple suspended files are consumed
+in reverse open order. Ordinary and conditional-only includes stay immediate;
+`.incbin` emits immediately. Include code observes the scope and text state in
+force when its characters are read, rather than when its file was opened.
+
+The projection sweep retains that input order with private token boundaries and
+pending character sources. Macro expansion frames delimit invocations; repeat
+recursion delimits repeated token streams. The authored tree is unchanged, and
+untaken branches still open nothing. Path lookup includes suspended files;
+recursive-cycle checks use actual caller ancestry, so repeated pending siblings
+are not mistaken for recursion. Native controls and retained process streams
+live in `docs/plans/2026-10-18-ca65-include-streams/`.
