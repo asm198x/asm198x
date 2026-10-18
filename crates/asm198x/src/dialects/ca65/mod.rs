@@ -117,6 +117,12 @@ fn segment_switch(source: &str) -> Option<SegSwitch> {
 // Parsed statements
 // ---------------------------------------------------------------------------
 
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum AddressSize {
+    ZeroPage,
+    Absolute,
+}
+
 // `Clone` so the assembler can project a statement out of the AST node that owns
 // it (the assemble+link driver runs on an owned `Vec<Stmt>`; see
 // `parsed_from_program`).
@@ -191,6 +197,7 @@ enum Kind {
     },
     Insn {
         operand: mos6502::OperandSyntax,
+        address_size: Option<AddressSize>,
         mnemonic: String,
         extension: Option<&'static isa::InstructionSet>,
     },
@@ -2199,8 +2206,31 @@ fn parse_op(
             target: parse_value(anons, anchor, parts[1], line)?,
         });
     }
+    let operand_text = operand_text.trim();
+    let (address_size, operand_text) = match operand_text.as_bytes() {
+        [b'a' | b'A', b':', ..] => (Some(AddressSize::Absolute), &operand_text[2..]),
+        [b'z' | b'Z', b':', ..] => (Some(AddressSize::ZeroPage), &operand_text[2..]),
+        [b'f' | b'F', b':', ..] => {
+            return Err(AsmError::new(
+                line,
+                "far addressing is not available on this CPU",
+            ));
+        }
+        _ => (None, operand_text),
+    };
     let operand =
         mos6502::parse_operand(operand_text, line, &|s, l| parse_value(anons, anchor, s, l))?;
+    if address_size.is_some()
+        && !matches!(
+            operand,
+            mos6502::OperandSyntax::Direct(_) | mos6502::OperandSyntax::Indexed(_, _)
+        )
+    {
+        return Err(AsmError::new(
+            line,
+            "address size requires a direct or indexed memory operand",
+        ));
+    }
     if set.instruction(&mnemonic).is_none()
         && extension.is_none_or(|set| set.instruction(&mnemonic).is_none())
     {
@@ -2211,6 +2241,7 @@ fn parse_op(
     }
     Ok(Kind::Insn {
         operand,
+        address_size,
         mnemonic,
         extension,
     })

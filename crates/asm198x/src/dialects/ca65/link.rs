@@ -8,7 +8,9 @@
 use std::collections::BTreeMap;
 
 use super::super::mos6502;
-use super::{AsmError, DiagSeverity, Expr, FileId, Kind, Warning, WarningKind, display_label};
+use super::{
+    AddressSize, AsmError, DiagSeverity, Expr, FileId, Kind, Warning, WarningKind, display_label,
+};
 
 /// The layout's memory account (#499): each area's capacity against the
 /// segments the program placed or reserved in it, in address order. `free` is
@@ -113,7 +115,7 @@ pub(super) enum Resolved {
     Insn {
         form: &'static isa::Form,
         operands: Vec<Expr>,
-        /// ca65's 4510 word pushes require unsigned 16-bit operands.
+        /// Explicit absolute operands and 4510 word pushes need unsigned words.
         unsigned_word: bool,
     },
     /// Something to say, carrying no bytes.
@@ -216,10 +218,27 @@ pub(super) fn resolve(
         ),
         Kind::Insn {
             operand,
+            address_size,
             mnemonic,
             extension,
         } => {
-            let (mode, mut operand) = if let Some(extension) = extension {
+            let (mode, mut operand) = if let Some(size) = address_size {
+                use mos6502::{Index, OperandSyntax};
+                let (index, value) = match operand {
+                    OperandSyntax::Direct(e) => (None, e),
+                    OperandSyntax::Indexed(e, index) => (Some(index), e),
+                    _ => return Err(AsmError::new(line, "invalid sized memory operand")),
+                };
+                let mode = match (size, index) {
+                    (AddressSize::ZeroPage, None) => "zeropage",
+                    (AddressSize::ZeroPage, Some(Index::X)) => "zeropage,x",
+                    (AddressSize::ZeroPage, Some(Index::Y)) => "zeropage,y",
+                    (AddressSize::Absolute, None) => "absolute",
+                    (AddressSize::Absolute, Some(Index::X)) => "absolute,x",
+                    (AddressSize::Absolute, Some(Index::Y)) => "absolute,y",
+                };
+                (mode, Some(value))
+            } else if let Some(extension) = extension {
                 mos6502::resolve_mode_in_sets(
                     set,
                     Some(extension),
@@ -256,7 +275,8 @@ pub(super) fn resolve(
                 Resolved::Insn {
                     form,
                     operands,
-                    unsigned_word: extension.is_some() && mnemonic == "PHW",
+                    unsigned_word: address_size == Some(AddressSize::Absolute)
+                        || (extension.is_some() && mnemonic == "PHW"),
                 },
                 size,
             )
