@@ -33,3 +33,5 @@ five outputs and source content in human and JSON modes.
 Five native generated A/X/Y/Z/F positive controls guard against a blanket register-name blacklist. Their existing formatter refusal is #854; the required package still executes all five original assembly commands and verifies native bytes. The other 72 accepted cases require formatter idempotence and byte/symbol/section equality. The cohort has 329 required commands.
 
 Final narrowed source: 1,584 Rust tests pass (38 ignored); the final 113-case focused fixture passes, as do 88 Node tests, Lua/all-target Clippy, fmt/Ruff and generated docs.
+
+Clean producer 711ede39cbf320b3b42910aad3588dc0d27a0b95 has executable SHA-256 04cd785990ddfcb28a3f7ef250ae85ff3052b176b8422894934ac3f8859bb63b. All 113 clean fixture controls match native. Its actual archive passes 73 cohorts and all 329 new commands; changed bytes fail exactly the three byte controls and an altered archive fails SHA-256. The preceding archive fails only the new cohort. Clean pinned 4510 replay matches all 564 bytes, with seven processes and fourteen streams retained and a failing changed-byte control.
