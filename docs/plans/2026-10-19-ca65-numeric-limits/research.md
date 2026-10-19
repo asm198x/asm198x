@@ -17,3 +17,24 @@ The linked path also refuses native-valid h/H suffixed hexadecimal literals.
 That is independently fixable without changing skipped-source handling. Keep
 lexical numeric range checks waiting for agreement on the binding decision's
 narrow exception; do not work around the decision by parsing inactive meaning.
+
+## Token boundaries
+
+A further 72 native boundary controls accept 24 and refuse 48. In skipped
+source, 0xFF, 123G, $FFFFFFFFG, %102 and 0FFhG are accepted, while
+123ABC, 0ff_4294967300, lone numeric prefixes and oversized numeric prefixes
+are lexical failures. Identifiers containing large decimal suffixes remain
+identifiers. Quoted strings and character constants are distinct: native
+rejects a multi-character single-quoted constant even in skipped source;
+that literal syntax is separate from numeric range correction.
+
+The primary cc65 V2.18 scanner source is
+https://github.com/cc65/cc65/blob/V2.18/src/ca65/scanner.c
+(blob 361a817c1383dc0b0aee9c5fa8fcb78f3e66501a, SHA-256
+eea593534c8211287437e6acf9042e74eb5714c08ebe255e16ae5a74096844f8).
+Its numeric scan stops before G or x; digit-start tokens collect hexadecimal
+digits and consume an optional h/H suffix before choosing decimal or hex.
+Prefix hex/bin scanners stop at the first non-digit of their radix. This is
+why validating the existing coarse token as a full expression would over-reject
+skipped source. Leading decimal zeros are skipped before the bounded buffer;
+range detection examines the previous partial value before multiplying.
