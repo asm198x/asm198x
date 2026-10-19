@@ -389,3 +389,9 @@ test('ca65 canonical end-source formatting is mandatory package evidence', () =>
   assert(qualifies(complete)); assert(requiredCases.includes('ca65_format_end'));
   assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_format_end')), false);
 });
+
+test('ca65 labels before end are mandatory package evidence', () => {
+  const complete = requiredCases.map(name => ({ name, status: 'pass' }));
+  assert(qualifies(complete)); assert(requiredCases.includes('ca65_labelled_end'));
+  assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_labelled_end')), false);
+});
