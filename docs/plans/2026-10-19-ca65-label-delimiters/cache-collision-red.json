@@ -1,0 +1,9 @@
+{
+  "shared_executable": "/private/tmp/asm198x-address-size-build/debug/asm198x",
+  "sha256": "53a03b8f67ef3700edf61cea19a33bde2555f2eda9e253cf3919436d8200fb3a",
+  "source_files": {
+    "crates/asm198x/src/dialects/ca65/mod.rs": "b6de5e16b7d4f945e751ad5e619b51d61a5641f9edbdc03b639f699a18fc3d92",
+    "crates/asm198x/src/dialects/ca65/project.rs": "3c5ba507682290d01ddd2cc9ab11653308660d5302de5dd370727a0e0cb76e85"
+  },
+  "observed": "attached_global refused as unknown instruction ENTRY:NOP after a different worktree ran cargo xtask in the shared target"
+}

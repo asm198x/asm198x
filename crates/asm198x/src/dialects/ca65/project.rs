@@ -482,10 +482,16 @@ fn sweep_line(
         return Ok(());
     };
     let processed = repeat_text(&processed, &node.span, st);
+    // The shared expander separates an optional label by whitespace. ca65
+    // owns the colon token, including attached/indented call-site labels.
+    let separated = super::split_label_head(processed.trim_start())
+        .filter(|(_, rest)| !rest.is_empty())
+        .map(|(label, rest)| format!("{label} {rest}"));
+    let macro_source = separated.as_deref().unwrap_or(&processed);
     let invokes = matches!(
-        macros::macro_line(&ca65_flat::Ca65Macros, &processed, &|name| st
-            .macro_state
-            .defines(name),),
+        macros::macro_line(&ca65_flat::Ca65Macros, macro_source.trim_start(), &|name| {
+            st.macro_state.defines(name)
+        },),
         macros::MacroLine::Invokes
     );
     if invokes && node.span.expansion_frames.len() >= 64 {
@@ -497,7 +503,11 @@ fn sweep_line(
     }
     let mut expanded = macros::expand_one_at(
         &ca65_flat::Ca65Macros,
-        &processed,
+        if invokes {
+            macro_source.trim_start()
+        } else {
+            &processed
+        },
         file,
         line,
         &mut st.macro_state,
