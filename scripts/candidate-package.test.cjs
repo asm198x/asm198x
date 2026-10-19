@@ -425,3 +425,9 @@ test('native generated identifier validation is mandatory package evidence', () 
   assert(qualifies(complete)); assert(requiredCases.includes('ca65_ident_names'));
   assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_ident_names')), false);
 });
+
+test('selected cheap-local anchor checks are mandatory package evidence', () => {
+  const complete = requiredCases.map(name => ({ name, status: 'pass' }));
+  assert(qualifies(complete)); assert(requiredCases.includes('ca65_cheap_root'));
+  assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_cheap_root')), false);
+});

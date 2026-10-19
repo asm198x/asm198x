@@ -33,3 +33,30 @@ not create one. Empty scopes still lack an anchor; a scope with output creates
 its established exit anchor. Scope entry after an existing global preserves the
 measured cheap context. Deferred includes observe an anchor created later in the
 active macro/repeat stream. Those two positive controls must remain unchanged.
+
+The selected reader now checks the existing ScopeEnv anchor before generating
+its unchanged cheap key. Label binding, value/query markers and .ifdef lookup
+use that check; constants retain their existing requirement with a clearer error.
+The expression mapper uses the same local failure-collection pattern as existing
+scope resolution. Label spelling uses existing is_cheap_ident, admitting plain
+@1/@1near and refusing dots while leaving .ident string grammar unchanged.
+The first compile caught a missing helper import; it was corrected without
+changing the mechanism. The focused suites then pass.
+
+All 315 scoped controls now match native, resolving 153 differences. Fourteen
+anchored undefined .ifconst cases remain explicitly #879. Include/macro human/JSON
+checks preserve five outputs and all sources, with the required missing-global
+message and correct invocation frames. Canonical formatting stays syntax-only.
+Actual native formatting preserves all 315 outcomes and 94 images, with no
+assembly gaps. The restored 165-case identifier cohort preserves all outcomes and
+61 images; only its existing two #876 constant gaps remain. Both #875 exclusions
+were removed from that fixture and its complete-audit accounting now includes
+all 165 controls. All 98 Node tests and Ruff checks pass. Full Rust/lints and clean
+producer/project/archive qualification remain required before shipping.
+
+Final full Rust passes all 1,605 tests (38 ignored). All 98 Node tests, Clippy,
+rustfmt, Ruff and generated docs pass. The actual archive passes all 83 cohorts,
+with 597 new cheap-local commands and 342 restored identifier commands; both
+corruption controls fail. The preceding archive fails exactly those two cohorts.
+The complete 329-case raw comparison leaves only the fourteen #879 cases. Freeze
+this verified source and retain a complete clean 4510 replay before shipping.
