@@ -80,3 +80,8 @@ Final isolated checks pass 1,553 Rust tests (38 ignored), 74 Node tests,
 Clippy/all workspace targets/features with warnings denied, fmt, Ruff and
 generated docs. Full logs, process records and actual archive controls are
 retained alongside the native/predecessor evidence.
+
+Clean producer `3221329b555abc1b02f4a7d8b0e9be522d83eb44` matches all
+564 unchanged native/upstream 4510 bytes. Seven successful processes/fourteen
+streams and complete output identities are retained; changed bytes fail the
+same verification guard.
