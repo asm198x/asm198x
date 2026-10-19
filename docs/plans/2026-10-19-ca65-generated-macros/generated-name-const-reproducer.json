@@ -1,0 +1,47 @@
+{
+  "source": ".ident(\"mark\"):.byte 6\n.byte .const(mark)\n",
+  "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+  "producer": "12af1dae8d81d8be968f717f5a2b3fb5870b5690",
+  "processes": [
+    {
+      "argv": [
+        "/opt/homebrew/bin/ca65",
+        "i.s",
+        "-o",
+        "i.o"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/opt/homebrew/bin/ld65",
+        "-C",
+        "i.cfg",
+        "i.o",
+        "-o",
+        "native.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/private/tmp/asm198x-cheap-root-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "i.cfg",
+        "i.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: i.s:2: error: `mark` is not defined anywhere in this source\n"
+    }
+  ],
+  "native_hex": "0600"
+}

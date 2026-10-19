@@ -41,3 +41,14 @@ prerequisite producer is 12af1dae8d81d8be968f717f5a2b3fb5870b5690, CLI SHA-256
 e43eb5c6a1cab293f97d50cdf802aca055e8da840c1905437582d7edd7c4a1f6.
 Rebuild tests with explicit global address assertions for concat/sprintf/spaced
 heads; the old trial's successful body bytes did not prove those bindings.
+
+The resumed macro attempt is withdrawn pending another independently reproduced
+prerequisite. Raw definition_phase first failed because bind_head_label did not
+register its generated name in the text-function constancy set. Adding that
+registration fixed the raw source, but canonical formatting separated the label
+onto the ordinary path, which had the same missing registration. The clean
+predecessor also refuses a simple generated label followed by .const(mark), while
+native emits 06 00. This is shared selected-label bookkeeping, not macro capture.
+Retain the resumed patch/test/fixture and both failures; production/harness are
+restored to the clean cheap-root source. Isolate that bookkeeping fix before
+resuming macro heads, with exact original/formatted address/constancy controls.
