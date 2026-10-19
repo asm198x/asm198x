@@ -1,0 +1,3712 @@
+{
+  "binary": "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+  "sha256": "371235c2826db37e56ba006a39b5469905d3ba49740e25a15a5df7adff28a25c",
+  "cases": [
+    {
+      "name": "plain_A",
+      "format": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident(\"A\"): .byte 7\n",
+        "stderr": "formatted input.s -> stdout\n"
+      },
+      "again": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "formatted.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident(\"A\"): .byte 7\n",
+        "stderr": "formatted formatted.s -> stdout\n"
+      },
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "formatted.s",
+            "-o",
+            "formatted.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "formatted.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07",
+      "assembled": {
+        "input.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+          "hex": "07"
+        },
+        "formatted.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+          "hex": "07"
+        }
+      }
+    },
+    {
+      "name": "reference_A",
+      "format": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident(\"A\"):.byte 7\n        .word .ident(\"A\")\n",
+        "stderr": "formatted input.s -> stdout\n"
+      },
+      "again": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "formatted.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident(\"A\"):.byte 7\n        .word .ident(\"A\")\n",
+        "stderr": "formatted formatted.s -> stdout\n"
+      },
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "formatted.s",
+            "-o",
+            "formatted.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "formatted.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070010",
+      "assembled": {
+        "input.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+          "hex": "070010"
+        },
+        "formatted.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+          "hex": "070010"
+        }
+      }
+    },
+    {
+      "name": "spaced_A",
+      "format": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "; source comment\n        .ident( \"A\" ) : .byte 7   ; trailing .end\n",
+        "stderr": "formatted input.s -> stdout\n"
+      },
+      "again": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "formatted.s"
+        ],
+        "exit": 0,
+        "stdout": "; source comment\n        .ident( \"A\" ) : .byte 7   ; trailing .end\n",
+        "stderr": "formatted formatted.s -> stdout\n"
+      },
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "formatted.s",
+            "-o",
+            "formatted.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "formatted.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07",
+      "assembled": {
+        "input.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s:2: error: unexpected character `:` in expression\n",
+          "hex": "70726576696f757320696d616765"
+        },
+        "formatted.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: formatted.s:2: error: unexpected character `:` in expression\n",
+          "hex": "70726576696f757320696d616765"
+        }
+      }
+    },
+    {
+      "name": "plain_X",
+      "format": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident(\"X\"): .byte 7\n",
+        "stderr": "formatted input.s -> stdout\n"
+      },
+      "again": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "formatted.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident(\"X\"): .byte 7\n",
+        "stderr": "formatted formatted.s -> stdout\n"
+      },
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "formatted.s",
+            "-o",
+            "formatted.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "formatted.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07",
+      "assembled": {
+        "input.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+          "hex": "07"
+        },
+        "formatted.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+          "hex": "07"
+        }
+      }
+    },
+    {
+      "name": "reference_X",
+      "format": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident(\"X\"):.byte 7\n        .word .ident(\"X\")\n",
+        "stderr": "formatted input.s -> stdout\n"
+      },
+      "again": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "formatted.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident(\"X\"):.byte 7\n        .word .ident(\"X\")\n",
+        "stderr": "formatted formatted.s -> stdout\n"
+      },
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "formatted.s",
+            "-o",
+            "formatted.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "formatted.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070010",
+      "assembled": {
+        "input.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+          "hex": "070010"
+        },
+        "formatted.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+          "hex": "070010"
+        }
+      }
+    },
+    {
+      "name": "spaced_X",
+      "format": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "; source comment\n        .ident( \"X\" ) : .byte 7   ; trailing .end\n",
+        "stderr": "formatted input.s -> stdout\n"
+      },
+      "again": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "formatted.s"
+        ],
+        "exit": 0,
+        "stdout": "; source comment\n        .ident( \"X\" ) : .byte 7   ; trailing .end\n",
+        "stderr": "formatted formatted.s -> stdout\n"
+      },
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "formatted.s",
+            "-o",
+            "formatted.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "formatted.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07",
+      "assembled": {
+        "input.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s:2: error: unexpected character `:` in expression\n",
+          "hex": "70726576696f757320696d616765"
+        },
+        "formatted.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: formatted.s:2: error: unexpected character `:` in expression\n",
+          "hex": "70726576696f757320696d616765"
+        }
+      }
+    },
+    {
+      "name": "plain_Y",
+      "format": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident(\"Y\"): .byte 7\n",
+        "stderr": "formatted input.s -> stdout\n"
+      },
+      "again": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "formatted.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident(\"Y\"): .byte 7\n",
+        "stderr": "formatted formatted.s -> stdout\n"
+      },
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "formatted.s",
+            "-o",
+            "formatted.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "formatted.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07",
+      "assembled": {
+        "input.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+          "hex": "07"
+        },
+        "formatted.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+          "hex": "07"
+        }
+      }
+    },
+    {
+      "name": "reference_Y",
+      "format": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident(\"Y\"):.byte 7\n        .word .ident(\"Y\")\n",
+        "stderr": "formatted input.s -> stdout\n"
+      },
+      "again": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "formatted.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident(\"Y\"):.byte 7\n        .word .ident(\"Y\")\n",
+        "stderr": "formatted formatted.s -> stdout\n"
+      },
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "formatted.s",
+            "-o",
+            "formatted.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "formatted.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070010",
+      "assembled": {
+        "input.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+          "hex": "070010"
+        },
+        "formatted.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+          "hex": "070010"
+        }
+      }
+    },
+    {
+      "name": "spaced_Y",
+      "format": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "; source comment\n        .ident( \"Y\" ) : .byte 7   ; trailing .end\n",
+        "stderr": "formatted input.s -> stdout\n"
+      },
+      "again": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "formatted.s"
+        ],
+        "exit": 0,
+        "stdout": "; source comment\n        .ident( \"Y\" ) : .byte 7   ; trailing .end\n",
+        "stderr": "formatted formatted.s -> stdout\n"
+      },
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "formatted.s",
+            "-o",
+            "formatted.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "formatted.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07",
+      "assembled": {
+        "input.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s:2: error: unexpected character `:` in expression\n",
+          "hex": "70726576696f757320696d616765"
+        },
+        "formatted.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: formatted.s:2: error: unexpected character `:` in expression\n",
+          "hex": "70726576696f757320696d616765"
+        }
+      }
+    },
+    {
+      "name": "plain_Z",
+      "format": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident(\"Z\"): .byte 7\n",
+        "stderr": "formatted input.s -> stdout\n"
+      },
+      "again": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "formatted.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident(\"Z\"): .byte 7\n",
+        "stderr": "formatted formatted.s -> stdout\n"
+      },
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "formatted.s",
+            "-o",
+            "formatted.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "formatted.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07",
+      "assembled": {
+        "input.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+          "hex": "07"
+        },
+        "formatted.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+          "hex": "07"
+        }
+      }
+    },
+    {
+      "name": "reference_Z",
+      "format": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident(\"Z\"):.byte 7\n        .word .ident(\"Z\")\n",
+        "stderr": "formatted input.s -> stdout\n"
+      },
+      "again": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "formatted.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident(\"Z\"):.byte 7\n        .word .ident(\"Z\")\n",
+        "stderr": "formatted formatted.s -> stdout\n"
+      },
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "formatted.s",
+            "-o",
+            "formatted.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "formatted.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070010",
+      "assembled": {
+        "input.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+          "hex": "070010"
+        },
+        "formatted.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+          "hex": "070010"
+        }
+      }
+    },
+    {
+      "name": "spaced_Z",
+      "format": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "; source comment\n        .ident( \"Z\" ) : .byte 7   ; trailing .end\n",
+        "stderr": "formatted input.s -> stdout\n"
+      },
+      "again": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "formatted.s"
+        ],
+        "exit": 0,
+        "stdout": "; source comment\n        .ident( \"Z\" ) : .byte 7   ; trailing .end\n",
+        "stderr": "formatted formatted.s -> stdout\n"
+      },
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "formatted.s",
+            "-o",
+            "formatted.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "formatted.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07",
+      "assembled": {
+        "input.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s:2: error: unexpected character `:` in expression\n",
+          "hex": "70726576696f757320696d616765"
+        },
+        "formatted.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: formatted.s:2: error: unexpected character `:` in expression\n",
+          "hex": "70726576696f757320696d616765"
+        }
+      }
+    },
+    {
+      "name": "plain_F",
+      "format": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident(\"F\"): .byte 7\n",
+        "stderr": "formatted input.s -> stdout\n"
+      },
+      "again": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "formatted.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident(\"F\"): .byte 7\n",
+        "stderr": "formatted formatted.s -> stdout\n"
+      },
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "formatted.s",
+            "-o",
+            "formatted.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "formatted.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07",
+      "assembled": {
+        "input.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+          "hex": "07"
+        },
+        "formatted.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+          "hex": "07"
+        }
+      }
+    },
+    {
+      "name": "reference_F",
+      "format": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident(\"F\"):.byte 7\n        .word .ident(\"F\")\n",
+        "stderr": "formatted input.s -> stdout\n"
+      },
+      "again": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "formatted.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident(\"F\"):.byte 7\n        .word .ident(\"F\")\n",
+        "stderr": "formatted formatted.s -> stdout\n"
+      },
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "formatted.s",
+            "-o",
+            "formatted.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "formatted.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070010",
+      "assembled": {
+        "input.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+          "hex": "070010"
+        },
+        "formatted.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+          "hex": "070010"
+        }
+      }
+    },
+    {
+      "name": "spaced_F",
+      "format": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "; source comment\n        .ident( \"F\" ) : .byte 7   ; trailing .end\n",
+        "stderr": "formatted input.s -> stdout\n"
+      },
+      "again": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "formatted.s"
+        ],
+        "exit": 0,
+        "stdout": "; source comment\n        .ident( \"F\" ) : .byte 7   ; trailing .end\n",
+        "stderr": "formatted formatted.s -> stdout\n"
+      },
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "formatted.s",
+            "-o",
+            "formatted.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "formatted.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07",
+      "assembled": {
+        "input.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s:2: error: unexpected character `:` in expression\n",
+          "hex": "70726576696f757320696d616765"
+        },
+        "formatted.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: formatted.s:2: error: unexpected character `:` in expression\n",
+          "hex": "70726576696f757320696d616765"
+        }
+      }
+    },
+    {
+      "name": "concat_head",
+      "format": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident(.concat(\"fin\", \"ish\")):.byte 7\n        .word finish\n",
+        "stderr": "formatted input.s -> stdout\n"
+      },
+      "again": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "formatted.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident(.concat(\"fin\", \"ish\")):.byte 7\n        .word finish\n",
+        "stderr": "formatted formatted.s -> stdout\n"
+      },
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "formatted.s",
+            "-o",
+            "formatted.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "formatted.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070010",
+      "assembled": {
+        "input.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+          "hex": "070010"
+        },
+        "formatted.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+          "hex": "070010"
+        }
+      }
+    },
+    {
+      "name": "sprintf_head",
+      "format": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident( .sprintf(\"mark%d\", 2) ) : .byte 7\n        .word mark2\n",
+        "stderr": "formatted input.s -> stdout\n"
+      },
+      "again": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "formatted.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident( .sprintf(\"mark%d\", 2) ) : .byte 7\n        .word mark2\n",
+        "stderr": "formatted formatted.s -> stdout\n"
+      },
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "formatted.s",
+            "-o",
+            "formatted.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "formatted.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070010",
+      "assembled": {
+        "input.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s:1: error: unexpected character `:` in expression\n",
+          "hex": "70726576696f757320696d616765"
+        },
+        "formatted.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: formatted.s:1: error: unexpected character `:` in expression\n",
+          "hex": "70726576696f757320696d616765"
+        }
+      }
+    },
+    {
+      "name": "scoped_head",
+      "format": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .scope outer\n        .ident(\"finish\"):.byte 7\n        .endscope\n        .word outer::finish\n",
+        "stderr": "formatted input.s -> stdout\n"
+      },
+      "again": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "formatted.s"
+        ],
+        "exit": 0,
+        "stdout": "        .scope outer\n        .ident(\"finish\"):.byte 7\n        .endscope\n        .word outer::finish\n",
+        "stderr": "formatted formatted.s -> stdout\n"
+      },
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "formatted.s",
+            "-o",
+            "formatted.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "formatted.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070010",
+      "assembled": {
+        "input.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+          "hex": "070010"
+        },
+        "formatted.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+          "hex": "070010"
+        }
+      }
+    },
+    {
+      "name": "scoped_register",
+      "format": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .scope outer\n        .ident(\"A\"):.byte 7\n        .endscope\n        .word outer::.ident(\"A\")\n",
+        "stderr": "formatted input.s -> stdout\n"
+      },
+      "again": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "formatted.s"
+        ],
+        "exit": 0,
+        "stdout": "        .scope outer\n        .ident(\"A\"):.byte 7\n        .endscope\n        .word outer::.ident(\"A\")\n",
+        "stderr": "formatted formatted.s -> stdout\n"
+      },
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "formatted.s",
+            "-o",
+            "formatted.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "formatted.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070010",
+      "assembled": {
+        "input.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+          "hex": "070010"
+        },
+        "formatted.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+          "hex": "070010"
+        }
+      }
+    },
+    {
+      "name": "cheap_context",
+      "format": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident(\"anchor\"):.byte 7\n@near:\n        .byte 8\n        .word @near\n",
+        "stderr": "formatted input.s -> stdout\n"
+      },
+      "again": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "formatted.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident(\"anchor\"):.byte 7\n@near:\n        .byte 8\n        .word @near\n",
+        "stderr": "formatted formatted.s -> stdout\n"
+      },
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "formatted.s",
+            "-o",
+            "formatted.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "formatted.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07080110",
+      "assembled": {
+        "input.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+          "hex": "07080110"
+        },
+        "formatted.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+          "hex": "07080110"
+        }
+      }
+    },
+    {
+      "name": "conditional_head",
+      "format": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident(\"mark\"):.if 1\n        .byte 7\n        .endif\n        .word mark\n",
+        "stderr": "formatted input.s -> stdout\n"
+      },
+      "again": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "formatted.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident(\"mark\"):.if 1\n        .byte 7\n        .endif\n        .word mark\n",
+        "stderr": "formatted formatted.s -> stdout\n"
+      },
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "formatted.s",
+            "-o",
+            "formatted.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "formatted.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070010",
+      "assembled": {
+        "input.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s:1: error: unsupported directive `.if`\n",
+          "hex": "70726576696f757320696d616765"
+        },
+        "formatted.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: formatted.s:1: error: unsupported directive `.if`\n",
+          "hex": "70726576696f757320696d616765"
+        }
+      }
+    },
+    {
+      "name": "inactive_head",
+      "format": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident(\"mark\"):.if 0\n        .byte 7\n        .endif\n        .byte .defined(mark)\n",
+        "stderr": "formatted input.s -> stdout\n"
+      },
+      "again": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "formatted.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident(\"mark\"):.if 0\n        .byte 7\n        .endif\n        .byte .defined(mark)\n",
+        "stderr": "formatted formatted.s -> stdout\n"
+      },
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "formatted.s",
+            "-o",
+            "formatted.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "formatted.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "01",
+      "assembled": {
+        "input.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s:1: error: unsupported directive `.if`\n",
+          "hex": "70726576696f757320696d616765"
+        },
+        "formatted.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: formatted.s:1: error: unsupported directive `.if`\n",
+          "hex": "70726576696f757320696d616765"
+        }
+      }
+    },
+    {
+      "name": "repeat_head",
+      "format": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident(\"mark\"):.repeat 2\n        .byte 7\n        .endrepeat\n        .word mark\n",
+        "stderr": "formatted input.s -> stdout\n"
+      },
+      "again": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "formatted.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident(\"mark\"):.repeat 2\n        .byte 7\n        .endrepeat\n        .word mark\n",
+        "stderr": "formatted formatted.s -> stdout\n"
+      },
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "formatted.s",
+            "-o",
+            "formatted.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "formatted.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07070010",
+      "assembled": {
+        "input.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s:1: error: unsupported directive `.repeat`\n",
+          "hex": "70726576696f757320696d616765"
+        },
+        "formatted.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: formatted.s:1: error: unsupported directive `.repeat`\n",
+          "hex": "70726576696f757320696d616765"
+        }
+      }
+    },
+    {
+      "name": "macro_definition_head",
+      "format": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident(\"mark\"):.macro emit\n        .byte 7\n        .endmacro\n        emit\n        .word mark\n",
+        "stderr": "formatted input.s -> stdout\n"
+      },
+      "again": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "formatted.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident(\"mark\"):.macro emit\n        .byte 7\n        .endmacro\n        emit\n        .word mark\n",
+        "stderr": "formatted formatted.s -> stdout\n"
+      },
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "formatted.s",
+            "-o",
+            "formatted.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "formatted.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070010",
+      "assembled": {
+        "input.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s:1: error: unsupported directive `.macro`\n",
+          "hex": "70726576696f757320696d616765"
+        },
+        "formatted.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: formatted.s:1: error: unsupported directive `.macro`\n",
+          "hex": "70726576696f757320696d616765"
+        }
+      }
+    },
+    {
+      "name": "macro_call_head",
+      "format": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .macro emit\n        .byte 7\n        .endmacro\n        .ident(\"mark\"):emit\n        .word mark\n",
+        "stderr": "formatted input.s -> stdout\n"
+      },
+      "again": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "formatted.s"
+        ],
+        "exit": 0,
+        "stdout": "        .macro emit\n        .byte 7\n        .endmacro\n        .ident(\"mark\"):emit\n        .word mark\n",
+        "stderr": "formatted formatted.s -> stdout\n"
+      },
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "formatted.s",
+            "-o",
+            "formatted.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "formatted.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070010",
+      "assembled": {
+        "input.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s:4: error: unknown instruction `EMIT`\n",
+          "hex": "70726576696f757320696d616765"
+        },
+        "formatted.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: formatted.s:4: error: unknown instruction `EMIT`\n",
+          "hex": "70726576696f757320696d616765"
+        }
+      }
+    },
+    {
+      "name": "macro_body_head",
+      "format": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .macro emit\n        .ident(\"mark\"):.byte 7\n        .endmacro\n        emit\n        .word mark\n",
+        "stderr": "formatted input.s -> stdout\n"
+      },
+      "again": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "formatted.s"
+        ],
+        "exit": 0,
+        "stdout": "        .macro emit\n        .ident(\"mark\"):.byte 7\n        .endmacro\n        emit\n        .word mark\n",
+        "stderr": "formatted formatted.s -> stdout\n"
+      },
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "formatted.s",
+            "-o",
+            "formatted.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "formatted.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070010",
+      "assembled": {
+        "input.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+          "hex": "070010"
+        },
+        "formatted.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+          "hex": "070010"
+        }
+      }
+    },
+    {
+      "name": "scope_directive_head",
+      "format": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident(\"mark\"):.scope outer\n        .byte 7\n        .endscope\n        .word mark\n",
+        "stderr": "formatted input.s -> stdout\n"
+      },
+      "again": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "formatted.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident(\"mark\"):.scope outer\n        .byte 7\n        .endscope\n        .word mark\n",
+        "stderr": "formatted formatted.s -> stdout\n"
+      },
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "formatted.s",
+            "-o",
+            "formatted.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "formatted.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070010",
+      "assembled": {
+        "input.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s:3: error: `.endscope` with no open `.scope`\n",
+          "hex": "70726576696f757320696d616765"
+        },
+        "formatted.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: formatted.s:3: error: `.endscope` with no open `.scope`\n",
+          "hex": "70726576696f757320696d616765"
+        }
+      }
+    },
+    {
+      "name": "static_scope_directive_head",
+      "format": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "mark:\n        .scope outer\n        .byte 7\n        .endscope\n        .word mark\n",
+        "stderr": "formatted input.s -> stdout\n"
+      },
+      "again": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "formatted.s"
+        ],
+        "exit": 0,
+        "stdout": "mark:\n        .scope outer\n        .byte 7\n        .endscope\n        .word mark\n",
+        "stderr": "formatted formatted.s -> stdout\n"
+      },
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "formatted.s",
+            "-o",
+            "formatted.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "formatted.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070010",
+      "assembled": {
+        "input.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s:3: error: `.endscope` with no open `.scope`\n",
+          "hex": "70726576696f757320696d616765"
+        },
+        "formatted.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+          "hex": "070010"
+        }
+      }
+    },
+    {
+      "name": "proc_directive_head",
+      "format": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident(\"mark\"):.proc outer\n        .byte 7\n        .endproc\n        .word mark\n",
+        "stderr": "formatted input.s -> stdout\n"
+      },
+      "again": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "formatted.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident(\"mark\"):.proc outer\n        .byte 7\n        .endproc\n        .word mark\n",
+        "stderr": "formatted formatted.s -> stdout\n"
+      },
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "formatted.s",
+            "-o",
+            "formatted.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "formatted.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070010",
+      "assembled": {
+        "input.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s:3: error: `.endproc` with no open `.proc`\n",
+          "hex": "70726576696f757320696d616765"
+        },
+        "formatted.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: formatted.s:3: error: `.endproc` with no open `.proc`\n",
+          "hex": "70726576696f757320696d616765"
+        }
+      }
+    },
+    {
+      "name": "static_conditional_head",
+      "format": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "mark:\n        .if 1\n        .byte 7\n        .endif\n        .word mark\n",
+        "stderr": "formatted input.s -> stdout\n"
+      },
+      "again": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "formatted.s"
+        ],
+        "exit": 0,
+        "stdout": "mark:\n        .if 1\n        .byte 7\n        .endif\n        .word mark\n",
+        "stderr": "formatted formatted.s -> stdout\n"
+      },
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "formatted.s",
+            "-o",
+            "formatted.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "formatted.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070010",
+      "assembled": {
+        "input.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+          "hex": "070010"
+        },
+        "formatted.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+          "hex": "070010"
+        }
+      }
+    },
+    {
+      "name": "static_repeat_head",
+      "format": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "mark:\n        .repeat 2\n        .byte 7\n        .endrepeat\n        .word mark\n",
+        "stderr": "formatted input.s -> stdout\n"
+      },
+      "again": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "formatted.s"
+        ],
+        "exit": 0,
+        "stdout": "mark:\n        .repeat 2\n        .byte 7\n        .endrepeat\n        .word mark\n",
+        "stderr": "formatted formatted.s -> stdout\n"
+      },
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "formatted.s",
+            "-o",
+            "formatted.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "formatted.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07070010",
+      "assembled": {
+        "input.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+          "hex": "07070010"
+        },
+        "formatted.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+          "hex": "07070010"
+        }
+      }
+    },
+    {
+      "name": "static_macro_definition_head",
+      "format": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "mark:\n        .macro emit\n        .byte 7\n        .endmacro\n        emit\n        .word mark\n",
+        "stderr": "formatted input.s -> stdout\n"
+      },
+      "again": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "formatted.s"
+        ],
+        "exit": 0,
+        "stdout": "mark:\n        .macro emit\n        .byte 7\n        .endmacro\n        emit\n        .word mark\n",
+        "stderr": "formatted formatted.s -> stdout\n"
+      },
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "formatted.s",
+            "-o",
+            "formatted.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "formatted.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070010",
+      "assembled": {
+        "input.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+          "hex": "070010"
+        },
+        "formatted.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+          "hex": "070010"
+        }
+      }
+    },
+    {
+      "name": "static_macro_call_head",
+      "format": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .macro emit\n        .byte 7\n        .endmacro\nmark:\n        emit\n        .word mark\n",
+        "stderr": "formatted input.s -> stdout\n"
+      },
+      "again": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "formatted.s"
+        ],
+        "exit": 0,
+        "stdout": "        .macro emit\n        .byte 7\n        .endmacro\nmark:\n        emit\n        .word mark\n",
+        "stderr": "formatted formatted.s -> stdout\n"
+      },
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "formatted.s",
+            "-o",
+            "formatted.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "formatted.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070010",
+      "assembled": {
+        "input.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+          "hex": "070010"
+        },
+        "formatted.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+          "hex": "070010"
+        }
+      }
+    },
+    {
+      "name": "static_proc_directive_head",
+      "format": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "mark:\n        .proc outer\n        .byte 7\n        .endproc\n        .word mark\n",
+        "stderr": "formatted input.s -> stdout\n"
+      },
+      "again": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "formatted.s"
+        ],
+        "exit": 0,
+        "stdout": "mark:\n        .proc outer\n        .byte 7\n        .endproc\n        .word mark\n",
+        "stderr": "formatted formatted.s -> stdout\n"
+      },
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "formatted.s",
+            "-o",
+            "formatted.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "formatted.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070010",
+      "assembled": {
+        "input.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s:3: error: `.endproc` with no open `.proc`\n",
+          "hex": "70726576696f757320696d616765"
+        },
+        "formatted.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+          "hex": "070010"
+        }
+      }
+    },
+    {
+      "name": "include_context",
+      "format": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .include \"child.inc\"\n        .word incmark\n",
+        "stderr": "formatted input.s -> stdout\n"
+      },
+      "again": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "formatted.s"
+        ],
+        "exit": 0,
+        "stdout": "        .include \"child.inc\"\n        .word incmark\n",
+        "stderr": "formatted formatted.s -> stdout\n"
+      },
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "formatted.s",
+            "-o",
+            "formatted.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "formatted.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070010",
+      "assembled": {
+        "input.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+          "hex": "070010"
+        },
+        "formatted.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+          "hex": "070010"
+        }
+      }
+    },
+    {
+      "name": "unread_missing_include",
+      "format": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .end\n        .include \"missing.inc\"\n        .ident(\"A\"):.byte 7\n",
+        "stderr": "formatted input.s -> stdout\n"
+      },
+      "again": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "formatted.s"
+        ],
+        "exit": 0,
+        "stdout": "        .end\n        .include \"missing.inc\"\n        .ident(\"A\"):.byte 7\n",
+        "stderr": "formatted formatted.s -> stdout\n"
+      },
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "formatted.s",
+            "-o",
+            "formatted.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "formatted.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "",
+      "assembled": {
+        "input.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 0 byte(s) -> out.bin\n",
+          "hex": ""
+        },
+        "formatted.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 0 byte(s) -> out.bin\n",
+          "hex": ""
+        }
+      }
+    },
+    {
+      "name": "missing_include",
+      "format": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .include \"missing.inc\"\n        .ident(\"A\"):.byte 7\n",
+        "stderr": "formatted input.s -> stdout\n"
+      },
+      "again": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "formatted.s"
+        ],
+        "exit": 0,
+        "stdout": "        .include \"missing.inc\"\n        .ident(\"A\"):.byte 7\n",
+        "stderr": "formatted formatted.s -> stdout\n"
+      },
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "formatted.s",
+            "-o",
+            "formatted.o"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "formatted.s(1): Error: Cannot open include file 'missing.inc': No such file or directory\n"
+        }
+      ],
+      "native_hex": null,
+      "assembled": {
+        "input.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s:1:10: error: cannot load `missing.inc` (requested from input.s): file not found\n",
+          "hex": "70726576696f757320696d616765"
+        },
+        "formatted.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: formatted.s:1:18: error: cannot load `missing.inc` (requested from formatted.s): file not found\n",
+          "hex": "70726576696f757320696d616765"
+        }
+      }
+    },
+    {
+      "name": "invalid_numeric_argument",
+      "format": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident(7):.byte 7\n",
+        "stderr": "formatted input.s -> stdout\n"
+      },
+      "again": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "formatted.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident(7):.byte 7\n",
+        "stderr": "formatted formatted.s -> stdout\n"
+      },
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "formatted.s",
+            "-o",
+            "formatted.o"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "formatted.s(1): Error: String constant expected\n"
+        }
+      ],
+      "native_hex": null,
+      "assembled": {
+        "input.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s:1: error: `.ident` takes a string here, and `7` is not one\n",
+          "hex": "70726576696f757320696d616765"
+        },
+        "formatted.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: formatted.s:1: error: `.ident` takes a string here, and `7` is not one\n",
+          "hex": "70726576696f757320696d616765"
+        }
+      }
+    },
+    {
+      "name": "invalid_unknown_argument",
+      "format": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident(UNKNOWN):.byte 7\n",
+        "stderr": "formatted input.s -> stdout\n"
+      },
+      "again": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "formatted.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident(UNKNOWN):.byte 7\n",
+        "stderr": "formatted formatted.s -> stdout\n"
+      },
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "formatted.s",
+            "-o",
+            "formatted.o"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "formatted.s(1): Error: String constant expected\n"
+        }
+      ],
+      "native_hex": null,
+      "assembled": {
+        "input.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s:1: error: `.ident` takes a string here, and `UNKNOWN` is not one\n",
+          "hex": "70726576696f757320696d616765"
+        },
+        "formatted.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: formatted.s:1: error: `.ident` takes a string here, and `UNKNOWN` is not one\n",
+          "hex": "70726576696f757320696d616765"
+        }
+      }
+    },
+    {
+      "name": "invalid_generated_name",
+      "format": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident(\"bad;name\"):.byte 7\n",
+        "stderr": "formatted input.s -> stdout\n"
+      },
+      "again": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "formatted.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident(\"bad;name\"):.byte 7\n",
+        "stderr": "formatted formatted.s -> stdout\n"
+      },
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "formatted.s",
+            "-o",
+            "formatted.o"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "formatted.s(1): Error: Argument of .IDENT is not a valid identifier\n"
+        }
+      ],
+      "native_hex": null,
+      "assembled": {
+        "input.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s:1: error: unknown instruction `BAD`\n",
+          "hex": "70726576696f757320696d616765"
+        },
+        "formatted.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: formatted.s:1: error: unknown instruction `BAD`\n",
+          "hex": "70726576696f757320696d616765"
+        }
+      }
+    },
+    {
+      "name": "invalid_format_argument",
+      "format": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident(.sprintf(\"%bad\",0)):.byte 7\n",
+        "stderr": "formatted input.s -> stdout\n"
+      },
+      "again": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "formatted.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident(.sprintf(\"%bad\",0)):.byte 7\n",
+        "stderr": "formatted formatted.s -> stdout\n"
+      },
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "formatted.s",
+            "-o",
+            "formatted.o"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "formatted.s(1): Error: Invalid format string\nformatted.s(1): Error: ')' expected\nformatted.s(1): Error: String constant expected\n"
+        }
+      ],
+      "native_hex": null,
+      "assembled": {
+        "input.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s:1: error: `.sprintf` cannot read the format spec for argument 1: ca65 takes `d`, `i`, `u`, `x`, `X`, `o`, `c` and `s`, and no others\n",
+          "hex": "70726576696f757320696d616765"
+        },
+        "formatted.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: formatted.s:1: error: `.sprintf` cannot read the format spec for argument 1: ca65 takes `d`, `i`, `u`, `x`, `X`, `o`, `c` and `s`, and no others\n",
+          "hex": "70726576696f757320696d616765"
+        }
+      }
+    },
+    {
+      "name": "unclosed_argument",
+      "format": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident(\"mark\":.byte 7\n",
+        "stderr": "formatted input.s -> stdout\n"
+      },
+      "again": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "formatted.s"
+        ],
+        "exit": 0,
+        "stdout": "        .ident(\"mark\":.byte 7\n",
+        "stderr": "formatted formatted.s -> stdout\n"
+      },
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "formatted.s",
+            "-o",
+            "formatted.o"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "formatted.s(1): Error: ')' expected\n"
+        }
+      ],
+      "native_hex": null,
+      "assembled": {
+        "input.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s:1: error: `.ident(\"mark\":.byte` is not a directive ca65 has\n",
+          "hex": "70726576696f757320696d616765"
+        },
+        "formatted.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: formatted.s:1: error: `.ident(\"mark\":.byte` is not a directive ca65 has\n",
+          "hex": "70726576696f757320696d616765"
+        }
+      }
+    },
+    {
+      "name": "static_baseline",
+      "format": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "mark:\n        .byte 7\n        .word mark\n",
+        "stderr": "formatted input.s -> stdout\n"
+      },
+      "again": {
+        "argv": [
+          "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "formatted.s"
+        ],
+        "exit": 0,
+        "stdout": "mark:\n        .byte 7\n        .word mark\n",
+        "stderr": "formatted formatted.s -> stdout\n"
+      },
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "formatted.s",
+            "-o",
+            "formatted.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "formatted.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070010",
+      "assembled": {
+        "input.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+          "hex": "070010"
+        },
+        "formatted.s": {
+          "argv": [
+            "/private/tmp/asm198x-canonical-end-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+          "hex": "070010"
+        }
+      }
+    }
+  ]
+}
