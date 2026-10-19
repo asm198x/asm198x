@@ -902,7 +902,7 @@ fn read_macro_label(
     };
     if let Some((label, _)) = super::split_label_head(source.trim()) {
         let name = label.trim_end_matches(':');
-        if sw.reader.reserved_head_label(name, generated.is_some()) {
+        if sw.reader.instruction_name(&name.to_ascii_uppercase()) {
             return Err(AsmError::at(
                 node.span.clone(),
                 format!("reserved label name `{name}`"),

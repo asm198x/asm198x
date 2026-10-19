@@ -182,46 +182,6 @@
       }
     },
     {
-      "name": "6502_A_False_definition",
-      "source": ".setcpu \"6502\"\nA:.macro emit arg\n.byte 7\n.endmacro\nemit 9\n.word .ident(\"A\")\n",
-      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
-      "native": [
-        {
-          "argv": [
-            "/opt/homebrew/bin/ca65",
-            "input.s",
-            "-o",
-            "input.o"
-          ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-rp721erg",
-          "exit": 1,
-          "stdout": "",
-          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: Unexpected '.ENDMACRO'\ninput.s(5): Error: ':' expected\ninput.s(5): Error: Unexpected trailing garbage characters\n"
-        }
-      ],
-      "native_hex": null
-    },
-    {
-      "name": "6502_A_False_call",
-      "source": ".setcpu \"6502\"\n.macro emit arg\n.byte 7\n.endmacro\nA:emit 9\n.word .ident(\"A\")\n",
-      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
-      "native": [
-        {
-          "argv": [
-            "/opt/homebrew/bin/ca65",
-            "input.s",
-            "-o",
-            "input.o"
-          ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-rp721erg",
-          "exit": 1,
-          "stdout": "",
-          "stderr": "input.s(5): Error: Unexpected trailing garbage characters\n"
-        }
-      ],
-      "native_hex": null
-    },
-    {
       "name": "6502_A_True_definition",
       "source": ".setcpu \"6502\"\n.ident(\"A\"):.macro emit arg\n.byte 7\n.endmacro\nemit 9\n.word .ident(\"A\")\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
@@ -294,46 +254,6 @@
       "symbol_values": {
         "A": 4096
       }
-    },
-    {
-      "name": "6502_X_False_definition",
-      "source": ".setcpu \"6502\"\nX:.macro emit arg\n.byte 7\n.endmacro\nemit 9\n.word .ident(\"X\")\n",
-      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
-      "native": [
-        {
-          "argv": [
-            "/opt/homebrew/bin/ca65",
-            "input.s",
-            "-o",
-            "input.o"
-          ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-rp721erg",
-          "exit": 1,
-          "stdout": "",
-          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: Unexpected '.ENDMACRO'\ninput.s(5): Error: ':' expected\ninput.s(5): Error: Unexpected trailing garbage characters\n"
-        }
-      ],
-      "native_hex": null
-    },
-    {
-      "name": "6502_X_False_call",
-      "source": ".setcpu \"6502\"\n.macro emit arg\n.byte 7\n.endmacro\nX:emit 9\n.word .ident(\"X\")\n",
-      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
-      "native": [
-        {
-          "argv": [
-            "/opt/homebrew/bin/ca65",
-            "input.s",
-            "-o",
-            "input.o"
-          ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-rp721erg",
-          "exit": 1,
-          "stdout": "",
-          "stderr": "input.s(5): Error: Unexpected trailing garbage characters\n"
-        }
-      ],
-      "native_hex": null
     },
     {
       "name": "6502_X_True_definition",
@@ -410,46 +330,6 @@
       }
     },
     {
-      "name": "6502_Y_False_definition",
-      "source": ".setcpu \"6502\"\nY:.macro emit arg\n.byte 7\n.endmacro\nemit 9\n.word .ident(\"Y\")\n",
-      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
-      "native": [
-        {
-          "argv": [
-            "/opt/homebrew/bin/ca65",
-            "input.s",
-            "-o",
-            "input.o"
-          ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-rp721erg",
-          "exit": 1,
-          "stdout": "",
-          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: Unexpected '.ENDMACRO'\ninput.s(5): Error: ':' expected\ninput.s(5): Error: Unexpected trailing garbage characters\n"
-        }
-      ],
-      "native_hex": null
-    },
-    {
-      "name": "6502_Y_False_call",
-      "source": ".setcpu \"6502\"\n.macro emit arg\n.byte 7\n.endmacro\nY:emit 9\n.word .ident(\"Y\")\n",
-      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
-      "native": [
-        {
-          "argv": [
-            "/opt/homebrew/bin/ca65",
-            "input.s",
-            "-o",
-            "input.o"
-          ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-rp721erg",
-          "exit": 1,
-          "stdout": "",
-          "stderr": "input.s(5): Error: Unexpected trailing garbage characters\n"
-        }
-      ],
-      "native_hex": null
-    },
-    {
       "name": "6502_Y_True_definition",
       "source": ".setcpu \"6502\"\n.ident(\"Y\"):.macro emit arg\n.byte 7\n.endmacro\nemit 9\n.word .ident(\"Y\")\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
@@ -524,46 +404,6 @@
       }
     },
     {
-      "name": "6502_F_False_definition",
-      "source": ".setcpu \"6502\"\nF:.macro emit arg\n.byte 7\n.endmacro\nemit 9\n.word .ident(\"F\")\n",
-      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
-      "native": [
-        {
-          "argv": [
-            "/opt/homebrew/bin/ca65",
-            "input.s",
-            "-o",
-            "input.o"
-          ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-rp721erg",
-          "exit": 1,
-          "stdout": "",
-          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: Unexpected '.ENDMACRO'\ninput.s(5): Error: ':' expected\ninput.s(5): Error: Unexpected trailing garbage characters\n"
-        }
-      ],
-      "native_hex": null
-    },
-    {
-      "name": "6502_F_False_call",
-      "source": ".setcpu \"6502\"\n.macro emit arg\n.byte 7\n.endmacro\nF:emit 9\n.word .ident(\"F\")\n",
-      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
-      "native": [
-        {
-          "argv": [
-            "/opt/homebrew/bin/ca65",
-            "input.s",
-            "-o",
-            "input.o"
-          ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-rp721erg",
-          "exit": 1,
-          "stdout": "",
-          "stderr": "input.s(5): Error: Unexpected trailing garbage characters\n"
-        }
-      ],
-      "native_hex": null
-    },
-    {
       "name": "6502_F_True_definition",
       "source": ".setcpu \"6502\"\n.ident(\"F\"):.macro emit arg\n.byte 7\n.endmacro\nemit 9\n.word .ident(\"F\")\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
@@ -636,46 +476,6 @@
       "symbol_values": {
         "F": 4096
       }
-    },
-    {
-      "name": "6502_Z_False_definition",
-      "source": ".setcpu \"6502\"\nZ:.macro emit arg\n.byte 7\n.endmacro\nemit 9\n.word .ident(\"Z\")\n",
-      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
-      "native": [
-        {
-          "argv": [
-            "/opt/homebrew/bin/ca65",
-            "input.s",
-            "-o",
-            "input.o"
-          ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-rp721erg",
-          "exit": 1,
-          "stdout": "",
-          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: Unexpected '.ENDMACRO'\ninput.s(5): Error: ':' expected\ninput.s(5): Error: Unexpected trailing garbage characters\n"
-        }
-      ],
-      "native_hex": null
-    },
-    {
-      "name": "6502_Z_False_call",
-      "source": ".setcpu \"6502\"\n.macro emit arg\n.byte 7\n.endmacro\nZ:emit 9\n.word .ident(\"Z\")\n",
-      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
-      "native": [
-        {
-          "argv": [
-            "/opt/homebrew/bin/ca65",
-            "input.s",
-            "-o",
-            "input.o"
-          ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-rp721erg",
-          "exit": 1,
-          "stdout": "",
-          "stderr": "input.s(5): Error: Unexpected trailing garbage characters\n"
-        }
-      ],
-      "native_hex": null
     },
     {
       "name": "6502_Z_True_definition",
@@ -1276,46 +1076,6 @@
       }
     },
     {
-      "name": "4510_A_False_definition",
-      "source": ".setcpu \"4510\"\nA:.macro emit arg\n.byte 7\n.endmacro\nemit 9\n.word .ident(\"A\")\n",
-      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
-      "native": [
-        {
-          "argv": [
-            "/opt/homebrew/bin/ca65",
-            "input.s",
-            "-o",
-            "input.o"
-          ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-rp721erg",
-          "exit": 1,
-          "stdout": "",
-          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: Unexpected '.ENDMACRO'\ninput.s(5): Error: ':' expected\ninput.s(5): Error: Unexpected trailing garbage characters\n"
-        }
-      ],
-      "native_hex": null
-    },
-    {
-      "name": "4510_A_False_call",
-      "source": ".setcpu \"4510\"\n.macro emit arg\n.byte 7\n.endmacro\nA:emit 9\n.word .ident(\"A\")\n",
-      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
-      "native": [
-        {
-          "argv": [
-            "/opt/homebrew/bin/ca65",
-            "input.s",
-            "-o",
-            "input.o"
-          ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-rp721erg",
-          "exit": 1,
-          "stdout": "",
-          "stderr": "input.s(5): Error: Unexpected trailing garbage characters\n"
-        }
-      ],
-      "native_hex": null
-    },
-    {
       "name": "4510_A_True_definition",
       "source": ".setcpu \"4510\"\n.ident(\"A\"):.macro emit arg\n.byte 7\n.endmacro\nemit 9\n.word .ident(\"A\")\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
@@ -1388,46 +1148,6 @@
       "symbol_values": {
         "A": 4096
       }
-    },
-    {
-      "name": "4510_X_False_definition",
-      "source": ".setcpu \"4510\"\nX:.macro emit arg\n.byte 7\n.endmacro\nemit 9\n.word .ident(\"X\")\n",
-      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
-      "native": [
-        {
-          "argv": [
-            "/opt/homebrew/bin/ca65",
-            "input.s",
-            "-o",
-            "input.o"
-          ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-rp721erg",
-          "exit": 1,
-          "stdout": "",
-          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: Unexpected '.ENDMACRO'\ninput.s(5): Error: ':' expected\ninput.s(5): Error: Unexpected trailing garbage characters\n"
-        }
-      ],
-      "native_hex": null
-    },
-    {
-      "name": "4510_X_False_call",
-      "source": ".setcpu \"4510\"\n.macro emit arg\n.byte 7\n.endmacro\nX:emit 9\n.word .ident(\"X\")\n",
-      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
-      "native": [
-        {
-          "argv": [
-            "/opt/homebrew/bin/ca65",
-            "input.s",
-            "-o",
-            "input.o"
-          ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-rp721erg",
-          "exit": 1,
-          "stdout": "",
-          "stderr": "input.s(5): Error: Unexpected trailing garbage characters\n"
-        }
-      ],
-      "native_hex": null
     },
     {
       "name": "4510_X_True_definition",
@@ -1504,46 +1224,6 @@
       }
     },
     {
-      "name": "4510_Y_False_definition",
-      "source": ".setcpu \"4510\"\nY:.macro emit arg\n.byte 7\n.endmacro\nemit 9\n.word .ident(\"Y\")\n",
-      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
-      "native": [
-        {
-          "argv": [
-            "/opt/homebrew/bin/ca65",
-            "input.s",
-            "-o",
-            "input.o"
-          ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-rp721erg",
-          "exit": 1,
-          "stdout": "",
-          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: Unexpected '.ENDMACRO'\ninput.s(5): Error: ':' expected\ninput.s(5): Error: Unexpected trailing garbage characters\n"
-        }
-      ],
-      "native_hex": null
-    },
-    {
-      "name": "4510_Y_False_call",
-      "source": ".setcpu \"4510\"\n.macro emit arg\n.byte 7\n.endmacro\nY:emit 9\n.word .ident(\"Y\")\n",
-      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
-      "native": [
-        {
-          "argv": [
-            "/opt/homebrew/bin/ca65",
-            "input.s",
-            "-o",
-            "input.o"
-          ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-rp721erg",
-          "exit": 1,
-          "stdout": "",
-          "stderr": "input.s(5): Error: Unexpected trailing garbage characters\n"
-        }
-      ],
-      "native_hex": null
-    },
-    {
       "name": "4510_Y_True_definition",
       "source": ".setcpu \"4510\"\n.ident(\"Y\"):.macro emit arg\n.byte 7\n.endmacro\nemit 9\n.word .ident(\"Y\")\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
@@ -1616,46 +1296,6 @@
       "symbol_values": {
         "Y": 4096
       }
-    },
-    {
-      "name": "4510_F_False_definition",
-      "source": ".setcpu \"4510\"\nF:.macro emit arg\n.byte 7\n.endmacro\nemit 9\n.word .ident(\"F\")\n",
-      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
-      "native": [
-        {
-          "argv": [
-            "/opt/homebrew/bin/ca65",
-            "input.s",
-            "-o",
-            "input.o"
-          ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-rp721erg",
-          "exit": 1,
-          "stdout": "",
-          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: Unexpected '.ENDMACRO'\ninput.s(5): Error: ':' expected\ninput.s(5): Error: Unexpected trailing garbage characters\n"
-        }
-      ],
-      "native_hex": null
-    },
-    {
-      "name": "4510_F_False_call",
-      "source": ".setcpu \"4510\"\n.macro emit arg\n.byte 7\n.endmacro\nF:emit 9\n.word .ident(\"F\")\n",
-      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
-      "native": [
-        {
-          "argv": [
-            "/opt/homebrew/bin/ca65",
-            "input.s",
-            "-o",
-            "input.o"
-          ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-rp721erg",
-          "exit": 1,
-          "stdout": "",
-          "stderr": "input.s(5): Error: Unexpected trailing garbage characters\n"
-        }
-      ],
-      "native_hex": null
     },
     {
       "name": "4510_F_True_definition",
@@ -1732,46 +1372,6 @@
       }
     },
     {
-      "name": "4510_Z_False_definition",
-      "source": ".setcpu \"4510\"\nZ:.macro emit arg\n.byte 7\n.endmacro\nemit 9\n.word .ident(\"Z\")\n",
-      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
-      "native": [
-        {
-          "argv": [
-            "/opt/homebrew/bin/ca65",
-            "input.s",
-            "-o",
-            "input.o"
-          ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-rp721erg",
-          "exit": 1,
-          "stdout": "",
-          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: Unexpected '.ENDMACRO'\ninput.s(5): Error: ':' expected\ninput.s(5): Error: Unexpected trailing garbage characters\n"
-        }
-      ],
-      "native_hex": null
-    },
-    {
-      "name": "4510_Z_False_call",
-      "source": ".setcpu \"4510\"\n.macro emit arg\n.byte 7\n.endmacro\nZ:emit 9\n.word .ident(\"Z\")\n",
-      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
-      "native": [
-        {
-          "argv": [
-            "/opt/homebrew/bin/ca65",
-            "input.s",
-            "-o",
-            "input.o"
-          ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-rp721erg",
-          "exit": 1,
-          "stdout": "",
-          "stderr": "input.s(5): Error: Unexpected trailing garbage characters\n"
-        }
-      ],
-      "native_hex": null
-    },
-    {
       "name": "4510_Z_True_definition",
       "source": ".setcpu \"4510\"\n.ident(\"Z\"):.macro emit arg\n.byte 7\n.endmacro\nemit 9\n.word .ident(\"Z\")\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
@@ -1846,46 +1446,6 @@
       }
     },
     {
-      "name": "4510_S_False_definition",
-      "source": ".setcpu \"4510\"\nS:.macro emit arg\n.byte 7\n.endmacro\nemit 9\n.word .ident(\"S\")\n",
-      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
-      "native": [
-        {
-          "argv": [
-            "/opt/homebrew/bin/ca65",
-            "input.s",
-            "-o",
-            "input.o"
-          ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-rp721erg",
-          "exit": 1,
-          "stdout": "",
-          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: Unexpected '.ENDMACRO'\ninput.s(5): Error: ':' expected\ninput.s(5): Error: Unexpected trailing garbage characters\n"
-        }
-      ],
-      "native_hex": null
-    },
-    {
-      "name": "4510_S_False_call",
-      "source": ".setcpu \"4510\"\n.macro emit arg\n.byte 7\n.endmacro\nS:emit 9\n.word .ident(\"S\")\n",
-      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
-      "native": [
-        {
-          "argv": [
-            "/opt/homebrew/bin/ca65",
-            "input.s",
-            "-o",
-            "input.o"
-          ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-rp721erg",
-          "exit": 1,
-          "stdout": "",
-          "stderr": "input.s(5): Error: Unexpected trailing garbage characters\n"
-        }
-      ],
-      "native_hex": null
-    },
-    {
       "name": "4510_S_True_definition",
       "source": ".setcpu \"4510\"\n.ident(\"S\"):.macro emit arg\n.byte 7\n.endmacro\nemit 9\n.word .ident(\"S\")\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
@@ -1958,46 +1518,6 @@
       "symbol_values": {
         "S": 4096
       }
-    },
-    {
-      "name": "4510_SP_False_definition",
-      "source": ".setcpu \"4510\"\nSP:.macro emit arg\n.byte 7\n.endmacro\nemit 9\n.word .ident(\"SP\")\n",
-      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
-      "native": [
-        {
-          "argv": [
-            "/opt/homebrew/bin/ca65",
-            "input.s",
-            "-o",
-            "input.o"
-          ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-rp721erg",
-          "exit": 1,
-          "stdout": "",
-          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: Unexpected '.ENDMACRO'\ninput.s(5): Error: ':' expected\ninput.s(5): Error: Unexpected trailing garbage characters\n"
-        }
-      ],
-      "native_hex": null
-    },
-    {
-      "name": "4510_SP_False_call",
-      "source": ".setcpu \"4510\"\n.macro emit arg\n.byte 7\n.endmacro\nSP:emit 9\n.word .ident(\"SP\")\n",
-      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
-      "native": [
-        {
-          "argv": [
-            "/opt/homebrew/bin/ca65",
-            "input.s",
-            "-o",
-            "input.o"
-          ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-rp721erg",
-          "exit": 1,
-          "stdout": "",
-          "stderr": "input.s(5): Error: Unexpected trailing garbage characters\n"
-        }
-      ],
-      "native_hex": null
     },
     {
       "name": "4510_SP_True_definition",
@@ -3477,6 +2997,226 @@
         }
       ],
       "native_hex": null
+    },
+    {
+      "name": "cpu_6502_4510_S_attached_captured_call",
+      "source": ".setcpu \"6502\"\n.macro emit\n.byte 7\n.endmacro\n.macro outer\nS:emit\n.endmacro\n.setcpu \"4510\"\nouter\n.word .ident(\"S\")\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-0uupjk89",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-0uupjk89",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070010",
+      "symbol_values": {
+        "S": 4096
+      }
+    },
+    {
+      "name": "cpu_6502_4510_SP_attached_captured_call",
+      "source": ".setcpu \"6502\"\n.macro emit\n.byte 7\n.endmacro\n.macro outer\nSP:emit\n.endmacro\n.setcpu \"4510\"\nouter\n.word .ident(\"SP\")\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-0uupjk89",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-0uupjk89",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070010",
+      "symbol_values": {
+        "SP": 4096
+      }
+    }
+  ],
+  "excluded_cases": [
+    {
+      "name": "4510_A_False_call",
+      "issue": 853,
+      "native_exit": 1,
+      "predecessor_exit": 0
+    },
+    {
+      "name": "4510_A_False_definition",
+      "issue": 853,
+      "native_exit": 1,
+      "predecessor_exit": 0
+    },
+    {
+      "name": "4510_F_False_call",
+      "issue": 853,
+      "native_exit": 1,
+      "predecessor_exit": 0
+    },
+    {
+      "name": "4510_F_False_definition",
+      "issue": 853,
+      "native_exit": 1,
+      "predecessor_exit": 0
+    },
+    {
+      "name": "4510_SP_False_call",
+      "issue": 853,
+      "native_exit": 1,
+      "predecessor_exit": 0
+    },
+    {
+      "name": "4510_SP_False_definition",
+      "issue": 853,
+      "native_exit": 1,
+      "predecessor_exit": 0
+    },
+    {
+      "name": "4510_S_False_call",
+      "issue": 853,
+      "native_exit": 1,
+      "predecessor_exit": 0
+    },
+    {
+      "name": "4510_S_False_definition",
+      "issue": 853,
+      "native_exit": 1,
+      "predecessor_exit": 0
+    },
+    {
+      "name": "4510_X_False_call",
+      "issue": 853,
+      "native_exit": 1,
+      "predecessor_exit": 0
+    },
+    {
+      "name": "4510_X_False_definition",
+      "issue": 853,
+      "native_exit": 1,
+      "predecessor_exit": 0
+    },
+    {
+      "name": "4510_Y_False_call",
+      "issue": 853,
+      "native_exit": 1,
+      "predecessor_exit": 0
+    },
+    {
+      "name": "4510_Y_False_definition",
+      "issue": 853,
+      "native_exit": 1,
+      "predecessor_exit": 0
+    },
+    {
+      "name": "4510_Z_False_call",
+      "issue": 853,
+      "native_exit": 1,
+      "predecessor_exit": 0
+    },
+    {
+      "name": "4510_Z_False_definition",
+      "issue": 853,
+      "native_exit": 1,
+      "predecessor_exit": 0
+    },
+    {
+      "name": "6502_A_False_call",
+      "issue": 853,
+      "native_exit": 1,
+      "predecessor_exit": 0
+    },
+    {
+      "name": "6502_A_False_definition",
+      "issue": 853,
+      "native_exit": 1,
+      "predecessor_exit": 0
+    },
+    {
+      "name": "6502_F_False_call",
+      "issue": 853,
+      "native_exit": 1,
+      "predecessor_exit": 0
+    },
+    {
+      "name": "6502_F_False_definition",
+      "issue": 853,
+      "native_exit": 1,
+      "predecessor_exit": 0
+    },
+    {
+      "name": "6502_X_False_call",
+      "issue": 853,
+      "native_exit": 1,
+      "predecessor_exit": 0
+    },
+    {
+      "name": "6502_X_False_definition",
+      "issue": 853,
+      "native_exit": 1,
+      "predecessor_exit": 0
+    },
+    {
+      "name": "6502_Y_False_call",
+      "issue": 853,
+      "native_exit": 1,
+      "predecessor_exit": 0
+    },
+    {
+      "name": "6502_Y_False_definition",
+      "issue": 853,
+      "native_exit": 1,
+      "predecessor_exit": 0
+    },
+    {
+      "name": "6502_Z_False_call",
+      "issue": 853,
+      "native_exit": 1,
+      "predecessor_exit": 0
+    },
+    {
+      "name": "6502_Z_False_definition",
+      "issue": 853,
+      "native_exit": 1,
+      "predecessor_exit": 0
     }
   ]
 }
