@@ -15,7 +15,7 @@
    actual preceding/current archives and both corruption controls, full Rust
    with Lua, Clippy/fmt, Node, Ruff and docs.
 5. Push the source, retain a clean unchanged 4510 replay, and qualify the exact
-   final head on all five hosts. Merge only after #788 lands and all checks,
+   final head on all five hosts. Rebase-merge only after #788 lands and all checks,
    receipts and ten corruption controls pass. Retain commits and clean owned
    worktrees, caches and processes. No dependency or public-contract change.
 
