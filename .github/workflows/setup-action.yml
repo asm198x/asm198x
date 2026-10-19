@@ -25,10 +25,15 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: setup-action-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   install:
     name: Install release (${{ matrix.runner }})
     runs-on: ${{ matrix.runner }}
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:

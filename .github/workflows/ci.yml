@@ -22,6 +22,7 @@ jobs:
   fmt:
     name: Format
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
@@ -48,6 +49,7 @@ jobs:
   clippy:
     name: Clippy
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
@@ -88,6 +90,7 @@ jobs:
   lua:
     name: Lua (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
@@ -115,6 +118,7 @@ jobs:
   web:
     name: Web shell (wasm-bindgen)
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
@@ -171,6 +175,7 @@ jobs:
   coverage:
     name: Coverage
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: [fmt, clippy]
     env:
       # Anti-regression floor (current total ~62% line). Ratchet up as the
@@ -258,6 +263,7 @@ jobs:
   docs:
     name: Docs
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: [fmt, clippy]
     steps:
       - name: Check out repository
@@ -345,6 +351,7 @@ jobs:
   replay:
     name: Replay
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: [fmt, clippy]
     steps:
       - name: Check out repository
@@ -432,6 +439,7 @@ jobs:
   build:
     name: Build (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
     needs: [fmt, clippy]
     strategy:
       fail-fast: false
