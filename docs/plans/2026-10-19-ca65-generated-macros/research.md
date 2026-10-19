@@ -19,3 +19,17 @@ bodies, anonymous/cheap heads, skipped malformed text, zero repeats, iteration
 names, scope/include/macro contexts, text arguments and numeric lexical errors.
 Native refuses the nested-definition captures in this matrix; no support is
 inferred from skipped or unused text. Existing capture/expansion seams remain.
+
+The first implementation is withdrawn, not qualified. Two boundary failures
+exposed the same underlying assumption: native .ident accepts whitespace before
+its opening parenthesis, but the text folder does not consume it. An authored
+colon gap also survived folding. The selected macro-header recogniser could then
+strip an unevaluated head and register a definition without binding its label;
+the formatter's separate label line failed ordinary assembly.
+
+Retain the production patch, candidate test/fixture and all failing logs here.
+Production and harness were restored to the last good clean scope producer.
+The next slice must probe/fix the text-function token boundary independently,
+then return to macro heads with explicit address-symbol assertions for every
+spaced/concatenated/sprintf head. Do not treat successful bytes from a body that
+never references its head label as evidence that the label was bound.
