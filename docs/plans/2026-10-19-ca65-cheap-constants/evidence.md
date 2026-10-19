@@ -39,7 +39,7 @@ its verifier checks identities/content/completion and rejects a changed byte.
 The full ecosystem ledger remains untouched. Rebase preserved identical tested
 crate/script/workflow/lockfile trees.
 
-Scope entry/exit discrepancies affecting existing cheap labels too remain
-separate as #778, with native/CLI evidence in deferred-scope-native.json and
-the fixture's deferred_cases. This slice does not claim those namespace
-boundaries fixed. Reserved names and attached labels continue as #775/#781.
+The scope audit held this staged result before merge. The completed #778/#784
+correction and its final local verification are in scope-evidence.md; those
+results supersede the staged counts and scope deferral above. Reserved names
+and attached labels continue as #775/#781.

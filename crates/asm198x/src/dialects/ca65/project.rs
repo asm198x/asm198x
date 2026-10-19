@@ -41,7 +41,9 @@ pub(super) fn parsed_from_program(
         stmts: Vec::new(),
         label_seg: BTreeMap::new(),
         consts: BTreeMap::new(),
+        const_names: BTreeMap::new(),
         equ_definitions: BTreeSet::new(),
+        zero_page_names: BTreeSet::new(),
         referenced: BTreeSet::new(),
         loop_vars: Vec::new(),
         token_depth: 0,
@@ -59,6 +61,7 @@ pub(super) fn parsed_from_program(
         stmts: st.stmts,
         label_seg: st.label_seg,
         consts: st.consts,
+        const_names: st.const_names,
     })
 }
 
@@ -129,9 +132,12 @@ struct Projection {
     stmts: Vec<Stmt>,
     label_seg: BTreeMap<String, String>,
     consts: BTreeMap<String, i64>,
+    const_names: BTreeMap<String, String>,
     /// Immutable declarations, even when their RHS cannot fold yet. Populated
     /// only by selected nodes, so alternate branches do not redefine a name.
     equ_definitions: BTreeSet<String>,
+    /// Source-time address-size declarations; exports alone do not hint.
+    zero_page_names: BTreeSet<String>,
     /// Every name the statements *above this point* have mentioned, which is
     /// what `.ref`/`.referenced` and `.ifref`/`.ifnref` ask about. Dead
     /// branches never reach here, so a use inside one does not count — probed
@@ -389,7 +395,7 @@ fn project_nodes(
             }
             _ => {}
         }
-        project_one(node, st)?;
+        project_selected(node, st, &mut sw.reader)?;
     }
     Ok(())
 }
@@ -441,6 +447,7 @@ fn read_block_head(
             line,
             file,
             expansion_frames: node.span.expansion_frames.clone(),
+            bound_insn: None,
             seg: st.seg.clone(),
             label: Some(symbol.qualified.clone()),
             kind: Kind::Empty,
@@ -538,7 +545,7 @@ fn sweep_line(
         if let Some(sp) = n.operand_span.as_mut() {
             sp.expansion_frames.clone_from(&node.span.expansion_frames);
         }
-        project_one(n, st)?;
+        project_selected(n, st, &mut sw.reader)?;
     }
     let Some(mut d) = walked else {
         return Ok(());
@@ -552,7 +559,7 @@ fn sweep_line(
     if sw.includes.is_none() {
         // Single-source: the target is never opened (KTD1); the projection's
         // Include/Incbin arms carry the pointer to the multi-file entry.
-        return project_one(&ca65_flat::unresolved_node(d), st);
+        return project_selected(&ca65_flat::unresolved_node(d), st, &mut sw.reader);
     }
     resolve_at_sweep(d, st, sw)
 }
@@ -586,6 +593,7 @@ fn resolve_at_sweep(
                     line: span.line as usize,
                     file: span.file,
                     expansion_frames: span.expansion_frames.clone(),
+                    bound_insn: None,
                     seg: st.seg.clone(),
                     label: Some(symbol.qualified),
                     kind: Kind::Empty,
@@ -635,7 +643,7 @@ fn resolve_at_sweep(
                     &ca65_flat::CA65_SEMANTICS,
                 )?
             };
-            project_one(
+            project_selected(
                 &crate::ast::Node {
                     operand_span: d.operand_span,
                     label: d.label,
@@ -645,6 +653,7 @@ fn resolve_at_sweep(
                     trivia: d.trivia,
                 },
                 st,
+                &mut sw.reader,
             )
         }
     }
@@ -1075,6 +1084,43 @@ pub(super) fn map_kind_syms(k: &Kind, f: &dyn Fn(&str) -> Option<Expr>) -> Kind 
     }
 }
 
+/// Track physical bytes while the selected source is read. `.org` changes
+/// reported addresses, while alignment continues to measure segment offsets.
+fn project_selected(
+    node: &crate::ast::Node,
+    st: &mut Projection,
+    reader: &mut Walker,
+) -> Result<(), AsmError> {
+    let start = st.stmts.len();
+    project_one(node, st)?;
+    for stmt in &st.stmts[start..] {
+        let off = reader.source_offsets.entry(stmt.seg.clone()).or_default();
+        let size = match &stmt.kind {
+            Kind::Bytes(v) => v.len(),
+            Kind::Raw(v) => v.len(),
+            Kind::Words(v) | Kind::DBytes(v) => v.len() * 2,
+            Kind::DWords(v) => v.len() * 4,
+            Kind::Res(size, _) => *size,
+            Kind::Align(boundary, _) => super::link::alignment_padding(*boundary, *off),
+            Kind::BitBranch { form, .. } => form.len(),
+            Kind::Insn { .. } => stmt
+                .bound_insn
+                .as_ref()
+                .expect("selected instruction form")
+                .form
+                .len(),
+            _ => 0,
+        };
+        *off += size as u32;
+        if size != 0
+            && let Some(open) = reader.scopes.last_mut()
+        {
+            open.has_output = true;
+        }
+    }
+    Ok(())
+}
+
 /// Project one ordinary node — the body of the original projection loop.
 fn project_one(node: &crate::ast::Node, st: &mut Projection) -> Result<(), AsmError> {
     use crate::ast::{Item, Operand};
@@ -1101,6 +1147,10 @@ fn project_one(node: &crate::ast::Node, st: &mut Projection) -> Result<(), AsmEr
                     }
                     if let Ok(v) = fold_const(value, consts, line) {
                         consts.insert(sym.qualified.clone(), v);
+                        if sym.name.starts_with('@') {
+                            st.const_names
+                                .insert(sym.qualified.clone(), sym.name.clone());
+                        }
                     }
                 }
             }
@@ -1140,6 +1190,7 @@ fn project_one(node: &crate::ast::Node, st: &mut Projection) -> Result<(), AsmEr
                     line,
                     file,
                     expansion_frames: node.span.expansion_frames.clone(),
+                    bound_insn: None,
                     seg: seg.clone(),
                     label,
                     kind: Kind::Raw(payload.clone()),
@@ -1179,14 +1230,71 @@ fn project_one(node: &crate::ast::Node, st: &mut Projection) -> Result<(), AsmEr
                 {
                     consts.insert(name.clone(), v);
                 }
+                if let Kind::Visible {
+                    rule,
+                    zero_page: true,
+                    names,
+                    ..
+                } = &kind
+                    && *rule != super::VisRule::MustBeDefined
+                {
+                    st.zero_page_names.extend(names.iter().cloned());
+                }
                 let label = node.label.as_ref().map(|s| s.qualified.clone());
                 if let Some(l) = &label {
                     label_seg.insert(l.clone(), seg.clone());
                 }
+                // ca65 fixes the form when it reads the instruction. A later
+                // constant or zero-page label must not shorten an earlier use.
+                // Resolve only this operand's dependencies, rather than copying
+                // the complete namespace for every instruction.
+                let bound_insn = if matches!(kind, Kind::Insn { .. }) {
+                    let mut names = BTreeSet::new();
+                    collect_syms(&kind, &mut names);
+                    let targets = super::scope_targets(&names, &|name| {
+                        consts.contains_key(name)
+                            || label_seg.contains_key(name)
+                            || st.zero_page_names.contains(name)
+                    });
+                    let env: BTreeMap<String, i64> = names
+                        .into_iter()
+                        .filter_map(|name| {
+                            let target = targets.get(&name).unwrap_or(&name);
+                            let value = consts.get(target).copied().or_else(|| {
+                                (st.zero_page_names.contains(target)
+                                    || label_seg.get(target).map(String::as_str)
+                                        == Some("ZEROPAGE"))
+                                .then_some(0)
+                            })?;
+                            Some((name, value))
+                        })
+                        .collect();
+                    let (resolved, _) =
+                        super::resolve(&isa::mos6502::SET, kind.clone(), &env, 0, line, 0, None)
+                            .map_err(|e| {
+                                super::statement_error(e, file, &node.span.expansion_frames)
+                            })?;
+                    let super::Resolved::Insn {
+                        form,
+                        operands,
+                        unsigned_word,
+                    } = resolved
+                    else {
+                        unreachable!("an instruction resolved to a non-instruction")
+                    };
+                    Some(super::BoundInsn {
+                        form,
+                        operands,
+                        unsigned_word,
+                    })
+                } else {
+                    None
+                };
                 stmts.push(Stmt {
                     line,
                     file,
                     expansion_frames: node.span.expansion_frames.clone(),
+                    bound_insn,
                     seg: seg.clone(),
                     label,
                     kind,
@@ -1217,6 +1325,7 @@ fn project_one(node: &crate::ast::Node, st: &mut Projection) -> Result<(), AsmEr
                         line,
                         file,
                         expansion_frames: node.span.expansion_frames.clone(),
+                        bound_insn: None,
                         seg: seg.clone(),
                         label: Some(sym.qualified.clone()),
                         kind: Kind::Empty,

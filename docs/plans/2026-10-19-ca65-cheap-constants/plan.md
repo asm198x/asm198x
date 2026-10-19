@@ -20,8 +20,8 @@ constant definitions end the previous cheap namespace.
    conditional/repeat folds in ca65/project.rs. Include cheap names in
    Ca65Macros::is_symbol_char in ca65_flat.rs through the existing grammar
    seam, so named parameters cannot rewrite a cheap token's suffix (#779).
-   Keep scope entry/exit corrections separate as #778, including retained
-   native controls for those existing label/constant namespace mismatches. Preserve
+   Complete the required scope/form corrections in scope-plan.md before
+   merging: newly accepted cheap constants expose wrong bytes (#778/#784). Preserve
    ordinary immutable duplicate checks and frozen AST/diagnostic shapes.
 3. Require real-package replay/omission controls. Run native/formatter/debug
    and preservation tests, full Rust/Lua, Clippy, fmt, Ruff, docs, Node and real

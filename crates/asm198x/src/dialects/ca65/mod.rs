@@ -203,6 +203,13 @@ enum Kind {
     },
 }
 
+#[derive(Clone)]
+struct BoundInsn {
+    form: &'static isa::Form,
+    operands: Vec<Expr>,
+    unsigned_word: bool,
+}
+
 struct Stmt {
     line: usize,
     /// The file `line` counts within (language-surface U5): the root for a
@@ -213,6 +220,7 @@ struct Stmt {
     seg: String,
     label: Option<String>,
     kind: Kind,
+    bound_insn: Option<BoundInsn>,
 }
 
 struct Placed {
@@ -256,6 +264,9 @@ struct Parsed {
     label_seg: BTreeMap<String, String>,
     /// `=` constants, folded in source order.
     consts: BTreeMap<String, i64>,
+    /// Authored cheap constant names for debug output; canonical keys remain
+    /// available to expression resolution and symbol exports.
+    const_names: BTreeMap<String, String>,
 }
 
 // ---------------------------------------------------------------------------
@@ -402,6 +413,13 @@ fn assemble_program(
             stmt.kind = map_kind_syms(&stmt.kind, &|name| {
                 targets.get(name).map(|t| Expr::Sym(t.clone()))
             });
+            if let Some(bound) = &mut stmt.bound_insn {
+                for operand in &mut bound.operands {
+                    *operand = map_expr_syms(operand, &|name| {
+                        targets.get(name).map(|t| Expr::Sym(t.clone()))
+                    });
+                }
+            }
             // `.sizeof` reads a size the declaration stored. A name that
             // declared none has no size to give, which is ca65's `Size of 'V'
             // is unknown` — answered here, where the message can still name
@@ -459,6 +477,7 @@ fn assemble_program(
                 off,
                 stmt.line,
                 layout_def.fill,
+                stmt.bound_insn.clone(),
             )
             .map_err(|e| statement_error(e, stmt.file, &stmt.expansion_frames))?;
             *lengths.get_mut(&stmt.seg).expect("segment length") += size as u32;
@@ -495,7 +514,7 @@ fn assemble_program(
     let mut dbg_cycles = Vec::new();
     for (name, value) in &parsed.consts {
         dbg_symbols.push(debug198x::Symbol {
-            name: name.clone(),
+            name: parsed.const_names.get(name).unwrap_or(name).clone(),
             kind: debug198x::SymbolKind::Const {
                 value: *value as u64,
             },
@@ -625,8 +644,16 @@ fn assemble_program(
                 &stmt.expansion_frames,
             ));
         }
-        let (resolved, size) = resolve(set, stmt.kind, &size_env, off, stmt.line, layout_def.fill)
-            .map_err(|e| statement_error(e, stmt.file, &stmt.expansion_frames))?;
+        let (resolved, size) = resolve(
+            set,
+            stmt.kind,
+            &size_env,
+            off,
+            stmt.line,
+            layout_def.fill,
+            stmt.bound_insn,
+        )
+        .map_err(|e| statement_error(e, stmt.file, &stmt.expansion_frames))?;
         *offsets.get_mut(&stmt.seg).expect("segment offset") += size as u32;
         // A line span per byte-emitting statement (address-space-only
         // reservations — ZEROPAGE/BSS `.res` — carry no bytes, so no span; the
@@ -951,12 +978,13 @@ struct Walker {
     text_names: BTreeSet<String>,
     anons: AnonCtx,
     /// The scoped symbol environment (#484): the cheap-local anchor — the
-    /// current global that `@cheap` labels key under, re-anchored by plain
-    /// labels and saved/restored around `.proc`/`.scope` — lives in the
+    /// current global that `@cheap` labels key under, re-anchored by native
+    /// definition events without restoration at scope exit — lives in the
     /// shared environment (`decisions/scoped-symbol-environment.md`); the
     /// `::`-path scope stack below is staged to follow.
     scope_env: crate::scopes::ScopeEnv,
     consts: BTreeMap<String, i64>,
+    source_offsets: BTreeMap<String, u32>,
     pending_leading: Vec<crate::ast::Comment>,
     nodes: Vec<crate::ast::Node>,
     /// The scopes open at this line, outermost first — what `.proc`/`.scope`
@@ -1047,8 +1075,8 @@ struct OpenScope {
     is_proc: bool,
     /// Where it was opened, so an unclosed one can say where to look.
     line: usize,
-    /// The cheap-local scope in force outside it, restored when it closes.
-    outer_global: String,
+    /// A positive physical span causes a native size definition on closure.
+    has_output: bool,
 }
 
 impl Walker {
@@ -1062,6 +1090,7 @@ impl Walker {
             anons: AnonCtx::default(),
             scope_env: crate::scopes::ScopeEnv::new(),
             consts: BTreeMap::new(),
+            source_offsets: BTreeMap::new(),
             pending_leading: Vec::new(),
             nodes: Vec::new(),
             scopes: Vec::new(),
@@ -1211,7 +1240,15 @@ impl Walker {
             match self.scopes.last() {
                 Some(open) if open.is_proc == is_proc => {
                     let open = self.scopes.pop().expect("just matched");
-                    self.scope_env.replace_anchor(open.outer_global);
+                    if open.has_output {
+                        self.scope_env.replace_anchor(format!(
+                            "scope-size{LABEL_SEP}{}",
+                            qualify(&self.path(), &open.segment)
+                        ));
+                        if let Some(parent) = self.scopes.last_mut() {
+                            parent.has_output = true;
+                        }
+                    }
                     return Ok(Some(None));
                 }
                 // ca65 pairs the closers by kind, so `.endscope` over an open
@@ -1250,14 +1287,14 @@ impl Walker {
             return Err(AsmError::new(line, format!("duplicate scope `{name}`")));
         }
         let label = (is_proc && !rest.is_empty()).then(|| qualify(&self.path(), &name));
-        let outer_global = self
-            .scope_env
-            .replace_anchor(label.clone().unwrap_or_else(|| path.clone()));
+        if let Some(label) = &label {
+            self.scope_env.replace_anchor(label.clone());
+        }
         self.scopes.push(OpenScope {
             segment: name,
             is_proc,
             line,
-            outer_global,
+            has_output: false,
         });
         Ok(Some(label))
     }
@@ -1269,12 +1306,11 @@ impl Walker {
         if !self.opened.insert(path.clone()) {
             return Err(AsmError::new(line, format!("duplicate scope `{name}`")));
         }
-        let outer_global = self.scope_env.replace_anchor(path.clone());
         self.scopes.push(OpenScope {
             segment: name.to_string(),
             is_proc: false,
             line,
-            outer_global,
+            has_output: false,
         });
         Ok(path)
     }
@@ -1329,8 +1365,10 @@ impl Walker {
             let done = self.records.pop().expect("just matched");
             let key = Self::record_size_key(&done.path);
             self.consts.insert(key.clone(), done.size());
-            if let Some(open) = self.scopes.pop() {
-                self.scope_env.replace_anchor(open.outer_global);
+            self.scopes.pop();
+            if done.kind != RecordKind::Enum {
+                self.scope_env
+                    .replace_anchor(format!("scope-size{LABEL_SEP}{}", done.path));
             }
             // A record declared inside another allocates its size there, the
             // way an unnamed field of that type would.
@@ -1455,6 +1493,7 @@ impl Walker {
             let size_key = Self::record_size_key(&key);
             self.consts.insert(size_key.clone(), size);
             self.consts.insert(key.clone(), offset);
+            self.scope_env.replace_anchor(key.clone());
             defined.push(Kind::Constant(size_key, size));
             defined.push(Kind::Constant(key, offset));
         }
@@ -1481,6 +1520,7 @@ impl Walker {
         open.cursor = value + 1;
         let key = qualify(&self.path(), name);
         self.consts.insert(key.clone(), value);
+        self.scope_env.replace_anchor(key.clone());
         Ok(vec![Kind::Constant(key, value)])
     }
 

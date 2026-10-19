@@ -1,0 +1,386 @@
+[
+  {
+    "name": "globalzp_forward",
+    "source": ".globalzp zp\nlda zp\n.zeropage\nzp: .res 1\n",
+    "config": "MEMORY { ZP:start=$00,size=$100,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp; CODE:load=MAIN,type=ro; }\n",
+    "native": [
+      {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "input.s",
+          "-o",
+          "input.o"
+        ],
+        "exit": 0,
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "/opt/homebrew/bin/ld65",
+          "-C",
+          "input.cfg",
+          "input.o",
+          "-o",
+          "native.bin"
+        ],
+        "exit": 0,
+        "stderr": ""
+      }
+    ],
+    "native_hex": "a500",
+    "asm": {
+      "exit": 0,
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad0000"
+    }
+  },
+  {
+    "name": "exportzp_forward",
+    "source": ".exportzp zp\nlda zp\n.zeropage\nzp: .res 1\n",
+    "config": "MEMORY { ZP:start=$00,size=$100,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp; CODE:load=MAIN,type=ro; }\n",
+    "native": [
+      {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "input.s",
+          "-o",
+          "input.o"
+        ],
+        "exit": 0,
+        "stderr": "input.s(2): Warning: Didn't use zeropage addressing for 'zp'\n"
+      },
+      {
+        "argv": [
+          "/opt/homebrew/bin/ld65",
+          "-C",
+          "input.cfg",
+          "input.o",
+          "-o",
+          "native.bin"
+        ],
+        "exit": 0,
+        "stderr": ""
+      }
+    ],
+    "native_hex": "ad0000",
+    "asm": {
+      "exit": 0,
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad0000"
+    }
+  },
+  {
+    "name": "importzp_forward",
+    "source": ".importzp zp\nlda zp\n.zeropage\nzp: .res 1\n",
+    "config": "MEMORY { ZP:start=$00,size=$100,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp; CODE:load=MAIN,type=ro; }\n",
+    "native": [
+      {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "input.s",
+          "-o",
+          "input.o"
+        ],
+        "exit": 1,
+        "stderr": "input.s(4): Error: Symbol 'zp' is already an import\n"
+      }
+    ],
+    "native_hex": null,
+    "asm": {
+      "exit": 1,
+      "stderr": "asm198x: input.s:4: error: symbol `zp` is already an import\n",
+      "hex": null
+    }
+  },
+  {
+    "name": "constant_shadow_later",
+    "source": "VALUE=$12\n.scope inner\nlda VALUE\nVALUE=$1234\n.endscope\n",
+    "config": "MEMORY { ZP:start=$00,size=$100,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp; CODE:load=MAIN,type=ro; }\n",
+    "native": [
+      {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "input.s",
+          "-o",
+          "input.o"
+        ],
+        "exit": 1,
+        "stderr": "input.s(3): Error: Range error (4660 not in [0..255])\n"
+      }
+    ],
+    "native_hex": null,
+    "asm": {
+      "exit": 0,
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512"
+    }
+  },
+  {
+    "name": "constant_shadow_earlier",
+    "source": "VALUE=$12\n.scope inner\nVALUE=$1234\nlda VALUE\n.endscope\n",
+    "config": "MEMORY { ZP:start=$00,size=$100,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp; CODE:load=MAIN,type=ro; }\n",
+    "native": [
+      {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "input.s",
+          "-o",
+          "input.o"
+        ],
+        "exit": 0,
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "/opt/homebrew/bin/ld65",
+          "-C",
+          "input.cfg",
+          "input.o",
+          "-o",
+          "native.bin"
+        ],
+        "exit": 0,
+        "stderr": ""
+      }
+    ],
+    "native_hex": "ad3412",
+    "asm": {
+      "exit": 0,
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3412"
+    }
+  },
+  {
+    "name": "earlier_zp_forward_addend",
+    "source": ".zeropage\nzp: .res 1\n.code\nlda zp+1\n",
+    "config": "MEMORY { ZP:start=$00,size=$100,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp; CODE:load=MAIN,type=ro; }\n",
+    "native": [
+      {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "input.s",
+          "-o",
+          "input.o"
+        ],
+        "exit": 0,
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "/opt/homebrew/bin/ld65",
+          "-C",
+          "input.cfg",
+          "input.o",
+          "-o",
+          "native.bin"
+        ],
+        "exit": 0,
+        "stderr": ""
+      }
+    ],
+    "native_hex": "a501",
+    "asm": {
+      "exit": 0,
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a501"
+    }
+  },
+  {
+    "name": "forward_zp_addend",
+    "source": "lda zp+1\n.zeropage\nzp: .res 1\n",
+    "config": "MEMORY { ZP:start=$00,size=$100,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp; CODE:load=MAIN,type=ro; }\n",
+    "native": [
+      {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "input.s",
+          "-o",
+          "input.o"
+        ],
+        "exit": 0,
+        "stderr": "input.s(1): Warning: Didn't use zeropage addressing for 'zp'\n"
+      },
+      {
+        "argv": [
+          "/opt/homebrew/bin/ld65",
+          "-C",
+          "input.cfg",
+          "input.o",
+          "-o",
+          "native.bin"
+        ],
+        "exit": 0,
+        "stderr": ""
+      }
+    ],
+    "native_hex": "ad0100",
+    "asm": {
+      "exit": 0,
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad0100"
+    }
+  },
+  {
+    "name": "empty_segment_switch",
+    "source": "anchor:\n@value=7\n.scope inner\n.zeropage\n.code\n.endscope\n.byte @value\n",
+    "config": "MEMORY { ZP:start=$00,size=$100,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp; CODE:load=MAIN,type=ro; }\n",
+    "native": [
+      {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "input.s",
+          "-o",
+          "input.o"
+        ],
+        "exit": 0,
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "/opt/homebrew/bin/ld65",
+          "-C",
+          "input.cfg",
+          "input.o",
+          "-o",
+          "native.bin"
+        ],
+        "exit": 0,
+        "stderr": ""
+      }
+    ],
+    "native_hex": "07",
+    "asm": {
+      "exit": 0,
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07"
+    }
+  },
+  {
+    "name": "other_segment_output",
+    "source": "anchor:\n@value=7\n.scope inner\n.zeropage\n.res 1\n.code\n.endscope\n.if .defined(@value)\n.byte @value\n.else\n.byte 255\n.endif\n",
+    "config": "MEMORY { ZP:start=$00,size=$100,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp; CODE:load=MAIN,type=ro; }\n",
+    "native": [
+      {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "input.s",
+          "-o",
+          "input.o"
+        ],
+        "exit": 0,
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "/opt/homebrew/bin/ld65",
+          "-C",
+          "input.cfg",
+          "input.o",
+          "-o",
+          "native.bin"
+        ],
+        "exit": 0,
+        "stderr": ""
+      }
+    ],
+    "native_hex": "ff",
+    "asm": {
+      "exit": 0,
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "ff"
+    }
+  },
+  {
+    "name": "nested_span",
+    "source": "anchor:\n@value=7\n.scope outer\n.scope inner\n.byte 0\n.endscope\n.endscope\n.if .defined(@value)\n.byte @value\n.else\n.byte 255\n.endif\n",
+    "config": "MEMORY { ZP:start=$00,size=$100,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp; CODE:load=MAIN,type=ro; }\n",
+    "native": [
+      {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "input.s",
+          "-o",
+          "input.o"
+        ],
+        "exit": 0,
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "/opt/homebrew/bin/ld65",
+          "-C",
+          "input.cfg",
+          "input.o",
+          "-o",
+          "native.bin"
+        ],
+        "exit": 0,
+        "stderr": ""
+      }
+    ],
+    "native_hex": "00ff",
+    "asm": {
+      "exit": 0,
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "00ff"
+    }
+  },
+  {
+    "name": "zero_field_struct",
+    "source": "anchor:\n@value=7\n.struct Point\nx .res 0\n.endstruct\n.if .defined(@value)\n.byte @value\n.else\n.byte 255\n.endif\n",
+    "config": "MEMORY { ZP:start=$00,size=$100,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp; CODE:load=MAIN,type=ro; }\n",
+    "native": [
+      {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "input.s",
+          "-o",
+          "input.o"
+        ],
+        "exit": 1,
+        "stderr": "input.s(4): Error: Invalid storage allocator in struct/union\n"
+      }
+    ],
+    "native_hex": null,
+    "asm": {
+      "exit": 0,
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "ff"
+    }
+  },
+  {
+    "name": "enum_with_member",
+    "source": "anchor:\n@value=7\n.enum Colors\nred\n.endenum\n.if .defined(@value)\n.byte @value\n.else\n.byte 255\n.endif\n",
+    "config": "MEMORY { ZP:start=$00,size=$100,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp; CODE:load=MAIN,type=ro; }\n",
+    "native": [
+      {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "input.s",
+          "-o",
+          "input.o"
+        ],
+        "exit": 0,
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "/opt/homebrew/bin/ld65",
+          "-C",
+          "input.cfg",
+          "input.o",
+          "-o",
+          "native.bin"
+        ],
+        "exit": 0,
+        "stderr": ""
+      }
+    ],
+    "native_hex": "ff",
+    "asm": {
+      "exit": 0,
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "ff"
+    }
+  }
+]

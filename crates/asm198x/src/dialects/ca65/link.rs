@@ -150,6 +150,11 @@ pub(crate) enum VisRule {
     EitherWay,
 }
 
+pub(super) fn alignment_padding(boundary: i64, off: u32) -> usize {
+    let pad = (boundary - i64::from(off).rem_euclid(boundary)) % boundary;
+    usize::try_from(pad).expect("non-negative")
+}
+
 /// Resolve a parsed statement to an emittable item plus its byte size.
 pub(super) fn resolve(
     set: &'static isa::InstructionSet,
@@ -158,7 +163,19 @@ pub(super) fn resolve(
     off: u32,
     line: usize,
     default_fill: u8,
+    bound: Option<super::BoundInsn>,
 ) -> Result<(Resolved, usize), AsmError> {
+    if let Some(bound) = bound {
+        let size = bound.form.len();
+        return Ok((
+            Resolved::Insn {
+                form: bound.form,
+                operands: bound.operands,
+                unsigned_word: bound.unsigned_word,
+            },
+            size,
+        ));
+    }
     Ok(match kind {
         Kind::Empty => (Resolved::Nothing, 0),
         // The sweep reads every unread line before projection ends; one
@@ -167,8 +184,7 @@ pub(super) fn resolve(
         // The only statement whose size depends on where it stands: pad to the
         // next multiple of the boundary, measured from the segment's start.
         Kind::Align(boundary, fill) => {
-            let pad = (boundary - i64::from(off).rem_euclid(boundary)) % boundary;
-            let pad = usize::try_from(pad).expect("non-negative");
+            let pad = alignment_padding(boundary, off);
             (Resolved::Fill(pad, fill.unwrap_or(default_fill)), pad)
         }
         Kind::Raw(v) => {
