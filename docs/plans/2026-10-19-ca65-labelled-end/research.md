@@ -35,5 +35,11 @@ The new end-label fixture rejects all original native-invalid cases.
 
 The actual local archive passes all 77 cohorts and its new 262-command cohort;
 changed bytes and corrupt archives fail. All 92 Node tests, Lua/all-target Clippy,
-rustfmt, Ruff and generated docs pass. Full Rust replay and clean producer/project
-qualification remain pending before shipping.
+rustfmt, Ruff and generated docs pass. Full Rust verification passes: 1,593 tests, with 38 ignored. Clean producer
+a6fb997e003b92bcdf5de9007dc2a6ea57473912 (CLI SHA-256
+26f7a27a5d27e162739d035dd0169b0a36bbe333643fe00c24e3a84c20eac644)
+passes all 77 actual-archive cohorts and both failing corruption controls. Its
+native-format report uses the identical executable hash. The preceding archive
+fails only the new end-label cohort. A clean pinned 4510 replay matches all 564
+bytes, with seven successful processes, fourteen streams and a failing changed-
+byte control. Exact-head CI and five actual host packages remain merge gates.
