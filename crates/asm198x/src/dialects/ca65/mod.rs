@@ -2604,6 +2604,23 @@ impl FlatWalk for Walker {
         // must not be opened by the parse (KTD1 — `--fmt` succeeds with a
         // missing target), so hand them back for the driver to resolve (or
         // keep unresolved, in the single-source parse).
+        if !self.expand_text_defines
+            && let Some(item) = ca65_flat::formatter_file_item(rest, line)
+        {
+            let opaque = matches!(&item, Item::Verbatim);
+            self.nodes.push(Node {
+                operand_span: ca65_flat::directive_operand_span(raw, rest, line, file),
+                label: if opaque { None } else { symbol },
+                item: Some(item),
+                source: if opaque { raw.trim_end() } else { rest.trim() }.to_string(),
+                span,
+                trivia: Trivia {
+                    leading: std::mem::take(&mut self.pending_leading),
+                    trailing: if opaque { None } else { trailing },
+                },
+            });
+            return Ok(None);
+        }
         if let Some(kind) = self.walk_directive(rest, line)? {
             return Ok(Some(DirectiveLine {
                 kind,

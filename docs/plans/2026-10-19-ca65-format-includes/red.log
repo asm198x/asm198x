@@ -1,0 +1,23 @@
+   Compiling verdict-corpus v0.0.71 (/Users/stevehill/Projects/198x/Asm198x/asm198x-ca65-format-end/crates/verdict-corpus)
+   Compiling asm198x v0.0.71 (/Users/stevehill/Projects/198x/Asm198x/asm198x-ca65-format-end/crates/asm198x)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 5.73s
+     Running tests/ca65_format_includes.rs (/private/tmp/asm198x-format-build/debug/deps/ca65_format_includes-c19fe627facd8d2b)
+
+running 1 test
+test formatter_keeps_native_include_operands_without_evaluating_them ... FAILED
+
+failures:
+
+---- formatter_keeps_native_include_operands_without_evaluating_them stdout ----
+
+thread 'formatter_keeps_native_include_operands_without_evaluating_them' (129709528) panicked at crates/asm198x/tests/ca65_format_includes.rs:124:9:
+include_computed: Output { status: ExitStatus(unix_wait_status(256)), stdout: "", stderr: "asm198x: input.s:1: error: `.include` needs a quoted file name\n" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    formatter_keeps_native_include_operands_without_evaluating_them
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s
+
+error: test failed, to rerun pass `-p asm198x --test ca65_format_includes`

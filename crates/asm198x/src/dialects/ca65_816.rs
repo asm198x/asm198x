@@ -114,6 +114,7 @@ pub(crate) fn parse_program(source: &str, mode: macros::Expand) -> Result<Progra
     let text = macros::expanded_text(&expanded, source);
     let origins = macros::line_origins(&expanded);
     let mut w = Walker::new();
+    w.formatting = mode == macros::Expand::No;
     for (i, raw) in text.lines().enumerate() {
         if let Some(d) = w
             .walk_line(raw, i + 1, FileId(0))
@@ -165,6 +166,8 @@ pub(crate) fn parse_program_multi(
 /// pending comment trivia — lives here, so in the multi-file walk it threads
 /// *through* include boundaries in both directions (KTD1, probe-pinned).
 struct Walker {
+    /// Only unexpanded formatting keeps file operands without evaluation.
+    formatting: bool,
     /// Constants bound with `name = expr`, consulted for zp/abs/long sizing
     /// and `.res`/`.incbin` argument folding at parse time.
     env: BTreeMap<String, i64>,
@@ -191,6 +194,7 @@ struct Walker {
 impl Walker {
     fn new() -> Self {
         Self {
+            formatting: false,
             env: BTreeMap::new(),
             a_width: 1,
             i_width: 1,
@@ -366,6 +370,31 @@ impl FlatWalk for Walker {
         // must not be opened here (KTD1 — `--fmt` succeeds with a missing
         // target), so hand them back for the driver to resolve (or keep
         // unresolved, in the single-source parse).
+        if self.formatting
+            && let Some(item) = ca65_flat::formatter_file_item(rest, line)
+        {
+            let opaque = matches!(&item, crate::ast::Item::Verbatim);
+            self.nodes.push(Node {
+                operand_span: ca65_flat::directive_operand_span(raw, rest, line, file),
+                label: if opaque {
+                    None
+                } else {
+                    label.map(|name| Symbol {
+                        qualified: name.clone(),
+                        scope: Scope::Global,
+                        name,
+                    })
+                },
+                item: Some(item),
+                source: if opaque { raw.trim_end() } else { rest.trim() }.to_string(),
+                span: Span::in_file(file, line as u32, 1),
+                trivia: Trivia {
+                    leading: std::mem::take(&mut self.pending_leading),
+                    trailing: if opaque { None } else { trailing },
+                },
+            });
+            return Ok(None);
+        }
         if let Some(kind) = self.walk_directive(rest, line)? {
             return Ok(Some(DirectiveLine {
                 kind,
