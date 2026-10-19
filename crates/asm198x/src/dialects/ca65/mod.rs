@@ -1316,7 +1316,9 @@ impl RecordBuild {
 /// Linked ca65 permits a source label before a macro definition. Keep the
 /// shared flat macro grammar unchanged: the selected reader owns its binding.
 fn macro_header(source: &str) -> Option<(String, Vec<String>)> {
-    let head = split_label_head(source.trim()).map_or(source, |(_, rest)| rest);
+    let head = split_label_head(source.trim())
+        .or_else(|| split_generated_label_head(source.trim()))
+        .map_or(source, |(_, rest)| rest);
     ca65_flat::Ca65Macros.header(head)
 }
 

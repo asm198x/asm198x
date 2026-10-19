@@ -437,3 +437,9 @@ test('selected generated-name constancy is mandatory package evidence', () => {
   assert(qualifies(complete)); assert(requiredCases.includes('ca65_generated_name_constancy'));
   assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_generated_name_constancy')), false);
 });
+
+test('generated macro definition and call heads are mandatory package evidence', () => {
+  const complete = requiredCases.map(name => ({ name, status: 'pass' }));
+  assert(qualifies(complete)); assert(requiredCases.includes('ca65_generated_macros'));
+  assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_generated_macros')), false);
+});
