@@ -40,3 +40,9 @@ bytes and literal .end stopping controls. All 1572 Rust tests passed
 both corruption controls passed. The new cohort runs 558 commands. A clean
 final-source 4510 replay and five-host PR qualification still precede merge.
 The parent #788 remains open for lexical source admission.
+
+Clean final producer 86b5608c9880e8cbb712e57a21518743cfb21231 matches all
+564 unchanged native/upstream 4510 bytes, with seven actual process records,
+fourteen streams and a changed-byte rejection control. No source changed
+during the audit. Five-host PR qualification still precedes merge; #788
+remains open for the following source-admission stage.
