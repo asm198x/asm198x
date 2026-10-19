@@ -41,3 +41,10 @@ fail at .org, so their refusal is not evidence of native operand overflow.
 Separate follow-up captures retain those facts; the current correction leaves
 no new origin acceptance. Missing size attributes remain #798, whose 100-case
 research is retained on fix/ca65-symbol-sizes before this higher-priority fix.
+
+Clean unchanged producer `df5da18d12ee12bddb02a634d9e340c7af2e41a4`
+replays pinned cc65-4510-opcodes `e11fb5c39371046ebe25485f984f644c5a0d65d3`.
+All 564 bytes match native SHA-256
+`8a5fcde630e55dd49403f7c6ffed25d8786e65e3d0a2723531b7ca3e2c0509ec`.
+Seven process records and fourteen streams verify; the changed-byte guard
+rejects corruption. The producer is retained on the task branch.
