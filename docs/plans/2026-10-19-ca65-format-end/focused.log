@@ -1,0 +1,10 @@
+   Compiling asm198x v0.0.71 (/Users/stevehill/Projects/198x/Asm198x/asm198x-ca65-format-end/crates/asm198x)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.58s
+     Running tests/ca65_format_end.rs (/private/tmp/asm198x-format-build/debug/deps/ca65_format_end-e28ebd9ec123ac06)
+
+running 2 tests
+test canonical_reader_retains_complete_end_source_without_evaluation ... ok
+test formatted_source_keeps_native_bytes_and_failed_outputs ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.71s
+

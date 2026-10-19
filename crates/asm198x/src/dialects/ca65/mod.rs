@@ -39,6 +39,7 @@ use crate::source::{SourceLoader, SourceMap};
 use crate::span::FileId;
 
 mod deferred;
+mod format;
 mod link;
 mod project;
 pub(crate) use link::VisRule;
@@ -1155,12 +1156,11 @@ pub(crate) fn parse_program(
     source: &str,
     mode: macros::Expand,
 ) -> Result<crate::ast::Program, AsmError> {
+    if matches!(mode, macros::Expand::No) {
+        return Ok(format::parse(source));
+    }
     // Assembly keeps definitions and calls unread for the selected sweep.
-    // Formatter parsing remains unexpanded and preserves authored source.
-    let mut w = match mode {
-        macros::Expand::Yes => Walker::structural_source(set, source),
-        macros::Expand::No => Walker::new(set, false),
-    };
+    let mut w = Walker::structural_source(set, source);
     ca65_flat::walk_source_expanded(&mut w, source, FileId(0))?;
     w.finish(source.lines().count() as u32)
 }

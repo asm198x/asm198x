@@ -204,6 +204,9 @@ pub(crate) enum Item {
     },
     Org(Operand),
     Equ(Operand),
+    /// An assignment read for canonical formatting without interpreting its
+    /// expression. It can never enter semantic lowering.
+    SourceAssignment,
     /// Several immutable constants defined by one source directive.
     DefineSymbols(Vec<(String, i64)>),
     /// A redefinable binding — see [`Operation::Set`](crate::engine::Operation::Set).
@@ -1201,6 +1204,12 @@ fn lower_item(item: Item) -> Result<Operation, AsmError> {
         // path expands macros before the walk sees one — so reaching the engine
         // with one means a dialect routed a formatter-only node into an
         // assembly. Same guard, same reason as `Native` above.
+        Item::SourceAssignment => {
+            return Err(AsmError::new(
+                0,
+                "internal error: a source assignment is the formatter's, not the engine's",
+            ));
+        }
         Item::Verbatim => {
             return Err(AsmError::new(
                 0,
@@ -1752,8 +1761,10 @@ fn emit_nodes(nodes: &[Node], out: &mut String, equ_label_colon: bool, comment_i
         // An `equ`-style binding keeps its label on the operation's line: the
         // shared `Item::Equ`, or a native (multi-pass CISC) statement that asks
         // for it (a vasm `equ`/`=`). Only these are rendered inline.
-        let is_equ = matches!(node.item, Some(Item::Equ(_) | Item::Set(_)))
-            || matches!(&node.item, Some(Item::Native(n)) if n.inline_label());
+        let is_equ = matches!(
+            node.item,
+            Some(Item::Equ(_) | Item::Set(_) | Item::SourceAssignment)
+        ) || matches!(&node.item, Some(Item::Native(n)) if n.inline_label());
         // A node "has an operation" if it carries an item (a real operation) or
         // just verbatim op source (an ACME directive/instruction the formatter
         // does not lower — it keeps the source and no item).
@@ -1837,8 +1848,13 @@ fn equ_run_widths(nodes: &[Node], equ_label_colon: bool) -> Vec<usize> {
     if equ_label_colon {
         return widths;
     }
-    let is_const =
-        |n: &Node| n.label.is_some() && matches!(n.item, Some(Item::Equ(_) | Item::Set(_)));
+    let is_const = |n: &Node| {
+        n.label.is_some()
+            && matches!(
+                n.item,
+                Some(Item::Equ(_) | Item::Set(_) | Item::SourceAssignment)
+            )
+    };
     let mut i = 0;
     while i < nodes.len() {
         if !is_const(&nodes[i]) {
