@@ -1,0 +1,27 @@
+{
+  "source": ".org $2000\n.proc outer\nroutine:nop\n.endproc\n; asm198x: cycles(outer::routine) <= 2\n",
+  "binary": "/private/tmp/asm198x-absolute-debug-predecessor/asm198x",
+  "sha256": "36712ad05c212af216799db6b0153ff6726909c7f29ba0b386711664d1aaf46b",
+  "identity": {
+    "source_commit": "f67f95885472337f2934145037de3de41993e51e",
+    "source_tree": "eef5f22320286beee03d0484bf2432ed910b98bd",
+    "sha256": "36712ad05c212af216799db6b0153ff6726909c7f29ba0b386711664d1aaf46b",
+    "profile": "debug",
+    "features": [
+      "lua"
+    ]
+  },
+  "argv": [
+    "/private/tmp/asm198x-absolute-debug-predecessor/asm198x",
+    "--dialect",
+    "ca65",
+    "-C",
+    "input.cfg",
+    "input.s",
+    "-o",
+    "out.bin"
+  ],
+  "exit": 1,
+  "stdout": "",
+  "stderr": "asm198x: input.s:5: error: malformed asm198x assertion `cycles(outer::routine) <= 2` in input.s (expected `cycles(<label>) <= <n>` or `free(<area>) >= <n>`)\n"
+}

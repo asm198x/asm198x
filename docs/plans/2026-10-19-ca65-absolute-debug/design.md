@@ -1,6 +1,6 @@
 # Proposed logical debug sections for absolute ca65 spans
 
-Status: logical debug section design approved on 2026-10-19. No implementation yet.
+Status: approved on 2026-10-19; implementation verified locally, awaiting package CI.
 
 The existing producer emits one debug section per touched configured segment.
 Labels, lines and cycle records share those section-relative offsets. After

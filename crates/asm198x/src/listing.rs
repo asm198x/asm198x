@@ -175,38 +175,53 @@ pub(crate) struct DebugCaptureMulti {
 
 impl DebugCaptureMulti {
     pub(crate) fn section_debug(&self) -> Vec<crate::contract::SectionDebug> {
-        self.sections
-            .iter()
-            .map(|section| {
-                let debug = crate::engine::DebugData {
-                    symbols: self.symbols.iter().filter(|s| matches!(s.kind,
-                        debug198x::SymbolKind::Label { section: id, .. }
-                        | debug198x::SymbolKind::Entry { section: id, .. } if id == section.id
-                    )).cloned().collect(),
-                    lines: self.lines.iter().filter(|l| l.2 == section.id).map(
-                        |&(file, line, _, offset, length)| crate::engine::LineRec {
-                            file, line, offset, length,
-                        }
-                    ).collect(),
-                    cycles: self.cycles.iter().filter(|c| c.0 == section.id)
-                        .map(|c| c.1).collect(),
+        let mut records = std::collections::BTreeMap::new();
+        for section in &self.sections {
+            records.insert(
+                section.id,
+                crate::engine::DebugData {
                     cycle_coverage: self.cycle_coverage,
                     ..crate::engine::DebugData::default()
-                };
-                crate::contract::SectionDebug {
-                    section: section.clone(),
-                    file_offset: self.file_offsets.get(&section.id).copied(),
-                    debug,
-                }
+                },
+            );
+        }
+        for symbol in &self.symbols {
+            if let debug198x::SymbolKind::Label { section, .. }
+            | debug198x::SymbolKind::Entry { section, .. } = symbol.kind
+                && let Some(debug) = records.get_mut(&section)
+            {
+                debug.symbols.push(symbol.clone());
+            }
+        }
+        for &(file, line, section, offset, length) in &self.lines {
+            if let Some(debug) = records.get_mut(&section) {
+                debug.lines.push(crate::engine::LineRec {
+                    file,
+                    line,
+                    offset,
+                    length,
+                });
+            }
+        }
+        for &(section, cycle) in &self.cycles {
+            if let Some(debug) = records.get_mut(&section) {
+                debug.cycles.push(cycle);
+            }
+        }
+        self.sections
+            .iter()
+            .map(|section| crate::contract::SectionDebug {
+                section: section.clone(),
+                file_offset: self.file_offsets.get(&section.id).copied(),
+                debug: records
+                    .remove(&section.id)
+                    .expect("configured debug section"),
             })
             .collect()
     }
 
     pub(crate) fn cycle_costs(&self) -> Vec<crate::cycles::LabelCost> {
-        self.section_debug()
-            .iter()
-            .flat_map(|s| crate::cycles::label_costs_debug(&s.debug, 1))
-            .collect()
+        crate::cycles::native_label_costs(&self.section_debug(), 1)
     }
 
     /// Collapse to the single-file [`DebugCapture`] (every record in the root

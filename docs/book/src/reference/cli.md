@@ -271,7 +271,10 @@ Where the instruction spec carries validated cycle data (6502, Z80, SM83,
 instruction with its cost from that spec: one number when the cost is fixed,
 `min/max` when a page-cross or branch-taken extra makes it a range. A tail
 sums each label's straight-line span — the instructions from the label to the
-next label, in address order; it is static cost, not execution. A CPU whose
+next label, in address order; it is static cost, not execution. For native
+section listings, that order follows physical bytes within the source segment:
+ca65 `.org` and `.reloc` change logical addresses without splitting a routine's
+total. Different source segments keep separate totals. A CPU whose
 spec has no cycle data yet says `no cycle data (backfill pending)` instead of
 inventing figures, and a dialect that pre-encodes some instructions marks its
 figures as lower bounds.
