@@ -42,3 +42,10 @@ Mixed-fill raw probes remain research evidence and are not qualification
 cases: differing per-area fill bytes exceed the existing one-fill image seam.
 The supported matrix uses the same fill byte for filled areas. No existing
 fixture was removed or weakened; no shared schema or dependency changed.
+
+Clean unchanged producer `f60b08b3e08448acdbb892739b93869bc719d004`
+replays pinned cc65-4510-opcodes `e11fb5c39371046ebe25485f984f644c5a0d65d3`.
+All 564 bytes match native SHA-256
+`8a5fcde630e55dd49403f7c6ffed25d8786e65e3d0a2723531b7ca3e2c0509ec`;
+seven process records and fourteen streams verify, and the changed-byte guard
+refuses corruption. The producer is retained on the task branch.

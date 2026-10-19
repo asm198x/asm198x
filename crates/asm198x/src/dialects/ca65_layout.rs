@@ -23,7 +23,7 @@ pub(crate) struct Area {
     /// (RAM, zero page) occupies address space only.
     pub(crate) in_file: bool,
     /// `fill = yes` retains the area's entire capacity; otherwise only its
-    /// occupied extent, including internal gaps, contributes file bytes.
+    /// packed initialized content and its preceding gaps contribute file bytes.
     pub(crate) fill_to_capacity: bool,
 }
 
@@ -63,7 +63,7 @@ pub(crate) struct ResolvedSeg {
     /// CPU base address.
     pub(crate) base: u32,
     /// Offset of the segment's first byte in the output file; `None` for a
-    /// segment in a RAM-only area.
+    /// segment in a RAM-only area or an uninitialized zp/bss segment.
     pub(crate) file_at: Option<usize>,
     /// Whether `base` means anything to the CPU. A file area whose address
     /// range overlaps a RAM area is paged somewhere the CPU is not looking —
