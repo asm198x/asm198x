@@ -50,6 +50,20 @@ use crate::engine::AsmError;
 use crate::source::{LoadError, MAX_INCLUDE_DEPTH, SourceLoader, SourceMap};
 use crate::span::FileId;
 
+/// ca65 also admits digit-starting hexadecimal tokens ending in h/H.
+/// Native scanner.c bounds those tokens independently of expression arithmetic.
+pub(crate) fn parse_number(token: &str, line: usize) -> Result<i64, AsmError> {
+    let token = token.trim();
+    if token.as_bytes().first().is_some_and(u8::is_ascii_digit)
+        && let Some(digits) = token.strip_suffix(['h', 'H'])
+    {
+        return u32::from_str_radix(digits, 16)
+            .map(i64::from)
+            .map_err(|_| AsmError::new(line, format!("invalid hexadecimal number `{token}`")));
+    }
+    super::mos6502::parse_number(token, line)
+}
+
 /// A walk-handled `.include`/`.incbin` line found by a dialect's per-line
 /// parse, handed back for the driver to decide: the single-source parse keeps
 /// it as an unresolved verbatim item (KTD1 — `--fmt` never opens the target);
@@ -1936,7 +1950,7 @@ fn tokens(text: &str, target: Target) -> Vec<Token<'_>> {
 /// else by nothing, because its kind already said everything.
 fn token_value(token: &Token) -> String {
     match token.kind {
-        TokenKind::Number => match super::mos6502::parse_number(token.text, 0) {
+        TokenKind::Number => match parse_number(token.text, 0) {
             Ok(n) => n.to_string(),
             Err(_) => token.text.to_string(),
         },

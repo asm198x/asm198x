@@ -308,3 +308,21 @@ test('ca65 label and data program counters are mandatory package evidence', () =
   assert(qualifies(complete)); assert(requiredCases.includes('ca65_org_labels'));
   assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_org_labels')), false);
 });
+
+test('ca65 origin bounds are mandatory package evidence', () => {
+  const complete = requiredCases.map(name => ({ name, status: 'pass' }));
+  assert(qualifies(complete)); assert(requiredCases.includes('ca65_origin_bounds'));
+  assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_origin_bounds')), false);
+});
+
+test('ca65 hexadecimal suffixes are mandatory package evidence', () => {
+  const complete = requiredCases.map(name => ({ name, status: 'pass' }));
+  assert(qualifies(complete)); assert(requiredCases.includes('ca65_hex_suffix'));
+  assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_hex_suffix')), false);
+});
+
+test('ca65 absolute counters are mandatory package evidence', () => {
+  const complete = requiredCases.map(name => ({ name, status: 'pass' }));
+  assert(qualifies(complete)); assert(requiredCases.includes('ca65_absolute_counter'));
+  assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_absolute_counter')), false);
+});

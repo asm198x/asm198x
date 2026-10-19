@@ -1,0 +1,614 @@
+{
+  "binary": "/private/tmp/asm198x-origin-validation-predecessor/asm198x",
+  "sha256": "9044ce896c517641b204a78867caaf9e63cd39bf9de1ec30722f102e5621c16b",
+  "results": [
+    {
+      "name": "False_0*item",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000000",
+      "native_hex": "000000",
+      "matches": true
+    },
+    {
+      "name": "False_item*0",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000000",
+      "native_hex": "000000",
+      "matches": true
+    },
+    {
+      "name": "False_item&0",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000000",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "False_item|0",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000010",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "False_item^item",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000000",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "False_(end-item)*2",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000200",
+      "native_hex": "000200",
+      "matches": true
+    },
+    {
+      "name": "False_<(end-item)",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000100",
+      "native_hex": "000100",
+      "matches": true
+    },
+    {
+      "name": "False_-(end-item)",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: `.org` puts this statement outside the address space\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "False_*-*",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000000",
+      "native_hex": "000000",
+      "matches": true
+    },
+    {
+      "name": "False_item-item",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000000",
+      "native_hex": "000000",
+      "matches": true
+    },
+    {
+      "name": "False_end-item",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000100",
+      "native_hex": "000100",
+      "matches": true
+    },
+    {
+      "name": "False_(item+1)-item",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000100",
+      "native_hex": "000100",
+      "matches": true
+    },
+    {
+      "name": "False_ALIAS-item",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: undefined symbol `ALIAS`\n",
+      "hex": null,
+      "native_hex": "000000",
+      "matches": false
+    },
+    {
+      "name": "False_ALIAS-ALIAS",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: undefined symbol `ALIAS`\n",
+      "hex": null,
+      "native_hex": "000000",
+      "matches": false
+    },
+    {
+      "name": "False_1||item",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000100",
+      "native_hex": "000100",
+      "matches": true
+    },
+    {
+      "name": "False_0&&item",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000000",
+      "native_hex": "000000",
+      "matches": true
+    },
+    {
+      "name": "True_0*item",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000000",
+      "native_hex": "000000",
+      "matches": true
+    },
+    {
+      "name": "True_item*0",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000000",
+      "native_hex": "000000",
+      "matches": true
+    },
+    {
+      "name": "True_item&0",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000000",
+      "native_hex": "000000",
+      "matches": true
+    },
+    {
+      "name": "True_item|0",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000020",
+      "native_hex": "000020",
+      "matches": true
+    },
+    {
+      "name": "True_item^item",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000000",
+      "native_hex": "000000",
+      "matches": true
+    },
+    {
+      "name": "True_(end-item)*2",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000200",
+      "native_hex": "000200",
+      "matches": true
+    },
+    {
+      "name": "True_<(end-item)",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000100",
+      "native_hex": "000100",
+      "matches": true
+    },
+    {
+      "name": "True_-(end-item)",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: `.org` puts this statement outside the address space\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "True_*-*",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000000",
+      "native_hex": "000000",
+      "matches": true
+    },
+    {
+      "name": "True_item-item",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000000",
+      "native_hex": "000000",
+      "matches": true
+    },
+    {
+      "name": "True_end-item",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000100",
+      "native_hex": "000100",
+      "matches": true
+    },
+    {
+      "name": "True_(item+1)-item",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000100",
+      "native_hex": "000100",
+      "matches": true
+    },
+    {
+      "name": "True_ALIAS-item",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: undefined symbol `ALIAS`\n",
+      "hex": null,
+      "native_hex": "000000",
+      "matches": false
+    },
+    {
+      "name": "True_ALIAS-ALIAS",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: undefined symbol `ALIAS`\n",
+      "hex": null,
+      "native_hex": "000000",
+      "matches": false
+    },
+    {
+      "name": "True_1||item",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000100",
+      "native_hex": "000100",
+      "matches": true
+    },
+    {
+      "name": "True_0&&item",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000000",
+      "native_hex": "000000",
+      "matches": true
+    }
+  ]
+}
