@@ -1,0 +1,23 @@
+   Compiling asm198x v0.0.71 (/Users/stevehill/Projects/198x/Asm198x/asm198x-ca65-numeric-admission/crates/asm198x)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.61s
+     Running tests/ca65_numeric_admission.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/ca65_numeric_admission-ff1000533da88207)
+
+running 2 tests
+test skipped_and_captured_numeric_errors_preserve_outputs_and_include_location ... FAILED
+test native_numeric_admission_checks_skipped_and_captured_source ... ok
+
+failures:
+
+---- skipped_and_captured_numeric_errors_preserve_outputs_and_include_location stdout ----
+
+thread 'skipped_and_captured_numeric_errors_preserve_outputs_and_include_location' (129273187) panicked at crates/asm198x/tests/ca65_numeric_admission.rs:195:17:
+Output { status: ExitStatus(unix_wait_status(256)), stdout: "", stderr: "asm198x: input.s:3:8: error: number `$100000000` is outside the native lexical range\n" }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    skipped_and_captured_numeric_errors_preserve_outputs_and_include_location
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 9.85s
+
+error: test failed, to rerun pass `-p asm198x --test ca65_numeric_admission`

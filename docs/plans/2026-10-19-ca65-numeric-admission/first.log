@@ -1,0 +1,39 @@
+   Compiling asm198x v0.0.71 (/Users/stevehill/Projects/198x/Asm198x/asm198x-ca65-numeric-admission/crates/asm198x)
+error[E0277]: the trait bound `FileId: Ord` is not satisfied
+   --> crates/asm198x/src/dialects/ca65/project.rs:174:39
+    |
+174 |         let starts = self.line_starts.entry(at.file).or_insert_with(|| {
+    |                                       ^^^^^ the trait `Ord` is not implemented for `FileId`
+    |
+note: required by a bound in `std::collections::BTreeMap::<K, V, A>::entry`
+   --> /rustc/88d9e12ae178fab0fb5cc050a94da85685d449ea/library/alloc/src/collections/btree/map.rs:1501:4
+help: consider annotating `FileId` with `#[derive(Ord)]`
+   --> crates/asm198x/src/span.rs:24:1
+    |
+ 24 + #[derive(Ord)]
+ 25 | pub struct FileId(pub u32);
+    |
+
+error[E0599]: the method `or_insert_with` exists for enum `std::collections::btree_map::Entry<'_, FileId, Vec<usize>>`, but its trait bounds were not satisfied
+   --> crates/asm198x/src/dialects/ca65/project.rs:174:54
+    |
+174 |         let starts = self.line_starts.entry(at.file).or_insert_with(|| {
+    |                      --------------------------------^^^^^^^^^^^^^^ method cannot be called due to unsatisfied trait bounds
+    |
+   ::: crates/asm198x/src/span.rs:24:1
+    |
+ 24 | pub struct FileId(pub u32);
+    | ----------------- doesn't satisfy `FileId: Ord`
+    |
+    = note: the following trait bounds were not satisfied:
+            `FileId: Ord`
+help: consider annotating `FileId` with `#[derive(Eq, Ord, PartialEq, PartialOrd)]`
+   --> crates/asm198x/src/span.rs:24:1
+    |
+ 24 + #[derive(Eq, Ord, PartialEq, PartialOrd)]
+ 25 | pub struct FileId(pub u32);
+    |
+
+Some errors have detailed explanations: E0277, E0599.
+For more information about an error, try `rustc --explain E0277`.
+error: could not compile `asm198x` (lib) due to 2 previous errors

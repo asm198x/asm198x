@@ -1,0 +1,57 @@
+{
+  "issue": 835,
+  "native": {
+    "name": "inactive_26",
+    "source": ".if 0\n.byte <'4294967300'\n.endif\n.byte 7\n",
+    "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+    "native": [
+      {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "input.s",
+          "-o",
+          "input.o"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+        "exit": 1,
+        "stdout": "",
+        "stderr": "input.s(2): Error: Illegal character constant\ninput.s(2): Error: Illegal character constant\n"
+      }
+    ],
+    "native_hex": null
+  },
+  "asm": [
+    {
+      "argv": [
+        "/private/tmp/asm198x-numeric-admission-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07"
+    },
+    {
+      "argv": [
+        "/private/tmp/asm198x-numeric-admission-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07"
+    }
+  ]
+}

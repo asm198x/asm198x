@@ -177,5 +177,8 @@ scanner evidence, including decimal's observed 4294967299 endpoint rather
 than an invented final-expression or field-count ceiling. Controls and the
 approved design are in docs/plans/2026-10-19-ca65-numeric-limits/.
 
-The narrow exception was approved on 2026-10-19. Implementation remains a
-separate verified change; approval does not imply the lexical checks exist.
+The narrow exception was approved on 2026-10-19. The selected sweep and the
+existing macro capture seam apply the numeric-only check. The 317 native
+admission controls, source identities and retained outcomes are in
+`docs/plans/2026-10-19-ca65-numeric-admission/`. Character-literal errors remain
+a separate lexical scope (#835); this exception does not authorize them.

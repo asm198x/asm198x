@@ -1,0 +1,2195 @@
+   Compiling asm198x v0.0.71 (/Users/stevehill/Projects/198x/Asm198x/asm198x-ca65-numeric-admission/crates/asm198x)
+   Compiling xtask v0.0.71 (/Users/stevehill/Projects/198x/Asm198x/asm198x-ca65-numeric-admission/xtask)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 13.87s
+     Running unittests src/lib.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/asm198x-5b501421ded2b657)
+
+running 765 tests
+test ast::tests::conditional_block_rejects_lowering ... ok
+test ast::tests::comment_is_queryable_trivia ... ok
+test ast::tests::span_carries_file_line_column ... ok
+test ast::tests::operand_preserves_source_spelling ... ok
+test ast::tests::reused_local_is_two_distinct_scoped_symbols ... ok
+test ast::tests::encoded_and_align_round_trip ... ok
+test ast::tests::structured_operand_models_6809_indexed ... ok
+test ast::tests::conditional_block_emits_with_delimiters_at_column_zero ... ok
+test contract::tests::diagnostic_flattens_to_envelope ... ok
+test contract::tests::diagnostic_fix_is_optional ... ok
+test contract::tests::diagnostic_from_lineless_error_has_no_span ... ok
+test contract::tests::diagnostic_from_line_only_error_is_line_granular ... ok
+test ast::tests::structured_operand_in_instruction_errors_not_panics ... ok
+test ast::tests::keyword_conditional_emits_indented_delimiters ... ok
+test contract::tests::diagnostic_from_error_with_span_reports_column ... ok
+test dialect_table::tests::the_rom_less_mcs48_parts_are_not_aliases_of_the_8048 ... ok
+test dialect_table::tests::an_unknown_name_resolves_to_nothing ... ok
+test ast::tests::item_round_trips_an_instruction ... ok
+test dialect_table::tests::every_spelling_resolves_to_its_canonical_name ... ok
+test dialect_table::tests::every_spelling_is_unique ... ok
+test ast::tests::seam_leaves_other_cpus_on_direct_lowering ... ok
+test dialects::acme::tests::a_byte_prefix_is_not_a_comparison ... ok
+test dialects::acme::tests::a_call_needs_its_plus ... ok
+test dialects::acme::tests::a_branch_inside_is_measured_from_the_claimed_address ... ok
+test dialects::acme::tests::a_body_is_delimited_by_braces_not_by_a_line ... ok
+test ast::tests::pasmo_and_sjasmplus_share_the_lowering ... ok
+test dialects::acme::tests::a_backward_label_sizes_to_zero_page ... ok
+test dialects::acme::tests::a_block_restores_the_mask_and_a_bare_xor_does_not ... ok
+test dialects::acme::tests::a_deliberate_absolute_is_not_oversized ... ok
+test dialects::acme::tests::a_dotted_label_is_scoped_to_its_expansion ... ok
+test dialects::acme::tests::a_label_after_a_separator_binds_at_that_point ... ok
+test dialects::acme::tests::a_one_character_string_is_a_value ... ok
+test dialects::acme::tests::a_scrxor_mask_is_truncated_not_range_checked ... ok
+test dialects::acme::tests::a_named_file_must_be_quoted_and_its_format_known ... ok
+test dialects::acme::tests::a_second_initmem_does_not_displace_the_first ... ok
+test dialects::acme::tests::a_second_name_warns_and_the_first_stands ... ok
+test ast::tests::scoped_locals_survive_the_ast_refactor ... ok
+test dialects::acme::tests::a_sized_directive_takes_a_list_and_an_expression ... ok
+test dialects::acme::tests::a_formatted_for_assembles_to_the_same_bytes ... ok
+test dialects::acme::tests::acmes_retired_spellings_are_the_references_refusal_not_our_gap ... ok
+test dialects::acme::tests::a_value_less_addr_is_a_label ... ok
+test dialects::acme::tests::a_formatted_macro_assembles_to_the_same_bytes ... ok
+test dialects::acme::tests::a_tail_tested_loop_always_runs_once ... ok
+test dialects::acme::tests::a_sized_value_spans_signed_and_unsigned ... ok
+test dialects::acme::tests::a_second_ct_replaces_where_a_second_xor_combines ... ok
+test dialects::acme::tests::addressing_modes_resolve ... ok
+test dialects::acme::tests::an_unterminated_definition_is_refused ... ok
+test dialects::acme::tests::align_pads_to_boundary_with_default_and_custom_fill ... ok
+test dialects::acme::tests::an_initmem_byte_is_signed_or_unsigned ... ok
+test dialects::acme::tests::addr_refuses_what_acme_refuses ... ok
+test dialects::acme::tests::an_unclosed_conditional_is_refused ... ok
+test dialects::acme::tests::addr_binds_a_name_exactly_as_an_assignment_does ... ok
+test dialects::acme::tests::an_oversized_addressing_mode_is_reported ... ok
+test dialects::acme::tests::anon_in_untaken_branch_does_not_exist ... ok
+test dialects::acme::tests::another_processor_is_refused_as_our_gap ... ok
+test dialects::acme::tests::an_if_condition_takes_every_comparison ... ok
+test dialects::acme::tests::anonymous_labels_resolve_by_direction ... ok
+test dialects::acme::tests::an_unknown_processor_is_the_references_refusal ... ok
+test dialects::acme::tests::arithmetic_and_byte_operators ... ok
+test dialects::acme::tests::an_xor_value_is_range_checked_unlike_scrxor ... ok
+test dialects::acme::tests::byte_prefixes_after_multiplication_match_acme ... ok
+test dialects::acme::tests::colon_separates_statements_after_a_label ... ok
+test dialects::acme::tests::backwards_origins_are_placed_by_address ... ok
+test dialects::acme::tests::colon_in_a_literal_is_not_a_statement_separator ... ok
+test dialects::acme::tests::bitwise_and_shift_bind_looser_than_arithmetic ... ok
+test dialects::acme::tests::caret_is_exponentiation_and_xor_is_the_keyword ... ok
+test dialects::acme::tests::emitting_without_an_origin_is_an_error ... ok
+test dialects::acme::tests::eof_inside_an_open_block_is_an_error ... ok
+test dialects::acme::tests::fill_reserves_bytes ... ok
+test dialects::acme::tests::fi_is_the_short_spelling_of_fill ... ok
+test dialects::acme::tests::eof_ends_the_file_without_parsing_the_rest ... ok
+test dialects::acme::tests::for_blocks_nest ... ok
+test dialects::acme::tests::formatting_colon_separated_statements_preserves_bytes ... ok
+test dialects::acme::tests::formatting_does_not_expand ... ok
+test dialects::acme::tests::ct_chooses_the_table_text_converts_through ... ok
+test dialects::acme::tests::every_loop_spelling_runs_the_body_the_right_number_of_times ... ok
+test dialects::acme::tests::forward_pc_gap_is_zero_filled ... ok
+test dialects::acme::tests::forward_anon_never_matches_its_own_line ... ok
+test dialects::acme::tests::cpu_selection_before_origin_does_not_emit_data ... ok
+test dialects::acme::tests::hex_takes_bare_digit_pairs ... ok
+test dialects::acme::tests::hex_reports_an_odd_count_before_a_bad_character ... ok
+test dialects::acme::tests::hex_width_forces_absolute ... ok
+test dialects::acme::tests::ifdef_skips_undefined_block ... ok
+test dialects::acme::tests::if_true_takes_then_branch ... ok
+test dialects::acme::tests::ifndef_inline_block_runs_and_defines ... ok
+test dialects::acme::tests::initmem_applies_to_the_whole_assembly_not_from_where_it_appears ... ok
+test dialects::acme::tests::initmem_fills_an_origin_gap ... ok
+test dialects::acme::tests::conditions_use_the_live_logical_program_counter ... ok
+test dialects::acme::tests::later_regions_overlay_bytes_but_not_origin_gaps ... ok
+test dialects::acme::tests::inline_else_is_preserved_and_trailing_text_is_rejected ... ok
+test dialects::acme::tests::nested_conditionals ... ok
+test dialects::acme::tests::nested_anonymous_levels_are_distinct ... ok
+test dialects::acme::tests::fill_count_reads_the_program_counter ... ok
+test dialects::acme::tests::macros_expand ... ok
+test dialects::acme::tests::one_name_may_carry_several_arities ... ok
+test dialects::acme::tests::no_operator_applies_to_a_string ... ok
+test dialects::acme::tests::only_the_named_encodings_are_taken ... ok
+test dialects::acme::tests::pet_converts_to_petscii ... ok
+test dialects::acme::tests::percent_is_binary_prefix_or_modulo_by_position ... ok
+test dialects::acme::tests::cpu_switches_instruction_sets_per_statement ... ok
+test dialects::acme::tests::only_an_xor_block_scopes_the_mask ... ok
+test dialects::acme::tests::loops_nest_and_mix_with_conditionals ... ok
+test dialects::acme::tests::only_a_known_low_address_shrinks ... ok
+test dialects::acme::tests::pseudopc_moves_the_address_and_not_the_bytes ... ok
+test dialects::acme::tests::register_width_directives_emit_nothing ... ok
+test dialects::acme::tests::raw_emits_its_operands_unconverted ... ok
+test dialects::acme::tests::self_referencing_backward_label ... ok
+test dialects::acme::tests::pseudopc_restores_and_nests ... ok
+test dialects::acme::tests::scr_converts_to_screen_codes ... ok
+test dialects::acme::tests::sets_pc_and_emits_bytes ... ok
+test dialects::acme::tests::scrxor_masks_what_it_converted_and_nothing_else ... ok
+test dialects::acme::tests::set_is_a_reassignable_variable ... ok
+test dialects::acme::tests::star_equals_with_spaces ... ok
+test dialects::acme::tests::symbol_assignment_binds_a_value ... ok
+test dialects::acme::tests::skip_reserves_and_initmem_says_with_what ... ok
+test dialects::acme::tests::text_emits_raw_bytes ... ok
+test dialects::acme::tests::star_is_the_program_counter ... ok
+test dialects::acme::tests::the_old_syntax_never_descends ... ok
+test dialects::acme::tests::the_new_for_syntax_is_inclusive_and_may_descend ... ok
+test dialects::acme::tests::the_old_for_syntax_counts_from_one ... ok
+test dialects::acme::tests::the_mask_spares_reserved_space ... ok
+test dialects::acme::tests::source_requested_diagnostics ... ok
+test dialects::acme::tests::to_without_a_format_defaults_to_cbm_and_says_so ... ok
+test dialects::acme::tests::to_requests_an_output_file_and_a_format ... ok
+test dialects::acme::tests::the_loop_variable_is_live_in_the_body ... ok
+test dialects::acme::tests::xor_masks_data_and_opcodes_alike ... ok
+test dialects::acme::tests::the_table_reaches_only_text ... ok
+test dialects::acme::tests::zero_page_sizing_follows_the_addressing_mode ... ok
+test dialects::acme::tests::zone_emits_nothing ... ok
+test dialects::acme::tests::zone_initial_scope_keeps_bare_keys ... ok
+test dialects::acme::tests::zone_interacts_with_conditionals_per_the_probes ... ok
+test dialects::acme::tests::zone_block_restores_enclosing_zone ... ok
+test dialects::acme::tests::zone_globals_do_not_delimit_locals ... ok
+test dialects::acme::tests::zone_line_label_binds_in_the_old_zone ... ok
+test dialects::acme::tests::the_sized_family_takes_its_byte_order_from_the_directive ... ok
+test dialects::acme::tests::zone_title_reentry_is_a_fresh_zone ... ok
+test dialects::acme::tests::zone_scopes_constants_set_and_ifdef ... ok
+test dialects::asl::semantic_tests::a_semantic_directive_is_refused_as_a_known_directive ... ok
+test dialects::acme::tests::zone_malformed_forms_are_rejected ... ok
+test dialects::asl::semantic_tests::charset_translates_strings_and_characters_but_not_numbers ... ok
+test dialects::asl::semantic_tests::enum_defines_a_fresh_sequence_of_constants ... ok
+test dialects::acme::tests::zone_scopes_local_reuse ... ok
+test dialects::asl::semantic_tests::an_inert_directive_is_accepted_and_dropped ... ok
+test dialects::asl::semantic_tests::radix_is_shared_parser_state ... ok
+test dialects::asl::semantic_tests::no_chip_ignores_relaxed ... ok
+test dialects::asl::semantic_tests::align_is_shared_across_byte_and_word_addressed_asl_chips ... ok
+test dialects::asl::semantic_tests::phase_is_shared_and_matches_asls_stack_rules ... ok
+test dialects::asl::tests::cp1610_window_appends_the_decle_zero_tail ... ok
+test dialects::asl::tests::file_name_accepts_quoted_and_bare_spellings ... ok
+test dialects::asl::tests::slice_binclude_matches_the_probe_matrix ... ok
+test dialects::asl::semantic_tests::every_asl_chip_declares_the_family_list ... ok
+test dialects::asl::semantic_tests::supmode_belongs_to_the_chips_that_have_one ... ok
+test dialects::asl::semantic_tests::charset_is_shared_by_every_asl_front_end ... ok
+test dialects::ca65::tests::a_condition_may_not_reach_forward ... ok
+test dialects::ca65::tests::a_blank_macro_argument_may_leave_invalid_source_in_the_dead_branch ... ok
+test dialects::ca65::tests::a_dead_conditional_branch_need_not_parse ... ok
+test dialects::ca65::tests::a_message_in_an_untaken_branch_stays_quiet ... ok
+test dialects::ca65::tests::a_cheap_local_belongs_to_its_scope ... ok
+test dialects::ca65::tests::a_conditional_picks_one_branch ... ok
+test dialects::ca65::tests::a_label_on_an_align_line_binds_before_the_pad ... ok
+test dialects::ca65::tests::a_real_directive_is_told_apart_from_a_typo ... ok
+test dialects::ca65::tests::a_pseudo_function_is_declared_as_an_expression_word ... ok
+test dialects::ca65::tests::a_label_may_share_a_conditional_or_repetition_head ... ok
+test dialects::ca65::tests::a_message_word_ignores_what_follows_its_string ... ok
+test dialects::ca65::tests::a_listing_word_is_accepted_and_a_parse_option_is_not ... ok
+test dialects::ca65::tests::a_repeat_body_applies_definitions_per_iteration ... ok
+test dialects::ca65::tests::a_repetition_assembles_its_body_n_times ... ok
+test dialects::ca65::tests::a_word_the_reference_never_accepts_is_refused_as_one ... ok
+test dialects::ca65::tests::a_record_declares_a_layout ... ok
+test dialects::ca65::tests::a_scope_has_to_be_opened_and_closed ... ok
+test dialects::ca65::tests::a_shorthand_for_a_segment_the_config_lacks_is_rejected_too ... ok
+test dialects::ca65::tests::a_record_has_to_be_closed_by_its_own_word ... ok
+test dialects::ca65::tests::a_scope_qualifies_the_names_inside_it ... ok
+test dialects::ca65::tests::an_exported_name_must_be_defined ... ok
+test dialects::ca65::tests::a_taken_branch_definition_flows_on ... ok
+test dialects::ca65::tests::an_imported_name_may_not_be_defined_here ... ok
+test dialects::ca65::tests::a_reference_is_counted_from_above_the_line ... ok
+test dialects::ca65::tests::align_pads_within_the_segment ... ok
+test dialects::ca65::tests::an_untaken_branch_defines_nothing_and_need_not_parse ... ok
+test dialects::ca65::tests::an_undefine_inside_a_taken_branch_takes_effect ... ok
+test dialects::ca65::tests::a_keyword_operator_is_its_symbol_twin ... ok
+test dialects::ca65::tests::anonymous_labels_resolve_by_direction ... ok
+test dialects::ca65::tests::an_untaken_branch_defines_nothing ... ok
+test dialects::ca65::tests::anonymous_label_multi_distance ... ok
+test dialects::ca65::tests::assert_takes_the_four_action_words ... ok
+test dialects::ca65::tests::an_untaken_branch_touches_no_binding_state ... ok
+test dialects::ca65::tests::assert_fires_on_zero_and_the_action_decides ... ok
+test dialects::ca65::tests::end_inside_a_taken_branch_leaves_the_block_unclosed ... ok
+test dialects::ca65::tests::assert_sees_a_label_defined_below_it ... ok
+test dialects::ca65::tests::const_and_ismnem_refuse_what_they_cannot_answer ... ok
+test dialects::ca65::tests::dword_dbyt_asciiz_match_reference_bytes ... ok
+test dialects::ca65::tests::cheap_locals_scope_to_global ... ok
+test dialects::ca65::tests::end_stops_the_read ... ok
+test dialects::ca65::tests::forceimport_is_refused_as_the_reference_refuses_it ... ok
+test dialects::ca65::tests::autoimport_is_accepted_and_discarded ... ok
+test dialects::ca65::tests::ifdef_of_a_live_text_symbol_lands_on_its_value ... ok
+test dialects::ca65::tests::global_checks_nothing_either_way ... ok
+test dialects::ca65::tests::out_refuses_anything_but_one_string ... ok
+test dialects::ca65::tests::header_and_code_and_vectors_place_correctly ... ok
+test dialects::ca65::tests::org_moves_the_address_and_not_the_bytes ... ok
+test dialects::ca65::tests::out_is_a_note_and_emits_nothing ... ok
+test dialects::ca65::tests::rom_has_nrom_shape ... ok
+test dialects::ca65::tests::export_assigns_as_well_as_exports ... ok
+test dialects::ca65::tests::redefining_a_live_text_symbol_is_refused ... ok
+test dialects::ca65::tests::popseg_restores_the_segment_pushseg_saved ... ok
+test dialects::ca65::tests::segment_outside_the_nes_config_is_rejected_with_help ... ok
+test dialects::ca65::tests::const_and_ismnem_answer_the_way_ca65_answers ... ok
+test dialects::ca65::tests::exporting_an_absolute_label_as_zeropage_warns ... ok
+test dialects::ca65::tests::single_source_numeric_admission_checks_skipped_captures ... ok
+test dialects::ca65::tests::the_loop_variable_does_not_outlive_the_loop ... ok
+test dialects::ca65::tests::text_defines_substitute_and_can_be_undefined ... ok
+test dialects::ca65::tests::sprintf_refuses_what_ca65_refuses ... ok
+test dialects::ca65::tests::sprintf_reads_the_constants_above_it ... ok
+test dialects::ca65::tests::the_message_words_carry_their_severity ... ok
+test dialects::ca65::tests::the_processor_words_accept_the_processor_we_assemble ... ok
+test dialects::ca65::tests::the_loop_variable_is_zero_based_and_live ... ok
+test dialects::ca65::tests::the_extractors_take_a_byte_from_each_value ... ok
+test dialects::ca65::tests::undefining_an_unknown_text_symbol_is_refused ... ok
+test dialects::ca65::tests::the_reference_conditionals_read_the_same_record ... ok
+test dialects::ca65::tests::the_segment_shorthands_are_their_spelled_out_segments ... ok
+test dialects::ca65::tests::zeropage_label_uses_zp_addressing ... ok
+test dialects::ca65::tests::the_string_functions_refuse_what_ca65_refuses ... ok
+test dialects::ca65::tests::the_logical_layer_reads_as_ca65_reads_it ... ok
+test dialects::ca65_816::tests::a_formatted_macro_body_label_still_assembles ... ok
+test dialects::ca65_816::tests::an_indented_instruction_is_not_read_as_a_label ... ok
+test dialects::ca65_816::tests::a_formatted_macro_assembles_to_the_same_bytes ... ok
+test dialects::ca65::tests::expression_functions_extract_bytes ... ok
+test dialects::ca65_816::tests::a_label_may_be_indented ... ok
+test dialects::ca65_816::tests::dword_dbyt_asciiz_match_reference_bytes ... ok
+test dialects::ca65_816::tests::formatting_does_not_expand ... ok
+test dialects::ca65_816::tests::block_moves_cop_wdm_and_bank_byte ... ok
+test dialects::ca65_816::tests::brl_relative_is_16_bit ... ok
+test dialects::ca65_816::tests::jumps_and_long_calls ... ok
+test dialects::ca65_816::tests::macros_expand ... ok
+test dialects::ca65_816::tests::mx_width_follows_directives ... ok
+test dialects::ca65_816::tests::macros_compose_and_take_a_label ... ok
+test dialects::ca65::tests::the_string_functions_fold_the_way_ca65_folds_them ... ok
+test dialects::ca65_816::tests::new_addressing_modes ... ok
+test dialects::ca65_816::tests::only_dot_local_scopes_a_label_to_its_expansion ... ok
+test dialects::ca65_816::tests::size_picks_smallest_with_forces ... ok
+test dialects::ca65_816::tests::standalone_and_stz ... ok
+test dialects::ca65_816::tests::substitution_respects_words_and_strings ... ok
+test dialects::ca65_flat::tests::quoted_name_requires_the_string_form ... ok
+test dialects::ca65_816::tests::too_many_arguments_is_an_error_but_too_few_is_not ... ok
+test dialects::ca65_flat::tests::slice_incbin_matches_the_probe_matrix ... ok
+test dialects::ca65_huc6280::tests::an_indented_instruction_is_not_read_as_a_label ... ok
+test dialects::ca65_huc6280::tests::a_label_may_be_indented ... ok
+test dialects::ca65_huc6280::tests::an_indented_label_survives_formatting ... ok
+test dialects::ca65_huc6280::tests::indexed_indirect_resolves_by_the_mnemonic_not_the_syntax ... ok
+test dialects::ca65_huc6280::tests::huc6280_block_transfers ... ok
+test dialects::ca65::tests::the_macro_predicates_answer_the_way_ca65_answers ... ok
+test dialects::ca65_huc6280::tests::huc6280_exotic_forms ... ok
+test dialects::ca65_huc6280::tests::inherited_6502_and_65c02_ops ... ok
+test dialects::ca65_huc6280::tests::multi_operand_forms_round_trip_via_disassembler ... ok
+test dialects::ca65_huc6280::tests::low_absolute_takes_a_force ... ok
+test dialects::ca65_huc6280::tests::huc6280_implied_and_bit_ops ... ok
+test dialects::ca65_layout::tests::a_floating_segment_follows_its_predecessor ... ok
+test dialects::ca65_layout::tests::a_start_behind_the_cursor_is_refused ... ok
+test dialects::ca65_huc6280::tests::macros_reach_this_dialect_too ... ok
+test dialects::ca65_layout::tests::out_of_bound_configs_are_refused_by_name ... ok
+test dialects::ca65_layout::tests::the_default_layout_is_the_historical_table ... ok
+test dialects::cdp1802::directive_surface::an_undeclared_spelling_is_not_a_directive ... ok
+test dialects::ca65_layout::tests::the_bradsmith_config_parses_and_places ... ok
+test dialects::cdp1802::directive_surface::every_declared_directive_is_dispatched ... ok
+test dialects::cdp1802::directive_surface::every_declared_spelling_is_recognised ... ok
+test dialects::cdp1802::directive_surface::ignored_directives_emit_no_bytes ... ok
+test dialects::ca65_816::tests::runaway_recursion_is_caught ... ok
+test dialects::cdp1802::tests::long_branch_is_big_endian ... ok
+test dialects::cdp1802::tests::immediate_and_inherent ... ok
+test dialects::cdp1802::tests::short_branch_emits_low_byte ... ok
+test dialects::cdp1802::tests::register_ops ... ok
+test dialects::cdp1802::tests::directives ... ok
+test dialects::cdp1802::tests::comments_are_carried_as_trivia ... ok
+test dialects::f8::tests::absolute_is_big_endian ... ok
+test dialects::cp1610::tests::byte_emits_two_decles_per_operand ... ok
+test dialects::f8::tests::forward_branch_label ... ok
+test dialects::f8::tests::branches_offset_from_the_offset_byte ... ok
+test dialects::f8::tests::immediates_and_nibbles ... ok
+test dialects::i8048::tests::jmp_and_call_pack_the_page ... ok
+test dialects::ca65::tests::the_conditional_heads_fold_as_ca65_folds_them ... ok
+test dialects::i8048::tests::conditional_jumps_emit_low_byte ... ok
+test dialects::f8::tests::registers_and_scratchpad ... ok
+test dialects::cp1610::tests::a_text_operand_silences_the_statement_and_warns ... ok
+test dialects::i8048::tests::accumulator_ops ... ok
+test dialects::i8048::tests::moves_and_registers ... ok
+test dialects::i8048::tests::romless_forbids_the_bus_port_ops ... ok
+test dialects::i8080::tests::a_leading_org_gap_moves_the_load_address_too ... ok
+test dialects::ca65::tests::the_token_functions_fold_the_way_ca65_folds_them ... ok
+test dialects::i8080::tests::comments_are_carried_as_trivia ... ok
+test dialects::i8080::tests::jump_to_label_not_register ... ok
+test dialects::i8080::tests::arithmetic_and_pairs ... ok
+test dialects::i8080::tests::unwritten_space_falls_away_at_both_ends ... ok
+test dialects::i8080::tests::direct_jumps_calls_rst ... ok
+test dialects::i8080::tests::moves_and_immediates ... ok
+test dialects::i8048::tests::romless_shares_the_8048_encoding ... ok
+test dialects::lwasm::tests::a_formatted_macro_assembles_to_the_same_bytes ... ok
+test dialects::i8080::tests::number_radixes ... ok
+test dialects::lwasm::tests::a_formatted_conditional_assembles_to_the_same_bytes ... ok
+test dialects::lwasm::tests::a_local_does_not_escape_its_expansion ... ok
+test dialects::lwasm::tests::a_pragma_takes_a_comma_list_and_then_a_comment ... ok
+test dialects::lwasm::tests::a_branch_inside_a_phase_measures_from_the_claimed_address ... ok
+test dialects::lwasm::tests::a_pragma_is_set_and_asked_after ... ok
+test dialects::lwasm::tests::a_refused_word_inside_a_dead_branch_is_never_reached ... ok
+test dialects::lwasm::tests::a_name_is_redefinable_or_fixed_but_not_both ... ok
+test dialects::lwasm::tests::a_second_org_moves_the_address_and_not_the_output ... ok
+test dialects::lwasm::tests::a_set_value_chooses_direct_or_extended ... ok
+test dialects::lwasm::tests::a_pragma_asking_for_what_we_cannot_do_says_so ... ok
+test dialects::lwasm::tests::a_struct_inside_a_dead_branch_is_never_read ... ok
+test dialects::lwasm::tests::a_struct_that_is_not_one_says_so ... ok
+test dialects::lwasm::tests::a_struct_names_offsets_and_emits_nothing ... ok
+test dialects::lwasm::tests::align_needs_a_positive_boundary ... ok
+test dialects::lwasm::tests::a_terminated_string_marks_its_own_end ... ok
+test dialects::lwasm::tests::a_suffix_scopes_a_label_to_its_expansion ... ok
+test dialects::lwasm::tests::big_endian_data ... ok
+test dialects::lwasm::tests::an_untaken_branch_binds_nothing_that_could_change_a_size ... ok
+test dialects::lwasm::tests::align_pads_to_the_stated_boundary ... ok
+test dialects::lwasm::tests::backward_org_discards_an_initial_reservation_only_region ... ok
+test dialects::lwasm::tests::conditionals_nest_and_take_an_else ... ok
+test dialects::lwasm::tests::comments_are_carried_as_trivia ... ok
+test dialects::lwasm::tests::an_instance_reserves_the_room_and_names_it ... ok
+test dialects::lwasm::tests::direct_and_extended_selection ... ok
+test dialects::lwasm::tests::fcc_string ... ok
+test dialects::lwasm::tests::formatting_does_not_expand ... ok
+test dialects::lwasm::tests::either_closer_ends_a_conditional ... ok
+test dialects::lwasm::tests::fill_zmb_fqb_match_reference_bytes ... ok
+test dialects::lwasm::tests::error_stops_the_assembly_unless_the_branch_is_untaken ... ok
+test dialects::lwasm::tests::fdbs_swaps_the_bytes_the_way_lwasm_does ... ok
+test dialects::lwasm::tests::each_comparison_tests_against_zero ... ok
+test dialects::lwasm::tests::includestr_inside_an_untaken_branch_is_not_parsed ... ok
+test dialects::lwasm::tests::indexed_auto_and_accumulator ... ok
+test dialects::lwasm::tests::ifstr_covers_exact_prefix_suffix_and_case_rules ... ok
+test dialects::lwasm::tests::inherent_and_immediate ... ok
+test dialects::lwasm::tests::indexed_indirect_and_pcr ... ok
+test dialects::lwasm::tests::indexed_offsets_pick_smallest ... ok
+test dialects::lwasm::tests::labels_and_org ... ok
+test dialects::lwasm::tests::macr_defines_a_macro_and_a_stray_one_says_why_not ... ok
+test dialects::lwasm::tests::macros_expand ... ok
+test dialects::lwasm::tests::parameters_are_positional_and_unchecked ... ok
+test dialects::lwasm::tests::lwasm_does_not_nest_a_phase ... ok
+test dialects::lwasm::tests::moving_the_counter_inside_a_phase_is_refused_as_our_gap ... ok
+test dialects::lwasm::tests::os9_module_boundaries_are_checked ... ok
+test dialects::lwasm::tests::os9_module_header_syscall_and_crc_match_lwtools ... ok
+test dialects::lwasm::tests::phase_claims_an_address_without_moving_the_output ... ok
+test dialects::lwasm::tests::opt_forgives_a_name_pragma_refuses ... ok
+test dialects::lwasm::tests::pass_conditionals_warn_and_take_the_true_branch ... ok
+test dialects::lwasm::tests::plain_if_tests_against_zero ... ok
+test dialects::lwasm::tests::set_binds_a_name_that_moves ... ok
+test dialects::lwasm::tests::setdp_applies_to_an_already_placed_label ... ok
+test dialects::lwasm::tests::setdp_moves_which_page_is_direct ... ok
+test dialects::lwasm::tests::reorg_goes_back_to_the_org_before_this_one ... ok
+test dialects::lwasm::tests::setdp_takes_a_constant_page_number ... ok
+test dialects::lwasm::tests::the_direct_force_emits_the_offset_within_the_page ... ok
+test dialects::lwasm::tests::short_and_long_branches ... ok
+test dialects::lwasm::tests::setstr_redefines_and_unsets_a_string_symbol ... ok
+test dialects::lwasm::tests::setstr_interpolates_into_includestr ... ok
+test dialects::lwasm::tests::the_section_words_are_the_references_refusal ... ok
+test dialects::lwasm::tests::the_reserve_family_reserves_in_units_of_its_width ... ok
+test dialects::m6800::tests::comments_are_carried_as_trivia ... ok
+test dialects::m6800::tests::addressing_modes ... ok
+test dialects::lwasm::tests::transfer_and_stack ... ok
+test dialects::lwasm::tests::warning_and_msg_say_something_and_carry_on ... ok
+test dialects::lwasm::tests::the_listing_words_emit_nothing_whatever_they_are_given ... ok
+test dialects::mos6502::tests::a_data_list_does_not_split_inside_a_call ... ok
+test dialects::macros::frame_tests::a_parse_error_in_an_expansion_keeps_its_frames ... ok
+test dialects::m6800::tests::sixteen_bit_and_force ... ok
+test dialects::m6800::tests::directives ... ok
+test dialects::macros::frame_tests::an_error_outside_an_expansion_gains_nothing ... ok
+test dialects::m6800::tests::inherent_and_branches ... ok
+test dialects::mos6502::tests::byte_operator_precedence_differs_by_dialect ... ok
+test dialects::pasmo::tests::a_column_zero_mnemonic_or_directive_is_the_operation ... ok
+test dialects::macros::frame_tests::every_expanding_dialect_reports_its_expansion ... ok
+test dialects::pasmo::tests::a_condition_folds_against_the_constants_above_it ... ok
+test dialects::pasmo::tests::a_diagnostic_never_names_a_directive_pasmo_lacks ... ok
+test dialects::pasmo::tests::a_dotted_label_is_not_local ... ok
+test dialects::pasmo::tests::a_conditional_picks_one_branch ... ok
+test dialects::pasmo::tests::a_keyword_may_be_written_in_any_case ... ok
+test dialects::pasmo::tests::a_formatted_repetition_assembles_to_the_same_bytes ... ok
+test dialects::pasmo::tests::a_formatted_macro_assembles_to_the_same_bytes ... ok
+test dialects::pasmo::tests::a_local_declaration_scopes_a_label_to_its_expansion ... ok
+test dialects::pasmo::tests::a_formatted_conditional_assembles_to_the_same_bytes ... ok
+test dialects::pasmo::tests::a_local_does_not_escape_its_expansion ... ok
+test dialects::pasmo::tests::a_lone_operand_on_add_is_refused ... ok
+test dialects::pasmo::tests::a_label_may_sit_in_front_of_an_invocation ... ok
+test dialects::pasmo::tests::a_macro_and_a_repetition_share_the_closer_without_colliding ... ok
+test dialects::pasmo::tests::a_macro_may_be_written_either_way_round ... ok
+test dialects::pasmo::tests::a_repetition_assembles_its_body_n_times ... ok
+test dialects::pasmo::tests::a_repetition_of_zero_emits_nothing ... ok
+test dialects::pasmo::tests::an_unbalanced_block_is_refused ... ok
+test dialects::pasmo::tests::an_unclosed_repetition_names_pasmos_own_keyword ... ok
+test dialects::pasmo::tests::an_untaken_branch_is_never_read ... ok
+test dialects::pasmo::tests::a_repetition_in_an_untaken_branch_folds_nothing ... ok
+test dialects::pasmo::tests::an_error_inside_an_expansion_names_the_invocation ... ok
+test dialects::pasmo::tests::arity_is_not_checked ... ok
+test dialects::pasmo::tests::arithmetic_respects_c_precedence ... ok
+test dialects::pasmo::tests::base_pasmo_and_pasmonext_agree_on_standard_z80 ... ok
+test dialects::pasmo::tests::cb_bit_ops_assemble ... ok
+test dialects::pasmo::tests::comments_are_carried_as_trivia ... ok
+test dialects::pasmo::tests::conditionals_nest ... ok
+test dialects::pasmo::tests::condition_codes_disambiguate_from_registers ... ok
+test dialects::pasmo::tests::defb_string_expands_to_char_bytes ... ok
+test dialects::pasmo::tests::defs_count_uses_prior_labels_and_defaults_to_zero_fill ... ok
+test dialects::pasmo::tests::comparisons_use_pasmos_own_spellings ... ok
+test dialects::pasmo::tests::constants_use_native_unsigned_word_values ... ok
+test dialects::pasmo::tests::defs_accepts_fill_and_live_location_counter ... ok
+test dialects::pasmo::tests::defs_reserves_zero_bytes ... ok
+test dialects::pasmo::tests::dollar_hex_is_still_a_number ... ok
+test dialects::pasmo::tests::defs_normalized_count_advances_labels_and_live_counter ... ok
+test dialects::pasmo::tests::defs_rejects_malformed_operands_and_unknown_counts ... ok
+test dialects::pasmo::tests::ed_block_move_assembles ... ok
+test dialects::pasmo::tests::ds_count_folds_a_constant_expression ... ok
+test dialects::pasmo::tests::equ_defines_a_constant ... ok
+test dialects::pasmo::tests::formatting_does_not_expand ... ok
+test dialects::pasmo::tests::im_selects_mode_by_literal ... ok
+test dialects::pasmo::tests::end_stops_assembly_and_keeps_its_entry_point ... ok
+test dialects::pasmo::tests::macros_nest ... ok
+test dialects::pasmo::tests::loads_registers_and_immediates ... ok
+test dialects::pasmo::tests::ix_iy_ops_assemble ... ok
+test dialects::pasmo::tests::location_counter_is_statement_start ... ok
+test dialects::pasmo::tests::macros_still_work_on_the_keyword_pipeline ... ok
+test dialects::pasmo::tests::index_register_halves_encode_through_the_shared_isa ... ok
+test dialects::pasmo::tests::oversized_byte_truncates_silently ... ok
+test dialects::pasmo::tests::port_io_uses_eight_bit_operand ... ok
+test dialects::pasmo::tests::relative_jumps_resolve_against_labels ... ok
+test dialects::pasmo::tests::sixteen_bit_add_and_indirect ... ok
+test dialects::pasmo::tests::repetitions_nest_and_may_carry_a_label ... ok
+test dialects::pasmo::tests::substitution_respects_words_and_strings ... ok
+test dialects::pasmo::tests::nested_condition_truth_values_are_unsigned_words ... ok
+test dialects::pasmo::tests::the_closer_is_endm_and_the_sjasmplus_spellings_are_refused ... ok
+test dialects::pasmo::tests::the_keyword_is_case_insensitive_but_the_name_is_not ... ok
+test dialects::pasmo::tests::word_binary_bitwise_results_are_unsigned ... ok
+test dialects::pasmo::tests::the_spellings_pasmo_lacks_are_refused ... ok
+test dialects::pasmo::tests::word_bitwise_operators_match_pasmo ... ok
+test dialects::pasmo::tests::word_operators_preserve_identifier_boundaries_and_dialect ... ok
+test dialects::pasmo::tests::word_operators_have_the_same_grouping_in_conditions ... ok
+test dialects::pasmo::tests::z80n_opcodes_follow_the_target_not_the_dialect ... ok
+test dialects::pasmo::tests::word_not_is_unsigned_before_comparison_division_and_reserve ... ok
+test dialects::rgbasm::tests::a_conditional_picks_one_branch ... ok
+test dialects::rgbasm::tests::a_condition_folds_against_the_constants_above_it ... ok
+test dialects::rgbasm::tests::a_banked_section_is_addressed_and_placed_differently ... ok
+test dialects::pasmo::tests::runaway_recursion_is_caught ... ok
+test dialects::rgbasm::tests::a_macro_expands_at_its_call_site ... ok
+test dialects::rgbasm::tests::a_label_takes_its_own_sections_base ... ok
+test dialects::rgbasm::tests::a_bank_is_not_an_origin ... ok
+test dialects::rgbasm::tests::a_formatted_block_assembles_to_the_same_bytes ... ok
+test dialects::rgbasm::tests::a_walk_handled_directive_survives_the_re_parse ... ok
+test dialects::rgbasm::tests::a_real_directive_is_told_apart_from_a_typo ... ok
+test dialects::rgbasm::tests::a_number_argument_reads_the_constants_above_it ... ok
+test dialects::rgbasm::tests::an_oversized_byte_is_a_warning_not_an_error ... ok
+test dialects::rgbasm::tests::an_assertion_fires_only_when_false_and_reaches_forward ... ok
+test dialects::rgbasm::tests::alu_one_and_two_operand ... ok
+test dialects::rgbasm::tests::an_elif_chain_formats_back_flat ... ok
+test dialects::rgbasm::tests::an_unresolved_interpolation_is_refused ... ok
+test dialects::rgbasm::tests::bank_of_an_unknown_section_is_refused ... ok
+test dialects::rgbasm::tests::a_repetition_assembles_its_body_n_times ... ok
+test dialects::rgbasm::tests::bank_reaches_forward_to_its_section ... ok
+test dialects::rgbasm::tests::directives ... ok
+test dialects::rgbasm::tests::current_pc_symbol ... ok
+test dialects::rgbasm::tests::ds_count_can_end_at_an_address_relative_to_the_current_location ... ok
+test dialects::rgbasm::tests::digit_separators_follow_rgbasm_rules ... ok
+test dialects::rgbasm::tests::embedded_bit_and_rst ... ok
+test dialects::rgbasm::tests::comments_are_carried_as_trivia ... ok
+test dialects::rgbasm::tests::equs_substitutes_text_and_braces_reach_inside_a_token ... ok
+test dialects::rgbasm::tests::definedness_and_logical_operators_follow_rgbasm ... ok
+test dialects::rgbasm::tests::export_asks_nothing_of_its_name ... ok
+test dialects::rgbasm::tests::extra_arguments_are_dropped_and_a_missing_one_fails_at_use ... ok
+test dialects::rgbasm::tests::floating_sections_use_rgblink_largest_first_first_fit ... ok
+test dialects::rgbasm::tests::formatting_does_not_expand ... ok
+test dialects::rgbasm::tests::floating_wram_sections_follow_rgblink_placement ... ok
+test dialects::rgbasm::tests::graphics_literals_pack_two_bit_tile_rows ... ok
+test dialects::rgbasm::tests::only_statement_vocabulary_is_declared ... ok
+test dialects::rgbasm::tests::fixed_point_reads_as_rgbasm_reads_it ... ok
+test dialects::rgbasm::tests::jumps_and_labels ... ok
+test dialects::rgbasm::tests::macros_compose_with_conditionals_and_repetitions ... ok
+test dialects::rgbasm::tests::loads_and_registers ... ok
+test dialects::rgbasm::tests::overlapping_sections_are_refused ... ok
+test dialects::rgbasm::tests::operandless_data_reserves_one_element ... ok
+test dialects::rgbasm::tests::ram_sections_have_addresses_without_rom_bytes ... ok
+test dialects::rgbasm::tests::sections_are_placed_by_address_not_by_source_order ... ok
+test dialects::rgbasm::tests::rs_definitions_follow_the_live_offset_counter ... ok
+test dialects::rgbasm::tests::source_requested_diagnostics ... ok
+test dialects::rgbasm::tests::sm83_specific ... ok
+test dialects::rgbasm::tests::strfmt_refuses_what_rgbasm_refuses ... ok
+test dialects::rgbasm::tests::the_old_header_form_is_refused ... ok
+test dialects::rgbasm::tests::the_spellings_rgbasm_lacks_are_refused ... ok
+test dialects::ca65::tests::sprintf_formats_the_way_ca65_formats ... ok
+test dialects::s2650::tests::register_and_immediate ... ok
+test dialects::rgbasm::tests::startof_reads_regions_and_placed_sections ... ok
+test dialects::rgbasm::tests::strfmt_formats_the_way_rgbasm_formats ... ok
+test dialects::rgbasm::tests::the_text_layer_formats_back_as_written ... ok
+test dialects::rgbasm::tests::the_string_functions_fold_the_way_rgbasm_folds_them ... ok
+test dialects::s2650::tests::absolute_and_indirect ... ok
+test dialects::s2650::tests::illegal_z_forms_rejected ... ok
+test dialects::s2650::tests::absolute_indexed ... ok
+test dialects::s2650::tests::out_of_range_operands_error ... ok
+test dialects::sjasmplus::tests::a_backward_condition_needs_no_pass ... ok
+test dialects::s2650::tests::relative_signed_7bit ... ok
+test dialects::s2650::tests::zero_relative_and_indexed_branch_aliases ... ok
+test dialects::scmp::tests::comments_are_carried_as_trivia ... ok
+test dialects::scmp::tests::immediates_c_hex ... ok
+test dialects::scmp::tests::inherent_and_pointer_exchange ... ok
+test dialects::scmp::tests::memory_reference ... ok
+test dialects::sjasmplus::tests::a_colon_in_a_literal_or_comment_separates_nothing ... ok
+test dialects::sjasmplus::tests::a_backward_org_moves_only_the_logical_counter ... ok
+test dialects::sjasmplus::tests::a_colon_separates_statements ... ok
+test dialects::sjasmplus::tests::a_column_zero_module_is_a_label_not_a_directive ... ok
+test dialects::sjasmplus::tests::a_condition_may_reach_forward ... ok
+test dialects::sjasmplus::tests::a_column_zero_word_is_always_a_label ... ok
+test dialects::sjasmplus::tests::a_condition_that_never_settles_warns_and_ships ... ok
+test dialects::sjasmplus::tests::a_ds_count_may_use_the_location_counter ... ok
+test dialects::sjasmplus::tests::a_conditional_fits_on_one_line ... ok
+test dialects::sjasmplus::tests::a_ds_count_on_a_moving_label_stops_where_the_reference_stops ... ok
+test dialects::sjasmplus::tests::a_ds_count_that_swings_between_passes_matches_pass_three ... ok
+test dialects::sjasmplus::tests::a_ds_count_reaches_a_later_equ ... ok
+test dialects::sjasmplus::tests::a_label_may_sit_in_front_of_an_invocation ... ok
+test dialects::sjasmplus::tests::a_forward_reference_picks_the_right_candidate ... ok
+test dialects::sjasmplus::tests::a_labels_colon_is_not_a_separator ... ok
+test dialects::sjasmplus::tests::a_local_label_inside_a_module_is_qualified_by_both ... ok
+test dialects::sjasmplus::tests::a_macro_local_label_is_scoped_to_its_expansion ... ok
+test dialects::sjasmplus::tests::a_malformed_module_is_refused ... ok
+test dialects::sjasmplus::tests::a_mixed_case_repetition_keyword_is_not_one ... ok
+test dialects::sjasmplus::tests::a_macro_expands_into_the_module_that_invoked_it ... ok
+test dialects::sjasmplus::tests::a_macro_may_be_defined_name_first ... ok
+test dialects::sjasmplus::tests::a_macro_is_defined_where_the_walk_reaches_it ... ok
+test dialects::sjasmplus::tests::a_module_may_be_reopened ... ok
+test dialects::sjasmplus::tests::a_lone_operand_on_add_adc_sbc_is_the_accumulator_form ... ok
+test dialects::sjasmplus::tests::a_module_prefixes_the_labels_defined_inside_it ... ok
+test dialects::sjasmplus::tests::a_negative_ds_count_rewinds_the_counter_without_rewinding_output ... ok
+test dialects::sjasmplus::tests::a_parameter_substitutes_before_the_expression_is_evaluated ... ok
+test dialects::sjasmplus::tests::a_macro_is_visible_across_files_from_its_definition_on ... ok
+test dialects::sjasmplus::tests::a_formatted_repetition_keeps_its_body ... ok
+test dialects::sjasmplus::tests::a_repetitions_closer_is_not_respelled ... ok
+test dialects::sjasmplus::tests::a_plain_label_in_a_macro_body_stays_global ... ok
+test dialects::sjasmplus::tests::a_reference_tries_the_qualified_name_then_the_global_one ... ok
+test dialects::sjasmplus::tests::a_struct_definition_emits_no_bytes ... ok
+test dialects::sjasmplus::tests::a_struct_initialiser_with_too_many_values_is_refused ... ok
+test dialects::sjasmplus::tests::a_struct_initialiser_value_is_an_expression_and_ds_takes_no_slot ... ok
+test dialects::sjasmplus::tests::a_nested_group_fills_an_embedded_member ... ok
+test dialects::sjasmplus::tests::an_error_in_an_expansion_carries_its_frames ... ok
+test dialects::sjasmplus::tests::a_struct_initialiser_list_runs_across_lines ... ok
+test dialects::sjasmplus::tests::an_error_outside_an_expansion_carries_none ... ok
+test dialects::sjasmplus::tests::a_tape_of_the_whole_device_is_refused_as_our_gap ... ok
+test dialects::sjasmplus::tests::a_temporary_label_does_not_reanchor_locals ... ok
+test dialects::sjasmplus::tests::a_symbol_no_pass_defines_is_an_error_on_the_last_pass ... ok
+test dialects::sjasmplus::tests::a_struct_member_ds_reaches_a_later_equ ... ok
+test dialects::sjasmplus::tests::an_error_inside_an_expansion_names_the_invocation ... ok
+test dialects::sjasmplus::tests::an_at_sign_escapes_the_module_scope ... ok
+test dialects::sjasmplus::tests::a_struct_instance_takes_an_initialiser_list ... ok
+test dialects::sjasmplus::tests::align_is_power_of_two_only ... ok
+test dialects::sjasmplus::tests::arity_and_termination_are_checked ... ok
+test dialects::sjasmplus::tests::an_unclosed_module_is_reported ... ok
+test dialects::sjasmplus::tests::byte_is_db ... ok
+test dialects::sjasmplus::tests::comparisons_answer_minus_one_in_the_dialects_own_spellings ... ok
+test dialects::sjasmplus::tests::an_inner_module_does_not_see_the_outer_modules_names ... ok
+test dialects::sjasmplus::tests::conditionals_nest ... ok
+test dialects::sjasmplus::tests::conditional_takes_the_live_branch ... ok
+test dialects::sjasmplus::tests::block_structure_errors ... ok
+test dialects::sjasmplus::tests::condition_expressions_match_the_reference ... ok
+test dialects::sjasmplus::tests::define_substitutes_textually ... ok
+test dialects::sjasmplus::tests::dup_repeats_its_body_a_computed_number_of_times ... ok
+test dialects::sjasmplus::tests::dotted_conditional_spellings ... ok
+test dialects::sjasmplus::tests::ds_reserves_bytes ... ok
+test dialects::sjasmplus::tests::ds_defs_and_block_take_a_fill_that_may_be_forward ... ok
+test dialects::sjasmplus::tests::each_statement_on_a_colon_line_gets_its_own_span ... ok
+test dialects::sjasmplus::tests::device_mapping_flows_across_includes_and_macros ... ok
+test dialects::sjasmplus::tests::end_in_an_include_stops_the_includer ... ok
+test dialects::sjasmplus::tests::equ_is_module_scoped_and_define_is_not ... ok
+test dialects::sjasmplus::tests::end_stops_the_whole_live_assembly ... ok
+test dialects::sjasmplus::tests::formatting_preserves_a_macro_rather_than_expanding_it ... ok
+test dialects::sjasmplus::tests::elseif_chains_pick_the_first_true_leg ... ok
+test dialects::sjasmplus::tests::label_on_the_if_line_binds ... ok
+test dialects::sjasmplus::tests::local_labels_scope_under_the_preceding_global ... ok
+test dialects::sjasmplus::tests::ifn_takes_the_branch_only_for_zero ... ok
+test dialects::sjasmplus::tests::macro_parameters_are_comma_separated ... ok
+test dialects::sjasmplus::tests::locals_stay_distinct_through_nesting ... ok
+test dialects::sjasmplus::tests::ifdef_namespace_is_defines_only_and_case_sensitive ... ok
+test dialects::sjasmplus::tests::every_directive_takes_an_optional_dot ... ok
+test dialects::sjasmplus::tests::malformed_graphic_and_hex_data_are_refused ... ok
+test dialects::sjasmplus::tests::location_counter_is_statement_start ... ok
+test dialects::sjasmplus::tests::mixed_case_keywords_are_not_conditionals ... ok
+test dialects::sjasmplus::tests::macros_nest_and_may_invoke_one_defined_later ... ok
+test dialects::sjasmplus::tests::number_formats ... ok
+test dialects::sjasmplus::tests::page_preserves_the_counter_and_device_writes_overwrite ... ok
+test dialects::sjasmplus::tests::pasmo_does_not_split_on_a_colon ... ok
+test dialects::sjasmplus::tests::opt_enables_the_specnext_invaders_option_state ... ok
+test dialects::sjasmplus::tests::oversized_byte_truncates_with_a_warning ... ok
+test dialects::sjasmplus::tests::pasmo_does_not_have_modules ... ok
+test dialects::sjasmplus::tests::pasmo_does_not_take_a_dotted_directive ... ok
+test dialects::sjasmplus::tests::pasmo_still_requires_a_constant_condition ... ok
+test dialects::sjasmplus::tests::rept_and_dup_are_the_same_block ... ok
+test dialects::sjasmplus::tests::pasmo_rejects_reused_local_label ... ok
+test dialects::sjasmplus::tests::repetition_nests_and_composes_with_macros ... ok
+test dialects::sjasmplus::tests::savecpr_serialises_zero_filled_pages_and_validates_its_device ... ok
+test dialects::sjasmplus::tests::savebin_needs_a_device ... ok
+test dialects::sjasmplus::tests::savecpr_replays_emission_through_the_live_slot_map ... ok
+test dialects::sjasmplus::tests::savecpr_is_a_source_ordered_snapshot ... ok
+test dialects::sjasmplus::tests::pages_are_separate_memory_bounded_by_the_device ... ok
+test dialects::sjasmplus::tests::savebin_describes_a_file_beside_the_machine_code ... ok
+test dialects::sjasmplus::tests::savetap_wraps_a_span_in_a_tape ... ok
+test dialects::sjasmplus::tests::slash_slash_comment ... ok
+test dialects::sjasmplus::tests::shares_instruction_syntax_with_pasmo ... ok
+test dialects::sjasmplus::tests::skipped_branch_defines_nothing ... ok
+test dialects::sjasmplus::tests::sldopt_comment_is_explicitly_inert_for_machine_output ... ok
+test dialects::sjasmplus::tests::specnext_invaders_struct_shapes_assemble ... ok
+test dialects::sjasmplus::tests::struct_refusals_match_the_reference ... ok
+test dialects::sjasmplus::tests::substitution_does_not_reach_inside_strings ... ok
+test dialects::sjasmplus::tests::runaway_recursion_is_reported_not_crashed_on ... ok
+test dialects::sjasmplus::tests::substitution_stops_at_word_boundaries ... ok
+test dialects::sjasmplus::tests::temporary_labels_resolve_forward_and_backward ... ok
+test dialects::sjasmplus::tests::taken_branch_bindings_flow_out ... ok
+test dialects::sjasmplus::tests::temporary_reference_spelling_is_jump_target_only ... ok
+test dialects::sjasmplus::tests::the_dot_does_not_relax_the_case_rule ... ok
+test dialects::sjasmplus::tests::temporary_labels_span_includes_and_macro_expansions ... ok
+test dialects::sjasmplus::tests::the_dotted_spellings_are_declared ... ok
+test dialects::sjasmplus::tests::the_formatter_expands_a_colon_line ... ok
+test dialects::sjasmplus::tests::the_formatter_keeps_a_dotted_equ_inline ... ok
+test dialects::sjasmplus::tests::the_qualified_candidate_wins_over_the_global_one ... ok
+test dialects::sjasmplus::tests::the_macro_spellings_are_told_apart_by_indentation ... ok
+test dialects::sjasmplus::tests::the_module_keyword_is_all_one_case ... ok
+test dialects::sjasmplus::tests::the_wider_data_directives_match_sjasmplus ... ok
+test dialects::tms7000::tests::dual_operand_alu ... ok
+test dialects::sjasmplus::tests::the_macro_keyword_is_case_insensitive_but_the_name_is_not ... ok
+test dialects::sjasmplus_lua::tests::memory_is_bounded ... ok
+test dialects::sjasmplus_lua::tests::sandbox_has_no_files_processes_or_binary_loader ... ok
+test dialects::sjasmplus_lua::tests::callbacks_and_globals_survive_between_scopes ... ok
+test dialects::tms7000::tests::jumps_and_bit_tests ... ok
+test dialects::tms7000::tests::implied_and_trap ... ok
+test dialects::tms7000::tests::peripheral_and_extended ... ok
+test dialects::vasm::comment_scanning::semicolons_inside_literals_are_not_comments ... ok
+test dialects::vasm::directive_surface::a_bare_stem_is_a_word ... ok
+test dialects::tms7000::tests::special_mov_and_single_register ... ok
+test dialects::vasm::comment_scanning::a_semicolon_character_literal_encodes_like_vasm ... ok
+test dialects::vasm::directive_surface::a_condition_on_the_location_counter_is_refused_not_guessed ... ok
+test dialects::vasm::directive_surface::a_known_mnemonic_is_refused_for_its_operands ... ok
+test dialects::vasm::directive_surface::a_longer_stem_is_not_swallowed_by_a_shorter_one ... ok
+test dialects::vasm::directive_surface::a_formatted_block_assembles_to_the_same_bytes ... ok
+test dialects::vasm::directive_surface::a_negative_repeat_count_is_empty_rather_than_an_error ... ok
+test dialects::vasm::directive_surface::a_name_defined_twice_is_refused ... ok
+test dialects::vasm::directive_surface::align_takes_an_exponent_not_a_boundary ... ok
+test dialects::vasm::directive_surface::an_undeclared_spelling_is_not_a_directive ... ok
+test dialects::vasm::directive_surface::an_unknown_size_keeps_its_own_diagnostic ... ok
+test dialects::vasm::directive_surface::a_visible_name_must_be_defined ... ok
+test dialects::vasm::directive_surface::assert_fires_only_when_false ... ok
+test dialects::vasm::directive_surface::comm_checks_its_name_and_not_its_size ... ok
+test dialects::vasm::directive_surface::distinct_names_and_locals_still_assemble ... ok
+test dialects::vasm::directive_surface::local_and_idnt_are_accepted_and_discarded ... ok
+test dialects::vasm::directive_surface::echo_is_a_note_and_emits_nothing ... ok
+test dialects::vasm::directive_surface::each_comparison_tests_against_zero ... ok
+test dialects::vasm::directive_surface::every_declared_spelling_is_recognised ... ok
+test dialects::vasm::directive_surface::fail_stops_the_assembly_unless_the_branch_is_untaken ... ok
+test dialects::vasm::directive_surface::repeated_named_sections_coalesce ... ok
+test dialects::vasm::directive_surface::each_section_shorthand_matches_its_long_form ... ok
+test dialects::vasm::directive_surface::the_data_families_are_declared_as_families ... ok
+test dialects::vasm::directive_surface::reptn_is_an_implicit_zero_based_counter ... ok
+test dialects::vasm::directive_surface::the_defined_tests_are_ifd_and_ifnd ... ok
+test dialects::vasm::directive_surface::the_import_side_needs_a_defined_name ... ok
+test dialects::vasm::directive_surface::unsigned_condition_aliases_reject_near_misses_and_disassemble_canonically ... ok
+test dialects::vasm::directive_surface::unsigned_condition_aliases_cover_branch_decrement_and_set_families ... ok
+test dialects::vasm::directive_surface::visibility_takes_a_list_and_reaches_forward ... ok
+test dialects::vasm::end_directive::bare_end_and_its_ignored_operand_stop_output ... ok
+test dialects::vasm::end_directive::end_only_stops_when_its_conditional_branch_is_taken ... ok
+test dialects::vasm::listing_words::printv_renders_the_way_vasm_renders ... ok
+test dialects::vasm::listing_words::the_listing_words_change_no_byte ... ok
+test dialects::vasm::offset_counters::rs_allocates_names_not_bytes ... ok
+test dialects::vasm::offset_counters::fo_is_separate_and_counts_down ... ok
+test directives::surface_invariants::ids_are_unique_within_a_dialect ... ok
+test dialects::vasm::offset_counters::so_is_rs_under_another_name ... ok
+test dialects::vasm::output_directive::output_names_the_file_and_the_first_one_stands ... ok
+test dialects::z80::define_substitution_tests::numeric_identifiers_expand_without_rewriting_packed_single_quotes ... ok
+test directives::surface_invariants::an_overridden_entry_does_not_appear_twice ... ok
+test directives::surface_invariants::both_z80_dialects_declare_their_file_directives ... ok
+test directives::surface_invariants::every_entry_has_at_least_one_spelling ... ok
+test directives::tests::a_declared_spelling_is_found ... ok
+test directives::tests::a_longer_stem_is_not_swallowed_by_a_shorter_one ... ok
+test directives::tests::an_optional_sigil_takes_both_forms ... ok
+test directives::surface_invariants::a_declared_spelling_finds_its_own_entry ... ok
+test directives::tests::a_required_sigil_is_required ... ok
+test directives::tests::an_undeclared_spelling_is_not_found ... ok
+test directives::tests::a_sigil_does_not_make_an_undeclared_name_valid ... ok
+test directives::tests::a_sized_stem_matches_bare_and_suffixed ... ok
+test directives::tests::a_stem_without_bare_needs_its_suffix ... ok
+test directives::surface_invariants::no_spelling_is_claimed_twice_within_a_dialect ... ok
+test directives::tests::sized_spellings_expand_for_a_generator ... ok
+test directives::tests::spellings_are_reachable_for_a_generator ... ok
+test directives::tests::an_unknown_size_still_reaches_its_stem ... ok
+test directives::tests::every_spelling_of_an_entry_finds_it ... ok
+test directives::tests::matching_ignores_case ... ok
+test includes::tests::no_dialect_is_listed_twice ... ok
+test directives::tests::sigilled_matching_ignores_case ... ok
+test directives::tests::sigilled_spellings_expand_by_optionality ... ok
+test directives::tests::the_category_travels_with_the_entry ... ok
+test includes::tests::every_selectable_dialect_is_accounted_for ... ok
+test includes::tests::only_the_asl_chips_default_an_extension ... ok
+test includes::tests::the_anchors_are_the_probed_ones ... ok
+test prg::tests::prepends_little_endian_load_address ... ok
+test roundtrip_tests::encodes_m68k_trap_movea_exg ... ok
+test roundtrip_tests::encodes_m68k_control_registers ... ok
+test roundtrip_tests::encodes_m68k_movep ... ok
+test roundtrip_tests::encodes_m68k_extended_and_bcd ... ok
+test roundtrip_tests::round_trips_6502_low_address_absolute ... ok
+test roundtrip_tests::round_trips_1802_through_asl_syntax ... ok
+test roundtrip_tests::round_trips_6502_through_acme ... ok
+test roundtrip_tests::round_trips_8048_through_asl_syntax ... ok
+test roundtrip_tests::round_trips_cp1610_jumps_and_labels_through_asl_syntax ... ok
+test roundtrip_tests::round_trips_cp1610_branches_through_asl_syntax ... ok
+test roundtrip_tests::round_trips_8039_romless_mcs48 ... ok
+test roundtrip_tests::round_trips_cp1610_memory_through_asl_syntax ... ok
+test roundtrip_tests::round_trips_cp1610_registers_through_asl_syntax ... ok
+test roundtrip_tests::round_trips_2650_through_asl_syntax ... ok
+test roundtrip_tests::round_trips_cp1610_shifts_through_asl_syntax ... ok
+test roundtrip_tests::round_trips_cp1610_sdbd_double_byte_through_asl_syntax ... ok
+test roundtrip_tests::round_trips_f8_through_asl_syntax ... ok
+test roundtrip_tests::round_trips_m6800_through_asl_syntax ... ok
+test roundtrip_tests::round_trips_i8080_through_asl_syntax ... ok
+test roundtrip_tests::round_trips_m68k_flat_curriculum ... ok
+test roundtrip_tests::round_trips_m68k_pure_code ... ok
+test dialects::sjasmplus::tests::savebin_reads_initialised_device_memory_for_every_device_class ... ok
+test roundtrip_tests::round_trips_pdp11_through_asl_syntax ... ok
+test roundtrip_tests::round_trips_scmp_through_asl_syntax ... ok
+test roundtrip_tests::round_trips_tms7000_through_asl_syntax ... ok
+test roundtrip_tests::round_trips_z8000_bit_through_asl_syntax ... ok
+test roundtrip_tests::round_trips_z8000_dyadic_through_asl_syntax ... ok
+test roundtrip_tests::round_trips_z8000_block_through_asl_syntax ... ok
+test roundtrip_tests::round_trips_z8000_cpu_control_through_asl_syntax ... ok
+test roundtrip_tests::round_trips_z8000_control_through_asl_syntax ... ok
+test roundtrip_tests::round_trips_z8000_misc_through_asl_syntax ... ok
+test roundtrip_tests::round_trips_z8000_io_through_asl_syntax ... ok
+test roundtrip_tests::round_trips_tms9900_through_asl_syntax ... ok
+test roundtrip_tests::round_trips_z8000_stack_through_asl_syntax ... ok
+test roundtrip_tests::round_trips_z8000_shift_rotate_through_asl_syntax ... ok
+test roundtrip_tests::round_trips_z8000_muldiv_through_asl_syntax ... ok
+test roundtrip_tests::round_trips_z8000_single_operand_through_asl_syntax ... ok
+test roundtrip_tests::the_6809_accepts_undocumented_opcodes_and_never_writes_them ... ok
+test scopes::tests::a_local_before_any_global_stays_bare ... ok
+test sna::tests::code_below_ram_is_rejected ... ok
+test sna::tests::header_defaults_and_pushed_entry_match_pasmo ... ok
+test roundtrip_tests::round_trips_z8001_segmented_through_asl_syntax ... ok
+test roundtrip_tests::z8000_writes_the_short_ldb_immediate_and_reads_both ... ok
+test scopes::tests::alias_repair_prefers_the_qualified_name ... ok
+test scopes::tests::defines_qualify_the_way_sjasmplus_does ... ok
+test scopes::tests::no_policy_means_no_change ... ok
+test sna::tests::missing_entry_point_is_an_error ... ok
+test roundtrip_tests::round_trips_z80_through_pasmonext ... ok
+test roundtrip_tests::round_trips_z80n_opcodes ... ok
+test tape::tests::tap_matches_pasmo ... ok
+test tape::tests::tapbas_matches_pasmo ... ok
+test tape::tests::tzx_matches_pasmo ... ok
+test tape::tests::the_stub_drops_its_last_line_without_an_entry_point ... ok
+test tests::reports_unknown_instruction_with_line ... ok
+test tape::tests::tzxbas_matches_pasmo ... ok
+test tape::tests::the_block_name_is_the_output_path_clipped_to_ten ... ok
+test tests::assembles_countdown_loop_via_acme ... ok
+test tests::vasm_formatting_does_not_expand ... ok
+test tests::vasm_immediate_ops_are_distinct_and_aliased ... ok
+test tests::vasm_expansion_counter_makes_a_label_unique ... ok
+test tests::vasm_macros_expand_in_both_header_spellings ... ok
+test tests::vasm_out_of_range_ccr_sr_immediate_warns_not_errors ... ok
+test tests::vasm_formatted_macro_assembles_to_the_same_bytes ... ok
+test tests::vasm_pc_relative_round_trips ... ok
+test tests::vasm_parameters_are_positional_and_unchecked ... ok
+test tests::vasm_out_of_range_immediates_warn_and_match_vasm ... ok
+test tests::z80_entry_points_wire_through ... ok
+test roundtrip_tests::round_trips_sm83_through_rgbasm ... ok
+test dialects::pasmo::tests::defs_counts_wrap_to_sixteen_bits_before_allocation ... ok
+test dialects::sjasmplus_lua::tests::instruction_budget_covers_coroutines_and_caught_errors ... ok
+test dialects::acme::tests::a_loop_whose_condition_never_moves_is_refused ... ok
+
+test result: ok. 765 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 6.06s
+
+     Running unittests src/main.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/asm198x-e187440360ec74f9)
+
+running 12 tests
+test tests::game_boy_rom_is_byte_identical_to_rgbfix ... ignored, needs rgbfix 1.0.3; run with --ignored
+test tests::game_boy_rom_reports_only_overwritten_nonzero_logo_bytes ... ok
+test tests::rgbasm_raw_images_end_at_a_full_bank ... ok
+test tests::game_boy_rom_matches_rgbfix_header_padding_and_checksums ... ok
+test tests::every_version_spelling_reports_the_crate_version ... ok
+test tests::equ_definitions_require_a_symbol_and_value ... ok
+test tests::render_error_omits_a_zero_column ... ok
+test tests::render_error_names_the_included_file_not_the_input ... ok
+test tests::render_error_falls_back_without_a_resolvable_span ... ok
+test tests::render_error_names_files_in_expansion_notes ... ok
+test tests::include_notes_render_one_note_per_hop ... ok
+test tests::pasmo_equ_definitions_are_visible_to_conditionals ... ok
+
+test result: ok. 11 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/book_samples.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/book_samples-fdcdb820a92e6078)
+
+running 10 tests
+test tests::an_output_block_must_name_a_mode ... ok
+test tests::an_output_block_carries_its_file_and_mode ... ok
+test tests::a_refusal_may_name_what_it_must_say ... ok
+test tests::an_unknown_option_is_refused ... ok
+test tests::a_marker_is_read_with_its_options ... ok
+test tests::a_sample_may_name_its_file_and_its_refusal ... ok
+test tests::an_output_block_may_pass_arguments ... ok
+test tests::a_marker_must_sit_on_its_fence ... ok
+test tests::an_unknown_output_mode_is_refused ... ok
+test every_book_sample_assembles ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.20s
+
+     Running tests/ca65_4510.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/ca65_4510-40d369009a9d7324)
+
+running 2 tests
+test native_4510_selection_and_indirect_z_match_configured_link ... ok
+test configured_cli_preserves_include_locations_and_previous_outputs ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/ca65_4510_bit_branches.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/ca65_4510_bit_branches-7372356b4d6858fa)
+
+running 2 tests
+test configured_cli_preserves_include_locations_and_previous_outputs ... ok
+test native_4510_bit_branches_match_configured_link ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/ca65_4510_phd.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/ca65_4510_phd-a2931b02edc1eff8)
+
+running 2 tests
+test native_4510_phd_alias_matches_configured_link ... ok
+test configured_cli_preserves_include_locations_and_previous_outputs ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.14s
+
+     Running tests/ca65_absolute_counter.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/ca65_absolute_counter-91240ce00e954323)
+
+running 2 tests
+test absolute_counter_failure_preserves_outputs_and_include_location ... ok
+test native_absolute_counter_is_independent_of_segment_placement ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.15s
+
+     Running tests/ca65_absolute_debug.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/ca65_absolute_debug-6835368e21ebe9c4)
+
+running 3 tests
+test logical_debug_failure_preserves_outputs_and_include_location ... ok
+test routine_budgets_cross_logical_spans_and_preserve_outputs_on_failure ... ok
+test native_labels_and_physical_source_ranges_agree ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.99s
+
+     Running tests/ca65_address_size.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/ca65_address_size-0f92eac29683c203)
+
+running 2 tests
+test include_refusals_complete_with_locations_and_preserve_previous_outputs ... ok
+test native_size_overrides_and_malformed_colons_complete_and_match ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.73s
+
+     Running tests/ca65_bss_warnings.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/ca65_bss_warnings-ee9313e48269047d)
+
+running 2 tests
+test omitted_segment_data_keeps_range_checks_and_outputs ... ok
+test native_bss_warning_counts_follow_nonzero_content ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 13.12s
+
+     Running tests/ca65_cheap_constants.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/ca65_cheap_constants-21eb48264483dcc5)
+
+running 2 tests
+test unanchored_cheap_constant_preserves_outputs_and_reports_its_file ... ok
+test native_cheap_constants_follow_global_definition_anchors ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.62s
+
+     Running tests/ca65_config.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/ca65_config-1413bab1ab17c676)
+
+running 9 tests
+test project_config_matches_ca65_plus_ld65 ... ignored, needs ca65 + ld65 on PATH
+test segment_extents_match_native_linking ... ignored, needs ca65 + ld65 on PATH
+test an_unknown_segment_names_the_config ... ok
+test a_floating_segment_places_after_its_predecessor ... ok
+test an_overfull_area_is_refused ... ok
+test compact_file_offsets_preserve_cpu_addresses_and_memory_capacity ... ok
+test default_vectors_keep_their_reserved_slot_and_helpful_error ... ok
+test segment_extents_follow_the_active_layout ... ok
+test used_file_extents_match_captured_native_builds ... ok
+
+test result: ok. 7 passed; 0 failed; 2 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/ca65_constant_names.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/ca65_constant_names-173dab8be20faf03)
+
+running 2 tests
+test invalid_included_constant_preserves_outputs_and_reports_its_file ... ok
+test native_constant_names_match_token_grammar ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.76s
+
+     Running tests/ca65_cycles.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/ca65_cycles-d421b1fe79ba2220)
+
+running 7 tests
+test budgeted_link_is_byte_identical_to_native_ca65_and_ld65 ... ignored, needs ca65 + ld65 on PATH
+test included_budget_diagnostic_names_the_included_file ... ok
+test reservations_data_and_unknown_labels_cannot_prove_a_cycle_budget ... ok
+test resolved_modes_and_conditional_penalties_come_from_the_spec ... ok
+test all_native_entries_check_the_same_budget_without_changing_bytes ... ok
+test org_and_macros_preserve_section_local_accounting ... ok
+test section_offsets_aliases_and_data_do_not_mix_routines ... ok
+
+test result: ok. 6 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/ca65_deferred_aliases.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/ca65_deferred_aliases-486efd73f58ff463)
+
+running 2 tests
+test included_unresolved_alias_preserves_outputs_and_source ... ok
+test native_deferred_aliases_resolve_without_changing_source_time_forms ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.77s
+
+     Running tests/ca65_enum_expressions.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/ca65_enum_expressions-cdfb7a1e1cb340ae)
+
+running 3 tests
+test enum_constancy_keeps_the_included_definition_location ... ok
+test included_used_cycle_preserves_outputs_and_definition_location ... ok
+test native_enum_expressions_and_cursor_match_native ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.15s
+
+     Running tests/ca65_hex_suffix.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/ca65_hex_suffix-54f6e31d01ba3558)
+
+running 2 tests
+test hex_suffix_failure_preserves_outputs_and_include_location ... ok
+test native_hexadecimal_suffixes_match_in_ca65_readers ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.63s
+
+     Running tests/ca65_include_streams.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/ca65_include_streams-a0304d5bd7600e95)
+
+running 2 tests
+test include_refusals_complete_with_locations_and_preserve_previous_outputs ... ok
+test native_include_streams_match_bytes_bindings_and_formatter ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.81s
+
+     Running tests/ca65_label_delimiters.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/ca65_label_delimiters-77428c74c03beb1a)
+
+running 3 tests
+test include_request_columns_point_into_the_authored_line ... ok
+test attached_label_operand_errors_preserve_outputs_and_report_the_file ... ok
+test native_label_delimiters_preserve_bytes_and_addresses ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.16s
+
+     Running tests/ca65_listings.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/ca65_listings-ac53410a116e2ab0)
+
+running 4 tests
+test native_records_keep_cpu_file_and_section_offsets_distinct ... ok
+test repeated_include_instances_have_per_emission_not_per_line_costs ... ok
+test section_capture_is_identical_across_debug_and_plain_entries_and_roundtrips ... ok
+test cli_lists_configured_sections_in_human_and_json_modes ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/ca65_macro_definition_labels.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/ca65_macro_definition_labels-9a73f1913e44b992)
+
+running 2 tests
+test included_macro_definition_label_keeps_refusal_outputs_and_frames ... ok
+test native_macro_definition_labels_bind_before_invocation ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.25s
+
+     Running tests/ca65_macro_introspection.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/ca65_macro_introspection-da51049a3c1f96b2)
+
+running 1 test
+test native_macro_introspection_preserves_tokens_and_live_order ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.59s
+
+     Running tests/ca65_numeric_admission.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/ca65_numeric_admission-ff1000533da88207)
+
+running 2 tests
+test skipped_and_captured_numeric_errors_preserve_outputs_and_include_location ... ok
+test native_numeric_admission_checks_skipped_and_captured_source ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 9.88s
+
+     Running tests/ca65_numeric_conversion.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/ca65_numeric_conversion-485f3ea8007255c8)
+
+running 2 tests
+test oversized_numeric_tokens_preserve_outputs_and_include_location ... ok
+test native_numeric_conversion_preserves_lexical_limits_before_arithmetic ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 7.09s
+
+     Running tests/ca65_org_labels.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/ca65_org_labels-f0cd3bca819f5f04)
+
+running 2 tests
+test counter_failure_preserves_outputs_and_include_location ... ok
+test native_labels_and_data_keep_their_own_program_counters ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 6.60s
+
+     Running tests/ca65_origin_bounds.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/ca65_origin_bounds-f8572de60705a793)
+
+running 2 tests
+test origin_range_failure_preserves_outputs_and_include_location ... ok
+test native_origins_keep_the_24_bit_range ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.24s
+
+     Running tests/ca65_record_allocators.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/ca65_record_allocators-f52ca464247f4bf9)
+
+running 2 tests
+test invalid_included_record_field_preserves_outputs_and_source_location ... ok
+test native_record_allocations_require_valid_counts_and_sizes ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 13.83s
+
+     Running tests/ca65_reserved_constants.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/ca65_reserved_constants-256c2045b69e51d5)
+
+running 2 tests
+test reserved_included_name_preserves_outputs_and_reports_its_file ... ok
+test native_reserved_names_follow_cpu_and_definition_position ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 9.96s
+
+     Running tests/ca65_scope_anchors.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/ca65_scope_anchors-de2ff4e081eda6da)
+
+running 3 tests
+test cheap_constant_debug_symbols_preserve_authored_names ... ok
+test scope_size_anchor_refusal_preserves_outputs_and_reports_its_file ... ok
+test native_scope_closures_follow_definitions_and_emitted_spans ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.08s
+
+     Running tests/ca65_scope_binding.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/ca65_scope_binding-f4584d658fed86ac)
+
+running 2 tests
+test included_scoped_range_refusal_preserves_outputs_and_source ... ok
+test native_scoped_bindings_and_source_time_forms_match_native ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 11.71s
+
+     Running tests/ca65_scope_repetition.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/ca65_scope_repetition-7acd5fddd82a2edd)
+
+running 2 tests
+test include_refusals_complete_with_locations_and_preserve_previous_outputs ... ok
+test native_procedure_and_repeat_tokens_match_and_roundtrip ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.23s
+
+     Running tests/ca65_scoped_constants.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/ca65_scoped_constants-ed57df049859df7c)
+
+running 3 tests
+test formatter_preserves_qualified_names_without_opening_includes ... ok
+test include_refusals_complete_with_locations_and_preserve_previous_outputs ... ok
+test scoped_constants_match_native_and_preserve_formatter_meaning ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.81s
+
+     Running tests/ca65_scoped_exports.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/ca65_scoped_exports-046c062cc337ba31)
+
+running 2 tests
+test undefined_scoped_export_keeps_outputs_and_include_location ... ok
+test native_visibility_declarations_keep_lexical_binding ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 7.87s
+
+     Running tests/ca65_source_widths.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/ca65_source_widths-aadfb0e47ac2133f)
+
+running 1 test
+test native_instruction_widths_follow_source_time_definitions ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.21s
+
+     Running tests/ca65_text_capture.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/ca65_text_capture-79886400b7f072c7)
+
+running 2 tests
+test captured_include_macro_errors_keep_frames_and_preserve_outputs ... ok
+test native_text_capture_matches_definition_and_invocation_order ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.97s
+
+     Running tests/ca65_unused_cycles.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/ca65_unused_cycles-d2371012d762bd0d)
+
+running 3 tests
+test included_used_cycle_preserves_outputs_and_definition_location ... ok
+test source_constancy_keeps_the_included_definition_location ... ok
+test native_unused_alias_validation_and_pc_width_match_native ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.44s
+
+     Running tests/ca65_zp_output.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/ca65_zp_output-973d20d1db3f52ce)
+
+running 2 tests
+test omitted_segment_data_keeps_range_checks_and_outputs ... ok
+test native_segment_types_pack_file_bytes_independently_of_memory ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 8.44s
+
+     Running tests/cli_cpu.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/cli_cpu-c85f241fb49606c9)
+
+running 5 tests
+test cli_target_does_not_override_lexical_cpu_directives ... ok
+test z80n_opcodes_follow_the_requested_cpu ... ok
+test invalid_cpu_selections_fail_without_touching_artifacts ... ok
+test unknown_cpu_fails_with_every_dialect_and_mode ... ok
+test published_cpu_matrix_and_all_aliases_match_the_cli ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.47s
+
+     Running tests/cli_dialects.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/cli_dialects-6bbf22cf44b56671)
+
+running 7 tests
+test the_generated_markdown_covers_every_dialect ... ok
+test help_lists_every_dialect ... ok
+test an_unknown_dialect_is_refused ... ok
+test the_rom_less_mcs48_parts_refuse_what_the_8048_accepts ... ok
+test every_documented_dialect_formats ... ok
+test every_documented_dialect_disassembles ... ok
+test every_documented_spelling_reaches_an_assembler ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.25s
+
+     Running tests/cli_disasm.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/cli_disasm-df4b8b5720c92a7f)
+
+running 6 tests
+test maximum_narrow_origin_still_reaches_the_narrow_decoder ... ok
+test ordinary_disassembly_preserves_cpu_origin_selection_and_round_trips ... ok
+test invalid_or_overflowing_68000_origins_fail_before_input_reads ... ok
+test ordinary_68000_disassembly_matches_the_decoder_at_the_requested_origin ... ok
+test wide_origins_remain_invalid_for_every_narrow_disassembler_and_recovery ... ok
+test unsupported_disassembly_options_fail_before_reading_or_writing_files ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.41s
+
+     Running tests/cli_equ.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/cli_equ-17e7169192ec34e2)
+
+running 6 tests
+test invalid_command_line_expression_does_not_blame_root_source ... ok
+test include_errors_and_include_chain_keep_original_lines ... ok
+test macro_errors_keep_definition_and_invocation_locations ... ok
+test root_errors_name_original_lines_with_command_line_constants ... ok
+test debug_cycles_and_listings_agree_with_unmodified_source ... ok
+test definitions_select_conditional_builds_without_changing_source_provenance ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+
+     Running tests/cli_json.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/cli_json-1630aed92dad6f66)
+
+running 22 tests
+test human_mode_is_unchanged_without_the_flag ... ok
+test invalid_message_format_errors_cleanly ... ok
+test human_io_failures_keep_terminal_messages ... ok
+test a_bare_invocation_still_assembles ... ok
+test json_failure_emits_diagnostics_with_span_and_code ... ok
+test disasm_and_fmt_are_subcommands ... ok
+test json_native_framing_errors_are_diagnostics_and_do_not_write_output ... ok
+test json_rejects_native_formats_for_incompatible_dialects_before_writing ... ok
+test json_output_override_ignores_source_framing_and_plain_queries_write_nothing ... ok
+test json_source_named_output_keeps_container_precedence_and_sidecar_collision_checks ... ok
+test json_save_paths_keep_parent_absolute_and_failure_behavior ... ok
+test json_success_emits_result_with_bytes_and_symbols ... ok
+test device_range_errors_name_the_included_source_in_both_reporting_modes ... ok
+test json_success_still_writes_output_file ... ok
+test the_asm_subcommand_matches_the_bare_form ... ok
+test json_source_named_symbols_match_human_and_respect_cli_precedence ... ok
+test the_withdrawn_mode_flags_name_their_replacement ... ok
+test json_io_failures_use_the_diagnostic_array_and_preserve_previous_outputs ... ok
+test json_source_names_reject_escaping_paths_but_cli_overrides_them ... ok
+test json_source_named_images_match_human_output_beside_the_source ... ok
+test json_save_artifacts_match_human_files_and_report_resolved_writes ... ok
+test json_native_images_match_human_output_and_keep_machine_code_in_result ... ok
+
+test result: ok. 22 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.14s
+
+     Running tests/cli_output_safety.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/cli_output_safety-9a6823f1dfbd2a4d)
+
+running 18 tests
+test distinct_files_with_identical_bytes_are_valid_output_destinations ... ok
+test directory_and_readonly_sidecars_do_not_truncate_an_existing_image ... ok
+test inferred_sidecar_names_participate_in_collision_checks ... ok
+test linker_save_and_origin_options_keep_their_intended_effects ... ok
+test sidecars_preserve_linker_configuration_and_source_named_images ... ok
+test formatter_rejects_linker_config_before_writing ... ok
+test write_only_sidecars_do_not_require_read_access_for_identity_checks ... ok
+test formatter_rejects_save_prefix_before_writing ... ok
+test sidecars_cannot_replace_absent_images_or_save_artifacts_through_aliases ... ok
+test memory_maps_match_between_reporting_modes_and_validate_before_writes ... ok
+test source_named_symbols_and_save_destinations_are_checked_before_the_image ... ok
+test formatter_rejects_explicit_origin_including_zero_before_writing ... ok
+test wrapped_pasmo_images_cannot_silently_overflow_tape_blocks ... ok
+test formatter_rejects_container_options_without_changing_destinations ... ok
+test invalid_sidecar_destinations_preserve_primary_images_in_every_driver ... ok
+test conflicting_sidecars_are_rejected_before_any_output_changes ... ok
+test primary_images_preserve_consumed_inputs_through_aliases ... ok
+test sidecars_preserve_inputs_and_binary_images_through_aliases ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.84s
+
+     Running tests/conformance.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/conformance-53fad454a8e01cb3)
+
+running 36 tests
+test ca65_cannot_satisfy_forceimport_for_a_binary ... ignored, needs the reference assemblers; run with --ignored
+test differential_fuzz ... ignored, needs the reference assemblers; run with --ignored
+test differential_fuzz_bytewise ... ignored, needs the reference assemblers; run with --ignored
+test every_present_reference_tool_can_be_identified ... ignored, needs the reference assemblers; run with --ignored
+test lwasm_refuses_its_object_target_words_for_a_binary ... ignored, needs the reference assemblers; run with --ignored
+test spec_opcodes_match_reference ... ignored, needs the reference assemblers; run with --ignored
+test spec_rows_match_reference_68000 ... ignored, needs the reference assemblers; run with --ignored
+test spec_rows_match_reference_6809 ... ignored, needs the reference assemblers; run with --ignored
+test spec_rows_match_reference_word_cpus ... ignored, needs the reference assemblers; run with --ignored
+test spec_rows_match_reference_z8000 ... ignored, needs the reference assemblers; run with --ignored
+test spec_rows_match_reference_z8001 ... ignored, needs the reference assemblers; run with --ignored
+test spec_sweep_matches_reference ... ignored, needs the reference assemblers; run with --ignored
+test support::tool_identity::tests::a_tool_outside_the_probe_table_is_not_identified ... ok
+test support::tool_identity::tests::an_absent_tool_is_not_identified ... ok
+test support::tool_identity::tests::identical_bytes_at_two_paths_digest_the_same ... ok
+test support::tool_identity::tests::the_digest_matches_the_published_sha256_vector ... ok
+test support::tool_identity::tests::a_resolved_binary_digests_deterministically ... ok
+test support::verdicts::tests::a_cpu_we_cannot_drive_is_not_a_silent_pass ... ok
+test support::verdicts::tests::a_chunk_mismatch_names_the_line_that_moved ... ok
+test support::verdicts::tests::a_chunk_that_only_differs_in_length_says_so ... ok
+test support::tool_identity::tests::identification_is_captured_once_per_process ... ok
+test support::verdicts::tests::a_fact_we_still_match_replays_clean ... ok
+test support::verdicts::tests::a_fact_we_no_longer_match_fails ... ok
+test support::verdicts::tests::a_divergence_that_now_matches_fails ... ok
+test support::verdicts::tests::a_divergence_that_still_diverges_replays_clean ... ok
+test unwritten_space_matches_p2bin_across_the_asl_family ... ignored, needs the reference assemblers; run with --ignored
+test the_bytes_view_collapses_every_non_byte_outcome ... ok
+test a_missing_output_file_is_not_empty_bytes ... ok
+test support::tool_identity::tests::the_marker_finds_a_version_below_the_first_line ... ok
+test vasm_visibility_words_need_a_defined_name ... ignored, needs the reference assemblers; run with --ignored
+test an_absent_tool_is_not_a_verdict ... ok
+test a_refusal_with_a_diagnostic_is_a_verdict ... ok
+test a_diagnostic_on_stdout_counts_as_well ... ok
+test a_tool_killed_by_a_signal_is_not_a_verdict ... ok
+test a_clean_run_yields_the_bytes ... ok
+test a_silent_failure_is_not_a_verdict ... ok
+
+test result: ok. 22 passed; 0 failed; 14 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/contract.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/contract-a4d5d87aa29d35e8)
+
+running 20 tests
+test foreign_rejection_builds_a_thin_envelope ... ok
+test acme_inline_conditional_body_reports_file_accurate_column ... ok
+test acme_labeled_line_reports_operand_column ... ok
+test acme_returns_flat_result_with_symbols ... ok
+test field_packed_error_stays_line_granular ... ok
+test acme_out_of_range_operand_reports_operand_column ... ok
+test assemble_error_becomes_diagnostic ... ok
+test resolve_span_path_out_of_table_stays_unresolved ... ok
+test diagnostic_json_round_trip ... ok
+test span_json_round_trips_with_and_without_path ... ok
+test vasm_warned_carries_warnings_in_the_unified_shape ... ok
+test payload_without_files_still_deserialises ... ok
+test unknown_fields_are_skipped_on_deserialise ... ok
+test files_table_serialises_and_round_trips ... ok
+test ca65_returns_linked_image_with_no_origin ... ok
+test assembly_result_json_round_trip_is_identity ... ok
+test payload_carries_version_and_defaults_when_absent ... ok
+test every_span_carrying_dialect_reports_operand_column ... ok
+test second_cpu_returns_same_shape ... ok
+test z80_out_of_range_branch_reports_operand_column ... ok
+
+test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/convert.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/convert-3dd8dceffe5ac29c)
+
+running 8 tests
+test conversion_matches_the_real_tools ... ignored, needs pasmo + sjasmplus on PATH
+test unknown_pairs_are_refused ... ok
+test unassemblable_input_reports_the_source_side ... ok
+test unresolved_conversion_files_have_actionable_guidance_and_keep_the_source_error ... ok
+test a_pasmo_program_converts_verified ... ok
+test rept_endm_becomes_endr_and_macro_endm_stays ... ok
+test inactive_file_directives_do_not_prevent_verified_conversion ... ok
+test cli_conversion_explains_existing_files_and_preserves_outputs ... ok
+
+test result: ok. 7 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/curriculum.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/curriculum-06a83de8797f2aab)
+
+running 15 tests
+test curriculum_is_byte_identical ... ignored, needs the reference assemblers and the Code198x checkout; run with --ignored
+test support::tool_identity::tests::the_digest_matches_the_published_sha256_vector ... ok
+test support::tool_identity::tests::an_absent_tool_is_not_identified ... ok
+test support::tool_identity::tests::identical_bytes_at_two_paths_digest_the_same ... ok
+test support::verdicts::tests::a_cpu_we_cannot_drive_is_not_a_silent_pass ... ok
+test support::tool_identity::tests::a_tool_outside_the_probe_table_is_not_identified ... ok
+test support::tool_identity::tests::a_resolved_binary_digests_deterministically ... ok
+test support::tool_identity::tests::the_marker_finds_a_version_below_the_first_line ... ok
+test support::verdicts::tests::a_chunk_that_only_differs_in_length_says_so ... ok
+test support::verdicts::tests::a_chunk_mismatch_names_the_line_that_moved ... ok
+test support::tool_identity::tests::identification_is_captured_once_per_process ... ok
+test support::verdicts::tests::a_fact_we_no_longer_match_fails ... ok
+test support::verdicts::tests::a_fact_we_still_match_replays_clean ... ok
+test support::verdicts::tests::a_divergence_that_still_diverges_replays_clean ... ok
+test support::verdicts::tests::a_divergence_that_now_matches_fails ... ok
+
+test result: ok. 14 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/cycles.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/cycles-9d811da2ceed1fde)
+
+running 12 tests
+test data_lines_carry_no_cycle_records ... ok
+test field_packed_instructions_capture_no_cycles ... ok
+test cycle_budget_without_cycle_data_is_refused ... ok
+test malformed_budget_comment_is_an_error ... ok
+test field_packed_listing_says_backfill_pending ... ok
+test partial_coverage_listing_declares_lower_bounds ... ok
+test cycle_budget_inside_an_include_is_checked ... ok
+test pass_two_captures_the_spec_cycles_per_instruction ... ok
+test cycle_budget_on_an_unknown_label_is_an_error ... ok
+test cycle_budget_passes_within_and_fails_beyond ... ok
+test listing_carries_the_cycles_column_and_label_totals ... ok
+test json_listing_carries_lines_labels_and_coverage ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/cycles_6809.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/cycles_6809-eea3394b4df4ec83)
+
+running 10 tests
+test old_cycle_records_keep_their_range_and_serialized_shape ... ok
+test addressing_and_operand_costs_follow_the_final_encoding ... ok
+test direct_page_selection_and_forward_operands_capture_the_selected_cost ... ok
+test computed_data_is_never_mistaken_for_an_instruction ... ok
+test branches_interrupts_and_waits_keep_their_distinct_bounds ... ok
+test listing_and_json_preserve_unbounded_totals_and_rti_range ... ok
+test includes_macros_and_conditional_emissions_keep_capture_and_budgets ... ok
+test undocumented_instructions_remain_unknown_and_refuse_budgets ... ok
+test budget_uses_the_runtime_maximum_and_refuses_unbounded_waits ... ok
+test every_documented_row_reassembles_with_timing ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/debug198x_fixtures.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/debug198x_fixtures-d7f82bbbfbf1b318)
+
+running 7 tests
+test corpus_address_space_posture ... ok
+test corpus_reader_skips_unknown_records ... ok
+test banked_fixture_resolves_per_paging_state ... ok
+test section_space_yields_the_base_map_for_a_paging_state ... ok
+test corpus_lookups_resolve ... ok
+test corpus_debug_capture_never_changes_bytes ... ok
+test corpus_sidecars_match_expected_exactly ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/debug_capture.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/debug_capture-ea7761da9bcb3260)
+
+running 6 tests
+test cp1610_spans_are_in_decles_not_bytes ... ok
+test equ_is_a_constant_with_no_span ... ok
+test label_and_equ_of_equal_value_carry_different_kinds ... ok
+test org_gap_produces_no_line_span ... ok
+test entry_point_is_an_entry_symbol_named_after_its_label ... ok
+test captures_labels_instructions_and_data ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/debug_cli.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/debug_cli-626c13c2c1e8a2f8)
+
+running 35 tests
+test artifact_path_never_clobbers_the_output_image ... ok
+test cp1610_listing_indexes_bytes_by_decle ... ok
+test ca65_duplicate_symbol_is_rejected ... ok
+test a_trimmed_leading_reservation_gets_its_own_section ... ok
+assembled + linked 40976 byte(s) -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-nes-ae6.nes
+wrote /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-nes-ae6.debug198x (debug sidecar)
+assembled + linked 40976 byte(s) -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-nes-alias.nes
+wrote /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-nes-alias.debug198x (debug sidecar)
+assembled + linked 40976 byte(s) -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-nes-cheap.nes
+wrote /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-nes-cheap.sym (symbol table)
+assembled + linked 40976 byte(s) -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-nes-plain.nes
+test ca65_non_cpu_segments_never_alias_the_zero_page ... ok
+assembled + linked 40976 byte(s) -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-nes-sym.nes
+wrote /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-nes-sym.sym (symbol table)
+test ca65_sidecar_covers_segments_symbols_and_lines ... ok
+test ca65_cheap_and_anon_labels_render_cleanly ... ok
+assembled + linked 40976 byte(s) -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-nes-multi/main.nes
+wrote /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-nes-multi/main.debug198x (debug sidecar)
+test ca65_listing_uses_the_default_filename ... ok
+test ca65_sym_renders_post_link_addresses ... ok
+test ca65_multifile_debug_line_records_name_the_included_file ... ok
+assembled 5 byte(s) -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-prg.prg (load $0801)
+wrote /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-explicit.debug198x (debug sidecar)assembled 49179 byte(s) -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-sna.sna (48K snapshot)
+wrote /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-sna.debug198x (debug sidecar)
+
+assembled 13 byte(s) at $8000 -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-ae2-plain.bin
+test debug_flags_reject_fmt_and_disasm ... ok
+test debug_coexists_with_sna_container ... ok
+test debug_coexists_with_prg_container ... ok
+test failed_container_run_writes_no_artifacts ... ok
+test listing_rendering_golden ... ok
+test ca65_json_mode_writes_sidecar ... ok
+test default_sidecar_path_never_clobbers_the_input ... ok
+test single_file_listing_files_matches_render_listing ... ok
+test multifile_listing_golden ... ok
+test sym_rendering_golden ... ok
+test sym_rendering_includes_entry_symbols ... ok
+test json_mode_writes_sidecar_and_keeps_stdout_json ... ok
+assembled 13 byte(s) at $8000 -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-flags-z80.bin
+wrote /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-flags-z80.debug198x (debug sidecar)
+wrote /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-flags-z80.sym (symbol table)
+wrote /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-flags-z80.lst (listing)
+assembled + linked 40976 byte(s) -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-nes-flagged.nes
+wrote /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-nes-flagged.debug198x (debug sidecar)
+wrote /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-nes-flagged.sym (symbol table)
+assembled 13 byte(s) at $8000 -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-single-lst.bin
+wrote /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-single-lst.lst (listing)
+assembled 13 byte(s) at $8000 -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-ae2-flagged.bin
+wrote /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-ae2-flagged.debug198x (debug sidecar)
+wrote /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-ae2-flagged.sym (symbol table)
+wrote /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-ae2-flagged.lst (listing)
+assembled 9 byte(s) at $8000 -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-z80-multi/main.bin
+wrote /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-z80-multi/main.debug198x (debug sidecar)
+wrote /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-z80-multi/main.sym (symbol table)
+wrote /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-z80-multi/main.lst (listing)
+test ca65_debug_flags_never_change_the_rom ... ok
+test single_file_cli_listing_output_unchanged ... ok
+test debug_flags_never_change_the_image ... ok
+assembled 13 byte(s) at $8000 -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-sidecar.bin
+wrote /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-sidecar.debug198x (debug sidecar)
+assembled 100 byte(s) -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-vasm-plain.exe
+test flat_multifile_debug_artifacts_tell_the_truth ... ok
+test sidecar_reads_back_and_resolves_symbols ... ok
+test vasm_json_mode_writes_sidecar ... ok
+assembled 100 byte(s) -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-vasm-exe-sym.exe
+wrote /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-vasm-exe-sym.sym (symbol table)
+assembled 8 byte(s) -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-vasm-flat-rec.bin
+wrote /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-vasm-flat-rec.debug198x (debug sidecar)
+wrote /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-vasm-flat-rec.sym (symbol table)
+test vasm_listing_still_rejected ... ok
+test vasm_exe_sym_is_section_qualified ... ok
+test vasm_flat_record_carries_constants_and_labels ... ok
+assembled 3 byte(s) at $C000 -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-flags-6502.bin
+wrote /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-flags-6502.debug198x (debug sidecar)
+wrote /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-flags-6502.sym (symbol table)
+wrote /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-flags-6502.lst (listing)
+test flags_produce_artifacts_for_z80_and_6502 ... ok
+assembled 100 byte(s) -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-vasm-ae4.exe
+wrote /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-vasm-ae4.debug198x (debug sidecar)
+assembled 60 byte(s) -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-vasm-multi/main.exe
+wrote /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-vasm-multi/main.debug198x (debug sidecar)
+assembled 100 byte(s) -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-vasm-flagged.exe
+wrote /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-vasm-flagged.debug198x (debug sidecar)
+wrote /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-vasm-flagged.sym (symbol table)
+test vasm_sidecar_covers_sections_and_relocatable_lookups ... ok
+test vasm_multifile_debug_line_records_name_the_included_file ... ok
+assembled 8 byte(s) -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-vasm-flat-plain.bin
+assembled 8 byte(s) -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-vasm-flat-flagged.bin
+wrote /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-vasm-flat-flagged.debug198x (debug sidecar)
+wrote /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-debug-cli-vasm-flat-flagged.sym (symbol table)
+test vasm_debug_flags_never_change_the_output ... ok
+
+test result: ok. 35 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/device_defaults.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/device_defaults-38d23c13abda24dc)
+
+running 4 tests
+test defaults_and_seeded_memory_match_native_sjasmplus ... ignored, requires SjASMPlus 1.21.0
+test seeded_attributes_follow_the_physical_bank_when_remapped ... ok
+test returning_to_a_device_restores_its_mapping_and_memory ... ok
+test every_device_starts_with_the_reference_slot_mapping ... ok
+
+test result: ok. 3 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/differential.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/differential-38a79cd8b7b5e407)
+
+running 18 tests
+test multi_file_source_matches_reference ... ignored, needs sjasmplus + pasmo + acme + ca65/ld65 + rgbasm/rgblink + lwasm; run with --ignored
+test source_matches_reference ... ignored, needs the reference assemblers; run with --ignored
+test support::tool_identity::tests::an_absent_tool_is_not_identified ... ok
+test support::tool_identity::tests::a_tool_outside_the_probe_table_is_not_identified ... ok
+test support::tool_identity::tests::the_digest_matches_the_published_sha256_vector ... ok
+test support::tool_identity::tests::identical_bytes_at_two_paths_digest_the_same ... ok
+test word_bitwise_spellings_stay_dialect_specific ... ignored, needs pasmo and sjasmplus; run with --ignored
+test support::verdicts::tests::a_cpu_we_cannot_drive_is_not_a_silent_pass ... ok
+test support::tool_identity::tests::a_resolved_binary_digests_deterministically ... ok
+test support::tool_identity::tests::the_marker_finds_a_version_below_the_first_line ... ok
+test support::tool_identity::tests::identification_is_captured_once_per_process ... ok
+test support::verdicts::tests::a_chunk_that_only_differs_in_length_says_so ... ok
+test support::verdicts::tests::a_chunk_mismatch_names_the_line_that_moved ... ok
+test support::verdicts::tests::a_fact_we_still_match_replays_clean ... ok
+test support::verdicts::tests::a_divergence_that_still_diverges_replays_clean ... ok
+test support::verdicts::tests::a_fact_we_no_longer_match_fails ... ok
+test support::verdicts::tests::a_divergence_that_now_matches_fails ... ok
+test the_formatter_reads_what_the_assembler_reads ... ok
+
+test result: ok. 15 passed; 0 failed; 3 ignored; 0 measured; 0 filtered out; finished in 0.12s
+
+     Running tests/directive_surface.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/directive_surface-ec687810da20547b)
+
+running 9 tests
+test every_selectable_dialect_is_accounted_for ... ok
+test every_dialect_surface_has_an_assembler ... ok
+test an_instruction_is_never_declared_a_directive ... ok
+test a_refused_by_reference_spelling_says_whose_rule_it_is ... ok
+test a_real_directive_reads_differently_from_a_typo ... ok
+test an_undeclared_spelling_is_refused_as_an_unknown_instruction ... ok
+test a_known_unsupported_spelling_says_which_it_is ... ok
+test an_expression_word_parses_where_it_belongs ... ok
+test every_declared_spelling_is_recognised ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/explanations.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/explanations-8c81f535a09731ba)
+
+running 4 tests
+test included_failure_keeps_code_location_and_human_explain_hint ... ok
+test raising_sites_classify_without_reinterpreting_human_messages ... ok
+test every_code_has_one_wire_name_cli_page_and_book_page ... ok
+test unknown_missing_and_mixed_requests_fail_without_reading_source ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/fmt.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/fmt-b2160d018be3dbd1)
+
+running 55 tests
+test fmt_acme_src_and_bin_are_verbatim_and_never_open_targets ... ok
+test fmt_ca65_flat_include_and_incbin_are_verbatim_and_never_open_targets ... ok
+test fmt_8048_reassembles_byte_identical ... ok
+test fmt_ca65_816_reassembles_byte_identical ... ok
+test fmt_1802_reassembles_byte_identical ... ok
+test fmt_2650_reassembles_byte_identical ... ok
+test fmt_acme_zone_block_round_trips ... ok
+test fmt_acme_src_and_bin_reassemble_byte_identical ... ok
+test fmt_ca65_flat_include_and_incbin_reassemble_byte_identical ... ok
+test fmt_ca65_huc6280_reassembles_byte_identical ... ok
+test fmt_ca65_nes_include_and_incbin_are_verbatim_and_never_open_targets ... ok
+test fmt_acme_reassembles_byte_identical ... ok
+test fmt_cp1610_include_and_binclude_are_verbatim_and_never_open_targets ... ok
+test fmt_i8080_equ_label_takes_no_colon ... ok
+test fmt_i8080_include_and_binclude_are_verbatim_and_never_open_targets ... ok
+test fmt_cp1610_reassembles_byte_identical ... ok
+test fmt_i8080_include_and_binclude_reassemble_byte_identical ... ok
+test fmt_incbin_is_verbatim_and_never_opens_the_asset ... ok
+test fmt_f8_reassembles_byte_identical ... ok
+test fmt_keeps_comments_in_position ... ok
+test fmt_is_idempotent ... ok
+test fmt_i8080_reassembles_byte_identical ... ok
+test fmt_lwasm_include_and_includebin_are_verbatim_and_never_open_targets ... ok
+test fmt_equ_label_colliding_with_mnemonic_round_trips ... ok
+test fmt_preserves_operand_spelling ... ok
+test fmt_lwasm_include_and_includebin_reassemble_byte_identical ... ok
+test fmt_m6800_reassembles_byte_identical ... ok
+test fmt_incbin_reassembles_byte_identical ... ok
+test fmt_ca65_nes_include_and_incbin_reassemble_byte_identical ... ok
+test fmt_preserves_comment_only_input ... ok
+test fmt_preserves_trailing_comment_block ... ok
+test fmt_ca65_reassembles_byte_identical ... ok
+test fmt_lwasm_reassembles_byte_identical ... ok
+test fmt_rgbasm_preserves_address_less_section ... ok
+test fmt_rgbasm_include_and_incbin_are_verbatim_and_never_open_targets ... ok
+test fmt_sjasmplus_include_is_verbatim_and_never_opens_the_target ... ok
+test fmt_pdp11_reassembles_byte_identical ... ok
+test fmt_reassembles_byte_identical ... ok
+test fmt_acme_keeps_block_delimiter_comments ... ok
+test fmt_sjasmplus_conditionals_round_trip ... ok
+test fmt_sjasmplus_guarded_include_is_verbatim_and_never_opens_the_target ... ok
+test fmt_reassembles_a_broader_program ... ok
+test fmt_rgbasm_include_and_incbin_reassemble_byte_identical ... ok
+test fmt_sjasmplus_include_reassembles_byte_identical ... ok
+test fmt_scmp_reassembles_byte_identical ... ok
+test fmt_vasm_include_and_incbin_are_verbatim_and_never_open_targets ... ok
+test fmt_sjasmplus_reassembles_byte_identical ... ok
+test fmt_tms7000_reassembles_byte_identical ... ok
+test fmt_tms9900_reassembles_byte_identical ... ok
+test fmt_vasm_include_and_incbin_reassemble_byte_identical ... ok
+test fmt_z8001_reassembles_byte_identical ... ok
+test fmt_z8000_reassembles_byte_identical ... ok
+test fmt_vasm_reassembles_byte_identical ... ok
+test fmt_rgbasm_reassembles_byte_identical ... ok
+test fmt_sjasmplus_keeps_repetition_comments ... ok
+
+test result: ok. 55 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/lazy_branches.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/lazy_branches-c75fcb55e2e16f3f)
+
+running 5 tests
+test lazy_branch_reading_matches_ca65_plus_ld65 ... ignored, needs ca65 + ld65 on PATH
+test a_missing_include_inside_an_untaken_branch_is_never_opened ... ok
+test a_definition_flows_into_an_include_inside_a_taken_branch ... ok
+test an_include_named_by_a_text_symbol_resolves ... ok
+test an_include_inside_a_taken_branch_shares_the_environment ... ok
+
+test result: ok. 4 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/lua.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/lua-c721381770831617)
+
+running 15 tests
+test lua_reference_probes ... ignored, requires installed SjASMPlus 1.21.0
+test tool_identity::tests::an_absent_tool_is_not_identified ... ok
+test tool_identity::tests::a_tool_outside_the_probe_table_is_not_identified ... ok
+test tool_identity::tests::the_digest_matches_the_published_sha256_vector ... ok
+test tool_identity::tests::identical_bytes_at_two_paths_digest_the_same ... ok
+test tool_identity::tests::a_resolved_binary_digests_deterministically ... ok
+test host_generated_work_is_bounded ... ok
+test includes_share_the_interpreter_and_load_lazily ... ok
+test machine_code_outside_allpass_has_an_acknowledgeable_warning ... ok
+test tool_identity::tests::the_marker_finds_a_version_below_the_first_line ... ok
+test tool_identity::tests::identification_is_captured_once_per_process ... ok
+test catching_a_host_error_does_not_make_the_assembly_succeed ... ok
+test lua_matches_pinned_reference_bytes ... ok
+test lua_formatting_preserves_foreign_syntax ... ok
+test committed_lua_verdicts_replay_without_reference_tools ... ok
+
+test result: ok. 14 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests/memory_map.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/memory_map-1164dbc478f9d0a4)
+
+running 5 tests
+test flat_dialects_report_the_single_space ... ok
+test space_budget_on_an_unknown_area_names_the_real_ones ... ok
+test the_map_renders_areas_and_segments ... ok
+test areas_account_use_free_and_the_largest_hole ... ok
+test space_budget_passes_within_and_fails_beyond ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/multifile.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/multifile-db01210388930820)
+
+running 185 tests
+test acme_include_macro_matches_reference_bytes ... ignored, needs ACME 0.97; run with --ignored
+test acme_bin_negative_size_is_an_error ... ok
+test acme_error_in_included_file_names_that_file_with_its_chain ... ok
+test acme_bad_bin_args_inside_an_include_name_the_included_file ... ok
+test acme_include_macro_error_preserves_definition_and_invocation ... ok
+test acme_include_three_deep_nests ... ok
+test acme_include_defined_symbol_drives_a_later_conditional ... ok
+test acme_label_on_the_bin_line_binds_at_the_payload ... ok
+test acme_include_defined_symbols_feed_later_zp_abs_selection ... ok
+test acme_local_before_any_zone_keeps_the_bare_key ... ok
+test acme_label_on_include_defined_macro_survives_for_forward_byte_refs ... ok
+test acme_include_matches_the_flattened_source ... ok
+test acme_label_on_the_src_line_binds_at_the_include_point ... ok
+test acme_conditional_guarded_include_loads_only_when_taken ... ok
+test acme_include_defined_macro_preserves_anonymous_body_labels ... ok
+test acme_anons_resolve_across_the_include_boundary ... ok
+test acme_macro_after_source_is_not_visible_inside_that_source ... ok
+test acme_macros_flow_both_ways_across_source ... ok
+test acme_malformed_directive_arguments_are_rejected ... ok
+test acme_single_source_entry_rejects_src_and_bin_with_a_pointer ... ok
+test binary_load_returns_bytes_and_mints_no_fileid ... ok
+test acme_repeated_nested_live_macros_scope_indented_dotted_labels ... ok
+test acme_missing_targets_report_at_the_directive_span ... ok
+test acme_self_include_reports_the_cycle ... ok
+test acme_bin_size_skip_windows_match_the_probes ... ok
+test acme_zone_local_reuse_yields_two_distinct_qualified_symbols ... ok
+test acme_zone_state_threads_through_the_include_boundary ... ok
+test ca65_816_single_source_entry_rejects_both_directives_with_a_pointer ... ok
+test ca65_816_missing_targets_report_at_the_directive_span ... ok
+test ca65_816_self_include_reports_the_cycle ... ok
+test angle_and_bare_include_spellings_resolve ... ok
+test ca65_816_error_in_included_file_names_that_file_with_its_chain ... ok
+test ca65_816_macros_expand_in_every_included_file ... ok
+test ca65_816_include_matches_the_flattened_source ... ok
+test ca65_816_include_three_deep_nests ... ok
+test ca65_816_labels_on_directive_lines_bind_at_the_point ... ok
+test ca65_816_width_and_symbols_thread_out_of_the_include ... ok
+test ca65_816_incbin_windows_match_the_probes ... ok
+test ca65_huc6280_extension_ops_and_negative_size_in_include ... ok
+test ca65_816_incbin_window_errors_match_the_probes ... ok
+test ca65_huc6280_errors_and_single_source_rejection ... ok
+test ca65_huc6280_include_and_incbin_match_the_probes ... ok
+test ca65_nes_missing_targets_report_at_the_directive_span ... ok
+test ca65_huc6280_label_on_the_incbin_line_binds_at_the_payload ... ok
+test ca65_nes_error_in_included_file_names_that_file_with_its_chain ... ok
+test ca65_nes_debug_line_records_carry_each_statements_file ... ok
+test ca65_define_state_threads_both_ways_through_nested_includes ... ok
+test ca65_nes_single_source_entry_rejects_both_directives_with_a_pointer ... ok
+test ca65_flat_include_resolution_walks_the_ancestor_chain ... ok
+test ca65_nes_incbin_chr_windows_match_the_probe ... ok
+test ca65_nes_segment_switch_inside_include_persists ... ok
+test cdp1802_include_smoke_matches_the_flattened_source ... ok
+test ca65_nes_program_split_across_includes ... ok
+test ca65_nes_anons_and_cheap_locals_cross_the_boundary ... ok
+test cli_acme_error_in_include_carries_an_included_from_note ... ok
+test cli_assembles_an_acme_include_via_a_search_dir ... ok
+test cli_assembles_an_incbin ... ok
+test cli_assembles_a_ca65_nes_include_via_a_search_dir ... ok
+test cli_assembles_an_uppercase_pasmo_include_via_a_search_dir ... ok
+test cli_assembles_a_ca65_816_include_via_a_search_dir ... ok
+test cli_assembles_a_pasmo_incbin ... ok
+test cli_assembles_an_include_via_a_search_dir ... ok
+test cli_assembles_a_vasm_include_via_a_search_dir ... ok
+test cli_accepts_repeatable_include_dirs ... ok
+test conditional_inside_include_sees_the_includers_environment ... ok
+test cp1610_binclude_counts_bytes_and_occupies_one_decle_per_byte ... ok
+test cp1610_binclude_past_32k_bytes_stays_inside_the_decle_space ... ok
+test cli_assembles_an_rgbasm_include_via_a_search_dir ... ok
+test cross_file_if_in_include_is_rejected ... ok
+test cross_file_endif_in_include_is_rejected ... ok
+test error_in_included_file_names_that_file_with_its_chain ... ok
+test defines_thread_through_includes_both_ways ... ok
+test cli_ca65_huc6280_error_in_include_carries_an_included_from_note ... ok
+test defaulted_include_that_resolves_but_cannot_be_read_errors ... ok
+test f8_include_smoke_matches_the_flattened_source ... ok
+test file_included_twice_is_processed_twice_with_one_fileid ... ok
+test depth_cap_fires_on_a_pathological_chain ... ok
+test global_defined_in_include_rescopes_later_includer_locals ... ok
+test guarded_incbin_never_loads_when_untaken ... ok
+test fs_loader_searches_include_dirs_in_order ... ok
+test guarded_include_loads_when_taken ... ok
+test guarded_include_never_loads_when_untaken ... ok
+test i8080_charset_state_threads_through_an_include ... ok
+test i8080_binclude_windows_match_the_probes ... ok
+test i8080_error_in_included_file_names_that_file_with_its_chain ... ok
+test cli_json_failure_span_carries_the_included_files_path ... ok
+test i8048_include_smoke_matches_the_flattened_source ... ok
+test i8080_binclude_window_errors_match_the_probes ... ok
+test i8080_include_defined_equ_feeds_later_includer_lines ... ok
+test i8080_extensionless_include_tries_inc_then_the_exact_name ... ok
+test i8080_labels_on_directive_lines_bind_at_the_point ... ok
+test i8080_missing_targets_report_at_the_directive_span ... ok
+test i8080_self_include_reports_the_cycle ... ok
+test i8080_include_three_deep_nests_in_both_spellings ... ok
+test i8080_radix_state_threads_through_an_include ... ok
+test incbin_inserts_the_asset_at_the_current_location ... ok
+test i8080_single_source_entry_rejects_directives_with_a_pointer ... ok
+test incbin_negative_offset_and_length_count_from_the_end ... ok
+test incbin_angle_and_bare_spellings_resolve ... ok
+test cli_error_in_include_carries_an_included_from_note ... ok
+test incbin_offset_and_length_slice_the_asset ... ok
+test incbin_past_the_64k_cap_carries_the_directive_span ... ok
+test incbin_payload_gets_one_linerec_at_the_directive ... ok
+test cli_human_error_renders_file_line_col ... ok
+test include_graph_records_the_chain_back_to_the_root ... ok
+test incbin_window_outside_the_file_is_an_error ... ok
+test cli_still_rejects_unknown_flags ... ok
+test include_defined_equ_feeds_later_includer_lines ... ok
+test include_three_deep_nests ... ok
+test cli_vasm_error_in_include_carries_an_included_from_note ... ok
+test incbin_zero_length_emits_nothing_and_assembles ... ok
+test include_two_files_matches_the_flattened_source ... ok
+test locals_scope_across_the_include_boundary ... ok
+test label_on_the_incbin_line_binds_at_the_payload ... ok
+test label_on_the_include_line_binds_at_the_include_point ... ok
+test lwasm_error_in_included_file_names_that_file_with_its_chain ... ok
+test lwasm_equ_in_include_feeds_direct_extended_selection ... ok
+test incbin_resolves_against_the_requesting_files_directory ... ok
+test lwasm_include_three_deep_nests ... ok
+test lwasm_missing_targets_report_at_the_directive_span ... ok
+test lwasm_labels_on_directive_lines_bind_at_the_point ... ok
+test lwasm_self_include_reports_the_cycle ... ok
+test lwasm_include_spellings_match_the_flattened_source ... ok
+test lwasm_single_source_entry_rejects_directives_with_a_pointer ... ok
+test cli_lwasm_error_in_include_carries_an_included_from_note ... ok
+test m6800_include_smoke_matches_the_flattened_source ... ok
+test memory_loader_missing_file_names_request_and_requester ... ok
+test missing_include_target_reports_at_the_directive_span ... ok
+test missing_incbin_asset_reports_at_the_directive_span ... ok
+test lwasm_includebin_window_errors_match_the_probes ... ok
+test pasmo_incbin_empty_file_emits_nothing ... ok
+test pasmo_incbin_rejects_an_offset_tail ... ok
+test pasmo_incbin_angle_brackets_are_literal ... ok
+test pasmo_include_nests_and_shares_state ... ok
+test pasmo_plain_incbin_inserts_the_asset ... ok
+test pasmo_single_source_include_has_a_clear_error ... ok
+test lwasm_includebin_windows_match_the_probes ... ok
+test pasmo_include_resolves_however_it_is_spelled ... ok
+test pasmo_untaken_include_is_not_loaded ... ok
+test pdp11_include_smoke_matches_the_flattened_source ... ok
+test rgbasm_labels_on_directive_lines_bind_at_the_point ... ok
+test rgbasm_global_defined_in_include_rescopes_later_includer_locals ... ok
+test rgbasm_include_matches_the_flattened_source ... ok
+test rgbasm_include_three_deep_nests ... ok
+test lwasm_include_resolution_is_requester_dir_then_search ... ok
+test rgbasm_error_in_included_file_names_that_file_with_its_chain ... ok
+test cli_ca65_nes_error_in_include_names_that_file ... ok
+test rgbasm_locals_scope_across_the_include_boundary ... ok
+test rgbasm_missing_targets_report_at_the_directive_span ... ok
+test rgbasm_self_include_reports_the_cycle ... ok
+test rgbasm_def_constants_feed_later_includer_lines ... ok
+test rgbasm_single_source_entry_rejects_both_directives_with_a_pointer ... ok
+test scmp_include_smoke_matches_the_flattened_source ... ok
+test rgbasm_incbin_windows_match_the_probes ... ok
+test self_include_reports_the_cycle ... ok
+test rgbasm_include_resolution_anchors_at_the_root ... ok
+test s2650_include_smoke_matches_the_flattened_source ... ok
+test single_source_entry_rejects_include_with_a_clear_error ... ok
+test single_source_entry_rejects_incbin_with_a_clear_error ... ok
+test root_reincluded_from_an_include_cycles_at_first_reentry ... ok
+test stray_endif_in_the_root_is_rejected ... ok
+test tms7000_include_smoke_matches_the_flattened_source ... ok
+test tms9900_include_smoke_matches_the_flattened_source ... ok
+test two_file_cycle_lists_the_chain ... ok
+test rgbasm_incbin_window_errors_match_the_probes ... ok
+test vasm_incbin_window_errors_match_the_probes ... ok
+test vasm_end_inside_include_terminates_the_root_source ... ok
+test vasm_equ_in_include_feeds_optimizer_selection ... ok
+test vasm_error_in_included_file_names_that_file_with_its_chain ... ok
+test two_spellings_of_one_file_share_a_fileid ... ok
+test vasm_debug_line_records_carry_each_statements_file ... ok
+test vasm_include_matches_the_flattened_source ... ok
+test vasm_incbin_windows_match_the_probes ... ok
+test vasm_include_three_deep_nests ... ok
+test vasm_self_include_reports_the_cycle ... ok
+test vasm_labels_on_directive_lines_bind_at_the_point ... ok
+test vasm_locals_cross_include_boundary ... ok
+test vasm_missing_targets_report_at_the_directive_span ... ok
+test vasm_single_source_entries_reject_both_directives_with_a_pointer ... ok
+test sjasmplus_device_range_errors_preserve_source_locations ... ok
+test vasm_section_switch_inside_include_persists_in_the_exe ... ok
+test vasm_request_spellings_match_the_probes ... ok
+test vasm_warning_in_included_file_names_that_file ... ok
+test z8000_include_smoke_matches_the_flattened_source ... ok
+test mutually_recursive_defines_error_instead_of_exhausting_memory ... ok
+
+test result: ok. 184 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests/paged_symbols.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/paged_symbols-1fc1ac4f32c1df38)
+
+running 16 tests
+test page_placements_match_native_cspectmap_addresses ... ignored, requires SjASMPlus 1.21.0
+test tool_identity::tests::an_absent_tool_is_not_identified ... ok
+test tool_identity::tests::a_tool_outside_the_probe_table_is_not_identified ... ok
+test tool_identity::tests::the_digest_matches_the_published_sha256_vector ... ok
+test tool_identity::tests::identical_bytes_at_two_paths_digest_the_same ... ok
+test numeric_entry_uses_current_mapping_without_rewriting_a_label ... ok
+test remapping_the_same_page_to_another_slot_preserves_physical_identity ... ok
+test mapping_changes_do_not_rewrite_earlier_symbols_or_fabricate_flat_pages ... ok
+test label_on_page_directive_uses_mapping_before_the_directive ... ok
+test page_geometry_comes_from_device_and_address_not_selected_slot ... ok
+test equal_logical_addresses_keep_distinct_pages_and_entry_placement ... ok
+test tool_identity::tests::a_resolved_binary_digests_deterministically ... ok
+test placement_is_additive_in_the_serialized_contract ... ok
+test all_device_geometries_preserve_the_highest_page ... ok
+test tool_identity::tests::the_marker_finds_a_version_below_the_first_line ... ok
+test tool_identity::tests::identification_is_captured_once_per_process ... ok
+
+test result: ok. 15 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/pasmo_arithmetic.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/pasmo_arithmetic-c0e75889ebf4972d)
+
+running 5 tests
+test fresh_native_arithmetic_agrees_with_recorded_facts ... ignored, requires native PasmoNext 0.1.3
+test sjasmplus_keeps_its_independently_measured_wide_arithmetic ... ok
+test arithmetic_matches_native_word_results_and_refusals ... ok
+test formatted_arithmetic_is_idempotent_and_matches_native_bytes ... ok
+test cli_arithmetic_matches_native_bytes_and_preserves_failed_outputs ... ok
+
+test result: ok. 4 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.37s
+
+     Running tests/pasmo_character_data_lists.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/pasmo_character_data_lists-1521ab1dde27a1c6)
+
+running 5 tests
+test character_data_lists_match_both_native_assemblers ... ok
+test formatting_preserves_data_lists_and_native_bytes ... ok
+test conversion_preserves_native_data_bytes ... ok
+test malformed_data_lists_preserve_previous_images_and_source ... ok
+test cli_assembly_and_formatting_preserve_character_data_lists ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.40s
+
+     Running tests/pasmo_nested_repetition.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/pasmo_nested_repetition-179573f384ba0e2c)
+
+running 6 tests
+test errors_inside_nested_repetitions_keep_macro_provenance ... ok
+test formatting_preserves_unexpanded_nested_macros_and_native_bytes ... ok
+test nested_repetitions_match_native_pasmo_bytes_in_both_frontends ... ok
+test conversion_keeps_its_verification_gate_after_parsing_nested_macros ... ok
+test cli_nested_errors_keep_provenance_and_previous_images ... ok
+test cli_assembly_and_formatting_preserve_nested_macro_boundaries ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.19s
+
+     Running tests/pasmo_output_wrap.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/pasmo_output_wrap-963b0b71c5c800a4)
+
+running 3 tests
+test other_dialects_keep_their_address_space_limit ... ok
+test debug_sidecars_and_listings_use_physical_addresses_and_image_bytes ... ok
+test native_images_and_symbols_match_both_pasmo_frontends ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.22s
+
+     Running tests/pasmo_quoted_semicolon.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/pasmo_quoted_semicolon-ccc2b0cbac2efb2c)
+
+running 4 tests
+test formatting_preserves_quoted_data_comments_and_native_bytes ... ok
+test quoted_semicolons_match_native_bytes_in_both_frontends ... ok
+test invalid_quoted_data_preserves_previous_image_and_source ... ok
+test cli_assembly_and_formatting_preserve_quoted_data ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.21s
+
+     Running tests/recovery.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/recovery-0dae46c056ab06f0)
+
+running 13 tests
+test recovered_source_matches_reference_acme_for_every_form_and_wrap_cases ... ignored, requires the reference ACME assembler
+test targets_in_data_are_named_without_promoting_data_to_code ... ok
+test indirect_jumps_and_external_calls_do_not_invent_destinations ... ok
+test custom_names_are_validated_and_generated_names_avoid_collisions ... ok
+test targets_inside_instructions_preserve_bytes_and_get_a_real_label ... ok
+test all_unmarked_bytes_stay_data_even_when_they_are_valid_opcodes ... ok
+test range_validation_refuses_wrap_empty_and_out_of_image_ranges ... ok
+test relative_wrap_at_the_address_space_boundary_is_reassemblable ... ok
+test code_ranges_stop_at_data_and_truncated_encodings ... ok
+test palette_recovers_labels_and_data_then_accepts_an_intentional_edit ... ok
+test cli_recovers_to_a_new_file_and_verifies_before_writing ... ok
+test cli_reports_unsupported_modes_and_emits_verified_source_to_stdout ... ok
+test every_documented_form_preserves_encoding_and_address_width ... ok
+
+test result: ok. 12 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.15s
+
+     Running tests/rgbasm_banks.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/rgbasm_banks-eb6b34d7780d8878)
+
+running 14 tests
+test matches_rgblink_bytes_and_every_symbol_bank ... ignored, requires RGBDS 1.0.3
+test tool_identity::tests::a_tool_outside_the_probe_table_is_not_identified ... ok
+test tool_identity::tests::an_absent_tool_is_not_identified ... ok
+test tool_identity::tests::the_digest_matches_the_published_sha256_vector ... ok
+test tool_identity::tests::identical_bytes_at_two_paths_digest_the_same ... ok
+test floating_ram_placement_does_not_reserve_addresses_in_other_banks ... ok
+test bank_attributes_are_not_section_name_text ... ok
+test tool_identity::tests::a_resolved_binary_digests_deterministically ... ok
+test invalid_bank_attributes_are_rejected_before_image_allocation ... ok
+test bank_capture_is_additive_and_excludes_constants ... ok
+test included_and_conditional_sections_keep_only_live_bank_metadata ... ok
+test bank_identity_is_independent_of_rom_file_placement ... ok
+test tool_identity::tests::the_marker_finds_a_version_below_the_first_line ... ok
+test tool_identity::tests::identification_is_captured_once_per_process ... ok
+
+test result: ok. 13 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/sjasm_symbol_exports.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/sjasm_symbol_exports-652e55231524abd9)
+
+running 7 tests
+test cspect_consumes_our_generated_map ... ignored, requires CSPECT_SYMBOL_PROBE (see support/cspect)
+test maps_match_native_for_pages_constants_structures_and_options ... ignored, requires SjASMPlus 1.21.0
+test unrealspeccy_consumes_our_generated_labels ... ignored, requires UNREAL_SYMBOL_PROBE (see docs/sjasmplus-symbol-exports.md)
+test last_request_wins_and_virtual_labels_keep_logical_addresses ... ok
+test source_requests_use_final_symbols_without_writing_files_or_changing_bytes ... ok
+test includes_default_names_conditionals_and_formatting_preserve_requests ... ok
+test cli_writes_source_maps_under_outprefix_in_human_and_json_modes ... ok
+
+test result: ok. 4 passed; 0 failed; 3 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/sjasmplus_decoded_escapes.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/sjasmplus_decoded_escapes-9a12ee98d3863e56)
+
+running 2 tests
+test decoded_strings_keep_native_composition_packing_and_refusals ... ok
+test cli_decoded_artifacts_match_native_and_refusals_preserve_images ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.07s
+
+     Running tests/sjasmplus_define_numbers.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/sjasmplus_define_numbers-6f8092a1970081d2)
+
+running 3 tests
+test pasmo_keeps_its_number_and_literal_rules ... ok
+test native_define_numbers_and_quoted_literals_match_both_frontends ... ok
+test define_refusals_keep_include_diagnostics_and_previous_artifacts ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running tests/sjasmplus_digit_separators.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/sjasmplus_digit_separators-06d5f8952ad81206)
+
+running 3 tests
+test pasmo_keeps_its_numeric_and_quote_rules ... ok
+test native_digit_separators_and_quote_boundaries_match_both_frontends ... ok
+test separator_refusals_keep_include_diagnostics_and_previous_artifacts ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running tests/sjasmplus_display_format.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/sjasmplus_display_format-471f331c12fdcb86)
+
+running 2 tests
+test native_display_bytes_and_notes_match_both_targets_and_formatting ... ok
+test cli_display_notes_and_include_failures_preserve_artifacts ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s
+
+     Running tests/sjasmplus_forward_equ.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/sjasmplus_forward_equ-0ff743efe9759edc)
+
+running 2 tests
+test native_forward_equ_matches_both_frontends ... ok
+test equ_refusals_keep_include_diagnostics_and_previous_artifacts ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running tests/sjasmplus_logical_expressions.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/sjasmplus_logical_expressions-b4d5cc395db3e3e8)
+
+running 2 tests
+test native_logical_truth_precedence_and_eager_refusals_match_both_frontends ... ok
+test logical_assertions_keep_include_diagnostics_and_previous_artifacts ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running tests/sjasmplus_quoted_comments.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/sjasmplus_quoted_comments-b74e4af17937a596)
+
+running 8 tests
+test escaped_source_formatting_preserves_native_bytes ... ignored, needs sjasmplus on PATH
+test formatting_retains_actual_comments_after_quoted_data ... ok
+test formatting_preserves_quoted_data_and_native_bytes ... ok
+test quoted_comments_match_native_bytes_in_both_cpu_entry_points ... ok
+test decoded_escapes_keep_native_data_directive_semantics ... ok
+test malformed_quoted_data_preserves_previous_images_and_source ... ok
+test cli_preserves_quoted_data_in_human_and_json_modes ... ok
+test escape_boundaries_emit_native_bytes_in_both_frontends_and_cli_modes ... ok
+
+test result: ok. 7 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 1.38s
+
+     Running tests/sjasmplus_remainder.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/sjasmplus_remainder-de087ef275d0ebe5)
+
+running 3 tests
+test pasmo_keeps_its_expression_and_binary_literal_rules ... ok
+test remainder_refusals_keep_include_diagnostics_and_previous_artifacts ... ok
+test native_remainder_and_binary_prefix_boundaries_match_both_frontends ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s
+
+     Running tests/sjasmplus_savenex.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/sjasmplus_savenex-5bf3f90241dd086d)
+
+running 3 tests
+test library_describes_artifacts_without_writing_the_requested_path ... ok
+test cli_nex_outputs_obey_host_controls_and_preserve_previous_files ... ok
+test native_nex_images_and_refusals_match_both_targets_and_formatter ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.44s
+
+     Running tests/sjasmplus_shift_widths.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/sjasmplus_shift_widths-85dbb7a897caff77)
+
+running 10 tests
+test live_native_shift_fixture_is_corroborated ... ignored, requires SjASMPlus 1.21.0; run with a 10-minute outer timeout
+test tool_identity::tests::an_absent_tool_is_not_identified ... ok
+test tool_identity::tests::a_tool_outside_the_probe_table_is_not_identified ... ok
+test tool_identity::tests::the_digest_matches_the_published_sha256_vector ... ok
+test tool_identity::tests::identical_bytes_at_two_paths_digest_the_same ... ok
+test tool_identity::tests::a_resolved_binary_digests_deterministically ... ok
+test tool_identity::tests::the_marker_finds_a_version_below_the_first_line ... ok
+test tool_identity::tests::identification_is_captured_once_per_process ... ok
+test shift_refusals_keep_include_diagnostics_and_previous_artifacts ... ok
+test native_signed_widths_shifts_and_refusals_match_both_frontends ... ok
+
+test result: ok. 9 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.35s
+
+     Running tests/sjasmplus_word_operators.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/sjasmplus_word_operators-cd5f107592a2263c)
+
+running 3 tests
+test pasmo_keeps_its_distinct_not_precedence_and_case_rules ... ok
+test native_word_operator_results_and_refusals_match_both_frontends ... ok
+test included_word_expressions_keep_cli_artifacts_and_failures_consistent ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/symbol_exports.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/symbol_exports-318b476184eaa223)
+
+running 7 tests
+test sameboy_resolves_generated_banked_symbol ... ignored, requires SAMEBOY_SYMBOL_PROBE built from support/sameboy_symbols.c
+test vice_imports_and_roundtrips_generated_labels ... ignored, requires VICE_X64SC and optionally VICE_DATADIR
+test names_cannot_inject_monitor_commands_or_collide_after_prefixing ... ok
+test address_exports_preserve_names_locations_and_bank_identity ... ok
+test exporters_refuse_lossy_bank_and_address_conversions ... ok
+test cli_rejects_bad_options_and_protects_source_and_image_paths ... ok
+test cli_exports_in_human_and_json_modes_without_changing_the_image ... ok
+
+test result: ok. 5 passed; 0 failed; 2 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/verdict_replay.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/verdict_replay-59dc50a3e1a74742)
+
+running 15 tests
+test support::tool_identity::tests::an_absent_tool_is_not_identified ... ok
+test support::tool_identity::tests::the_digest_matches_the_published_sha256_vector ... ok
+test support::verdicts::tests::a_cpu_we_cannot_drive_is_not_a_silent_pass ... ok
+test support::tool_identity::tests::identical_bytes_at_two_paths_digest_the_same ... ok
+test support::tool_identity::tests::a_tool_outside_the_probe_table_is_not_identified ... ok
+test support::tool_identity::tests::a_resolved_binary_digests_deterministically ... ok
+test support::verdicts::tests::a_chunk_that_only_differs_in_length_says_so ... ok
+test support::verdicts::tests::a_chunk_mismatch_names_the_line_that_moved ... ok
+test support::verdicts::tests::a_fact_we_still_match_replays_clean ... ok
+test support::verdicts::tests::a_fact_we_no_longer_match_fails ... ok
+test support::verdicts::tests::a_divergence_that_now_matches_fails ... ok
+test support::verdicts::tests::a_divergence_that_still_diverges_replays_clean ... ok
+test support::tool_identity::tests::identification_is_captured_once_per_process ... ok
+test support::tool_identity::tests::the_marker_finds_a_version_below_the_first_line ... ok
+test committed_verdicts_replay_without_the_reference_tools has been running for over 60 seconds
+test committed_verdicts_replay_without_the_reference_tools ... ok
+
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 140.88s
+
+     Running unittests src/lib.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/verdict_corpus-70e7a937c1d4abad)
+
+running 18 tests
+test derive::tests::address_filler_stays_above_the_size_force_thresholds ... ok
+test derive::tests::a_cpu_without_a_listing_helper_yields_no_case ... ok
+test tests::an_empty_corpus_is_not_an_error ... ok
+test derive::tests::the_derived_source_names_the_cpu_and_carries_the_form ... ok
+test tests::a_corrupt_line_reports_where ... ok
+test tests::an_unrecorded_case_resolves_to_nothing ... ok
+test derive::tests::deriving_the_same_form_twice_gives_the_same_text ... ok
+test tests::a_verdict_round_trips_every_field ... ok
+test tests::a_supersede_retires_the_loser_and_leaves_it_walkable ... ok
+test tests::a_rejection_is_a_verdict_and_keeps_its_diagnostic ... ok
+test tests::a_divergence_keeps_its_join_id ... ok
+test tests::an_unknown_record_kind_is_skipped_not_fatal ... ok
+test merge_tests::two_binaries_behind_one_version_both_survive ... ok
+test tests::hex_round_trips_including_empty ... ok
+test merge_tests::an_exactly_repeated_verdict_counts_once ... ok
+test tests::the_same_bytes_from_two_binaries_corroborate_one_fact ... ok
+test tests::the_same_identity_disagreeing_raises_an_alarm ... ok
+test tests::appending_preserves_what_was_already_recorded ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/xtask-ad22b00877c6c37d)
+
+running 73 tests
+test changelog::tests::only_the_newest_entry_is_judged ... ok
+test coverage::tests::a_declared_shortfall_is_accepted ... ok
+test coverage::tests::a_reason_opening_with_owed_is_debt ... ok
+test changelog::tests::the_committed_changelog_passes_its_own_gate ... ok
+test coverage::tests::coverage_is_integer_tenths_of_a_percent ... ok
+test coverage::tests::a_shortfall_beyond_its_declaration_is_not_accepted ... ok
+test coverage::tests::a_declaration_for_a_complete_cpu_is_stale ... ok
+test coverage::tests::an_undeclared_shortfall_is_not_accepted ... ok
+test coverage::tests::a_cpu_arbitrating_nothing_cannot_be_declared_away ... ok
+test coverage::tests::debt_is_still_a_declaration ... ok
+test coverage::tests::the_status_distinguishes_owed_from_accepted ... ok
+test coverage::tests::a_fall_is_reported_with_both_numbers ... ok
+test coverage::tests::an_unchanged_corpus_has_no_delta ... ok
+test coverage::tests::comments_are_not_rows ... ok
+test coverage::tests::a_delta_reports_movement_and_arrivals ... ok
+test coverage::tests::a_cpu_absent_from_the_stamp_is_new_not_drift ... ok
+test coverage::tests::a_stamp_round_trips_its_rows ... ok
+test coverage::tests::matching_coverage_is_not_drift ... ok
+test coverage::tests::rising_coverage_is_drift_but_not_a_fall ... ok
+test coverage::tests::a_second_arbiter_does_not_inflate_coverage ... ok
+test ecosystem::execution::tests::existing_and_dangling_symlinks_cannot_escape_workspaces ... ok
+test ecosystem::execution::tests::incomplete_plans_cannot_admit_shells_unproduced_outputs_or_empty_comparisons ... ok
+test ecosystem::execution::tests::missing_and_empty_artifacts_fail_and_source_mutations_change_the_tree ... ok
+test ecosystem::execution::tests::native_hunk_comparisons_cannot_accidentally_select_raw_asm_output ... ok
+test dialect_pages::tests::every_declared_dialect_has_a_page ... ok
+test dialect_pages::tests::every_page_carries_a_directive_table ... ok
+test dialect_pages::tests::pasmo_says_how_it_resolves_includes ... ok
+test ecosystem::process::tests::digest_matches_independent_standard_vector_and_checks_the_bound ... ok
+test ecosystem::tests::paths_cannot_escape_the_checkout ... ok
+test evidence::tests::a_list_reads_as_prose ... ok
+test dialect_pages::tests::the_summary_and_the_pages_agree ... ok
+test ecosystem::tests::committed_manifest_is_valid ... ok
+test ecosystem::execution::tests::capture_dates_use_gregorian_utc_and_replay_keeps_the_native_date ... ok
+test evidence::tests::thousands_are_separated ... ok
+test evidence::tests::a_paragraph_break_survives_wrapping ... ok
+test evidence::tests::wrapping_matches_the_prose_around_it ... ok
+test instructions::tests::every_listed_cpu_has_instructions ... ok
+test instructions::tests::slugs_are_unique ... ok
+test ecosystem::execution::tests::replay_uses_the_finalised_artifact_and_supports_hash_only_controls ... ok
+test nav::tests::comments_carry_no_structure ... ok
+test nav::tests::headings_open_sections ... ok
+test nav::tests::indentation_nests ... ok
+test nav::tests::slugs_come_out_in_reading_order ... ok
+test nav::tests::the_document_title_is_not_a_section ... ok
+test instructions::tests::no_generated_table_cell_carries_a_raw_angle_bracket ... ok
+test parity::tests::a_checkout_at_another_revision_names_both ... ok
+test parity::tests::a_key_without_a_digest_is_not_one ... ok
+test parity::tests::a_key_yields_its_path_variant_and_digest ... ok
+test parity::tests::a_stale_date_is_caught_even_when_the_sha_agrees ... ok
+test parity::tests::an_agreeing_checkout_says_nothing ... ok
+test parity::tests::a_missing_sidecar_is_wrong_rather_than_unverifiable ... ok
+test parity::tests::two_disagreements_are_two_lines ... ok
+test search::tests::a_mnemonic_carries_its_description ... ok
+test search::tests::a_hash_inside_a_fence_is_not_a_heading ... ok
+test instructions::tests::every_generated_page_cites_its_sources ... ok
+test search::tests::a_table_row_is_not_taken_as_context ... ok
+test search::tests::markdown_is_stripped_from_what_is_searched ... ok
+test surface::tests::a_declared_directive_needing_arguments_is_covered ... ok
+test surface::tests::a_sigilled_reference_is_asked_with_its_sigil ... ok
+test surface::tests::a_word_the_tool_refuses_on_this_target_is_not_a_gap ... ok
+test surface::tests::a_declared_gap_is_not_coverage ... ok
+test surface::tests::the_harvest_keeps_only_word_shaped_runs ... ok
+test supersede::tests::scope_retires_the_named_suites_and_leaves_the_rest ... ok
+test instructions::tests::no_generated_table_row_is_split_by_a_stray_pipe ... ok
+test surface::tests::every_reference_names_a_dialect_we_have ... ok
+test ecosystem::process::tests::nonzero_and_missing_executables_keep_the_failure_evidence ... ok
+test ecosystem::execution::tests::focused_captures_cannot_replace_the_published_complete_cohort ... ok
+test ecosystem::process::tests::a_successful_process_with_excess_output_cannot_pass ... ok
+test ecosystem::process::tests::executable_proxies_keep_the_invoked_name_and_hash_the_target_bytes ... ok
+test ecosystem::execution::tests::evidence_rejects_empty_stale_duplicate_incomplete_and_wrong_byte_results ... ok
+test ecosystem::process::tests::timeouts_terminate_inherited_pipes_without_waiting_for_the_helper ... ok
+test ledger::tests::the_ledger_names_the_corpus_it_describes ... ok
+test ledger::tests::the_ledger_is_byte_stable_across_runs ... ok
+
+test result: ok. 73 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.14s
+
+   Doc-tests asm198x
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests verdict_corpus
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
