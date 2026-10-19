@@ -83,3 +83,8 @@ Local checks pass 1,547 Rust tests (38 ignored), 72 Node tests, Clippy with
 all workspace targets/features and warnings denied, fmt, Ruff and generated
 docs. The initial Clippy run found a needless borrow; the corrected rerun
 passes. Its initial failure is retained alongside the final log.
+
+Clean producer `e6ae33bade3c8e971e23ee228452cc07092fc08d` matches all
+564 unchanged native/upstream 4510 bytes. The pinned source, all seven
+processes/fourteen streams and complete output identities are retained. The
+changed-byte verification guard refuses corruption as required.
