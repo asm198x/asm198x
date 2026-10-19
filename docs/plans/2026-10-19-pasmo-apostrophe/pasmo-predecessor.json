@@ -1,0 +1,104 @@
+{
+  "producer": {
+    "source_commit": "711ede39cbf320b3b42910aad3588dc0d27a0b95",
+    "source_tree": "65c2d992219619e4f42627c86de402b08333915d",
+    "source_clean": true,
+    "profile": "debug",
+    "features": [
+      "lua"
+    ],
+    "sha256": "04cd785990ddfcb28a3f7ef250ae85ff3052b176b8422894934ac3f8859bb63b"
+  },
+  "results": [
+    {
+      "name": "char",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "pasmo",
+        "input.asm",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $0000 -> out.bin\n",
+      "hex": "4100"
+    },
+    {
+      "name": "packed",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "pasmo",
+        "input.asm",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765"
+    },
+    {
+      "name": "empty",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "pasmo",
+        "input.asm",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765"
+    },
+    {
+      "name": "apostrophe",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "pasmo",
+        "input.asm",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $0000 -> out.bin\n",
+      "hex": "2700"
+    },
+    {
+      "name": "af",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "pasmo",
+        "input.asm",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "08"
+    },
+    {
+      "name": "numeric_separator",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "pasmo",
+        "input.asm",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765"
+    }
+  ]
+}
