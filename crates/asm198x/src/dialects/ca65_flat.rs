@@ -1679,6 +1679,10 @@ impl Ca65Text<'_> {
 }
 
 impl text::TextSyntax for Ca65Text<'_> {
+    fn permits_function_space(&self) -> bool {
+        true
+    }
+
     fn definition(&self, _line: &str) -> Option<(String, String)> {
         None
     }

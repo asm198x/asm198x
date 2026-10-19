@@ -20,3 +20,31 @@ This prerequisite follows the withdrawn #862 trial. Do not reuse its production
 patch until this independently qualified lexical boundary is available. Spaced
 generated heads must get actual symbol/address assertions, not merely successful
 body bytes that do not reference the head.
+
+The private TextSyntax seam now supplies the measured ca65 horizontal-whitespace
+posture, with other dialects retaining their defaults. A single call_open helper
+is used by fold_once and has_call. Nested calls therefore use the same boundary;
+quotes/comments remain untouched. All 31 spacing differences are resolved. The
+four unbraced .left controls remain explicit #872 failures, not waived matches.
+
+The Rust matrix asserts real mark/row2 address labels through the official debug
+reader, accepted native bytes, rejected-output preservation and canonical
+idempotence/symbol-section round trips. Include/macro diagnostics check human and
+JSON spans/frames and preserve five existing outputs and all source text.
+All 73 native formatter outcomes and 61 accepted images match. The exact two-line
+#871 report also reproduces native 03 01 versus the preceding CLI's empty image.
+
+All 96 Node tests and Ruff checks pass. The actual archive passes all 81 cohorts,
+including 244 new commands, and both corruption controls fail. Its executable is
+identical to the frozen native-check prototype (SHA-256
+1fdcbf84dace5acad9ee6d11f5677a83906937cfbe3cc846ca2be9903646905d).
+The preceding archive fails exactly the new cohort. One focused run hit a CLI
+replacement race from a concurrent cargo build: spawn CLI: Os { code: 2, kind:
+NotFound, message: "No such file or directory" }. Retain that failure; external
+checks now use a frozen executable. Final full/focused Rust, lints, clean producer
+and replay qualification remain required before merge.
+
+Final full Rust passes 1,601 tests (38 ignored). The sequential focused rerun,
+Clippy, rustfmt and generated docs pass; all 96 Node tests and Ruff checks pass.
+The focused build-output race is superseded by this clean rerun. Source is ready
+for a clean producer and complete replay before shipping.
