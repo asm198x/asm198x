@@ -383,3 +383,9 @@ test('SjASMPlus packed quotes are mandatory package evidence', () => {
   assert(qualifies(complete)); assert(requiredCases.includes('sjasmplus_packed_single'));
   assert.equal(qualifies(complete.filter(r => r.name !== 'sjasmplus_packed_single')), false);
 });
+
+test('ca65 canonical end-source formatting is mandatory package evidence', () => {
+  const complete = requiredCases.map(name => ({ name, status: 'pass' }));
+  assert(qualifies(complete)); assert(requiredCases.includes('ca65_format_end'));
+  assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_format_end')), false);
+});
