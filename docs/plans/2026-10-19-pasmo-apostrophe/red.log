@@ -1,0 +1,24 @@
+   Compiling asm198x v0.0.71 (/Users/stevehill/Projects/198x/Asm198x/asm198x-ca65-format-end/crates/asm198x)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.15s
+     Running tests/pasmo_character_literals.rs (/private/tmp/asm198x-format-build/debug/deps/pasmo_character_literals-2ebbea32e7333a28)
+
+running 1 test
+test native_pasmo_character_boundaries_match_both_frontends ... FAILED
+
+failures:
+
+---- native_pasmo_character_boundaries_match_both_frontends stdout ----
+
+thread 'native_pasmo_character_boundaries_match_both_frontends' (130300584) panicked at crates/asm198x/tests/pasmo_character_literals.rs:54:13:
+assertion `left == right` failed: apostrophe: Ok(AssemblyResult { version: 1, bytes: [39, 0], origin: Some(0), reserved_prefix: 0, symbols: {}, start: None, warnings: [], debug: DebugData { symbols: [], symbol_pages: {}, symbol_banks: {}, lines: [LineRec { line: 1, offset: 0, length: 2, file: FileId(0) }], cycles: [], cycle_coverage: Full }, section_debug: [], areas: [AreaUsage { name: "address space", start: 0, size: 65536, used: 2, free: 65534, largest_free: 65534, segments: [] }], diagnostics: [], files: [], requested_output: None, requested_symbols: None, artifacts: [] })
+  left: true
+ right: false
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    native_pasmo_character_boundaries_match_both_frontends
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `-p asm198x --test pasmo_character_literals`

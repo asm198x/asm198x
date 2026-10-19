@@ -1,4 +1,4 @@
-# Refuse native-invalid three-apostrophe character tokens
+# Refuse native-invalid three-apostrophe character tokens (#855)
 
 The shared Z80 tokenizer admits any three-character quote shape, including
 three apostrophes. Native PasmoNext v0.1.3 rejects that input. Six native controls
