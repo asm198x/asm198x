@@ -42,3 +42,10 @@ here. Both corruption controls fail for their intended reasons. The actual
 preceding archive fails only this cohort while its other 61 pass. These local
 archives are artifact-only; clean producer replay and five-host qualification
 remain required before merge.
+
+Clean unchanged producer `3946f7de9bfd58d36f586f7b20fac3e42575aefd`
+replays pinned cc65-4510-opcodes `e11fb5c39371046ebe25485f984f644c5a0d65d3`.
+All 564 bytes match native SHA-256
+`8a5fcde630e55dd49403f7c6ffed25d8786e65e3d0a2723531b7ca3e2c0509ec`;
+seven process records and fourteen streams verify. The changed-byte guard
+rejects corruption, and the producer is retained on the task branch.
