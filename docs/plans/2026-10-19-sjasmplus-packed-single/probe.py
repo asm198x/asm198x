@@ -57,8 +57,20 @@ def cases() -> dict[str, str]:
         "dz",
     ]:
         out[f"alias_{directive}"] = f" {directive} 'AB'\n"
+    for value in [*range(32), 127]:
+        for directive in ["db", "dd"]:
+            out[f"control_{value}_{directive}"] = f" {directive} 'A{chr(value)}B'\n"
     out.update(
         {
+            "empty_data_0": ' db ""\n',
+            "empty_data_1": ' dc ""\n',
+            "empty_data_2": ' dz ""\n',
+            "empty_data_3": ' dd ""\n',
+            "empty_data_4": ' db "",1\n',
+            "empty_data_5": ' db "",""\n',
+            "empty_data_6": " dz ''\n",
+            "empty_data_7": " db '',1\n",
+            "empty_data_8": ' abytez 1 ""\n',
             "abyte_spaced": " ABYTE 1 'AB'\n",
             "abytec_spaced": " ABYTEC 1 'AB'\n",
             "abytez_spaced": " ABYTEZ 1 'AB'\n",
