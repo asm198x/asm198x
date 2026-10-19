@@ -1,0 +1,738 @@
+[
+  {
+    "name": "scope_empty",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "07",
+    "matches": true
+  },
+  {
+    "name": "scope_byte",
+    "exit": 0,
+    "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+    "hex": "0007",
+    "native_hex": "00ff",
+    "matches": false
+  },
+  {
+    "name": "scope_empty_string",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "07",
+    "matches": true
+  },
+  {
+    "name": "scope_res_zero",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "07",
+    "matches": true
+  },
+  {
+    "name": "scope_res_one",
+    "exit": 0,
+    "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+    "hex": "0007",
+    "native_hex": "00ff",
+    "matches": false
+  },
+  {
+    "name": "scope_align_one",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "07",
+    "matches": true
+  },
+  {
+    "name": "scope_align_two",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "07",
+    "matches": true
+  },
+  {
+    "name": "scope_explicit_segment",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "07",
+    "matches": true
+  },
+  {
+    "name": "scope_org",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "07",
+    "matches": true
+  },
+  {
+    "name": "scope_org_align",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "07",
+    "matches": true
+  },
+  {
+    "name": "scope_dead_bytes",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "07",
+    "matches": true
+  },
+  {
+    "name": "scope_repeat_zero",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "07",
+    "matches": true
+  },
+  {
+    "name": "scope_global_constant",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "ff",
+    "matches": false
+  },
+  {
+    "name": "scope_cheap_value",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "scope_new_cheap",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "07",
+    "matches": true
+  },
+  {
+    "name": "scope_label_only",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "ff",
+    "matches": false
+  },
+  {
+    "name": "scope_nested_empty",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "07",
+    "matches": true
+  },
+  {
+    "name": "scope_macro_definition",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "07",
+    "matches": true
+  },
+  {
+    "name": "proc_empty",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "ff",
+    "matches": false
+  },
+  {
+    "name": "proc_byte",
+    "exit": 0,
+    "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+    "hex": "0007",
+    "native_hex": "00ff",
+    "matches": false
+  },
+  {
+    "name": "proc_empty_string",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "ff",
+    "matches": false
+  },
+  {
+    "name": "proc_res_zero",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "ff",
+    "matches": false
+  },
+  {
+    "name": "proc_res_one",
+    "exit": 0,
+    "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+    "hex": "0007",
+    "native_hex": "00ff",
+    "matches": false
+  },
+  {
+    "name": "proc_align_one",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "ff",
+    "matches": false
+  },
+  {
+    "name": "proc_align_two",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "ff",
+    "matches": false
+  },
+  {
+    "name": "proc_explicit_segment",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "ff",
+    "matches": false
+  },
+  {
+    "name": "proc_org",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "ff",
+    "matches": false
+  },
+  {
+    "name": "proc_org_align",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "ff",
+    "matches": false
+  },
+  {
+    "name": "proc_dead_bytes",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "ff",
+    "matches": false
+  },
+  {
+    "name": "proc_repeat_zero",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "ff",
+    "matches": false
+  },
+  {
+    "name": "proc_global_constant",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "ff",
+    "matches": false
+  },
+  {
+    "name": "proc_cheap_value",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "09",
+    "matches": false
+  },
+  {
+    "name": "proc_new_cheap",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "ff",
+    "matches": false
+  },
+  {
+    "name": "proc_label_only",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "ff",
+    "matches": false
+  },
+  {
+    "name": "proc_nested_empty",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "ff",
+    "matches": false
+  },
+  {
+    "name": "proc_macro_definition",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "ff",
+    "matches": false
+  },
+  {
+    "name": "prior_byte",
+    "exit": 0,
+    "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+    "hex": "0007",
+    "native_hex": "0007",
+    "matches": true
+  },
+  {
+    "name": "prior_res_zero",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "07",
+    "matches": true
+  },
+  {
+    "name": "prior_res_one",
+    "exit": 0,
+    "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+    "hex": "0007",
+    "native_hex": "0007",
+    "matches": true
+  },
+  {
+    "name": "prior_segment",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "07",
+    "matches": true
+  },
+  {
+    "name": "prior_org",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "07",
+    "matches": true
+  },
+  {
+    "name": "prior_align",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "07",
+    "matches": true
+  },
+  {
+    "name": "struct",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "ff",
+    "matches": false
+  },
+  {
+    "name": "enum",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "ff",
+    "matches": false
+  },
+  {
+    "name": "align_0_1",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "07",
+    "matches": true
+  },
+  {
+    "name": "align_0_2",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "07",
+    "matches": true
+  },
+  {
+    "name": "align_0_3",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "07",
+    "matches": true
+  },
+  {
+    "name": "align_0_4",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "07",
+    "matches": true
+  },
+  {
+    "name": "align_0_16",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "07",
+    "matches": true
+  },
+  {
+    "name": "align_1_1",
+    "exit": 0,
+    "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+    "hex": "0007",
+    "native_hex": "0007",
+    "matches": true
+  },
+  {
+    "name": "align_1_2",
+    "exit": 0,
+    "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+    "hex": "000007",
+    "native_hex": "0000ff",
+    "matches": false
+  },
+  {
+    "name": "align_1_3",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000007",
+    "native_hex": "000000ff",
+    "matches": false
+  },
+  {
+    "name": "align_1_4",
+    "exit": 0,
+    "stderr": "assembled + linked 5 byte(s) -> out.bin\n",
+    "hex": "0000000007",
+    "native_hex": "00000000ff",
+    "matches": false
+  },
+  {
+    "name": "align_1_16",
+    "exit": 0,
+    "stderr": "assembled + linked 17 byte(s) -> out.bin\n",
+    "hex": "0000000000000000000000000000000007",
+    "native_hex": "00000000000000000000000000000000ff",
+    "matches": false
+  },
+  {
+    "name": "align_2_1",
+    "exit": 0,
+    "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+    "hex": "000007",
+    "native_hex": "000007",
+    "matches": true
+  },
+  {
+    "name": "align_2_2",
+    "exit": 0,
+    "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+    "hex": "000007",
+    "native_hex": "000007",
+    "matches": true
+  },
+  {
+    "name": "align_2_3",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000007",
+    "native_hex": "000000ff",
+    "matches": false
+  },
+  {
+    "name": "align_2_4",
+    "exit": 0,
+    "stderr": "assembled + linked 5 byte(s) -> out.bin\n",
+    "hex": "0000000007",
+    "native_hex": "00000000ff",
+    "matches": false
+  },
+  {
+    "name": "align_2_16",
+    "exit": 0,
+    "stderr": "assembled + linked 17 byte(s) -> out.bin\n",
+    "hex": "0000000000000000000000000000000007",
+    "native_hex": "00000000000000000000000000000000ff",
+    "matches": false
+  },
+  {
+    "name": "align_3_1",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000007",
+    "native_hex": "00000007",
+    "matches": true
+  },
+  {
+    "name": "align_3_2",
+    "exit": 0,
+    "stderr": "assembled + linked 5 byte(s) -> out.bin\n",
+    "hex": "0000000007",
+    "native_hex": "00000000ff",
+    "matches": false
+  },
+  {
+    "name": "align_3_3",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000007",
+    "native_hex": "00000007",
+    "matches": true
+  },
+  {
+    "name": "align_3_4",
+    "exit": 0,
+    "stderr": "assembled + linked 5 byte(s) -> out.bin\n",
+    "hex": "0000000007",
+    "native_hex": "00000000ff",
+    "matches": false
+  },
+  {
+    "name": "align_3_16",
+    "exit": 0,
+    "stderr": "assembled + linked 17 byte(s) -> out.bin\n",
+    "hex": "0000000000000000000000000000000007",
+    "native_hex": "00000000000000000000000000000000ff",
+    "matches": false
+  },
+  {
+    "name": "align_4_1",
+    "exit": 0,
+    "stderr": "assembled + linked 5 byte(s) -> out.bin\n",
+    "hex": "0000000007",
+    "native_hex": "0000000007",
+    "matches": true
+  },
+  {
+    "name": "align_4_2",
+    "exit": 0,
+    "stderr": "assembled + linked 5 byte(s) -> out.bin\n",
+    "hex": "0000000007",
+    "native_hex": "0000000007",
+    "matches": true
+  },
+  {
+    "name": "align_4_3",
+    "exit": 0,
+    "stderr": "assembled + linked 7 byte(s) -> out.bin\n",
+    "hex": "00000000000007",
+    "native_hex": "000000000000ff",
+    "matches": false
+  },
+  {
+    "name": "align_4_4",
+    "exit": 0,
+    "stderr": "assembled + linked 5 byte(s) -> out.bin\n",
+    "hex": "0000000007",
+    "native_hex": "0000000007",
+    "matches": true
+  },
+  {
+    "name": "align_4_16",
+    "exit": 0,
+    "stderr": "assembled + linked 17 byte(s) -> out.bin\n",
+    "hex": "0000000000000000000000000000000007",
+    "native_hex": "00000000000000000000000000000000ff",
+    "matches": false
+  },
+  {
+    "name": "align_5_1",
+    "exit": 0,
+    "stderr": "assembled + linked 6 byte(s) -> out.bin\n",
+    "hex": "000000000007",
+    "native_hex": "000000000007",
+    "matches": true
+  },
+  {
+    "name": "align_5_2",
+    "exit": 0,
+    "stderr": "assembled + linked 7 byte(s) -> out.bin\n",
+    "hex": "00000000000007",
+    "native_hex": "000000000000ff",
+    "matches": false
+  },
+  {
+    "name": "align_5_3",
+    "exit": 0,
+    "stderr": "assembled + linked 7 byte(s) -> out.bin\n",
+    "hex": "00000000000007",
+    "native_hex": "000000000000ff",
+    "matches": false
+  },
+  {
+    "name": "align_5_4",
+    "exit": 0,
+    "stderr": "assembled + linked 9 byte(s) -> out.bin\n",
+    "hex": "000000000000000007",
+    "native_hex": "0000000000000000ff",
+    "matches": false
+  },
+  {
+    "name": "align_5_16",
+    "exit": 0,
+    "stderr": "assembled + linked 17 byte(s) -> out.bin\n",
+    "hex": "0000000000000000000000000000000007",
+    "native_hex": "00000000000000000000000000000000ff",
+    "matches": false
+  },
+  {
+    "name": "width_forward",
+    "exit": 0,
+    "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+    "hex": "a512",
+    "native_hex": "ad1200",
+    "matches": false
+  },
+  {
+    "name": "width_backward",
+    "exit": 0,
+    "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+    "hex": "a512",
+    "native_hex": "a512",
+    "matches": true
+  },
+  {
+    "name": "width_zp_forward",
+    "exit": 0,
+    "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+    "hex": "a500",
+    "native_hex": "ad0000",
+    "matches": false
+  },
+  {
+    "name": "width_zp_backward",
+    "exit": 0,
+    "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+    "hex": "a500",
+    "native_hex": "a500",
+    "matches": true
+  },
+  {
+    "name": "width_forward_align",
+    "exit": 0,
+    "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+    "hex": "a51207",
+    "native_hex": "ad120000ff",
+    "matches": false
+  },
+  {
+    "name": "scope_instruction",
+    "exit": 0,
+    "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+    "hex": "ea07",
+    "native_hex": "eaff",
+    "matches": false
+  },
+  {
+    "name": "scope_raw",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "61626307",
+    "native_hex": "616263ff",
+    "matches": false
+  },
+  {
+    "name": "scope_include",
+    "exit": 0,
+    "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+    "hex": "0007",
+    "native_hex": "00ff",
+    "matches": false
+  },
+  {
+    "name": "scope_repeat",
+    "exit": 0,
+    "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+    "hex": "000007",
+    "native_hex": "0000ff",
+    "matches": false
+  },
+  {
+    "name": "scope_deferred_include",
+    "exit": 0,
+    "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+    "hex": "0007",
+    "native_hex": "0007",
+    "matches": true
+  },
+  {
+    "name": "scope_macro",
+    "exit": 0,
+    "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+    "hex": "0007",
+    "native_hex": "00ff",
+    "matches": false
+  },
+  {
+    "name": "scope_macro_deferred_include",
+    "exit": 0,
+    "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+    "hex": "0007",
+    "native_hex": "0007",
+    "matches": true
+  },
+  {
+    "name": "proc_value_no_data",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "09",
+    "matches": false
+  },
+  {
+    "name": "proc_value_with_data",
+    "exit": 0,
+    "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+    "hex": "0007",
+    "native_hex": "00ff",
+    "matches": false
+  },
+  {
+    "name": "empty_struct",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "ff",
+    "matches": false
+  },
+  {
+    "name": "empty_union",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "ff",
+    "matches": false
+  },
+  {
+    "name": "empty_enum",
+    "exit": 0,
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "07",
+    "matches": true
+  },
+  {
+    "name": "after_scope_new_cheap",
+    "exit": 1,
+    "stderr": "asm198x: input.s:6:1: error: symbol `@value` is already defined\n",
+    "hex": null,
+    "native_hex": "0009",
+    "matches": false
+  }
+]

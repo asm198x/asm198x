@@ -1,0 +1,49 @@
+{
+  "name": "cheap_macro_label_external",
+  "source": ".macro emit value\n@value: .byte value\n.endmacro\nanchor:\nemit 7\n.word @value\n",
+  "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+  "native": [
+    {
+      "argv": [
+        "/opt/homebrew/bin/ca65",
+        "input.s",
+        "-o",
+        "input.o"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-cheap-constants-probe-ghy0rdv8",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/opt/homebrew/bin/ld65",
+        "-C",
+        "input.cfg",
+        "input.o",
+        "-o",
+        "native.bin"
+      ],
+      "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-cheap-constants-probe-ghy0rdv8",
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "native_hex": "070010",
+  "asm": {
+    "argv": [
+      "/private/tmp/asm198x-address-size-build/debug/asm198x",
+      "--dialect",
+      "ca65",
+      "-C",
+      "input.cfg",
+      "input.s",
+      "-o",
+      "out.bin"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:5: error: invalid cheap-local label `@7`\nin expansion of macro `emit` defined at input.s:1, invoked at input.s:5\n"
+  }
+}

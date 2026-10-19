@@ -457,8 +457,9 @@ pub(crate) struct ExprOpts {
     /// ca65 deliberately leaves this false because its `.not`/`!` layer binds
     /// looser than the whole logical expression.
     pub logical_not_tight: bool,
-    /// `::` inside a name (ca65's `scope::name`, and `::name` for the top
-    /// level). Off everywhere else, where a `:` ends a name — a lone `:` is an
+    /// ca65 scoped names: `scope::name`, `::name` for the top level, and
+    /// `@cheap` tokens that the reader binds to their global anchor.
+    /// Off everywhere else, where a `:` ends a name — a lone `:` is an
     /// anonymous label in several dialects, so only the doubled form is taken.
     pub scoped_names: bool,
     /// A `.` inside a number, and an optional `qN` precision suffix after it —
@@ -698,6 +699,19 @@ fn tokenize(
             '@' if opts.at_is_pc => {
                 tokens.push(Tok::Pc);
                 i += 1;
+            }
+            // The ca65 scoped-name grammar also owns cheap-local tokens.
+            // Keep the sigil in the symbol until its reader binds the anchor.
+            '@' if opts.scoped_names => {
+                let start = i;
+                i += 1;
+                while i < chars.len() && (chars[i].is_ascii_alphanumeric() || chars[i] == '_') {
+                    i += 1;
+                }
+                if i == start + 1 {
+                    return Err(AsmError::new(line, "expected a cheap-local name after `@`"));
+                }
+                tokens.push(Tok::Sym(chars[start..i].iter().collect()));
             }
             '/' => {
                 tokens.push(Tok::Slash);

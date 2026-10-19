@@ -42,7 +42,7 @@ mod link;
 mod project;
 pub(crate) use link::VisRule;
 use link::{Emit, Resolved, area_usage, emit, link, resolve};
-use project::{Sweep, collect_syms, map_kind_syms, parsed_from_program};
+use project::{Sweep, collect_syms, map_expr_syms, map_kind_syms, parsed_from_program};
 
 // ---------------------------------------------------------------------------
 // The fixed NES (NROM) layout
@@ -203,6 +203,13 @@ enum Kind {
     },
 }
 
+#[derive(Clone)]
+struct BoundInsn {
+    form: &'static isa::Form,
+    operands: Vec<Expr>,
+    unsigned_word: bool,
+}
+
 struct Stmt {
     line: usize,
     /// The file `line` counts within (language-surface U5): the root for a
@@ -213,6 +220,7 @@ struct Stmt {
     seg: String,
     label: Option<String>,
     kind: Kind,
+    bound_insn: Option<BoundInsn>,
 }
 
 struct Placed {
@@ -256,6 +264,9 @@ struct Parsed {
     label_seg: BTreeMap<String, String>,
     /// `=` constants, folded in source order.
     consts: BTreeMap<String, i64>,
+    /// Authored cheap constant names for debug output; canonical keys remain
+    /// available to expression resolution and symbol exports.
+    const_names: BTreeMap<String, String>,
 }
 
 // ---------------------------------------------------------------------------
@@ -402,6 +413,13 @@ fn assemble_program(
             stmt.kind = map_kind_syms(&stmt.kind, &|name| {
                 targets.get(name).map(|t| Expr::Sym(t.clone()))
             });
+            if let Some(bound) = &mut stmt.bound_insn {
+                for operand in &mut bound.operands {
+                    *operand = map_expr_syms(operand, &|name| {
+                        targets.get(name).map(|t| Expr::Sym(t.clone()))
+                    });
+                }
+            }
             // `.sizeof` reads a size the declaration stored. A name that
             // declared none has no size to give, which is ca65's `Size of 'V'
             // is unknown` — answered here, where the message can still name
@@ -459,6 +477,7 @@ fn assemble_program(
                 off,
                 stmt.line,
                 layout_def.fill,
+                stmt.bound_insn.clone(),
             )
             .map_err(|e| statement_error(e, stmt.file, &stmt.expansion_frames))?;
             *lengths.get_mut(&stmt.seg).expect("segment length") += size as u32;
@@ -495,7 +514,7 @@ fn assemble_program(
     let mut dbg_cycles = Vec::new();
     for (name, value) in &parsed.consts {
         dbg_symbols.push(debug198x::Symbol {
-            name: name.clone(),
+            name: parsed.const_names.get(name).unwrap_or(name).clone(),
             kind: debug198x::SymbolKind::Const {
                 value: *value as u64,
             },
@@ -625,8 +644,16 @@ fn assemble_program(
                 &stmt.expansion_frames,
             ));
         }
-        let (resolved, size) = resolve(set, stmt.kind, &size_env, off, stmt.line, layout_def.fill)
-            .map_err(|e| statement_error(e, stmt.file, &stmt.expansion_frames))?;
+        let (resolved, size) = resolve(
+            set,
+            stmt.kind,
+            &size_env,
+            off,
+            stmt.line,
+            layout_def.fill,
+            stmt.bound_insn,
+        )
+        .map_err(|e| statement_error(e, stmt.file, &stmt.expansion_frames))?;
         *offsets.get_mut(&stmt.seg).expect("segment offset") += size as u32;
         // A line span per byte-emitting statement (address-space-only
         // reservations — ZEROPAGE/BSS `.res` — carry no bytes, so no span; the
@@ -951,12 +978,13 @@ struct Walker {
     text_names: BTreeSet<String>,
     anons: AnonCtx,
     /// The scoped symbol environment (#484): the cheap-local anchor — the
-    /// current global that `@cheap` labels key under, re-anchored by plain
-    /// labels and saved/restored around `.proc`/`.scope` — lives in the
+    /// current global that `@cheap` labels key under, re-anchored by native
+    /// definition events without restoration at scope exit — lives in the
     /// shared environment (`decisions/scoped-symbol-environment.md`); the
     /// `::`-path scope stack below is staged to follow.
     scope_env: crate::scopes::ScopeEnv,
     consts: BTreeMap<String, i64>,
+    source_offsets: BTreeMap<String, u32>,
     pending_leading: Vec<crate::ast::Comment>,
     nodes: Vec<crate::ast::Node>,
     /// The scopes open at this line, outermost first — what `.proc`/`.scope`
@@ -1047,8 +1075,8 @@ struct OpenScope {
     is_proc: bool,
     /// Where it was opened, so an unclosed one can say where to look.
     line: usize,
-    /// The cheap-local scope in force outside it, restored when it closes.
-    outer_global: String,
+    /// A positive physical span causes a native size definition on closure.
+    has_output: bool,
 }
 
 impl Walker {
@@ -1062,6 +1090,7 @@ impl Walker {
             anons: AnonCtx::default(),
             scope_env: crate::scopes::ScopeEnv::new(),
             consts: BTreeMap::new(),
+            source_offsets: BTreeMap::new(),
             pending_leading: Vec::new(),
             nodes: Vec::new(),
             scopes: Vec::new(),
@@ -1211,7 +1240,15 @@ impl Walker {
             match self.scopes.last() {
                 Some(open) if open.is_proc == is_proc => {
                     let open = self.scopes.pop().expect("just matched");
-                    self.scope_env.replace_anchor(open.outer_global);
+                    if open.has_output {
+                        self.scope_env.replace_anchor(format!(
+                            "scope-size{LABEL_SEP}{}",
+                            qualify(&self.path(), &open.segment)
+                        ));
+                        if let Some(parent) = self.scopes.last_mut() {
+                            parent.has_output = true;
+                        }
+                    }
                     return Ok(Some(None));
                 }
                 // ca65 pairs the closers by kind, so `.endscope` over an open
@@ -1250,14 +1287,14 @@ impl Walker {
             return Err(AsmError::new(line, format!("duplicate scope `{name}`")));
         }
         let label = (is_proc && !rest.is_empty()).then(|| qualify(&self.path(), &name));
-        let outer_global = self
-            .scope_env
-            .replace_anchor(label.clone().unwrap_or_else(|| path.clone()));
+        if let Some(label) = &label {
+            self.scope_env.replace_anchor(label.clone());
+        }
         self.scopes.push(OpenScope {
             segment: name,
             is_proc,
             line,
-            outer_global,
+            has_output: false,
         });
         Ok(Some(label))
     }
@@ -1269,12 +1306,11 @@ impl Walker {
         if !self.opened.insert(path.clone()) {
             return Err(AsmError::new(line, format!("duplicate scope `{name}`")));
         }
-        let outer_global = self.scope_env.replace_anchor(path.clone());
         self.scopes.push(OpenScope {
             segment: name.to_string(),
             is_proc: false,
             line,
-            outer_global,
+            has_output: false,
         });
         Ok(path)
     }
@@ -1329,8 +1365,10 @@ impl Walker {
             let done = self.records.pop().expect("just matched");
             let key = Self::record_size_key(&done.path);
             self.consts.insert(key.clone(), done.size());
-            if let Some(open) = self.scopes.pop() {
-                self.scope_env.replace_anchor(open.outer_global);
+            self.scopes.pop();
+            if done.kind != RecordKind::Enum {
+                self.scope_env
+                    .replace_anchor(format!("scope-size{LABEL_SEP}{}", done.path));
             }
             // A record declared inside another allocates its size there, the
             // way an unnamed field of that type would.
@@ -1455,6 +1493,7 @@ impl Walker {
             let size_key = Self::record_size_key(&key);
             self.consts.insert(size_key.clone(), size);
             self.consts.insert(key.clone(), offset);
+            self.scope_env.replace_anchor(key.clone());
             defined.push(Kind::Constant(size_key, size));
             defined.push(Kind::Constant(key, offset));
         }
@@ -1481,6 +1520,7 @@ impl Walker {
         open.cursor = value + 1;
         let key = qualify(&self.path(), name);
         self.consts.insert(key.clone(), value);
+        self.scope_env.replace_anchor(key.clone());
         Ok(vec![Kind::Constant(key, value)])
     }
 
@@ -1570,6 +1610,17 @@ impl Walker {
     /// for an unqualified name, and a qualified target's entire parent must
     /// exist (finding just its first component is insufficient).
     fn constant_key(&self, name: &str, line: usize) -> Result<String, AsmError> {
+        if let Some(local) = name.strip_prefix('@') {
+            if !is_cheap_ident(local)
+                || (self.expand_text_defines && self.scope_env.anchor_str().is_empty())
+            {
+                return Err(AsmError::new(
+                    line,
+                    format!("invalid cheap-local constant `{name}`"),
+                ));
+            }
+            return Ok(cheap_key(self.scope_env.anchor_str(), local));
+        }
         let plain = name.strip_prefix("::").unwrap_or(name);
         // The shared MOS helper permits dots for other dialects' local
         // names. ca65 tokenises a dot as a control-command prefix instead;
@@ -1976,11 +2027,21 @@ impl FlatWalk for Walker {
             if let Ok(v) = fold_const(&expr, &self.consts, line) {
                 self.consts.insert(qualified.clone(), v);
             }
+            let scope = if name.starts_with('@') {
+                Scope::Local {
+                    in_global: self.scope_env.anchor_str().to_string(),
+                }
+            } else {
+                // Native reads the RHS under the previous global, then the
+                // new immutable symbol starts the next cheap namespace.
+                self.scope_env.set_anchor(qualified.clone());
+                Scope::Global
+            };
             self.nodes.push(Node {
                 operand_span: None,
                 label: Some(Symbol {
                     qualified,
-                    scope: Scope::Global,
+                    scope,
                     name: name.to_string(),
                 }),
                 item: Some(crate::ast::item_from_operation(Operation::Equ(expr))),
@@ -3324,12 +3385,7 @@ fn parse_value(anons: &AnonCtx, anchor: &str, raw: &str, line: usize) -> Result<
     if let Some((sign, level)) = anon_ref(t) {
         return Ok(Expr::Sym(anons.refer(sign, level, line)?));
     }
-    if let Some(cheap) = t.strip_prefix('@')
-        && is_ident(cheap)
-    {
-        return Ok(Expr::Sym(cheap_key(anchor, cheap)));
-    }
-    mos6502::parse_expr(
+    let expr = mos6502::parse_expr(
         t,
         line,
         parse_number,
@@ -3354,7 +3410,22 @@ fn parse_value(anons: &AnonCtx, anchor: &str, raw: &str, line: usize) -> Result<
             caret: mos6502::Caret::BankOrXor,
             at_is_pc: false,
         },
-    )
+    )?;
+    // Bare names, arithmetic and name-query markers all share the same
+    // cheap namespace. Binding only a bare operand loses that context.
+    Ok(map_expr_syms(&expr, &|name| {
+        let (prefix, symbol) = if let Some(symbol) = name.strip_prefix(DEFINED_MARK) {
+            (DEFINED_MARK, symbol)
+        } else if let Some(symbol) = name.strip_prefix(REF_MARK) {
+            (REF_MARK, symbol)
+        } else {
+            ("", name)
+        };
+        let local = symbol
+            .strip_prefix('@')
+            .filter(|name| is_cheap_ident(name))?;
+        Some(Expr::Sym(format!("{prefix}{}", cheap_key(anchor, local))))
+    }))
 }
 
 /// Marks a `.defined(NAME)` the projection has yet to answer. `\u{1}` cannot
@@ -3508,6 +3579,11 @@ fn resolve_ref(used: &BTreeSet<String>) -> impl Fn(&str) -> Option<Expr> + '_ {
         let sym = name.strip_prefix(REF_MARK)?;
         Some(Expr::Num(i64::from(used.contains(sym))))
     }
+}
+
+/// ca65 cheap tokens allow digits after `@`, but never a dot keyword.
+fn is_cheap_ident(name: &str) -> bool {
+    !name.is_empty() && name.bytes().all(|c| c.is_ascii_alphanumeric() || c == b'_')
 }
 
 /// A collision-proof symbol key for a cheap local, scoped to its global.
