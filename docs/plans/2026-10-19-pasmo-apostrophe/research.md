@@ -18,3 +18,5 @@ an omission control preventing qualification without it.
 Local verification: 1,586 Rust tests pass (38 ignored), all 89 Node tests pass,
 and Lua/all-target Clippy, rustfmt and generated-doc checks pass. A clean
 producer and actual archive controls follow this source commit.
+
+Clean producer ce867773e5d1d54b06229dda0b9831e81df889be has executable SHA-256 c6a28a48ec8b51a2ede3cc6b379a97f027c3d8e047ca3c32312283492eaf8e75. Its actual archive passes all 74 required cohorts and all 24 new commands; changed bytes and archive controls fail. The preceding archive fails only the new cohort. The clean pinned SpecNext replay matches all 33,280 native NEX bytes (SHA-256 5fbed92a7d60dab47de8b22162c9227df051eaf67c26e85e618b24f6429dd07f), with five successful processes, ten streams, full comparison bytes and a failing changed-byte control.
