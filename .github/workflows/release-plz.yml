@@ -1,155 +1,30 @@
 name: Release-plz
 
+# Tags merged releases, then opens or updates the next release PR, using the
+# workflow every 198x Rust repo shares (stevehill1981/198x-workflows).
 on:
   push:
     branches:
       - main
 
 permissions:
-  pull-requests: write
   contents: write
+  pull-requests: write
+  # crates.io Trusted Publishing matches this file's name, so keep it.
   id-token: write
 
 jobs:
-  release:
-    name: Release merged versions
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v7
-        with:
-          # release-plz needs full history to diff the changelog from the
-          # last tag.
-          fetch-depth: 0
-          # The `release` step below pushes the version tag with this token. A
-          # tag pushed by GITHUB_TOKEN does NOT trigger other workflows, so the
-          # per-org RELEASE_PLZ_TOKEN (a fine-grained PAT) is required for the
-          # tag to fire cargo-dist's release.yml.
-          token: ${{ secrets.RELEASE_PLZ_TOKEN || secrets.GITHUB_TOKEN }}
-
-      - name: Read pinned toolchain
-        id: toolchain
-        run: |
-          channel=$(awk -F'"' '/^channel/{print $2}' rust-toolchain.toml)
-          echo "channel=${channel}" >> "$GITHUB_OUTPUT"
-
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: ${{ steps.toolchain.outputs.channel }}
-
-      # The pre-tag ratchet. This must sit *before* the tagging step: tagging
-      # fires cargo-dist's release.yml, and by then the release exists. A
-      # shortfall that is settled rides along fine; one still owed does not,
-      # because a release is the deadline for recovering it.
-      - name: Refuse to tag while arbitration debt is owed
-        run: cargo xtask coverage --no-debt
-
-      - name: Run release-plz (tag merged releases)
-        uses: release-plz/action@v0.5
-        with:
-          command: release
-        env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_PLZ_TOKEN || secrets.GITHUB_TOKEN }}
-
-  release-pr:
-    name: Prepare the next release
-    needs: release
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    concurrency:
-      group: release-plz-pr-${{ github.ref }}
-      cancel-in-progress: false
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.RELEASE_PLZ_TOKEN || secrets.GITHUB_TOKEN }}
-      - id: toolchain
-        run: echo "channel=$(awk -F'\"' '/^channel/{print $2}' rust-toolchain.toml)" >> "$GITHUB_OUTPUT"
-      - uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: ${{ steps.toolchain.outputs.channel }}
-      - uses: release-plz/action@v0.5
-        with:
-          command: release-pr
-        env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_PLZ_TOKEN || secrets.GITHUB_TOKEN }}
-
-      # release-plz changes the workspace version on its generated branch.
-      # The conformance ledger embeds that version, so regenerate it after the
-      # release PR has been created or updated rather than relying on a manual
-      # follow-up every time.
-      - name: Regenerate generated documentation on the release branch
-        env:
-          GH_TOKEN: ${{ secrets.RELEASE_PLZ_TOKEN || secrets.GITHUB_TOKEN }}
-        run: |
-          set -euo pipefail
-
-          branch="$(gh pr list \
-            --state open \
-            --json headRefName,title \
-            --jq '.[] | select(.headRefName | startswith("release-plz-")) | select(.title | startswith("chore: release")) | .headRefName' \
-            --limit 10 | head -n 1)"
-          if [[ -z "$branch" ]]; then
-            echo "No open release-plz PR found; nothing to regenerate."
-            exit 0
-          fi
-
-          git fetch origin "$branch"
-          git checkout -B "$branch" "origin/$branch"
-          cargo xtask docs
-
-          if git diff --quiet; then
-            echo "Generated documentation is already current."
-            exit 0
-          fi
-
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/book/src
-          git commit -m "docs: regenerate release documentation"
-          git push origin "HEAD:$branch"
-
-      # crates/asm198x-web is excluded from the workspace (see the root
-      # Cargo.toml), so it carries its own lockfile, and that lockfile records
-      # the version of the `asm198x` it builds against. release-plz bumps the
-      # workspace and never touches it, so every release PR arrives with the
-      # shell pinned to the previous version and fails ci.yml's
-      # `cargo fetch --locked` on exactly that line. Same shape and fix as
-      # Play198x's shell.
-      #
-      # `-p asm198x`, not a bare `cargo update`: a bare one also refreshes
-      # unrelated transitive dependencies, which puts a dependency bump nobody
-      # reviewed into a release that should carry only the release.
-      - name: Point the web shell's lockfile at the released version
-        env:
-          GH_TOKEN: ${{ secrets.RELEASE_PLZ_TOKEN || secrets.GITHUB_TOKEN }}
-        run: |
-          set -euo pipefail
-
-          branch="$(gh pr list \
-            --state open \
-            --json headRefName,title \
-            --jq '.[] | select(.headRefName | startswith("release-plz-")) | select(.title | startswith("chore: release")) | .headRefName' \
-            --limit 10 | head -n 1)"
-          if [[ -z "$branch" ]]; then
-            echo "No open release-plz PR found; nothing to update."
-            exit 0
-          fi
-
-          git fetch origin "$branch"
-          git checkout -B "$branch" "origin/$branch"
-          cargo update -p asm198x --manifest-path crates/asm198x-web/Cargo.toml
-
-          if git diff --quiet crates/asm198x-web/Cargo.lock; then
-            echo "The web shell's lockfile is already current."
-            exit 0
-          fi
-
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -q crates/asm198x-web/Cargo.lock \
-            -m "chore(web): point the shell's lockfile at the released version"
-          git push origin "HEAD:$branch"
+  release-plz:
+    name: Release-plz
+    uses: stevehill1981/198x-workflows/.github/workflows/release-plz.yml@v1
+    secrets: inherit
+    with:
+      # The pre-tag ratchet: tagging fires cargo-dist's release, and a release
+      # is the deadline for recovering arbitration debt.
+      pre-release-command: cargo xtask coverage --no-debt
+      # The conformance ledger embeds the workspace version, and the web
+      # shell's own lockfile pins asm198x; release-plz updates neither.
+      release-branch-command: >-
+        cargo xtask docs &&
+        cargo update -p asm198x --manifest-path crates/asm198x-web/Cargo.toml
+      release-branch-commit-message: "chore(release): regenerate documentation and the web shell's lockfile"
