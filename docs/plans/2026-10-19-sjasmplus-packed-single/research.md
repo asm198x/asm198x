@@ -22,5 +22,11 @@ Normal width warnings remain checked; native empty-value and packed-overflow
 warning gaps remain explicitly tracked in #857 and #715.
 
 Focused tests, all 90 Node tests, Lua/all-target Clippy, rustfmt, Ruff and generated
-docs pass. Full Rust verdict replay and clean producer/project qualification
-remain required before shipping.
+docs pass. Full Rust verification passes: 1,588 tests and 38 ignored. Clean producer
+287e9883ad713e2d5b9edd64b52253c52b732aa9 (CLI SHA-256
+6553571ecff05502dcd16a6c79442707ca1b8e6185aece701e17191b289a9f45)
+passes all 75 actual-archive cohorts and both failing corruption controls. Its
+clean pinned SpecNext replay matches all 33,280 native NEX bytes, with five
+successful processes, ten retained streams and a failing changed-byte control.
+The fixture verifies the packed-literal correction independently of whether the
+pinned project uses that syntax. Five-host exact-head CI remains a merge gate.
