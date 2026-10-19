@@ -578,6 +578,7 @@ fn assemble_program(
     let mut dbg_symbols: Vec<debug198x::Symbol> = Vec::new();
     let mut dbg_lines: Vec<(FileId, u32, debug198x::SectionId, u64, u64)> = Vec::new();
     let mut dbg_cycles = Vec::new();
+    let mut dbg_spans = DebugSpans::default();
     for (name, value) in &parsed.consts {
         dbg_symbols.push(debug198x::Symbol {
             name: parsed.const_names.get(name).unwrap_or(name).clone(),
@@ -686,11 +687,18 @@ fn assemble_program(
             // (`@name`) labels are qualified with a control byte internally;
             // render the source form.
             if !label.starts_with(LABEL_SEP) {
+                let (section, offset) = dbg_spans.location(
+                    layout.seg_id(&stmt.seg),
+                    layout.segs.len(),
+                    info,
+                    off,
+                    prior_pc,
+                );
                 dbg_symbols.push(debug198x::Symbol {
                     name: display_label(label),
                     kind: debug198x::SymbolKind::Label {
-                        section: layout.seg_id(&stmt.seg),
-                        offset: u64::from(off),
+                        section,
+                        offset,
                         space: None,
                     },
                 });
@@ -750,20 +758,21 @@ fn assemble_program(
         // HEADER segment is iNES file metadata, not CPU-addressed code, so its
         // records would alias CPU $0000 — skipped, per AE3's no-fabrication rule).
         if size > 0 && info.file_at.is_some() && stmt.seg != "HEADER" {
-            dbg_lines.push((
-                stmt.file,
-                stmt.line as u32,
+            let (section, offset) = dbg_spans.location(
                 layout.seg_id(&stmt.seg),
-                u64::from(off),
-                size as u64,
-            ));
+                layout.segs.len(),
+                info,
+                off,
+                absolute_pc.unwrap_or(i64::from(addr)),
+            );
+            dbg_lines.push((stmt.file, stmt.line as u32, section, offset, size as u64));
             if let Resolved::Insn { form, .. } = &resolved {
                 dbg_cycles.push((
-                    layout.seg_id(&stmt.seg),
+                    section,
                     crate::engine::CycleRec {
                         file: stmt.file,
                         line: stmt.line as u32,
-                        offset: u64::from(off),
+                        offset,
                         base: form.cycles.base,
                         page_cross: form.cycles.page_cross,
                         branch_taken: form.cycles.branch_taken,
@@ -840,7 +849,7 @@ fn assemble_program(
     // absolute lookups skip them rather than aliasing them onto the zero page,
     // and a PPU-space consumer can supply a `BaseMap` (KTD7). A `Space`
     // qualifier is the eventual richer answer (KTD5, U7).
-    let sections: Vec<debug198x::Section> = layout
+    let mut sections: Vec<debug198x::Section> = layout
         .segs
         .iter()
         .enumerate()
@@ -948,6 +957,18 @@ fn assemble_program(
         .map_err(|e| statement_error(e, file, &expansion_frames))?;
     }
 
+    let mut file_offsets: BTreeMap<_, _> = layout
+        .segs
+        .iter()
+        .enumerate()
+        .filter_map(|(id, s)| Some((id as debug198x::SectionId, s.file_at? as u64)))
+        .collect();
+    for (section, file_offset, _, _) in dbg_spans.spans {
+        if let Some(at) = file_offset {
+            file_offsets.insert(section.id, at);
+        }
+        sections.push(section);
+    }
     let rom = link(&seg_bytes, layout)?;
     let areas = area_usage(layout_def, layout, &offsets);
     Ok((
@@ -955,12 +976,7 @@ fn assemble_program(
         warnings,
         DebugCaptureMulti {
             cycle_coverage: crate::engine::CycleCoverage::Full,
-            file_offsets: layout
-                .segs
-                .iter()
-                .enumerate()
-                .filter_map(|(id, s)| Some((id as debug198x::SectionId, s.file_at? as u64)))
-                .collect(),
+            file_offsets,
             sections,
             symbols: dbg_symbols,
             lines: dbg_lines,
@@ -968,6 +984,52 @@ fn assemble_program(
         },
         areas,
     ))
+}
+
+/// Logical debug coordinates retain a separate physical mapping for each span.
+#[derive(Default)]
+struct DebugSpans {
+    spans: Vec<(debug198x::Section, Option<u64>, u32, i64)>,
+    last: BTreeMap<debug198x::SectionId, usize>,
+}
+
+impl DebugSpans {
+    fn location(
+        &mut self,
+        parent: debug198x::SectionId,
+        configured_count: usize,
+        info: &ca65_layout::ResolvedSeg,
+        physical: u32,
+        logical: i64,
+    ) -> (debug198x::SectionId, u64) {
+        if logical == i64::from(info.base) + i64::from(physical) {
+            return (parent, u64::from(physical));
+        }
+        if let Some(&index) = self.last.get(&parent) {
+            let (section, _, start, base) = &self.spans[index];
+            if let Some(delta) = physical.checked_sub(*start)
+                && base.checked_add(i64::from(delta)) == Some(logical)
+            {
+                return (section.id, u64::from(delta));
+            }
+        }
+        let id = debug198x::SectionId::try_from(configured_count + self.spans.len())
+            .expect("debug section count fits section ID");
+        let section = debug198x::Section {
+            id,
+            name: info.name.clone(),
+            base: info
+                .cpu_addressable
+                .then(|| u64::try_from(logical).expect("validated PC")),
+            space: None,
+        };
+        let file_offset = info
+            .file_at
+            .and_then(|at| (at as u64).checked_add(u64::from(physical)));
+        self.last.insert(parent, self.spans.len());
+        self.spans.push((section, file_offset, physical, logical));
+        (id, 0)
+    }
 }
 
 // ---------------------------------------------------------------------------
