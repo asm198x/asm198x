@@ -30,3 +30,19 @@ has 74 differences, so the prerequisite does not hide the macro behavior.
    4510 replay. Ship only this slice on actual main, inspect exact-head CI, all
    five actual candidate reports/receipts and ten corruption controls, rebase
    merge #862/#870 and reuse/clean owned workspaces after retention checks.
+
+Exact shipping files:
+
+- `crates/asm198x/src/dialects/ca65/mod.rs`: recognize an optional balanced
+  generated label before a macro definition.
+- `crates/asm198x/src/dialects/ca65/project.rs`: read and bind selected definition
+  and call heads through existing binding/token rules before macro execution.
+- `crates/asm198x/tests/ca65_generated_macros.rs` and
+  `crates/asm198x/tests/fixtures/ca65-generated-macros.json`: native complete
+  byte/address/format cases plus include/macro diagnostics and preservation.
+- `crates/asm198x/tests/ca65_generated_format.rs` and its existing
+  `fixtures/ca65-generated-format.json`: restore the two resolved #862 controls.
+- `scripts/test-candidate-package.cjs` and `scripts/candidate-package.test.cjs`:
+  required macro cohort, actual address checks and omission failure.
+- This plan directory: complete native/predecessor/current captures, verifier,
+  red/green/full logs, archive controls and clean producer/4510 evidence.
