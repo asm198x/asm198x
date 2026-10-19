@@ -1140,6 +1140,13 @@ fn run(args: &[String]) -> Result<String, String> {
                 None,
             ),
         };
+        for warning in &rom.warnings {
+            let file = rom
+                .files
+                .get(warning.file.0 as usize)
+                .map_or(input, String::as_str);
+            eprintln!("asm198x: {file}: {warning}");
+        }
         if let Some(path) = &linker_config {
             loader.inputs.borrow_mut().push(path.clone());
         }

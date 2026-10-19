@@ -233,6 +233,8 @@ struct Placed {
     file: FileId,
     expansion_frames: Vec<crate::span::ExpansionFrame>,
     item: Resolved,
+    /// Default reservation/alignment fill is not initialized BSS content.
+    has_initializer: bool,
 }
 
 /// Ask the shared evaluator which unresolved numeric values are actually
@@ -712,6 +714,7 @@ fn assemble_program(
                 &stmt.expansion_frames,
             ));
         }
+        let has_initializer = !matches!(stmt.kind, Kind::Res(_, None) | Kind::Align(_, None));
         let (resolved, size) = resolve(
             set,
             stmt.kind,
@@ -770,6 +773,7 @@ fn assemble_program(
                 line: stmt.line,
                 file: stmt.file,
                 expansion_frames: stmt.expansion_frames,
+                has_initializer,
                 item: resolved,
             });
         }
@@ -833,6 +837,13 @@ fn assemble_program(
     // they were written.
     let mut seg_bytes: BTreeMap<String, Vec<u8>> = BTreeMap::new();
     let mut warnings: Vec<Warning> = Vec::new();
+    let uninitialized: BTreeSet<&str> = layout_def
+        .segments
+        .iter()
+        .filter(|s| !s.initialized)
+        .map(|s| s.name.as_str())
+        .collect();
+    let mut warned_segments = BTreeSet::new();
     for Placed {
         seg,
         addr,
@@ -840,31 +851,45 @@ fn assemble_program(
         file,
         expansion_frames,
         item,
+        has_initializer,
     } in placed
     {
         // A diagnostic carries no bytes, so it is answered before the segment
         // filter: an `.out` written inside BSS still prints.
         let diagnostic = matches!(item, Resolved::Message(..) | Resolved::Assert(..));
         if !diagnostic && layout.seg(&seg).expect("seg").file_at.is_none() {
-            // Omitted file content still has native expression/range checks.
-            // Raw bytes and reservations need no evaluation or allocation.
-            if !matches!(
-                item,
-                Resolved::Nothing | Resolved::Raw(_) | Resolved::Fill(..)
-            ) {
-                emit(
-                    item,
-                    addr,
-                    &Emit {
-                        env: &addr_env,
-                        label_seg: &parsed.label_seg,
-                        file,
-                        line,
-                    },
-                    &mut Vec::new(),
-                    &mut warnings,
-                )
-                .map_err(|e| statement_error(e, file, &expansion_frames))?;
+            // ld65 ignores reservations and all-zero initialized content.
+            // Validate omitted expressions before inspecting their actual bytes.
+            let check_content = has_initializer && uninitialized.contains(seg.as_str());
+            let nonzero = match &item {
+                Resolved::Nothing => false,
+                Resolved::Raw(bytes) => check_content && bytes.iter().any(|&b| b != 0),
+                Resolved::Fill(count, fill) => check_content && *count != 0 && *fill != 0,
+                _ => {
+                    let mut bytes = Vec::new();
+                    emit(
+                        item,
+                        addr,
+                        &Emit {
+                            env: &addr_env,
+                            label_seg: &parsed.label_seg,
+                            file,
+                            line,
+                        },
+                        &mut bytes,
+                        &mut warnings,
+                    )
+                    .map_err(|e| statement_error(e, file, &expansion_frames))?;
+                    check_content && bytes.iter().any(|&b| b != 0)
+                }
+            };
+            if nonzero && warned_segments.insert(seg.clone()) {
+                warnings.push(Warning {
+                    file,
+                    line,
+                    message: format!("segment `{seg}` with type bss contains initialized data"),
+                    kind: WarningKind::Advisory,
+                });
             }
             continue;
         }

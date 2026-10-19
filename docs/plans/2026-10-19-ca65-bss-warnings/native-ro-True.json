@@ -1,0 +1,1135 @@
+{
+  "tools": {
+    "ca65": {
+      "path": "/opt/homebrew/bin/ca65",
+      "sha256": "1a57997819fd98814e4601b5160df589e7a1a24e1888a80fee51ae450d8fd0ea",
+      "version": {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "--version"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "ca65 V2.18 - N/A\n"
+      }
+    },
+    "ld65": {
+      "path": "/opt/homebrew/bin/ld65",
+      "sha256": "36bb196207a6b2c90a4aa991b419d6113885303951b14b60b455f51c777b3339",
+      "version": {
+        "argv": [
+          "/opt/homebrew/bin/ld65",
+          "--version"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "ld65 V2.18 - N/A\n"
+      }
+    }
+  },
+  "files": {
+    "blob.bin": "X",
+    "data.inc": ".res 1\n.byte 0\n",
+    "empty.bin": "",
+    "zero.bin": "\u0000",
+    "nonzero.inc": ".res 1\n.byte 1\n"
+  },
+  "cases": [
+    {
+      "name": "byte",
+      "source": ".segment \"ZEROPAGE\"\n.byte 0\n.segment \"CODE\"\n.byte 9\n",
+      "config": "MEMORY { RAM:start=$20,size=$100,file=%O; MAIN:start=$1000,size=$100,file=%O; }\nSEGMENTS { ZEROPAGE:load=RAM,type=ro; SECOND:load=RAM,type=ro; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(3): Segment 'SECOND' does not exist\n"
+        }
+      ],
+      "native_hex": "0009"
+    },
+    {
+      "name": "word",
+      "source": ".segment \"ZEROPAGE\"\n.word 0\n.segment \"CODE\"\n.byte 9\n",
+      "config": "MEMORY { RAM:start=$20,size=$100,file=%O; MAIN:start=$1000,size=$100,file=%O; }\nSEGMENTS { ZEROPAGE:load=RAM,type=ro; SECOND:load=RAM,type=ro; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(3): Segment 'SECOND' does not exist\n"
+        }
+      ],
+      "native_hex": "000009"
+    },
+    {
+      "name": "dword",
+      "source": ".segment \"ZEROPAGE\"\n.dword 0\n.segment \"CODE\"\n.byte 9\n",
+      "config": "MEMORY { RAM:start=$20,size=$100,file=%O; MAIN:start=$1000,size=$100,file=%O; }\nSEGMENTS { ZEROPAGE:load=RAM,type=ro; SECOND:load=RAM,type=ro; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(3): Segment 'SECOND' does not exist\n"
+        }
+      ],
+      "native_hex": "0000000009"
+    },
+    {
+      "name": "instruction",
+      "source": ".segment \"ZEROPAGE\"\nnop\n.segment \"CODE\"\n.byte 9\n",
+      "config": "MEMORY { RAM:start=$20,size=$100,file=%O; MAIN:start=$1000,size=$100,file=%O; }\nSEGMENTS { ZEROPAGE:load=RAM,type=ro; SECOND:load=RAM,type=ro; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(3): Segment 'SECOND' does not exist\n"
+        }
+      ],
+      "native_hex": "ea09"
+    },
+    {
+      "name": "reserve",
+      "source": ".segment \"ZEROPAGE\"\n.res 2\n.segment \"CODE\"\n.byte 9\n",
+      "config": "MEMORY { RAM:start=$20,size=$100,file=%O; MAIN:start=$1000,size=$100,file=%O; }\nSEGMENTS { ZEROPAGE:load=RAM,type=ro; SECOND:load=RAM,type=ro; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(3): Segment 'SECOND' does not exist\n"
+        }
+      ],
+      "native_hex": "000009"
+    },
+    {
+      "name": "reserve_fill_zero",
+      "source": ".segment \"ZEROPAGE\"\n.res 2,0\n.segment \"CODE\"\n.byte 9\n",
+      "config": "MEMORY { RAM:start=$20,size=$100,file=%O; MAIN:start=$1000,size=$100,file=%O; }\nSEGMENTS { ZEROPAGE:load=RAM,type=ro; SECOND:load=RAM,type=ro; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(3): Segment 'SECOND' does not exist\n"
+        }
+      ],
+      "native_hex": "000009"
+    },
+    {
+      "name": "reserve_fill_nonzero",
+      "source": ".segment \"ZEROPAGE\"\n.res 2,$AA\n.segment \"CODE\"\n.byte 9\n",
+      "config": "MEMORY { RAM:start=$20,size=$100,file=%O; MAIN:start=$1000,size=$100,file=%O; }\nSEGMENTS { ZEROPAGE:load=RAM,type=ro; SECOND:load=RAM,type=ro; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(3): Segment 'SECOND' does not exist\n"
+        }
+      ],
+      "native_hex": "aaaa09"
+    },
+    {
+      "name": "reserve_empty",
+      "source": ".segment \"ZEROPAGE\"\n.res 0\n.segment \"CODE\"\n.byte 9\n",
+      "config": "MEMORY { RAM:start=$20,size=$100,file=%O; MAIN:start=$1000,size=$100,file=%O; }\nSEGMENTS { ZEROPAGE:load=RAM,type=ro; SECOND:load=RAM,type=ro; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(3): Segment 'SECOND' does not exist\n"
+        }
+      ],
+      "native_hex": "09"
+    },
+    {
+      "name": "reserve_fill_empty",
+      "source": ".segment \"ZEROPAGE\"\n.res 0,0\n.segment \"CODE\"\n.byte 9\n",
+      "config": "MEMORY { RAM:start=$20,size=$100,file=%O; MAIN:start=$1000,size=$100,file=%O; }\nSEGMENTS { ZEROPAGE:load=RAM,type=ro; SECOND:load=RAM,type=ro; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(3): Segment 'SECOND' does not exist\n"
+        }
+      ],
+      "native_hex": "09"
+    },
+    {
+      "name": "align",
+      "source": ".segment \"ZEROPAGE\"\n.res 1\n.align 4\n.segment \"CODE\"\n.byte 9\n",
+      "config": "MEMORY { RAM:start=$20,size=$100,file=%O; MAIN:start=$1000,size=$100,file=%O; }\nSEGMENTS { ZEROPAGE:load=RAM,type=ro; SECOND:load=RAM,type=ro; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(3): Segment 'SECOND' does not exist\nld65: Warning: input.cfg(2): Segment 'ZEROPAGE' isn't aligned properly; the resulting executable might not be functional.\n"
+        }
+      ],
+      "native_hex": "0000000009"
+    },
+    {
+      "name": "align_fill_zero",
+      "source": ".segment \"ZEROPAGE\"\n.res 1\n.align 4,0\n.segment \"CODE\"\n.byte 9\n",
+      "config": "MEMORY { RAM:start=$20,size=$100,file=%O; MAIN:start=$1000,size=$100,file=%O; }\nSEGMENTS { ZEROPAGE:load=RAM,type=ro; SECOND:load=RAM,type=ro; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(3): Segment 'SECOND' does not exist\nld65: Warning: input.cfg(2): Segment 'ZEROPAGE' isn't aligned properly; the resulting executable might not be functional.\n"
+        }
+      ],
+      "native_hex": "0000000009"
+    },
+    {
+      "name": "align_fill_empty",
+      "source": ".segment \"ZEROPAGE\"\n.align 1,0\n.segment \"CODE\"\n.byte 9\n",
+      "config": "MEMORY { RAM:start=$20,size=$100,file=%O; MAIN:start=$1000,size=$100,file=%O; }\nSEGMENTS { ZEROPAGE:load=RAM,type=ro; SECOND:load=RAM,type=ro; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(3): Segment 'SECOND' does not exist\n"
+        }
+      ],
+      "native_hex": "09"
+    },
+    {
+      "name": "empty",
+      "source": ".segment \"ZEROPAGE\"\n.segment \"CODE\"\n.byte 9\n",
+      "config": "MEMORY { RAM:start=$20,size=$100,file=%O; MAIN:start=$1000,size=$100,file=%O; }\nSEGMENTS { ZEROPAGE:load=RAM,type=ro; SECOND:load=RAM,type=ro; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(3): Segment 'SECOND' does not exist\n"
+        }
+      ],
+      "native_hex": "09"
+    },
+    {
+      "name": "string_empty",
+      "source": ".segment \"ZEROPAGE\"\n.byte \"\"\n.segment \"CODE\"\n.byte 9\n",
+      "config": "MEMORY { RAM:start=$20,size=$100,file=%O; MAIN:start=$1000,size=$100,file=%O; }\nSEGMENTS { ZEROPAGE:load=RAM,type=ro; SECOND:load=RAM,type=ro; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(3): Segment 'SECOND' does not exist\n"
+        }
+      ],
+      "native_hex": "09"
+    },
+    {
+      "name": "string",
+      "source": ".segment \"ZEROPAGE\"\n.byte \"A\"\n.segment \"CODE\"\n.byte 9\n",
+      "config": "MEMORY { RAM:start=$20,size=$100,file=%O; MAIN:start=$1000,size=$100,file=%O; }\nSEGMENTS { ZEROPAGE:load=RAM,type=ro; SECOND:load=RAM,type=ro; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(3): Segment 'SECOND' does not exist\n"
+        }
+      ],
+      "native_hex": "4109"
+    },
+    {
+      "name": "incbin",
+      "source": ".segment \"ZEROPAGE\"\n.incbin \"blob.bin\"\n.segment \"CODE\"\n.byte 9\n",
+      "config": "MEMORY { RAM:start=$20,size=$100,file=%O; MAIN:start=$1000,size=$100,file=%O; }\nSEGMENTS { ZEROPAGE:load=RAM,type=ro; SECOND:load=RAM,type=ro; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(3): Segment 'SECOND' does not exist\n"
+        }
+      ],
+      "native_hex": "5809"
+    },
+    {
+      "name": "many",
+      "source": ".segment \"ZEROPAGE\"\n.byte 0\n.word 0\nnop\n.res 2,0\n.segment \"CODE\"\n.byte 9\n",
+      "config": "MEMORY { RAM:start=$20,size=$100,file=%O; MAIN:start=$1000,size=$100,file=%O; }\nSEGMENTS { ZEROPAGE:load=RAM,type=ro; SECOND:load=RAM,type=ro; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(3): Segment 'SECOND' does not exist\n"
+        }
+      ],
+      "native_hex": "000000ea000009"
+    },
+    {
+      "name": "included",
+      "source": ".segment \"ZEROPAGE\"\n.include \"data.inc\"\n.segment \"CODE\"\n.byte 9\n",
+      "config": "MEMORY { RAM:start=$20,size=$100,file=%O; MAIN:start=$1000,size=$100,file=%O; }\nSEGMENTS { ZEROPAGE:load=RAM,type=ro; SECOND:load=RAM,type=ro; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(3): Segment 'SECOND' does not exist\n"
+        }
+      ],
+      "native_hex": "000009"
+    },
+    {
+      "name": "invalid_range",
+      "source": ".segment \"ZEROPAGE\"\n.byte 256\n.segment \"CODE\"\n.byte 9\n",
+      "config": "MEMORY { RAM:start=$20,size=$100,file=%O; MAIN:start=$1000,size=$100,file=%O; }\nSEGMENTS { ZEROPAGE:load=RAM,type=ro; SECOND:load=RAM,type=ro; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Range error (256 not in [0..255])\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "undefined",
+      "source": ".segment \"ZEROPAGE\"\n.word MISSING\n.segment \"CODE\"\n.byte 9\n",
+      "config": "MEMORY { RAM:start=$20,size=$100,file=%O; MAIN:start=$1000,size=$100,file=%O; }\nSEGMENTS { ZEROPAGE:load=RAM,type=ro; SECOND:load=RAM,type=ro; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Symbol 'MISSING' is undefined\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "byte_nonzero",
+      "source": ".segment \"ZEROPAGE\"\n.byte 1\n.segment \"CODE\"\n.byte 9\n",
+      "config": "MEMORY { RAM:start=$20,size=$100,file=%O; MAIN:start=$1000,size=$100,file=%O; }\nSEGMENTS { ZEROPAGE:load=RAM,type=ro; SECOND:load=RAM,type=ro; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(3): Segment 'SECOND' does not exist\n"
+        }
+      ],
+      "native_hex": "0109"
+    },
+    {
+      "name": "word_nonzero",
+      "source": ".segment \"ZEROPAGE\"\n.word 1\n.segment \"CODE\"\n.byte 9\n",
+      "config": "MEMORY { RAM:start=$20,size=$100,file=%O; MAIN:start=$1000,size=$100,file=%O; }\nSEGMENTS { ZEROPAGE:load=RAM,type=ro; SECOND:load=RAM,type=ro; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(3): Segment 'SECOND' does not exist\n"
+        }
+      ],
+      "native_hex": "010009"
+    },
+    {
+      "name": "dword_nonzero",
+      "source": ".segment \"ZEROPAGE\"\n.dword 65536\n.segment \"CODE\"\n.byte 9\n",
+      "config": "MEMORY { RAM:start=$20,size=$100,file=%O; MAIN:start=$1000,size=$100,file=%O; }\nSEGMENTS { ZEROPAGE:load=RAM,type=ro; SECOND:load=RAM,type=ro; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(3): Segment 'SECOND' does not exist\n"
+        }
+      ],
+      "native_hex": "0000010009"
+    },
+    {
+      "name": "expression_zero",
+      "source": ".segment \"ZEROPAGE\"\n.word VALUE\nVALUE=0\n.segment \"CODE\"\n.byte 9\n",
+      "config": "MEMORY { RAM:start=$20,size=$100,file=%O; MAIN:start=$1000,size=$100,file=%O; }\nSEGMENTS { ZEROPAGE:load=RAM,type=ro; SECOND:load=RAM,type=ro; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(3): Segment 'SECOND' does not exist\n"
+        }
+      ],
+      "native_hex": "000009"
+    },
+    {
+      "name": "expression_nonzero",
+      "source": ".segment \"ZEROPAGE\"\n.word VALUE\nVALUE=1\n.segment \"CODE\"\n.byte 9\n",
+      "config": "MEMORY { RAM:start=$20,size=$100,file=%O; MAIN:start=$1000,size=$100,file=%O; }\nSEGMENTS { ZEROPAGE:load=RAM,type=ro; SECOND:load=RAM,type=ro; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(3): Segment 'SECOND' does not exist\n"
+        }
+      ],
+      "native_hex": "010009"
+    },
+    {
+      "name": "instruction_zero",
+      "source": ".segment \"ZEROPAGE\"\nbrk\n.segment \"CODE\"\n.byte 9\n",
+      "config": "MEMORY { RAM:start=$20,size=$100,file=%O; MAIN:start=$1000,size=$100,file=%O; }\nSEGMENTS { ZEROPAGE:load=RAM,type=ro; SECOND:load=RAM,type=ro; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(3): Segment 'SECOND' does not exist\n"
+        }
+      ],
+      "native_hex": "0009"
+    },
+    {
+      "name": "align_nonzero",
+      "source": ".segment \"ZEROPAGE\"\n.res 1\n.align 4,$AA\n.segment \"CODE\"\n.byte 9\n",
+      "config": "MEMORY { RAM:start=$20,size=$100,file=%O; MAIN:start=$1000,size=$100,file=%O; }\nSEGMENTS { ZEROPAGE:load=RAM,type=ro; SECOND:load=RAM,type=ro; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(3): Segment 'SECOND' does not exist\nld65: Warning: input.cfg(2): Segment 'ZEROPAGE' isn't aligned properly; the resulting executable might not be functional.\n"
+        }
+      ],
+      "native_hex": "00aaaaaa09"
+    },
+    {
+      "name": "incbin_empty",
+      "source": ".segment \"ZEROPAGE\"\n.incbin \"empty.bin\"\n.segment \"CODE\"\n.byte 9\n",
+      "config": "MEMORY { RAM:start=$20,size=$100,file=%O; MAIN:start=$1000,size=$100,file=%O; }\nSEGMENTS { ZEROPAGE:load=RAM,type=ro; SECOND:load=RAM,type=ro; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(3): Segment 'SECOND' does not exist\n"
+        }
+      ],
+      "native_hex": "09"
+    },
+    {
+      "name": "incbin_zero",
+      "source": ".segment \"ZEROPAGE\"\n.incbin \"zero.bin\"\n.segment \"CODE\"\n.byte 9\n",
+      "config": "MEMORY { RAM:start=$20,size=$100,file=%O; MAIN:start=$1000,size=$100,file=%O; }\nSEGMENTS { ZEROPAGE:load=RAM,type=ro; SECOND:load=RAM,type=ro; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(3): Segment 'SECOND' does not exist\n"
+        }
+      ],
+      "native_hex": "0009"
+    },
+    {
+      "name": "included_nonzero",
+      "source": ".segment \"ZEROPAGE\"\n.include \"nonzero.inc\"\n.segment \"CODE\"\n.byte 9\n",
+      "config": "MEMORY { RAM:start=$20,size=$100,file=%O; MAIN:start=$1000,size=$100,file=%O; }\nSEGMENTS { ZEROPAGE:load=RAM,type=ro; SECOND:load=RAM,type=ro; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(3): Segment 'SECOND' does not exist\n"
+        }
+      ],
+      "native_hex": "000109"
+    },
+    {
+      "name": "reservation_around_zero",
+      "source": ".segment \"ZEROPAGE\"\n.res 1\n.byte 0\n.res 1\n.segment \"CODE\"\n.byte 9\n",
+      "config": "MEMORY { RAM:start=$20,size=$100,file=%O; MAIN:start=$1000,size=$100,file=%O; }\nSEGMENTS { ZEROPAGE:load=RAM,type=ro; SECOND:load=RAM,type=ro; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(3): Segment 'SECOND' does not exist\n"
+        }
+      ],
+      "native_hex": "00000009"
+    },
+    {
+      "name": "two_segments",
+      "source": ".segment \"ZEROPAGE\"\n.byte 0\n.segment \"SECOND\"\nnop\n.segment \"ZEROPAGE\"\n.word 0\n.segment \"CODE\"\n.byte 9\n",
+      "config": "MEMORY { RAM:start=$20,size=$100,file=%O; MAIN:start=$1000,size=$100,file=%O; }\nSEGMENTS { ZEROPAGE:load=RAM,type=ro; SECOND:load=RAM,type=ro; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "000000ea09"
+    },
+    {
+      "name": "two_nonzero",
+      "source": ".segment \"ZEROPAGE\"\n.byte 1\n.segment \"SECOND\"\nnop\n.segment \"ZEROPAGE\"\n.word 1\n.segment \"CODE\"\n.byte 9\n",
+      "config": "MEMORY { RAM:start=$20,size=$100,file=%O; MAIN:start=$1000,size=$100,file=%O; }\nSEGMENTS { ZEROPAGE:load=RAM,type=ro; SECOND:load=RAM,type=ro; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2tfx84ao",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "010100ea09"
+    }
+  ]
+}

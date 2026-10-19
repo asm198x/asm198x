@@ -287,3 +287,10 @@ test('ca65 zero-page packing is mandatory package evidence', () => {
   assert(qualifies(complete)); assert(requiredCases.includes('ca65_zp_output'));
   assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_zp_output')), false);
 });
+
+
+test('ca65 BSS initialization warnings are mandatory package evidence', () => {
+  const complete = requiredCases.map(name => ({ name, status: 'pass' }));
+  assert(qualifies(complete)); assert(requiredCases.includes('ca65_bss_warnings'));
+  assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_bss_warnings')), false);
+});
