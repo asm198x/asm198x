@@ -1634,6 +1634,34 @@ impl Walker {
                 format!("invalid constant name `{name}`"),
             ));
         }
+        let extended = self.extension.is_some();
+        let register = plain.split("::").any(|part| {
+            let upper = part.to_ascii_uppercase();
+            matches!(upper.as_str(), "A" | "X" | "Y")
+                || (extended && matches!(upper.as_str(), "Z" | "SP"))
+        });
+        let head = plain.split("::").next().unwrap_or("").to_ascii_uppercase();
+        // ca65 checks an instruction at the statement head, before reading
+        // a scoped definition. A leading :: bypasses that check. Register
+        // tokens remain reserved in every component.
+        let instruction = !name.starts_with("::")
+            && if extended && matches!(head.as_str(), "BRU" | "LBRU") {
+                // ISA aliases that native ca65 leaves available as names.
+                false
+            } else {
+                self.set.instruction(&head).is_some()
+                    || self.extension.is_some_and(|set| set.instruction(&head).is_some())
+                    // Native source aliases need not be ISA mnemonics.
+                    || (extended && matches!(head.as_str(), "INA" | "DEA" | "PHD"))
+            };
+        // Formatting also reads inactive definitions. Reserved tokens are
+        // a selected assembly check, so preserve those authored names there.
+        if self.expand_text_defines && (register || instruction) {
+            return Err(AsmError::new(
+                line,
+                format!("reserved constant name `{name}`"),
+            ));
+        }
         let qualified = if name.starts_with("::") {
             plain.to_string()
         } else if name.contains("::") {
