@@ -58,3 +58,14 @@ assembly gaps remain in this fixture. The actual archive passes all 82 cohorts,
 including 340 identifier commands, and both corruption controls fail. The
 preceding archive fails exactly the new cohort. Freeze this verified source and
 retain a complete clean 4510 replay before opening the shipping PR.
+
+Final clean producer `431560df6d7036be06c32351204ecd133c618f70`, tree
+`df587bf9068e6ec024b6db09daa5c833779df396`, has CLI SHA-256
+`9cbec83b77db0d2e0199b6391df19c3a5591f161cd50388080fda0add31a0ed5`.
+Its actual archive passes all 82 cohorts and 340 identifier commands. Changed
+bytes fail exactly three reference controls; corrupt archives fail SHA validation.
+Clean 4510 replay matches all 564 native bytes across seven processes/fourteen
+retained streams, and the changed-byte guard fails. Disposable audit work was
+removed. Shipping code/harness and the native audit embedded by the Rust test
+match the clean producer. The generated Python bytecode cache from the initial
+probe was removed; no trial production patch or cache is shipped.
