@@ -1,0 +1,851 @@
+{
+  "tools": {
+    "ca65": {
+      "path": "/opt/homebrew/bin/ca65",
+      "sha256": "1a57997819fd98814e4601b5160df589e7a1a24e1888a80fee51ae450d8fd0ea",
+      "version": {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "--version"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-b0l_p2fe",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "ca65 V2.18 - N/A\n"
+      }
+    },
+    "ld65": {
+      "path": "/opt/homebrew/bin/ld65",
+      "sha256": "36bb196207a6b2c90a4aa991b419d6113885303951b14b60b455f51c777b3339",
+      "version": {
+        "argv": [
+          "/opt/homebrew/bin/ld65",
+          "--version"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-b0l_p2fe",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "ld65 V2.18 - N/A\n"
+      }
+    }
+  },
+  "files": {},
+  "cases": [
+    {
+      "name": "zp_False_first_start",
+      "source": ".segment \"ZEROPAGE\"\nstart:.byte 7\n.segment \"CODE\"\n.word start\n",
+      "config": "MEMORY { MAIN:start=$20,size=$20,file=%O; }\nSEGMENTS { ZEROPAGE:load=MAIN,type=zp,start=$28; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-b0l_p2fe",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-b0l_p2fe",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(2): Segment 'ZEROPAGE' with type 'bss' contains initialized data\n"
+        }
+      ],
+      "native_hex": "2800"
+    },
+    {
+      "name": "zp_False_second_start",
+      "source": ".segment \"ZEROPAGE\"\nstart:.byte 7\n.segment \"CODE\"\n.word start\n",
+      "config": "MEMORY { MAIN:start=$20,size=$20,file=%O; }\nSEGMENTS { ZEROPAGE:load=MAIN,type=zp; CODE:load=MAIN,type=ro,start=$28; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-qzumz97u",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-qzumz97u",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(2): Segment 'ZEROPAGE' with type 'bss' contains initialized data\n"
+        }
+      ],
+      "native_hex": "000000000000002000"
+    },
+    {
+      "name": "zp_False_second_align",
+      "source": ".segment \"ZEROPAGE\"\nstart:.byte 7\n.segment \"CODE\"\n.word start\n",
+      "config": "MEMORY { MAIN:start=$20,size=$20,file=%O; }\nSEGMENTS { ZEROPAGE:load=MAIN,type=zp; CODE:load=MAIN,type=ro,align=$8; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-zqchc35n",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-zqchc35n",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(2): Segment 'ZEROPAGE' with type 'bss' contains initialized data\n"
+        }
+      ],
+      "native_hex": "000000000000002000"
+    },
+    {
+      "name": "zp_True_first_start",
+      "source": ".segment \"ZEROPAGE\"\nstart:.byte 7\n.segment \"CODE\"\n.word start\n",
+      "config": "MEMORY { MAIN:start=$20,size=$20,file=%O,fill=yes,fillval=$A5; }\nSEGMENTS { ZEROPAGE:load=MAIN,type=zp,start=$28; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5eaynxlk",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5eaynxlk",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(2): Segment 'ZEROPAGE' with type 'bss' contains initialized data\n"
+        }
+      ],
+      "native_hex": "a5a5a5a5a5a5a5a5a52800a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5"
+    },
+    {
+      "name": "zp_True_second_start",
+      "source": ".segment \"ZEROPAGE\"\nstart:.byte 7\n.segment \"CODE\"\n.word start\n",
+      "config": "MEMORY { MAIN:start=$20,size=$20,file=%O,fill=yes,fillval=$A5; }\nSEGMENTS { ZEROPAGE:load=MAIN,type=zp; CODE:load=MAIN,type=ro,start=$28; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2wznoo3w",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-2wznoo3w",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(2): Segment 'ZEROPAGE' with type 'bss' contains initialized data\n"
+        }
+      ],
+      "native_hex": "a5a5a5a5a5a5a5a52000a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5"
+    },
+    {
+      "name": "zp_True_second_align",
+      "source": ".segment \"ZEROPAGE\"\nstart:.byte 7\n.segment \"CODE\"\n.word start\n",
+      "config": "MEMORY { MAIN:start=$20,size=$20,file=%O,fill=yes,fillval=$A5; }\nSEGMENTS { ZEROPAGE:load=MAIN,type=zp; CODE:load=MAIN,type=ro,align=$8; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-wnoc9v13",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-wnoc9v13",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(2): Segment 'ZEROPAGE' with type 'bss' contains initialized data\n"
+        }
+      ],
+      "native_hex": "a5a5a5a5a5a5a5a52000a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5"
+    },
+    {
+      "name": "bss_False_first_start",
+      "source": ".segment \"ZEROPAGE\"\nstart:.byte 7\n.segment \"CODE\"\n.word start\n",
+      "config": "MEMORY { MAIN:start=$20,size=$20,file=%O; }\nSEGMENTS { ZEROPAGE:load=MAIN,type=bss,start=$28; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5dj64z2s",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5dj64z2s",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(2): Segment 'ZEROPAGE' with type 'bss' contains initialized data\n"
+        }
+      ],
+      "native_hex": "2800"
+    },
+    {
+      "name": "bss_False_second_start",
+      "source": ".segment \"ZEROPAGE\"\nstart:.byte 7\n.segment \"CODE\"\n.word start\n",
+      "config": "MEMORY { MAIN:start=$20,size=$20,file=%O; }\nSEGMENTS { ZEROPAGE:load=MAIN,type=bss; CODE:load=MAIN,type=ro,start=$28; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-za9so4bq",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-za9so4bq",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(2): Segment 'ZEROPAGE' with type 'bss' contains initialized data\n"
+        }
+      ],
+      "native_hex": "000000000000002000"
+    },
+    {
+      "name": "bss_False_second_align",
+      "source": ".segment \"ZEROPAGE\"\nstart:.byte 7\n.segment \"CODE\"\n.word start\n",
+      "config": "MEMORY { MAIN:start=$20,size=$20,file=%O; }\nSEGMENTS { ZEROPAGE:load=MAIN,type=bss; CODE:load=MAIN,type=ro,align=$8; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ndkewarn",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ndkewarn",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(2): Segment 'ZEROPAGE' with type 'bss' contains initialized data\n"
+        }
+      ],
+      "native_hex": "000000000000002000"
+    },
+    {
+      "name": "bss_True_first_start",
+      "source": ".segment \"ZEROPAGE\"\nstart:.byte 7\n.segment \"CODE\"\n.word start\n",
+      "config": "MEMORY { MAIN:start=$20,size=$20,file=%O,fill=yes,fillval=$A5; }\nSEGMENTS { ZEROPAGE:load=MAIN,type=bss,start=$28; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-4l2_l59m",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-4l2_l59m",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(2): Segment 'ZEROPAGE' with type 'bss' contains initialized data\n"
+        }
+      ],
+      "native_hex": "a5a5a5a5a5a5a5a5a52800a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5"
+    },
+    {
+      "name": "bss_True_second_start",
+      "source": ".segment \"ZEROPAGE\"\nstart:.byte 7\n.segment \"CODE\"\n.word start\n",
+      "config": "MEMORY { MAIN:start=$20,size=$20,file=%O,fill=yes,fillval=$A5; }\nSEGMENTS { ZEROPAGE:load=MAIN,type=bss; CODE:load=MAIN,type=ro,start=$28; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-fxjzm9_o",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-fxjzm9_o",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(2): Segment 'ZEROPAGE' with type 'bss' contains initialized data\n"
+        }
+      ],
+      "native_hex": "a5a5a5a5a5a5a5a52000a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5"
+    },
+    {
+      "name": "bss_True_second_align",
+      "source": ".segment \"ZEROPAGE\"\nstart:.byte 7\n.segment \"CODE\"\n.word start\n",
+      "config": "MEMORY { MAIN:start=$20,size=$20,file=%O,fill=yes,fillval=$A5; }\nSEGMENTS { ZEROPAGE:load=MAIN,type=bss; CODE:load=MAIN,type=ro,align=$8; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oyx_lht7",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oyx_lht7",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(2): Segment 'ZEROPAGE' with type 'bss' contains initialized data\n"
+        }
+      ],
+      "native_hex": "a5a5a5a5a5a5a5a52000a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5"
+    },
+    {
+      "name": "ro_False_first_start",
+      "source": ".segment \"ZEROPAGE\"\nstart:.byte 7\n.segment \"CODE\"\n.word start\n",
+      "config": "MEMORY { MAIN:start=$20,size=$20,file=%O; }\nSEGMENTS { ZEROPAGE:load=MAIN,type=ro,start=$28; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-k992j8by",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-k992j8by",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0000000000000000072800"
+    },
+    {
+      "name": "ro_False_second_start",
+      "source": ".segment \"ZEROPAGE\"\nstart:.byte 7\n.segment \"CODE\"\n.word start\n",
+      "config": "MEMORY { MAIN:start=$20,size=$20,file=%O; }\nSEGMENTS { ZEROPAGE:load=MAIN,type=ro; CODE:load=MAIN,type=ro,start=$28; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-38j5eves",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-38j5eves",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07000000000000002000"
+    },
+    {
+      "name": "ro_False_second_align",
+      "source": ".segment \"ZEROPAGE\"\nstart:.byte 7\n.segment \"CODE\"\n.word start\n",
+      "config": "MEMORY { MAIN:start=$20,size=$20,file=%O; }\nSEGMENTS { ZEROPAGE:load=MAIN,type=ro; CODE:load=MAIN,type=ro,align=$8; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-on5nb6di",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-on5nb6di",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07000000000000002000"
+    },
+    {
+      "name": "ro_True_first_start",
+      "source": ".segment \"ZEROPAGE\"\nstart:.byte 7\n.segment \"CODE\"\n.word start\n",
+      "config": "MEMORY { MAIN:start=$20,size=$20,file=%O,fill=yes,fillval=$A5; }\nSEGMENTS { ZEROPAGE:load=MAIN,type=ro,start=$28; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-zd_t44u0",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-zd_t44u0",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "a5a5a5a5a5a5a5a5072800a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5"
+    },
+    {
+      "name": "ro_True_second_start",
+      "source": ".segment \"ZEROPAGE\"\nstart:.byte 7\n.segment \"CODE\"\n.word start\n",
+      "config": "MEMORY { MAIN:start=$20,size=$20,file=%O,fill=yes,fillval=$A5; }\nSEGMENTS { ZEROPAGE:load=MAIN,type=ro; CODE:load=MAIN,type=ro,start=$28; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ox084uc1",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ox084uc1",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07a5a5a5a5a5a5a52000a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5"
+    },
+    {
+      "name": "ro_True_second_align",
+      "source": ".segment \"ZEROPAGE\"\nstart:.byte 7\n.segment \"CODE\"\n.word start\n",
+      "config": "MEMORY { MAIN:start=$20,size=$20,file=%O,fill=yes,fillval=$A5; }\nSEGMENTS { ZEROPAGE:load=MAIN,type=ro; CODE:load=MAIN,type=ro,align=$8; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-yt4pr56t",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-yt4pr56t",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07a5a5a5a5a5a5a52000a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5"
+    },
+    {
+      "name": "rw_False_first_start",
+      "source": ".segment \"ZEROPAGE\"\nstart:.byte 7\n.segment \"CODE\"\n.word start\n",
+      "config": "MEMORY { MAIN:start=$20,size=$20,file=%O; }\nSEGMENTS { ZEROPAGE:load=MAIN,type=rw,start=$28; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-zl45qkdd",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-zl45qkdd",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0000000000000000072800"
+    },
+    {
+      "name": "rw_False_second_start",
+      "source": ".segment \"ZEROPAGE\"\nstart:.byte 7\n.segment \"CODE\"\n.word start\n",
+      "config": "MEMORY { MAIN:start=$20,size=$20,file=%O; }\nSEGMENTS { ZEROPAGE:load=MAIN,type=rw; CODE:load=MAIN,type=ro,start=$28; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-lkm5zkkn",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-lkm5zkkn",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07000000000000002000"
+    },
+    {
+      "name": "rw_False_second_align",
+      "source": ".segment \"ZEROPAGE\"\nstart:.byte 7\n.segment \"CODE\"\n.word start\n",
+      "config": "MEMORY { MAIN:start=$20,size=$20,file=%O; }\nSEGMENTS { ZEROPAGE:load=MAIN,type=rw; CODE:load=MAIN,type=ro,align=$8; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n6jg76vt",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n6jg76vt",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07000000000000002000"
+    },
+    {
+      "name": "rw_True_first_start",
+      "source": ".segment \"ZEROPAGE\"\nstart:.byte 7\n.segment \"CODE\"\n.word start\n",
+      "config": "MEMORY { MAIN:start=$20,size=$20,file=%O,fill=yes,fillval=$A5; }\nSEGMENTS { ZEROPAGE:load=MAIN,type=rw,start=$28; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_atn63_g",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_atn63_g",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "a5a5a5a5a5a5a5a5072800a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5"
+    },
+    {
+      "name": "rw_True_second_start",
+      "source": ".segment \"ZEROPAGE\"\nstart:.byte 7\n.segment \"CODE\"\n.word start\n",
+      "config": "MEMORY { MAIN:start=$20,size=$20,file=%O,fill=yes,fillval=$A5; }\nSEGMENTS { ZEROPAGE:load=MAIN,type=rw; CODE:load=MAIN,type=ro,start=$28; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-l9kudgkc",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-l9kudgkc",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07a5a5a5a5a5a5a52000a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5"
+    },
+    {
+      "name": "rw_True_second_align",
+      "source": ".segment \"ZEROPAGE\"\nstart:.byte 7\n.segment \"CODE\"\n.word start\n",
+      "config": "MEMORY { MAIN:start=$20,size=$20,file=%O,fill=yes,fillval=$A5; }\nSEGMENTS { ZEROPAGE:load=MAIN,type=rw; CODE:load=MAIN,type=ro,align=$8; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-78p2z257",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-78p2z257",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07a5a5a5a5a5a5a52000a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5"
+    }
+  ]
+}

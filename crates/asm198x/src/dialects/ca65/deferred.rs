@@ -284,9 +284,11 @@ impl Deferred {
         values: &BTreeMap<String, i64>,
         labels: &BTreeMap<String, String>,
         zero_page: &BTreeSet<String>,
+        pc_byte: bool,
         line: usize,
     ) -> Option<bool> {
-        self.hint(value, values, labels, zero_page, None, line).byte
+        self.hint(value, values, labels, zero_page, Some(pc_byte), line)
+            .byte
     }
 
     /// Freeze width before installing the new definition. Source references to

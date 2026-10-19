@@ -1,0 +1,4110 @@
+{
+  "binary": "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+  "sha256": "781a212a1b2a6cab9c4600d882011acd497805108f27c86087759b55cafd1a78",
+  "results": [
+    {
+      "name": "zp_False_False_byte",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0709",
+      "native_hex": "09",
+      "matches": false
+    },
+    {
+      "name": "zp_False_False_reserve",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000009",
+      "native_hex": "09",
+      "matches": false
+    },
+    {
+      "name": "zp_False_False_initialized_reserve",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "aaaa09",
+      "native_hex": "09",
+      "matches": false
+    },
+    {
+      "name": "zp_False_False_invalid_byte",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: range error (256 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "zp_False_False_invalid_word",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: range error (65536 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "zp_False_False_undefined_data",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `MISSING`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "zp_False_False_undefined_instruction",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `MISSING`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "zp_False_False_labels",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+      "hex": "07200009",
+      "native_hex": "09",
+      "matches": false
+    },
+    {
+      "name": "zp_False_False_pc_stride",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\n",
+      "hex": "ad2000002300",
+      "native_hex": "2200",
+      "matches": false
+    },
+    {
+      "name": "zp_False_False_forced_pc_stride",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\n",
+      "hex": "ad2000002300",
+      "native_hex": "2300",
+      "matches": false
+    },
+    {
+      "name": "zp_False_False_backward_branch",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+      "hex": "07d0fd09",
+      "native_hex": "09",
+      "matches": false
+    },
+    {
+      "name": "zp_False_False_empty",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "zp_False_True_byte",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0709",
+      "native_hex": "09",
+      "matches": false
+    },
+    {
+      "name": "zp_False_True_reserve",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000009",
+      "native_hex": "09",
+      "matches": false
+    },
+    {
+      "name": "zp_False_True_initialized_reserve",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "aaaa09",
+      "native_hex": "09",
+      "matches": false
+    },
+    {
+      "name": "zp_False_True_invalid_byte",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: range error (256 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "zp_False_True_invalid_word",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: range error (65536 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "zp_False_True_undefined_data",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `MISSING`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "zp_False_True_undefined_instruction",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `MISSING`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "zp_False_True_labels",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+      "hex": "07200009",
+      "native_hex": "09",
+      "matches": false
+    },
+    {
+      "name": "zp_False_True_pc_stride",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\n",
+      "hex": "ad2000002300",
+      "native_hex": "2200",
+      "matches": false
+    },
+    {
+      "name": "zp_False_True_forced_pc_stride",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\n",
+      "hex": "ad2000002300",
+      "native_hex": "2300",
+      "matches": false
+    },
+    {
+      "name": "zp_False_True_backward_branch",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+      "hex": "07d0fd09",
+      "native_hex": "09",
+      "matches": false
+    },
+    {
+      "name": "zp_False_True_empty",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "zp_True_False_byte",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 33 byte(s) -> out.bin\n",
+      "hex": "07a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "native_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "matches": false
+    },
+    {
+      "name": "zp_True_False_reserve",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 33 byte(s) -> out.bin\n",
+      "hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "native_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "matches": true
+    },
+    {
+      "name": "zp_True_False_initialized_reserve",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 33 byte(s) -> out.bin\n",
+      "hex": "aaaaa5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "native_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "matches": false
+    },
+    {
+      "name": "zp_True_False_invalid_byte",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: range error (256 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "zp_True_False_invalid_word",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: range error (65536 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "zp_True_False_undefined_data",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `MISSING`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "zp_True_False_undefined_instruction",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `MISSING`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "zp_True_False_labels",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 33 byte(s) -> out.bin\n",
+      "hex": "072000a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "native_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "matches": false
+    },
+    {
+      "name": "zp_True_False_pc_stride",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 34 byte(s) -> out.bin\n",
+      "hex": "ad2000a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a52300",
+      "native_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a52200",
+      "matches": false
+    },
+    {
+      "name": "zp_True_False_forced_pc_stride",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 34 byte(s) -> out.bin\n",
+      "hex": "ad2000a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a52300",
+      "native_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a52300",
+      "matches": false
+    },
+    {
+      "name": "zp_True_False_backward_branch",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 33 byte(s) -> out.bin\n",
+      "hex": "07d0fda5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "native_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "matches": false
+    },
+    {
+      "name": "zp_True_False_empty",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 33 byte(s) -> out.bin\n",
+      "hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "native_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "matches": true
+    },
+    {
+      "name": "zp_True_True_byte",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 32 byte(s) -> out.bin\n",
+      "hex": "0709a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "native_hex": "a509a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "matches": false
+    },
+    {
+      "name": "zp_True_True_reserve",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 32 byte(s) -> out.bin\n",
+      "hex": "a5a509a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "native_hex": "a5a509a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "matches": true
+    },
+    {
+      "name": "zp_True_True_initialized_reserve",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 32 byte(s) -> out.bin\n",
+      "hex": "aaaa09a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "native_hex": "a5a509a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "matches": false
+    },
+    {
+      "name": "zp_True_True_invalid_byte",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: range error (256 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "zp_True_True_invalid_word",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: range error (65536 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "zp_True_True_undefined_data",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `MISSING`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "zp_True_True_undefined_instruction",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `MISSING`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "zp_True_True_labels",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 32 byte(s) -> out.bin\n",
+      "hex": "07200009a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "native_hex": "a5a5a509a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "matches": false
+    },
+    {
+      "name": "zp_True_True_pc_stride",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 32 byte(s) -> out.bin\n",
+      "hex": "ad2000a52300a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "native_hex": "a5a5a52200a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "matches": false
+    },
+    {
+      "name": "zp_True_True_forced_pc_stride",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 32 byte(s) -> out.bin\n",
+      "hex": "ad2000a52300a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "native_hex": "a5a5a5a52300a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "matches": false
+    },
+    {
+      "name": "zp_True_True_backward_branch",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 32 byte(s) -> out.bin\n",
+      "hex": "07d0fd09a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "native_hex": "a5a5a509a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "matches": false
+    },
+    {
+      "name": "zp_True_True_empty",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 32 byte(s) -> out.bin\n",
+      "hex": "09a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "native_hex": "09a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "matches": true
+    },
+    {
+      "name": "bss_False_False_byte",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0709",
+      "native_hex": "09",
+      "matches": false
+    },
+    {
+      "name": "bss_False_False_reserve",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000009",
+      "native_hex": "09",
+      "matches": false
+    },
+    {
+      "name": "bss_False_False_initialized_reserve",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "aaaa09",
+      "native_hex": "09",
+      "matches": false
+    },
+    {
+      "name": "bss_False_False_invalid_byte",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: range error (256 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "bss_False_False_invalid_word",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: range error (65536 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "bss_False_False_undefined_data",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `MISSING`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "bss_False_False_undefined_instruction",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `MISSING`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "bss_False_False_labels",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+      "hex": "07200009",
+      "native_hex": "09",
+      "matches": false
+    },
+    {
+      "name": "bss_False_False_pc_stride",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\n",
+      "hex": "ad2000002300",
+      "native_hex": "2200",
+      "matches": false
+    },
+    {
+      "name": "bss_False_False_forced_pc_stride",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\n",
+      "hex": "ad2000002300",
+      "native_hex": "2300",
+      "matches": false
+    },
+    {
+      "name": "bss_False_False_backward_branch",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+      "hex": "07d0fd09",
+      "native_hex": "09",
+      "matches": false
+    },
+    {
+      "name": "bss_False_False_empty",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "bss_False_True_byte",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0709",
+      "native_hex": "09",
+      "matches": false
+    },
+    {
+      "name": "bss_False_True_reserve",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000009",
+      "native_hex": "09",
+      "matches": false
+    },
+    {
+      "name": "bss_False_True_initialized_reserve",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "aaaa09",
+      "native_hex": "09",
+      "matches": false
+    },
+    {
+      "name": "bss_False_True_invalid_byte",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: range error (256 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "bss_False_True_invalid_word",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: range error (65536 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "bss_False_True_undefined_data",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `MISSING`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "bss_False_True_undefined_instruction",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `MISSING`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "bss_False_True_labels",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+      "hex": "07200009",
+      "native_hex": "09",
+      "matches": false
+    },
+    {
+      "name": "bss_False_True_pc_stride",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\n",
+      "hex": "ad2000002300",
+      "native_hex": "2200",
+      "matches": false
+    },
+    {
+      "name": "bss_False_True_forced_pc_stride",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\n",
+      "hex": "ad2000002300",
+      "native_hex": "2300",
+      "matches": false
+    },
+    {
+      "name": "bss_False_True_backward_branch",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+      "hex": "07d0fd09",
+      "native_hex": "09",
+      "matches": false
+    },
+    {
+      "name": "bss_False_True_empty",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "bss_True_False_byte",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 33 byte(s) -> out.bin\n",
+      "hex": "07a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "native_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "matches": false
+    },
+    {
+      "name": "bss_True_False_reserve",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 33 byte(s) -> out.bin\n",
+      "hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "native_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "matches": true
+    },
+    {
+      "name": "bss_True_False_initialized_reserve",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 33 byte(s) -> out.bin\n",
+      "hex": "aaaaa5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "native_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "matches": false
+    },
+    {
+      "name": "bss_True_False_invalid_byte",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: range error (256 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "bss_True_False_invalid_word",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: range error (65536 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "bss_True_False_undefined_data",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `MISSING`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "bss_True_False_undefined_instruction",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `MISSING`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "bss_True_False_labels",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 33 byte(s) -> out.bin\n",
+      "hex": "072000a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "native_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "matches": false
+    },
+    {
+      "name": "bss_True_False_pc_stride",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 34 byte(s) -> out.bin\n",
+      "hex": "ad2000a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a52300",
+      "native_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a52200",
+      "matches": false
+    },
+    {
+      "name": "bss_True_False_forced_pc_stride",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 34 byte(s) -> out.bin\n",
+      "hex": "ad2000a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a52300",
+      "native_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a52300",
+      "matches": false
+    },
+    {
+      "name": "bss_True_False_backward_branch",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 33 byte(s) -> out.bin\n",
+      "hex": "07d0fda5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "native_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "matches": false
+    },
+    {
+      "name": "bss_True_False_empty",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 33 byte(s) -> out.bin\n",
+      "hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "native_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "matches": true
+    },
+    {
+      "name": "bss_True_True_byte",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 32 byte(s) -> out.bin\n",
+      "hex": "0709a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "native_hex": "a509a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "matches": false
+    },
+    {
+      "name": "bss_True_True_reserve",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 32 byte(s) -> out.bin\n",
+      "hex": "a5a509a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "native_hex": "a5a509a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "matches": true
+    },
+    {
+      "name": "bss_True_True_initialized_reserve",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 32 byte(s) -> out.bin\n",
+      "hex": "aaaa09a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "native_hex": "a5a509a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "matches": false
+    },
+    {
+      "name": "bss_True_True_invalid_byte",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: range error (256 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "bss_True_True_invalid_word",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: range error (65536 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "bss_True_True_undefined_data",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `MISSING`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "bss_True_True_undefined_instruction",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `MISSING`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "bss_True_True_labels",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 32 byte(s) -> out.bin\n",
+      "hex": "07200009a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "native_hex": "a5a5a509a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "matches": false
+    },
+    {
+      "name": "bss_True_True_pc_stride",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 32 byte(s) -> out.bin\n",
+      "hex": "ad2000a52300a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "native_hex": "a5a5a52200a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "matches": false
+    },
+    {
+      "name": "bss_True_True_forced_pc_stride",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 32 byte(s) -> out.bin\n",
+      "hex": "ad2000a52300a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "native_hex": "a5a5a5a52300a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "matches": false
+    },
+    {
+      "name": "bss_True_True_backward_branch",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 32 byte(s) -> out.bin\n",
+      "hex": "07d0fd09a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "native_hex": "a5a5a509a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "matches": false
+    },
+    {
+      "name": "bss_True_True_empty",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 32 byte(s) -> out.bin\n",
+      "hex": "09a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "native_hex": "09a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "matches": true
+    },
+    {
+      "name": "ro_False_False_byte",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0709",
+      "native_hex": "0709",
+      "matches": true
+    },
+    {
+      "name": "ro_False_False_reserve",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000009",
+      "native_hex": "000009",
+      "matches": true
+    },
+    {
+      "name": "ro_False_False_initialized_reserve",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "aaaa09",
+      "native_hex": "aaaa09",
+      "matches": true
+    },
+    {
+      "name": "ro_False_False_invalid_byte",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: range error (256 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "ro_False_False_invalid_word",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: range error (65536 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "ro_False_False_undefined_data",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `MISSING`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "ro_False_False_undefined_instruction",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `MISSING`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "ro_False_False_labels",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+      "hex": "07200009",
+      "native_hex": "07200009",
+      "matches": true
+    },
+    {
+      "name": "ro_False_False_pc_stride",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\n",
+      "hex": "ad2000002300",
+      "native_hex": "a520002200",
+      "matches": false
+    },
+    {
+      "name": "ro_False_False_forced_pc_stride",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\n",
+      "hex": "ad2000002300",
+      "native_hex": "ad2000002300",
+      "matches": true
+    },
+    {
+      "name": "ro_False_False_backward_branch",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+      "hex": "07d0fd09",
+      "native_hex": "07d0fd09",
+      "matches": true
+    },
+    {
+      "name": "ro_False_False_empty",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "ro_False_True_byte",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0709",
+      "native_hex": "0709",
+      "matches": true
+    },
+    {
+      "name": "ro_False_True_reserve",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000009",
+      "native_hex": "000009",
+      "matches": true
+    },
+    {
+      "name": "ro_False_True_initialized_reserve",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "aaaa09",
+      "native_hex": "aaaa09",
+      "matches": true
+    },
+    {
+      "name": "ro_False_True_invalid_byte",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: range error (256 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "ro_False_True_invalid_word",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: range error (65536 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "ro_False_True_undefined_data",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `MISSING`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "ro_False_True_undefined_instruction",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `MISSING`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "ro_False_True_labels",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+      "hex": "07200009",
+      "native_hex": "07200009",
+      "matches": true
+    },
+    {
+      "name": "ro_False_True_pc_stride",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\n",
+      "hex": "ad2000002300",
+      "native_hex": "a520002200",
+      "matches": false
+    },
+    {
+      "name": "ro_False_True_forced_pc_stride",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\n",
+      "hex": "ad2000002300",
+      "native_hex": "ad2000002300",
+      "matches": true
+    },
+    {
+      "name": "ro_False_True_backward_branch",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+      "hex": "07d0fd09",
+      "native_hex": "07d0fd09",
+      "matches": true
+    },
+    {
+      "name": "ro_False_True_empty",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "ro_True_False_byte",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 33 byte(s) -> out.bin\n",
+      "hex": "07a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "native_hex": "07a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "matches": true
+    },
+    {
+      "name": "ro_True_False_reserve",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 33 byte(s) -> out.bin\n",
+      "hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "native_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "matches": true
+    },
+    {
+      "name": "ro_True_False_initialized_reserve",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 33 byte(s) -> out.bin\n",
+      "hex": "aaaaa5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "native_hex": "aaaaa5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "matches": true
+    },
+    {
+      "name": "ro_True_False_invalid_byte",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: range error (256 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "ro_True_False_invalid_word",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: range error (65536 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "ro_True_False_undefined_data",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `MISSING`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "ro_True_False_undefined_instruction",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `MISSING`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "ro_True_False_labels",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 33 byte(s) -> out.bin\n",
+      "hex": "072000a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "native_hex": "072000a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "matches": true
+    },
+    {
+      "name": "ro_True_False_pc_stride",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 34 byte(s) -> out.bin\n",
+      "hex": "ad2000a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a52300",
+      "native_hex": "a520a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a52200",
+      "matches": false
+    },
+    {
+      "name": "ro_True_False_forced_pc_stride",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 34 byte(s) -> out.bin\n",
+      "hex": "ad2000a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a52300",
+      "native_hex": "ad2000a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a52300",
+      "matches": true
+    },
+    {
+      "name": "ro_True_False_backward_branch",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 33 byte(s) -> out.bin\n",
+      "hex": "07d0fda5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "native_hex": "07d0fda5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "matches": true
+    },
+    {
+      "name": "ro_True_False_empty",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 33 byte(s) -> out.bin\n",
+      "hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "native_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "matches": true
+    },
+    {
+      "name": "ro_True_True_byte",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 32 byte(s) -> out.bin\n",
+      "hex": "0709a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "native_hex": "0709a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "matches": true
+    },
+    {
+      "name": "ro_True_True_reserve",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 32 byte(s) -> out.bin\n",
+      "hex": "a5a509a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "native_hex": "a5a509a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "matches": true
+    },
+    {
+      "name": "ro_True_True_initialized_reserve",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 32 byte(s) -> out.bin\n",
+      "hex": "aaaa09a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "native_hex": "aaaa09a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "matches": true
+    },
+    {
+      "name": "ro_True_True_invalid_byte",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: range error (256 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "ro_True_True_invalid_word",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: range error (65536 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "ro_True_True_undefined_data",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `MISSING`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "ro_True_True_undefined_instruction",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `MISSING`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "ro_True_True_labels",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 32 byte(s) -> out.bin\n",
+      "hex": "07200009a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "native_hex": "07200009a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "matches": true
+    },
+    {
+      "name": "ro_True_True_pc_stride",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 32 byte(s) -> out.bin\n",
+      "hex": "ad2000a52300a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "native_hex": "a520a52200a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "matches": false
+    },
+    {
+      "name": "ro_True_True_forced_pc_stride",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 32 byte(s) -> out.bin\n",
+      "hex": "ad2000a52300a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "native_hex": "ad2000a52300a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "matches": true
+    },
+    {
+      "name": "ro_True_True_backward_branch",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 32 byte(s) -> out.bin\n",
+      "hex": "07d0fd09a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "native_hex": "07d0fd09a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "matches": true
+    },
+    {
+      "name": "ro_True_True_empty",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 32 byte(s) -> out.bin\n",
+      "hex": "09a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "native_hex": "09a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "matches": true
+    },
+    {
+      "name": "rw_False_False_byte",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0709",
+      "native_hex": "0709",
+      "matches": true
+    },
+    {
+      "name": "rw_False_False_reserve",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000009",
+      "native_hex": "000009",
+      "matches": true
+    },
+    {
+      "name": "rw_False_False_initialized_reserve",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "aaaa09",
+      "native_hex": "aaaa09",
+      "matches": true
+    },
+    {
+      "name": "rw_False_False_invalid_byte",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: range error (256 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "rw_False_False_invalid_word",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: range error (65536 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "rw_False_False_undefined_data",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `MISSING`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "rw_False_False_undefined_instruction",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `MISSING`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "rw_False_False_labels",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+      "hex": "07200009",
+      "native_hex": "07200009",
+      "matches": true
+    },
+    {
+      "name": "rw_False_False_pc_stride",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\n",
+      "hex": "ad2000002300",
+      "native_hex": "a520002200",
+      "matches": false
+    },
+    {
+      "name": "rw_False_False_forced_pc_stride",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\n",
+      "hex": "ad2000002300",
+      "native_hex": "ad2000002300",
+      "matches": true
+    },
+    {
+      "name": "rw_False_False_backward_branch",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+      "hex": "07d0fd09",
+      "native_hex": "07d0fd09",
+      "matches": true
+    },
+    {
+      "name": "rw_False_False_empty",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "rw_False_True_byte",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0709",
+      "native_hex": "0709",
+      "matches": true
+    },
+    {
+      "name": "rw_False_True_reserve",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000009",
+      "native_hex": "000009",
+      "matches": true
+    },
+    {
+      "name": "rw_False_True_initialized_reserve",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "aaaa09",
+      "native_hex": "aaaa09",
+      "matches": true
+    },
+    {
+      "name": "rw_False_True_invalid_byte",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: range error (256 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "rw_False_True_invalid_word",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: range error (65536 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "rw_False_True_undefined_data",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `MISSING`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "rw_False_True_undefined_instruction",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `MISSING`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "rw_False_True_labels",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+      "hex": "07200009",
+      "native_hex": "07200009",
+      "matches": true
+    },
+    {
+      "name": "rw_False_True_pc_stride",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\n",
+      "hex": "ad2000002300",
+      "native_hex": "a520002200",
+      "matches": false
+    },
+    {
+      "name": "rw_False_True_forced_pc_stride",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\n",
+      "hex": "ad2000002300",
+      "native_hex": "ad2000002300",
+      "matches": true
+    },
+    {
+      "name": "rw_False_True_backward_branch",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+      "hex": "07d0fd09",
+      "native_hex": "07d0fd09",
+      "matches": true
+    },
+    {
+      "name": "rw_False_True_empty",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "rw_True_False_byte",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 33 byte(s) -> out.bin\n",
+      "hex": "07a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "native_hex": "07a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "matches": true
+    },
+    {
+      "name": "rw_True_False_reserve",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 33 byte(s) -> out.bin\n",
+      "hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "native_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "matches": true
+    },
+    {
+      "name": "rw_True_False_initialized_reserve",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 33 byte(s) -> out.bin\n",
+      "hex": "aaaaa5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "native_hex": "aaaaa5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "matches": true
+    },
+    {
+      "name": "rw_True_False_invalid_byte",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: range error (256 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "rw_True_False_invalid_word",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: range error (65536 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "rw_True_False_undefined_data",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `MISSING`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "rw_True_False_undefined_instruction",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `MISSING`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "rw_True_False_labels",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 33 byte(s) -> out.bin\n",
+      "hex": "072000a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "native_hex": "072000a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "matches": true
+    },
+    {
+      "name": "rw_True_False_pc_stride",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 34 byte(s) -> out.bin\n",
+      "hex": "ad2000a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a52300",
+      "native_hex": "a520a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a52200",
+      "matches": false
+    },
+    {
+      "name": "rw_True_False_forced_pc_stride",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 34 byte(s) -> out.bin\n",
+      "hex": "ad2000a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a52300",
+      "native_hex": "ad2000a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a52300",
+      "matches": true
+    },
+    {
+      "name": "rw_True_False_backward_branch",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 33 byte(s) -> out.bin\n",
+      "hex": "07d0fda5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "native_hex": "07d0fda5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "matches": true
+    },
+    {
+      "name": "rw_True_False_empty",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 33 byte(s) -> out.bin\n",
+      "hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "native_hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a509",
+      "matches": true
+    },
+    {
+      "name": "rw_True_True_byte",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 32 byte(s) -> out.bin\n",
+      "hex": "0709a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "native_hex": "0709a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "matches": true
+    },
+    {
+      "name": "rw_True_True_reserve",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 32 byte(s) -> out.bin\n",
+      "hex": "a5a509a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "native_hex": "a5a509a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "matches": true
+    },
+    {
+      "name": "rw_True_True_initialized_reserve",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 32 byte(s) -> out.bin\n",
+      "hex": "aaaa09a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "native_hex": "aaaa09a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "matches": true
+    },
+    {
+      "name": "rw_True_True_invalid_byte",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: range error (256 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "rw_True_True_invalid_word",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: range error (65536 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "rw_True_True_undefined_data",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `MISSING`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "rw_True_True_undefined_instruction",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `MISSING`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "rw_True_True_labels",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 32 byte(s) -> out.bin\n",
+      "hex": "07200009a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "native_hex": "07200009a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "matches": true
+    },
+    {
+      "name": "rw_True_True_pc_stride",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 32 byte(s) -> out.bin\n",
+      "hex": "ad2000a52300a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "native_hex": "a520a52200a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "matches": false
+    },
+    {
+      "name": "rw_True_True_forced_pc_stride",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 32 byte(s) -> out.bin\n",
+      "hex": "ad2000a52300a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "native_hex": "ad2000a52300a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "matches": true
+    },
+    {
+      "name": "rw_True_True_backward_branch",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 32 byte(s) -> out.bin\n",
+      "hex": "07d0fd09a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "native_hex": "07d0fd09a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "matches": true
+    },
+    {
+      "name": "rw_True_True_empty",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 32 byte(s) -> out.bin\n",
+      "hex": "09a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "native_hex": "09a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "matches": true
+    },
+    {
+      "name": "zp_False_first_start",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 11 byte(s) -> out.bin\n",
+      "hex": "0000000000000000072800",
+      "native_hex": "2800",
+      "matches": false
+    },
+    {
+      "name": "zp_False_second_start",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 10 byte(s) -> out.bin\n",
+      "hex": "07000000000000002000",
+      "native_hex": "000000000000002000",
+      "matches": false
+    },
+    {
+      "name": "zp_False_second_align",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 10 byte(s) -> out.bin\n",
+      "hex": "07000000000000002000",
+      "native_hex": "000000000000002000",
+      "matches": false
+    },
+    {
+      "name": "zp_True_first_start",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 32 byte(s) -> out.bin\n",
+      "hex": "a5a5a5a5a5a5a5a5072800a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "native_hex": "a5a5a5a5a5a5a5a5a52800a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "matches": false
+    },
+    {
+      "name": "zp_True_second_start",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 32 byte(s) -> out.bin\n",
+      "hex": "07a5a5a5a5a5a5a52000a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "native_hex": "a5a5a5a5a5a5a5a52000a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "matches": false
+    },
+    {
+      "name": "zp_True_second_align",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 32 byte(s) -> out.bin\n",
+      "hex": "07a5a5a5a5a5a5a52000a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "native_hex": "a5a5a5a5a5a5a5a52000a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "matches": false
+    },
+    {
+      "name": "bss_False_first_start",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 11 byte(s) -> out.bin\n",
+      "hex": "0000000000000000072800",
+      "native_hex": "2800",
+      "matches": false
+    },
+    {
+      "name": "bss_False_second_start",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 10 byte(s) -> out.bin\n",
+      "hex": "07000000000000002000",
+      "native_hex": "000000000000002000",
+      "matches": false
+    },
+    {
+      "name": "bss_False_second_align",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 10 byte(s) -> out.bin\n",
+      "hex": "07000000000000002000",
+      "native_hex": "000000000000002000",
+      "matches": false
+    },
+    {
+      "name": "bss_True_first_start",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 32 byte(s) -> out.bin\n",
+      "hex": "a5a5a5a5a5a5a5a5072800a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "native_hex": "a5a5a5a5a5a5a5a5a52800a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "matches": false
+    },
+    {
+      "name": "bss_True_second_start",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 32 byte(s) -> out.bin\n",
+      "hex": "07a5a5a5a5a5a5a52000a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "native_hex": "a5a5a5a5a5a5a5a52000a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "matches": false
+    },
+    {
+      "name": "bss_True_second_align",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 32 byte(s) -> out.bin\n",
+      "hex": "07a5a5a5a5a5a5a52000a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "native_hex": "a5a5a5a5a5a5a5a52000a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "matches": false
+    },
+    {
+      "name": "ro_False_first_start",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 11 byte(s) -> out.bin\n",
+      "hex": "0000000000000000072800",
+      "native_hex": "0000000000000000072800",
+      "matches": true
+    },
+    {
+      "name": "ro_False_second_start",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 10 byte(s) -> out.bin\n",
+      "hex": "07000000000000002000",
+      "native_hex": "07000000000000002000",
+      "matches": true
+    },
+    {
+      "name": "ro_False_second_align",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 10 byte(s) -> out.bin\n",
+      "hex": "07000000000000002000",
+      "native_hex": "07000000000000002000",
+      "matches": true
+    },
+    {
+      "name": "ro_True_first_start",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 32 byte(s) -> out.bin\n",
+      "hex": "a5a5a5a5a5a5a5a5072800a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "native_hex": "a5a5a5a5a5a5a5a5072800a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "matches": true
+    },
+    {
+      "name": "ro_True_second_start",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 32 byte(s) -> out.bin\n",
+      "hex": "07a5a5a5a5a5a5a52000a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "native_hex": "07a5a5a5a5a5a5a52000a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "matches": true
+    },
+    {
+      "name": "ro_True_second_align",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 32 byte(s) -> out.bin\n",
+      "hex": "07a5a5a5a5a5a5a52000a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "native_hex": "07a5a5a5a5a5a5a52000a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "matches": true
+    },
+    {
+      "name": "rw_False_first_start",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 11 byte(s) -> out.bin\n",
+      "hex": "0000000000000000072800",
+      "native_hex": "0000000000000000072800",
+      "matches": true
+    },
+    {
+      "name": "rw_False_second_start",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 10 byte(s) -> out.bin\n",
+      "hex": "07000000000000002000",
+      "native_hex": "07000000000000002000",
+      "matches": true
+    },
+    {
+      "name": "rw_False_second_align",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 10 byte(s) -> out.bin\n",
+      "hex": "07000000000000002000",
+      "native_hex": "07000000000000002000",
+      "matches": true
+    },
+    {
+      "name": "rw_True_first_start",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 32 byte(s) -> out.bin\n",
+      "hex": "a5a5a5a5a5a5a5a5072800a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "native_hex": "a5a5a5a5a5a5a5a5072800a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "matches": true
+    },
+    {
+      "name": "rw_True_second_start",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 32 byte(s) -> out.bin\n",
+      "hex": "07a5a5a5a5a5a5a52000a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "native_hex": "07a5a5a5a5a5a5a52000a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "matches": true
+    },
+    {
+      "name": "rw_True_second_align",
+      "argv": [
+        "/private/tmp/asm198x-zp-output-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 32 byte(s) -> out.bin\n",
+      "hex": "07a5a5a5a5a5a5a52000a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "native_hex": "07a5a5a5a5a5a5a52000a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "matches": true
+    }
+  ]
+}
