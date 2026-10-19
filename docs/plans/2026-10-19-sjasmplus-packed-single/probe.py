@@ -45,8 +45,27 @@ def cases() -> dict[str, str]:
                 )
     for count in range(2, 11):
         out[f"apostrophes_{count}"] = " dd " + ("'" * count) + "\n"
+    for directive in [
+        "defb",
+        "byte",
+        "defm",
+        "dm",
+        "defw",
+        "word",
+        "dword",
+        "defd",
+        "dz",
+    ]:
+        out[f"alias_{directive}"] = f" {directive} 'AB'\n"
     out.update(
         {
+            "abyte_spaced": " ABYTE 1 'AB'\n",
+            "abytec_spaced": " ABYTEC 1 'AB'\n",
+            "abytez_spaced": " ABYTEZ 1 'AB'\n",
+            "abytec_single": " ABYTEC 1 'F'\n",
+            "byte_empty_parenthesized": " db ('')\n",
+            "byte_empty_plus": " db ''+1\n",
+            "dword_empty_plus": " dd ''+1\n",
             "if_value": " IF 'AB'=$4142\n db 7\n ELSE\n db 8\n ENDIF\n",
             "shift_sign": " dd 'éé'>>24\n dd ('éé'&$80000000)!=0\n",
             "instruction": " ld hl,'AB'\n ld a,'F'\n",
