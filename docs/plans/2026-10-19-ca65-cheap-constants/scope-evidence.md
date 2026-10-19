@@ -48,3 +48,10 @@ complete configuration accepted by both readers.
 
 Final isolated verification: 1,534 Rust tests passed (38 ignored), 66 Node tests
 passed, and Clippy/all features, fmt, Ruff and generated docs passed.
+
+Clean producer d8f9d3ed163c4c210c9c9aec74036de83d649d8b matches all 564
+unchanged upstream/native 4510 bytes, SHA-256
+8a5fcde630e55dd49403f7c6ffed25d8786e65e3d0a2723531b7ca3e2c0509ec.
+4510-after-scope-binding retains complete comparison bodies and fourteen raw
+streams. verify_replay.py checks producer/native identity, bytes and completion,
+and rejects a changed reference byte. The full ecosystem ledger is unchanged.
