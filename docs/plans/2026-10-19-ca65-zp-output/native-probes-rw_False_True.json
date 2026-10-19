@@ -1,0 +1,387 @@
+{
+  "tools": {
+    "ca65": {
+      "path": "/opt/homebrew/bin/ca65",
+      "sha256": "1a57997819fd98814e4601b5160df589e7a1a24e1888a80fee51ae450d8fd0ea",
+      "version": {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "--version"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7e84jdkb",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "ca65 V2.18 - N/A\n"
+      }
+    },
+    "ld65": {
+      "path": "/opt/homebrew/bin/ld65",
+      "sha256": "36bb196207a6b2c90a4aa991b419d6113885303951b14b60b455f51c777b3339",
+      "version": {
+        "argv": [
+          "/opt/homebrew/bin/ld65",
+          "--version"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7e84jdkb",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "ld65 V2.18 - N/A\n"
+      }
+    }
+  },
+  "files": {},
+  "cases": [
+    {
+      "name": "byte",
+      "source": ".segment \"ZEROPAGE\"\n.byte 7\n.segment \"CODE\"\n.byte 9\n",
+      "config": "MEMORY { ZP:start=$20,size=$20,file=%O; MAIN:start=$1000,size=$100,file=%O,fillval=$00; }\nSEGMENTS { ZEROPAGE:load=ZP,type=rw; CODE:load=ZP,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7e84jdkb",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7e84jdkb",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0709"
+    },
+    {
+      "name": "reserve",
+      "source": ".segment \"ZEROPAGE\"\n.res 2\n.segment \"CODE\"\n.byte 9\n",
+      "config": "MEMORY { ZP:start=$20,size=$20,file=%O; MAIN:start=$1000,size=$100,file=%O,fillval=$00; }\nSEGMENTS { ZEROPAGE:load=ZP,type=rw; CODE:load=ZP,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7e84jdkb",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7e84jdkb",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "000009"
+    },
+    {
+      "name": "initialized_reserve",
+      "source": ".segment \"ZEROPAGE\"\n.res 2,$AA\n.segment \"CODE\"\n.byte 9\n",
+      "config": "MEMORY { ZP:start=$20,size=$20,file=%O; MAIN:start=$1000,size=$100,file=%O,fillval=$00; }\nSEGMENTS { ZEROPAGE:load=ZP,type=rw; CODE:load=ZP,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7e84jdkb",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7e84jdkb",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "aaaa09"
+    },
+    {
+      "name": "invalid_byte",
+      "source": ".segment \"ZEROPAGE\"\n.byte 256\n.segment \"CODE\"\n.byte 9\n",
+      "config": "MEMORY { ZP:start=$20,size=$20,file=%O; MAIN:start=$1000,size=$100,file=%O,fillval=$00; }\nSEGMENTS { ZEROPAGE:load=ZP,type=rw; CODE:load=ZP,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7e84jdkb",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Range error (256 not in [0..255])\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "invalid_word",
+      "source": ".segment \"ZEROPAGE\"\n.word 65536\n.segment \"CODE\"\n.byte 9\n",
+      "config": "MEMORY { ZP:start=$20,size=$20,file=%O; MAIN:start=$1000,size=$100,file=%O,fillval=$00; }\nSEGMENTS { ZEROPAGE:load=ZP,type=rw; CODE:load=ZP,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7e84jdkb",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Range error (65536 not in [0..65535])\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "undefined_data",
+      "source": ".segment \"ZEROPAGE\"\n.byte MISSING\n.segment \"CODE\"\n.byte 9\n",
+      "config": "MEMORY { ZP:start=$20,size=$20,file=%O; MAIN:start=$1000,size=$100,file=%O,fillval=$00; }\nSEGMENTS { ZEROPAGE:load=ZP,type=rw; CODE:load=ZP,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7e84jdkb",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Symbol 'MISSING' is undefined\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "undefined_instruction",
+      "source": ".segment \"ZEROPAGE\"\nlda MISSING\n.segment \"CODE\"\n.byte 9\n",
+      "config": "MEMORY { ZP:start=$20,size=$20,file=%O; MAIN:start=$1000,size=$100,file=%O,fillval=$00; }\nSEGMENTS { ZEROPAGE:load=ZP,type=rw; CODE:load=ZP,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7e84jdkb",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Symbol 'MISSING' is undefined\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "labels",
+      "source": ".segment \"ZEROPAGE\"\nstart:.byte 7\n.word start\n.segment \"CODE\"\n.byte 9\n",
+      "config": "MEMORY { ZP:start=$20,size=$20,file=%O; MAIN:start=$1000,size=$100,file=%O,fillval=$00; }\nSEGMENTS { ZEROPAGE:load=ZP,type=rw; CODE:load=ZP,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7e84jdkb",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7e84jdkb",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07200009"
+    },
+    {
+      "name": "pc_stride",
+      "source": ".segment \"ZEROPAGE\"\nstart:lda *\nnext:.res 1\n.segment \"CODE\"\n.word next\n",
+      "config": "MEMORY { ZP:start=$20,size=$20,file=%O; MAIN:start=$1000,size=$100,file=%O,fillval=$00; }\nSEGMENTS { ZEROPAGE:load=ZP,type=rw; CODE:load=ZP,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7e84jdkb",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7e84jdkb",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "a520002200"
+    },
+    {
+      "name": "forced_pc_stride",
+      "source": ".segment \"ZEROPAGE\"\nstart:lda a:*\nnext:.res 1\n.segment \"CODE\"\n.word next\n",
+      "config": "MEMORY { ZP:start=$20,size=$20,file=%O; MAIN:start=$1000,size=$100,file=%O,fillval=$00; }\nSEGMENTS { ZEROPAGE:load=ZP,type=rw; CODE:load=ZP,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7e84jdkb",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7e84jdkb",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "ad2000002300"
+    },
+    {
+      "name": "backward_branch",
+      "source": ".segment \"ZEROPAGE\"\nstart:.byte 7\nbne start\n.segment \"CODE\"\n.byte 9\n",
+      "config": "MEMORY { ZP:start=$20,size=$20,file=%O; MAIN:start=$1000,size=$100,file=%O,fillval=$00; }\nSEGMENTS { ZEROPAGE:load=ZP,type=rw; CODE:load=ZP,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7e84jdkb",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7e84jdkb",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07d0fd09"
+    },
+    {
+      "name": "empty",
+      "source": ".segment \"ZEROPAGE\"\n.segment \"CODE\"\n.byte 9\n",
+      "config": "MEMORY { ZP:start=$20,size=$20,file=%O; MAIN:start=$1000,size=$100,file=%O,fillval=$00; }\nSEGMENTS { ZEROPAGE:load=ZP,type=rw; CODE:load=ZP,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7e84jdkb",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7e84jdkb",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "09"
+    }
+  ]
+}

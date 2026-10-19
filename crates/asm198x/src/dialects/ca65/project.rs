@@ -1428,7 +1428,14 @@ fn project_one(node: &crate::ast::Node, st: &mut Projection) -> Result<(), AsmEr
                         if let Some((value, index)) = memory {
                             let byte = st
                                 .deferred
-                                .size_hint(value, consts, label_seg, &st.zero_page_names, line)
+                                .size_hint(
+                                    value,
+                                    consts,
+                                    label_seg,
+                                    &st.zero_page_names,
+                                    seg == "ZEROPAGE",
+                                    line,
+                                )
                                 .unwrap_or(false);
                             let mode = match (byte, index) {
                                 (true, None) => "zeropage",

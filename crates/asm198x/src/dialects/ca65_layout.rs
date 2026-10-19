@@ -23,7 +23,7 @@ pub(crate) struct Area {
     /// (RAM, zero page) occupies address space only.
     pub(crate) in_file: bool,
     /// `fill = yes` retains the area's entire capacity; otherwise only its
-    /// occupied extent, including internal gaps, contributes file bytes.
+    /// packed initialized content and its preceding gaps contribute file bytes.
     pub(crate) fill_to_capacity: bool,
 }
 
@@ -32,6 +32,8 @@ pub(crate) struct Area {
 #[derive(Debug)]
 pub(crate) struct SegmentDef {
     pub(crate) name: String,
+    /// zp/bss consume address space without initialized file content.
+    pub(crate) initialized: bool,
     /// Index into [`Layout::areas`].
     pub(crate) area: usize,
     /// ld65 `start =` — pins the segment's base address inside its area.
@@ -61,7 +63,7 @@ pub(crate) struct ResolvedSeg {
     /// CPU base address.
     pub(crate) base: u32,
     /// Offset of the segment's first byte in the output file; `None` for a
-    /// segment in a RAM-only area.
+    /// segment in a RAM-only area or an uninitialized zp/bss segment.
     pub(crate) file_at: Option<usize>,
     /// Whether `base` means anything to the CPU. A file area whose address
     /// range overlaps a RAM area is paged somewhere the CPU is not looking —
@@ -119,6 +121,7 @@ impl Layout {
         };
         let seg = |name: &str, area: usize, start: Option<u32>| SegmentDef {
             name: name.to_string(),
+            initialized: area >= 3,
             area,
             start,
             align: None,
@@ -183,6 +186,7 @@ impl Layout {
             .collect();
 
         let mut cursor: Vec<u32> = self.areas.iter().map(|a| a.start).collect();
+        let mut file_cursor = vec![0usize; self.areas.len()];
         let mut segs = Vec::with_capacity(self.segments.len());
         for s in &self.segments {
             let a = &self.areas[s.area];
@@ -204,14 +208,30 @@ impl Layout {
                 }
                 at = start;
             }
+            if present && (s.initialized || a.fill_to_capacity) {
+                file_cursor[s.area] += at.saturating_sub(cursor[s.area]) as usize;
+            }
             segs.push(ResolvedSeg {
                 name: s.name.clone(),
                 base: at,
-                file_at: a.in_file.then(|| at.saturating_sub(a.start) as usize),
+                // Absent pinned segments retain their potential file address
+                // without consuming a gap or advancing either cursor.
+                file_at: (a.in_file && s.initialized).then(|| {
+                    file_cursor[s.area]
+                        + if present {
+                            0
+                        } else {
+                            at.saturating_sub(cursor[s.area]) as usize
+                        }
+                }),
                 cpu_addressable: addressable[s.area],
             });
             if present {
-                cursor[s.area] = at + lengths.get(&s.name).copied().unwrap_or(0);
+                let length = lengths.get(&s.name).copied().unwrap_or(0);
+                cursor[s.area] = at + length;
+                if s.initialized || a.fill_to_capacity {
+                    file_cursor[s.area] += length as usize;
+                }
             }
         }
         // CPU placement is independent of file packing. Only after all area
@@ -226,7 +246,7 @@ impl Layout {
                 image_size += if area.fill_to_capacity {
                     area.size
                 } else {
-                    cursor[index].saturating_sub(area.start)
+                    file_cursor[index] as u32
                 } as usize;
             }
         }
@@ -388,6 +408,7 @@ pub(crate) fn from_cfg(text: &str) -> Result<Layout, AsmError> {
                 for entry in entries(body) {
                     let (name, attrs) = entry?;
                     let mut area = None;
+                    let mut initialized = true;
                     let mut start = None;
                     let mut align = None;
                     for (key, value) in attrs {
@@ -406,9 +427,9 @@ pub(crate) fn from_cfg(text: &str) -> Result<Layout, AsmError> {
                                         },
                                     )?);
                             }
-                            // zp/bss/ro/rw select ld65 diagnostics; placement
-                            // here follows the area, so they parse and pass.
-                            "type" if matches!(value.as_str(), "zp" | "bss" | "ro" | "rw") => {}
+                            "type" if matches!(value.as_str(), "zp" | "bss" | "ro" | "rw") => {
+                                initialized = matches!(value.as_str(), "ro" | "rw");
+                            }
                             "start" => start = Some(number(&value, &name)?),
                             "align" => align = Some(number(&value, &name)?),
                             _ => {
@@ -430,6 +451,7 @@ pub(crate) fn from_cfg(text: &str) -> Result<Layout, AsmError> {
                     };
                     segments.push(SegmentDef {
                         name,
+                        initialized,
                         area,
                         start,
                         align,
@@ -545,6 +567,7 @@ mod tests {
             5,
             SegmentDef {
                 name: "RODATA".to_string(),
+                initialized: true,
                 area: 4,
                 start: None,
                 align: None,

@@ -846,7 +846,27 @@ fn assemble_program(
         // filter: an `.out` written inside BSS still prints.
         let diagnostic = matches!(item, Resolved::Message(..) | Resolved::Assert(..));
         if !diagnostic && layout.seg(&seg).expect("seg").file_at.is_none() {
-            continue; // bss/zp segments occupy address space but emit no file bytes
+            // Omitted file content still has native expression/range checks.
+            // Raw bytes and reservations need no evaluation or allocation.
+            if !matches!(
+                item,
+                Resolved::Nothing | Resolved::Raw(_) | Resolved::Fill(..)
+            ) {
+                emit(
+                    item,
+                    addr,
+                    &Emit {
+                        env: &addr_env,
+                        label_seg: &parsed.label_seg,
+                        file,
+                        line,
+                    },
+                    &mut Vec::new(),
+                    &mut warnings,
+                )
+                .map_err(|e| statement_error(e, file, &expansion_frames))?;
+            }
+            continue;
         }
         let buf = seg_bytes.entry(seg).or_default();
         emit(
