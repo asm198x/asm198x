@@ -1,0 +1,101 @@
+{
+  "binary": "/private/tmp/asm198x-org-labels-predecessor/asm198x",
+  "sha256": "c6b6a734f81e12173034edb8dd016c7352690458e211596fc2a42cd399dfdedc",
+  "results": [
+    {
+      "name": "forward_origin",
+      "argv": [
+        "/private/tmp/asm198x-org-labels-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "relocatable_pc_origin",
+      "argv": [
+        "/private/tmp/asm198x-org-labels-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "absolute_pc_origin",
+      "argv": [
+        "/private/tmp/asm198x-org-labels-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": "07",
+      "matches": true
+    },
+    {
+      "name": "outside_24bit_origin",
+      "argv": [
+        "/private/tmp/asm198x-org-labels-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "maximum_24bit_origin",
+      "argv": [
+        "/private/tmp/asm198x-org-labels-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": "07",
+      "matches": true
+    }
+  ]
+}

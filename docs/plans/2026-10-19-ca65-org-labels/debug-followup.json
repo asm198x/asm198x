@@ -1,0 +1,170 @@
+{
+  "issue": 814,
+  "source": ".org $2000\nitem:.byte 7\nALIAS=item\n.word item\n",
+  "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; }\n",
+  "native": [
+    {
+      "argv": [
+        "/opt/homebrew/bin/ca65",
+        "input.s",
+        "-o",
+        "input.o"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/opt/homebrew/bin/ld65",
+        "-C",
+        "input.cfg",
+        "input.o",
+        "-o",
+        "native.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "native_hex": "070020",
+  "binaries": {
+    "preceding": {
+      "binary": "/private/tmp/asm198x-org-labels-predecessor/asm198x",
+      "sha256": "c6b6a734f81e12173034edb8dd016c7352690458e211596fc2a42cd399dfdedc",
+      "argv": [
+        "/private/tmp/asm198x-org-labels-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "070020",
+      "debug": [
+        {
+          "t": "header",
+          "format": "debug198x",
+          "format_version": "0.1",
+          "tool": "asm198x",
+          "tool_version": "0.0.71",
+          "cpu": "6502",
+          "dialect": "ca65",
+          "sources": [
+            "input.s"
+          ]
+        },
+        {
+          "t": "section",
+          "id": 0,
+          "name": "CODE",
+          "base": 4096
+        },
+        {
+          "t": "symbol",
+          "name": "item",
+          "kind": "label",
+          "section": 0,
+          "offset": 0
+        },
+        {
+          "t": "symbol",
+          "name": "ALIAS",
+          "kind": "const",
+          "value": 8192
+        },
+        {
+          "t": "line",
+          "file": "input.s",
+          "line": 2,
+          "section": 0,
+          "offset": 0,
+          "length": 1
+        },
+        {
+          "t": "line",
+          "file": "input.s",
+          "line": 4,
+          "section": 0,
+          "offset": 1,
+          "length": 2
+        }
+      ]
+    },
+    "current": {
+      "binary": "/private/tmp/asm198x-org-labels-build/debug/asm198x",
+      "sha256": "9044ce896c517641b204a78867caaf9e63cd39bf9de1ec30722f102e5621c16b",
+      "argv": [
+        "/private/tmp/asm198x-org-labels-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "070020",
+      "debug": [
+        {
+          "t": "header",
+          "format": "debug198x",
+          "format_version": "0.1",
+          "tool": "asm198x",
+          "tool_version": "0.0.71",
+          "cpu": "6502",
+          "dialect": "ca65",
+          "sources": [
+            "input.s"
+          ]
+        },
+        {
+          "t": "section",
+          "id": 0,
+          "name": "CODE",
+          "base": 4096
+        },
+        {
+          "t": "symbol",
+          "name": "item",
+          "kind": "label",
+          "section": 0,
+          "offset": 0
+        },
+        {
+          "t": "symbol",
+          "name": "ALIAS",
+          "kind": "const",
+          "value": 8192
+        },
+        {
+          "t": "line",
+          "file": "input.s",
+          "line": 2,
+          "section": 0,
+          "offset": 0,
+          "length": 1
+        },
+        {
+          "t": "line",
+          "file": "input.s",
+          "line": 4,
+          "section": 0,
+          "offset": 1,
+          "length": 2
+        }
+      ]
+    }
+  }
+}

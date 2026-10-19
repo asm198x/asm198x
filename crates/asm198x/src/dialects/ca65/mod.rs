@@ -256,8 +256,16 @@ fn demanded_values(placed: &[Placed], values: &BTreeMap<String, i64>) -> BTreeSe
             | Resolved::Insn {
                 operands: exprs, ..
             } => {
+                let width = match &at.item {
+                    Resolved::Bytes(_) => 1,
+                    Resolved::Words(_) | Resolved::DBytes(_) => 2,
+                    Resolved::DWords(_) => 4,
+                    _ => 0, // Instruction operands retain their statement PC.
+                };
+                let mut pc = i64::from(at.addr);
                 for value in exprs {
-                    let _ = value.eval_with(&lookup, Some(i64::from(at.addr)), at.line);
+                    let _ = value.eval_with(&lookup, Some(pc), at.line);
+                    pc += width;
                 }
             }
             Resolved::Assert(value, ..) => {
@@ -642,22 +650,6 @@ fn assemble_program(
         if needed_positions.contains(&position) {
             definition_positions.insert(position, i64::from(addr) + pseudo);
         }
-        match &stmt.kind {
-            // A label on the `.org` line binds at the new address, so the
-            // offset moves before the label is recorded.
-            Kind::Org(e) => {
-                let target = e
-                    .eval(&addr_env, i64::from(addr) + pseudo, stmt.line)
-                    .map_err(|e| statement_error(e, stmt.file, &stmt.expansion_frames))?;
-                pseudo = target - i64::from(addr);
-                absolute_mode = true;
-            }
-            Kind::Reloc => {
-                pseudo = 0;
-                absolute_mode = false;
-            }
-            _ => {}
-        }
         if let Some(label) = &stmt.label {
             // Real ca65 rejects a duplicate symbol; accepting one would also
             // make the debug record lie (the record keeps every definition,
@@ -711,6 +703,21 @@ fn assemble_program(
                     },
                 });
             }
+        }
+        // Native defines the label before the directive changes the PC/mode.
+        match &stmt.kind {
+            Kind::Org(e) => {
+                let target = e
+                    .eval(&addr_env, i64::from(addr) + pseudo, stmt.line)
+                    .map_err(|e| statement_error(e, stmt.file, &stmt.expansion_frames))?;
+                pseudo = target - i64::from(addr);
+                absolute_mode = true;
+            }
+            Kind::Reloc => {
+                pseudo = 0;
+                absolute_mode = false;
+            }
+            _ => {}
         }
         // A constant-only bit-branch target has no segment base to cancel
         // ca65's relocatable PC. Native ca65 refuses it before linking; `.org`
@@ -5728,9 +5735,9 @@ two:\n\
              .reloc\nM: .byte $33\n .word M\n");
         // The `$22` still lands next to the `$11` — only the address moved.
         assert_eq!(&image[16..18], &[0x11, 0x22]);
-        // `L` and `*` both read from the new origin. `*` is the address of the
-        // statement it stands in — the `.word` itself, one byte along.
-        assert_eq!(&image[18..22], &[0x00, 0x20, 0x01, 0x20]);
+        // `L` reads from the new origin. The first word advances the counter,
+        // so `*` is three bytes past that origin when its operand is read.
+        assert_eq!(&image[18..22], &[0x00, 0x20, 0x03, 0x20]);
         // After `.reloc` the segment's own addressing is back: `M` is the
         // seventh byte of CODE, which is based at $8000.
         assert_eq!(image[22], 0x33);

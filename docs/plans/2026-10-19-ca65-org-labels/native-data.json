@@ -1,0 +1,827 @@
+{
+  "tools": {
+    "ca65": {
+      "path": "/opt/homebrew/bin/ca65",
+      "sha256": "1a57997819fd98814e4601b5160df589e7a1a24e1888a80fee51ae450d8fd0ea",
+      "version": {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "--version"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "ca65 V2.18 - N/A\n"
+      }
+    },
+    "ld65": {
+      "path": "/opt/homebrew/bin/ld65",
+      "sha256": "36bb196207a6b2c90a4aa991b419d6113885303951b14b60b455f51c777b3339",
+      "version": {
+        "argv": [
+          "/opt/homebrew/bin/ld65",
+          "--version"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "ld65 V2.18 - N/A\n"
+      }
+    }
+  },
+  "files": {},
+  "cases": [
+    {
+      "name": "data_byte_$20",
+      "source": ".org $20\n.byte *,*,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "202122"
+    },
+    {
+      "name": "data_byte_$FE",
+      "source": ".org $FE\n.byte *,*,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Range error (256 not in [0..255])\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "data_byte_$FF",
+      "source": ".org $FF\n.byte *,*,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Range error (256 not in [0..255])\ninput.s(2): Error: Range error (257 not in [0..255])\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "data_byte_$FFFE",
+      "source": ".org $FFFE\n.byte *,*,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Range error (65534 not in [0..255])\ninput.s(2): Error: Range error (65535 not in [0..255])\ninput.s(2): Error: Range error (65536 not in [0..255])\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "data_byte_$FFFFFFFC",
+      "source": ".org $FFFFFFFC\n.byte *,*,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Range error\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "data_word_$20",
+      "source": ".org $20\n.word *,*,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "200022002400"
+    },
+    {
+      "name": "data_word_$FE",
+      "source": ".org $FE\n.word *,*,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "fe0000010201"
+    },
+    {
+      "name": "data_word_$FF",
+      "source": ".org $FF\n.word *,*,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "ff0001010301"
+    },
+    {
+      "name": "data_word_$FFFE",
+      "source": ".org $FFFE\n.word *,*,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Range error (65536 not in [0..65535])\ninput.s(2): Error: Range error (65538 not in [0..65535])\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "data_word_$FFFFFFFC",
+      "source": ".org $FFFFFFFC\n.word *,*,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Range error\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "data_dbyt_$20",
+      "source": ".org $20\n.dbyt *,*,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "002000220024"
+    },
+    {
+      "name": "data_dbyt_$FE",
+      "source": ".org $FE\n.dbyt *,*,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "00fe01000102"
+    },
+    {
+      "name": "data_dbyt_$FF",
+      "source": ".org $FF\n.dbyt *,*,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "00ff01010103"
+    },
+    {
+      "name": "data_dbyt_$FFFE",
+      "source": ".org $FFFE\n.dbyt *,*,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Range error (65536 not in [0..65535])\ninput.s(2): Error: Range error (66048 not in [0..65535])\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "data_dbyt_$FFFFFFFC",
+      "source": ".org $FFFFFFFC\n.dbyt *,*,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Range error\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "data_dword_$20",
+      "source": ".org $20\n.dword *,*,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "200000002400000028000000"
+    },
+    {
+      "name": "data_dword_$FE",
+      "source": ".org $FE\n.dword *,*,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "fe0000000201000006010000"
+    },
+    {
+      "name": "data_dword_$FF",
+      "source": ".org $FF\n.dword *,*,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "ff0000000301000007010000"
+    },
+    {
+      "name": "data_dword_$FFFE",
+      "source": ".org $FFFE\n.dword *,*,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "feff00000200010006000100"
+    },
+    {
+      "name": "data_dword_$FFFFFFFC",
+      "source": ".org $FFFFFFFC\n.dword *,*,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Range error\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "data_reloc_bytes",
+      "source": ".byte <*,<*,<*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "000102"
+    },
+    {
+      "name": "data_reloc_words",
+      "source": ".word *,*,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "001002100410"
+    },
+    {
+      "name": "data_strings",
+      "source": ".org $20\n.byte \"A\",*,\"BC\",*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "4121424324"
+    },
+    {
+      "name": "data_operators",
+      "source": ".org $20\n.byte <*,>*,<*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "200022"
+    },
+    {
+      "name": "data_alias_pc",
+      "source": ".org $20\nPC_ALIAS=*\n.word PC_ALIAS,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "20002200"
+    },
+    {
+      "name": "data_forward_pc",
+      "source": ".org $20\n.word ALIAS,*\nALIAS=*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "24002200"
+    },
+    {
+      "name": "data_instruction_baseline",
+      "source": ".org $2000\nlda *\n.word *\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-5t_jxwlc",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "ad00200320"
+    }
+  ]
+}

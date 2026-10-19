@@ -333,7 +333,7 @@ pub(super) fn emit(
     warnings: &mut Vec<Warning>,
 ) -> Result<(), AsmError> {
     let (env, label_seg, file, line_for_errors) = (at.env, at.label_seg, at.file, at.line);
-    let pc = i64::from(addr);
+    let mut pc = i64::from(addr);
     match item {
         Resolved::Nothing => {}
         Resolved::Message(severity, text) => match severity {
@@ -407,6 +407,7 @@ pub(super) fn emit(
             for e in &exprs {
                 let v = e.eval(env, pc, line_for_errors)?;
                 out.push(to_byte(v, line_for_errors)?);
+                pc += 1;
             }
         }
         Resolved::Words(exprs) => {
@@ -414,6 +415,7 @@ pub(super) fn emit(
                 let v = e.eval(env, pc, line_for_errors)?;
                 let w = u16::try_from(to_width(v, 0xFFFF, line_for_errors)?).expect("checked");
                 out.extend_from_slice(&w.to_le_bytes());
+                pc += 2;
             }
         }
         Resolved::DBytes(exprs) => {
@@ -421,6 +423,7 @@ pub(super) fn emit(
                 let v = e.eval(env, pc, line_for_errors)?;
                 let w = u16::try_from(to_width(v, 0xFFFF, line_for_errors)?).expect("checked");
                 out.extend_from_slice(&w.to_be_bytes());
+                pc += 2;
             }
         }
         Resolved::DWords(exprs) => {
@@ -428,6 +431,7 @@ pub(super) fn emit(
                 let v = e.eval(env, pc, line_for_errors)?;
                 let w = u32::try_from(to_width(v, 0xFFFF_FFFF, line_for_errors)?).expect("checked");
                 out.extend_from_slice(&w.to_le_bytes());
+                pc += 4;
             }
         }
         Resolved::Insn {
