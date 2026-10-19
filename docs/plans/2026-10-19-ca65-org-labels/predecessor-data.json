@@ -1,0 +1,519 @@
+{
+  "binary": "/private/tmp/asm198x-org-labels-predecessor/asm198x",
+  "sha256": "c6b6a734f81e12173034edb8dd016c7352690458e211596fc2a42cd399dfdedc",
+  "results": [
+    {
+      "name": "data_byte_$20",
+      "argv": [
+        "/private/tmp/asm198x-org-labels-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "202020",
+      "native_hex": "202122",
+      "matches": false
+    },
+    {
+      "name": "data_byte_$FE",
+      "argv": [
+        "/private/tmp/asm198x-org-labels-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "fefefe",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "data_byte_$FF",
+      "argv": [
+        "/private/tmp/asm198x-org-labels-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ffffff",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "data_byte_$FFFE",
+      "argv": [
+        "/private/tmp/asm198x-org-labels-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: range error (65534 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "data_byte_$FFFFFFFC",
+      "argv": [
+        "/private/tmp/asm198x-org-labels-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: range error (4294967292 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "data_word_$20",
+      "argv": [
+        "/private/tmp/asm198x-org-labels-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\n",
+      "hex": "200020002000",
+      "native_hex": "200022002400",
+      "matches": false
+    },
+    {
+      "name": "data_word_$FE",
+      "argv": [
+        "/private/tmp/asm198x-org-labels-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\n",
+      "hex": "fe00fe00fe00",
+      "native_hex": "fe0000010201",
+      "matches": false
+    },
+    {
+      "name": "data_word_$FF",
+      "argv": [
+        "/private/tmp/asm198x-org-labels-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\n",
+      "hex": "ff00ff00ff00",
+      "native_hex": "ff0001010301",
+      "matches": false
+    },
+    {
+      "name": "data_word_$FFFE",
+      "argv": [
+        "/private/tmp/asm198x-org-labels-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\n",
+      "hex": "fefffefffeff",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "data_word_$FFFFFFFC",
+      "argv": [
+        "/private/tmp/asm198x-org-labels-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: range error (4294967292 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "data_dbyt_$20",
+      "argv": [
+        "/private/tmp/asm198x-org-labels-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\n",
+      "hex": "002000200020",
+      "native_hex": "002000220024",
+      "matches": false
+    },
+    {
+      "name": "data_dbyt_$FE",
+      "argv": [
+        "/private/tmp/asm198x-org-labels-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\n",
+      "hex": "00fe00fe00fe",
+      "native_hex": "00fe01000102",
+      "matches": false
+    },
+    {
+      "name": "data_dbyt_$FF",
+      "argv": [
+        "/private/tmp/asm198x-org-labels-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\n",
+      "hex": "00ff00ff00ff",
+      "native_hex": "00ff01010103",
+      "matches": false
+    },
+    {
+      "name": "data_dbyt_$FFFE",
+      "argv": [
+        "/private/tmp/asm198x-org-labels-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\n",
+      "hex": "fffefffefffe",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "data_dbyt_$FFFFFFFC",
+      "argv": [
+        "/private/tmp/asm198x-org-labels-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: range error (4294967292 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "data_dword_$20",
+      "argv": [
+        "/private/tmp/asm198x-org-labels-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 12 byte(s) -> out.bin\n",
+      "hex": "200000002000000020000000",
+      "native_hex": "200000002400000028000000",
+      "matches": false
+    },
+    {
+      "name": "data_dword_$FE",
+      "argv": [
+        "/private/tmp/asm198x-org-labels-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 12 byte(s) -> out.bin\n",
+      "hex": "fe000000fe000000fe000000",
+      "native_hex": "fe0000000201000006010000",
+      "matches": false
+    },
+    {
+      "name": "data_dword_$FF",
+      "argv": [
+        "/private/tmp/asm198x-org-labels-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 12 byte(s) -> out.bin\n",
+      "hex": "ff000000ff000000ff000000",
+      "native_hex": "ff0000000301000007010000",
+      "matches": false
+    },
+    {
+      "name": "data_dword_$FFFE",
+      "argv": [
+        "/private/tmp/asm198x-org-labels-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 12 byte(s) -> out.bin\n",
+      "hex": "feff0000feff0000feff0000",
+      "native_hex": "feff00000200010006000100",
+      "matches": false
+    },
+    {
+      "name": "data_dword_$FFFFFFFC",
+      "argv": [
+        "/private/tmp/asm198x-org-labels-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 12 byte(s) -> out.bin\n",
+      "hex": "fcfffffffcfffffffcffffff",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "data_reloc_bytes",
+      "argv": [
+        "/private/tmp/asm198x-org-labels-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000000",
+      "native_hex": "000102",
+      "matches": false
+    },
+    {
+      "name": "data_reloc_words",
+      "argv": [
+        "/private/tmp/asm198x-org-labels-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\n",
+      "hex": "001000100010",
+      "native_hex": "001002100410",
+      "matches": false
+    },
+    {
+      "name": "data_strings",
+      "argv": [
+        "/private/tmp/asm198x-org-labels-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\n",
+      "hex": "4120424320",
+      "native_hex": "4121424324",
+      "matches": false
+    },
+    {
+      "name": "data_operators",
+      "argv": [
+        "/private/tmp/asm198x-org-labels-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "200020",
+      "native_hex": "200022",
+      "matches": false
+    },
+    {
+      "name": "data_alias_pc",
+      "argv": [
+        "/private/tmp/asm198x-org-labels-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+      "hex": "20002000",
+      "native_hex": "20002200",
+      "matches": false
+    },
+    {
+      "name": "data_forward_pc",
+      "argv": [
+        "/private/tmp/asm198x-org-labels-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+      "hex": "24002000",
+      "native_hex": "24002200",
+      "matches": false
+    },
+    {
+      "name": "data_instruction_baseline",
+      "argv": [
+        "/private/tmp/asm198x-org-labels-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\n",
+      "hex": "ad00200320",
+      "native_hex": "ad00200320",
+      "matches": true
+    }
+  ]
+}
