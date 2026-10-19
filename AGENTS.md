@@ -88,8 +88,11 @@ Keep assemblers featherweight: no GUI, audio, emulator, or graphics dependencies
 
 ## Working rules for agents
 
-- Land work through a pull request and squash-merge it, with a
-  conventional-commit subject — see
+- Land work through a checked pull request and rebase-merge it. Every commit
+  subject and the PR title must be conventional commits; do not merge main
+  into the task branch. The approved 2026-10-07 update in
+  [`releasing-published-crates.md`](../../decisions/releasing-published-crates.md)
+  supersedes the older local squash instructions in
   [`decisions/branch-and-merge-workflow.md`](decisions/branch-and-merge-workflow.md).
   `main` is unprotected, so the convention is the only thing holding.
 - Read the relevant decision record before changing crate boundaries, ISA modelling, syntax compatibility, diagnostics, or external formats.
