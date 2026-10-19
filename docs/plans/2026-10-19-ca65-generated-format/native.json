@@ -8,7 +8,7 @@
           "/opt/homebrew/bin/ca65",
           "--version"
         ],
-        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
         "exit": 0,
         "stdout": "",
         "stderr": "ca65 V2.18 - N/A\n"
@@ -22,7 +22,7 @@
           "/opt/homebrew/bin/ld65",
           "--version"
         ],
-        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
         "exit": 0,
         "stdout": "",
         "stderr": "ld65 V2.18 - N/A\n"
@@ -45,7 +45,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -59,7 +59,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -79,7 +79,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -93,7 +93,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -113,7 +113,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -127,7 +127,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -147,7 +147,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -161,7 +161,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -181,7 +181,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -195,7 +195,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -215,7 +215,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -229,7 +229,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -249,7 +249,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -263,7 +263,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -283,7 +283,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -297,7 +297,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -317,7 +317,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -331,7 +331,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -351,7 +351,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -365,7 +365,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -385,7 +385,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -399,7 +399,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -419,7 +419,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -433,7 +433,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -453,7 +453,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -467,7 +467,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -487,7 +487,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -501,7 +501,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -521,7 +521,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -535,7 +535,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -555,7 +555,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -569,7 +569,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -589,7 +589,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -603,7 +603,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -623,7 +623,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -637,7 +637,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -657,7 +657,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -671,7 +671,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -691,7 +691,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -705,7 +705,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -725,7 +725,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -739,7 +739,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -759,7 +759,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -773,7 +773,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -793,7 +793,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -807,7 +807,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -827,7 +827,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -841,7 +841,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -861,7 +861,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -875,7 +875,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -895,7 +895,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -909,7 +909,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -929,7 +929,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -943,7 +943,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -963,7 +963,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -977,7 +977,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -997,7 +997,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1011,7 +1011,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1031,7 +1031,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1045,7 +1045,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1065,7 +1065,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1079,7 +1079,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1099,7 +1099,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1113,7 +1113,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1133,7 +1133,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1147,7 +1147,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1167,7 +1167,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1181,7 +1181,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1201,7 +1201,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1215,7 +1215,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1235,7 +1235,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1249,7 +1249,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1269,7 +1269,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 1,
           "stdout": "",
           "stderr": "input.s(1): Error: Cannot open include file 'missing.inc': No such file or directory\n"
@@ -1289,7 +1289,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 1,
           "stdout": "",
           "stderr": "input.s(1): Error: String constant expected\n"
@@ -1309,7 +1309,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 1,
           "stdout": "",
           "stderr": "input.s(1): Error: String constant expected\n"
@@ -1329,7 +1329,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 1,
           "stdout": "",
           "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\n"
@@ -1349,7 +1349,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 1,
           "stdout": "",
           "stderr": "input.s(1): Error: Invalid format string\ninput.s(1): Error: ')' expected\ninput.s(1): Error: String constant expected\n"
@@ -1369,7 +1369,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 1,
           "stdout": "",
           "stderr": "input.s(1): Error: ')' expected\n"
@@ -1378,8 +1378,8 @@
       "native_hex": null
     },
     {
-      "name": "static_baseline",
-      "source": "mark:.byte 7\n.word mark\n",
+      "name": "generated_address_alias",
+      "source": ".ident(\"answer\"):=7\n.byte answer\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
         {
@@ -1389,7 +1389,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1403,7 +1403,109 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-843nnesc",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "generated_constant",
+      "source": ".ident(\"answer\")=7\n.byte answer\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "spaced_address_alias",
+      "source": ".ident(\"answer\") := 7\n.byte answer\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "static_baseline",
+      "source": "mark:.byte 7\n.word mark\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vwz_2gsr",
           "exit": 0,
           "stdout": "",
           "stderr": ""

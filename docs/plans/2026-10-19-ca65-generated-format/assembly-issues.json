@@ -1,0 +1,29 @@
+[
+  {
+    "number": 861,
+    "url": "https://github.com/asm198x/asm198x/issues/861",
+    "cases": [
+      "conditional_head",
+      "inactive_head",
+      "repeat_head"
+    ]
+  },
+  {
+    "number": 862,
+    "url": "https://github.com/asm198x/asm198x/issues/862",
+    "cases": [
+      "macro_definition_head",
+      "macro_call_head"
+    ]
+  },
+  {
+    "number": 863,
+    "url": "https://github.com/asm198x/asm198x/issues/863",
+    "cases": [
+      "scope_directive_head",
+      "static_scope_directive_head",
+      "proc_directive_head",
+      "static_proc_directive_head"
+    ]
+  }
+]

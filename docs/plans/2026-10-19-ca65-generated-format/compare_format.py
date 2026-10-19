@@ -104,8 +104,8 @@ def main() -> None:
                     "assembled": assembled,
                 }
             )
-    assert len(rows) == 43
-    assert sum(r["native"][-1]["exit"] == 0 for r in rows) == 37
+    assert len(rows) == 46
+    assert sum(r["native"][-1]["exit"] == 0 for r in rows) == 40
     args.output.write_text(
         json.dumps(
             {
@@ -117,7 +117,7 @@ def main() -> None:
         )
         + "\n"
     )
-    print("43 native formatter outcomes retained; all 37 accepted images match")
+    print("46 native formatter outcomes retained; all 40 accepted images match")
     print(
         "remaining original assembly gaps:",
         [
