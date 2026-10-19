@@ -1,0 +1,1555 @@
+{
+  "binary": "/private/tmp/asm198x-text-call-spacing-clean-producer/asm198x",
+  "sha256": "1fdcbf84dace5acad9ee6d11f5677a83906937cfbe3cc846ca2be9903646905d",
+  "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+  "tools": {
+    "ca65": "1a57997819fd98814e4601b5160df589e7a1a24e1888a80fee51ae450d8fd0ea",
+    "ld65": "36bb196207a6b2c90a4aa991b419d6113885303951b14b60b455f51c777b3339"
+  },
+  "cases": [
+    {
+      "name": "mark",
+      "gap": "",
+      "colon_gap": "",
+      "source": ".ident(\"mark\"):.byte 7\n.word .ident(\"mark\")\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070010",
+      "actual": {
+        "argv": [
+          "/private/tmp/asm198x-text-call-spacing-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 3 byte(s) -> out.bin\n"
+      },
+      "actual_hex": "070010"
+    },
+    {
+      "name": "mark",
+      "gap": "",
+      "colon_gap": " ",
+      "source": ".ident(\"mark\") :.byte 7\n.word .ident(\"mark\")\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070010",
+      "actual": {
+        "argv": [
+          "/private/tmp/asm198x-text-call-spacing-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:1: error: unexpected character `:` in expression\n"
+      },
+      "actual_hex": null
+    },
+    {
+      "name": "mark",
+      "gap": " ",
+      "colon_gap": "",
+      "source": ".ident (\"mark\"):.byte 7\n.word .ident(\"mark\")\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070010",
+      "actual": {
+        "argv": [
+          "/private/tmp/asm198x-text-call-spacing-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 3 byte(s) -> out.bin\n"
+      },
+      "actual_hex": "070010"
+    },
+    {
+      "name": "mark",
+      "gap": " ",
+      "colon_gap": " ",
+      "source": ".ident (\"mark\") :.byte 7\n.word .ident(\"mark\")\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070010",
+      "actual": {
+        "argv": [
+          "/private/tmp/asm198x-text-call-spacing-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:1: error: unexpected character `:` in expression\n"
+      },
+      "actual_hex": null
+    },
+    {
+      "name": "mark ",
+      "gap": "",
+      "colon_gap": "",
+      "source": ".ident(\"mark \"):.byte 7\n.word .ident(\"mark \")\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+        }
+      ],
+      "native_hex": null,
+      "actual": {
+        "argv": [
+          "/private/tmp/asm198x-text-call-spacing-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:1: error: unexpected character `:` in expression\n"
+      },
+      "actual_hex": null
+    },
+    {
+      "name": "mark ",
+      "gap": "",
+      "colon_gap": " ",
+      "source": ".ident(\"mark \") :.byte 7\n.word .ident(\"mark \")\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+        }
+      ],
+      "native_hex": null,
+      "actual": {
+        "argv": [
+          "/private/tmp/asm198x-text-call-spacing-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:1: error: unexpected character `:` in expression\n"
+      },
+      "actual_hex": null
+    },
+    {
+      "name": "mark ",
+      "gap": " ",
+      "colon_gap": "",
+      "source": ".ident (\"mark \"):.byte 7\n.word .ident(\"mark \")\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+        }
+      ],
+      "native_hex": null,
+      "actual": {
+        "argv": [
+          "/private/tmp/asm198x-text-call-spacing-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:1: error: unexpected character `:` in expression\n"
+      },
+      "actual_hex": null
+    },
+    {
+      "name": "mark ",
+      "gap": " ",
+      "colon_gap": " ",
+      "source": ".ident (\"mark \") :.byte 7\n.word .ident(\"mark \")\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+        }
+      ],
+      "native_hex": null,
+      "actual": {
+        "argv": [
+          "/private/tmp/asm198x-text-call-spacing-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:1: error: unexpected character `:` in expression\n"
+      },
+      "actual_hex": null
+    },
+    {
+      "name": " mark",
+      "gap": "",
+      "colon_gap": "",
+      "source": ".ident(\" mark\"):.byte 7\n.word .ident(\" mark\")\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+        }
+      ],
+      "native_hex": null,
+      "actual": {
+        "argv": [
+          "/private/tmp/asm198x-text-call-spacing-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 3 byte(s) -> out.bin\n"
+      },
+      "actual_hex": "070010"
+    },
+    {
+      "name": " mark",
+      "gap": "",
+      "colon_gap": " ",
+      "source": ".ident(\" mark\") :.byte 7\n.word .ident(\" mark\")\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+        }
+      ],
+      "native_hex": null,
+      "actual": {
+        "argv": [
+          "/private/tmp/asm198x-text-call-spacing-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:1: error: unexpected character `:` in expression\n"
+      },
+      "actual_hex": null
+    },
+    {
+      "name": " mark",
+      "gap": " ",
+      "colon_gap": "",
+      "source": ".ident (\" mark\"):.byte 7\n.word .ident(\" mark\")\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+        }
+      ],
+      "native_hex": null,
+      "actual": {
+        "argv": [
+          "/private/tmp/asm198x-text-call-spacing-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 3 byte(s) -> out.bin\n"
+      },
+      "actual_hex": "070010"
+    },
+    {
+      "name": " mark",
+      "gap": " ",
+      "colon_gap": " ",
+      "source": ".ident (\" mark\") :.byte 7\n.word .ident(\" mark\")\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+        }
+      ],
+      "native_hex": null,
+      "actual": {
+        "argv": [
+          "/private/tmp/asm198x-text-call-spacing-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:1: error: unexpected character `:` in expression\n"
+      },
+      "actual_hex": null
+    },
+    {
+      "name": "mark name",
+      "gap": "",
+      "colon_gap": "",
+      "source": ".ident(\"mark name\"):.byte 7\n.word .ident(\"mark name\")\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+        }
+      ],
+      "native_hex": null,
+      "actual": {
+        "argv": [
+          "/private/tmp/asm198x-text-call-spacing-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:1: error: unexpected character `:` in expression\n"
+      },
+      "actual_hex": null
+    },
+    {
+      "name": "mark name",
+      "gap": "",
+      "colon_gap": " ",
+      "source": ".ident(\"mark name\") :.byte 7\n.word .ident(\"mark name\")\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+        }
+      ],
+      "native_hex": null,
+      "actual": {
+        "argv": [
+          "/private/tmp/asm198x-text-call-spacing-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:1: error: unexpected character `:` in expression\n"
+      },
+      "actual_hex": null
+    },
+    {
+      "name": "mark name",
+      "gap": " ",
+      "colon_gap": "",
+      "source": ".ident (\"mark name\"):.byte 7\n.word .ident(\"mark name\")\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+        }
+      ],
+      "native_hex": null,
+      "actual": {
+        "argv": [
+          "/private/tmp/asm198x-text-call-spacing-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:1: error: unexpected character `:` in expression\n"
+      },
+      "actual_hex": null
+    },
+    {
+      "name": "mark name",
+      "gap": " ",
+      "colon_gap": " ",
+      "source": ".ident (\"mark name\") :.byte 7\n.word .ident(\"mark name\")\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+        }
+      ],
+      "native_hex": null,
+      "actual": {
+        "argv": [
+          "/private/tmp/asm198x-text-call-spacing-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:1: error: unexpected character `:` in expression\n"
+      },
+      "actual_hex": null
+    },
+    {
+      "name": "",
+      "gap": "",
+      "colon_gap": "",
+      "source": ".ident(\"\"):.byte 7\n.word .ident(\"\")\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+        }
+      ],
+      "native_hex": null,
+      "actual": {
+        "argv": [
+          "/private/tmp/asm198x-text-call-spacing-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:2: error: directive needs a value\n"
+      },
+      "actual_hex": null
+    },
+    {
+      "name": "",
+      "gap": "",
+      "colon_gap": " ",
+      "source": ".ident(\"\") :.byte 7\n.word .ident(\"\")\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+        }
+      ],
+      "native_hex": null,
+      "actual": {
+        "argv": [
+          "/private/tmp/asm198x-text-call-spacing-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:2: error: directive needs a value\n"
+      },
+      "actual_hex": null
+    },
+    {
+      "name": "",
+      "gap": " ",
+      "colon_gap": "",
+      "source": ".ident (\"\"):.byte 7\n.word .ident(\"\")\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+        }
+      ],
+      "native_hex": null,
+      "actual": {
+        "argv": [
+          "/private/tmp/asm198x-text-call-spacing-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:2: error: directive needs a value\n"
+      },
+      "actual_hex": null
+    },
+    {
+      "name": "",
+      "gap": " ",
+      "colon_gap": " ",
+      "source": ".ident (\"\") :.byte 7\n.word .ident(\"\")\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+        }
+      ],
+      "native_hex": null,
+      "actual": {
+        "argv": [
+          "/private/tmp/asm198x-text-call-spacing-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:2: error: directive needs a value\n"
+      },
+      "actual_hex": null
+    },
+    {
+      "name": "1mark",
+      "gap": "",
+      "colon_gap": "",
+      "source": ".ident(\"1mark\"):.byte 7\n.word .ident(\"1mark\")\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+        }
+      ],
+      "native_hex": null,
+      "actual": {
+        "argv": [
+          "/private/tmp/asm198x-text-call-spacing-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:1: error: invalid label `1mark`\n"
+      },
+      "actual_hex": null
+    },
+    {
+      "name": "1mark",
+      "gap": "",
+      "colon_gap": " ",
+      "source": ".ident(\"1mark\") :.byte 7\n.word .ident(\"1mark\")\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+        }
+      ],
+      "native_hex": null,
+      "actual": {
+        "argv": [
+          "/private/tmp/asm198x-text-call-spacing-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:1: error: unexpected character `:` in expression\n"
+      },
+      "actual_hex": null
+    },
+    {
+      "name": "1mark",
+      "gap": " ",
+      "colon_gap": "",
+      "source": ".ident (\"1mark\"):.byte 7\n.word .ident(\"1mark\")\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+        }
+      ],
+      "native_hex": null,
+      "actual": {
+        "argv": [
+          "/private/tmp/asm198x-text-call-spacing-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:1: error: invalid label `1mark`\n"
+      },
+      "actual_hex": null
+    },
+    {
+      "name": "1mark",
+      "gap": " ",
+      "colon_gap": " ",
+      "source": ".ident (\"1mark\") :.byte 7\n.word .ident(\"1mark\")\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+        }
+      ],
+      "native_hex": null,
+      "actual": {
+        "argv": [
+          "/private/tmp/asm198x-text-call-spacing-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:1: error: unexpected character `:` in expression\n"
+      },
+      "actual_hex": null
+    },
+    {
+      "name": "::mark",
+      "gap": "",
+      "colon_gap": "",
+      "source": ".ident(\"::mark\"):.byte 7\n.word .ident(\"::mark\")\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+        }
+      ],
+      "native_hex": null,
+      "actual": {
+        "argv": [
+          "/private/tmp/asm198x-text-call-spacing-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:1: error: invalid label `::mark`\n"
+      },
+      "actual_hex": null
+    },
+    {
+      "name": "::mark",
+      "gap": "",
+      "colon_gap": " ",
+      "source": ".ident(\"::mark\") :.byte 7\n.word .ident(\"::mark\")\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+        }
+      ],
+      "native_hex": null,
+      "actual": {
+        "argv": [
+          "/private/tmp/asm198x-text-call-spacing-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:1: error: unexpected character `:` in expression\n"
+      },
+      "actual_hex": null
+    },
+    {
+      "name": "::mark",
+      "gap": " ",
+      "colon_gap": "",
+      "source": ".ident (\"::mark\"):.byte 7\n.word .ident(\"::mark\")\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+        }
+      ],
+      "native_hex": null,
+      "actual": {
+        "argv": [
+          "/private/tmp/asm198x-text-call-spacing-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:1: error: invalid label `::mark`\n"
+      },
+      "actual_hex": null
+    },
+    {
+      "name": "::mark",
+      "gap": " ",
+      "colon_gap": " ",
+      "source": ".ident (\"::mark\") :.byte 7\n.word .ident(\"::mark\")\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+        }
+      ],
+      "native_hex": null,
+      "actual": {
+        "argv": [
+          "/private/tmp/asm198x-text-call-spacing-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:1: error: unexpected character `:` in expression\n"
+      },
+      "actual_hex": null
+    },
+    {
+      "name": "@near",
+      "gap": "",
+      "colon_gap": "",
+      "source": ".ident(\"@near\"):.byte 7\n.word .ident(\"@near\")\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: No preceeding global symbol\ninput.s(2): Error: No preceeding global symbol\n"
+        }
+      ],
+      "native_hex": null,
+      "actual": {
+        "argv": [
+          "/private/tmp/asm198x-text-call-spacing-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 3 byte(s) -> out.bin\n"
+      },
+      "actual_hex": "070010"
+    },
+    {
+      "name": "@near",
+      "gap": "",
+      "colon_gap": " ",
+      "source": ".ident(\"@near\") :.byte 7\n.word .ident(\"@near\")\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: No preceeding global symbol\ninput.s(2): Error: No preceeding global symbol\n"
+        }
+      ],
+      "native_hex": null,
+      "actual": {
+        "argv": [
+          "/private/tmp/asm198x-text-call-spacing-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:1: error: unexpected character `:` in expression\n"
+      },
+      "actual_hex": null
+    },
+    {
+      "name": "@near",
+      "gap": " ",
+      "colon_gap": "",
+      "source": ".ident (\"@near\"):.byte 7\n.word .ident(\"@near\")\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: No preceeding global symbol\ninput.s(2): Error: No preceeding global symbol\n"
+        }
+      ],
+      "native_hex": null,
+      "actual": {
+        "argv": [
+          "/private/tmp/asm198x-text-call-spacing-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 3 byte(s) -> out.bin\n"
+      },
+      "actual_hex": "070010"
+    },
+    {
+      "name": "@near",
+      "gap": " ",
+      "colon_gap": " ",
+      "source": ".ident (\"@near\") :.byte 7\n.word .ident(\"@near\")\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: No preceeding global symbol\ninput.s(2): Error: No preceeding global symbol\n"
+        }
+      ],
+      "native_hex": null,
+      "actual": {
+        "argv": [
+          "/private/tmp/asm198x-text-call-spacing-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:1: error: unexpected character `:` in expression\n"
+      },
+      "actual_hex": null
+    },
+    {
+      "name": "LDA",
+      "gap": "",
+      "colon_gap": "",
+      "source": ".ident(\"LDA\"):.byte 7\n.word .ident(\"LDA\")\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Syntax error\ninput.s(1): Error: Unexpected trailing garbage characters\n"
+        }
+      ],
+      "native_hex": null,
+      "actual": {
+        "argv": [
+          "/private/tmp/asm198x-text-call-spacing-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:1: error: reserved label name `LDA`\n"
+      },
+      "actual_hex": null
+    },
+    {
+      "name": "LDA",
+      "gap": "",
+      "colon_gap": " ",
+      "source": ".ident(\"LDA\") :.byte 7\n.word .ident(\"LDA\")\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Syntax error\ninput.s(1): Error: Unexpected trailing garbage characters\n"
+        }
+      ],
+      "native_hex": null,
+      "actual": {
+        "argv": [
+          "/private/tmp/asm198x-text-call-spacing-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:1: error: unexpected character `:` in expression\n"
+      },
+      "actual_hex": null
+    },
+    {
+      "name": "LDA",
+      "gap": " ",
+      "colon_gap": "",
+      "source": ".ident (\"LDA\"):.byte 7\n.word .ident(\"LDA\")\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Syntax error\ninput.s(1): Error: Unexpected trailing garbage characters\n"
+        }
+      ],
+      "native_hex": null,
+      "actual": {
+        "argv": [
+          "/private/tmp/asm198x-text-call-spacing-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:1: error: reserved label name `LDA`\n"
+      },
+      "actual_hex": null
+    },
+    {
+      "name": "LDA",
+      "gap": " ",
+      "colon_gap": " ",
+      "source": ".ident (\"LDA\") :.byte 7\n.word .ident(\"LDA\")\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Syntax error\ninput.s(1): Error: Unexpected trailing garbage characters\n"
+        }
+      ],
+      "native_hex": null,
+      "actual": {
+        "argv": [
+          "/private/tmp/asm198x-text-call-spacing-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:1: error: unexpected character `:` in expression\n"
+      },
+      "actual_hex": null
+    },
+    {
+      "name": "A",
+      "gap": "",
+      "colon_gap": "",
+      "source": ".ident(\"A\"):.byte 7\n.word .ident(\"A\")\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070010",
+      "actual": {
+        "argv": [
+          "/private/tmp/asm198x-text-call-spacing-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 3 byte(s) -> out.bin\n"
+      },
+      "actual_hex": "070010"
+    },
+    {
+      "name": "A",
+      "gap": "",
+      "colon_gap": " ",
+      "source": ".ident(\"A\") :.byte 7\n.word .ident(\"A\")\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070010",
+      "actual": {
+        "argv": [
+          "/private/tmp/asm198x-text-call-spacing-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:1: error: unexpected character `:` in expression\n"
+      },
+      "actual_hex": null
+    },
+    {
+      "name": "A",
+      "gap": " ",
+      "colon_gap": "",
+      "source": ".ident (\"A\"):.byte 7\n.word .ident(\"A\")\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070010",
+      "actual": {
+        "argv": [
+          "/private/tmp/asm198x-text-call-spacing-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 3 byte(s) -> out.bin\n"
+      },
+      "actual_hex": "070010"
+    },
+    {
+      "name": "A",
+      "gap": " ",
+      "colon_gap": " ",
+      "source": ".ident (\"A\") :.byte 7\n.word .ident(\"A\")\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070010",
+      "actual": {
+        "argv": [
+          "/private/tmp/asm198x-text-call-spacing-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:1: error: unexpected character `:` in expression\n"
+      },
+      "actual_hex": null
+    }
+  ]
+}
