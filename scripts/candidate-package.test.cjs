@@ -364,3 +364,10 @@ test('ca65 end-token boundaries are mandatory package evidence', () => {
   assert(qualifies(complete)); assert(requiredCases.includes('ca65_end_tokens'));
   assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_end_tokens')), false);
 });
+
+
+test('ca65 reserved label tokens are mandatory package evidence', () => {
+  const complete = requiredCases.map(name => ({ name, status: 'pass' }));
+  assert(qualifies(complete)); assert(requiredCases.includes('ca65_reserved_labels'));
+  assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_reserved_labels')), false);
+});

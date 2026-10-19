@@ -1,0 +1,10 @@
+   Compiling asm198x v0.0.71 (/Users/stevehill/Projects/198x/Asm198x/asm198x-ca65-format-end/crates/asm198x)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.83s
+     Running tests/ca65_reserved_labels.rs (/private/tmp/asm198x-format-build/debug/deps/ca65_reserved_labels-f8a75b1a42037cc5)
+
+running 2 tests
+test reserved_label_failures_preserve_outputs_and_include_location ... ok
+test native_reserved_labels_follow_cpu_and_token_context ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.79s
+

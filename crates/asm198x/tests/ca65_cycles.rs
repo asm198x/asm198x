@@ -102,7 +102,7 @@ fn resolved_modes_and_conditional_penalties_come_from_the_spec() {
 #[test]
 fn section_offsets_aliases_and_data_do_not_mix_routines() {
     let cfg = "MEMORY { ROM: start=$8000, size=$100, file=%O, fill=yes; }\nSEGMENTS { ONE: load=ROM, type=ro; TWO: load=ROM, type=ro; }";
-    let src = ".segment \"ONE\"\na:\nalias: lda #1\n rts\n .byte $60,$60\nnext: nop\n.segment \"TWO\"\nb: rts\n; asm198x: cycles(a) <= 8\n; asm198x: cycles(alias) <= 8\n; asm198x: cycles(next) <= 2\n; asm198x: cycles(b) <= 6\n";
+    let src = ".segment \"ONE\"\nroutine_one:\nalias: lda #1\n rts\n .byte $60,$60\nnext: nop\n.segment \"TWO\"\nb: rts\n; asm198x: cycles(routine_one) <= 8\n; asm198x: cycles(alias) <= 8\n; asm198x: cycles(next) <= 2\n; asm198x: cycles(b) <= 6\n";
     let loader = MemoryLoader::new();
     let r = asm198x::assemble_ca65_files_with_config(src, "main.s", &loader, cfg)
         .expect("independent section offsets");
