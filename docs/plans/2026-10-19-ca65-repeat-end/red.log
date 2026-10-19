@@ -1,0 +1,25 @@
+   Compiling verdict-corpus v0.0.71 (/Users/stevehill/Projects/198x/Asm198x/asm198x-ca65-repeat-end/crates/verdict-corpus)
+   Compiling asm198x v0.0.71 (/Users/stevehill/Projects/198x/Asm198x/asm198x-ca65-repeat-end/crates/asm198x)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.62s
+     Running tests/ca65_repeat_end.rs (/private/tmp/asm198x-repeat-end-build/debug/deps/ca65_repeat_end-73594e2c6667701f)
+
+running 1 test
+test native_repeat_end_stops_even_billion_count_streams ... FAILED
+
+failures:
+
+---- native_repeat_end_stops_even_billion_count_streams stdout ----
+
+thread 'native_repeat_end_stops_even_billion_count_streams' (129482634) panicked at crates/asm198x/tests/ca65_repeat_end.rs:92:9:
+assertion `left == right` failed: count_1: Output { status: ExitStatus(unix_wait_status(256)), stdout: "", stderr: "asm198x: input.s:1:1: error: repetition block is never closed\n" }
+  left: false
+ right: true
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    native_repeat_end_stops_even_billion_count_streams
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+error: test failed, to rerun pass `-p asm198x --test ca65_repeat_end`

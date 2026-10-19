@@ -1,0 +1,10 @@
+   Compiling asm198x v0.0.71 (/Users/stevehill/Projects/198x/Asm198x/asm198x-ca65-repeat-end/crates/asm198x)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.03s
+     Running tests/ca65_repeat_end.rs (/private/tmp/asm198x-repeat-end-build/debug/deps/ca65_repeat_end-73594e2c6667701f)
+
+running 2 tests
+test repeat_end_preserves_outputs_and_nested_conditional_errors ... ok
+test native_repeat_end_stops_even_billion_count_streams ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.45s
+

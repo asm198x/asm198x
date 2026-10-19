@@ -480,17 +480,17 @@ fn project_nodes(
                         st.token_depth -= 1;
                         return Err(error);
                     }
+                    // Native .end terminates every enclosing token stream.
+                    // Restore this iteration's state, then stop even when the
+                    // authored count would otherwise require billions of trips.
+                    if sw.reader.ended {
+                        break;
+                    }
                 }
                 st.token_captures.pop();
                 st.token_depth -= 1;
                 if st.token_depth == 0 {
                     drain_includes(watermark, st, sw)?;
-                }
-                if sw.reader.ended {
-                    return Err(AsmError::at(
-                        node.span.clone(),
-                        "repetition block is never closed".to_string(),
-                    ));
                 }
                 continue;
             }
