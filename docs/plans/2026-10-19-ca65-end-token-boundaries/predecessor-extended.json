@@ -1,0 +1,758 @@
+[
+  {
+    "name": "token_0",
+    "argv": [
+      "/private/tmp/asm198x-format-includes-clean-producer/asm198x",
+      "--dialect",
+      "ca65",
+      "-C",
+      "input.cfg",
+      "input.s",
+      "-o",
+      "out.bin"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "matches_native": true
+  },
+  {
+    "name": "token_1",
+    "argv": [
+      "/private/tmp/asm198x-format-includes-clean-producer/asm198x",
+      "--dialect",
+      "ca65",
+      "-C",
+      "input.cfg",
+      "input.s",
+      "-o",
+      "out.bin"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2:6: error: number `$100000000` is outside the native lexical range\n",
+    "hex": "70726576696f757320696d616765",
+    "matches_native": false
+  },
+  {
+    "name": "token_2",
+    "argv": [
+      "/private/tmp/asm198x-format-includes-clean-producer/asm198x",
+      "--dialect",
+      "ca65",
+      "-C",
+      "input.cfg",
+      "input.s",
+      "-o",
+      "out.bin"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2:6: error: number `$100000000` is outside the native lexical range\n",
+    "hex": "70726576696f757320696d616765",
+    "matches_native": false
+  },
+  {
+    "name": "token_3",
+    "argv": [
+      "/private/tmp/asm198x-format-includes-clean-producer/asm198x",
+      "--dialect",
+      "ca65",
+      "-C",
+      "input.cfg",
+      "input.s",
+      "-o",
+      "out.bin"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2: error: `.end\"unread\"` is not a directive ca65 has\n",
+    "hex": "70726576696f757320696d616765",
+    "matches_native": false
+  },
+  {
+    "name": "token_4",
+    "argv": [
+      "/private/tmp/asm198x-format-includes-clean-producer/asm198x",
+      "--dialect",
+      "ca65",
+      "-C",
+      "input.cfg",
+      "input.s",
+      "-o",
+      "out.bin"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2:6: error: number `$100000000` is outside the native lexical range\n",
+    "hex": "70726576696f757320696d616765",
+    "matches_native": false
+  },
+  {
+    "name": "token_5",
+    "argv": [
+      "/private/tmp/asm198x-format-includes-clean-producer/asm198x",
+      "--dialect",
+      "ca65",
+      "-C",
+      "input.cfg",
+      "input.s",
+      "-o",
+      "out.bin"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2:6: error: number `$100000000` is outside the native lexical range\n",
+    "hex": "70726576696f757320696d616765",
+    "matches_native": false
+  },
+  {
+    "name": "token_6",
+    "argv": [
+      "/private/tmp/asm198x-format-includes-clean-producer/asm198x",
+      "--dialect",
+      "ca65",
+      "-C",
+      "input.cfg",
+      "input.s",
+      "-o",
+      "out.bin"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2:6: error: number `$100000000` is outside the native lexical range\n",
+    "hex": "70726576696f757320696d616765",
+    "matches_native": false
+  },
+  {
+    "name": "token_7",
+    "argv": [
+      "/private/tmp/asm198x-format-includes-clean-producer/asm198x",
+      "--dialect",
+      "ca65",
+      "-C",
+      "input.cfg",
+      "input.s",
+      "-o",
+      "out.bin"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2:6: error: number `$100000000` is outside the native lexical range\n",
+    "hex": "70726576696f757320696d616765",
+    "matches_native": false
+  },
+  {
+    "name": "token_8",
+    "argv": [
+      "/private/tmp/asm198x-format-includes-clean-producer/asm198x",
+      "--dialect",
+      "ca65",
+      "-C",
+      "input.cfg",
+      "input.s",
+      "-o",
+      "out.bin"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2:5: error: number `$100000000` is outside the native lexical range\n",
+    "hex": "70726576696f757320696d616765",
+    "matches_native": false
+  },
+  {
+    "name": "token_9",
+    "argv": [
+      "/private/tmp/asm198x-format-includes-clean-producer/asm198x",
+      "--dialect",
+      "ca65",
+      "-C",
+      "input.cfg",
+      "input.s",
+      "-o",
+      "out.bin"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2: error: `.end%100` is not a directive ca65 has\n",
+    "hex": "70726576696f757320696d616765",
+    "matches_native": false
+  },
+  {
+    "name": "token_10",
+    "argv": [
+      "/private/tmp/asm198x-format-includes-clean-producer/asm198x",
+      "--dialect",
+      "ca65",
+      "-C",
+      "input.cfg",
+      "input.s",
+      "-o",
+      "out.bin"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2: error: `.end.unknown` is not a directive ca65 has\n",
+    "hex": "70726576696f757320696d616765",
+    "matches_native": false
+  },
+  {
+    "name": "token_11",
+    "argv": [
+      "/private/tmp/asm198x-format-includes-clean-producer/asm198x",
+      "--dialect",
+      "ca65",
+      "-C",
+      "input.cfg",
+      "input.s",
+      "-o",
+      "out.bin"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2: error: `.end_thing` is not a directive ca65 has\n",
+    "hex": "70726576696f757320696d616765",
+    "matches_native": true
+  },
+  {
+    "name": "token_12",
+    "argv": [
+      "/private/tmp/asm198x-format-includes-clean-producer/asm198x",
+      "--dialect",
+      "ca65",
+      "-C",
+      "input.cfg",
+      "input.s",
+      "-o",
+      "out.bin"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2: error: unsupported directive `.endmacro`\n",
+    "hex": "70726576696f757320696d616765",
+    "matches_native": true
+  },
+  {
+    "name": "token_13",
+    "argv": [
+      "/private/tmp/asm198x-format-includes-clean-producer/asm198x",
+      "--dialect",
+      "ca65",
+      "-C",
+      "input.cfg",
+      "input.s",
+      "-o",
+      "out.bin"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2: error: `.end2` is not a directive ca65 has\n",
+    "hex": "70726576696f757320696d616765",
+    "matches_native": true
+  },
+  {
+    "name": "named",
+    "argv": [
+      "/private/tmp/asm198x-format-includes-clean-producer/asm198x",
+      "--dialect",
+      "ca65",
+      "-C",
+      "input.cfg",
+      "input.s",
+      "-o",
+      "out.bin"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2: error: unsupported directive `.end`\n",
+    "hex": "70726576696f757320696d616765",
+    "matches_native": false
+  },
+  {
+    "name": "named_spaced",
+    "argv": [
+      "/private/tmp/asm198x-format-includes-clean-producer/asm198x",
+      "--dialect",
+      "ca65",
+      "-C",
+      "input.cfg",
+      "input.s",
+      "-o",
+      "out.bin"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:1: error: undefined symbol `finish`\n",
+    "hex": "70726576696f757320696d616765",
+    "matches_native": false
+  },
+  {
+    "name": "named_tail",
+    "argv": [
+      "/private/tmp/asm198x-format-includes-clean-producer/asm198x",
+      "--dialect",
+      "ca65",
+      "-C",
+      "input.cfg",
+      "input.s",
+      "-o",
+      "out.bin"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2:13: error: number `$100000000` is outside the native lexical range\n",
+    "hex": "70726576696f757320696d616765",
+    "matches_native": false
+  },
+  {
+    "name": "ident_label",
+    "argv": [
+      "/private/tmp/asm198x-format-includes-clean-producer/asm198x",
+      "--dialect",
+      "ca65",
+      "-C",
+      "input.cfg",
+      "input.s",
+      "-o",
+      "out.bin"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2: error: unsupported directive `.end`\n",
+    "hex": "70726576696f757320696d616765",
+    "matches_native": false
+  },
+  {
+    "name": "ident_tail",
+    "argv": [
+      "/private/tmp/asm198x-format-includes-clean-producer/asm198x",
+      "--dialect",
+      "ca65",
+      "-C",
+      "input.cfg",
+      "input.s",
+      "-o",
+      "out.bin"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2:37: error: number `4294967300` is outside the native lexical range\n",
+    "hex": "70726576696f757320696d616765",
+    "matches_native": false
+  },
+  {
+    "name": "ident_spaced",
+    "argv": [
+      "/private/tmp/asm198x-format-includes-clean-producer/asm198x",
+      "--dialect",
+      "ca65",
+      "-C",
+      "input.cfg",
+      "input.s",
+      "-o",
+      "out.bin"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:1: error: undefined symbol `finish`\n",
+    "hex": "70726576696f757320696d616765",
+    "matches_native": false
+  },
+  {
+    "name": "define_label",
+    "argv": [
+      "/private/tmp/asm198x-format-includes-clean-producer/asm198x",
+      "--dialect",
+      "ca65",
+      "-C",
+      "input.cfg",
+      "input.s",
+      "-o",
+      "out.bin"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:3: error: unsupported directive `.end`\n",
+    "hex": "70726576696f757320696d616765",
+    "matches_native": false
+  },
+  {
+    "name": "define_tail",
+    "argv": [
+      "/private/tmp/asm198x-format-includes-clean-producer/asm198x",
+      "--dialect",
+      "ca65",
+      "-C",
+      "input.cfg",
+      "input.s",
+      "-o",
+      "out.bin"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:3: error: unsupported directive `.end`\n",
+    "hex": "70726576696f757320696d616765",
+    "matches_native": false
+  },
+  {
+    "name": "cheap_label",
+    "argv": [
+      "/private/tmp/asm198x-format-includes-clean-producer/asm198x",
+      "--dialect",
+      "ca65",
+      "-C",
+      "input.cfg",
+      "input.s",
+      "-o",
+      "out.bin"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:3: error: unsupported directive `.end`\n",
+    "hex": "70726576696f757320696d616765",
+    "matches_native": false
+  },
+  {
+    "name": "anonymous_label",
+    "argv": [
+      "/private/tmp/asm198x-format-includes-clean-producer/asm198x",
+      "--dialect",
+      "ca65",
+      "-C",
+      "input.cfg",
+      "input.s",
+      "-o",
+      "out.bin"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2: error: unsupported directive `.end`\n",
+    "hex": "70726576696f757320696d616765",
+    "matches_native": false
+  },
+  {
+    "name": "absolute_label",
+    "argv": [
+      "/private/tmp/asm198x-format-includes-clean-producer/asm198x",
+      "--dialect",
+      "ca65",
+      "-C",
+      "input.cfg",
+      "input.s",
+      "-o",
+      "out.bin"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:3: error: unsupported directive `.end`\n",
+    "hex": "70726576696f757320696d616765",
+    "matches_native": false
+  },
+  {
+    "name": "qualified_label",
+    "argv": [
+      "/private/tmp/asm198x-format-includes-clean-producer/asm198x",
+      "--dialect",
+      "ca65",
+      "-C",
+      "input.cfg",
+      "input.s",
+      "-o",
+      "out.bin"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:4: error: invalid label `outer::finish`\n",
+    "hex": "70726576696f757320696d616765",
+    "matches_native": false
+  },
+  {
+    "name": "include_label",
+    "argv": [
+      "/private/tmp/asm198x-format-includes-clean-producer/asm198x",
+      "--dialect",
+      "ca65",
+      "-C",
+      "input.cfg",
+      "input.s",
+      "-o",
+      "out.bin"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/tmp2axm1ddz/ending.inc:2:13: error: number `$100000000` is outside the native lexical range\nincluded from input.s:1\n",
+    "hex": "70726576696f757320696d616765",
+    "matches_native": false
+  },
+  {
+    "name": "macro_label",
+    "argv": [
+      "/private/tmp/asm198x-format-includes-clean-producer/asm198x",
+      "--dialect",
+      "ca65",
+      "-C",
+      "input.cfg",
+      "input.s",
+      "-o",
+      "out.bin"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:5: error: unsupported directive `.end`\nin expansion of macro `stop` defined at input.s:1, invoked at input.s:5\n",
+    "hex": "70726576696f757320696d616765",
+    "matches_native": false
+  },
+  {
+    "name": "macro_local_label",
+    "argv": [
+      "/private/tmp/asm198x-format-includes-clean-producer/asm198x",
+      "--dialect",
+      "ca65",
+      "-C",
+      "input.cfg",
+      "input.s",
+      "-o",
+      "out.bin"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:6: error: unsupported directive `.end`\nin expansion of macro `stop` defined at input.s:1, invoked at input.s:6\n",
+    "hex": "70726576696f757320696d616765",
+    "matches_native": false
+  },
+  {
+    "name": "repeat_label",
+    "argv": [
+      "/private/tmp/asm198x-format-includes-clean-producer/asm198x",
+      "--dialect",
+      "ca65",
+      "-C",
+      "input.cfg",
+      "input.s",
+      "-o",
+      "out.bin"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:3: error: duplicate symbol `finish`\n",
+    "hex": "70726576696f757320696d616765",
+    "matches_native": false
+  },
+  {
+    "name": "zero_label",
+    "argv": [
+      "/private/tmp/asm198x-format-includes-clean-producer/asm198x",
+      "--dialect",
+      "ca65",
+      "-C",
+      "input.cfg",
+      "input.s",
+      "-o",
+      "out.bin"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "00",
+    "matches_native": true
+  },
+  {
+    "name": "inactive_label",
+    "argv": [
+      "/private/tmp/asm198x-format-includes-clean-producer/asm198x",
+      "--dialect",
+      "ca65",
+      "-C",
+      "input.cfg",
+      "input.s",
+      "-o",
+      "out.bin"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "00",
+    "matches_native": true
+  },
+  {
+    "name": "inactive_bad_tail",
+    "argv": [
+      "/private/tmp/asm198x-format-includes-clean-producer/asm198x",
+      "--dialect",
+      "ca65",
+      "-C",
+      "input.cfg",
+      "input.s",
+      "-o",
+      "out.bin"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2:13: error: number `$100000000` is outside the native lexical range\n",
+    "hex": "70726576696f757320696d616765",
+    "matches_native": true
+  },
+  {
+    "name": "macro_bad_tail",
+    "argv": [
+      "/private/tmp/asm198x-format-includes-clean-producer/asm198x",
+      "--dialect",
+      "ca65",
+      "-C",
+      "input.cfg",
+      "input.s",
+      "-o",
+      "out.bin"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2:13: error: number `$100000000` is outside the native lexical range\n",
+    "hex": "70726576696f757320696d616765",
+    "matches_native": true
+  },
+  {
+    "name": "macro_unused_bad_tail",
+    "argv": [
+      "/private/tmp/asm198x-format-includes-clean-producer/asm198x",
+      "--dialect",
+      "ca65",
+      "-C",
+      "input.cfg",
+      "input.s",
+      "-o",
+      "out.bin"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2:13: error: number `$100000000` is outside the native lexical range\n",
+    "hex": "70726576696f757320696d616765",
+    "matches_native": true
+  },
+  {
+    "name": "repeat_zero_bad_tail",
+    "argv": [
+      "/private/tmp/asm198x-format-includes-clean-producer/asm198x",
+      "--dialect",
+      "ca65",
+      "-C",
+      "input.cfg",
+      "input.s",
+      "-o",
+      "out.bin"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2:13: error: number `$100000000` is outside the native lexical range\n",
+    "hex": "70726576696f757320696d616765",
+    "matches_native": true
+  },
+  {
+    "name": "alias_end_bad_format",
+    "argv": [
+      "/private/tmp/asm198x-format-includes-clean-producer/asm198x",
+      "--dialect",
+      "ca65",
+      "-C",
+      "input.cfg",
+      "input.s",
+      "-o",
+      "out.bin"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2: error: `.sprintf` cannot read the format spec for argument 1: ca65 takes `d`, `i`, `u`, `x`, `X`, `o`, `c` and `s`, and no others\n",
+    "hex": "70726576696f757320696d616765",
+    "matches_native": true
+  },
+  {
+    "name": "alias_end_large_token",
+    "argv": [
+      "/private/tmp/asm198x-format-includes-clean-producer/asm198x",
+      "--dialect",
+      "ca65",
+      "-C",
+      "input.cfg",
+      "input.s",
+      "-o",
+      "out.bin"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2:20: error: number `4294967300` is outside the native lexical range\n",
+    "hex": "70726576696f757320696d616765",
+    "matches_native": true
+  },
+  {
+    "name": "named_alias_end",
+    "argv": [
+      "/private/tmp/asm198x-format-includes-clean-producer/asm198x",
+      "--dialect",
+      "ca65",
+      "-C",
+      "input.cfg",
+      "input.s",
+      "-o",
+      "out.bin"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:3: error: `.sprintf` cannot read the format spec for argument 1: ca65 takes `d`, `i`, `u`, `x`, `X`, `o`, `c` and `s`, and no others\n",
+    "hex": "70726576696f757320696d616765",
+    "matches_native": true
+  },
+  {
+    "name": "root_unclosed_tail",
+    "argv": [
+      "/private/tmp/asm198x-format-includes-clean-producer/asm198x",
+      "--dialect",
+      "ca65",
+      "-C",
+      "input.cfg",
+      "input.s",
+      "-o",
+      "out.bin"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:3:1: error: conditional block is never closed\n",
+    "hex": "70726576696f757320696d616765",
+    "matches_native": false
+  },
+  {
+    "name": "same_line_conditional_tail",
+    "argv": [
+      "/private/tmp/asm198x-format-includes-clean-producer/asm198x",
+      "--dialect",
+      "ca65",
+      "-C",
+      "input.cfg",
+      "input.s",
+      "-o",
+      "out.bin"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2:1: error: conditional block is never closed\n",
+    "hex": "70726576696f757320696d616765",
+    "matches_native": false
+  },
+  {
+    "name": "macro_unclosed_tail",
+    "argv": [
+      "/private/tmp/asm198x-format-includes-clean-producer/asm198x",
+      "--dialect",
+      "ca65",
+      "-C",
+      "input.cfg",
+      "input.s",
+      "-o",
+      "out.bin"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:6:1: error: conditional block is never closed\nin expansion of macro `stop` defined at input.s:1, invoked at input.s:6\n",
+    "hex": "70726576696f757320696d616765",
+    "matches_native": false
+  }
+]

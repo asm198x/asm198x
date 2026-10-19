@@ -1,31 +1,33 @@
-# Recognize native .end tokens and labels (#830/#842)
+# Recognize native .end token boundaries (#842)
 
-1. Retain the fourteen native token-boundary controls and clean predecessor
-   refusals. Extend them with the labelled .end controls from #830, generated
-   labels, scopes, includes and captured token streams before changing code.
-   Re-consult source-reading, label and diagnostic decisions.
-2. In crates/asm198x/src/dialects/ca65/mod.rs, recognize the native .end keyword
-   at token boundaries, preserving distinct longer words. Bind an optional label
-   at the authored address before ending the selected reader. Reuse existing
-   empty-label placement and source spans, without a public AST/schema change.
-3. In crates/asm198x/src/dialects/ca65/project.rs, use the same boundary for the
-   unread operand tail before text evaluation/numeric admission. Original macro
-   and repeat captures must still validate their complete token source first.
-   Keep include input priority, conditional errors and physical offsets.
-4. Add crates/asm198x/tests/ca65_end_tokens.rs and a retained native fixture.
-   Compare acceptance/bytes/labels/debug positions; test longer-word refusals,
-   dynamic label tails, included diagnostics and five-output preservation. Pin
-   formatter coverage separately against the existing #833 source-loss gap.
-5. Add a mandatory cohort/omission control to scripts/test-candidate-package.cjs
-   and scripts/candidate-package.test.cjs. Verify full Rust/Lua, Node, Clippy,
-   fmt/Ruff/docs, actual preceding/current archives and both corruption controls.
-6. Move only these own commits onto current main, without merge commits or
-   force-pushing published history. Retain a clean 4510 replay, inspect all current
-   exact-head checks and five actual packages/receipts plus ten controls, then
-   rebase-merge, retain source and clean owned workspaces/caches/processes.
+This slice fixes the literal directive token only. #830 label binding is a
+separate follow-up; its extended native research is retained here. #844 covers
+unclosed blocks on later unread lines, and #833 formatter preservation remains
+pending approval. No general label grammar or structural-reader rewrite belongs
+in this change.
 
-The initial native audit finds eleven accepted forms and three longer-word
-refusals; ten accepted forms fail in Asm. The pre-admission producer also rejects
-an attached comma tail, so this is an existing directive-recognition gap rather
-than a new numeric-validation regression. The formatter design in #833 remains
-unimplemented pending approval; this plan fixes selected assembly recognition.
+1. Retain the fourteen initial and twenty-five expanded root/capture controls.
+   Verify default identifier boundaries and longer-word refusals before changing
+   crates/asm198x/src/dialects/ca65/mod.rs.
+2. Add one private token-length helper in that module, reused by the reader and
+   structural keyword classifier. A literal .end must win before a colon can be
+   mistaken for a label/conditional head. Keep .endmacro, .end2 and .end_thing
+   distinct. No public AST/schema or dependency change.
+3. Use the same boundary in crates/asm198x/src/dialects/ca65/project.rs before
+   text evaluation/numeric admission of selected character source. Original
+   macro/repeat captures still validate their entire source before execution.
+4. Add crates/asm198x/tests/ca65_end_tokens.rs and retained native fixture.
+   Compare acceptance/bytes, includes, macro/repeat streams, inactive/captured
+   numeric refusals and five-output preservation. Keep formatter #833 separate.
+5. Add a mandatory cohort/omission control in scripts/test-candidate-package.cjs
+   and scripts/candidate-package.test.cjs; verify full Rust/Lua, Node, Clippy,
+   fmt/Ruff/docs, actual preceding/current archives and corruption controls.
+6. Put only this slice's own commits onto current main; retain a clean 4510
+   replay, inspect current exact-head checks and five actual packages/receipts
+   plus ten controls, then rebase-merge and clean owned workspaces/caches.
+
+The initial native audit has eleven accepted forms and three longer-word
+refusals; ten accepted forms fail in Asm. Pre-admission producer 86b5608 also
+rejects an attached comma tail: this is an existing recognition gap, rather
+than a numeric-admission regression. Broader label/structure cases remain
+visible in native-extended.json without being claimed as fixed here.

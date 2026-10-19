@@ -597,10 +597,12 @@ fn sweep_line(
     // stops before text evaluation can read its unused operand tail.
     let source = {
         let code = super::strip_comment(&source).trim_start();
-        let head = super::split_label_head(code).map_or(code, |(_, head)| head);
-        let (word, _) = split_first_word(head);
-        if word.eq_ignore_ascii_case(".end") {
-            code[..code.len() - head.len() + word.len()].to_string()
+        let end = super::end_token_len(code).or_else(|| {
+            let (_, head) = super::split_label_head(code)?;
+            super::end_token_len(head).map(|len| code.len() - head.len() + len)
+        });
+        if let Some(end) = end {
+            code[..end].to_string()
         } else {
             source
         }
