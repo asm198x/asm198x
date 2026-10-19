@@ -1,0 +1,866 @@
+{
+  "tools": {
+    "ca65": {
+      "path": "/opt/homebrew/bin/ca65",
+      "sha256": "1a57997819fd98814e4601b5160df589e7a1a24e1888a80fee51ae450d8fd0ea",
+      "version": {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "--version"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "ca65 V2.18 - N/A\n"
+      }
+    },
+    "ld65": {
+      "path": "/opt/homebrew/bin/ld65",
+      "sha256": "36bb196207a6b2c90a4aa991b419d6113885303951b14b60b455f51c777b3339",
+      "version": {
+        "argv": [
+          "/opt/homebrew/bin/ld65",
+          "--version"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "ld65 V2.18 - N/A\n"
+      }
+    }
+  },
+  "files": {},
+  "cases": [
+    {
+      "name": "zero_repeat",
+      "source": ".repeat 0\n.end\n.endrepeat\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "08"
+    },
+    {
+      "name": "unused_macro",
+      "source": ".macro stop\n.end\n.endmacro\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "08"
+    },
+    {
+      "name": "called_macro",
+      "source": ".macro stop\n.end\n.endmacro\n.byte 7\nstop\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "root_end",
+      "source": ".byte 7\n.end\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "root_end_oversized",
+      "source": ".byte 7\n.end\n.byte $100000000\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "root_end_bad_function",
+      "source": ".byte 7\n.end\n.byte .sprintf(\"%bad\",0)\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "root_end_unclosed_if",
+      "source": ".byte 7\n.end\n.if 1\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07",
+      "formatted_assembly_gap": 844
+    },
+    {
+      "name": "root_end_unclosed_macro",
+      "source": ".byte 7\n.end\n.macro pending\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "root_end_unclosed_scope",
+      "source": ".byte 7\n.end\n.scope pending\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "root_end_unclosed_record",
+      "source": ".byte 7\n.end\n.struct pending\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "called_end_unclosed_if",
+      "source": ".macro stop\n.end\n.endmacro\n.byte 7\nstop\n.if 1\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07",
+      "formatted_assembly_gap": 844
+    },
+    {
+      "name": "called_end_unclosed_scope",
+      "source": ".macro stop\n.end\n.endmacro\n.byte 7\nstop\n.scope pending\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "false_end",
+      "source": ".if 0\n.end\n.else\n.byte 7\n.endif\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0708"
+    },
+    {
+      "name": "true_end",
+      "source": ".if 1\n.byte 7\n.end\n.endif\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Conditional assembly branch was never closed\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "repeat_end",
+      "source": ".repeat 2\n.byte 7\n.end\n.endrepeat\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "comment_end",
+      "source": "; .end\n.byte 7 ; .end\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0708"
+    },
+    {
+      "name": "quoted_end",
+      "source": ".asciiz \".end;:.if\"\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "2e656e643b3a2e69660008"
+    },
+    {
+      "name": "ordinary_labels",
+      "source": "entry:.byte 7\n@cheap:.byte 8\n: .word entry\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "input.s(3): Warning: No reference to unnamed label\n"
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07080010"
+    },
+    {
+      "name": "end_tail_colon",
+      "source": ".byte 7\n.end:.if 1\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "labelled_end",
+      "source": ".byte 7\nfinish:.end\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "define_end",
+      "source": ".define STOP .end\n.byte 7\nSTOP\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "define_end_bad_argument",
+      "source": ".define STOP .end\n.byte 7\nSTOP .sprintf(\"%bad\",0)\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Invalid format string\ninput.s(3): Error: ')' expected\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "constant_runs",
+      "source": "SHORT=1\nLONG_NAME=$02\n.byte SHORT,LONG_NAME\n.end\nIGNORED=$100000000\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0102"
+    },
+    {
+      "name": "unused_macro_bad_capture",
+      "source": ".macro stop\n.end\n.byte $100000000\n.endmacro\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Overflow in hexadecimal number\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "zero_repeat_bad_capture",
+      "source": ".repeat 0\n.end\n.byte $100000000\n.endrepeat\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Overflow in hexadecimal number\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "macro_literal_end",
+      "source": ".macro say\n.asciiz \".end\"\n.endmacro\nsay\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "2e656e640008"
+    }
+  ],
+  "dialect": "ca65"
+}
