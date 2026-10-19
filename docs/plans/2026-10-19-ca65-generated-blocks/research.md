@@ -49,3 +49,16 @@ The initial actual archive passes all 79 required cohorts, including 273 new
 commands; changed bytes and archive corruption fail. All 94 Node tests and
 Clippy/fmt/Ruff/docs pass. Final full Rust and clean producer/replay evidence
 remain required before merge.
+
+Final clean qualification passes: 1,597 Rust tests (38 ignored), 94 Node tests,
+Lua/all-target Clippy, rustfmt, Ruff and docs. The frozen clean producer
+`a3ef9a534f53fc733526fbbc5c211328966e04e1` has CLI SHA-256
+`846c8a501b5179a47060c7d137456192154117531470b7c3723cec0b95debbe7`.
+Its actual archive passes all 79 cohorts, including 273 block-head commands;
+changed bytes fail exactly three reference controls and archive corruption fails
+SHA-256 validation. The preceding archive fails exactly the new block-head cohort
+and the generated-format cohort whose three resolved #861 gaps were removed.
+
+Clean 4510 replay matches all 564 native bytes across seven processes and fourteen
+retained streams. The changed-byte guard fails as required; disposable audit work
+was removed. Shipping source and harness match the clean producer exactly.
