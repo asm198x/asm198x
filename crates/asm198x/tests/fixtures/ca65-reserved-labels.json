@@ -3340,8 +3340,7 @@
         }
       ],
       "native_hex": "07",
-      "dialect": "ca65",
-      "formatter_gap": "https://github.com/asm198x/asm198x/issues/854"
+      "dialect": "ca65"
     },
     {
       "name": "generated_X",
@@ -3376,8 +3375,7 @@
         }
       ],
       "native_hex": "07",
-      "dialect": "ca65",
-      "formatter_gap": "https://github.com/asm198x/asm198x/issues/854"
+      "dialect": "ca65"
     },
     {
       "name": "generated_Y",
@@ -3412,8 +3410,7 @@
         }
       ],
       "native_hex": "07",
-      "dialect": "ca65",
-      "formatter_gap": "https://github.com/asm198x/asm198x/issues/854"
+      "dialect": "ca65"
     },
     {
       "name": "generated_Z",
@@ -3448,8 +3445,7 @@
         }
       ],
       "native_hex": "07",
-      "dialect": "ca65",
-      "formatter_gap": "https://github.com/asm198x/asm198x/issues/854"
+      "dialect": "ca65"
     },
     {
       "name": "generated_F",
@@ -3484,8 +3480,7 @@
         }
       ],
       "native_hex": "07",
-      "dialect": "ca65",
-      "formatter_gap": "https://github.com/asm198x/asm198x/issues/854"
+      "dialect": "ca65"
     }
   ]
 }

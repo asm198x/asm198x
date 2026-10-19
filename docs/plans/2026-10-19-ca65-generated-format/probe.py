@@ -43,6 +43,9 @@ def cases() -> dict[str, str]:
             "invalid_generated_name": '.ident("bad;name"):.byte 7\n',
             "invalid_format_argument": '.ident(.sprintf("%bad",0)):.byte 7\n',
             "unclosed_argument": '.ident("mark":.byte 7\n',
+            "generated_address_alias": '.ident("answer"):=7\n.byte answer\n',
+            "generated_constant": '.ident("answer")=7\n.byte answer\n',
+            "spaced_address_alias": '.ident("answer") := 7\n.byte answer\n',
             "static_baseline": "mark:.byte 7\n.word mark\n",
         }
     )
