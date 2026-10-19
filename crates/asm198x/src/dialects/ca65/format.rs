@@ -32,10 +32,11 @@ pub(super) fn parse(source: &str) -> Program {
                 format!("= {}", code[eq + 1..].trim_start()),
             )
         } else if super::end_token_len(code).is_none()
-            && let Some((head, rest)) = super::split_label_head(code)
+            && let Some((head, rest)) =
+                super::split_label_head(code).or_else(|| super::split_generated_label_head(code))
         {
             (
-                Some(symbol(&head[..head.len() - 1])),
+                Some(symbol(head[..head.len() - 1].trim_end())),
                 None,
                 rest.to_string(),
             )

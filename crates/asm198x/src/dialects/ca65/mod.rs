@@ -2873,6 +2873,47 @@ fn split_label_head(text: &str) -> Option<(&str, &str)> {
     None
 }
 
+/// A generated label's authored head, without evaluating its .ident argument.
+/// Both canonical formatting and selected end-tail admission need this syntax.
+fn split_generated_label_head(text: &str) -> Option<(&str, &str)> {
+    if !text.get(..6)?.eq_ignore_ascii_case(".ident") {
+        return None;
+    }
+    let args = text[6..].trim_start_matches([' ', '\t']);
+    if !args.starts_with('(') {
+        return None;
+    }
+    let open = text.len() - args.len();
+    let mut depth = 0usize;
+    let mut quote = None;
+    for (at, byte) in text.bytes().enumerate().skip(open) {
+        if let Some(delimiter) = quote {
+            if byte == delimiter {
+                quote = None;
+            }
+            continue;
+        }
+        match byte {
+            b'\'' | b'"' => quote = Some(byte),
+            b'(' => depth += 1,
+            b')' => {
+                depth -= 1;
+                if depth == 0 {
+                    let after = text[at + 1..].trim_start_matches([' ', '\t']);
+                    if !after.starts_with(':') || after.starts_with("::") || after.starts_with(":=")
+                    {
+                        return None;
+                    }
+                    let end = text.len() - after.len() + 1;
+                    return Some((&text[..end], text[end..].trim_start()));
+                }
+            }
+            _ => {}
+        }
+    }
+    None
+}
+
 /// Split a leading `name:`, `@cheap:`, or bare `:` (anonymous) label into an AST
 /// [`Symbol`](crate::ast::Symbol) carrying both the **source form** (`name` /
 /// `@cheap` / empty for anonymous — what the formatter re-emits) and the

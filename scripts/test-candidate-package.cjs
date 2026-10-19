@@ -58,6 +58,7 @@ requiredCases.push('pasmo_character_literals');
 requiredCases.push('sjasmplus_packed_single');
 requiredCases.push('ca65_format_end');
 requiredCases.push('ca65_labelled_end');
+requiredCases.push('ca65_generated_format');
 const sourceFiles = {
   'LICENSE': '62cd567bc9270c722abcaa6ad88b6a1fe861698d63890f787cc557d2395be203',
   'helloworld.asm': '9e57c82435c0cf35e56089d56d6b83991c61624c2b3448ab6c66fb13a884a0a5',
@@ -1382,6 +1383,37 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
         assert.equal(p.status, accepted ? 0 : 1, fact.name + ': ' + p.stderr);
         if (accepted) assert.deepEqual(read('cpu.bin'), Buffer.from(fact.native_hex, 'hex'), fact.name + ': native bytes');
         else assert.equal(read('cpu.bin').toString(), 'previous image', fact.name);
+      }
+    });
+    test('ca65_generated_format', () => {
+      const facts = require('../crates/asm198x/tests/fixtures/ca65-generated-format.json');
+      assert.equal(facts.cases.length, 46);
+      for (const [name, text] of Object.entries(facts.files)) write(name, text);
+      const shape = () => read('scope.debug198x').toString().trim().split('\n').map(s => JSON.parse(s)).filter(r => r.t === 'symbol' || r.t === 'section');
+      const assemble = input => run(['--dialect', 'ca65', '-C', 'cpu.cfg', input, '-o', 'cpu.bin', '--debug=scope.debug198x']);
+      for (const fact of facts.cases) {
+        write('cpu.cfg', fact.config); write('cpu.s', fact.source); write('cpu.bin', 'previous image');
+        const accepted = fact.native.at(-1).exit === 0;
+        const originalAccepted = accepted && !fact.original_assembly_gap;
+        const original = assemble('cpu.s');
+        assert.equal(original.status, originalAccepted ? 0 : 1, fact.name + ': ' + original.stderr);
+        let before;
+        if (originalAccepted) { assert.deepEqual(read('cpu.bin'), Buffer.from(fact.native_hex, 'hex'), fact.name); before = shape(); }
+        else assert.equal(read('cpu.bin').toString(), 'previous image', fact.name);
+        const formatted = run(['fmt', '--dialect', 'ca65', 'cpu.s']);
+        assert.equal(formatted.status, 0, fact.name + ': ' + formatted.stderr);
+        for (const head of fact.generated_heads) assert(formatted.stdout.split('\n').includes(head + ':'), fact.name + ': canonical label');
+        write('scope-formatted.s', formatted.stdout);
+        const again = run(['fmt', '--dialect', 'ca65', 'scope-formatted.s']);
+        assert.equal(again.status, 0, fact.name + ': ' + again.stderr);
+        assert.equal(again.stdout, formatted.stdout, fact.name + ': idempotence');
+        write('cpu.bin', 'previous image');
+        const result = assemble('scope-formatted.s');
+        assert.equal(result.status, accepted && !fact.formatted_assembly_gap ? 0 : 1, fact.name + ': ' + result.stderr);
+        if (accepted && !fact.formatted_assembly_gap) {
+          assert.deepEqual(read('cpu.bin'), Buffer.from(fact.native_hex, 'hex'), fact.name + ': native formatted bytes');
+          if (before) assert.deepEqual(shape(), before, fact.name + ': symbols and sections');
+        } else assert.equal(read('cpu.bin').toString(), 'previous image', fact.name);
       }
     });
     test('ca65_absolute_debug', () => {
