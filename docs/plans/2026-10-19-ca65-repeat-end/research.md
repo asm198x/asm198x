@@ -30,3 +30,10 @@ and JSON modes. Each command has a five-second runtime bound.
 
 Local verification: 1577 Rust tests pass (38 ignored); 85 Node tests,
 Clippy with Lua/all workspace targets, fmt, Ruff and docs pass.
+
+Clean producer 37defdaccdffe3c04c445b0c591a32e86a731984 matches all 22 native
+cases, with no timeout, and preserves all 564 unchanged 4510 bytes. All seven
+replay processes and fourteen streams pass the retained verifier; changing
+one expected byte fails. The actual current package passes all 70 cohorts
+and both corruption controls fail as required. The actual clean predecessor
+package fails only ca65_repeat_end. Exact executable hashes are retained.
