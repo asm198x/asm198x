@@ -1,0 +1,162 @@
+{
+  "binary": "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+  "sha256": "c6a28a48ec8b51a2ede3cc6b379a97f027c3d8e047ca3c32312283492eaf8e75",
+  "cases": [
+    {
+      "name": "zero_repeat",
+      "exit": 0,
+      "stdout": "        .repeat 0\n        .endrepeat\n",
+      "stderr": "formatted input.s -> stdout\n"
+    },
+    {
+      "name": "unused_macro",
+      "exit": 0,
+      "stdout": "        .macro stop\n",
+      "stderr": "formatted input.s -> stdout\n"
+    },
+    {
+      "name": "called_macro",
+      "exit": 0,
+      "stdout": "        .macro stop\n",
+      "stderr": "formatted input.s -> stdout\n"
+    },
+    {
+      "name": "root_end",
+      "exit": 0,
+      "stdout": "        .byte 7\n",
+      "stderr": "formatted input.s -> stdout\n"
+    },
+    {
+      "name": "root_end_oversized",
+      "exit": 0,
+      "stdout": "        .byte 7\n",
+      "stderr": "formatted input.s -> stdout\n"
+    },
+    {
+      "name": "root_end_bad_function",
+      "exit": 0,
+      "stdout": "        .byte 7\n",
+      "stderr": "formatted input.s -> stdout\n"
+    },
+    {
+      "name": "root_end_unclosed_if",
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3:1: error: conditional block is never closed\n"
+    },
+    {
+      "name": "root_end_unclosed_macro",
+      "exit": 0,
+      "stdout": "        .byte 7\n",
+      "stderr": "formatted input.s -> stdout\n"
+    },
+    {
+      "name": "root_end_unclosed_scope",
+      "exit": 0,
+      "stdout": "        .byte 7\n",
+      "stderr": "formatted input.s -> stdout\n"
+    },
+    {
+      "name": "root_end_unclosed_record",
+      "exit": 0,
+      "stdout": "        .byte 7\n",
+      "stderr": "formatted input.s -> stdout\n"
+    },
+    {
+      "name": "called_end_unclosed_if",
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6:1: error: conditional block is never closed\n"
+    },
+    {
+      "name": "called_end_unclosed_scope",
+      "exit": 0,
+      "stdout": "        .macro stop\n",
+      "stderr": "formatted input.s -> stdout\n"
+    },
+    {
+      "name": "false_end",
+      "exit": 0,
+      "stdout": "        .if 0\n        .else\n        .endif\n",
+      "stderr": "formatted input.s -> stdout\n"
+    },
+    {
+      "name": "true_end",
+      "exit": 0,
+      "stdout": "        .if 1\n        .byte 7\n        .endif\n",
+      "stderr": "formatted input.s -> stdout\n"
+    },
+    {
+      "name": "repeat_end",
+      "exit": 0,
+      "stdout": "        .repeat 2\n        .byte 7\n        .endrepeat\n",
+      "stderr": "formatted input.s -> stdout\n"
+    },
+    {
+      "name": "comment_end",
+      "exit": 0,
+      "stdout": "; .end\n        .byte 7   ; .end\n        .byte 8\n",
+      "stderr": "formatted input.s -> stdout\n"
+    },
+    {
+      "name": "quoted_end",
+      "exit": 0,
+      "stdout": "        .asciiz \".end;:.if\"\n        .byte 8\n",
+      "stderr": "formatted input.s -> stdout\n"
+    },
+    {
+      "name": "ordinary_labels",
+      "exit": 0,
+      "stdout": "entry:\n        .byte 7\n@cheap:\n        .byte 8\n:\n        .word entry\n",
+      "stderr": "formatted input.s -> stdout\n"
+    },
+    {
+      "name": "end_tail_colon",
+      "exit": 0,
+      "stdout": "        .byte 7\n",
+      "stderr": "formatted input.s -> stdout\n"
+    },
+    {
+      "name": "labelled_end",
+      "exit": 0,
+      "stdout": "        .byte 7\nfinish:\n        .end\n        .byte 8\n",
+      "stderr": "formatted input.s -> stdout\n"
+    },
+    {
+      "name": "define_end",
+      "exit": 0,
+      "stdout": "        .define STOP .end\n        .byte 7\n        STOP\n        .byte 8\n",
+      "stderr": "formatted input.s -> stdout\n"
+    },
+    {
+      "name": "define_end_bad_argument",
+      "exit": 0,
+      "stdout": "        .define STOP .end\n        .byte 7\n        STOP .sprintf(\"%bad\",0)\n",
+      "stderr": "formatted input.s -> stdout\n"
+    },
+    {
+      "name": "constant_runs",
+      "exit": 0,
+      "stdout": "SHORT     =1\nLONG_NAME =$02\n        .byte SHORT,LONG_NAME\n",
+      "stderr": "formatted input.s -> stdout\n"
+    },
+    {
+      "name": "unused_macro_bad_capture",
+      "exit": 0,
+      "stdout": "        .macro stop\n",
+      "stderr": "formatted input.s -> stdout\n"
+    },
+    {
+      "name": "zero_repeat_bad_capture",
+      "exit": 0,
+      "stdout": "        .repeat 0\n        .endrepeat\n",
+      "stderr": "formatted input.s -> stdout\n"
+    },
+    {
+      "name": "macro_literal_end",
+      "exit": 0,
+      "stdout": "        .macro say\n        .asciiz \".end\"\n        .endmacro\n        say\n        .byte 8\n",
+      "stderr": "formatted input.s -> stdout\n"
+    }
+  ]
+}
