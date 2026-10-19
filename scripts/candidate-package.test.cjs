@@ -245,3 +245,10 @@ test('ca65 macro-definition labels are mandatory package evidence', () => {
   assert(qualifies(complete)); assert(requiredCases.includes('ca65_macro_definition_labels'));
   assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_macro_definition_labels')), false);
 });
+
+
+test('ca65 record allocation limits are mandatory package evidence', () => {
+  const complete = requiredCases.map(name => ({ name, status: 'pass' }));
+  assert(qualifies(complete)); assert(requiredCases.includes('ca65_record_allocators'));
+  assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_record_allocators')), false);
+});

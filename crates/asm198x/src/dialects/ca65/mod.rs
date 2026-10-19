@@ -1459,6 +1459,9 @@ impl Walker {
             let expr = parse_value(&self.anons, self.scope_env.anchor_str(), text, line)?;
             fold_const(&expr, &self.consts, line)
         };
+        if self.expand_text_defines && allocator.eq_ignore_ascii_case(".res") && args.is_empty() {
+            return Err(AsmError::new(line, "`.res` needs a field size"));
+        }
         // `.tag` names another record, whose size this field takes. It is
         // resolved here rather than later because ca65 requires the record to
         // be declared above the field that uses it.
@@ -1484,12 +1487,26 @@ impl Walker {
                 ));
             }
         };
+        if self.expand_text_defines && count <= 0 {
+            return Err(AsmError::new(line, "record field count must be positive"));
+        }
+        // Validate before defining symbols or advancing the record. A zero-size
+        // tag is valid with a positive count, while a field may occupy at most
+        // 24 bits' worth of bytes regardless of its allocator's unit size.
+        let size = unit
+            .checked_mul(count)
+            .ok_or_else(|| AsmError::new(line, "record field allocation overflows"))?;
+        if self.expand_text_defines && !(0..=0xFF_FFFF).contains(&size) {
+            return Err(AsmError::new(
+                line,
+                "record field allocation exceeds 24 bits",
+            ));
+        }
         let open = self.records.last().expect("a record is open");
         let offset = match open.kind {
             RecordKind::Union => 0,
             _ => open.cursor,
         };
-        let size = unit * count;
         let mut defined = Vec::new();
         if !name.is_empty() {
             if !is_ident(name) {
