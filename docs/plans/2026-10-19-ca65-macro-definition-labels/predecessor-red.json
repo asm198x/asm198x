@@ -1,0 +1,272 @@
+[
+  {
+    "name": "attached",
+    "source": "entry:.macro emit\n.byte 7\n.endmacro\nemit\n.word entry\n",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:1: error: unsupported directive `.macro`\n",
+    "hex": null,
+    "native_hex": "070010",
+    "matches": false
+  },
+  {
+    "name": "spaced",
+    "source": "entry: .macro emit\n.byte 7\n.endmacro\nemit\n.word entry\n",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:1: error: unsupported directive `.macro`\n",
+    "hex": null,
+    "native_hex": "070010",
+    "matches": false
+  },
+  {
+    "name": "indented",
+    "source": "  entry:.macro emit\n.byte 7\n.endmacro\nemit\n.word entry\n",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:1: error: unsupported directive `.macro`\n",
+    "hex": null,
+    "native_hex": "070010",
+    "matches": false
+  },
+  {
+    "name": "uncalled",
+    "source": ".byte 3\nentry:.macro emit\n.byte 7\n.endmacro\n.word entry\n",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2: error: unsupported directive `.macro`\n",
+    "hex": null,
+    "native_hex": "030110",
+    "matches": false
+  },
+  {
+    "name": "call_after_bytes",
+    "source": ".byte 3\nentry:.macro emit\n.byte 7\n.endmacro\n.byte 4\nemit\n.word entry\n",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2: error: unsupported directive `.macro`\n",
+    "hex": null,
+    "native_hex": "0304070110",
+    "matches": false
+  },
+  {
+    "name": "short_header",
+    "source": "entry:.mac emit\n.byte 7\n.endmac\nemit\n.word entry\n",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:1: error: unsupported directive `.mac`\n",
+    "hex": null,
+    "native_hex": "070010",
+    "matches": false
+  },
+  {
+    "name": "cheap_header",
+    "source": "anchor:\n@entry:.macro emit\n.byte 7\n.endmacro\nemit\n.word @entry\n",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2: error: unsupported directive `.macro`\n",
+    "hex": null,
+    "native_hex": "070010",
+    "matches": false
+  },
+  {
+    "name": "anonymous_header",
+    "source": ":.macro emit\n.byte 7\n.endmacro\nemit\n.word :-\n",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:1: error: unsupported directive `.macro`\n",
+    "hex": null,
+    "native_hex": "070010",
+    "matches": false
+  },
+  {
+    "name": "local_scope",
+    "source": ".scope inner\nentry:.macro emit\n.byte 7\n.endmacro\n.endscope\nemit\n.word inner::entry\n",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2: error: unsupported directive `.macro`\n",
+    "hex": null,
+    "native_hex": "070010",
+    "matches": false
+  },
+  {
+    "name": "selected",
+    "source": ".if 1\nentry:.macro emit\n.byte 7\n.endmacro\n.endif\nemit\n.word entry\n",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2: error: unsupported directive `.macro`\n",
+    "hex": null,
+    "native_hex": "070010",
+    "matches": false
+  },
+  {
+    "name": "dead",
+    "source": ".if 0\nentry:.macro emit\n.byte MISSING\n.endmacro\n.endif\n.byte .defined(entry), .definedmacro(emit)\n",
+    "exit": 0,
+    "stdout": "",
+    "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+    "hex": "0000",
+    "native_hex": "0000",
+    "matches": true
+  },
+  {
+    "name": "captured_body",
+    "source": ".define V 7\nentry:.macro emit\n.byte V\n.endmacro\n.undefine V\n.define V 9\nemit\n.word entry\n",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2: error: unsupported directive `.macro`\n",
+    "hex": null,
+    "native_hex": "070010",
+    "matches": false
+  },
+  {
+    "name": "body_control",
+    "source": "entry:.macro emit p\n.ifblank p\n.byte 7\n.else\n.byte p\n.endif\n.endmacro\nemit\n.word entry\n",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:1: error: unsupported directive `.macro`\n",
+    "hex": null,
+    "native_hex": "070010",
+    "matches": false
+  },
+  {
+    "name": "body_nested_calls",
+    "source": ".macro first\n.byte 7\n.endmacro\nentry:.macro emit\nfirst\n.endmacro\nemit\n.word entry\n",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:4: error: unsupported directive `.macro`\n",
+    "hex": null,
+    "native_hex": "070010",
+    "matches": false
+  },
+  {
+    "name": "definition_visible",
+    "source": "entry:.macro emit\n.byte 7\n.endmacro\n.byte .defined(entry), .definedmacro(emit)\nemit\n.word entry\n",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:1: error: unsupported directive `.macro`\n",
+    "hex": null,
+    "native_hex": "0101070010",
+    "matches": false
+  },
+  {
+    "name": "caller_cheap_anchor",
+    "source": "before:\n@value=7\nentry:.macro emit\n.byte 0\n.endmacro\n@value=9\n.byte @value\n",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:3: error: unsupported directive `.macro`\n",
+    "hex": null,
+    "native_hex": "09",
+    "matches": false
+  },
+  {
+    "name": "duplicate_label",
+    "source": "entry: nop\nentry:.macro emit\n.byte 7\n.endmacro\nemit\n",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2: error: duplicate symbol `entry`\n",
+    "hex": null,
+    "native_hex": null,
+    "matches": true
+  },
+  {
+    "name": "invalid_label",
+    "source": "123:.macro emit\n.byte 7\n.endmacro\nemit\n",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:1: error: invalid label `123`\n",
+    "hex": null,
+    "native_hex": null,
+    "matches": true
+  },
+  {
+    "name": "duplicate_macro",
+    "source": ".macro emit\n.endmacro\nentry:.macro emit\n.endmacro\nemit\n",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:3: error: unsupported directive `.macro`\n",
+    "hex": null,
+    "native_hex": null,
+    "matches": true
+  },
+  {
+    "name": "unclosed",
+    "source": "entry:.macro emit\n.byte 7\n",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:1: error: unsupported directive `.macro`\n",
+    "hex": null,
+    "native_hex": null,
+    "matches": true
+  },
+  {
+    "name": "include_definition",
+    "source": ".include \"definition.inc\"\nemit\n.word entry\n",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-macro-definition-labels-red-hzyhrpf6/definition.inc:1: error: unsupported directive `.macro`\nincluded from input.s:1\n",
+    "hex": null,
+    "native_hex": "070010",
+    "matches": false
+  },
+  {
+    "name": "included_body",
+    "source": "entry:.macro emit\n.include \"body.inc\"\n.endmacro\nemit\n.word entry\n",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:1: error: unsupported directive `.macro`\n",
+    "hex": null,
+    "native_hex": "070010",
+    "matches": false
+  },
+  {
+    "name": "comment_colon",
+    "source": ".macro emit ; entry:\n.byte 7\n.endmacro\nemit\n",
+    "exit": 0,
+    "stdout": "",
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+    "hex": "07",
+    "native_hex": "07",
+    "matches": true
+  },
+  {
+    "name": "quoted_colon",
+    "source": "entry:.macro emit\n.byte \"entry:.macro\"\n.endmacro\nemit\n.word entry\n",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:1: error: unsupported directive `.macro`\n",
+    "hex": null,
+    "native_hex": "656e7472793a2e6d6163726f0010",
+    "matches": false
+  },
+  {
+    "name": "params",
+    "source": "entry:.macro emit p, q\n.byte p,q\n.endmacro\nemit 7,9\n.word entry\n",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:1: error: unsupported directive `.macro`\n",
+    "hex": null,
+    "native_hex": "07090010",
+    "matches": false
+  },
+  {
+    "name": "cpu4510",
+    "source": ".p4510\nentry:.macro emit\nldz #7\n.endmacro\nemit\n.word entry\n",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2: error: unsupported directive `.macro`\n",
+    "hex": null,
+    "native_hex": "a3070010",
+    "matches": false
+  },
+  {
+    "name": "repeat_definition",
+    "source": ".repeat 1\nentry:.macro emit\n.byte 7\n.endmacro\n.endrepeat\nemit\n.word entry\n",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2: error: unsupported directive `.macro`\n",
+    "hex": null,
+    "native_hex": "070010",
+    "matches": false
+  }
+]

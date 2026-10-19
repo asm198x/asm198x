@@ -1064,6 +1064,13 @@ impl RecordBuild {
     }
 }
 
+/// Linked ca65 permits a source label before a macro definition. Keep the
+/// shared flat macro grammar unchanged: the selected reader owns its binding.
+fn macro_header(source: &str) -> Option<(String, Vec<String>)> {
+    let head = split_label_head(source.trim()).map_or(source, |(_, rest)| rest);
+    ca65_flat::Ca65Macros.header(head)
+}
+
 /// One open scope.
 struct OpenScope {
     /// Its path segment. An unnamed `.proc` gets a synthetic one, which cannot
@@ -1133,7 +1140,7 @@ impl Walker {
         let syntax = ca65_flat::Ca65Macros;
         let mut index = 0;
         while index < lines.len() {
-            if syntax.header(lines[index]).is_some()
+            if macro_header(lines[index]).is_some()
                 && let Some(end) = (index + 1..lines.len()).find(|&i| syntax.is_end(lines[i]))
             {
                 opaque.extend(index + 1..=end + 1);
