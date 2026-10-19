@@ -38,3 +38,7 @@ accepted, 44 refused). Decimal 4294967299 is accepted but 4294967300 and
 hex/binary values above 0xFFFFFFFF are refused. This is not a generic 32-bit
 count limit. Scoped binding, source-time queries and remaining scoped folds
 continue under #785; this commit does not claim to close that issue.
+
+Clean producer `36a3fc5f3e539c0ca129b7943c2d0c3e2c69c352` matches all
+564 unchanged native 4510 bytes. All seven processes and fourteen streams are
+retained; the changed-byte guard fails as required.
