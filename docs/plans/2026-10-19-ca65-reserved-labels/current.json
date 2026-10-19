@@ -1,6 +1,6 @@
 {
   "binary": "/private/tmp/asm198x-format-build/debug/asm198x",
-  "sha256": "54f53b753055ea10d66881240aee6f023f65dbad63ccc4bdd5d626d7a4e29de4",
+  "sha256": "04cd785990ddfcb28a3f7ef250ae85ff3052b176b8422894934ac3f8859bb63b",
   "results": [
     {
       "name": "6502_plain_lda",
@@ -528,11 +528,11 @@
         "out.bin",
         "--debug=out.debug198x"
       ],
-      "exit": 1,
+      "exit": 0,
       "stdout": "",
-      "stderr": "asm198x: input.s:2: error: reserved label name `Z`\n",
-      "hex": "70726576696f757320696d616765",
-      "matches_native": true
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "070010",
+      "matches_native": false
     },
     {
       "name": "6502_absolute_Z",
@@ -642,11 +642,11 @@
         "out.bin",
         "--debug=out.debug198x"
       ],
-      "exit": 1,
+      "exit": 0,
       "stdout": "",
-      "stderr": "asm198x: input.s:2: error: reserved label name `A`\n",
-      "hex": "70726576696f757320696d616765",
-      "matches_native": true
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "070010",
+      "matches_native": false
     },
     {
       "name": "6502_absolute_A",
@@ -699,11 +699,11 @@
         "out.bin",
         "--debug=out.debug198x"
       ],
-      "exit": 1,
+      "exit": 0,
       "stdout": "",
-      "stderr": "asm198x: input.s:2: error: reserved label name `X`\n",
-      "hex": "70726576696f757320696d616765",
-      "matches_native": true
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "070010",
+      "matches_native": false
     },
     {
       "name": "6502_absolute_X",
@@ -756,11 +756,11 @@
         "out.bin",
         "--debug=out.debug198x"
       ],
-      "exit": 1,
+      "exit": 0,
       "stdout": "",
-      "stderr": "asm198x: input.s:2: error: reserved label name `Y`\n",
-      "hex": "70726576696f757320696d616765",
-      "matches_native": true
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "070010",
+      "matches_native": false
     },
     {
       "name": "6502_absolute_Y",
@@ -927,11 +927,11 @@
         "out.bin",
         "--debug=out.debug198x"
       ],
-      "exit": 1,
+      "exit": 0,
       "stdout": "",
-      "stderr": "asm198x: input.s:2: error: reserved label name `z`\n",
-      "hex": "70726576696f757320696d616765",
-      "matches_native": true
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "070010",
+      "matches_native": false
     },
     {
       "name": "6502_absolute_z",
@@ -984,11 +984,11 @@
         "out.bin",
         "--debug=out.debug198x"
       ],
-      "exit": 1,
+      "exit": 0,
       "stdout": "",
-      "stderr": "asm198x: input.s:2: error: reserved label name `a`\n",
-      "hex": "70726576696f757320696d616765",
-      "matches_native": true
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "070010",
+      "matches_native": false
     },
     {
       "name": "6502_absolute_a",
@@ -1953,11 +1953,11 @@
         "out.bin",
         "--debug=out.debug198x"
       ],
-      "exit": 1,
+      "exit": 0,
       "stdout": "",
-      "stderr": "asm198x: input.s:2: error: reserved label name `Z`\n",
-      "hex": "70726576696f757320696d616765",
-      "matches_native": true
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "070010",
+      "matches_native": false
     },
     {
       "name": "4510_absolute_Z",
@@ -2010,11 +2010,11 @@
         "out.bin",
         "--debug=out.debug198x"
       ],
-      "exit": 1,
+      "exit": 0,
       "stdout": "",
-      "stderr": "asm198x: input.s:2: error: reserved label name `SP`\n",
-      "hex": "70726576696f757320696d616765",
-      "matches_native": true
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "070010",
+      "matches_native": false
     },
     {
       "name": "4510_absolute_SP",
@@ -2067,11 +2067,11 @@
         "out.bin",
         "--debug=out.debug198x"
       ],
-      "exit": 1,
+      "exit": 0,
       "stdout": "",
-      "stderr": "asm198x: input.s:2: error: reserved label name `A`\n",
-      "hex": "70726576696f757320696d616765",
-      "matches_native": true
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "070010",
+      "matches_native": false
     },
     {
       "name": "4510_absolute_A",
@@ -2124,11 +2124,11 @@
         "out.bin",
         "--debug=out.debug198x"
       ],
-      "exit": 1,
+      "exit": 0,
       "stdout": "",
-      "stderr": "asm198x: input.s:2: error: reserved label name `X`\n",
-      "hex": "70726576696f757320696d616765",
-      "matches_native": true
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "070010",
+      "matches_native": false
     },
     {
       "name": "4510_absolute_X",
@@ -2181,11 +2181,11 @@
         "out.bin",
         "--debug=out.debug198x"
       ],
-      "exit": 1,
+      "exit": 0,
       "stdout": "",
-      "stderr": "asm198x: input.s:2: error: reserved label name `Y`\n",
-      "hex": "70726576696f757320696d616765",
-      "matches_native": true
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "070010",
+      "matches_native": false
     },
     {
       "name": "4510_absolute_Y",
@@ -2295,11 +2295,11 @@
         "out.bin",
         "--debug=out.debug198x"
       ],
-      "exit": 1,
+      "exit": 0,
       "stdout": "",
-      "stderr": "asm198x: input.s:2: error: reserved label name `S`\n",
-      "hex": "70726576696f757320696d616765",
-      "matches_native": true
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "070010",
+      "matches_native": false
     },
     {
       "name": "4510_absolute_S",
@@ -2352,11 +2352,11 @@
         "out.bin",
         "--debug=out.debug198x"
       ],
-      "exit": 1,
+      "exit": 0,
       "stdout": "",
-      "stderr": "asm198x: input.s:2: error: reserved label name `z`\n",
-      "hex": "70726576696f757320696d616765",
-      "matches_native": true
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "070010",
+      "matches_native": false
     },
     {
       "name": "4510_absolute_z",
@@ -2409,11 +2409,11 @@
         "out.bin",
         "--debug=out.debug198x"
       ],
-      "exit": 1,
+      "exit": 0,
       "stdout": "",
-      "stderr": "asm198x: input.s:2: error: reserved label name `a`\n",
-      "hex": "70726576696f757320696d616765",
-      "matches_native": true
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "070010",
+      "matches_native": false
     },
     {
       "name": "4510_absolute_a",
@@ -2466,11 +2466,11 @@
         "out.bin",
         "--debug=out.debug198x"
       ],
-      "exit": 1,
+      "exit": 0,
       "stdout": "",
-      "stderr": "asm198x: input.s:2: error: reserved label name `sp`\n",
-      "hex": "70726576696f757320696d616765",
-      "matches_native": true
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "070010",
+      "matches_native": false
     },
     {
       "name": "4510_absolute_sp",

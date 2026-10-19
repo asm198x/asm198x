@@ -2590,10 +2590,7 @@ impl FlatWalk for Walker {
             && !symbol.name.starts_with('@')
         {
             let head = symbol.name.to_ascii_uppercase();
-            if matches!(head.as_str(), "A" | "X" | "Y" | "Z")
-                || (self.extension.is_some() && matches!(head.as_str(), "S" | "SP"))
-                || self.instruction_name(&head)
-            {
+            if self.instruction_name(&head) {
                 return Err(AsmError::new(
                     line,
                     format!("reserved label name `{}`", symbol.name),

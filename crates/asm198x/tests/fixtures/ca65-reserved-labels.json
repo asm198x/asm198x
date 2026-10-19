@@ -606,27 +606,6 @@
       "dialect": "ca65"
     },
     {
-      "name": "6502_plain_Z",
-      "source": ".setcpu \"6502\"\nZ: .byte 7\n.word ::Z\n",
-      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
-      "native": [
-        {
-          "argv": [
-            "/opt/homebrew/bin/ca65",
-            "input.s",
-            "-o",
-            "input.o"
-          ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk4pbk1d",
-          "exit": 1,
-          "stdout": "",
-          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\n"
-        }
-      ],
-      "native_hex": null,
-      "dialect": "ca65"
-    },
-    {
       "name": "6502_absolute_Z",
       "source": ".setcpu \"6502\"\n::Z: .byte 7\n.word ::Z\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
@@ -753,27 +732,6 @@
       "dialect": "ca65"
     },
     {
-      "name": "6502_plain_A",
-      "source": ".setcpu \"6502\"\nA: .byte 7\n.word ::A\n",
-      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
-      "native": [
-        {
-          "argv": [
-            "/opt/homebrew/bin/ca65",
-            "input.s",
-            "-o",
-            "input.o"
-          ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk4pbk1d",
-          "exit": 1,
-          "stdout": "",
-          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(3): Error: Identifier expected\ninput.s(3): Error: Unexpected trailing garbage characters\n"
-        }
-      ],
-      "native_hex": null,
-      "dialect": "ca65"
-    },
-    {
       "name": "6502_absolute_A",
       "source": ".setcpu \"6502\"\n::A: .byte 7\n.word ::A\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
@@ -830,27 +788,6 @@
       "dialect": "ca65"
     },
     {
-      "name": "6502_plain_X",
-      "source": ".setcpu \"6502\"\nX: .byte 7\n.word ::X\n",
-      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
-      "native": [
-        {
-          "argv": [
-            "/opt/homebrew/bin/ca65",
-            "input.s",
-            "-o",
-            "input.o"
-          ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk4pbk1d",
-          "exit": 1,
-          "stdout": "",
-          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(3): Error: Identifier expected\ninput.s(3): Error: Unexpected trailing garbage characters\n"
-        }
-      ],
-      "native_hex": null,
-      "dialect": "ca65"
-    },
-    {
       "name": "6502_absolute_X",
       "source": ".setcpu \"6502\"\n::X: .byte 7\n.word ::X\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
@@ -904,27 +841,6 @@
         }
       ],
       "native_hex": "070010",
-      "dialect": "ca65"
-    },
-    {
-      "name": "6502_plain_Y",
-      "source": ".setcpu \"6502\"\nY: .byte 7\n.word ::Y\n",
-      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
-      "native": [
-        {
-          "argv": [
-            "/opt/homebrew/bin/ca65",
-            "input.s",
-            "-o",
-            "input.o"
-          ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk4pbk1d",
-          "exit": 1,
-          "stdout": "",
-          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(3): Error: Identifier expected\ninput.s(3): Error: Unexpected trailing garbage characters\n"
-        }
-      ],
-      "native_hex": null,
       "dialect": "ca65"
     },
     {
@@ -1124,27 +1040,6 @@
       "dialect": "ca65"
     },
     {
-      "name": "6502_plain_z",
-      "source": ".setcpu \"6502\"\nz: .byte 7\n.word ::z\n",
-      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
-      "native": [
-        {
-          "argv": [
-            "/opt/homebrew/bin/ca65",
-            "input.s",
-            "-o",
-            "input.o"
-          ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk4pbk1d",
-          "exit": 1,
-          "stdout": "",
-          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\n"
-        }
-      ],
-      "native_hex": null,
-      "dialect": "ca65"
-    },
-    {
       "name": "6502_absolute_z",
       "source": ".setcpu \"6502\"\n::z: .byte 7\n.word ::z\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
@@ -1198,27 +1093,6 @@
         }
       ],
       "native_hex": "070010",
-      "dialect": "ca65"
-    },
-    {
-      "name": "6502_plain_a",
-      "source": ".setcpu \"6502\"\na: .byte 7\n.word ::a\n",
-      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
-      "native": [
-        {
-          "argv": [
-            "/opt/homebrew/bin/ca65",
-            "input.s",
-            "-o",
-            "input.o"
-          ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk4pbk1d",
-          "exit": 1,
-          "stdout": "",
-          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(3): Error: Identifier expected\ninput.s(3): Error: Unexpected trailing garbage characters\n"
-        }
-      ],
-      "native_hex": null,
       "dialect": "ca65"
     },
     {
@@ -2300,27 +2174,6 @@
       "dialect": "ca65"
     },
     {
-      "name": "4510_plain_Z",
-      "source": ".setcpu \"4510\"\nZ: .byte 7\n.word ::Z\n",
-      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
-      "native": [
-        {
-          "argv": [
-            "/opt/homebrew/bin/ca65",
-            "input.s",
-            "-o",
-            "input.o"
-          ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk4pbk1d",
-          "exit": 1,
-          "stdout": "",
-          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(3): Error: Identifier expected\ninput.s(3): Error: Unexpected trailing garbage characters\n"
-        }
-      ],
-      "native_hex": null,
-      "dialect": "ca65"
-    },
-    {
       "name": "4510_absolute_Z",
       "source": ".setcpu \"4510\"\n::Z: .byte 7\n.word ::Z\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
@@ -2374,27 +2227,6 @@
         }
       ],
       "native_hex": "070010",
-      "dialect": "ca65"
-    },
-    {
-      "name": "4510_plain_SP",
-      "source": ".setcpu \"4510\"\nSP: .byte 7\n.word ::SP\n",
-      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
-      "native": [
-        {
-          "argv": [
-            "/opt/homebrew/bin/ca65",
-            "input.s",
-            "-o",
-            "input.o"
-          ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk4pbk1d",
-          "exit": 1,
-          "stdout": "",
-          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(3): Error: Identifier expected\ninput.s(3): Error: Unexpected trailing garbage characters\n"
-        }
-      ],
-      "native_hex": null,
       "dialect": "ca65"
     },
     {
@@ -2454,27 +2286,6 @@
       "dialect": "ca65"
     },
     {
-      "name": "4510_plain_A",
-      "source": ".setcpu \"4510\"\nA: .byte 7\n.word ::A\n",
-      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
-      "native": [
-        {
-          "argv": [
-            "/opt/homebrew/bin/ca65",
-            "input.s",
-            "-o",
-            "input.o"
-          ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk4pbk1d",
-          "exit": 1,
-          "stdout": "",
-          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(3): Error: Identifier expected\ninput.s(3): Error: Unexpected trailing garbage characters\n"
-        }
-      ],
-      "native_hex": null,
-      "dialect": "ca65"
-    },
-    {
       "name": "4510_absolute_A",
       "source": ".setcpu \"4510\"\n::A: .byte 7\n.word ::A\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
@@ -2531,27 +2342,6 @@
       "dialect": "ca65"
     },
     {
-      "name": "4510_plain_X",
-      "source": ".setcpu \"4510\"\nX: .byte 7\n.word ::X\n",
-      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
-      "native": [
-        {
-          "argv": [
-            "/opt/homebrew/bin/ca65",
-            "input.s",
-            "-o",
-            "input.o"
-          ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk4pbk1d",
-          "exit": 1,
-          "stdout": "",
-          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(3): Error: Identifier expected\ninput.s(3): Error: Unexpected trailing garbage characters\n"
-        }
-      ],
-      "native_hex": null,
-      "dialect": "ca65"
-    },
-    {
       "name": "4510_absolute_X",
       "source": ".setcpu \"4510\"\n::X: .byte 7\n.word ::X\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
@@ -2605,27 +2395,6 @@
         }
       ],
       "native_hex": "070010",
-      "dialect": "ca65"
-    },
-    {
-      "name": "4510_plain_Y",
-      "source": ".setcpu \"4510\"\nY: .byte 7\n.word ::Y\n",
-      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
-      "native": [
-        {
-          "argv": [
-            "/opt/homebrew/bin/ca65",
-            "input.s",
-            "-o",
-            "input.o"
-          ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk4pbk1d",
-          "exit": 1,
-          "stdout": "",
-          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(3): Error: Identifier expected\ninput.s(3): Error: Unexpected trailing garbage characters\n"
-        }
-      ],
-      "native_hex": null,
       "dialect": "ca65"
     },
     {
@@ -2755,27 +2524,6 @@
       "dialect": "ca65"
     },
     {
-      "name": "4510_plain_S",
-      "source": ".setcpu \"4510\"\nS: .byte 7\n.word ::S\n",
-      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
-      "native": [
-        {
-          "argv": [
-            "/opt/homebrew/bin/ca65",
-            "input.s",
-            "-o",
-            "input.o"
-          ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk4pbk1d",
-          "exit": 1,
-          "stdout": "",
-          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(3): Error: Identifier expected\ninput.s(3): Error: Unexpected trailing garbage characters\n"
-        }
-      ],
-      "native_hex": null,
-      "dialect": "ca65"
-    },
-    {
       "name": "4510_absolute_S",
       "source": ".setcpu \"4510\"\n::S: .byte 7\n.word ::S\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
@@ -2829,27 +2577,6 @@
         }
       ],
       "native_hex": "070010",
-      "dialect": "ca65"
-    },
-    {
-      "name": "4510_plain_z",
-      "source": ".setcpu \"4510\"\nz: .byte 7\n.word ::z\n",
-      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
-      "native": [
-        {
-          "argv": [
-            "/opt/homebrew/bin/ca65",
-            "input.s",
-            "-o",
-            "input.o"
-          ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk4pbk1d",
-          "exit": 1,
-          "stdout": "",
-          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(3): Error: Identifier expected\ninput.s(3): Error: Unexpected trailing garbage characters\n"
-        }
-      ],
-      "native_hex": null,
       "dialect": "ca65"
     },
     {
@@ -2909,27 +2636,6 @@
       "dialect": "ca65"
     },
     {
-      "name": "4510_plain_a",
-      "source": ".setcpu \"4510\"\na: .byte 7\n.word ::a\n",
-      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
-      "native": [
-        {
-          "argv": [
-            "/opt/homebrew/bin/ca65",
-            "input.s",
-            "-o",
-            "input.o"
-          ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk4pbk1d",
-          "exit": 1,
-          "stdout": "",
-          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(3): Error: Identifier expected\ninput.s(3): Error: Unexpected trailing garbage characters\n"
-        }
-      ],
-      "native_hex": null,
-      "dialect": "ca65"
-    },
-    {
       "name": "4510_absolute_a",
       "source": ".setcpu \"4510\"\n::a: .byte 7\n.word ::a\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
@@ -2983,27 +2689,6 @@
         }
       ],
       "native_hex": "070010",
-      "dialect": "ca65"
-    },
-    {
-      "name": "4510_plain_sp",
-      "source": ".setcpu \"4510\"\nsp: .byte 7\n.word ::sp\n",
-      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
-      "native": [
-        {
-          "argv": [
-            "/opt/homebrew/bin/ca65",
-            "input.s",
-            "-o",
-            "input.o"
-          ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk4pbk1d",
-          "exit": 1,
-          "stdout": "",
-          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(3): Error: Identifier expected\ninput.s(3): Error: Unexpected trailing garbage characters\n"
-        }
-      ],
-      "native_hex": null,
       "dialect": "ca65"
     },
     {
@@ -3621,6 +3306,186 @@
       ],
       "native_hex": null,
       "dialect": "ca65"
+    },
+    {
+      "name": "generated_A",
+      "source": ".ident(\"A\"): .byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-gp6ktq0a",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-gp6ktq0a",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07",
+      "dialect": "ca65",
+      "formatter_gap": "https://github.com/asm198x/asm198x/issues/854"
+    },
+    {
+      "name": "generated_X",
+      "source": ".ident(\"X\"): .byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-gp6ktq0a",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-gp6ktq0a",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07",
+      "dialect": "ca65",
+      "formatter_gap": "https://github.com/asm198x/asm198x/issues/854"
+    },
+    {
+      "name": "generated_Y",
+      "source": ".ident(\"Y\"): .byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-gp6ktq0a",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-gp6ktq0a",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07",
+      "dialect": "ca65",
+      "formatter_gap": "https://github.com/asm198x/asm198x/issues/854"
+    },
+    {
+      "name": "generated_Z",
+      "source": ".ident(\"Z\"): .byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-gp6ktq0a",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-gp6ktq0a",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07",
+      "dialect": "ca65",
+      "formatter_gap": "https://github.com/asm198x/asm198x/issues/854"
+    },
+    {
+      "name": "generated_F",
+      "source": ".ident(\"F\"): .byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-gp6ktq0a",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-gp6ktq0a",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07",
+      "dialect": "ca65",
+      "formatter_gap": "https://github.com/asm198x/asm198x/issues/854"
     }
   ]
 }

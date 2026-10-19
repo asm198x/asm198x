@@ -1,10 +1,23 @@
    Compiling asm198x v0.0.71 (/Users/stevehill/Projects/198x/Asm198x/asm198x-ca65-format-end/crates/asm198x)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.83s
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.52s
+     Running tests/ca65_cycles.rs (/private/tmp/asm198x-format-build/debug/deps/ca65_cycles-d421b1fe79ba2220)
+
+running 7 tests
+test budgeted_link_is_byte_identical_to_native_ca65_and_ld65 ... ignored, needs ca65 + ld65 on PATH
+test included_budget_diagnostic_names_the_included_file ... ok
+test reservations_data_and_unknown_labels_cannot_prove_a_cycle_budget ... ok
+test resolved_modes_and_conditional_penalties_come_from_the_spec ... ok
+test org_and_macros_preserve_section_local_accounting ... ok
+test section_offsets_aliases_and_data_do_not_mix_routines ... ok
+test all_native_entries_check_the_same_budget_without_changing_bytes ... ok
+
+test result: ok. 6 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
      Running tests/ca65_reserved_labels.rs (/private/tmp/asm198x-format-build/debug/deps/ca65_reserved_labels-f8a75b1a42037cc5)
 
 running 2 tests
 test reserved_label_failures_preserve_outputs_and_include_location ... ok
 test native_reserved_labels_follow_cpu_and_token_context ... ok
 
-test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.79s
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.57s
 
