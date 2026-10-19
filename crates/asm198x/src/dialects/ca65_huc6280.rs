@@ -27,10 +27,10 @@
 
 use std::collections::BTreeMap;
 
-use super::ca65_flat::{self, DirectiveLine, FlatWalk, WalkDirective};
+use super::ca65_flat::{self, DirectiveLine, FlatWalk, WalkDirective, parse_number};
 use super::mos6502::{
-    self, BytePrec, Index, OperandSyntax, fold_const, is_ident, parse_number, split_data_items,
-    split_first_word, split_top_level, string_literal, top_level_rfind,
+    self, BytePrec, Index, OperandSyntax, fold_const, is_ident, split_data_items, split_first_word,
+    split_top_level, string_literal, top_level_rfind,
 };
 use crate::ast::{Comment, Node, Program, Scope, Span, Symbol, Trivia};
 use crate::dialect::Dialect;
