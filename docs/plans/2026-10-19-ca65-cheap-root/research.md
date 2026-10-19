@@ -60,3 +60,13 @@ with 597 new cheap-local commands and 342 restored identifier commands; both
 corruption controls fail. The preceding archive fails exactly those two cohorts.
 The complete 329-case raw comparison leaves only the fourteen #879 cases. Freeze
 this verified source and retain a complete clean 4510 replay before shipping.
+
+Final clean producer `12af1dae8d81d8be968f717f5a2b3fb5870b5690`, tree
+`bae12d46b903f2685995b9593f578fef4beb725c`, has CLI SHA-256
+`e43eb5c6a1cab293f97d50cdf802aca055e8da840c1905437582d7edd7c4a1f6`.
+Its actual archive passes all 83 cohorts, including 597 cheap-local commands and
+342 restored identifier commands. Changed bytes fail exactly three reference
+controls; corrupt archives fail SHA validation. Clean 4510 replay matches all
+564 native bytes across seven processes/fourteen retained streams, and rejects
+a changed-byte image. Disposable audit work was removed. Shipping code/harness
+and both native audits embedded by the tests match the clean producer exactly.

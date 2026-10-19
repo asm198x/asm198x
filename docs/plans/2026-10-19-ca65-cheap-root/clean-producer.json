@@ -1,0 +1,10 @@
+{
+  "source_commit": "12af1dae8d81d8be968f717f5a2b3fb5870b5690",
+  "source_tree": "bae12d46b903f2685995b9593f578fef4beb725c",
+  "source_clean": true,
+  "profile": "debug",
+  "features": [
+    "lua"
+  ],
+  "sha256": "e43eb5c6a1cab293f97d50cdf802aca055e8da840c1905437582d7edd7c4a1f6"
+}
