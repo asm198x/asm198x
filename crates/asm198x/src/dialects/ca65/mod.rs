@@ -2068,17 +2068,7 @@ impl Walker {
         // ca65 checks an instruction at the statement head, before reading
         // a scoped definition. A leading :: bypasses that check. Register
         // tokens remain reserved in every component.
-        let instruction = statement_head
-            && !name.starts_with("::")
-            && if extended && matches!(head.as_str(), "BRU" | "LBRU") {
-                // ISA aliases that native ca65 leaves available as names.
-                false
-            } else {
-                self.set.instruction(&head).is_some()
-                    || self.extension.is_some_and(|set| set.instruction(&head).is_some())
-                    // Native source aliases need not be ISA mnemonics.
-                    || (extended && matches!(head.as_str(), "INA" | "DEA" | "PHD"))
-            };
+        let instruction = statement_head && !name.starts_with("::") && self.instruction_name(&head);
         // Formatting also reads inactive definitions. Reserved tokens are
         // a selected assembly check, so preserve those authored names there.
         if self.expand_text_defines && (register || instruction) {
@@ -2101,6 +2091,19 @@ impl Walker {
             return Err(AsmError::new(line, format!("no such scope `{parent}`")));
         }
         Ok(qualified)
+    }
+
+    fn instruction_name(&self, head: &str) -> bool {
+        let extended = self.extension.is_some();
+        if extended && matches!(head, "BRU" | "LBRU") {
+            // ISA aliases that native ca65 leaves available as names.
+            false
+        } else {
+            self.set.instruction(head).is_some()
+                || self.extension.is_some_and(|set| set.instruction(head).is_some())
+                // Native source aliases need not be ISA mnemonics.
+                || (extended && matches!(head, "INA" | "DEA" | "PHD"))
+        }
     }
 
     /// Rewrite every name in a statement to the key it resolves under. A no-op
@@ -2581,6 +2584,19 @@ impl FlatWalk for Walker {
 
         // An optional `name:` / `@cheap:` / `:` label, then an optional operation.
         let (symbol, rest) = split_label_symbol(&self.anons, line, &mut self.scope_env, trimmed)?;
+        if self.expand_text_defines
+            && let Some(symbol) = &symbol
+            && !symbol.name.is_empty()
+            && !symbol.name.starts_with('@')
+        {
+            let head = symbol.name.to_ascii_uppercase();
+            if self.instruction_name(&head) {
+                return Err(AsmError::new(
+                    line,
+                    format!("reserved label name `{}`", symbol.name),
+                ));
+            }
+        }
         let symbol = symbol.map(|mut s| {
             // Only a plain label: a cheap local is already keyed on its global
             // (which is itself qualified, so two procs' `@l` stay apart), and an

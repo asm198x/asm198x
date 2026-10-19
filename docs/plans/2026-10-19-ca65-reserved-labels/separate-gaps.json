@@ -1,0 +1,202 @@
+[
+  {
+    "name": "6502_absolute_lda",
+    "issue": 850
+  },
+  {
+    "name": "6502_absolute_ldA",
+    "issue": 850
+  },
+  {
+    "name": "6502_absolute_nop",
+    "issue": 850
+  },
+  {
+    "name": "6502_absolute_adc",
+    "issue": 850
+  },
+  {
+    "name": "6502_absolute_INA",
+    "issue": 850
+  },
+  {
+    "name": "6502_absolute_DEA",
+    "issue": 850
+  },
+  {
+    "name": "6502_absolute_PHD",
+    "issue": 850
+  },
+  {
+    "name": "6502_absolute_BRU",
+    "issue": 850
+  },
+  {
+    "name": "6502_absolute_LBRU",
+    "issue": 850
+  },
+  {
+    "name": "6502_plain_Z",
+    "issue": 853
+  },
+  {
+    "name": "6502_absolute_SP",
+    "issue": 850
+  },
+  {
+    "name": "6502_plain_A",
+    "issue": 853
+  },
+  {
+    "name": "6502_plain_X",
+    "issue": 853
+  },
+  {
+    "name": "6502_plain_Y",
+    "issue": 853
+  },
+  {
+    "name": "6502_absolute_finish",
+    "issue": 850
+  },
+  {
+    "name": "6502_absolute_S",
+    "issue": 850
+  },
+  {
+    "name": "6502_plain_z",
+    "issue": 853
+  },
+  {
+    "name": "6502_plain_a",
+    "issue": 853
+  },
+  {
+    "name": "6502_absolute_sp",
+    "issue": 850
+  },
+  {
+    "name": "6502_absolute_bra",
+    "issue": 850
+  },
+  {
+    "name": "6502_absolute_phx",
+    "issue": 850
+  },
+  {
+    "name": "6502_absolute_taz",
+    "issue": 850
+  },
+  {
+    "name": "6502_absolute_rtn",
+    "issue": 850
+  },
+  {
+    "name": "6502_absolute_map",
+    "issue": 850
+  },
+  {
+    "name": "6502_absolute_eom",
+    "issue": 850
+  },
+  {
+    "name": "4510_absolute_lda",
+    "issue": 850
+  },
+  {
+    "name": "4510_absolute_ldA",
+    "issue": 850
+  },
+  {
+    "name": "4510_absolute_nop",
+    "issue": 850
+  },
+  {
+    "name": "4510_absolute_adc",
+    "issue": 850
+  },
+  {
+    "name": "4510_absolute_INA",
+    "issue": 850
+  },
+  {
+    "name": "4510_absolute_DEA",
+    "issue": 850
+  },
+  {
+    "name": "4510_absolute_PHD",
+    "issue": 850
+  },
+  {
+    "name": "4510_absolute_BRU",
+    "issue": 850
+  },
+  {
+    "name": "4510_absolute_LBRU",
+    "issue": 850
+  },
+  {
+    "name": "4510_plain_Z",
+    "issue": 853
+  },
+  {
+    "name": "4510_plain_SP",
+    "issue": 853
+  },
+  {
+    "name": "4510_plain_A",
+    "issue": 853
+  },
+  {
+    "name": "4510_plain_X",
+    "issue": 853
+  },
+  {
+    "name": "4510_plain_Y",
+    "issue": 853
+  },
+  {
+    "name": "4510_absolute_finish",
+    "issue": 850
+  },
+  {
+    "name": "4510_plain_S",
+    "issue": 853
+  },
+  {
+    "name": "4510_plain_z",
+    "issue": 853
+  },
+  {
+    "name": "4510_plain_a",
+    "issue": 853
+  },
+  {
+    "name": "4510_plain_sp",
+    "issue": 853
+  },
+  {
+    "name": "4510_absolute_bra",
+    "issue": 850
+  },
+  {
+    "name": "4510_absolute_phx",
+    "issue": 850
+  },
+  {
+    "name": "4510_absolute_taz",
+    "issue": 850
+  },
+  {
+    "name": "4510_absolute_rtn",
+    "issue": 850
+  },
+  {
+    "name": "4510_absolute_map",
+    "issue": 850
+  },
+  {
+    "name": "4510_absolute_eom",
+    "issue": 850
+  }
+]
