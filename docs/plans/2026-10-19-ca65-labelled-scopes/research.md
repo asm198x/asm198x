@@ -40,3 +40,12 @@ cohort. Final Rust and clean producer/replay qualification remain pending.
 
 The final full run passes all 1,599 Rust tests (38 ignored). The final 100-case
 focused run passes too. Clean producer and fresh 4510 replay follow this commit.
+
+Final clean qualification uses producer `1cacfa5d42d42522e4e2e036cb95653d81845f41`,
+tree `fa159b4c7e464adc3f070971a044e2395b6bdd9c`, CLI SHA-256
+`99a47d49e1730577c0c3a5294724c626c3aa29036dd6f11d1f0b9621e01f2d48`.
+Its actual archive passes all 80 cohorts and 274 new commands. Changed bytes
+fail exactly the three reference controls; corrupt archives fail SHA validation.
+The clean 4510 project replay matches all 564 native bytes across seven
+processes/fourteen retained streams, and rejects a changed-byte image. Disposable
+audit work was removed. Shipping source/harness match this producer exactly.
