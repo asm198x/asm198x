@@ -7,7 +7,7 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-CONFIG = 'MEMORY { ZP:start=$20,size=$E0,file=""; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n'
+CONFIG = 'MEMORY { ZP:start=$20,size=$E0,file=""; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp; CODE:load=MAIN,type=ro; }\n'
 
 
 def cases() -> dict[str, str]:
@@ -47,6 +47,10 @@ def cases() -> dict[str, str]:
         "backward": "VALUE=3\nOTHER=VALUE+1\n.byte OTHER\n",
     }.items():
         out[name] = source
+    out["long_forward_chain"] = (
+        "".join(f"LINK_{index}=LINK_{index + 1}\n" for index in range(500))
+        + "LINK_500=$34\n.byte LINK_0\n"
+    )
     return out
 
 
