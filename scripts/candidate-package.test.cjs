@@ -294,3 +294,10 @@ test('ca65 BSS initialization warnings are mandatory package evidence', () => {
   assert(qualifies(complete)); assert(requiredCases.includes('ca65_bss_warnings'));
   assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_bss_warnings')), false);
 });
+
+
+test('ca65 scoped visibility declarations are mandatory package evidence', () => {
+  const complete = requiredCases.map(name => ({ name, status: 'pass' }));
+  assert(qualifies(complete)); assert(requiredCases.includes('ca65_scoped_exports'));
+  assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_scoped_exports')), false);
+});

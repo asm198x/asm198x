@@ -1191,26 +1191,61 @@ fn project_selected(
 /// Project one ordinary node — the body of the original projection loop.
 fn project_one(node: &crate::ast::Node, st: &mut Projection) -> Result<(), AsmError> {
     use crate::ast::{Item, Operand};
-    if let Some(Item::Native(payload)) = &node.item
-        && let Some(Kind::EnumValue(name, value)) = payload.as_any().downcast_ref::<Kind>()
-    {
-        // Lower the retained enum event through the same constant path. This
-        // private node is never exposed to the source-preserving formatter.
-        let definition = crate::ast::Node {
-            label: Some(crate::ast::Symbol {
-                name: name.rsplit("::").next().unwrap_or(name).to_string(),
-                qualified: name.clone(),
-                scope: crate::ast::Scope::Global,
-            }),
-            item: Some(crate::ast::item_from_operation(
-                crate::engine::Operation::Equ(value.clone()),
-            )),
-            source: String::new(),
-            span: node.span.clone(),
-            operand_span: node.operand_span.clone(),
-            trivia: crate::ast::Trivia::default(),
+    if let Some(Item::Native(payload)) = &node.item {
+        let kind = payload
+            .as_any()
+            .downcast_ref::<Kind>()
+            .expect("ca65 native kind");
+        let constant = match kind {
+            Kind::EnumValue(name, value) => Some((name, value)),
+            Kind::Visible {
+                names,
+                define: Some(value),
+                ..
+            } => names.first().map(|name| (name, value)),
+            _ => None,
         };
-        return project_one(&definition, st);
+        if let Some((name, value)) = constant {
+            // Native retained definitions use the ordinary Equ binding path.
+            let definition = crate::ast::Node {
+                label: Some(crate::ast::Symbol {
+                    name: name.rsplit("::").next().unwrap_or(name).to_string(),
+                    qualified: name.clone(),
+                    scope: crate::ast::Scope::Global,
+                }),
+                item: Some(crate::ast::item_from_operation(
+                    crate::engine::Operation::Equ(value.clone()),
+                )),
+                source: String::new(),
+                span: node.span.clone(),
+                operand_span: node.operand_span.clone(),
+                trivia: crate::ast::Trivia::default(),
+            };
+            project_one(&definition, st)?;
+            if let Kind::Visible {
+                rule,
+                zero_page,
+                names,
+                ..
+            } = kind
+            {
+                let declaration = crate::ast::Node {
+                    label: node.label.clone(),
+                    item: Some(Item::Native(Box::new(Kind::Visible {
+                        rule: *rule,
+                        zero_page: *zero_page,
+                        names: names.clone(),
+                        define: None,
+                    }))),
+                    source: node.source.clone(),
+                    span: node.span.clone(),
+                    operand_span: node.operand_span.clone(),
+                    trivia: crate::ast::Trivia::default(),
+                };
+                return project_one(&declaration, st);
+            }
+            return Ok(());
+        }
     }
     let seg = &mut st.seg;
     let seg_stack = &mut st.seg_stack;
@@ -1345,20 +1380,6 @@ fn project_one(node: &crate::ast::Node, st: &mut Projection) -> Result<(), AsmEr
                             .insert(name.clone(), format!("{owner}{}size", super::LABEL_SEP));
                     }
                 }
-                // `.export foo := 7` defines `foo` as well as exporting it, so
-                // it is collected here with the `=` constants rather than left
-                // to the visibility check, which would then find it undefined.
-                if let Kind::Visible {
-                    names,
-                    define: Some(value),
-                    ..
-                } = &kind
-                    && let Some(name) = names.first()
-                    && let Ok(v) = fold_const(value, consts, line)
-                {
-                    consts.insert(name.clone(), v);
-                    st.constant_updates.push((name.clone(), v));
-                }
                 if let Kind::Visible {
                     rule,
                     zero_page: true,
@@ -1367,7 +1388,18 @@ fn project_one(node: &crate::ast::Node, st: &mut Projection) -> Result<(), AsmEr
                 } = &kind
                     && *rule != super::VisRule::MustBeDefined
                 {
-                    st.zero_page_names.extend(names.iter().cloned());
+                    st.zero_page_names.extend(names.iter().map(|key| {
+                        super::split_scope_ref(key).map_or_else(
+                            || key.clone(),
+                            |(path, name)| {
+                                if path.is_empty() {
+                                    name.to_string()
+                                } else {
+                                    format!("{path}::{name}")
+                                }
+                            },
+                        )
+                    }));
                 }
                 let label = node.label.as_ref().map(|s| s.qualified.clone());
                 if let Some(l) = &label {
