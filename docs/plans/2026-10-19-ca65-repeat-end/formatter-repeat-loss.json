@@ -1,0 +1,77 @@
+{
+  "original": {
+    "name": "count_0",
+    "source": ".repeat 0\n.end\n.endrepeat\n.byte 8\n",
+    "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+    "native": [
+      {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "input.s",
+          "-o",
+          "input.o"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-kx5_p0us",
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "/opt/homebrew/bin/ld65",
+          "-C",
+          "input.cfg",
+          "input.o",
+          "-o",
+          "native.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-kx5_p0us",
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      }
+    ],
+    "native_hex": "08"
+  },
+  "formatter": {
+    "argv": [
+      "/private/tmp/asm198x-numeric-admission-final-predecessor/asm198x",
+      "fmt",
+      "--dialect",
+      "ca65",
+      "input.s"
+    ],
+    "exit": 0,
+    "stdout": "        .repeat 0\n        .endrepeat\n",
+    "stderr": "formatted input.s -> stdout\n",
+    "timed_out": false,
+    "lost_end": true
+  },
+  "native_formatted": [
+    {
+      "argv": [
+        "/opt/homebrew/bin/ca65",
+        "formatted.s",
+        "-o",
+        "formatted.o"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/opt/homebrew/bin/ld65",
+        "-C",
+        "input.cfg",
+        "formatted.o",
+        "-o",
+        "formatted.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "native_formatted_hex": ""
+}

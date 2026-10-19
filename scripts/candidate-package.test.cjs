@@ -346,3 +346,9 @@ test('ca65 numeric source admission is mandatory package evidence', () => {
   assert(qualifies(complete)); assert(requiredCases.includes('ca65_numeric_admission'));
   assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_numeric_admission')), false);
 });
+
+test('ca65 repeat termination is mandatory package evidence', () => {
+  const complete = requiredCases.map(name => ({ name, status: 'pass' }));
+  assert(qualifies(complete)); assert(requiredCases.includes('ca65_repeat_end'));
+  assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_repeat_end')), false);
+});
