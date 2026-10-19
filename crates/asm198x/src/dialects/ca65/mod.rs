@@ -569,15 +569,9 @@ fn assemble_program(
     for (name, value) in &parsed.consts {
         addr_env.insert(name.clone(), *value);
     }
-    // What `.org` adds to the address a statement reports. ca65's `.org` moves
-    // the address and leaves the bytes where they were going: `.byte $11 /
-    // .org $2000 / L: .byte $22 / .word L` is `11 22 00 20`, so the `$22`
-    // still lands next to the `$11` and `L` reads `$2000`. `.reloc` ends it.
-    // The offset is computed here rather than in the projection because it is
-    // measured from where the bytes are actually going, which only the layout
-    // knows.
-    let mut pseudo: i64 = 0;
-    let mut absolute_mode = false;
+    // Native default absolute mode advances one cursor across segment changes.
+    // Physical segment offsets still decide where the bytes are placed.
+    let mut absolute_pc: Option<i64> = None;
     let mut placed: Vec<Placed> = Vec::new();
     // The debug read-out (U4): symbols and line spans fall out of the layout
     // values already in hand — `(section, offset)` is `(seg, addr - base)`.
@@ -647,8 +641,9 @@ fn assemble_program(
         })?;
         let off = *offsets.entry(stmt.seg.clone()).or_insert(0);
         let addr = info.base + off;
+        let prior_pc = absolute_pc.unwrap_or(i64::from(addr));
         if needed_positions.contains(&position) {
-            definition_positions.insert(position, i64::from(addr) + pseudo);
+            definition_positions.insert(position, prior_pc);
         }
         if let Some(label) = &stmt.label {
             // Real ca65 rejects a duplicate symbol; accepting one would also
@@ -676,10 +671,7 @@ fn assemble_program(
                     &stmt.expansion_frames,
                 ));
             }
-            if addr_env
-                .insert(label.clone(), i64::from(addr) + pseudo)
-                .is_some()
-            {
+            if addr_env.insert(label.clone(), prior_pc).is_some() {
                 return Err(statement_error(
                     AsmError::new(
                         stmt.line,
@@ -708,7 +700,7 @@ fn assemble_program(
         match &stmt.kind {
             Kind::Org(e) => {
                 let target = e
-                    .eval(&addr_env, i64::from(addr) + pseudo, stmt.line)
+                    .eval(&addr_env, prior_pc, stmt.line)
                     .map_err(|e| statement_error(e, stmt.file, &stmt.expansion_frames))?;
                 // Native DoOrg validates the 24-bit origin before changing mode.
                 if !(0..=0xFF_FFFF).contains(&target) {
@@ -718,19 +710,17 @@ fn assemble_program(
                         &stmt.expansion_frames,
                     ));
                 }
-                pseudo = target - i64::from(addr);
-                absolute_mode = true;
+                absolute_pc = Some(target);
             }
             Kind::Reloc => {
-                pseudo = 0;
-                absolute_mode = false;
+                absolute_pc = None;
             }
             _ => {}
         }
         // A constant-only bit-branch target has no segment base to cancel
         // ca65's relocatable PC. Native ca65 refuses it before linking; `.org`
-        // makes the PC absolute, including when its bias happens to be zero.
-        if !absolute_mode
+        // makes the PC absolute even when it matches the linked address.
+        if absolute_pc.is_none()
             && let Kind::BitBranch { target, .. } = &stmt.kind
             && fold_const(target, &parsed.consts, stmt.line).is_ok()
         {
@@ -786,7 +776,7 @@ fn assemble_program(
             // The address the statement *reports* — what `*` reads and what a
             // relative branch measures from. Where its bytes go is the
             // segment buffer's business, and that has not moved.
-            let reported = u32::try_from(i64::from(addr) + pseudo).map_err(|_| {
+            let reported = u32::try_from(absolute_pc.unwrap_or(i64::from(addr))).map_err(|_| {
                 statement_error(
                     AsmError::new(
                         stmt.line,
@@ -805,6 +795,9 @@ fn assemble_program(
                 has_initializer,
                 item: resolved,
             });
+        }
+        if let Some(pc) = &mut absolute_pc {
+            *pc += size as i64;
         }
     }
 
