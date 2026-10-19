@@ -1,4 +1,4 @@
-# Preserve formatter source containing .end (#833)
+# Canonical syntax-only formatting with .end (#833)
 
 Native ca65 accepts an unused macro or zero-repeat body containing .end without
 executing it. Our formatter currently executes the stop directive while parsing
@@ -13,7 +13,7 @@ which native never reads. A formatter must retain those characters without
 executing the macro or interpreting unread source. The current formatter shares
 number, scope and block validation with the semantic reader.
 
-## A. Preserve the complete source when it contains literal .end (recommended)
+## A. Preserve the complete source when it contains literal .end (rejected)
 
 In ca65::parse_program only for Expand::No, recognize a literal .end instruction
 head outside quoted/comment text, including an optional label. Return existing
@@ -28,7 +28,7 @@ existing formatter. Aliases which manufacture .end are separate source cases,
 not an invitation to expand text macros in the formatter. Track canonical
 formatting for literal .end separately if needed.
 
-## B. Finish a canonical syntax-only reader first
+## B. Finish a canonical syntax-only reader first (selected)
 
 Separate canonical formatting from semantic numeric/scope/block validation,
 while preserving complete macro/repeat captures and unread tails after dynamic
@@ -36,10 +36,18 @@ while preserving complete macro/repeat captures and unread tails after dynamic
 several current parser assumptions need independent native controls. It should
 not be improvised as another exception in the semantic reader.
 
-## Approval boundary
+## Agreed scope
 
-Option A changes the existing canonical-formatting convention for this narrow
-set of files. The AGENTS.md ask-first rule for significant convention departures
-therefore applies. This proposal is for design agreement, not implemented code.
-The user already authorized investigating/fixing #833; no dependency or public
-schema change is proposed.
+On 2026-10-19, the user selected “Build canonical parsing first”. Canonical
+formatting remains binding; do not implement whole-file verbatim preservation.
+The formatter reads source syntax without executing .end, macros, repeats,
+conditionals, includes, numeric expressions or text functions. It retains all
+source statements and renders them through the existing canonical AST emitter.
+Assembly's selected reader and diagnostics remain separate and unchanged.
+
+Before implementing, map the existing formatter path and retain controls for
+unread malformed tails, complete and incomplete blocks, quoted delimiters,
+labels and generated names. Reuse the existing source-carrying nodes and private
+reader seams. A public AST/schema change or further decision departure requires
+separate agreement. The implementation plan will identify the exact reader and
+emitter functions after that inspection.
