@@ -46,3 +46,14 @@ Exact shipping files:
   required macro cohort, actual address checks and omission failure.
 - This plan directory: complete native/predecessor/current captures, verifier,
   red/green/full logs, archive controls and clean producer/4510 evidence.
+
+## Captured CPU boundary correction
+
+The follow-up 398-case audit found two new valid refusals in the pending producer:
+S/SP call labels captured under 6502 and expanded after a switch to 4510. #883
+stays draft. Narrow macro admission to instruction names, matching #870; leave
+register/prefix token admission to #853. Retain all 24 native-refused controls
+with positive predecessor acceptances as explicit #853 exclusions. Add both CPU
+capture regressions to the native audit (120 cases) and required cohort (96
+cases, 67 accepted images). Re-run the full qualification and verify the broader
+398-case audit introduces no mismatch relative to the preceding producer.

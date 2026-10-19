@@ -1,37 +1,43 @@
-# Generated macro definition and invocation labels
+# Generated macro heads with captured identifier preservation
 
-The retained native audit contains 118 cases: 65 accepted and 53 refused.
-Clean predecessor `9b48a599d997e883505d60ce47ed65d76c05ff03` has 74 differences.
-Generated heads are structurally classified before text folding, while the
-linked macro-header/call split recognizes only static labels. The generated
-label therefore survives into ordinary parsing instead of becoming a selected
-macro head. Static instruction names on definition heads also bypass the native
-reserved-token admission check. Those are the separate #862/#870 symptoms.
+The complete macro audit now has 120 cases: the original 118 controls plus two
+captured-CPU regressions. Native accepts 67 and refuses 53. The targeted
+96-case cohort accepts all 67 native images and refuses the other 29 inputs.
+Twenty-four original static register/prefix macro-head false acceptances remain
+explicitly tracked in #853; every exclusion has both a native refusal and a
+positive acceptance in clean predecessor
+`9b48a599d997e883505d60ce47ed65d76c05ff03`. Tests account for every audit case
+exactly once and verify those positive predecessor outcomes.
 
-Use the existing balanced generated-label classifier to find the macro word
-without evaluating an inactive head. For a selected definition or invocation,
-fold only its label, apply the existing native reserved-head rule, and bind it
-through the existing selected binding path. Bind a call head before reading its
-expanded body. Preserve definition-body capture and invocation-argument timing,
-source AST and the shared macro grammar. Existing #881 registration makes actual
-names visible to constancy queries on both raw and canonically separated labels.
+Generated heads are classified before text folding, while the old linked
+macro-header/call split strips only static labels. A generated definition
+therefore reaches ordinary parsing and fails with `unsupported directive
+.macro`. Use the existing balanced classifier to find the macro word without
+evaluating inactive text. Fold only a selected label and bind it through the
+existing path before definition/body execution. Apply the existing instruction
+name check to fix #870. Definition-body capture, invocation arguments and the
+shared macro grammar retain their existing timing and representation.
 
-The fresh red-first test fails on `6502_mark_True_definition` with
-`unsupported directive .macro`. The focused fix passes the full 118-case test,
-59 explicit official debug-reader label address/kind assertions, canonical
-round trips, include/macro diagnostic frames and preservation of all prior
-outputs and source files. The complete original-source comparison has zero
-remaining native differences, and all 65 accepted native images match.
+The initial pending producer applied register/prefix admission using the
+current CPU. A follow-up 398-case audit found two new refusals: S/SP call labels
+captured under 6502 remain identifier tokens after a switch to 4510. Native and
+the preceding main producer emit `07 00 10`; the initial pending macro producer
+refuses them at the outer macro invocation. The red-first extended test captures
+that exact failure. Register/prefix identity needs the wider #853 capture model,
+so it is removed from this slice rather than guessed from the final name.
 
-Formatting preserves all 118 native outcomes and 65 images. Twenty-four invalid
-static register heads become ordinary label lines that the assembler already
-accepts under #853; every formatted false acceptance is proved against the
-frozen predecessor. They are not counted as repaired by this slice. Both former
-#862 raw-assembly gaps in the existing generated-format cohort are restored;
-eight unrelated tracked raw gaps remain.
+The narrowed fix passes all 96 targeted raw/formatted outcomes and 67 native
+images, including both captured CPU controls, with 61 explicit label
+address/kind checks. The complete raw comparison has exactly the 24 positively
+proved #853 differences. Across all 398 follow-up inputs it introduces no new
+difference against the preceding main producer; the existing 204 differences
+remain visible. Both former #862 raw-assembly gaps in the 46-case formatter
+cohort are restored; eight unrelated raw gaps and two #762 formatted alias
+gaps remain explicitly tracked.
 
-The earlier trials and failed boundary evidence remain at
-[the retained resume](https://github.com/asm198x/asm198x/tree/733ca4bb/docs/plans/2026-10-19-ca65-generated-macros).
-The independent spacing, identifier grammar, cheap-anchor and generated-name
-constancy fixes qualified before this resume. The shipping branch imports this
-slice alone; it does not import the prototype's earlier trial ancestry.
+The [398-case audit and both frozen producer comparisons](https://github.com/asm198x/asm198x/tree/575fec1b/docs/plans/2026-10-20-ca65-label-token-boundaries)
+retain the new refusals and token-origin evidence. Earlier withdrawn trials are
+[retained separately](https://github.com/asm198x/asm198x/tree/733ca4bb/docs/plans/2026-10-19-ca65-generated-macros).
+#883 stays draft until the corrected shipping head has full local, clean replay
+and five-platform package qualification. The shipping branch imports this slice
+alone, preserving the independent prerequisite fixes already on main.

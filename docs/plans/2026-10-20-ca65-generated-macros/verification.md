@@ -1,42 +1,45 @@
 # Generated macro-head qualification
 
-All 118 original-source cases match native ca65: 65 accepted and 53 refused.
-The slice resolves all 74 predecessor differences. It uses the existing balanced
-generated-label classifier, selected binding path and native reserved-token
-policy at definition/call heads. Actual labels bind before the definition or
-expanded body while body capture and argument timing retain their existing path.
+The complete 120-case native audit contains 67 accepted and 53 refused inputs.
+All 96 targeted raw/formatted outcomes and all 67 images match native ca65.
+The 24 original raw static register/prefix macro-head false acceptances remain
+explicit #853 exclusions. Each has a native refusal and a positive acceptance
+in the frozen predecessor; tests account for every audit case exactly once.
+This slice resolves 50 prior differences in generated heads and instruction-name
+admission. Both former #862 gaps in the existing 46-case formatter cohort pass,
+leaving eight unrelated raw gaps and two #762 formatted alias gaps tracked.
 
-The red-first test refuses a valid generated definition with `unsupported
-directive .macro`. Focused tests now preserve complete native bytes, 59 explicit
-official debug-reader label addresses/kinds, canonical idempotence and debug
-symbol/section shape, include/macro diagnostic frames, all prior output files
-and authored source. The two #862 raw gaps in the existing 46-case formatter
-cohort are restored, leaving eight unrelated raw gaps and two formatted alias
-gaps in #762. The new required package cohort checks the same 59 address/kind
-assertions and executes 313 commands from all 118 native cases.
+The initial pending producer added register/prefix checks using the current CPU.
+The follow-up 398-case audit caught two new valid refusals before merge: S/SP
+call labels captured under 6502 remain identifiers after switching to 4510.
+The PR became draft. The corrected slice checks instruction names and preserves
+existing register/prefix behavior for #853's fuller token-origin work. Both
+captured CPU inputs are required positive controls. All 398 outcomes retain the
+same 204 existing differences as the preceding main producer; none is introduced
+by this corrected slice. Native evidence is linked in research.md and #848/#853.
 
-All 118 native formatter outcomes and all 65 accepted images match. Twenty-four
-invalid static register heads remain accepted after formatting because the
-formatter places them on ordinary label lines, the existing #853 behavior.
-The native verifier proves every such acceptance against the frozen preceding
-producer; no original-source or accepted formatted assembly gap remains.
+The red-first base test reports unsupported .macro on a generated definition;
+the extended red-first test catches the captured-S refusal. The corrected tests
+preserve native bytes, 61 explicit official-reader label addresses/kinds, canonical
+idempotence and symbol/section shape, include/macro diagnostics, all old output
+files and authored source. The initial pending actual archive fails exactly the
+extended macro cohort. The preceding main archive fails both changed cohorts.
+The corrected and clean archives pass all 85 required cohorts, including 297
+commands in the 96-case macro cohort and 184 in the 46-case formatter cohort.
+Wrong bytes fail exactly three byte-contract cases; archive corruption fails
+checksum validation. Complete reports and both controls are retained.
 
-The full Rust run passed 1,608 tests (38 ignored). All 100 Node tests,
-Clippy/fmt/Ruff/generated docs passed. The preceding actual archive fails exactly
-the changed generated-macro and generated-format cohorts. The fixed archive
-passes all 85 cohorts; wrong bytes fail exactly the three byte-contract cases,
-and archive corruption fails the checksum check. The clean producer repeats
-all 85 cohorts and both failure controls successfully.
+Full local validation passes 1,608 Rust tests (38 ignored), 100 Node tests,
+Clippy/fmt/Ruff and generated docs. Clean producer
+c478532a4f4fee2fd608a594f8e0f33a125b01a4, tree
+c1ba5b03656cc28fbde9762c54469930b057fa08, has CLI SHA-256
+4e34c5dcdd830a0769c39727fcd47aa279d1d35e1dfaea06e2eeb84ca9a2842a,
+identical to the frozen native-check binary. Shipping source, tests, scripts
+and embedded native facts match the verified producer byte for byte.
 
-Clean producer `b41e3ee95852ef74a5f2aba817dc150d39364641`, tree
-`59432ee71e6c52a7a53dfa80702bed0b5132d6aa`, has CLI SHA-256
-`5c64e19dd8a0b79e97137974fe3f84dec1222ae0b0ba80bff039f98ab063621e`,
-identical to the frozen native-check binary. Shipping source, tests, scripts and
-embedded native facts were compared byte-for-byte with that verified producer.
-
-A fresh clean 4510 replay preserves all 564 native/upstream bytes and retains
-all seven processes and fourteen stdout/stderr streams. The verifier rejects a
-changed byte. The audit removed its disposable build workspace automatically.
-Complete local logs/process reports are retained as deterministic gzip files.
-Five-target candidate builds, producer-lock receipts and exact-head CI follow
-on the shipping head; these local archives do not replace their qualification.
+The fresh clean 4510 replay preserves all 564 native/upstream bytes, seven
+processes and fourteen stdout/stderr streams; its verifier rejects a changed
+byte. The disposable build workspace was removed automatically. Exact-head CI
+and five actual platform reports/receipts with all ten corruption controls must
+qualify this corrected shipping head before rebase merge. Older-head CI cannot
+qualify it. Complete local evidence is retained as deterministic gzip files.
