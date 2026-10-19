@@ -1,0 +1,268 @@
+[
+  {
+    "name": "cheap_constant",
+    "source": "anchor:\n@value=7\n.byte @value\n",
+    "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+    "native": [
+      {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "input.s",
+          "-o",
+          "input.o"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-constant-names-probe-92ookuv3",
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "/opt/homebrew/bin/ld65",
+          "-C",
+          "input.cfg",
+          "input.o",
+          "-o",
+          "native.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-constant-names-probe-92ookuv3",
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      }
+    ],
+    "native_hex": "07",
+    "asm": {
+      "argv": [
+        "/private/tmp/asm198x-address-size-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: invalid constant name `@value`\n",
+      "hex": null
+    }
+  },
+  {
+    "name": "accumulator_upper",
+    "source": "A=7\n.byte A\n",
+    "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+    "native": [
+      {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "input.s",
+          "-o",
+          "input.o"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-constant-names-probe-92ookuv3",
+        "exit": 1,
+        "stdout": "",
+        "stderr": "input.s(1): Error: Unexpected trailing garbage characters\ninput.s(2): Error: Syntax error\n"
+      }
+    ],
+    "native_hex": null,
+    "asm": {
+      "argv": [
+        "/private/tmp/asm198x-address-size-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07"
+    }
+  },
+  {
+    "name": "accumulator_lower",
+    "source": "a=7\n.byte a\n",
+    "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+    "native": [
+      {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "input.s",
+          "-o",
+          "input.o"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-constant-names-probe-92ookuv3",
+        "exit": 1,
+        "stdout": "",
+        "stderr": "input.s(1): Error: Unexpected trailing garbage characters\ninput.s(2): Error: Syntax error\n"
+      }
+    ],
+    "native_hex": null,
+    "asm": {
+      "argv": [
+        "/private/tmp/asm198x-address-size-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07"
+    }
+  },
+  {
+    "name": "register_x",
+    "source": "X=7\n.byte X\n",
+    "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+    "native": [
+      {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "input.s",
+          "-o",
+          "input.o"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-constant-names-probe-92ookuv3",
+        "exit": 1,
+        "stdout": "",
+        "stderr": "input.s(1): Error: Unexpected trailing garbage characters\ninput.s(2): Error: Syntax error\n"
+      }
+    ],
+    "native_hex": null,
+    "asm": {
+      "argv": [
+        "/private/tmp/asm198x-address-size-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07"
+    }
+  },
+  {
+    "name": "register_y",
+    "source": "Y=7\n.byte Y\n",
+    "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+    "native": [
+      {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "input.s",
+          "-o",
+          "input.o"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-constant-names-probe-92ookuv3",
+        "exit": 1,
+        "stdout": "",
+        "stderr": "input.s(1): Error: Unexpected trailing garbage characters\ninput.s(2): Error: Syntax error\n"
+      }
+    ],
+    "native_hex": null,
+    "asm": {
+      "argv": [
+        "/private/tmp/asm198x-address-size-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07"
+    }
+  },
+  {
+    "name": "mnemonic",
+    "source": "lda=7\n.byte lda\n",
+    "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+    "native": [
+      {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "input.s",
+          "-o",
+          "input.o"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-constant-names-probe-92ookuv3",
+        "exit": 1,
+        "stdout": "",
+        "stderr": "input.s(1): Error: Syntax error\ninput.s(1): Error: Unexpected trailing garbage characters\n"
+      }
+    ],
+    "native_hex": null,
+    "asm": {
+      "argv": [
+        "/private/tmp/asm198x-address-size-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07"
+    }
+  },
+  {
+    "name": "dead_branch",
+    "source": ".if 0\n.bogus=7\n.endif\n.byte 7\n",
+    "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+    "native": [
+      {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "input.s",
+          "-o",
+          "input.o"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-constant-names-probe-92ookuv3",
+        "exit": 1,
+        "stdout": "",
+        "stderr": "input.s(2): Error: '.BOGUS' is not a recognized control command\n"
+      }
+    ],
+    "native_hex": null,
+    "asm": {
+      "argv": [
+        "/private/tmp/asm198x-address-size-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07"
+    }
+  }
+]

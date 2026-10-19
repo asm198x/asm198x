@@ -1571,7 +1571,13 @@ impl Walker {
     /// exist (finding just its first component is insufficient).
     fn constant_key(&self, name: &str, line: usize) -> Result<String, AsmError> {
         let plain = name.strip_prefix("::").unwrap_or(name);
-        if !plain.split("::").all(is_ident) {
+        // The shared MOS helper permits dots for other dialects' local
+        // names. ca65 tokenises a dot as a control-command prefix instead;
+        // no component of an immutable definition may contain one.
+        if !plain
+            .split("::")
+            .all(|part| is_ident(part) && !part.contains('.'))
+        {
             return Err(AsmError::new(
                 line,
                 format!("invalid constant name `{name}`"),
