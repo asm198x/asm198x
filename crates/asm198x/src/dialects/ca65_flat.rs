@@ -1161,6 +1161,11 @@ pub(crate) fn directive_operand_span(
 pub(crate) struct Ca65Macros;
 
 impl macros::MacroSyntax for Ca65Macros {
+    fn is_symbol_char(&self, c: u8) -> bool {
+        // ca65 tokenises @value independently of a parameter named value.
+        c.is_ascii_alphanumeric() || matches!(c, b'_' | b'.' | b'@')
+    }
+
     fn argument_count_word(&self) -> Option<&'static str> {
         Some(".paramcount")
     }

@@ -42,7 +42,7 @@ mod link;
 mod project;
 pub(crate) use link::VisRule;
 use link::{Emit, Resolved, area_usage, emit, link, resolve};
-use project::{Sweep, collect_syms, map_kind_syms, parsed_from_program};
+use project::{Sweep, collect_syms, map_expr_syms, map_kind_syms, parsed_from_program};
 
 // ---------------------------------------------------------------------------
 // The fixed NES (NROM) layout
@@ -1570,6 +1570,17 @@ impl Walker {
     /// for an unqualified name, and a qualified target's entire parent must
     /// exist (finding just its first component is insufficient).
     fn constant_key(&self, name: &str, line: usize) -> Result<String, AsmError> {
+        if let Some(local) = name.strip_prefix('@') {
+            if !is_cheap_ident(local)
+                || (self.expand_text_defines && self.scope_env.anchor_str().is_empty())
+            {
+                return Err(AsmError::new(
+                    line,
+                    format!("invalid cheap-local constant `{name}`"),
+                ));
+            }
+            return Ok(cheap_key(self.scope_env.anchor_str(), local));
+        }
         let plain = name.strip_prefix("::").unwrap_or(name);
         // The shared MOS helper permits dots for other dialects' local
         // names. ca65 tokenises a dot as a control-command prefix instead;
@@ -1976,11 +1987,21 @@ impl FlatWalk for Walker {
             if let Ok(v) = fold_const(&expr, &self.consts, line) {
                 self.consts.insert(qualified.clone(), v);
             }
+            let scope = if name.starts_with('@') {
+                Scope::Local {
+                    in_global: self.scope_env.anchor_str().to_string(),
+                }
+            } else {
+                // Native reads the RHS under the previous global, then the
+                // new immutable symbol starts the next cheap namespace.
+                self.scope_env.set_anchor(qualified.clone());
+                Scope::Global
+            };
             self.nodes.push(Node {
                 operand_span: None,
                 label: Some(Symbol {
                     qualified,
-                    scope: Scope::Global,
+                    scope,
                     name: name.to_string(),
                 }),
                 item: Some(crate::ast::item_from_operation(Operation::Equ(expr))),
@@ -3324,12 +3345,7 @@ fn parse_value(anons: &AnonCtx, anchor: &str, raw: &str, line: usize) -> Result<
     if let Some((sign, level)) = anon_ref(t) {
         return Ok(Expr::Sym(anons.refer(sign, level, line)?));
     }
-    if let Some(cheap) = t.strip_prefix('@')
-        && is_ident(cheap)
-    {
-        return Ok(Expr::Sym(cheap_key(anchor, cheap)));
-    }
-    mos6502::parse_expr(
+    let expr = mos6502::parse_expr(
         t,
         line,
         parse_number,
@@ -3354,7 +3370,22 @@ fn parse_value(anons: &AnonCtx, anchor: &str, raw: &str, line: usize) -> Result<
             caret: mos6502::Caret::BankOrXor,
             at_is_pc: false,
         },
-    )
+    )?;
+    // Bare names, arithmetic and name-query markers all share the same
+    // cheap namespace. Binding only a bare operand loses that context.
+    Ok(map_expr_syms(&expr, &|name| {
+        let (prefix, symbol) = if let Some(symbol) = name.strip_prefix(DEFINED_MARK) {
+            (DEFINED_MARK, symbol)
+        } else if let Some(symbol) = name.strip_prefix(REF_MARK) {
+            (REF_MARK, symbol)
+        } else {
+            ("", name)
+        };
+        let local = symbol
+            .strip_prefix('@')
+            .filter(|name| is_cheap_ident(name))?;
+        Some(Expr::Sym(format!("{prefix}{}", cheap_key(anchor, local))))
+    }))
 }
 
 /// Marks a `.defined(NAME)` the projection has yet to answer. `\u{1}` cannot
@@ -3508,6 +3539,11 @@ fn resolve_ref(used: &BTreeSet<String>) -> impl Fn(&str) -> Option<Expr> + '_ {
         let sym = name.strip_prefix(REF_MARK)?;
         Some(Expr::Num(i64::from(used.contains(sym))))
     }
+}
+
+/// ca65 cheap tokens allow digits after `@`, but never a dot keyword.
+fn is_cheap_ident(name: &str) -> bool {
+    !name.is_empty() && name.bytes().all(|c| c.is_ascii_alphanumeric() || c == b'_')
 }
 
 /// A collision-proof symbol key for a cheap local, scoped to its global.

@@ -1,0 +1,124 @@
+{
+  "tools": {
+    "ca65": {
+      "path": "/opt/homebrew/bin/ca65",
+      "sha256": "1a57997819fd98814e4601b5160df589e7a1a24e1888a80fee51ae450d8fd0ea",
+      "version": {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "--version"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-zz7ohtef",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "ca65 V2.18 - N/A\n"
+      }
+    },
+    "ld65": {
+      "path": "/opt/homebrew/bin/ld65",
+      "sha256": "36bb196207a6b2c90a4aa991b419d6113885303951b14b60b455f51c777b3339",
+      "version": {
+        "argv": [
+          "/opt/homebrew/bin/ld65",
+          "--version"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-zz7ohtef",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "ld65 V2.18 - N/A\n"
+      }
+    }
+  },
+  "files": {
+    "constants.inc": "VALUE=7\n",
+    "wrapped.inc": ".scope inner\nVALUE=7\n nop\n.endscope\n"
+  },
+  "cases": [
+    {
+      "name": "scope_open_reference",
+      "source": "anchor:\n@value: nop\n.scope inner\n.word @value\n.endscope\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-zz7ohtef",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-zz7ohtef",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "ea0010",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-address-size-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:4: error: undefined symbol `inner\u0001value`\n",
+        "hex": null
+      }
+    },
+    {
+      "name": "proc_close_reference",
+      "source": "anchor:\n@value: nop\n.proc inner\n@value: nop\n.endproc\n.word @value\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-scoped-constants-probe-zz7ohtef",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(6): Error: Symbol '@value' is undefined\n"
+        }
+      ],
+      "native_hex": null,
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-address-size-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+        "hex": "eaea0010"
+      }
+    }
+  ]
+}

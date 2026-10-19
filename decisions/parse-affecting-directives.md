@@ -138,3 +138,20 @@ opaque to structural block grouping, while an unclosed definition inside an
 untaken branch does not hide that branch's closing directive. Existing macro
 frames continue through private statement placement into backend diagnostics.
 Native controls live in `docs/plans/2026-10-18-ca65-text-capture/`.
+
+
+## Native cheap-local constant anchors (2026-10-19, #774/#779)
+
+A selected cheap constant uses the current global symbol's namespace and keeps
+its authored @name. An ordinary immutable definition reads its RHS under the
+previous anchor, then starts the new cheap namespace. Bind cheap references in
+arithmetic and positional name queries through the same private key as bare
+operands; conditional/repeat folds receive the current reader anchor. The
+existing ca65 scoped-name expression grammar includes @name tokens, and macro
+parameter substitution treats that token as a whole. These are private lexical
+bindings on the existing AST, without a public shape change.
+
+The separate scope-entry/exit mismatches (#778) apply to existing cheap labels
+as well as constants and remain tracked independently. Native captures and
+accepted/refused boundaries live in
+`docs/plans/2026-10-19-ca65-cheap-constants/`.

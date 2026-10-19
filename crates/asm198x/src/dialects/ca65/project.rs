@@ -19,6 +19,7 @@ use super::{
     Walker, fold_const, is_ident, parse_value, resolve_defined, resolve_ref, segment_switch,
     split_first_word,
 };
+use super::{cheap_key, is_cheap_ident, vis_name};
 
 /// Project the semantic [`Program`](crate::ast::Program) into the assembler's
 /// [`Parsed`] — the assemble+link driver runs on an owned `Vec<Stmt>` plus the
@@ -312,7 +313,14 @@ fn project_nodes(
             }) => {
                 let line = node.span.line as usize;
                 let head = read_block_head(node, head, st, sw)?;
-                if fold_condition(&head, st, sw.reader.extension, line).map_err(|e| {
+                if fold_condition(
+                    &head,
+                    st,
+                    sw.reader.extension,
+                    sw.reader.scope_env.anchor_str(),
+                    line,
+                )
+                .map_err(|e| {
                     super::statement_error(e, node.span.file, &node.span.expansion_frames)
                 })? {
                     project_nodes(then_body, st, sw)?;
@@ -334,7 +342,8 @@ fn project_nodes(
             Some(Item::Repeat { head, body, .. }) => {
                 let line = node.span.line as usize;
                 let head = read_block_head(node, head, st, sw)?;
-                let (count, var) = fold_repeat(&head, st, line).map_err(|e| {
+                let (count, var) = fold_repeat(&head, st, sw.reader.scope_env.anchor_str(), line)
+                    .map_err(|e| {
                     super::statement_error(e, node.span.file, &node.span.expansion_frames)
                 })?;
                 let watermark = pending_len(sw);
@@ -757,6 +766,7 @@ fn fold_condition(
     head: &str,
     st: &Projection,
     extension: Option<&'static isa::InstructionSet>,
+    anchor: &str,
     line: usize,
 ) -> Result<bool, AsmError> {
     let (word, args) = split_first_word(head.trim());
@@ -772,13 +782,18 @@ fn fold_condition(
             // An active text symbol was substituted into the argument before
             // this fold, so a numeric value lands here — which ca65 answers
             // `Identifier expected`, not with a membership test.
-            if !is_ident(name) {
-                return Err(AsmError::new(
-                    line,
-                    format!("`{word}` needs an identifier, got `{name}`"),
-                ));
-            }
-            let defined = env.contains_key(name) || st.label_seg.contains_key(name);
+            let key =
+                if let Some(local) = name.strip_prefix('@').filter(|name| is_cheap_ident(name)) {
+                    cheap_key(anchor, local)
+                } else if is_ident(name) {
+                    name.to_string()
+                } else {
+                    return Err(AsmError::new(
+                        line,
+                        format!("`{word}` needs an identifier, got `{name}`"),
+                    ));
+                };
+            let defined = env.contains_key(&key) || st.label_seg.contains_key(&key);
             Ok(if word == ".ifdef" { defined } else { !defined })
         }
         // `.ifblank` asks whether anything follows it on the line — which is
@@ -793,7 +808,7 @@ fn fold_condition(
                 .split_whitespace()
                 .next()
                 .ok_or_else(|| AsmError::new(line, format!("`{word}` needs a name")))?;
-            Ok((word == ".ifref") == st.referenced.contains(name))
+            Ok((word == ".ifref") == st.referenced.contains(&vis_name(anchor, name)))
         }
         ".ifp02" => Ok(extension.is_none()),
         ".ifp4510" => Ok(extension.is_some()),
@@ -813,7 +828,7 @@ fn fold_condition(
             if args.is_empty() {
                 return Err(AsmError::new(line, format!("`{word}` needs an expression")));
             }
-            let expr = parse_value(&AnonCtx::default(), "", args, line)?;
+            let expr = parse_value(&AnonCtx::default(), anchor, args, line)?;
             let expr = map_expr_syms(&expr, &resolve_defined(&st.consts, &st.label_seg));
             Ok((word == ".ifconst") == weighs_nothing(&expr, st))
         }
@@ -821,7 +836,7 @@ fn fold_condition(
             if args.is_empty() {
                 return Err(AsmError::new(line, format!("`{word}` needs a condition")));
             }
-            let expr = parse_value(&AnonCtx::default(), "", args, line)?;
+            let expr = parse_value(&AnonCtx::default(), anchor, args, line)?;
             // `.if .defined(X)` — answered against what stands above this line,
             // which is what makes `.defined` positional in the first place.
             let expr = map_expr_syms(&expr, &resolve_defined(&st.consts, &st.label_seg));
@@ -918,6 +933,7 @@ fn walk_weights(
 fn fold_repeat(
     head: &str,
     st: &Projection,
+    anchor: &str,
     line: usize,
 ) -> Result<(i64, Option<String>), AsmError> {
     let (_, args) = split_first_word(head.trim());
@@ -928,7 +944,7 @@ fn fold_repeat(
     if count_text.is_empty() {
         return Err(AsmError::new(line, "`.repeat` needs a count"));
     }
-    let expr = parse_value(&AnonCtx::default(), "", count_text, line)?;
+    let expr = parse_value(&AnonCtx::default(), anchor, count_text, line)?;
     let count = fold_const(&expr, &st.consts, line)?;
     // ca65: a negative count is `Range error`, where zero is no iterations.
     if count < 0 {
@@ -954,7 +970,7 @@ fn fold_repeat(
 /// acme's `!for` variable is: ca65 resolves `Expr::Sym` once, in a later pass,
 /// against one table — and a loop variable holds a different value on every
 /// iteration, so there is no single entry that table could hold.
-fn map_expr_syms(e: &Expr, f: &dyn Fn(&str) -> Option<Expr>) -> Expr {
+pub(super) fn map_expr_syms(e: &Expr, f: &dyn Fn(&str) -> Option<Expr>) -> Expr {
     match e {
         Expr::Sym(name) => f(name).unwrap_or_else(|| e.clone()),
         Expr::Lo(i) => Expr::Lo(Box::new(map_expr_syms(i, f))),

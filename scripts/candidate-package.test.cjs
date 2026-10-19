@@ -210,3 +210,10 @@ test('ca65 dotted constant refusals are mandatory package evidence', () => {
   assert(qualifies(complete)); assert(requiredCases.includes('ca65_constant_names'));
   assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_constant_names')), false);
 });
+
+
+test('ca65 cheap-constant anchors are mandatory package evidence', () => {
+  const complete = requiredCases.map(name => ({ name, status: 'pass' }));
+  assert(qualifies(complete)); assert(requiredCases.includes('ca65_cheap_constants'));
+  assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_cheap_constants')), false);
+});
