@@ -1,0 +1,90 @@
+[
+  {
+    "cpu": "65816",
+    "source": ".macro emit operand\n.byte operand\n.endmacro\nemit $FF\n",
+    "processes": [
+      {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "--cpu",
+          "65816",
+          "input.s",
+          "-o",
+          "native.o"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+          "--dialect",
+          "65816",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n"
+      },
+      {
+        "argv": [
+          "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+          "fmt",
+          "--dialect",
+          "65816",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .macro emit operand\n        .byte operand\n        .endmacro\n        emit $FF\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    ]
+  },
+  {
+    "cpu": "huc6280",
+    "source": ".macro emit operand\n.byte operand\n.endmacro\nemit $FF\n",
+    "processes": [
+      {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "--cpu",
+          "huc6280",
+          "input.s",
+          "-o",
+          "native.o"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+          "--dialect",
+          "huc6280",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n"
+      },
+      {
+        "argv": [
+          "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+          "fmt",
+          "--dialect",
+          "huc6280",
+          "input.s"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s: line 1: `.macro` is declared (`macro`) but not dispatched here\n"
+      }
+    ]
+  }
+]

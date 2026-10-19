@@ -26,12 +26,12 @@
 use std::cell::{Cell, RefCell};
 use std::collections::{BTreeMap, BTreeSet};
 
-use super::ca65_flat::{self, DirectiveLine, FlatWalk, WalkDirective};
+use super::ca65_flat::{self, DirectiveLine, FlatWalk, WalkDirective, parse_number};
 use super::ca65_layout;
 use super::macros::{self, MacroSyntax};
 use super::mos6502::{
-    self, BytePrec, assignment_split, fold_const, is_ident, parse_number, split_data_items,
-    split_first_word, split_top_level, string_literal,
+    self, BytePrec, assignment_split, fold_const, is_ident, split_data_items, split_first_word,
+    split_top_level, string_literal,
 };
 use crate::directives::{Category, Directive, Pattern, lookup};
 use crate::engine::{AsmError, DiagSeverity, Expr, Operation, Warning, WarningKind};

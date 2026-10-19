@@ -1,0 +1,576 @@
+{
+  "binary": "/private/tmp/asm198x-hex-suffix-build/debug/asm198x",
+  "sha256": "c6df887dcb31f33ff3eb2ee7c49d225db7d3264d303edc0c2512a4af6c353b5a",
+  "results": [
+    {
+      "name": "difference_0h",
+      "argv": [
+        "/private/tmp/asm198x-hex-suffix-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "00",
+      "native_hex": "00",
+      "matches": true
+    },
+    {
+      "name": "constant_0h",
+      "argv": [
+        "/private/tmp/asm198x-hex-suffix-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0000",
+      "native_hex": "0000",
+      "matches": true
+    },
+    {
+      "name": "difference_0H",
+      "argv": [
+        "/private/tmp/asm198x-hex-suffix-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "00",
+      "native_hex": "00",
+      "matches": true
+    },
+    {
+      "name": "constant_0H",
+      "argv": [
+        "/private/tmp/asm198x-hex-suffix-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0000",
+      "native_hex": "0000",
+      "matches": true
+    },
+    {
+      "name": "difference_0FFh",
+      "argv": [
+        "/private/tmp/asm198x-hex-suffix-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "00",
+      "native_hex": "00",
+      "matches": true
+    },
+    {
+      "name": "constant_0FFh",
+      "argv": [
+        "/private/tmp/asm198x-hex-suffix-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "ff00",
+      "native_hex": "ff00",
+      "matches": true
+    },
+    {
+      "name": "difference_0ffH",
+      "argv": [
+        "/private/tmp/asm198x-hex-suffix-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "00",
+      "native_hex": "00",
+      "matches": true
+    },
+    {
+      "name": "constant_0ffH",
+      "argv": [
+        "/private/tmp/asm198x-hex-suffix-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "ff00",
+      "native_hex": "ff00",
+      "matches": true
+    },
+    {
+      "name": "difference_01234h",
+      "argv": [
+        "/private/tmp/asm198x-hex-suffix-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "00",
+      "native_hex": "00",
+      "matches": true
+    },
+    {
+      "name": "constant_01234h",
+      "argv": [
+        "/private/tmp/asm198x-hex-suffix-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "3412",
+      "native_hex": "3412",
+      "matches": true
+    },
+    {
+      "name": "difference_0FFFFFFFFh",
+      "argv": [
+        "/private/tmp/asm198x-hex-suffix-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "00",
+      "native_hex": "00",
+      "matches": true
+    },
+    {
+      "name": "constant_0FFFFFFFFh",
+      "argv": [
+        "/private/tmp/asm198x-hex-suffix-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "ffff",
+      "native_hex": "ffff",
+      "matches": true
+    },
+    {
+      "name": "difference_0000FFFFFFFFH",
+      "argv": [
+        "/private/tmp/asm198x-hex-suffix-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "00",
+      "native_hex": "00",
+      "matches": true
+    },
+    {
+      "name": "constant_0000FFFFFFFFH",
+      "argv": [
+        "/private/tmp/asm198x-hex-suffix-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "ffff",
+      "native_hex": "ffff",
+      "matches": true
+    },
+    {
+      "name": "difference_100000000h",
+      "argv": [
+        "/private/tmp/asm198x-hex-suffix-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: invalid hexadecimal number `100000000h`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "constant_100000000h",
+      "argv": [
+        "/private/tmp/asm198x-hex-suffix-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: invalid hexadecimal number `100000000h`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "difference_0FFFFFFFFFh",
+      "argv": [
+        "/private/tmp/asm198x-hex-suffix-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: invalid hexadecimal number `0FFFFFFFFFh`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "constant_0FFFFFFFFFh",
+      "argv": [
+        "/private/tmp/asm198x-hex-suffix-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: invalid hexadecimal number `0FFFFFFFFFh`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "word",
+      "argv": [
+        "/private/tmp/asm198x-hex-suffix-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "3412",
+      "native_hex": "3412",
+      "matches": true
+    },
+    {
+      "name": "dword",
+      "argv": [
+        "/private/tmp/asm198x-hex-suffix-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+      "hex": "ffffffff",
+      "native_hex": "ffffffff",
+      "matches": true
+    },
+    {
+      "name": "reservation",
+      "argv": [
+        "/private/tmp/asm198x-hex-suffix-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a5a5",
+      "native_hex": "a5a5",
+      "matches": true
+    },
+    {
+      "name": "macro",
+      "argv": [
+        "/private/tmp/asm198x-hex-suffix-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "ff",
+      "native_hex": "ff",
+      "matches": true
+    },
+    {
+      "name": "define",
+      "argv": [
+        "/private/tmp/asm198x-hex-suffix-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "ff",
+      "native_hex": "ff",
+      "matches": true
+    },
+    {
+      "name": "include",
+      "argv": [
+        "/private/tmp/asm198x-hex-suffix-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "ff",
+      "native_hex": "ff",
+      "matches": true
+    },
+    {
+      "name": "quoted",
+      "argv": [
+        "/private/tmp/asm198x-hex-suffix-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+      "hex": "30464668",
+      "native_hex": "30464668",
+      "matches": true
+    },
+    {
+      "name": "decimal_prefix_baseline",
+      "argv": [
+        "/private/tmp/asm198x-hex-suffix-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "11120a",
+      "native_hex": "11120a",
+      "matches": true
+    },
+    {
+      "name": "invalid_digits",
+      "argv": [
+        "/private/tmp/asm198x-hex-suffix-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: invalid hexadecimal number `012Gh`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "bare_identifier",
+      "argv": [
+        "/private/tmp/asm198x-hex-suffix-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: undefined symbol `AAh`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "lazy_overflow",
+      "argv": [
+        "/private/tmp/asm198x-hex-suffix-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: invalid hexadecimal number `100000000h`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "numeric_token_identity",
+      "argv": [
+        "/private/tmp/asm198x-hex-suffix-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+      "hex": "01010101",
+      "native_hex": "01010101",
+      "matches": true
+    }
+  ]
+}
