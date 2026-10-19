@@ -57,3 +57,8 @@ Final isolated checks pass 1,550 Rust tests (38 ignored), 73 Node tests,
 Clippy with all workspace targets/features and warnings denied, fmt, Ruff and
 generated docs. The actual preceding archive fails only the new cohort; all
 57 other cohorts pass.
+
+Clean producer `ab986b3c235e6161321cf327257cc9802ae31ac7` matches all
+564 unchanged native/upstream 4510 bytes. The pinned source, seven successful
+processes/fourteen streams and full output identities are retained; the
+changed-byte guard rejects corruption.
