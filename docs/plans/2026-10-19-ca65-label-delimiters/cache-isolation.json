@@ -1,0 +1,9 @@
+{
+  "isolated_executable": "/private/tmp/asm198x-label-delimiters-build/debug/asm198x",
+  "sha256": "c6168b4d2f47127a003a8ec7aa14b4fd2d6587746f4841c1b5c10125591c8f92",
+  "source_files": {
+    "crates/asm198x/src/dialects/ca65/mod.rs": "b6de5e16b7d4f945e751ad5e619b51d61a5641f9edbdc03b639f699a18fc3d92",
+    "crates/asm198x/src/dialects/ca65/project.rs": "3c5ba507682290d01ddd2cc9ab11653308660d5302de5dd370727a0e0cb76e85"
+  },
+  "result": "same product source passes the full native label cohort and included operand preservation after cleaning the workspace packages in an isolated target"
+}
