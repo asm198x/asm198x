@@ -1,0 +1,86 @@
+[
+  {
+    "name": "end_0",
+    "exit": 0,
+    "stdout": "",
+    "stderr": "assembled + linked 1 byte(s) -> out.bin\n"
+  },
+  {
+    "name": "end_1",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2:6: error: number `$100000000` is outside the native lexical range\n"
+  },
+  {
+    "name": "end_2",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2:6: error: number `$100000000` is outside the native lexical range\n"
+  },
+  {
+    "name": "end_3",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2: error: `.end\"unread\"` is not a directive ca65 has\n"
+  },
+  {
+    "name": "end_4",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2:6: error: number `$100000000` is outside the native lexical range\n"
+  },
+  {
+    "name": "end_5",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2:6: error: number `$100000000` is outside the native lexical range\n"
+  },
+  {
+    "name": "end_6",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2:6: error: number `$100000000` is outside the native lexical range\n"
+  },
+  {
+    "name": "end_7",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2:6: error: number `$100000000` is outside the native lexical range\n"
+  },
+  {
+    "name": "end_8",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2:5: error: number `$100000000` is outside the native lexical range\n"
+  },
+  {
+    "name": "end_9",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2: error: `.end%100` is not a directive ca65 has\n"
+  },
+  {
+    "name": "end_10",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2: error: `.end.unknown` is not a directive ca65 has\n"
+  },
+  {
+    "name": "end_11",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2: error: `.end_thing` is not a directive ca65 has\n"
+  },
+  {
+    "name": "end_12",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2: error: unsupported directive `.endmacro`\n"
+  },
+  {
+    "name": "end_13",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:2: error: `.end2` is not a directive ca65 has\n"
+  }
+]
