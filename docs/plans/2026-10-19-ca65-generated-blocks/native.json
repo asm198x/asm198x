@@ -1,0 +1,2913 @@
+{
+  "tools": {
+    "ca65": {
+      "path": "/opt/homebrew/bin/ca65",
+      "sha256": "1a57997819fd98814e4601b5160df589e7a1a24e1888a80fee51ae450d8fd0ea",
+      "version": {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "--version"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "ca65 V2.18 - N/A\n"
+      }
+    },
+    "ld65": {
+      "path": "/opt/homebrew/bin/ld65",
+      "sha256": "36bb196207a6b2c90a4aa991b419d6113885303951b14b60b455f51c777b3339",
+      "version": {
+        "argv": [
+          "/opt/homebrew/bin/ld65",
+          "--version"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "ld65 V2.18 - N/A\n"
+      }
+    }
+  },
+  "files": {
+    "body.inc": ".byte 9\n"
+  },
+  "cases": [
+    {
+      "name": "generated_if",
+      "source": ".ident(\"mark\"):.if 1\n.byte 7\n.endif\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0708"
+    },
+    {
+      "name": "plain_.if 0",
+      "source": "mark:.if 0\n.byte 7\n.endif\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "08"
+    },
+    {
+      "name": "plain_.if 1",
+      "source": "mark:.if 1\n.byte 7\n.endif\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0708"
+    },
+    {
+      "name": "plain_.repeat 0",
+      "source": "mark:.repeat 0\n.byte 7\n.endrepeat\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "08"
+    },
+    {
+      "name": "plain_.repeat 2",
+      "source": "mark:.repeat 2\n.byte 7\n.endrepeat\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070708"
+    },
+    {
+      "name": "generated_.if 0",
+      "source": ".ident(\"mark\"):.if 0\n.byte 7\n.endif\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "08"
+    },
+    {
+      "name": "generated_.if 1",
+      "source": ".ident(\"mark\"):.if 1\n.byte 7\n.endif\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0708"
+    },
+    {
+      "name": "generated_.repeat 0",
+      "source": ".ident(\"mark\"):.repeat 0\n.byte 7\n.endrepeat\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "08"
+    },
+    {
+      "name": "generated_.repeat 2",
+      "source": ".ident(\"mark\"):.repeat 2\n.byte 7\n.endrepeat\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070708"
+    },
+    {
+      "name": "nested_.if 0",
+      "source": ".ident(.concat(\"ma\", \"rk\")):.if 0\n.byte 7\n.endif\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "08"
+    },
+    {
+      "name": "nested_.if 1",
+      "source": ".ident(.concat(\"ma\", \"rk\")):.if 1\n.byte 7\n.endif\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0708"
+    },
+    {
+      "name": "nested_.repeat 0",
+      "source": ".ident(.concat(\"ma\", \"rk\")):.repeat 0\n.byte 7\n.endrepeat\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "08"
+    },
+    {
+      "name": "nested_.repeat 2",
+      "source": ".ident(.concat(\"ma\", \"rk\")):.repeat 2\n.byte 7\n.endrepeat\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070708"
+    },
+    {
+      "name": "6502_A_plain_.if 1",
+      "source": ".setcpu \"6502\"\nA:.if 1\n.byte 7\n.endif\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error:  Unexpected .ENDIF\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "6502_A_plain_.repeat 1",
+      "source": ".setcpu \"6502\"\nA:.repeat 1\n.byte 7\n.endrepeat\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: Unexpected '.ENDREPEAT'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "6502_A_generated_.if 1",
+      "source": ".setcpu \"6502\"\n.ident(\"A\"):.if 1\n.byte 7\n.endif\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0708"
+    },
+    {
+      "name": "6502_A_generated_.repeat 1",
+      "source": ".setcpu \"6502\"\n.ident(\"A\"):.repeat 1\n.byte 7\n.endrepeat\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0708"
+    },
+    {
+      "name": "6502_X_plain_.if 1",
+      "source": ".setcpu \"6502\"\nX:.if 1\n.byte 7\n.endif\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error:  Unexpected .ENDIF\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "6502_X_plain_.repeat 1",
+      "source": ".setcpu \"6502\"\nX:.repeat 1\n.byte 7\n.endrepeat\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: Unexpected '.ENDREPEAT'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "6502_X_generated_.if 1",
+      "source": ".setcpu \"6502\"\n.ident(\"X\"):.if 1\n.byte 7\n.endif\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0708"
+    },
+    {
+      "name": "6502_X_generated_.repeat 1",
+      "source": ".setcpu \"6502\"\n.ident(\"X\"):.repeat 1\n.byte 7\n.endrepeat\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0708"
+    },
+    {
+      "name": "6502_Y_plain_.if 1",
+      "source": ".setcpu \"6502\"\nY:.if 1\n.byte 7\n.endif\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error:  Unexpected .ENDIF\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "6502_Y_plain_.repeat 1",
+      "source": ".setcpu \"6502\"\nY:.repeat 1\n.byte 7\n.endrepeat\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: Unexpected '.ENDREPEAT'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "6502_Y_generated_.if 1",
+      "source": ".setcpu \"6502\"\n.ident(\"Y\"):.if 1\n.byte 7\n.endif\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0708"
+    },
+    {
+      "name": "6502_Y_generated_.repeat 1",
+      "source": ".setcpu \"6502\"\n.ident(\"Y\"):.repeat 1\n.byte 7\n.endrepeat\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0708"
+    },
+    {
+      "name": "6502_S_plain_.if 1",
+      "source": ".setcpu \"6502\"\nS:.if 1\n.byte 7\n.endif\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0708"
+    },
+    {
+      "name": "6502_S_plain_.repeat 1",
+      "source": ".setcpu \"6502\"\nS:.repeat 1\n.byte 7\n.endrepeat\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0708"
+    },
+    {
+      "name": "6502_S_generated_.if 1",
+      "source": ".setcpu \"6502\"\n.ident(\"S\"):.if 1\n.byte 7\n.endif\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0708"
+    },
+    {
+      "name": "6502_S_generated_.repeat 1",
+      "source": ".setcpu \"6502\"\n.ident(\"S\"):.repeat 1\n.byte 7\n.endrepeat\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0708"
+    },
+    {
+      "name": "6502_SP_plain_.if 1",
+      "source": ".setcpu \"6502\"\nSP:.if 1\n.byte 7\n.endif\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0708"
+    },
+    {
+      "name": "6502_SP_plain_.repeat 1",
+      "source": ".setcpu \"6502\"\nSP:.repeat 1\n.byte 7\n.endrepeat\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0708"
+    },
+    {
+      "name": "6502_SP_generated_.if 1",
+      "source": ".setcpu \"6502\"\n.ident(\"SP\"):.if 1\n.byte 7\n.endif\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0708"
+    },
+    {
+      "name": "6502_SP_generated_.repeat 1",
+      "source": ".setcpu \"6502\"\n.ident(\"SP\"):.repeat 1\n.byte 7\n.endrepeat\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0708"
+    },
+    {
+      "name": "6502_Z_plain_.if 1",
+      "source": ".setcpu \"6502\"\nZ:.if 1\n.byte 7\n.endif\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error:  Unexpected .ENDIF\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "6502_Z_plain_.repeat 1",
+      "source": ".setcpu \"6502\"\nZ:.repeat 1\n.byte 7\n.endrepeat\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: Unexpected '.ENDREPEAT'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "6502_Z_generated_.if 1",
+      "source": ".setcpu \"6502\"\n.ident(\"Z\"):.if 1\n.byte 7\n.endif\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0708"
+    },
+    {
+      "name": "6502_Z_generated_.repeat 1",
+      "source": ".setcpu \"6502\"\n.ident(\"Z\"):.repeat 1\n.byte 7\n.endrepeat\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0708"
+    },
+    {
+      "name": "6502_F_plain_.if 1",
+      "source": ".setcpu \"6502\"\nF:.if 1\n.byte 7\n.endif\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error:  Unexpected .ENDIF\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "6502_F_plain_.repeat 1",
+      "source": ".setcpu \"6502\"\nF:.repeat 1\n.byte 7\n.endrepeat\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: Unexpected '.ENDREPEAT'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "6502_F_generated_.if 1",
+      "source": ".setcpu \"6502\"\n.ident(\"F\"):.if 1\n.byte 7\n.endif\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0708"
+    },
+    {
+      "name": "6502_F_generated_.repeat 1",
+      "source": ".setcpu \"6502\"\n.ident(\"F\"):.repeat 1\n.byte 7\n.endrepeat\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0708"
+    },
+    {
+      "name": "6502_LDA_plain_.if 1",
+      "source": ".setcpu \"6502\"\nLDA:.if 1\n.byte 7\n.endif\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Syntax error\ninput.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error:  Unexpected .ENDIF\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "6502_LDA_plain_.repeat 1",
+      "source": ".setcpu \"6502\"\nLDA:.repeat 1\n.byte 7\n.endrepeat\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Syntax error\ninput.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: Unexpected '.ENDREPEAT'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "6502_LDA_generated_.if 1",
+      "source": ".setcpu \"6502\"\n.ident(\"LDA\"):.if 1\n.byte 7\n.endif\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Syntax error\ninput.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error:  Unexpected .ENDIF\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "6502_LDA_generated_.repeat 1",
+      "source": ".setcpu \"6502\"\n.ident(\"LDA\"):.repeat 1\n.byte 7\n.endrepeat\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Syntax error\ninput.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: Unexpected '.ENDREPEAT'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "4510_A_plain_.if 1",
+      "source": ".setcpu \"4510\"\nA:.if 1\n.byte 7\n.endif\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error:  Unexpected .ENDIF\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "4510_A_plain_.repeat 1",
+      "source": ".setcpu \"4510\"\nA:.repeat 1\n.byte 7\n.endrepeat\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: Unexpected '.ENDREPEAT'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "4510_A_generated_.if 1",
+      "source": ".setcpu \"4510\"\n.ident(\"A\"):.if 1\n.byte 7\n.endif\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0708"
+    },
+    {
+      "name": "4510_A_generated_.repeat 1",
+      "source": ".setcpu \"4510\"\n.ident(\"A\"):.repeat 1\n.byte 7\n.endrepeat\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0708"
+    },
+    {
+      "name": "4510_X_plain_.if 1",
+      "source": ".setcpu \"4510\"\nX:.if 1\n.byte 7\n.endif\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error:  Unexpected .ENDIF\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "4510_X_plain_.repeat 1",
+      "source": ".setcpu \"4510\"\nX:.repeat 1\n.byte 7\n.endrepeat\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: Unexpected '.ENDREPEAT'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "4510_X_generated_.if 1",
+      "source": ".setcpu \"4510\"\n.ident(\"X\"):.if 1\n.byte 7\n.endif\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0708"
+    },
+    {
+      "name": "4510_X_generated_.repeat 1",
+      "source": ".setcpu \"4510\"\n.ident(\"X\"):.repeat 1\n.byte 7\n.endrepeat\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0708"
+    },
+    {
+      "name": "4510_Y_plain_.if 1",
+      "source": ".setcpu \"4510\"\nY:.if 1\n.byte 7\n.endif\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error:  Unexpected .ENDIF\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "4510_Y_plain_.repeat 1",
+      "source": ".setcpu \"4510\"\nY:.repeat 1\n.byte 7\n.endrepeat\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: Unexpected '.ENDREPEAT'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "4510_Y_generated_.if 1",
+      "source": ".setcpu \"4510\"\n.ident(\"Y\"):.if 1\n.byte 7\n.endif\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0708"
+    },
+    {
+      "name": "4510_Y_generated_.repeat 1",
+      "source": ".setcpu \"4510\"\n.ident(\"Y\"):.repeat 1\n.byte 7\n.endrepeat\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0708"
+    },
+    {
+      "name": "4510_S_plain_.if 1",
+      "source": ".setcpu \"4510\"\nS:.if 1\n.byte 7\n.endif\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error:  Unexpected .ENDIF\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "4510_S_plain_.repeat 1",
+      "source": ".setcpu \"4510\"\nS:.repeat 1\n.byte 7\n.endrepeat\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: Unexpected '.ENDREPEAT'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "4510_S_generated_.if 1",
+      "source": ".setcpu \"4510\"\n.ident(\"S\"):.if 1\n.byte 7\n.endif\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0708"
+    },
+    {
+      "name": "4510_S_generated_.repeat 1",
+      "source": ".setcpu \"4510\"\n.ident(\"S\"):.repeat 1\n.byte 7\n.endrepeat\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0708"
+    },
+    {
+      "name": "4510_SP_plain_.if 1",
+      "source": ".setcpu \"4510\"\nSP:.if 1\n.byte 7\n.endif\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error:  Unexpected .ENDIF\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "4510_SP_plain_.repeat 1",
+      "source": ".setcpu \"4510\"\nSP:.repeat 1\n.byte 7\n.endrepeat\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: Unexpected '.ENDREPEAT'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "4510_SP_generated_.if 1",
+      "source": ".setcpu \"4510\"\n.ident(\"SP\"):.if 1\n.byte 7\n.endif\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0708"
+    },
+    {
+      "name": "4510_SP_generated_.repeat 1",
+      "source": ".setcpu \"4510\"\n.ident(\"SP\"):.repeat 1\n.byte 7\n.endrepeat\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0708"
+    },
+    {
+      "name": "4510_Z_plain_.if 1",
+      "source": ".setcpu \"4510\"\nZ:.if 1\n.byte 7\n.endif\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error:  Unexpected .ENDIF\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "4510_Z_plain_.repeat 1",
+      "source": ".setcpu \"4510\"\nZ:.repeat 1\n.byte 7\n.endrepeat\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: Unexpected '.ENDREPEAT'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "4510_Z_generated_.if 1",
+      "source": ".setcpu \"4510\"\n.ident(\"Z\"):.if 1\n.byte 7\n.endif\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0708"
+    },
+    {
+      "name": "4510_Z_generated_.repeat 1",
+      "source": ".setcpu \"4510\"\n.ident(\"Z\"):.repeat 1\n.byte 7\n.endrepeat\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0708"
+    },
+    {
+      "name": "4510_F_plain_.if 1",
+      "source": ".setcpu \"4510\"\nF:.if 1\n.byte 7\n.endif\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error:  Unexpected .ENDIF\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "4510_F_plain_.repeat 1",
+      "source": ".setcpu \"4510\"\nF:.repeat 1\n.byte 7\n.endrepeat\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: Unexpected '.ENDREPEAT'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "4510_F_generated_.if 1",
+      "source": ".setcpu \"4510\"\n.ident(\"F\"):.if 1\n.byte 7\n.endif\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0708"
+    },
+    {
+      "name": "4510_F_generated_.repeat 1",
+      "source": ".setcpu \"4510\"\n.ident(\"F\"):.repeat 1\n.byte 7\n.endrepeat\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0708"
+    },
+    {
+      "name": "4510_LDA_plain_.if 1",
+      "source": ".setcpu \"4510\"\nLDA:.if 1\n.byte 7\n.endif\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Syntax error\ninput.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error:  Unexpected .ENDIF\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "4510_LDA_plain_.repeat 1",
+      "source": ".setcpu \"4510\"\nLDA:.repeat 1\n.byte 7\n.endrepeat\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Syntax error\ninput.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: Unexpected '.ENDREPEAT'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "4510_LDA_generated_.if 1",
+      "source": ".setcpu \"4510\"\n.ident(\"LDA\"):.if 1\n.byte 7\n.endif\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Syntax error\ninput.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error:  Unexpected .ENDIF\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "4510_LDA_generated_.repeat 1",
+      "source": ".setcpu \"4510\"\n.ident(\"LDA\"):.repeat 1\n.byte 7\n.endrepeat\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Syntax error\ninput.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: Unexpected '.ENDREPEAT'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "forward_address",
+      "source": ".word mark\n.ident(\"mark\"):.if 1\n.byte 7\n.endif\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "021007"
+    },
+    {
+      "name": "repeat_address",
+      "source": ".word mark\n.ident(\"mark\"):.repeat 2\n.byte 7\n.endrepeat\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "02100707"
+    },
+    {
+      "name": "generated_defined",
+      "source": ".ident(\"mark\"):.ifdef mark\n.byte 7\n.else\n.byte 8\n.endif\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "generated_unreferenced",
+      "source": ".ident(\"mark\"):.ifnref mark\n.byte 7\n.else\n.byte 8\n.endif\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "repeat_counter",
+      "source": ".ident(\"mark\"):.repeat 2,I\n.byte I\n.endrepeat\n.word mark\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "00010010"
+    },
+    {
+      "name": "nested_outer_false",
+      "source": ".if 0\n.ident(\"mark\"):.if 1\n.byte 7\n.endif\n.endif\n.byte .defined(mark)\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "00"
+    },
+    {
+      "name": "nested_unknown_head",
+      "source": ".if 0\n.ident(.sprintf(\"%bad\",0)):.if 1\n.byte 7\n.endif\n.endif\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "08"
+    },
+    {
+      "name": "zero_unknown_head",
+      "source": ".repeat 0\n.ident(.sprintf(\"%bad\",0)):.if 1\n.byte 7\n.endif\n.endrepeat\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "08"
+    },
+    {
+      "name": "inactive_missing_include",
+      "source": ".if 0\n.ident(\"mark\"):.if 1\n.include \"missing.inc\"\n.endif\n.endif\n.byte 8\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "08"
+    },
+    {
+      "name": "active_include",
+      "source": ".ident(\"mark\"):.if 1\n.include \"body.inc\"\n.endif\n.word mark\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "090010"
+    },
+    {
+      "name": "macro_context",
+      "source": ".macro emit\n.ident(\"mark\"):.if 1\n.byte 7\n.endif\n.endmacro\nemit\n.word mark\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070010"
+    },
+    {
+      "name": "scope_context",
+      "source": ".scope outer\n.ident(\"mark\"):.if 1\n.byte 7\n.endif\n.endscope\n.word outer::mark\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070010"
+    },
+    {
+      "name": "iteration_names",
+      "source": ".repeat 2,I\n.ident(.sprintf(\"row%d\",I)):.if 1\n.byte I\n.endif\n.endrepeat\n.word row0,row1\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "000100100110"
+    },
+    {
+      "name": "invalid_selected_name",
+      "source": ".ident(\"bad;name\"):.if 1\n.byte 7\n.endif\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(3): Error:  Unexpected .ENDIF\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "invalid_selected_argument",
+      "source": ".ident(7):.repeat 0\n.byte 7\n.endrepeat\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: String constant expected\ninput.s(3): Error: Unexpected '.ENDREPEAT'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "inactive_oversized_argument",
+      "source": ".if 0\n.ident(.sprintf(\"%d\",$100000000)):.if 1\n.byte 7\n.endif\n.endif\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Overflow in hexadecimal number\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "static_labelled_endif",
+      "source": ".if 1\n.byte 7\ntail:.endif\n.word tail\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070110"
+    },
+    {
+      "name": "static_labelled_endrepeat",
+      "source": ".repeat 1\n.byte 7\ntail:.endrepeat\n.word tail\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070110"
+    },
+    {
+      "name": "static_labelled_else",
+      "source": ".if 1\n.byte 7\ntail:.else\n.byte 8\n.endif\n.word tail\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070110"
+    },
+    {
+      "name": "labelled_endif",
+      "source": ".if 1\n.byte 7\n.ident(\"tail\"):.endif\n.word tail\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070110"
+    },
+    {
+      "name": "labelled_endrepeat",
+      "source": ".repeat 1\n.byte 7\n.ident(\"tail\"):.endrepeat\n.word tail\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070110"
+    },
+    {
+      "name": "labelled_else",
+      "source": ".if 1\n.byte 7\n.ident(\"tail\"):.else\n.byte 8\n.endif\n.word tail\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hmxwl1qp",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070110"
+    }
+  ]
+}

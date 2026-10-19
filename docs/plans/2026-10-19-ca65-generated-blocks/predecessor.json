@@ -1,0 +1,1887 @@
+{
+  "binary": "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+  "sha256": "c6d24d6aa5ee2e94561c78285332344c8713be16bf11de48ce5fadde7134316f",
+  "results": [
+    {
+      "name": "generated_if",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "plain_.if 0",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "08",
+      "matches_native": true
+    },
+    {
+      "name": "plain_.if 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0708",
+      "matches_native": true
+    },
+    {
+      "name": "plain_.repeat 0",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "08",
+      "matches_native": true
+    },
+    {
+      "name": "plain_.repeat 2",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "070708",
+      "matches_native": true
+    },
+    {
+      "name": "generated_.if 0",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "generated_.if 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "generated_.repeat 0",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: unsupported directive `.repeat`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "generated_.repeat 2",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: unsupported directive `.repeat`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "nested_.if 0",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "nested_.if 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "nested_.repeat 0",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: unsupported directive `.repeat`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "nested_.repeat 2",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: unsupported directive `.repeat`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "6502_A_plain_.if 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0708",
+      "matches_native": false
+    },
+    {
+      "name": "6502_A_plain_.repeat 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0708",
+      "matches_native": false
+    },
+    {
+      "name": "6502_A_generated_.if 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "6502_A_generated_.repeat 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.repeat`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "6502_X_plain_.if 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0708",
+      "matches_native": false
+    },
+    {
+      "name": "6502_X_plain_.repeat 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0708",
+      "matches_native": false
+    },
+    {
+      "name": "6502_X_generated_.if 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "6502_X_generated_.repeat 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.repeat`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "6502_Y_plain_.if 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0708",
+      "matches_native": false
+    },
+    {
+      "name": "6502_Y_plain_.repeat 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0708",
+      "matches_native": false
+    },
+    {
+      "name": "6502_Y_generated_.if 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "6502_Y_generated_.repeat 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.repeat`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "6502_S_plain_.if 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0708",
+      "matches_native": true
+    },
+    {
+      "name": "6502_S_plain_.repeat 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0708",
+      "matches_native": true
+    },
+    {
+      "name": "6502_S_generated_.if 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "6502_S_generated_.repeat 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.repeat`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "6502_SP_plain_.if 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0708",
+      "matches_native": true
+    },
+    {
+      "name": "6502_SP_plain_.repeat 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0708",
+      "matches_native": true
+    },
+    {
+      "name": "6502_SP_generated_.if 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "6502_SP_generated_.repeat 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.repeat`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "6502_Z_plain_.if 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0708",
+      "matches_native": false
+    },
+    {
+      "name": "6502_Z_plain_.repeat 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0708",
+      "matches_native": false
+    },
+    {
+      "name": "6502_Z_generated_.if 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "6502_Z_generated_.repeat 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.repeat`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "6502_F_plain_.if 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0708",
+      "matches_native": false
+    },
+    {
+      "name": "6502_F_plain_.repeat 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0708",
+      "matches_native": false
+    },
+    {
+      "name": "6502_F_generated_.if 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "6502_F_generated_.repeat 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.repeat`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "6502_LDA_plain_.if 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0708",
+      "matches_native": false
+    },
+    {
+      "name": "6502_LDA_plain_.repeat 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0708",
+      "matches_native": false
+    },
+    {
+      "name": "6502_LDA_generated_.if 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: reserved label name `LDA`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "6502_LDA_generated_.repeat 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: reserved label name `LDA`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "4510_A_plain_.if 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0708",
+      "matches_native": false
+    },
+    {
+      "name": "4510_A_plain_.repeat 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0708",
+      "matches_native": false
+    },
+    {
+      "name": "4510_A_generated_.if 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "4510_A_generated_.repeat 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.repeat`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "4510_X_plain_.if 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0708",
+      "matches_native": false
+    },
+    {
+      "name": "4510_X_plain_.repeat 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0708",
+      "matches_native": false
+    },
+    {
+      "name": "4510_X_generated_.if 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "4510_X_generated_.repeat 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.repeat`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "4510_Y_plain_.if 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0708",
+      "matches_native": false
+    },
+    {
+      "name": "4510_Y_plain_.repeat 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0708",
+      "matches_native": false
+    },
+    {
+      "name": "4510_Y_generated_.if 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "4510_Y_generated_.repeat 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.repeat`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "4510_S_plain_.if 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0708",
+      "matches_native": false
+    },
+    {
+      "name": "4510_S_plain_.repeat 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0708",
+      "matches_native": false
+    },
+    {
+      "name": "4510_S_generated_.if 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "4510_S_generated_.repeat 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.repeat`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "4510_SP_plain_.if 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0708",
+      "matches_native": false
+    },
+    {
+      "name": "4510_SP_plain_.repeat 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0708",
+      "matches_native": false
+    },
+    {
+      "name": "4510_SP_generated_.if 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "4510_SP_generated_.repeat 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.repeat`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "4510_Z_plain_.if 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0708",
+      "matches_native": false
+    },
+    {
+      "name": "4510_Z_plain_.repeat 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0708",
+      "matches_native": false
+    },
+    {
+      "name": "4510_Z_generated_.if 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "4510_Z_generated_.repeat 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.repeat`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "4510_F_plain_.if 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0708",
+      "matches_native": false
+    },
+    {
+      "name": "4510_F_plain_.repeat 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0708",
+      "matches_native": false
+    },
+    {
+      "name": "4510_F_generated_.if 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "4510_F_generated_.repeat 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.repeat`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "4510_LDA_plain_.if 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0708",
+      "matches_native": false
+    },
+    {
+      "name": "4510_LDA_plain_.repeat 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0708",
+      "matches_native": false
+    },
+    {
+      "name": "4510_LDA_generated_.if 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: reserved label name `LDA`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "4510_LDA_generated_.repeat 1",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: reserved label name `LDA`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "forward_address",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "repeat_address",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.repeat`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "generated_defined",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: unsupported directive `.ifdef`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "generated_unreferenced",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: unsupported directive `.ifnref`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "repeat_counter",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: unsupported directive `.repeat`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "nested_outer_false",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: unsupported directive `.endif`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "nested_unknown_head",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: unsupported directive `.endif`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "zero_unknown_head",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1:1: error: repetition block is never closed\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "inactive_missing_include",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: unsupported directive `.endif`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "active_include",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "macro_context",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: unsupported directive `.if`\nin expansion of macro `emit` defined at input.s:1, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "scope_context",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "iteration_names",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1:1: error: repetition block is never closed\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "invalid_selected_name",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: unknown instruction `BAD`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "invalid_selected_argument",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: `.ident` takes a string here, and `7` is not one\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "inactive_oversized_argument",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:22: error: number `$100000000` is outside the native lexical range\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "static_labelled_endif",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: undefined symbol `tail`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "static_labelled_endrepeat",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: undefined symbol `tail`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "static_labelled_else",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: undefined symbol `tail`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "labelled_endif",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1:1: error: conditional block is never closed\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "labelled_endrepeat",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1:1: error: repetition block is never closed\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "labelled_else",
+      "argv": [
+        "/private/tmp/asm198x-generated-format-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: unsupported directive `.else`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    }
+  ]
+}
