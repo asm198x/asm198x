@@ -37,5 +37,11 @@ The actual preceding archive fails only this cohort; its other 64 pass.
 #788's approved skipped-source lexical check is still a separate implementation.
 The #814 audit independently found global absolute cursor byte differences
 across segment changes (#822); this numeric fix makes no counter change.
-Clean unchanged 4510 producer replay and five actual host qualification
-reports/receipts with all ten controls remain required before merge.
+Clean unchanged producer e2438b59e82573d2f4b4462885c490a606e78663 replays
+pinned cc65-4510-opcodes e11fb5c39371046ebe25485f984f644c5a0d65d3.
+All 564 bytes match native SHA-256
+8a5fcde630e55dd49403f7c6ffed25d8786e65e3d0a2723531b7ca3e2c0509ec.
+Seven processes and fourteen streams verify; changed-byte corruption is
+rejected. The source tree stayed clean and unchanged during replay.
+Five actual host qualification reports/receipts with all ten controls remain
+required before merge.
