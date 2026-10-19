@@ -155,3 +155,27 @@ The separate scope-entry/exit mismatches (#778) apply to existing cheap labels
 as well as constants and remain tracked independently. Native captures and
 accepted/refused boundaries live in
 `docs/plans/2026-10-19-ca65-cheap-constants/`.
+
+
+## Native numeric lexical errors in skipped source (2026-10-19, #788)
+
+This paragraph overrides the earlier blanket statement that an untaken branch
+is never tokenised at all, narrowly for native numeric lexical validation.
+The 72 boundary and 48 admission controls show ca65 rejects oversized numeric
+tokens even inside .if 0, unused macro definitions and zero-repeat captures.
+Meaning still stays selected and lazy.
+
+Validate numeric tokens at the character/token admission boundary, preserving
+quoted text, comments, source locations and native macro/repeat capture order.
+Do not parse directives, evaluate expressions, resolve names, expand inactive
+text symbols or open inactive includes to perform this check. Those operations
+remain governed by selected-source reading. Native source after .end is not
+read; quoted numbers and comments are not numeric tokens.
+
+Decimal, hexadecimal and binary token limits follow the retained native
+scanner evidence, including decimal's observed 4294967299 endpoint rather
+than an invented final-expression or field-count ceiling. Controls and the
+approved design are in docs/plans/2026-10-19-ca65-numeric-limits/.
+
+The narrow exception was approved on 2026-10-19. Implementation remains a
+separate verified change; approval does not imply the lexical checks exist.

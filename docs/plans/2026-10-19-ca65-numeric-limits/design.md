@@ -17,7 +17,7 @@ This conflicts with the broad wording in decisions/parse-affecting-directives.md
 reading under the wrong text environment—still applies. Numeric token overflow
 is an earlier lexical error that native preserves even when meaning is skipped.
 
-## Proposed binding clarification (awaiting approval)
+## Binding clarification (approved 2026-10-19)
 
 Append a narrow exception to the existing decision:
 
@@ -28,7 +28,7 @@ Append a narrow exception to the existing decision:
 > or open inactive includes. The selected-source rule continues to govern those
 > operations. Decimal/hex/binary limits are pinned by #788's native fixture.
 
-## Implementation after agreement
+## Implementation after approval
 
 Use the existing ca65 token lexer/reader boundaries. Validate authored numeric
 tokens where native consumes them, including skipped conditional text and
@@ -41,3 +41,6 @@ unused/called macros, zero-repeat bodies, `.end`, missing inactive includes,
 include error spans and available ca65 CPU paths. Bound every probe. Verify
 native-valid large empty-tag counts and existing selected-source parity cases.
 Do not broaden semantic parsing in an untaken branch to obtain this check.
+
+The user approved the narrow lexical exception on 2026-10-19. The binding
+record now contains that clarification; implementation is still pending.
