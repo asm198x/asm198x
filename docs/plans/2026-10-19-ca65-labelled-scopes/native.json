@@ -8,7 +8,7 @@
           "/opt/homebrew/bin/ca65",
           "--version"
         ],
-        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
         "exit": 0,
         "stdout": "",
         "stderr": "ca65 V2.18 - N/A\n"
@@ -22,7 +22,7 @@
           "/opt/homebrew/bin/ld65",
           "--version"
         ],
-        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
         "exit": 0,
         "stdout": "",
         "stderr": "ld65 V2.18 - N/A\n"
@@ -45,7 +45,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -59,7 +59,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -79,7 +79,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -93,7 +93,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -113,7 +113,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -127,7 +127,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -147,7 +147,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -161,7 +161,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -181,7 +181,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 1,
           "stdout": "",
           "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: No open .SCOPE\n"
@@ -201,7 +201,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 1,
           "stdout": "",
           "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: No open .PROC\n"
@@ -221,7 +221,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -235,7 +235,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -255,7 +255,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -269,7 +269,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -289,7 +289,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 1,
           "stdout": "",
           "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: No open .SCOPE\n"
@@ -309,7 +309,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 1,
           "stdout": "",
           "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: No open .PROC\n"
@@ -329,7 +329,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -343,7 +343,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -363,7 +363,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -377,7 +377,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -397,7 +397,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 1,
           "stdout": "",
           "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: No open .SCOPE\n"
@@ -417,7 +417,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 1,
           "stdout": "",
           "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: No open .PROC\n"
@@ -437,7 +437,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -451,7 +451,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -471,7 +471,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -485,7 +485,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -505,7 +505,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 1,
           "stdout": "",
           "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: No open .SCOPE\n"
@@ -525,7 +525,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 1,
           "stdout": "",
           "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: No open .PROC\n"
@@ -545,7 +545,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -559,7 +559,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -579,7 +579,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -593,7 +593,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -613,7 +613,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 1,
           "stdout": "",
           "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: No open .SCOPE\n"
@@ -633,7 +633,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 1,
           "stdout": "",
           "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: No open .PROC\n"
@@ -653,7 +653,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -667,7 +667,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -687,7 +687,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -701,7 +701,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -721,7 +721,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -735,7 +735,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -755,7 +755,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -769,7 +769,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -789,7 +789,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -803,7 +803,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -823,7 +823,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -837,7 +837,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -857,7 +857,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -871,7 +871,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -891,7 +891,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -905,7 +905,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -925,7 +925,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -939,7 +939,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -959,7 +959,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -973,7 +973,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -993,7 +993,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 1,
           "stdout": "",
           "stderr": "input.s(2): Error: Syntax error\ninput.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: No open .SCOPE\n"
@@ -1013,7 +1013,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 1,
           "stdout": "",
           "stderr": "input.s(2): Error: Syntax error\ninput.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: No open .PROC\n"
@@ -1033,7 +1033,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 1,
           "stdout": "",
           "stderr": "input.s(2): Error: Syntax error\ninput.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: No open .SCOPE\n"
@@ -1053,7 +1053,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 1,
           "stdout": "",
           "stderr": "input.s(2): Error: Syntax error\ninput.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: No open .PROC\n"
@@ -1073,7 +1073,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1087,7 +1087,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1107,7 +1107,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1121,7 +1121,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1141,7 +1141,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1155,7 +1155,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1175,7 +1175,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1189,7 +1189,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1209,7 +1209,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 1,
           "stdout": "",
           "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: No open .SCOPE\n"
@@ -1229,7 +1229,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 1,
           "stdout": "",
           "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: No open .PROC\n"
@@ -1249,7 +1249,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1263,7 +1263,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1283,7 +1283,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1297,7 +1297,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1317,7 +1317,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 1,
           "stdout": "",
           "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: No open .SCOPE\n"
@@ -1337,7 +1337,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 1,
           "stdout": "",
           "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: No open .PROC\n"
@@ -1357,7 +1357,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1371,7 +1371,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1391,7 +1391,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1405,7 +1405,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1425,7 +1425,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 1,
           "stdout": "",
           "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: No open .SCOPE\n"
@@ -1445,7 +1445,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 1,
           "stdout": "",
           "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: No open .PROC\n"
@@ -1465,7 +1465,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1479,7 +1479,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1499,7 +1499,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1513,7 +1513,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1533,7 +1533,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 1,
           "stdout": "",
           "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: No open .SCOPE\n"
@@ -1553,7 +1553,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 1,
           "stdout": "",
           "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: No open .PROC\n"
@@ -1573,7 +1573,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1587,7 +1587,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1607,7 +1607,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1621,7 +1621,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1641,7 +1641,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 1,
           "stdout": "",
           "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: No open .SCOPE\n"
@@ -1661,7 +1661,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 1,
           "stdout": "",
           "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: No open .PROC\n"
@@ -1681,7 +1681,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1695,7 +1695,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1715,7 +1715,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1729,7 +1729,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1749,7 +1749,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 1,
           "stdout": "",
           "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: No open .SCOPE\n"
@@ -1769,7 +1769,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 1,
           "stdout": "",
           "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: No open .PROC\n"
@@ -1789,7 +1789,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1803,7 +1803,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1823,7 +1823,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1837,7 +1837,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1857,7 +1857,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 1,
           "stdout": "",
           "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: No open .SCOPE\n"
@@ -1877,7 +1877,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 1,
           "stdout": "",
           "stderr": "input.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: No open .PROC\n"
@@ -1897,7 +1897,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1911,7 +1911,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1931,7 +1931,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1945,7 +1945,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1965,7 +1965,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 1,
           "stdout": "",
           "stderr": "input.s(2): Error: Syntax error\ninput.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: No open .SCOPE\n"
@@ -1985,7 +1985,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 1,
           "stdout": "",
           "stderr": "input.s(2): Error: Syntax error\ninput.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: No open .PROC\n"
@@ -2005,7 +2005,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 1,
           "stdout": "",
           "stderr": "input.s(2): Error: Syntax error\ninput.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: No open .SCOPE\n"
@@ -2025,7 +2025,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 1,
           "stdout": "",
           "stderr": "input.s(2): Error: Syntax error\ninput.s(2): Error: Unexpected trailing garbage characters\ninput.s(4): Error: No open .PROC\n"
@@ -2045,7 +2045,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -2059,7 +2059,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -2079,7 +2079,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -2093,7 +2093,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -2113,7 +2113,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -2127,7 +2127,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -2147,7 +2147,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -2161,7 +2161,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -2181,7 +2181,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -2195,7 +2195,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -2215,7 +2215,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -2229,7 +2229,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -2249,7 +2249,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": "input.s(1): Warning: Unnamed .PROCs are deprecated, please use .SCOPE\n"
@@ -2263,7 +2263,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -2283,7 +2283,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 1,
           "stdout": "",
           "stderr": "input.s(5): Error: Symbol '@near' is undefined\n"
@@ -2303,7 +2303,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 1,
           "stdout": "",
           "stderr": "input.s(5): Error: Symbol '@near' is undefined\n"
@@ -2323,7 +2323,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -2337,7 +2337,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -2357,7 +2357,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -2371,7 +2371,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -2391,7 +2391,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -2405,7 +2405,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -2425,7 +2425,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -2439,7 +2439,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -2459,7 +2459,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -2473,7 +2473,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -2493,7 +2493,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -2507,7 +2507,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -2527,7 +2527,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -2541,7 +2541,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -2561,7 +2561,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 1,
           "stdout": "",
           "stderr": "input.s(2): Error: Symbol 'mark' is already defined\ninput.s(2): Error: Symbol '.size' is already defined\n"
@@ -2581,7 +2581,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 1,
           "stdout": "",
           "stderr": "input.s(1): Error: Symbol 'inner' is already defined\ninput.s(3): Error: Symbol '.size' is already defined\n"
@@ -2601,7 +2601,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 1,
           "stdout": "",
           "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(3): Error: No open .SCOPE\n"
@@ -2621,7 +2621,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 1,
           "stdout": "",
           "stderr": "input.s(1): Error: String constant expected\ninput.s(3): Error: No open .SCOPE\n"
@@ -2641,7 +2641,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -2655,7 +2655,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -2675,7 +2675,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -2689,7 +2689,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -2709,7 +2709,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -2723,7 +2723,7 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -2743,7 +2743,7 @@
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -2757,13 +2757,149 @@
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ighi3hfy",
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         }
       ],
       "native_hex": "070110"
+    },
+    {
+      "name": "comment_boundary_False_.scope",
+      "source": "mark:.scope; comment\n.byte 7\n.endscope\n.word mark\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070010"
+    },
+    {
+      "name": "comment_boundary_False_.proc",
+      "source": "mark:.proc; comment\n.byte 7\n.endscope\n.word mark\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "input.s(1): Warning: Unnamed .PROCs are deprecated, please use .SCOPE\n"
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070010"
+    },
+    {
+      "name": "comment_boundary_True_.scope",
+      "source": ".ident(\"mark\"):.scope; comment\n.byte 7\n.endscope\n.word mark\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070010"
+    },
+    {
+      "name": "comment_boundary_True_.proc",
+      "source": ".ident(\"mark\"):.proc; comment\n.byte 7\n.endscope\n.word mark\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "input.s(1): Warning: Unnamed .PROCs are deprecated, please use .SCOPE\n"
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-oeqfuvxs",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "070010"
     }
   ]
 }

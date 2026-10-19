@@ -1143,7 +1143,6 @@
       "generated_heads": [
         ".ident(\"mark\")"
       ],
-      "original_assembly_gap": 863,
       "symbol_values": {
         "mark": 4096
       },
@@ -1183,7 +1182,6 @@
       ],
       "native_hex": "070010",
       "generated_heads": [],
-      "original_assembly_gap": 863,
       "symbol_values": {
         "mark": 4096
       },
@@ -1225,7 +1223,6 @@
       "generated_heads": [
         ".ident(\"mark\")"
       ],
-      "original_assembly_gap": 863,
       "symbol_values": {
         "mark": 4096
       },
@@ -1421,7 +1418,6 @@
       ],
       "native_hex": "070010",
       "generated_heads": [],
-      "original_assembly_gap": 863,
       "symbol_values": {
         "mark": 4096
       },

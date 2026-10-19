@@ -691,20 +691,40 @@ fn sweep_line(
             ));
         }
     }
+    // An explicit scope-opening label belongs to the enclosing scope. Bind it
+    // before the ordinary reader enters the scope (and defines a proc name).
+    let scope_head = super::split_label_head(processed.trim()).filter(|(_, rest)| {
+        super::split_comment(rest)
+            .0
+            .split_whitespace()
+            .next()
+            .is_some_and(|word| {
+                word.eq_ignore_ascii_case(".scope") || word.eq_ignore_ascii_case(".proc")
+            })
+    });
+    let selected = if let Some((label, _)) = scope_head {
+        let name = label.trim_end_matches(':');
+        if sw.reader.reserved_head_label(name, generated_label) {
+            return Err(AsmError::at(
+                node.span.clone(),
+                format!("reserved label name `{name}`"),
+            ));
+        }
+        bind_head_label(&processed, node, st, sw)?
+    } else {
+        end_label.unwrap_or(&processed)
+    };
     let start = sw.reader.nodes.len();
     // Bind through the ordinary label-only walk before stopping. Parsing the
     // remaining .end as an operation would instead report unsupported syntax.
-    let walked = sw
-        .reader
-        .walk_line(end_label.unwrap_or(&processed), line, file)
-        .map_err(|e| {
-            let mut error = super::statement_error(e, file, &node.span.expansion_frames);
-            if let Some(span) = error.span.as_mut() {
-                span.expansion_frames
-                    .clone_from(&node.span.expansion_frames);
-            }
-            error
-        });
+    let walked = sw.reader.walk_line(selected, line, file).map_err(|e| {
+        let mut error = super::statement_error(e, file, &node.span.expansion_frames);
+        if let Some(span) = error.span.as_mut() {
+            span.expansion_frames
+                .clone_from(&node.span.expansion_frames);
+        }
+        error
+    });
     let mut drained: Vec<crate::ast::Node> = sw.reader.nodes.split_off(start);
     let walked = walked?;
     // A macro-expanded line carries its author's frames on the structural
