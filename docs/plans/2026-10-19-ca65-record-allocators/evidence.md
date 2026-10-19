@@ -27,3 +27,8 @@ CI plus all five actual package reports and ten negative controls.
 The separate numeric-literal refusal gap is retained in
 `deferred-huge-literal-native.json` and tracked as #788. No public shape or
 dependency changed.
+
+The parent rebase preserved all tested source subtrees. Clean producer
+`b285007736f2fb4c6f6c0e585a82a268afa0d92d` matches the complete unchanged
+564-byte native 4510 fixture; all seven processes and fourteen streams are
+retained, and the changed-byte guard fails as required. Generated docs pass.
