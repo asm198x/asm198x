@@ -1,0 +1,849 @@
+{
+  "binary": "/private/tmp/asm198x-repeat-end-clean-producer/asm198x",
+  "sha256": "b6a36ae2851d078b1fb31763e220d1854093883fecc7297a609ca72619218dce",
+  "results": [
+    {
+      "name": "count_0",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-repeat-end-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+        "timed_out": false
+      },
+      "hex": "08",
+      "matches_native": true,
+      "formatter": {
+        "argv": [
+          "/private/tmp/asm198x-repeat-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .repeat 0\n        .endrepeat\n",
+        "stderr": "formatted input.s -> stdout\n",
+        "timed_out": false,
+        "lost_end": true
+      }
+    },
+    {
+      "name": "count_1",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-repeat-end-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 0 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+        "timed_out": false
+      },
+      "hex": "",
+      "matches_native": true,
+      "formatter": {
+        "argv": [
+          "/private/tmp/asm198x-repeat-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .repeat 1\n        .endrepeat\n",
+        "stderr": "formatted input.s -> stdout\n",
+        "timed_out": false,
+        "lost_end": true
+      }
+    },
+    {
+      "name": "count_2",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-repeat-end-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 0 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+        "timed_out": false
+      },
+      "hex": "",
+      "matches_native": true,
+      "formatter": {
+        "argv": [
+          "/private/tmp/asm198x-repeat-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .repeat 2\n        .endrepeat\n",
+        "stderr": "formatted input.s -> stdout\n",
+        "timed_out": false,
+        "lost_end": true
+      }
+    },
+    {
+      "name": "count_1000000",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-repeat-end-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 0 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+        "timed_out": false
+      },
+      "hex": "",
+      "matches_native": true,
+      "formatter": {
+        "argv": [
+          "/private/tmp/asm198x-repeat-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .repeat 1000000\n        .endrepeat\n",
+        "stderr": "formatted input.s -> stdout\n",
+        "timed_out": false,
+        "lost_end": true
+      }
+    },
+    {
+      "name": "count_4294967295",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-repeat-end-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 0 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+        "timed_out": false
+      },
+      "hex": "",
+      "matches_native": true,
+      "formatter": {
+        "argv": [
+          "/private/tmp/asm198x-repeat-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .repeat 4294967295\n        .endrepeat\n",
+        "stderr": "formatted input.s -> stdout\n",
+        "timed_out": false,
+        "lost_end": true
+      }
+    },
+    {
+      "name": "emitted_before_end",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-repeat-end-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+        "timed_out": false
+      },
+      "hex": "07",
+      "matches_native": true,
+      "formatter": {
+        "argv": [
+          "/private/tmp/asm198x-repeat-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .repeat 2\n        .byte 7\n        .endrepeat\n",
+        "stderr": "formatted input.s -> stdout\n",
+        "timed_out": false,
+        "lost_end": true
+      }
+    },
+    {
+      "name": "nested_repeat",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-repeat-end-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+        "timed_out": false
+      },
+      "hex": "07",
+      "matches_native": true,
+      "formatter": {
+        "argv": [
+          "/private/tmp/asm198x-repeat-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .repeat 2\n        .repeat 3\n        .byte 7\n        .endrepeat\n        .endrepeat\n",
+        "stderr": "formatted input.s -> stdout\n",
+        "timed_out": false,
+        "lost_end": true
+      }
+    },
+    {
+      "name": "nested_conditional",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-repeat-end-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:2:1: error: conditional block is never closed\n",
+        "timed_out": false
+      },
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true,
+      "formatter": null
+    },
+    {
+      "name": "unclosed_repeat",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-repeat-end-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:1:1: error: repetition block is never closed\n",
+        "timed_out": false
+      },
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true,
+      "formatter": null
+    },
+    {
+      "name": "macro_repeat",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-repeat-end-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+        "timed_out": false
+      },
+      "hex": "07",
+      "matches_native": true,
+      "formatter": {
+        "argv": [
+          "/private/tmp/asm198x-repeat-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .macro stop\n        .repeat 2\n        .byte 7\n        .endrepeat\n",
+        "stderr": "formatted input.s -> stdout\n",
+        "timed_out": false,
+        "lost_end": true
+      }
+    },
+    {
+      "name": "deferred_oversized_include",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-repeat-end-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 0 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+        "timed_out": false
+      },
+      "hex": "",
+      "matches_native": true,
+      "formatter": {
+        "argv": [
+          "/private/tmp/asm198x-repeat-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .repeat 2\n        .include \"oversized.inc\"\n        .endrepeat\n",
+        "stderr": "formatted input.s -> stdout\n",
+        "timed_out": false,
+        "lost_end": true
+      }
+    },
+    {
+      "name": "missing_include_before_end",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-repeat-end-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:2:10: error: cannot load `missing.inc` (requested from input.s): file not found\n",
+        "timed_out": false
+      },
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true,
+      "formatter": null
+    },
+    {
+      "name": "missing_include_after_end",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-repeat-end-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 0 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+        "timed_out": false
+      },
+      "hex": "",
+      "matches_native": true,
+      "formatter": {
+        "argv": [
+          "/private/tmp/asm198x-repeat-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .repeat 2\n        .endrepeat\n",
+        "stderr": "formatted input.s -> stdout\n",
+        "timed_out": false,
+        "lost_end": true
+      }
+    },
+    {
+      "name": "zero_repeat_missing_include",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-repeat-end-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+        "timed_out": false
+      },
+      "hex": "08",
+      "matches_native": true,
+      "formatter": {
+        "argv": [
+          "/private/tmp/asm198x-repeat-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .repeat 0\n        .include \"missing.inc\"\n        .endrepeat\n",
+        "stderr": "formatted input.s -> stdout\n",
+        "timed_out": false,
+        "lost_end": true
+      }
+    },
+    {
+      "name": "oversized_capture_after_end",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-repeat-end-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:3:8: error: number `$100000000` is outside the native lexical range\n",
+        "timed_out": false
+      },
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true,
+      "formatter": null
+    },
+    {
+      "name": "zero_oversized_capture_after_end",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-repeat-end-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:3:8: error: number `$100000000` is outside the native lexical range\n",
+        "timed_out": false
+      },
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true,
+      "formatter": null
+    },
+    {
+      "name": "conditional_false_end",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-repeat-end-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+        "timed_out": false
+      },
+      "hex": "070708",
+      "matches_native": true,
+      "formatter": {
+        "argv": [
+          "/private/tmp/asm198x-repeat-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .repeat 2\n        .if 0\n        .else\n        .endif\n        .endrepeat\n",
+        "stderr": "formatted input.s -> stdout\n",
+        "timed_out": false,
+        "lost_end": true
+      }
+    },
+    {
+      "name": "macro_end_inside_repeat",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-repeat-end-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+        "timed_out": false
+      },
+      "hex": "07",
+      "matches_native": true,
+      "formatter": {
+        "argv": [
+          "/private/tmp/asm198x-repeat-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .macro stop\n        .repeat 2\n        .endrepeat\n",
+        "stderr": "formatted input.s -> stdout\n",
+        "timed_out": false,
+        "lost_end": true
+      }
+    },
+    {
+      "name": "include_ends_reader",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-repeat-end-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+        "timed_out": false
+      },
+      "hex": "07",
+      "matches_native": true,
+      "formatter": {
+        "argv": [
+          "/private/tmp/asm198x-repeat-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .repeat 1\n        .include \"ends.inc\"\n        .byte 7\n        .endrepeat\n        .byte 8\n",
+        "stderr": "formatted input.s -> stdout\n",
+        "timed_out": false,
+        "lost_end": false,
+        "native": [
+          {
+            "argv": [
+              "/opt/homebrew/bin/ca65",
+              "formatted.s",
+              "-o",
+              "formatted.o"
+            ],
+            "exit": 0,
+            "stdout": "",
+            "stderr": "",
+            "timed_out": false
+          },
+          {
+            "argv": [
+              "/opt/homebrew/bin/ld65",
+              "-C",
+              "input.cfg",
+              "formatted.o",
+              "-o",
+              "formatted.bin"
+            ],
+            "exit": 0,
+            "stdout": "",
+            "stderr": "",
+            "timed_out": false
+          }
+        ],
+        "native_hex": "07"
+      }
+    },
+    {
+      "name": "ordinary_counter",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-repeat-end-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+        "timed_out": false
+      },
+      "hex": "000108",
+      "matches_native": true,
+      "formatter": {
+        "argv": [
+          "/private/tmp/asm198x-repeat-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .repeat 2,I\n        .byte I\n        .endrepeat\n        .byte 8\n",
+        "stderr": "formatted input.s -> stdout\n",
+        "timed_out": false,
+        "lost_end": false,
+        "native": [
+          {
+            "argv": [
+              "/opt/homebrew/bin/ca65",
+              "formatted.s",
+              "-o",
+              "formatted.o"
+            ],
+            "exit": 0,
+            "stdout": "",
+            "stderr": "",
+            "timed_out": false
+          },
+          {
+            "argv": [
+              "/opt/homebrew/bin/ld65",
+              "-C",
+              "input.cfg",
+              "formatted.o",
+              "-o",
+              "formatted.bin"
+            ],
+            "exit": 0,
+            "stdout": "",
+            "stderr": "",
+            "timed_out": false
+          }
+        ],
+        "native_hex": "000108"
+      }
+    },
+    {
+      "name": "ordinary_zero",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-repeat-end-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+        "timed_out": false
+      },
+      "hex": "08",
+      "matches_native": true,
+      "formatter": {
+        "argv": [
+          "/private/tmp/asm198x-repeat-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .repeat 0\n        .byte 7\n        .endrepeat\n        .byte 8\n",
+        "stderr": "formatted input.s -> stdout\n",
+        "timed_out": false,
+        "lost_end": false,
+        "native": [
+          {
+            "argv": [
+              "/opt/homebrew/bin/ca65",
+              "formatted.s",
+              "-o",
+              "formatted.o"
+            ],
+            "exit": 0,
+            "stdout": "",
+            "stderr": "",
+            "timed_out": false
+          },
+          {
+            "argv": [
+              "/opt/homebrew/bin/ld65",
+              "-C",
+              "input.cfg",
+              "formatted.o",
+              "-o",
+              "formatted.bin"
+            ],
+            "exit": 0,
+            "stdout": "",
+            "stderr": "",
+            "timed_out": false
+          }
+        ],
+        "native_hex": "08"
+      }
+    },
+    {
+      "name": "ordinary_deferred_include",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-repeat-end-clean-producer/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 5 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+        "timed_out": false
+      },
+      "hex": "0707090908",
+      "matches_native": true,
+      "formatter": {
+        "argv": [
+          "/private/tmp/asm198x-repeat-end-clean-producer/asm198x",
+          "fmt",
+          "--dialect",
+          "ca65",
+          "input.s"
+        ],
+        "exit": 0,
+        "stdout": "        .repeat 2\n        .include \"prefix.inc\"\n        .byte 7\n        .endrepeat\n        .byte 8\n",
+        "stderr": "formatted input.s -> stdout\n",
+        "timed_out": false,
+        "lost_end": false,
+        "native": [
+          {
+            "argv": [
+              "/opt/homebrew/bin/ca65",
+              "formatted.s",
+              "-o",
+              "formatted.o"
+            ],
+            "exit": 0,
+            "stdout": "",
+            "stderr": "",
+            "timed_out": false
+          },
+          {
+            "argv": [
+              "/opt/homebrew/bin/ld65",
+              "-C",
+              "input.cfg",
+              "formatted.o",
+              "-o",
+              "formatted.bin"
+            ],
+            "exit": 0,
+            "stdout": "",
+            "stderr": "",
+            "timed_out": false
+          }
+        ],
+        "native_hex": "0707090908"
+      }
+    }
+  ]
+}
