@@ -1,0 +1,1635 @@
+{
+  "binary": "/private/tmp/asm198x-format-build/debug/asm198x",
+  "sha256": "ee0cb31b30a537910e5610f5ff96850f4a1f97a63ac80364f08234d8c69ef202",
+  "results": [
+    {
+      "name": "include_literal",
+      "dialect": "ca65",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n"
+      },
+      "hex": "4c",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .include \"payload.inc\"\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "include_computed",
+      "dialect": "ca65",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n"
+      },
+      "hex": "4c",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": ".include .sprintf(\"%s\",\"payload.inc\")\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "incbin_literal",
+      "dialect": "ca65",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n"
+      },
+      "hex": "00112233",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .incbin \"bytes.bin\"\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "incbin_computed",
+      "dialect": "ca65",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n"
+      },
+      "hex": "1122",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": ".incbin .sprintf(\"%s\",\"bytes.bin\"),1,2\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "constant_window",
+      "dialect": "ca65",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n"
+      },
+      "hex": "1122",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "OFFSET =1\nCOUNT  =2\n        .incbin \"bytes.bin\",OFFSET,COUNT\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "expression_window",
+      "dialect": "ca65",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n"
+      },
+      "hex": "22",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .incbin \"bytes.bin\",1+1,1\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "literal_label",
+      "dialect": "ca65",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n"
+      },
+      "hex": "4c0010",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "here:\n        .include \"payload.inc\"\n        .word here\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "computed_label",
+      "dialect": "ca65",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n"
+      },
+      "hex": "4c0010",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "here: .include .sprintf(\"%s\",\"payload.inc\") ; inline\n        .word here\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "binary_label",
+      "dialect": "ca65",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n"
+      },
+      "hex": "11220010",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "here: .incbin .sprintf(\"%s\",\"bytes.bin\"),1,2 ; inline\n        .word here\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "semicolon_name",
+      "dialect": "ca65",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n"
+      },
+      "hex": "05",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .include \"semi;colon.inc\"   ; actual comment\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "comma_name",
+      "dialect": "ca65",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n"
+      },
+      "hex": "06",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .include \"comma,name.inc\"\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "space_name",
+      "dialect": "ca65",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n"
+      },
+      "hex": "09",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .include \"space name.inc\"\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "missing_computed",
+      "dialect": "ca65",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:1:10: error: cannot load `missing.inc` (requested from input.s): file not found\n"
+      },
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": ".include .sprintf(\"%s\",\"missing.inc\")\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "forward_window",
+      "dialect": "ca65",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:1: error: `.incbin` offset must be a constant expression: undefined symbol `OFFSET`\n"
+      },
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .incbin \"bytes.bin\",OFFSET,SIZE\nOFFSET =1\nSIZE   =2\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "negative_window",
+      "dialect": "ca65",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:1:9: error: `bytes.bin`: offset -1 must not be negative\n"
+      },
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .incbin \"bytes.bin\",-1,1\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "number_include",
+      "dialect": "ca65",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:1: error: `.include` needs a quoted file name\n"
+      },
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": ".include 3\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "empty_window",
+      "dialect": "ca65",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:1: error: `.incbin` takes at most a file name, an offset, and a size\n"
+      },
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .incbin \"bytes.bin\",1,,2\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "undefined_window",
+      "dialect": "ca65",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:1: error: `.incbin` offset must be a constant expression: undefined symbol `MISSING`\n"
+      },
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .incbin \"bytes.bin\",MISSING,1\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "65816_include_literal",
+      "dialect": "65816",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "65816",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n"
+      },
+      "hex": "4c",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .setcpu \"65816\"\n        .org $1000\n        .include \"payload.inc\"\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "65816_include_computed",
+      "dialect": "65816",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "65816",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n"
+      },
+      "hex": "4c",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .setcpu \"65816\"\n        .org $1000\n.include .sprintf(\"%s\",\"payload.inc\")\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "65816_incbin_literal",
+      "dialect": "65816",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "65816",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n"
+      },
+      "hex": "00112233",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .setcpu \"65816\"\n        .org $1000\n        .incbin \"bytes.bin\"\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "65816_incbin_computed",
+      "dialect": "65816",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "65816",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n"
+      },
+      "hex": "1122",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .setcpu \"65816\"\n        .org $1000\n.incbin .sprintf(\"%s\",\"bytes.bin\"),1,2\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "65816_constant_window",
+      "dialect": "65816",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "65816",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n"
+      },
+      "hex": "1122",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .setcpu \"65816\"\n        .org $1000\nOFFSET =1\nCOUNT  =2\n        .incbin \"bytes.bin\",OFFSET,COUNT\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "65816_expression_window",
+      "dialect": "65816",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "65816",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n"
+      },
+      "hex": "22",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .setcpu \"65816\"\n        .org $1000\n        .incbin \"bytes.bin\",1+1,1\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "65816_literal_label",
+      "dialect": "65816",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "65816",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 3 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n"
+      },
+      "hex": "4c0010",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .setcpu \"65816\"\n        .org $1000\nhere:\n        .include \"payload.inc\"\n        .word here\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "65816_computed_label",
+      "dialect": "65816",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "65816",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 3 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n"
+      },
+      "hex": "4c0010",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .setcpu \"65816\"\n        .org $1000\nhere: .include .sprintf(\"%s\",\"payload.inc\") ; inline\n        .word here\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "65816_binary_label",
+      "dialect": "65816",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "65816",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n"
+      },
+      "hex": "11220010",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .setcpu \"65816\"\n        .org $1000\nhere: .incbin .sprintf(\"%s\",\"bytes.bin\"),1,2 ; inline\n        .word here\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "65816_semicolon_name",
+      "dialect": "65816",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "65816",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n"
+      },
+      "hex": "05",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .setcpu \"65816\"\n        .org $1000\n        .include \"semi;colon.inc\"   ; actual comment\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "65816_comma_name",
+      "dialect": "65816",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "65816",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n"
+      },
+      "hex": "06",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .setcpu \"65816\"\n        .org $1000\n        .include \"comma,name.inc\"\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "65816_space_name",
+      "dialect": "65816",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "65816",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n"
+      },
+      "hex": "09",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .setcpu \"65816\"\n        .org $1000\n        .include \"space name.inc\"\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "65816_missing_computed",
+      "dialect": "65816",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "65816",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:3:10: error: cannot load `missing.inc` (requested from input.s): file not found\n"
+      },
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .setcpu \"65816\"\n        .org $1000\n.include .sprintf(\"%s\",\"missing.inc\")\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "65816_forward_window",
+      "dialect": "65816",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "65816",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:3: error: `.incbin` offset must be a constant expression: undefined symbol `OFFSET`\n"
+      },
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .setcpu \"65816\"\n        .org $1000\n        .incbin \"bytes.bin\",OFFSET,SIZE\nOFFSET =1\nSIZE   =2\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "65816_negative_window",
+      "dialect": "65816",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "65816",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:3:9: error: `bytes.bin`: offset -1 must not be negative\n"
+      },
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .setcpu \"65816\"\n        .org $1000\n        .incbin \"bytes.bin\",-1,1\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "65816_number_include",
+      "dialect": "65816",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "65816",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:3: error: `.include` needs a quoted file name\n"
+      },
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .setcpu \"65816\"\n        .org $1000\n.include 3\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "65816_empty_window",
+      "dialect": "65816",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "65816",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:3: error: `.incbin` takes at most a file name, an offset, and a size\n"
+      },
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .setcpu \"65816\"\n        .org $1000\n        .incbin \"bytes.bin\",1,,2\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "65816_undefined_window",
+      "dialect": "65816",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "65816",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:3: error: `.incbin` offset must be a constant expression: undefined symbol `MISSING`\n"
+      },
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .setcpu \"65816\"\n        .org $1000\n        .incbin \"bytes.bin\",MISSING,1\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "huc6280_include_literal",
+      "dialect": "huc6280",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "huc6280",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n"
+      },
+      "hex": "4c",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .setcpu \"huc6280\"\n        .org $1000\n        .include \"payload.inc\"\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "huc6280_include_computed",
+      "dialect": "huc6280",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "huc6280",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n"
+      },
+      "hex": "4c",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .setcpu \"huc6280\"\n        .org $1000\n.include .sprintf(\"%s\",\"payload.inc\")\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "huc6280_incbin_literal",
+      "dialect": "huc6280",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "huc6280",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n"
+      },
+      "hex": "00112233",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .setcpu \"huc6280\"\n        .org $1000\n        .incbin \"bytes.bin\"\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "huc6280_incbin_computed",
+      "dialect": "huc6280",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "huc6280",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n"
+      },
+      "hex": "1122",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .setcpu \"huc6280\"\n        .org $1000\n.incbin .sprintf(\"%s\",\"bytes.bin\"),1,2\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "huc6280_constant_window",
+      "dialect": "huc6280",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "huc6280",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n"
+      },
+      "hex": "1122",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .setcpu \"huc6280\"\n        .org $1000\nOFFSET =1\nCOUNT  =2\n        .incbin \"bytes.bin\",OFFSET,COUNT\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "huc6280_expression_window",
+      "dialect": "huc6280",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "huc6280",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n"
+      },
+      "hex": "22",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .setcpu \"huc6280\"\n        .org $1000\n        .incbin \"bytes.bin\",1+1,1\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "huc6280_literal_label",
+      "dialect": "huc6280",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "huc6280",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 3 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n"
+      },
+      "hex": "4c0010",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .setcpu \"huc6280\"\n        .org $1000\nhere:\n        .include \"payload.inc\"\n        .word here\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "huc6280_computed_label",
+      "dialect": "huc6280",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "huc6280",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 3 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n"
+      },
+      "hex": "4c0010",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .setcpu \"huc6280\"\n        .org $1000\nhere: .include .sprintf(\"%s\",\"payload.inc\") ; inline\n        .word here\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "huc6280_binary_label",
+      "dialect": "huc6280",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "huc6280",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n"
+      },
+      "hex": "11220010",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .setcpu \"huc6280\"\n        .org $1000\nhere: .incbin .sprintf(\"%s\",\"bytes.bin\"),1,2 ; inline\n        .word here\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "huc6280_semicolon_name",
+      "dialect": "huc6280",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "huc6280",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n"
+      },
+      "hex": "05",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .setcpu \"huc6280\"\n        .org $1000\n        .include \"semi;colon.inc\"   ; actual comment\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "huc6280_comma_name",
+      "dialect": "huc6280",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "huc6280",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n"
+      },
+      "hex": "06",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .setcpu \"huc6280\"\n        .org $1000\n        .include \"comma,name.inc\"\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "huc6280_space_name",
+      "dialect": "huc6280",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "huc6280",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n"
+      },
+      "hex": "09",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .setcpu \"huc6280\"\n        .org $1000\n        .include \"space name.inc\"\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "huc6280_missing_computed",
+      "dialect": "huc6280",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "huc6280",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:3:10: error: cannot load `missing.inc` (requested from input.s): file not found\n"
+      },
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .setcpu \"huc6280\"\n        .org $1000\n.include .sprintf(\"%s\",\"missing.inc\")\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "huc6280_forward_window",
+      "dialect": "huc6280",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "huc6280",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:3: error: `.incbin` offset must be a constant expression: undefined symbol `OFFSET`\n"
+      },
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .setcpu \"huc6280\"\n        .org $1000\n        .incbin \"bytes.bin\",OFFSET,SIZE\nOFFSET =1\nSIZE   =2\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "huc6280_negative_window",
+      "dialect": "huc6280",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "huc6280",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:3:9: error: `bytes.bin`: offset -1 must not be negative\n"
+      },
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .setcpu \"huc6280\"\n        .org $1000\n        .incbin \"bytes.bin\",-1,1\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "huc6280_number_include",
+      "dialect": "huc6280",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "huc6280",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:3: error: `.include` needs a quoted file name\n"
+      },
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .setcpu \"huc6280\"\n        .org $1000\n.include 3\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "huc6280_empty_window",
+      "dialect": "huc6280",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "huc6280",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:3: error: `.incbin` takes at most a file name, an offset, and a size\n"
+      },
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .setcpu \"huc6280\"\n        .org $1000\n        .incbin \"bytes.bin\",1,,2\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "huc6280_undefined_window",
+      "dialect": "huc6280",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "huc6280",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:3: error: `.incbin` offset must be a constant expression: undefined symbol `MISSING`\n"
+      },
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .setcpu \"huc6280\"\n        .org $1000\n        .incbin \"bytes.bin\",MISSING,1\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "skipped_number_include",
+      "dialect": "ca65",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n"
+      },
+      "hex": "07",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .if 0\n.include 3\n        .endif\nOFFSET =1\nSIZE   =2\n        .byte 7\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "skipped_computed_missing",
+      "dialect": "ca65",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n"
+      },
+      "hex": "07",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .if 0\n.include .sprintf(\"%s\",\"missing.inc\")\n        .endif\nOFFSET =1\nSIZE   =2\n        .byte 7\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "skipped_missing_literal",
+      "dialect": "ca65",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n"
+      },
+      "hex": "07",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .if 0\n        .include \"missing.inc\"\n        .endif\nOFFSET =1\nSIZE   =2\n        .byte 7\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "skipped_undefined_window",
+      "dialect": "ca65",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n"
+      },
+      "hex": "07",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .if 0\n        .incbin \"bytes.bin\",MISSING,1\n        .endif\nOFFSET =1\nSIZE   =2\n        .byte 7\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "skipped_forward_window",
+      "dialect": "ca65",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n"
+      },
+      "hex": "07",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .if 0\n        .incbin \"bytes.bin\",OFFSET,SIZE\n        .endif\nOFFSET =1\nSIZE   =2\n        .byte 7\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "skipped_divide_zero",
+      "dialect": "ca65",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n"
+      },
+      "hex": "07",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .if 0\n        .incbin \"bytes.bin\",1/0,1\n        .endif\nOFFSET =1\nSIZE   =2\n        .byte 7\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "skipped_negative_window",
+      "dialect": "ca65",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n"
+      },
+      "hex": "07",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .if 0\n        .incbin \"bytes.bin\",-1,1\n        .endif\nOFFSET =1\nSIZE   =2\n        .byte 7\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "skipped_empty_window",
+      "dialect": "ca65",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n"
+      },
+      "hex": "07",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .if 0\n        .incbin \"bytes.bin\",1,,2\n        .endif\nOFFSET =1\nSIZE   =2\n        .byte 7\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    },
+    {
+      "name": "anonymous_include_label",
+      "dialect": "ca65",
+      "assembly": {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n"
+      },
+      "hex": "02104c",
+      "matches_native": true,
+      "formatter": {
+        "exit": 0,
+        "stdout": "        .word :+\n:\n        .include \"payload.inc\"\n",
+        "stderr": "formatted input.s -> stdout\n"
+      }
+    }
+  ]
+}

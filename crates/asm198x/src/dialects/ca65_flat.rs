@@ -1125,6 +1125,30 @@ pub(crate) fn include_request(
     Ok(name)
 }
 
+/// Classify file requests without evaluating source in the unexpanded formatter.
+/// Known literal requests keep their existing AST kind; computed or otherwise
+/// opaque spellings remain verbatim instead of inventing a resolved filename.
+pub(crate) fn formatter_file_item(rest: &str, line: usize) -> Option<crate::ast::Item> {
+    use crate::ast::Item;
+    let (word, args) = super::mos6502::split_first_word(rest.trim());
+    if word.eq_ignore_ascii_case(".include") {
+        Some(
+            include_request(args, line, word)
+                .map(|request| Item::Include { request })
+                .unwrap_or(Item::Verbatim),
+        )
+    } else if word.eq_ignore_ascii_case(".incbin") {
+        // The window is source text, not a formatter-time constant query.
+        Some(
+            quoted_name(args, line, word)
+                .map(|(request, _)| Item::Incbin { request })
+                .unwrap_or(Item::Verbatim),
+        )
+    } else {
+        None
+    }
+}
+
 /// Parse an incbin directive's arguments (`directive` names it in errors):
 /// the quoted file name, then an optional `, offset[, size]` tail of
 /// parse-time constant expressions. `fold` is the dialect's expression
