@@ -22,3 +22,8 @@ exact-head CI and all five real package reports before merge.
 The retained cache collision and column red controls document why isolated
 build targets and source-derived diagnostic positions are required. No public
 AST/API/schema/trait or dependency changed.
+
+After incorporating the complete scope/width correction, isolated verification
+passes 1,539 Rust tests (38 ignored), 68 Node tests and Clippy/fmt/Ruff/docs.
+The combined Lua archive passes all 53 required cohorts and both controls.
+These combined results supersede the staged counts above.
