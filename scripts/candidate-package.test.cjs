@@ -358,3 +358,9 @@ test('ca65 formatter include operands are mandatory package evidence', () => {
   assert(qualifies(complete)); assert(requiredCases.includes('ca65_format_includes'));
   assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_format_includes')), false);
 });
+
+test('ca65 end-token boundaries are mandatory package evidence', () => {
+  const complete = requiredCases.map(name => ({ name, status: 'pass' }));
+  assert(qualifies(complete)); assert(requiredCases.includes('ca65_end_tokens'));
+  assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_end_tokens')), false);
+});

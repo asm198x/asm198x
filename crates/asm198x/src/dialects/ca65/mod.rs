@@ -2311,6 +2311,10 @@ impl FlatWalk for Walker {
         }
         use ca65_flat::BlockKw;
         let code = code.trim();
+        // A reserved .end token wins over a following colon/block keyword.
+        if end_token_len(code).is_some() {
+            return None;
+        }
         let code = split_label_head(code).map_or(code, |(_, rest)| rest);
         let word = split_first_word(code).0.to_ascii_lowercase();
         Some(match word.as_str() {
@@ -2455,11 +2459,7 @@ impl FlatWalk for Walker {
             return Ok(None);
         }
 
-        if trimmed
-            .split_whitespace()
-            .next()
-            .is_some_and(|w| w.eq_ignore_ascii_case(".end"))
-        {
+        if end_token_len(trimmed).is_some() {
             self.ended = true;
             return Ok(None);
         }
@@ -2822,6 +2822,23 @@ fn strip_comment(line: &str) -> &str {
         }
     }
     line
+}
+
+/// End of a literal .end token, including leading whitespace. Native directive
+/// names consume identifier characters; punctuation starts the unread tail.
+fn end_token_len(text: &str) -> Option<usize> {
+    let head = text.trim_start();
+    let bytes = head.as_bytes();
+    if !bytes
+        .get(..4)
+        .is_some_and(|word| word.eq_ignore_ascii_case(b".end"))
+        || bytes
+            .get(4)
+            .is_some_and(|c| c.is_ascii_alphanumeric() || *c == b'_')
+    {
+        return None;
+    }
+    Some(text.len() - head.len() + 4)
 }
 
 /// Split the initial label token at a single colon. A scope's `::` pair
