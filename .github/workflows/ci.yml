@@ -15,66 +15,40 @@ concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
-  # Format and lint run as separate jobs so the workflow summary surfaces
-  # them independently. Both are fast (no test compile); the heavier test
-  # and build jobs gate on both passing.
-  fmt:
-    name: Format
+  # Format, Clippy, coverage (the Linux test run) and a build and test on
+  # macOS and Windows, shared by every 198x Rust repo
+  # (stevehill1981/198x-workflows). Project jobs follow.
+  rust:
+    name: Rust
+    uses: stevehill1981/198x-workflows/.github/workflows/rust-ci.yml@feat/rust-ci-inputs
+    with:
+      coverage-floor: 60
+      coverage-args: --lib --tests
+      # The verdict replay tests read the curriculum at its pinned revision.
+      coverage-setup-command: >-
+        git clone --quiet --filter=blob:none https://github.com/code198x/code-samples _code198x/code-samples &&
+        git -C _code198x/code-samples checkout --quiet "$(cat crates/asm198x/tests/verdicts/code-samples.pin)"
+
+
+  # Was a step after Clippy; Clippy now runs in the shared workflow.
+  dependencies:
+    name: Shipped dependencies
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v7
-
-      - name: Read pinned toolchain
-        # rust-toolchain.toml is the single source of truth across local +
-        # CI. dtolnay/rust-toolchain@master no longer auto-reads it, so we
-        # extract the channel here and pass it explicitly. Edit the pin in
-        # rust-toolchain.toml only.
-        id: toolchain
-        run: |
-          channel=$(awk -F'"' '/^channel/{print $2}' rust-toolchain.toml)
-          echo "channel=${channel}" >> "$GITHUB_OUTPUT"
-
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@master
+      - uses: actions/checkout@v7
         with:
-          toolchain: ${{ steps.toolchain.outputs.channel }}
-          components: rustfmt
-
-      - name: Check formatting
-        run: cargo fmt --all --check
-
-  clippy:
-    name: Clippy
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v7
-
+          persist-credentials: false
       - name: Read pinned toolchain
         id: toolchain
-        run: |
-          channel=$(awk -F'"' '/^channel/{print $2}' rust-toolchain.toml)
-          echo "channel=${channel}" >> "$GITHUB_OUTPUT"
-
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@master
+        run: echo "channel=$(awk -F'"' '/^channel/{print $2}' rust-toolchain.toml)" >> "$GITHUB_OUTPUT"
+      - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ steps.toolchain.outputs.channel }}
-          components: clippy
-
-      - name: Cache Rust build artifacts
-        uses: Swatinem/rust-cache@v2
-
-      - name: Run Clippy
-        run: cargo clippy --workspace --all-targets -- -D warnings
-
-      # The test infrastructure (#61) must never reach the shipped assembler.
-      # A dev-dependency is only dev-only until someone moves a line; this
-      # fails the build rather than letting it ship quietly.
       - name: Assert the shipped binary links no test-only crate
         run: |
           tree=$(cargo tree -p asm198x --edges normal)
@@ -168,89 +142,6 @@ jobs:
       - name: Build the browser module
         run: wasm-pack build --target web crates/asm198x-web --out-dir pkg-web
 
-  # Coverage is also the test runner: cargo-llvm-cov compiles and runs every
-  # test under instrumentation, so one pass gives both the regression signal
-  # and coverage metrics. Gated on fmt + clippy so a fast lint failure
-  # doesn't waste the instrumented compile.
-  coverage:
-    name: Coverage
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    needs: [fmt, clippy]
-    env:
-      # Anti-regression floor (current total ~62% line). Ratchet up as the
-      # suite grows; this is the lowest acceptable, not the target.
-      COVERAGE_GATE_THRESHOLD: 60
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v7
-
-      - name: Read pinned toolchain
-        id: toolchain
-        run: |
-          channel=$(awk -F'"' '/^channel/{print $2}' rust-toolchain.toml)
-          echo "channel=${channel}" >> "$GITHUB_OUTPUT"
-
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: ${{ steps.toolchain.outputs.channel }}
-          components: llvm-tools-preview
-
-      - name: Install cargo-llvm-cov
-        uses: taiki-e/install-action@cargo-llvm-cov
-
-      - name: Cache Rust build artifacts
-        uses: Swatinem/rust-cache@v2
-
-      # The curriculum's verdicts (#61) are keyed by each file's content
-      # digest, so they only replay against the revision they were recorded
-      # from. The pin names it; tracking `main` instead would silently replay
-      # nothing the first time the curriculum moved.
-      - name: Read the pinned curriculum revision
-        id: pin
-        run: echo "sha=$(cat crates/asm198x/tests/verdicts/code-samples.pin)" >> "$GITHUB_OUTPUT"
-
-      - name: Check out the curriculum at that revision
-        uses: actions/checkout@v7
-        with:
-          repository: code198x/code-samples
-          ref: ${{ steps.pin.outputs.sha }}
-          path: _code198x/code-samples
-
-      - name: Run coverage suite
-        # This is the test step too — pass/fail here is the regression gate.
-        # ASM198X_CODE_SAMPLES points at the parent of the checkout, matching
-        # the layout the curriculum suite expects from a dev machine.
-        env:
-          ASM198X_CODE_SAMPLES: ${{ github.workspace }}/_code198x
-        run: ./scripts/coverage.sh
-
-      - name: Enforce coverage floor
-        run: ./scripts/coverage-gate.sh
-
-      - name: Publish coverage summary
-        if: always()
-        run: |
-          total_line="$(grep '^TOTAL' target/llvm-cov/coverage-summary.txt | tail -n 1)"
-          {
-            echo "## Coverage"
-            echo
-            echo '```text'
-            echo "${total_line}"
-            echo '```'
-          } >> "${GITHUB_STEP_SUMMARY}"
-
-      - name: Upload coverage report
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: coverage
-          path: |
-            target/llvm-cov/coverage-summary.txt
-            target/llvm-cov/lcov.info
-            target/llvm-cov/html
-
   # The corpus replay, as a status of its own.
   #
   # It also runs inside `coverage` (which is the test runner), but that buries
@@ -264,7 +155,6 @@ jobs:
     name: Docs
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    needs: [fmt, clippy]
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
@@ -352,7 +242,6 @@ jobs:
     name: Replay
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    needs: [fmt, clippy]
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
@@ -433,48 +322,12 @@ jobs:
           ASM198X_CODE_SAMPLES: ${{ github.workspace }}/_code198x
         run: cargo xtask parity --check
 
-  # Cross-platform smoke compile. Proves the workspace builds on macOS
-  # (primary dev host) and Windows without paying for a full test run
-  # there. Assemblers pull no platform-specific deps, so no extra install.
-  build:
-    name: Build (${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 15
-    needs: [fmt, clippy]
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [macos-latest, windows-latest]
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v7
-
-      - name: Read pinned toolchain
-        id: toolchain
-        shell: bash
-        run: |
-          channel=$(awk -F'"' '/^channel/{print $2}' rust-toolchain.toml)
-          echo "channel=${channel}" >> "$GITHUB_OUTPUT"
-
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: ${{ steps.toolchain.outputs.channel }}
-
-      - name: Cache Rust build artifacts
-        uses: Swatinem/rust-cache@v2
-        with:
-          shared-key: build-${{ matrix.os }}
-
-      - name: Check workspace
-        run: cargo check --workspace --all-targets
   ecosystem:
     name: Ecosystem replay
     permissions:
       contents: read
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    needs: [fmt, clippy]
     steps:
       - uses: actions/checkout@v7
       - name: Read pinned toolchain
