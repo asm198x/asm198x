@@ -57,3 +57,30 @@ This changes the present one-debug-section-per-configured-segment convention.
 The supplied AGENTS.md requires asking before significant deviations from
 existing conventions; that agreement was received on 2026-10-19. Independent
 origin-validation research (#815) can continue while this proposal is reviewed.
+
+## Consumer accounting after the approved representation change
+
+The native budget adapter and text/JSON listings currently total each debug
+section independently. That would truncate a source routine when a logical
+span splits it. Preserve the existing source-segment accounting instead.
+
+Logical spans retain the configured source segment's name. Native source
+section names identify that scope: ca65 config names are unique, and vasm
+reopens/coalesces a named section. IDs continue to identify individual debug
+coordinate spans. A shared native cycle helper will group file-mapped,
+unqualified spans by their source name, calculate intervals in physical file
+coordinates, and return each label's original logical section/offset with its
+complete existing total. Unmapped or qualified sections keep their independent
+section scope; a missing file offset never means zero. Both budget checks and
+native text/JSON listings must call that one calculation.
+
+The result has no dialect field or explicit parent field, and no schema field
+is added. Tests must prove source-segment separation, aliases at one offset,
+sparse IDs, non-CPU policy and no-origin stability. In particular, a routine
+crossing .org/.reloc must keep the same total as the preceding executable;
+listings and passing/failing assertions must agree. Retain the native section
+name as source identity rather than generating names that would lose it.
+
+The capture adapter must group records by ID in one pass before constructing
+SectionDebug values, preserving record/section order. Adding many logical spans
+must not turn its current per-section filtering into quadratic work.
