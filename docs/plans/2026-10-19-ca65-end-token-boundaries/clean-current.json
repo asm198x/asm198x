@@ -1,0 +1,481 @@
+{
+  "binary": "/private/tmp/asm198x-end-tokens-clean-producer/asm198x",
+  "sha256": "0388cb0e93f585f8d95d783a683877008c17caf5057dcdb533945079a8c71995",
+  "results": [
+    {
+      "name": "token_0",
+      "argv": [
+        "/private/tmp/asm198x-end-tokens-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "token_1",
+      "argv": [
+        "/private/tmp/asm198x-end-tokens-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "token_2",
+      "argv": [
+        "/private/tmp/asm198x-end-tokens-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "token_3",
+      "argv": [
+        "/private/tmp/asm198x-end-tokens-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "token_4",
+      "argv": [
+        "/private/tmp/asm198x-end-tokens-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "token_5",
+      "argv": [
+        "/private/tmp/asm198x-end-tokens-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "token_6",
+      "argv": [
+        "/private/tmp/asm198x-end-tokens-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "token_7",
+      "argv": [
+        "/private/tmp/asm198x-end-tokens-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "token_8",
+      "argv": [
+        "/private/tmp/asm198x-end-tokens-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "token_9",
+      "argv": [
+        "/private/tmp/asm198x-end-tokens-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "token_10",
+      "argv": [
+        "/private/tmp/asm198x-end-tokens-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "token_11",
+      "argv": [
+        "/private/tmp/asm198x-end-tokens-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: `.end_thing` is not a directive ca65 has\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "token_12",
+      "argv": [
+        "/private/tmp/asm198x-end-tokens-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.endmacro`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "token_13",
+      "argv": [
+        "/private/tmp/asm198x-end-tokens-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: `.end2` is not a directive ca65 has\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "same_line_conditional_tail",
+      "argv": [
+        "/private/tmp/asm198x-end-tokens-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "include_end",
+      "argv": [
+        "/private/tmp/asm198x-end-tokens-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "macro_legal_tail",
+      "argv": [
+        "/private/tmp/asm198x-end-tokens-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "repeat_legal_tail",
+      "argv": [
+        "/private/tmp/asm198x-end-tokens-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "inactive_bad_tail",
+      "argv": [
+        "/private/tmp/asm198x-end-tokens-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:6: error: number `$100000000` is outside the native lexical range\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "repeat_zero_bad_tail",
+      "argv": [
+        "/private/tmp/asm198x-end-tokens-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:6: error: number `$100000000` is outside the native lexical range\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "macro_unused_bad_tail",
+      "argv": [
+        "/private/tmp/asm198x-end-tokens-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:6: error: number `$100000000` is outside the native lexical range\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "comment_end",
+      "argv": [
+        "/private/tmp/asm198x-end-tokens-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0708",
+      "matches_native": true
+    },
+    {
+      "name": "quoted_end",
+      "argv": [
+        "/private/tmp/asm198x-end-tokens-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 16 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "2e656e642c2431303030303030303007",
+      "matches_native": true
+    },
+    {
+      "name": "trailing_comment",
+      "argv": [
+        "/private/tmp/asm198x-end-tokens-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "ordinary_bytes",
+      "argv": [
+        "/private/tmp/asm198x-end-tokens-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0708",
+      "matches_native": true
+    }
+  ]
+}
