@@ -53,3 +53,13 @@ controls and 344 commands from the now-unconditional 113-case reserved-label
 cohort. Changed bytes and corrupt archives fail. All 93 Node tests, focused Rust,
 Lua/all-target Clippy, rustfmt, Ruff and generated docs pass with the := guard.
 The final full Rust replay and clean producer/project checks are still pending.
+
+Final verification passes: 1,595 Rust tests (38 ignored), 93 Node tests, Clippy,
+rustfmt, Ruff and generated docs. Clean producer 6283a1b3638908b6851be800cf1b9f06d38d78b8
+(CLI SHA-256 c6d24d6aa5ee2e94561c78285332344c8713be16bf11de48ce5fadde7134316f)
+passes all 78 actual-archive cohorts and both failing corruption controls. The
+46-case native-format report uses that exact executable hash. The preceding
+archive fails only the new generated-format cohort. A clean pinned 4510 replay
+matches all 564 native/upstream bytes, with seven successful processes, fourteen
+streams and a failing changed-byte control. Exact-head CI and five actual host
+packages remain required before merge.
