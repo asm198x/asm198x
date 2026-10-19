@@ -38,6 +38,7 @@ use crate::engine::{AsmError, DiagSeverity, Expr, Operation, Warning, WarningKin
 use crate::source::{SourceLoader, SourceMap};
 use crate::span::FileId;
 
+mod deferred;
 mod link;
 mod project;
 pub(crate) use link::VisRule;
@@ -267,6 +268,7 @@ struct Parsed {
     /// Authored cheap constant names for debug output; canonical keys remain
     /// available to expression resolution and symbol exports.
     const_names: BTreeMap<String, String>,
+    deferred: deferred::Deferred,
 }
 
 // ---------------------------------------------------------------------------
@@ -398,10 +400,14 @@ fn assemble_program(
         for stmt in &parsed.stmts {
             collect_syms(&stmt.kind, &mut refs);
         }
+        for definition in parsed.deferred.definitions.values() {
+            collect_syms(&Kind::Bytes(vec![definition.value.clone()]), &mut refs);
+        }
         let known: BTreeSet<&String> = parsed
             .label_seg
             .keys()
             .chain(parsed.consts.keys())
+            .chain(parsed.deferred.definitions.keys())
             .collect();
         let scoped: BTreeSet<String> = refs
             .iter()
@@ -409,6 +415,11 @@ fn assemble_program(
             .cloned()
             .collect();
         let targets = scope_targets(&scoped, &|name| known.contains(&name.to_string()));
+        for definition in parsed.deferred.definitions.values_mut() {
+            definition.value = map_expr_syms(&definition.value, &|name| {
+                targets.get(name).map(|target| Expr::Sym(target.clone()))
+            });
+        }
         for stmt in &mut parsed.stmts {
             stmt.kind = map_kind_syms(&stmt.kind, &|name| {
                 targets.get(name).map(|t| Expr::Sym(t.clone()))
@@ -537,7 +548,14 @@ fn assemble_program(
         .flatten()
         .collect();
 
-    for stmt in parsed.stmts {
+    let mut definition_positions = BTreeMap::new();
+    let needed_positions: BTreeSet<usize> = parsed
+        .deferred
+        .definitions
+        .values()
+        .map(|definition| definition.position)
+        .collect();
+    for (position, stmt) in parsed.stmts.into_iter().enumerate() {
         let info = layout.seg(&stmt.seg).ok_or_else(|| {
             // Layout errors are stamped with the statement's file (U5), so a
             // failure inside an included file names that file.
@@ -568,6 +586,9 @@ fn assemble_program(
         })?;
         let off = *offsets.entry(stmt.seg.clone()).or_insert(0);
         let addr = info.base + off;
+        if needed_positions.contains(&position) {
+            definition_positions.insert(position, i64::from(addr) + pseudo);
+        }
         match &stmt.kind {
             // A label on the `.org` line binds at the new address, so the
             // offset moves before the label is recorded.
@@ -590,6 +611,16 @@ fn assemble_program(
             // the encoder the last — a debugger would disagree with the bytes).
             // `addr_env` was seeded with the `=` constants, so this covers a
             // label colliding with a constant too.
+            if parsed.deferred.definitions.contains_key(label) {
+                return Err(statement_error(
+                    AsmError::new(
+                        stmt.line,
+                        format!("duplicate symbol `{}`", display_label(label)),
+                    ),
+                    stmt.file,
+                    &stmt.expansion_frames,
+                ));
+            }
             if imported.contains(label) {
                 return Err(statement_error(
                     AsmError::new(
@@ -703,6 +734,28 @@ fn assemble_program(
                 file: stmt.file,
                 expansion_frames: stmt.expansion_frames,
                 item: resolved,
+            });
+        }
+    }
+
+    for (name, definition) in &parsed.deferred.definitions {
+        if imported.contains(name) {
+            return Err(AsmError::at(
+                definition.span.clone(),
+                format!("symbol `{}` is already an import", display_label(name)),
+            ));
+        }
+    }
+    parsed
+        .deferred
+        .finish(&mut addr_env, &definition_positions)?;
+    for name in parsed.deferred.definitions.keys() {
+        if !parsed.consts.contains_key(name) {
+            dbg_symbols.push(debug198x::Symbol {
+                name: parsed.const_names.get(name).unwrap_or(name).clone(),
+                kind: debug198x::SymbolKind::Const {
+                    value: addr_env[name] as u64,
+                },
             });
         }
     }
@@ -2154,7 +2207,7 @@ impl FlatWalk for Walker {
                     self.extension,
                     &self.anons,
                     self.scope_env.anchor_str(),
-                    &self.consts,
+                    &SourceConstants(self),
                     rest,
                     line,
                 ) {
@@ -2398,12 +2451,38 @@ fn split_label_symbol<'a>(
     ))
 }
 
+/// Borrow the live scope for source-time allocation folds without copying
+/// the namespace. Numeric expressions do not fall outward implicitly here.
+struct SourceConstants<'a>(&'a Walker);
+
+impl SourceConstants<'_> {
+    fn fold(&self, value: &Expr, line: usize) -> Result<i64, AsmError> {
+        value.eval_with(
+            &|name| {
+                let reader = self.0;
+                let key = if name.contains(LABEL_SEP) {
+                    name.to_string()
+                } else if let Some(global) = name.strip_prefix("::") {
+                    global.to_string()
+                } else if name.contains("::") {
+                    reader.resolve_qualified(name, line).ok()?
+                } else {
+                    qualify(&reader.path(), name)
+                };
+                reader.consts.get(&key).copied()
+            },
+            None,
+            line,
+        )
+    }
+}
+
 fn parse_op(
     set: &'static isa::InstructionSet,
     extension: Option<&'static isa::InstructionSet>,
     anons: &AnonCtx,
     anchor: &str,
-    consts: &BTreeMap<String, i64>,
+    consts: &SourceConstants<'_>,
     rest: &str,
     line: usize,
 ) -> Result<Kind, AsmError> {
@@ -3054,7 +3133,7 @@ pub const DIRECTIVES: &[Directive] = &[
 fn parse_directive(
     anons: &AnonCtx,
     anchor: &str,
-    consts: &BTreeMap<String, i64>,
+    consts: &SourceConstants<'_>,
     directive: &str,
     line: usize,
 ) -> Result<Kind, AsmError> {
@@ -3231,20 +3310,21 @@ fn parse_directive(
 fn parse_res(
     anons: &AnonCtx,
     anchor: &str,
-    consts: &BTreeMap<String, i64>,
+    consts: &SourceConstants<'_>,
     rest: &str,
     line: usize,
 ) -> Result<Kind, AsmError> {
     let mut parts = rest.splitn(2, ',');
     let count_src = parts.next().unwrap_or("").trim();
-    let count = fold_const(&parse_value(anons, anchor, count_src, line)?, consts, line)
+    let count = consts
+        .fold(&parse_value(anons, anchor, count_src, line)?, line)
         .map_err(|_| AsmError::new(line, "`.res` count must be a constant"))?;
     let count = usize::try_from(count)
         .map_err(|_| AsmError::new(line, "`.res` count must be non-negative"))?;
     let fill = match parts.next() {
         None => None,
         Some(v) => {
-            let n = fold_const(&parse_value(anons, anchor, v, line)?, consts, line)?;
+            let n = consts.fold(&parse_value(anons, anchor, v, line)?, line)?;
             Some(u8::try_from(n).map_err(|_| AsmError::new(line, "`.res` fill must be a byte"))?)
         }
     };
@@ -3353,25 +3433,22 @@ fn parse_assert(anons: &AnonCtx, anchor: &str, rest: &str, line: usize) -> Resul
 fn parse_align(
     anons: &AnonCtx,
     anchor: &str,
-    consts: &BTreeMap<String, i64>,
+    consts: &SourceConstants<'_>,
     rest: &str,
     line: usize,
 ) -> Result<Kind, AsmError> {
     let mut parts = rest.splitn(2, ',');
     let boundary_src = parts.next().unwrap_or("").trim();
-    let boundary = fold_const(
-        &parse_value(anons, anchor, boundary_src, line)?,
-        consts,
-        line,
-    )
-    .map_err(|_| AsmError::new(line, "`.align` boundary must be a constant"))?;
+    let boundary = consts
+        .fold(&parse_value(anons, anchor, boundary_src, line)?, line)
+        .map_err(|_| AsmError::new(line, "`.align` boundary must be a constant"))?;
     if boundary < 1 {
         return Err(AsmError::new(line, "`.align` boundary must be positive"));
     }
     let fill = match parts.next() {
         None => None,
         Some(v) => {
-            let n = fold_const(&parse_value(anons, anchor, v, line)?, consts, line)?;
+            let n = consts.fold(&parse_value(anons, anchor, v, line)?, line)?;
             Some(u8::try_from(n).map_err(|_| AsmError::new(line, "`.align` fill must be a byte"))?)
         }
     };
