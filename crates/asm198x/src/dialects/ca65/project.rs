@@ -275,7 +275,7 @@ fn project_nodes(
             break;
         }
         let node = &nodes[index];
-        if ca65_flat::Ca65Macros.header(&node.source).is_some() {
+        if super::macro_header(&node.source).is_some() {
             let end = (index + 1..nodes.len())
                 .find(|&i| ca65_flat::Ca65Macros.is_end(&nodes[i].source))
                 .ok_or_else(|| {
@@ -436,9 +436,22 @@ fn read_block_head(
     .text;
     let processed = live_text(&processed, st, &sw.reader, line)
         .map_err(|e| super::statement_error(e, file, &node.span.expansion_frames))?;
+    bind_head_label(&processed, node, st, sw).map(str::to_string)
+}
+
+/// Place a selected block or macro-definition label at its authored position.
+fn bind_head_label<'a>(
+    source: &'a str,
+    node: &crate::ast::Node,
+    st: &mut Projection,
+    sw: &mut Sweep<'_>,
+) -> Result<&'a str, AsmError> {
+    let line = node.span.line as usize;
+    let file = node.span.file;
+    sw.reader.anons.file.set(file);
     let (symbol, rest) = sw
         .reader
-        .block_open(&processed, line)
+        .block_open(source, line)
         .map_err(|e| super::statement_error(e, file, &node.span.expansion_frames))?;
     if let Some(symbol) = symbol {
         st.label_seg
@@ -453,7 +466,7 @@ fn read_block_head(
             kind: Kind::Empty,
         });
     }
-    Ok(rest.to_string())
+    Ok(rest)
 }
 
 /// Read one unread line (#481): apply the reader's live text environment,
@@ -683,7 +696,7 @@ fn register_macro(
     node: &crate::ast::Node,
     body: &[crate::ast::Node],
     st: &mut Projection,
-    sw: &Sweep<'_>,
+    sw: &mut Sweep<'_>,
 ) -> Result<(), AsmError> {
     let capture = |raw: &str, at: &crate::span::Span| -> Result<String, AsmError> {
         let raw = capture_text(raw, at, st)?;
@@ -693,8 +706,7 @@ fn register_macro(
         Ok(repeat_text(&raw, at, st))
     };
     let head = capture(&node.source, &node.span)?;
-    let (name, params) = ca65_flat::Ca65Macros
-        .header(&head)
+    let (name, params) = super::macro_header(&head)
         .ok_or_else(|| AsmError::at(node.span.clone(), "invalid macro definition"))?;
     if !is_ident(&name) || params.iter().any(|name| !is_ident(name)) {
         return Err(AsmError::at(
@@ -712,6 +724,7 @@ fn register_macro(
         .iter()
         .map(|n| capture(&n.source, &n.span))
         .collect::<Result<Vec<_>, _>>()?;
+    bind_head_label(&head, node, st, sw)?;
     st.macro_state.register(
         name,
         macros::MacroDef {
