@@ -1,0 +1,1203 @@
+{
+  "binary": "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+  "sha256": "c6df887dcb31f33ff3eb2ee7c49d225db7d3264d303edc0c2512a4af6c353b5a",
+  "results": [
+    {
+      "name": "$20_global",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "072000",
+      "native_hex": "072000",
+      "matches": true
+    },
+    {
+      "name": "$20_cheap",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "072000",
+      "native_hex": "072000",
+      "matches": true
+    },
+    {
+      "name": "$20_scope",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "072000",
+      "native_hex": "072000",
+      "matches": true
+    },
+    {
+      "name": "$1000_global",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "070010",
+      "native_hex": "070010",
+      "matches": true
+    },
+    {
+      "name": "$1000_cheap",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "070010",
+      "native_hex": "070010",
+      "matches": true
+    },
+    {
+      "name": "$1000_scope",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "070010",
+      "native_hex": "070010",
+      "matches": true
+    },
+    {
+      "name": "$2000_global",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "070020",
+      "native_hex": "070020",
+      "matches": true
+    },
+    {
+      "name": "$2000_cheap",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "070020",
+      "native_hex": "070020",
+      "matches": true
+    },
+    {
+      "name": "$2000_scope",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "070020",
+      "native_hex": "070020",
+      "matches": true
+    },
+    {
+      "name": "metadata_only",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0020",
+      "native_hex": "0020",
+      "matches": true
+    },
+    {
+      "name": "mode_label",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0020",
+      "native_hex": "0020",
+      "matches": true
+    },
+    {
+      "name": "multiple_origins",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\n",
+      "hex": "070800200030",
+      "native_hex": "070800200030",
+      "matches": true
+    },
+    {
+      "name": "segment_change",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+      "hex": "0100200720052002",
+      "native_hex": "0100200120062002",
+      "matches": false
+    },
+    {
+      "name": "other_segment_reloc",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+      "hex": "0100200710051002",
+      "native_hex": "0100200710051002",
+      "matches": true
+    },
+    {
+      "name": "each_segment_origin",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+      "hex": "0100200030fe2f02",
+      "native_hex": "0100200030053002",
+      "matches": false
+    },
+    {
+      "name": "return_relative_segment",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+      "hex": "0100100030fe2f02",
+      "native_hex": "0100100030053002",
+      "matches": false
+    },
+    {
+      "name": "RODATA_0_keep",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\n",
+      "hex": "01002007200520",
+      "native_hex": "01002001200520",
+      "matches": false
+    },
+    {
+      "name": "RODATA_0_org",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\n",
+      "hex": "0100200030fe2f",
+      "native_hex": "01002000300430",
+      "matches": false
+    },
+    {
+      "name": "RODATA_0_reloc",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\n",
+      "hex": "01002007100510",
+      "native_hex": "01002007100510",
+      "matches": true
+    },
+    {
+      "name": "RODATA_0_align",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\n",
+      "hex": "01002007200520",
+      "native_hex": "01002001200520",
+      "matches": false
+    },
+    {
+      "name": "RODATA_1_keep",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+      "hex": "0100200720052000",
+      "native_hex": "0100200120062000",
+      "matches": false
+    },
+    {
+      "name": "RODATA_1_org",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+      "hex": "0100200030fe2f00",
+      "native_hex": "0100200030053000",
+      "matches": false
+    },
+    {
+      "name": "RODATA_1_reloc",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+      "hex": "0100200710051000",
+      "native_hex": "0100200710051000",
+      "matches": true
+    },
+    {
+      "name": "RODATA_1_align",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 11 byte(s) -> out.bin\n",
+      "hex": "0100200b20052000000000",
+      "native_hex": "0100200520092000000000",
+      "matches": false
+    },
+    {
+      "name": "RODATA_3_keep",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 10 byte(s) -> out.bin\n",
+      "hex": "01002007200520000000",
+      "native_hex": "01002001200820000000",
+      "matches": false
+    },
+    {
+      "name": "RODATA_3_org",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 10 byte(s) -> out.bin\n",
+      "hex": "0100200030fe2f000000",
+      "native_hex": "01002000300730000000",
+      "matches": false
+    },
+    {
+      "name": "RODATA_3_reloc",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 10 byte(s) -> out.bin\n",
+      "hex": "01002007100510000000",
+      "native_hex": "01002007100510000000",
+      "matches": true
+    },
+    {
+      "name": "RODATA_3_align",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 11 byte(s) -> out.bin\n",
+      "hex": "0100200b20052000000000",
+      "native_hex": "0100200520092000000000",
+      "matches": false
+    },
+    {
+      "name": "BSS_0_keep",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\n",
+      "hex": "01002020100520",
+      "native_hex": "01002001200520",
+      "matches": false
+    },
+    {
+      "name": "BSS_0_org",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\n",
+      "hex": "0100200030e53f",
+      "native_hex": "01002000300430",
+      "matches": false
+    },
+    {
+      "name": "BSS_0_reloc",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\n",
+      "hex": "01002020000510",
+      "native_hex": "01002020000510",
+      "matches": true
+    },
+    {
+      "name": "BSS_0_align",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\n",
+      "hex": "01002020100520",
+      "native_hex": "01002001200520",
+      "matches": false
+    },
+    {
+      "name": "BSS_1_keep",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\n",
+      "hex": "01002020100520",
+      "native_hex": "01002001200620",
+      "matches": false
+    },
+    {
+      "name": "BSS_1_org",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\n",
+      "hex": "0100200030e53f",
+      "native_hex": "01002000300530",
+      "matches": false
+    },
+    {
+      "name": "BSS_1_reloc",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\n",
+      "hex": "01002020000510",
+      "native_hex": "01002020000510",
+      "matches": true
+    },
+    {
+      "name": "BSS_1_align",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\n",
+      "hex": "01002024100520",
+      "native_hex": "01002005200920",
+      "matches": false
+    },
+    {
+      "name": "BSS_3_keep",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\n",
+      "hex": "01002020100520",
+      "native_hex": "01002001200820",
+      "matches": false
+    },
+    {
+      "name": "BSS_3_org",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\n",
+      "hex": "0100200030e53f",
+      "native_hex": "01002000300730",
+      "matches": false
+    },
+    {
+      "name": "BSS_3_reloc",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\n",
+      "hex": "01002020000510",
+      "native_hex": "01002020000510",
+      "matches": true
+    },
+    {
+      "name": "BSS_3_align",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\n",
+      "hex": "01002024100520",
+      "native_hex": "01002005200920",
+      "matches": false
+    },
+    {
+      "name": "ZEROPAGE_0_keep",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\n",
+      "hex": "01002020100520",
+      "native_hex": "01002001200520",
+      "matches": false
+    },
+    {
+      "name": "ZEROPAGE_0_org",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\n",
+      "hex": "0100200030e53f",
+      "native_hex": "01002000300430",
+      "matches": false
+    },
+    {
+      "name": "ZEROPAGE_0_reloc",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\n",
+      "hex": "01002020000510",
+      "native_hex": "01002020000510",
+      "matches": true
+    },
+    {
+      "name": "ZEROPAGE_0_align",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\n",
+      "hex": "01002020100520",
+      "native_hex": "01002001200520",
+      "matches": false
+    },
+    {
+      "name": "ZEROPAGE_1_keep",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\n",
+      "hex": "01002020100520",
+      "native_hex": "01002001200620",
+      "matches": false
+    },
+    {
+      "name": "ZEROPAGE_1_org",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\n",
+      "hex": "0100200030e53f",
+      "native_hex": "01002000300530",
+      "matches": false
+    },
+    {
+      "name": "ZEROPAGE_1_reloc",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\n",
+      "hex": "01002020000510",
+      "native_hex": "01002020000510",
+      "matches": true
+    },
+    {
+      "name": "ZEROPAGE_1_align",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\n",
+      "hex": "01002024100520",
+      "native_hex": "01002005200920",
+      "matches": false
+    },
+    {
+      "name": "ZEROPAGE_3_keep",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\n",
+      "hex": "01002020100520",
+      "native_hex": "01002001200820",
+      "matches": false
+    },
+    {
+      "name": "ZEROPAGE_3_org",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\n",
+      "hex": "0100200030e53f",
+      "native_hex": "01002000300730",
+      "matches": false
+    },
+    {
+      "name": "ZEROPAGE_3_reloc",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\n",
+      "hex": "01002020000510",
+      "native_hex": "01002020000510",
+      "matches": true
+    },
+    {
+      "name": "ZEROPAGE_3_align",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\n",
+      "hex": "01002024100520",
+      "native_hex": "01002005200920",
+      "matches": false
+    },
+    {
+      "name": "data_byte",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+      "hex": "00200203",
+      "native_hex": "02200001",
+      "matches": false
+    },
+    {
+      "name": "data_word",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\n",
+      "hex": "002002200420",
+      "native_hex": "042000200220",
+      "matches": false
+    },
+    {
+      "name": "data_dbyt",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\n",
+      "hex": "002020022004",
+      "native_hex": "042020002002",
+      "matches": false
+    },
+    {
+      "name": "data_dword",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 10 byte(s) -> out.bin\n",
+      "hex": "00200220000006200000",
+      "native_hex": "08200020000004200000",
+      "matches": false
+    },
+    {
+      "name": "push_pop",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+      "hex": "0100200320000000",
+      "native_hex": "0100200620000000",
+      "matches": false
+    },
+    {
+      "name": "include",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+      "hex": "0100200720052002",
+      "native_hex": "0100200120062002",
+      "matches": false
+    },
+    {
+      "name": "macro",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+      "hex": "0100200720052002",
+      "native_hex": "0100200120062002",
+      "matches": false
+    },
+    {
+      "name": "repeat",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\n",
+      "hex": "002002200001",
+      "native_hex": "012004200001",
+      "matches": false
+    },
+    {
+      "name": "alias_definition_pc",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\n",
+      "hex": "010520032002",
+      "native_hex": "010120042002",
+      "matches": false
+    },
+    {
+      "name": "absolute_bit_branch",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+      "hex": "0f200101",
+      "native_hex": "0f200001",
+      "matches": false
+    },
+    {
+      "name": "relative_bit_branch",
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: constant bit-branch target requires absolute mode (`.org`)\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    }
+  ]
+}
