@@ -31,3 +31,12 @@ exclude quoted/comment digits and unopened includes, and preserve all measured
 .end boundaries including operands on its own line. Do not call an expression
 parser on skipped source or claim the whole issue is fixed by conversion alone.
 The repeat-execution false refusal is tracked separately from numeric limits.
+
+## First-stage final controls
+
+The selected-conversion fixture has 186 native cases, including actual value
+bytes and literal .end stopping controls. All 1572 Rust tests passed
+(38 ignored), 83 Node tests passed, and all 68 mandatory archive cohorts and
+both corruption controls passed. The new cohort runs 558 commands. A clean
+final-source 4510 replay and five-host PR qualification still precede merge.
+The parent #788 remains open for lexical source admission.

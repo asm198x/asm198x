@@ -3565,6 +3565,132 @@
       "stderr": "",
       "hex": "04000000",
       "matches_native": false
+    },
+    {
+      "name": "end_tail_decimal",
+      "dialect": "ca65",
+      "argv": [
+        "/private/tmp/asm198x-numeric-limits-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--message-format=json"
+      ],
+      "exit": 0,
+      "stdout": "{\"version\":1,\"bytes\":[7],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"section_debug\":[{\"section\":{\"id\":0,\"name\":\"CODE\",\"base\":4096},\"file_offset\":0,\"debug\":{\"symbols\":[],\"lines\":[{\"line\":1,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"}}],\"areas\":[{\"name\":\"MAIN\",\"start\":4096,\"size\":28672,\"used\":1,\"free\":28671,\"largest_free\":28671,\"segments\":[{\"name\":\"CODE\",\"base\":4096,\"length\":1}]}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+      "stderr": "",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "end_tail_hex",
+      "dialect": "ca65",
+      "argv": [
+        "/private/tmp/asm198x-numeric-limits-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--message-format=json"
+      ],
+      "exit": 0,
+      "stdout": "{\"version\":1,\"bytes\":[7],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"section_debug\":[{\"section\":{\"id\":0,\"name\":\"CODE\",\"base\":4096},\"file_offset\":0,\"debug\":{\"symbols\":[],\"lines\":[{\"line\":1,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"}}],\"areas\":[{\"name\":\"MAIN\",\"start\":4096,\"size\":28672,\"used\":1,\"free\":28671,\"largest_free\":28671,\"segments\":[{\"name\":\"CODE\",\"base\":4096,\"length\":1}]}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+      "stderr": "",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "end_tail_ident",
+      "dialect": "ca65",
+      "argv": [
+        "/private/tmp/asm198x-numeric-limits-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--message-format=json"
+      ],
+      "exit": 0,
+      "stdout": "{\"version\":1,\"bytes\":[7],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"section_debug\":[{\"section\":{\"id\":0,\"name\":\"CODE\",\"base\":4096},\"file_offset\":0,\"debug\":{\"symbols\":[],\"lines\":[{\"line\":1,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"}}],\"areas\":[{\"name\":\"MAIN\",\"start\":4096,\"size\":28672,\"used\":1,\"free\":28671,\"largest_free\":28671,\"segments\":[{\"name\":\"CODE\",\"base\":4096,\"length\":1}]}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+      "stderr": "",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "end_tail_include",
+      "dialect": "ca65",
+      "argv": [
+        "/private/tmp/asm198x-numeric-limits-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--message-format=json"
+      ],
+      "exit": 0,
+      "stdout": "{\"version\":1,\"bytes\":[7],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"section_debug\":[{\"section\":{\"id\":0,\"name\":\"CODE\",\"base\":4096},\"file_offset\":0,\"debug\":{\"symbols\":[],\"lines\":[{\"line\":1,\"offset\":0,\"length\":1,\"file\":1}],\"cycle_coverage\":\"full\"}}],\"areas\":[{\"name\":\"MAIN\",\"start\":4096,\"size\":28672,\"used\":1,\"free\":28671,\"largest_free\":28671,\"segments\":[{\"name\":\"CODE\",\"base\":4096,\"length\":1}]}],\"diagnostics\":[],\"files\":[\"input.s\",\"/private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-numeric-conversion-70cuivou/ending.inc\"]}\n",
+      "stderr": "",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "captured_end_decimal",
+      "dialect": "ca65",
+      "argv": [
+        "/private/tmp/asm198x-numeric-limits-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--message-format=json"
+      ],
+      "exit": 0,
+      "stdout": "{\"version\":1,\"bytes\":[],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"areas\":[{\"name\":\"MAIN\",\"start\":4096,\"size\":28672,\"used\":0,\"free\":28672,\"largest_free\":28672}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+      "stderr": "",
+      "hex": "",
+      "matches_native": false
+    },
+    {
+      "name": "captured_end_hex_suffix",
+      "dialect": "ca65",
+      "argv": [
+        "/private/tmp/asm198x-numeric-limits-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":0,\"line\":4,\"col\":0,\"expansion_frames\":[{\"macro_name\":\"finish\",\"defined_at\":{\"file\":0,\"line\":1,\"col\":1,\"expansion_frames\":[],\"path\":\"input.s\"},\"invoked_at\":{\"file\":0,\"line\":4,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"}}],\"path\":\"input.s\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"`.sprintf` needs a number it can work out where it stands, and `100000000h` is not one: this pass runs before the layout, so a label's address cannot be reached from here\",\"fix\":null}]\n",
+      "stderr": "",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
     }
   ]
 }

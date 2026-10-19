@@ -14,10 +14,12 @@ def main() -> None:
     args = parser.parse_args()
     binary = args.binary.resolve(strict=True)
     facts = json.loads(Path(__file__).with_name('selected-conversion-native.json').read_text())
-    assert len(facts['cases']) == 180
+    assert len(facts['cases']) == 186
     rows = []
     with tempfile.TemporaryDirectory(prefix='asm198x-numeric-conversion-') as td:
         root = Path(td)
+        for name, text in facts['files'].items():
+            root.joinpath(name).write_text(text)
         for fact in facts['cases']:
             root.joinpath('input.s').write_text(fact['source'])
             root.joinpath('input.cfg').write_text(fact['config'])

@@ -53,7 +53,7 @@ fn native_numeric_conversion_preserves_lexical_limits_before_arithmetic() {
         serde_json::from_str(include_str!("fixtures/ca65-numeric-conversion.json"))
             .expect("native captures");
     let cases = facts["cases"].as_array().expect("cases");
-    assert_eq!(cases.len(), 180);
+    assert_eq!(cases.len(), 186);
     let root = scratch::dir("ca65-numeric-conversion");
     for (name, text) in facts["files"].as_object().expect("includes") {
         std::fs::create_dir_all(root.join(name).parent().expect("include parent"))

@@ -1067,7 +1067,7 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
     });
     test('ca65_numeric_conversion', () => {
       const facts = require('../crates/asm198x/tests/fixtures/ca65-numeric-conversion.json');
-      assert.equal(facts.cases.length, 180);
+      assert.equal(facts.cases.length, 186);
       for (const [name, text] of Object.entries(facts.files)) {
         fs.mkdirSync(path.dirname(path.join(root, name)), { recursive: true }); write(name, text);
       }

@@ -491,6 +491,20 @@ fn sweep_line(
     let file = node.span.file;
     let source = capture_text(&node.source, &node.span, st)?;
     let source = repeat_text(&source, &node.span, st);
+    // A file's literal .end stops before text evaluation can read its tail.
+    // Captured macro/repeat sources keep their existing token-source path.
+    let source = if st.token_depth == 0 {
+        let code = super::strip_comment(&source).trim_start();
+        let head = super::split_label_head(code).map_or(code, |(_, head)| head);
+        let (word, _) = split_first_word(head);
+        if word.eq_ignore_ascii_case(".end") {
+            code[..code.len() - head.len() + word.len()].to_string()
+        } else {
+            source
+        }
+    } else {
+        source
+    };
     let Some(processed) = sw
         .reader
         .preprocess_line(&source, line, file)
