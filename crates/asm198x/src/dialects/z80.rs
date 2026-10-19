@@ -4804,7 +4804,7 @@ fn tokenize_impl<S: Z80Syntax>(
                 i += 1;
             }
             '\'' => {
-                if i + 2 < chars.len() && chars[i + 2] == '\'' {
+                if i + 2 < chars.len() && chars[i + 1] != '\'' && chars[i + 2] == '\'' {
                     let s: String = chars[i..=i + 2].iter().collect();
                     tokens.push(Tok::Num(syntax.parse_number(&s, line)?));
                     i += 3;
