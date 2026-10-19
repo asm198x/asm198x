@@ -1,0 +1,95 @@
+[
+  {
+    "source": ".byte .tcount({.ident(\" mark\")})\n",
+    "processes": [
+      {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "i.s",
+          "-o",
+          "i.o"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "i.s(1): Error: Argument of .IDENT is not a valid identifier\ni.s(1): Error: ')' expected\n"
+      },
+      {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "i.cfg",
+          "i.s",
+          "-o",
+          "i.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: i.s:1: error: `.ident` argument is not a valid identifier\n"
+      }
+    ]
+  },
+  {
+    "source": ".byte .match({.ident(\" mark\")},{mark})\n",
+    "processes": [
+      {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "i.s",
+          "-o",
+          "i.o"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "i.s(1): Error: Argument of .IDENT is not a valid identifier\ni.s(1): Error: Unexpected end of line\ni.s(1): Error: ')' expected\n"
+      },
+      {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "i.cfg",
+          "i.s",
+          "-o",
+          "i.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: i.s:1: error: `.ident` argument is not a valid identifier\n"
+      }
+    ]
+  },
+  {
+    "source": ".byte .blank({.ident(\" mark\")})\n",
+    "processes": [
+      {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "i.s",
+          "-o",
+          "i.o"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "i.s(1): Error: Argument of .IDENT is not a valid identifier\ni.s(1): Error: ')' expected\n"
+      },
+      {
+        "argv": [
+          "/private/tmp/asm198x-format-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "i.cfg",
+          "i.s",
+          "-o",
+          "i.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: i.s:1: error: `.ident` argument is not a valid identifier\n"
+      }
+    ]
+  }
+]
