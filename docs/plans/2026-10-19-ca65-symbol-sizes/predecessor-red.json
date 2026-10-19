@@ -1,0 +1,1906 @@
+{
+  "binary": "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+  "sha256": "c6b6a734f81e12173034edb8dd016c7352690458e211596fc2a42cd399dfdedc",
+  "results": [
+    {
+      "name": "label_byte",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "070100",
+      "matches": false
+    },
+    {
+      "name": "cheap_byte",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: size of `@item` is unknown\n",
+      "hex": null,
+      "native_hex": "070100",
+      "matches": false
+    },
+    {
+      "name": "procedure_byte",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "070100",
+      "matches": false
+    },
+    {
+      "name": "label_word",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "07000200",
+      "matches": false
+    },
+    {
+      "name": "cheap_word",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: size of `@item` is unknown\n",
+      "hex": null,
+      "native_hex": "07000200",
+      "matches": false
+    },
+    {
+      "name": "procedure_word",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "07000200",
+      "matches": false
+    },
+    {
+      "name": "label_dword",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "070000000400",
+      "matches": false
+    },
+    {
+      "name": "cheap_dword",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: size of `@item` is unknown\n",
+      "hex": null,
+      "native_hex": "070000000400",
+      "matches": false
+    },
+    {
+      "name": "procedure_dword",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "070000000400",
+      "matches": false
+    },
+    {
+      "name": "label_dbyt",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "00070200",
+      "matches": false
+    },
+    {
+      "name": "cheap_dbyt",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: size of `@item` is unknown\n",
+      "hex": null,
+      "native_hex": "00070200",
+      "matches": false
+    },
+    {
+      "name": "procedure_dbyt",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "00070200",
+      "matches": false
+    },
+    {
+      "name": "label_string",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "4142430300",
+      "matches": false
+    },
+    {
+      "name": "cheap_string",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: size of `@item` is unknown\n",
+      "hex": null,
+      "native_hex": "4142430300",
+      "matches": false
+    },
+    {
+      "name": "procedure_string",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "4142430300",
+      "matches": false
+    },
+    {
+      "name": "label_empty_string",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "0000",
+      "matches": false
+    },
+    {
+      "name": "cheap_empty_string",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: size of `@item` is unknown\n",
+      "hex": null,
+      "native_hex": "0000",
+      "matches": false
+    },
+    {
+      "name": "procedure_empty_string",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "label_reserve",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "0000000300",
+      "matches": false
+    },
+    {
+      "name": "cheap_reserve",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: size of `@item` is unknown\n",
+      "hex": null,
+      "native_hex": "0000000300",
+      "matches": false
+    },
+    {
+      "name": "procedure_reserve",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "0000000300",
+      "matches": false
+    },
+    {
+      "name": "label_filled_reserve",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "aaaaaa0300",
+      "matches": false
+    },
+    {
+      "name": "cheap_filled_reserve",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: size of `@item` is unknown\n",
+      "hex": null,
+      "native_hex": "aaaaaa0300",
+      "matches": false
+    },
+    {
+      "name": "procedure_filled_reserve",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "aaaaaa0300",
+      "matches": false
+    },
+    {
+      "name": "label_instruction",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "ea0100",
+      "matches": false
+    },
+    {
+      "name": "cheap_instruction",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: size of `@item` is unknown\n",
+      "hex": null,
+      "native_hex": "ea0100",
+      "matches": false
+    },
+    {
+      "name": "procedure_instruction",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "ea0100",
+      "matches": false
+    },
+    {
+      "name": "label_short_instruction",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "a5120200",
+      "matches": false
+    },
+    {
+      "name": "cheap_short_instruction",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: size of `@item` is unknown\n",
+      "hex": null,
+      "native_hex": "a5120200",
+      "matches": false
+    },
+    {
+      "name": "procedure_short_instruction",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "a5120200",
+      "matches": false
+    },
+    {
+      "name": "label_long_instruction",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "ad34120300",
+      "matches": false
+    },
+    {
+      "name": "cheap_long_instruction",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: size of `@item` is unknown\n",
+      "hex": null,
+      "native_hex": "ad34120300",
+      "matches": false
+    },
+    {
+      "name": "procedure_long_instruction",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "ad34120300",
+      "matches": false
+    },
+    {
+      "name": "label_many_lines",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "0708000100",
+      "matches": false
+    },
+    {
+      "name": "cheap_many_lines",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: size of `@item` is unknown\n",
+      "hex": null,
+      "native_hex": "0708000100",
+      "matches": false
+    },
+    {
+      "name": "procedure_many_lines",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "0708000300",
+      "matches": false
+    },
+    {
+      "name": "label_alignment",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "000000000100",
+      "matches": false
+    },
+    {
+      "name": "cheap_alignment",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: size of `@item` is unknown\n",
+      "hex": null,
+      "native_hex": "000000000100",
+      "matches": false
+    },
+    {
+      "name": "procedure_alignment",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "000000000400",
+      "matches": false
+    },
+    {
+      "name": "label_explicit_alignment",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "00aaaaaa0100",
+      "matches": false
+    },
+    {
+      "name": "cheap_explicit_alignment",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: size of `@item` is unknown\n",
+      "hex": null,
+      "native_hex": "00aaaaaa0100",
+      "matches": false
+    },
+    {
+      "name": "procedure_explicit_alignment",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "00aaaaaa0400",
+      "matches": false
+    },
+    {
+      "name": "label_org",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "070020",
+      "matches": false
+    },
+    {
+      "name": "cheap_org",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: size of `@item` is unknown\n",
+      "hex": null,
+      "native_hex": "070020",
+      "matches": false
+    },
+    {
+      "name": "procedure_org",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "070100",
+      "matches": false
+    },
+    {
+      "name": "label_empty",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "0000",
+      "matches": false
+    },
+    {
+      "name": "cheap_empty",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: size of `@item` is unknown\n",
+      "hex": null,
+      "native_hex": "0000",
+      "matches": false
+    },
+    {
+      "name": "procedure_empty",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "label_binary",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "4142430300",
+      "matches": false
+    },
+    {
+      "name": "cheap_binary",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: size of `@item` is unknown\n",
+      "hex": null,
+      "native_hex": "4142430300",
+      "matches": false
+    },
+    {
+      "name": "procedure_binary",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "4142430300",
+      "matches": false
+    },
+    {
+      "name": "label_own_operand",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "label_forward",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "label_separate_line",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "070000",
+      "matches": false
+    },
+    {
+      "name": "label_two_on_one_line",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: size of `first` is unknown\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "label_alias",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: size of `ALIAS` is unknown\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "constant",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: size of `VALUE` is unknown\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "procedure_own",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "procedure_forward",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "procedure_large",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000101",
+      "matches": false
+    },
+    {
+      "name": "procedure_alias",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: size of `ALIAS` is unknown\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "scope",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: size of `inner` is unknown\n",
+      "hex": null,
+      "native_hex": "070100",
+      "matches": false
+    },
+    {
+      "name": "scope_label",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `.endscope` with no open `.scope`\n",
+      "hex": null,
+      "native_hex": "070000",
+      "matches": false
+    },
+    {
+      "name": "outer_before_local",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "07010009000200",
+      "matches": false
+    },
+    {
+      "name": "qualified_label",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: size of `inner::item` is unknown\n",
+      "hex": null,
+      "native_hex": "070100",
+      "matches": false
+    },
+    {
+      "name": "qualified_forward",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: no such scope `inner`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "reservation_query",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: `.res` count must be a constant\n",
+      "hex": null,
+      "native_hex": "0700aaaa",
+      "matches": false
+    },
+    {
+      "name": "cheap_reservation",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `.res` count must be a constant\n",
+      "hex": null,
+      "native_hex": "0700aaaa",
+      "matches": false
+    },
+    {
+      "name": "bss_label",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "0300",
+      "matches": false
+    },
+    {
+      "name": "zp_label",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "0300",
+      "matches": false
+    },
+    {
+      "name": "procedure_segment_return",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:8: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "010402000203",
+      "matches": false
+    },
+    {
+      "name": "procedure_segment_leave",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:7: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "0101000203",
+      "matches": false
+    },
+    {
+      "name": "procedure_reloc",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:8: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "0102030300",
+      "matches": false
+    },
+    {
+      "name": "procedure_nested",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:8: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "0102000304000200",
+      "matches": false
+    },
+    {
+      "name": "include",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "070100",
+      "matches": false
+    },
+    {
+      "name": "macro",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: size of `item` is unknown\nin expansion of macro `make` defined at input.s:1, invoked at input.s:5\n",
+      "hex": null,
+      "native_hex": "07000200",
+      "matches": false
+    },
+    {
+      "name": "repeat",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: size of `L0` is unknown\n",
+      "hex": null,
+      "native_hex": "000100010100020100",
+      "matches": false
+    },
+    {
+      "name": "reference_effect",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "0700010000",
+      "matches": false
+    },
+    {
+      "name": "private_property",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "0701000900",
+      "matches": false
+    },
+    {
+      "name": "missing",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: size of `missing` is unknown\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "org_label_address",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0020",
+      "native_hex": "0010",
+      "matches": false
+    },
+    {
+      "name": "absolute_org_label_address",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0030",
+      "native_hex": "0020",
+      "matches": false
+    },
+    {
+      "name": "reloc_label_address",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0010",
+      "native_hex": "0020",
+      "matches": false
+    },
+    {
+      "name": "org_pc_relative",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "absolute_pc_relative",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "0300",
+      "matches": false
+    },
+    {
+      "name": "org_forward",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "org_delta_after_bytes",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "07ff1f0000",
+      "matches": false
+    },
+    {
+      "name": "org_delta_absolute",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "00100000",
+      "matches": false
+    },
+    {
+      "name": "org_delta_backward",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "reloc_delta",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "segment_line_size",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "070000",
+      "matches": false
+    },
+    {
+      "name": "include_line_size",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "0708000000",
+      "matches": false
+    },
+    {
+      "name": "repeat_line_size",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "0707070000",
+      "matches": false
+    },
+    {
+      "name": "conditional_line_size",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "070000",
+      "matches": false
+    },
+    {
+      "name": "label_on_endproc",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: line 1: `.proc` is never closed\n",
+      "hex": null,
+      "native_hex": "0701000000",
+      "matches": false
+    },
+    {
+      "name": "empty_scope",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: size of `inner` is unknown\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "scope_only_other_segment",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: size of `inner` is unknown\n",
+      "hex": null,
+      "native_hex": "07080200",
+      "matches": false
+    },
+    {
+      "name": "procedure_only_other_segment",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: size of `item` is unknown\n",
+      "hex": null,
+      "native_hex": "07080200",
+      "matches": false
+    },
+    {
+      "name": "scope_initial_later",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:7: error: size of `inner` is unknown\n",
+      "hex": null,
+      "native_hex": "0901000708",
+      "matches": false
+    },
+    {
+      "name": "scope_existing_segment_order",
+      "argv": [
+        "/private/tmp/asm198x-symbol-sizes-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:13: error: size of `inner` is unknown\n",
+      "hex": null,
+      "native_hex": "0200010708",
+      "matches": false
+    }
+  ]
+}
