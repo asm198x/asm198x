@@ -23,8 +23,12 @@ refuses. Retain that final existence check separately from numeric demand.
 The initial capture is retained as native-initial.json. Its lazy cyclic alias
 case timed out after ten seconds (exit 124), and its macro parameter spelling
 was invalid. Neither is qualification evidence. The completed matrix replaces
-them with a known short-circuit constant and a valid macro parameter; every
-completed native process exits 0 or 1.
+the cycle with a known short-circuit constant, but its revised macro parameter
+control still has a syntax error: native ca65 has no comma between the macro
+name and first parameter. That case is a syntax refusal, not a valid macro
+execution control. Every completed native process exits 0 or 1; the seven
+range qualification cases contain no macros. The follow-up numeric audit
+retains corrected macro admission controls separately.
 
 Do not implement a broad eager fold or flatten scope lookup. The next private
 design must track source labels/definition PCs and relocatable segment terms,
