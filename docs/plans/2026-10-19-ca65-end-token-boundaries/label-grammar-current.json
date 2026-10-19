@@ -1,0 +1,116 @@
+{
+  "producer": {
+    "source_commit": "cc8a56a9fd1a8d5931a1f765862fc23a5658191b",
+    "source_tree": "a8d6d4faa218832a4f1997624b2711ea67a66173",
+    "source_clean": true,
+    "profile": "debug",
+    "features": [
+      "lua"
+    ],
+    "sha256": "0388cb0e93f585f8d95d783a683877008c17caf5057dcdb533945079a8c71995"
+  },
+  "results": [
+    {
+      "name": "plain_spaced",
+      "argv": [
+        "/private/tmp/asm198x-end-tokens-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: unexpected character `:` in expression\n",
+      "hex": "6f6c64"
+    },
+    {
+      "name": "plain_attached",
+      "argv": [
+        "/private/tmp/asm198x-end-tokens-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "070010"
+    },
+    {
+      "name": "mnemonic_spaced",
+      "argv": [
+        "/private/tmp/asm198x-end-tokens-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: unexpected character `:` in expression\n",
+      "hex": "6f6c64"
+    },
+    {
+      "name": "mnemonic_attached",
+      "argv": [
+        "/private/tmp/asm198x-end-tokens-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "070010"
+    },
+    {
+      "name": "qualified_without_end",
+      "argv": [
+        "/private/tmp/asm198x-end-tokens-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: invalid label `outer::finish`\n",
+      "hex": "6f6c64"
+    },
+    {
+      "name": "operand_colon",
+      "argv": [
+        "/private/tmp/asm198x-end-tokens-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: unexpected character `:` in expression\n",
+      "hex": "6f6c64"
+    }
+  ]
+}
