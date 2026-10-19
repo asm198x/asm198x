@@ -58,3 +58,10 @@ cases, 782 commands total. Its omission control must fail qualification.
 all workspace targets, Rust formatting, Ruff and docs checks pass. The actual
 current package passes all 69 cohorts and both corruption controls fail as
 required. The clean predecessor package fails only ca65_numeric_admission.
+
+The final clean producer is 2440ca723bf40f35e1c079a007d1460abc0acc54. Its
+standalone CLI has a different executable hash from the preceding workspace
+build, so the clean native comparison and all three actual package checks
+were run again against that exact executable. They pass. The clean unchanged
+4510 replay preserves all 564 native bytes; seven process outcomes and all
+fourteen streams were checked, including a changed-byte negative control.
