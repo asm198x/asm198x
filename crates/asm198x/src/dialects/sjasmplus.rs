@@ -987,23 +987,29 @@ impl Z80Syntax for SjasmplusSyntax {
         let lower = word.to_ascii_lowercase();
         match lower.as_str() {
             "db" | "defb" | "defm" | "dm" | "byte" => {
-                return Ok(Some(Operation::Bytes(flat(data_items(args, line)?))));
+                return Ok(Some(Operation::Bytes(flat(data_items(args, line, true)?))));
             }
             "dw" | "defw" | "word" => {
-                return Ok(Some(Operation::Words(packed(data_items(args, line)?))));
+                return Ok(Some(Operation::Words(packed(data_items(
+                    args, line, false,
+                )?))));
             }
             "dword" | "dd" | "defd" => {
-                return Ok(Some(wide(packed(data_items(args, line)?), 4)));
+                return Ok(Some(wide(packed(data_items(args, line, false)?), 4)));
             }
-            "d24" => return Ok(Some(wide(packed(data_items(args, line)?), 3))),
+            "d24" => return Ok(Some(wide(packed(data_items(args, line, false)?), 3))),
             // `dz` terminates with a zero; `dc` sets bit 7 on the last
             // character of each string and leaves numbers alone.
             "dz" => {
-                let mut bytes = flat(data_items(args, line)?);
+                let mut bytes = flat(data_items(args, line, true)?);
                 bytes.push(Expr::Num(0));
                 return Ok(Some(Operation::Bytes(bytes)));
             }
-            "dc" => return Ok(Some(Operation::Bytes(marked(data_items(args, line)?)))),
+            "dc" => {
+                return Ok(Some(Operation::Bytes(marked(data_items(
+                    args, line, true,
+                )?))));
+            }
             "dh" | "hex" | "defh" => {
                 return Ok(Some(Operation::Bytes(hex_bytes(args, line)?)));
             }
@@ -1014,7 +1020,7 @@ impl Z80Syntax for SjasmplusSyntax {
             "abyte" | "abytec" | "abytez" => {
                 let (offset, rest) = crate::dialects::mos6502::split_first_word(args.trim());
                 let offset = z80::parse_value(self, offset, line)?;
-                let items = data_items(rest, line)?;
+                let items = data_items(rest, line, true)?;
                 let mut bytes = if lower == "abytec" {
                     marked(items)
                 } else {
@@ -1083,13 +1089,17 @@ impl Z80Syntax for SjasmplusSyntax {
     }
 
     /// sjasmplus numbers: hex (`$`/`0x`/`#` prefix, `h` suffix), binary (`%`/`0b`
-    /// prefix, `b` suffix), `'c'` char, decimal.
+    /// prefix, `b` suffix), packed single-quoted bytes, decimal.
     fn parse_number(&self, tok: &str, line: usize) -> Result<i64, AsmError> {
         let t = tok.trim();
         let bad = || AsmError::new(line, format!("invalid number `{tok}`"));
 
-        if t.starts_with('\'') && t.ends_with('\'') && t.chars().count() == 3 {
-            return t.chars().nth(1).map(|c| c as i64).ok_or_else(bad);
+        if t.starts_with('\'') {
+            let (bytes, end) = single_quoted(t, line)?;
+            if end != t.len() {
+                return Err(bad());
+            }
+            return Ok(i64::from(pack_bytes(bytes) as i32));
         }
         // Validate separators in the actual digit body, after selecting its
         // radix. Removing quotes first would wrongly accept `0'xff` or `10'h`.
@@ -1146,7 +1156,30 @@ enum DataItem {
     Value(Expr),
 }
 
-fn data_items(rest: &str, line: usize) -> Result<Vec<DataItem>, AsmError> {
+/// Single quotes double their delimiter and leave backslashes literal. Native
+/// character input ends at NUL/CR/LF even when the closing quote appears later.
+fn single_quoted(piece: &str, line: usize) -> Result<(Vec<u8>, usize), AsmError> {
+    let source = piece.as_bytes();
+    let mut bytes = Vec::new();
+    let mut i = 1;
+    while let Some(&byte) = source.get(i) {
+        match byte {
+            0 | b'\r' | b'\n' => break,
+            b'\'' if source.get(i + 1) == Some(&b'\'') => {
+                bytes.push(b'\'');
+                i += 2;
+            }
+            b'\'' => return Ok((bytes, i + 1)),
+            _ => {
+                bytes.push(byte);
+                i += 1;
+            }
+        }
+    }
+    Err(AsmError::new(line, "unterminated single-quoted literal"))
+}
+
+fn data_items(rest: &str, line: usize, byte_context: bool) -> Result<Vec<DataItem>, AsmError> {
     let rest = rest.trim();
     if rest.is_empty() {
         return Err(AsmError::new(line, "directive needs at least one value"));
@@ -1178,11 +1211,25 @@ fn data_items(rest: &str, line: usize) -> Result<Vec<DataItem>, AsmError> {
         return Err(AsmError::new(line, "unterminated quoted data"));
     }
     pieces.push(rest[start..].trim());
-    pieces
+    let items = pieces
         .into_iter()
         .map(|piece| {
             if piece.starts_with('"') {
                 Ok(DataItem::String(decoded_string(piece, line)?))
+            } else if byte_context && piece.starts_with('\'') {
+                let (bytes, end) = single_quoted(piece, line)?;
+                if bytes.len() != 1 {
+                    if !piece[end..].trim().is_empty() {
+                        return Err(AsmError::new(line, "unexpected tokens after quoted data"));
+                    }
+                    Ok(DataItem::String(bytes))
+                } else {
+                    Ok(DataItem::Value(z80::parse_value(
+                        &SjasmplusSyntax,
+                        piece,
+                        line,
+                    )?))
+                }
             } else {
                 Ok(DataItem::Value(z80::parse_value(
                     &SjasmplusSyntax,
@@ -1191,7 +1238,15 @@ fn data_items(rest: &str, line: usize) -> Result<Vec<DataItem>, AsmError> {
                 )?))
             }
         })
-        .collect()
+        .collect::<Result<Vec<_>, AsmError>>()?;
+    if byte_context
+        && items
+            .iter()
+            .all(|item| matches!(item, DataItem::String(bytes) if bytes.is_empty()))
+    {
+        return Err(AsmError::new(line, "byte directive needs a nonempty value"));
+    }
+    Ok(items)
 }
 
 fn parse_savenex(args: &str, line: usize) -> Result<Operation, AsmError> {
@@ -1499,14 +1554,16 @@ fn packed(items: Vec<DataItem>) -> Vec<Expr> {
     items
         .into_iter()
         .map(|item| match item {
-            DataItem::String(bytes) => {
-                Expr::Num(i64::from(bytes.into_iter().fold(0u32, |value, byte| {
-                    value.wrapping_shl(8) | u32::from(byte)
-                })))
-            }
+            DataItem::String(bytes) => Expr::Num(i64::from(pack_bytes(bytes))),
             DataItem::Value(value) => value,
         })
         .collect()
+}
+
+fn pack_bytes(bytes: Vec<u8>) -> u32 {
+    bytes
+        .into_iter()
+        .fold(0u32, |value, byte| value.wrapping_shl(8) | u32::from(byte))
 }
 
 /// Set bit 7 on each string's last decoded byte; scalar values stay unchanged.
