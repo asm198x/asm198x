@@ -351,7 +351,7 @@ pub(crate) fn assemble_with_debug(source: &str) -> Assembled<DebugCapture> {
     let (rom, warnings, capture, areas) = assemble_program(
         &parse_program(&isa::mos6502::SET, source, macros::Expand::Yes)?,
         &super::ca65_layout::Layout::nes_default(),
-        Sweep::single(&isa::mos6502::SET),
+        Sweep::single(&isa::mos6502::SET, source),
     )?;
     crate::cycles::check_budgets(
         &[("input", source)],
@@ -5860,5 +5860,25 @@ two:\n\
         for d in [".export", ".proc", ".segment", ".byte"] {
             assert!(kind(d).is_some(), "`{d}` should be declared");
         }
+    }
+    #[test]
+    fn single_source_numeric_admission_checks_skipped_captures() {
+        for source in [
+            ".if 0\n.byte <$100000000\n.endif\n",
+            ".repeat 0\n.byte <$100000000\n.endrepeat\n",
+            ".macro unused\n.byte <$100000000\n.endmacro\n",
+        ] {
+            let error = assemble(source).expect_err("native lexical overflow");
+            let span = error.span.expect("source location");
+            assert_eq!(span.file, crate::span::FileId(0));
+            assert_eq!(span.line, 2);
+        }
+        assert!(
+            assemble(
+                ".if 0\n.include 3\n.setcpu \"not-a-cpu\"\n.byte MISSING,,\n.endif\n.byte 7\n"
+            )
+            .is_ok()
+        );
+        assert!(assemble(".end .sprintf(\"%d\",4294967300)\n.byte <$100000000\n").is_ok());
     }
 }

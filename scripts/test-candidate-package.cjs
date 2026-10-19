@@ -49,6 +49,7 @@ requiredCases.push('ca65_hex_suffix');
 requiredCases.push('ca65_absolute_counter');
 requiredCases.push('ca65_absolute_debug');
 requiredCases.push('ca65_numeric_conversion');
+requiredCases.push('ca65_numeric_admission');
 const sourceFiles = {
   'LICENSE': '62cd567bc9270c722abcaa6ad88b6a1fe861698d63890f787cc557d2395be203',
   'helloworld.asm': '9e57c82435c0cf35e56089d56d6b83991c61624c2b3448ab6c66fb13a884a0a5',
@@ -1080,6 +1081,38 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
         if (fact.native.at(-1).exit === 0) {
           assert.equal(p.status, 0, fact.name + ': ' + p.stderr);
           assert.deepEqual(read('cpu.bin'), Buffer.from(fact.native_hex, 'hex'), fact.name);
+          const before = shape();
+          const formatted = run(['fmt', '--dialect', fact.dialect, 'cpu.s']);
+          assert.equal(formatted.status, 0, fact.name + ': ' + formatted.stderr);
+          write('scope-formatted.s', formatted.stdout);
+          const again = run(['fmt', '--dialect', fact.dialect, 'scope-formatted.s']);
+          assert.equal(again.status, 0, fact.name + ': ' + again.stderr);
+          assert.equal(again.stdout, formatted.stdout, fact.name + ': idempotence');
+          const roundtrip = assemble('scope-formatted.s');
+          assert.equal(roundtrip.status, 0, fact.name + ': ' + roundtrip.stderr);
+          assert.deepEqual(read('cpu.bin'), Buffer.from(fact.native_hex, 'hex'), fact.name + ': formatted bytes');
+          assert.deepEqual(shape(), before, fact.name + ': formatted symbols and addresses');
+        } else {
+          assert.equal(p.status, 1, fact.name + ': ' + p.stderr); assert.equal(read('cpu.bin').toString(), 'previous image', fact.name);
+        }
+      }
+    });
+    test('ca65_numeric_admission', () => {
+      const facts = require('../crates/asm198x/tests/fixtures/ca65-numeric-admission.json');
+      assert.equal(facts.cases.length, 317);
+      for (const [name, text] of Object.entries(facts.files)) {
+        fs.mkdirSync(path.dirname(path.join(root, name)), { recursive: true }); write(name, text);
+      }
+      for (const fact of facts.cases) {
+        write('cpu.cfg', fact.config); write('cpu.s', fact.source);
+        write('cpu.bin', 'previous image');
+        const assemble = input => run(['--dialect', fact.dialect, ...(fact.dialect === 'ca65' ? ['-C', 'cpu.cfg'] : []), input, '-o', 'cpu.bin', '--debug=scope.debug198x']);
+        const shape = () => read('scope.debug198x').toString().trim().split('\n').map(s => JSON.parse(s)).filter(r => r.t === 'symbol' || r.t === 'section');
+        const p = assemble('cpu.s');
+        if (fact.native.at(-1).exit === 0) {
+          assert.equal(p.status, 0, fact.name + ': ' + p.stderr);
+          assert.deepEqual(read('cpu.bin'), Buffer.from(fact.native_hex, 'hex'), fact.name);
+          if (fact.formatter_gap) continue;
           const before = shape();
           const formatted = run(['fmt', '--dialect', fact.dialect, 'cpu.s']);
           assert.equal(formatted.status, 0, fact.name + ': ' + formatted.stderr);

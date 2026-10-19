@@ -340,3 +340,9 @@ test('ca65 numeric conversion bounds are mandatory package evidence', () => {
   assert(qualifies(complete)); assert(requiredCases.includes('ca65_numeric_conversion'));
   assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_numeric_conversion')), false);
 });
+
+test('ca65 numeric source admission is mandatory package evidence', () => {
+  const complete = requiredCases.map(name => ({ name, status: 'pass' }));
+  assert(qualifies(complete)); assert(requiredCases.includes('ca65_numeric_admission'));
+  assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_numeric_admission')), false);
+});

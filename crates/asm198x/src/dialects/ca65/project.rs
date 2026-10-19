@@ -81,6 +81,8 @@ pub(super) struct Sweep<'a> {
     /// reads it. `None` on the single-source path, which keeps meaning "one
     /// file, no includes".
     includes: Option<IncludeCx<'a>>,
+    root: Option<&'a str>,
+    line_starts: BTreeMap<u32, Vec<usize>>,
 }
 
 struct IncludeCx<'a> {
@@ -100,10 +102,12 @@ struct PendingInclude {
 }
 
 impl<'a> Sweep<'a> {
-    pub(super) fn single(set: &'static isa::InstructionSet) -> Self {
+    pub(super) fn single(set: &'static isa::InstructionSet, source: &'a str) -> Self {
         Self {
             reader: Walker::new(set, true),
             includes: None,
+            root: Some(source),
+            line_starts: BTreeMap::new(),
         }
     }
 
@@ -114,6 +118,8 @@ impl<'a> Sweep<'a> {
     ) -> Self {
         Self {
             reader: Walker::new(set, true),
+            root: None,
+            line_starts: BTreeMap::new(),
             includes: Some(IncludeCx {
                 map,
                 loader,
@@ -122,6 +128,68 @@ impl<'a> Sweep<'a> {
                 pending: Vec::new(),
             }),
         }
+    }
+}
+
+// Structural ca65 parsing keeps every physical body line, even blank ones.
+// Elseif is a nested conditional sharing its parent's closer (empty close).
+fn end_line(node: &crate::ast::Node) -> u32 {
+    use crate::ast::Item;
+    match &node.item {
+        Some(Item::Repeat { body, .. }) => body.last().map_or(node.span.line, end_line) + 1,
+        Some(Item::Conditional {
+            then_body,
+            else_body,
+            close,
+            ..
+        }) => {
+            let then_end = then_body.last().map_or(node.span.line, end_line);
+            match else_body {
+                None => then_end + 1,
+                Some(body) if close.is_empty() => body.last().map_or(then_end + 1, end_line),
+                Some(body) => body.last().map_or(then_end + 1, end_line) + 1,
+            }
+        }
+        _ => node.span.line,
+    }
+}
+
+impl Sweep<'_> {
+    /// Read original character lines, never generated token-stream coordinates.
+    fn admit_range(
+        &mut self,
+        at: &crate::span::Span,
+        first: u32,
+        last: u32,
+    ) -> Result<(), AsmError> {
+        if !at.expansion_frames.is_empty() || first > last {
+            return Ok(());
+        }
+        let source = self
+            .includes
+            .as_ref()
+            .and_then(|cx| cx.map.contents(at.file))
+            .or(self.root.filter(|_| at.file == FileId(0)))
+            .ok_or_else(|| AsmError::at(at.clone(), "numeric source location is unavailable"))?;
+        let starts = self.line_starts.entry(at.file.0).or_insert_with(|| {
+            std::iter::once(0)
+                .chain(source.match_indices('\n').map(|(i, _)| i + 1))
+                .collect()
+        });
+        for line in first..=last {
+            let index = line
+                .checked_sub(1)
+                .map(|n| n as usize)
+                .ok_or_else(|| AsmError::at(at.clone(), "invalid numeric source line"))?;
+            let start = *starts
+                .get(index)
+                .ok_or_else(|| AsmError::at(at.clone(), "numeric source line is unavailable"))?;
+            let end = starts.get(index + 1).copied().unwrap_or(source.len());
+            let mut span = at.clone();
+            span.line = line;
+            ca65_flat::validate_numeric_tokens(&source[start..end], &span)?;
+        }
+        Ok(())
     }
 }
 
@@ -288,6 +356,9 @@ fn project_nodes(
                 .ok_or_else(|| {
                     AsmError::at(node.span.clone(), "macro definition is never closed")
                 })?;
+            if st.token_depth == 0 {
+                sw.admit_range(&node.span, node.span.line, nodes[end].span.line)?;
+            }
             register_macro(node, &nodes[index + 1..end], st, sw)?;
             index = end + 1;
             continue;
@@ -326,15 +397,32 @@ fn project_nodes(
             }) => {
                 let line = node.span.line as usize;
                 let head = read_block_head(node, head, st, sw)?;
-                if fold_condition(&head, st, &sw.reader, line).map_err(|error| match error {
-                    ConditionError::Use(error) => {
-                        super::statement_error(error, node.span.file, &node.span.expansion_frames)
-                    }
-                    ConditionError::Definition(error) => error,
-                })? {
+                let selected =
+                    fold_condition(&head, st, &sw.reader, line).map_err(|error| match error {
+                        ConditionError::Use(error) => super::statement_error(
+                            error,
+                            node.span.file,
+                            &node.span.expansion_frames,
+                        ),
+                        ConditionError::Definition(error) => error,
+                    })?;
+                let then_end = then_body.last().map_or(node.span.line, end_line);
+                if selected {
                     project_nodes(then_body, st, sw)?;
-                } else if let Some(body) = else_body {
-                    project_nodes(body, st, sw)?;
+                } else {
+                    if st.token_depth == 0 {
+                        sw.admit_range(&node.span, node.span.line + 1, then_end)?;
+                        if let Some(body) = else_body {
+                            // A nested elseif owns its head; plain else does not.
+                            if !matches!(&node.item, Some(Item::Conditional { close, .. }) if close.is_empty())
+                            {
+                                sw.admit_range(&node.span, then_end + 1, then_end + 1)?;
+                            }
+                            project_nodes(body, st, sw)?;
+                        }
+                    } else if let Some(body) = else_body {
+                        project_nodes(body, st, sw)?;
+                    }
                 }
                 // `.end` inside the block: ca65's reader stops before ever
                 // seeing the closer, and says so (probed: `Conditional
@@ -346,6 +434,14 @@ fn project_nodes(
                         "conditional block is never closed".to_string(),
                     ));
                 }
+                if st.token_depth == 0 {
+                    let first = if selected {
+                        then_end + 1
+                    } else {
+                        end_line(node)
+                    };
+                    sw.admit_range(&node.span, first, end_line(node))?;
+                }
                 continue;
             }
             Some(Item::Repeat { head, body, .. }) => {
@@ -354,6 +450,9 @@ fn project_nodes(
                 let (count, var) = fold_repeat(&head, st, &sw.reader, line).map_err(|e| {
                     super::statement_error(e, node.span.file, &node.span.expansion_frames)
                 })?;
+                if st.token_depth == 0 {
+                    sw.admit_range(&node.span, node.span.line + 1, end_line(node))?;
+                }
                 let watermark = pending_len(sw);
                 st.token_captures.push(TokenCapture {
                     at: node.span.clone(),
@@ -418,6 +517,9 @@ fn read_block_head(
     let line = node.span.line as usize;
     let file = node.span.file;
     sw.reader.anons.file.set(file);
+    if st.token_depth == 0 {
+        sw.admit_range(&node.span, node.span.line, node.span.line)?;
+    }
     let head = capture_text(head, &node.span, st)?;
     let head = repeat_text(&head, &node.span, st);
     let processed = sw
@@ -491,9 +593,9 @@ fn sweep_line(
     let file = node.span.file;
     let source = capture_text(&node.source, &node.span, st)?;
     let source = repeat_text(&source, &node.span, st);
-    // A file's literal .end stops before text evaluation can read its tail.
-    // Captured macro/repeat sources keep their existing token-source path.
-    let source = if st.token_depth == 0 {
+    // Captures were admitted in full before execution. A selected .end now
+    // stops before text evaluation can read its unused operand tail.
+    let source = {
         let code = super::strip_comment(&source).trim_start();
         let head = super::split_label_head(code).map_or(code, |(_, head)| head);
         let (word, _) = split_first_word(head);
@@ -502,9 +604,10 @@ fn sweep_line(
         } else {
             source
         }
-    } else {
-        source
     };
+    if st.token_depth == 0 && node.span.expansion_frames.is_empty() {
+        ca65_flat::validate_numeric_tokens(&source, &node.span)?;
+    }
     let Some(processed) = sw
         .reader
         .preprocess_line(&source, line, file)
