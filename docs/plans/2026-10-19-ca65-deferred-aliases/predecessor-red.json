@@ -1,0 +1,1184 @@
+{
+  "binary": "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+  "sha256": "4e45f0030625202f7bcfd152f4c87e8fb29513f556ad6a0daa128dce1eac8ea7",
+  "results": [
+    {
+      "name": "forward_constant_VALUE_.word OTHER",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "3400",
+      "matches": false
+    },
+    {
+      "name": "forward_constant_VALUE_lda OTHER",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "ad3400",
+      "matches": false
+    },
+    {
+      "name": "forward_constant_VALUE_.byte .defined(OTHER)",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "01",
+      "matches": false
+    },
+    {
+      "name": "forward_constant_VALUE_.res OTHER",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "forward_constant_VALUE+1_.word OTHER",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "3500",
+      "matches": false
+    },
+    {
+      "name": "forward_constant_VALUE+1_lda OTHER",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "ad3500",
+      "matches": false
+    },
+    {
+      "name": "forward_constant_VALUE+1_.byte .defined(OTHER)",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "01",
+      "matches": false
+    },
+    {
+      "name": "forward_constant_VALUE+1_.res OTHER",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "forward_constant_<VALUE_.word OTHER",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "3400",
+      "matches": false
+    },
+    {
+      "name": "forward_constant_<VALUE_lda OTHER",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "a534",
+      "matches": false
+    },
+    {
+      "name": "forward_constant_<VALUE_.byte .defined(OTHER)",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "01",
+      "matches": false
+    },
+    {
+      "name": "forward_constant_<VALUE_.res OTHER",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "forward_constant_>VALUE_.word OTHER",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "0000",
+      "matches": false
+    },
+    {
+      "name": "forward_constant_>VALUE_lda OTHER",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "a500",
+      "matches": false
+    },
+    {
+      "name": "forward_constant_>VALUE_.byte .defined(OTHER)",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "01",
+      "matches": false
+    },
+    {
+      "name": "forward_constant_>VALUE_.res OTHER",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "forward_constant_VALUE*2_.word OTHER",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "6800",
+      "matches": false
+    },
+    {
+      "name": "forward_constant_VALUE*2_lda OTHER",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "ad6800",
+      "matches": false
+    },
+    {
+      "name": "forward_constant_VALUE*2_.byte .defined(OTHER)",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "01",
+      "matches": false
+    },
+    {
+      "name": "forward_constant_VALUE*2_.res OTHER",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "forward_label_VALUE_.word OTHER",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "021007",
+      "matches": false
+    },
+    {
+      "name": "forward_label_VALUE_lda OTHER",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "ad031007",
+      "matches": false
+    },
+    {
+      "name": "forward_label_VALUE_.byte .defined(OTHER)",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "0107",
+      "matches": false
+    },
+    {
+      "name": "forward_label_VALUE_.res OTHER",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "forward_label_VALUE+1_.word OTHER",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "031007",
+      "matches": false
+    },
+    {
+      "name": "forward_label_VALUE+1_lda OTHER",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "ad041007",
+      "matches": false
+    },
+    {
+      "name": "forward_label_VALUE+1_.byte .defined(OTHER)",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "0107",
+      "matches": false
+    },
+    {
+      "name": "forward_label_VALUE+1_.res OTHER",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "forward_label_<VALUE_.word OTHER",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "020007",
+      "matches": false
+    },
+    {
+      "name": "forward_label_<VALUE_lda OTHER",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "a50207",
+      "matches": false
+    },
+    {
+      "name": "forward_label_<VALUE_.byte .defined(OTHER)",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "0107",
+      "matches": false
+    },
+    {
+      "name": "forward_label_<VALUE_.res OTHER",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "forward_label_>VALUE_.word OTHER",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "100007",
+      "matches": false
+    },
+    {
+      "name": "forward_label_>VALUE_lda OTHER",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "a51007",
+      "matches": false
+    },
+    {
+      "name": "forward_label_>VALUE_.byte .defined(OTHER)",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "0107",
+      "matches": false
+    },
+    {
+      "name": "forward_label_>VALUE_.res OTHER",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "forward_label_VALUE*2_.word OTHER",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "042007",
+      "matches": false
+    },
+    {
+      "name": "forward_label_VALUE*2_lda OTHER",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "ad062007",
+      "matches": false
+    },
+    {
+      "name": "forward_label_VALUE*2_.byte .defined(OTHER)",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "0107",
+      "matches": false
+    },
+    {
+      "name": "forward_label_VALUE*2_.res OTHER",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "unused_undefined",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "unused_cycle",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "unused_self",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "alias_chain",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "3412",
+      "matches": false
+    },
+    {
+      "name": "alias_updates",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "0000",
+      "matches": false
+    },
+    {
+      "name": "chain_updates",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "0000",
+      "matches": false
+    },
+    {
+      "name": "zero_page_alias",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "a520",
+      "matches": false
+    },
+    {
+      "name": "pc_early",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "0010",
+      "matches": false
+    },
+    {
+      "name": "pc_after_byte",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "070110",
+      "matches": false
+    },
+    {
+      "name": "pc_before_org",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "0010",
+      "matches": false
+    },
+    {
+      "name": "pc_after_org",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "0020",
+      "matches": false
+    },
+    {
+      "name": "pc_alias_chain",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "070010",
+      "matches": false
+    },
+    {
+      "name": "pc_unused",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "07",
+      "matches": false
+    },
+    {
+      "name": "scoped_forward",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "3400",
+      "matches": false
+    },
+    {
+      "name": "scoped_updates",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "0000",
+      "matches": false
+    },
+    {
+      "name": "cheap_forward",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "021007",
+      "matches": false
+    },
+    {
+      "name": "export_alias",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "021007",
+      "matches": false
+    },
+    {
+      "name": "import_alias",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "duplicate_alias",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "dead_undefined",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "07",
+      "matches": false
+    },
+    {
+      "name": "dead_cycle",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "07",
+      "matches": false
+    },
+    {
+      "name": "backward",
+      "argv": [
+        "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s: config: segment attribute `optional = yes` on `ZEROPAGE` is outside this bounded reader\n",
+      "hex": null,
+      "native_hex": "04",
+      "matches": false
+    }
+  ]
+}
