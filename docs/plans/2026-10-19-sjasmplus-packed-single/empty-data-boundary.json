@@ -1,0 +1,324 @@
+{
+  "reference": {
+    "path": "/usr/local/bin/sjasmplus",
+    "sha256": "454bfa33058d5a0f5323db1ee65bbdd2b5871f7d697c328e2ee1f1a950f0d78b",
+    "version": {
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--version"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\n"
+    }
+  },
+  "producer": {
+    "source_commit": "711ede39cbf320b3b42910aad3588dc0d27a0b95",
+    "source_tree": "65c2d992219619e4f42627c86de402b08333915d",
+    "source_clean": true,
+    "profile": "debug",
+    "features": [
+      "lua"
+    ],
+    "sha256": "04cd785990ddfcb28a3f7ef250ae85ff3052b176b8422894934ac3f8859bb63b"
+  },
+  "cases": [
+    {
+      "source": " db \"\"\n",
+      "stages": [
+        {
+          "side": "native",
+          "argv": [
+            "/usr/local/bin/sjasmplus",
+            "--raw=native.bin",
+            "input.asm"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: Empty string: \"\"\ninput.asm(1): error: no arguments\nPass 3 complete\nErrors: 1, warnings: 1, compiled: 2 lines, work time: 0.000 seconds\n",
+          "hex": ""
+        },
+        {
+          "side": "assembler",
+          "argv": [
+            "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "input.asm",
+            "-o",
+            "asm.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 0 byte(s) at $0000 -> asm.bin\n",
+          "hex": ""
+        }
+      ],
+      "name": "empty_data_0"
+    },
+    {
+      "source": " dc \"\"\n",
+      "stages": [
+        {
+          "side": "native",
+          "argv": [
+            "/usr/local/bin/sjasmplus",
+            "--raw=native.bin",
+            "input.asm"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: Empty string: \"\"\ninput.asm(1): error: no arguments\nPass 3 complete\nErrors: 1, warnings: 1, compiled: 2 lines, work time: 0.000 seconds\n",
+          "hex": ""
+        },
+        {
+          "side": "assembler",
+          "argv": [
+            "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "input.asm",
+            "-o",
+            "asm.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 0 byte(s) at $0000 -> asm.bin\n",
+          "hex": ""
+        }
+      ],
+      "name": "empty_data_1"
+    },
+    {
+      "source": " dz \"\"\n",
+      "stages": [
+        {
+          "side": "native",
+          "argv": [
+            "/usr/local/bin/sjasmplus",
+            "--raw=native.bin",
+            "input.asm"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: Empty string: \"\"\ninput.asm(1): error: no arguments\nPass 3 complete\nErrors: 1, warnings: 1, compiled: 2 lines, work time: 0.000 seconds\n",
+          "hex": ""
+        },
+        {
+          "side": "assembler",
+          "argv": [
+            "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "input.asm",
+            "-o",
+            "asm.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 1 byte(s) at $0000 -> asm.bin\n",
+          "hex": "00"
+        }
+      ],
+      "name": "empty_data_2"
+    },
+    {
+      "source": " dd \"\"\n",
+      "stages": [
+        {
+          "side": "native",
+          "argv": [
+            "/usr/local/bin/sjasmplus",
+            "--raw=native.bin",
+            "input.asm"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: Empty string literal converted to value 0!: \"\"\nPass 3 complete\nErrors: 0, warnings: 1, compiled: 2 lines, work time: 0.000 seconds\n",
+          "hex": "00000000"
+        },
+        {
+          "side": "assembler",
+          "argv": [
+            "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "input.asm",
+            "-o",
+            "asm.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 4 byte(s) at $0000 -> asm.bin\n",
+          "hex": "00000000"
+        }
+      ],
+      "name": "empty_data_3"
+    },
+    {
+      "source": " db \"\",1\n",
+      "stages": [
+        {
+          "side": "native",
+          "argv": [
+            "/usr/local/bin/sjasmplus",
+            "--raw=native.bin",
+            "input.asm"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: Empty string: \"\",1\nPass 3 complete\nErrors: 0, warnings: 1, compiled: 2 lines, work time: 0.001 seconds\n",
+          "hex": "01"
+        },
+        {
+          "side": "assembler",
+          "argv": [
+            "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "input.asm",
+            "-o",
+            "asm.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 1 byte(s) at $0000 -> asm.bin\n",
+          "hex": "01"
+        }
+      ],
+      "name": "empty_data_4"
+    },
+    {
+      "source": " db \"\",\"\"\n",
+      "stages": [
+        {
+          "side": "native",
+          "argv": [
+            "/usr/local/bin/sjasmplus",
+            "--raw=native.bin",
+            "input.asm"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: Empty string: \"\",\"\"\ninput.asm(1): warning: Empty string: \"\"\ninput.asm(1): error: no arguments\nPass 3 complete\nErrors: 1, warnings: 2, compiled: 2 lines, work time: 0.000 seconds\n",
+          "hex": ""
+        },
+        {
+          "side": "assembler",
+          "argv": [
+            "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "input.asm",
+            "-o",
+            "asm.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 0 byte(s) at $0000 -> asm.bin\n",
+          "hex": ""
+        }
+      ],
+      "name": "empty_data_5"
+    },
+    {
+      "source": " dz ''\n",
+      "stages": [
+        {
+          "side": "native",
+          "argv": [
+            "/usr/local/bin/sjasmplus",
+            "--raw=native.bin",
+            "input.asm"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: Empty string: ''\ninput.asm(1): error: no arguments\nPass 3 complete\nErrors: 1, warnings: 1, compiled: 2 lines, work time: 0.001 seconds\n",
+          "hex": ""
+        },
+        {
+          "side": "assembler",
+          "argv": [
+            "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "input.asm",
+            "-o",
+            "asm.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+          "hex": null
+        }
+      ],
+      "name": "empty_data_6"
+    },
+    {
+      "source": " db '',1\n",
+      "stages": [
+        {
+          "side": "native",
+          "argv": [
+            "/usr/local/bin/sjasmplus",
+            "--raw=native.bin",
+            "input.asm"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: Empty string: '',1\nPass 3 complete\nErrors: 0, warnings: 1, compiled: 2 lines, work time: 0.000 seconds\n",
+          "hex": "01"
+        },
+        {
+          "side": "assembler",
+          "argv": [
+            "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "input.asm",
+            "-o",
+            "asm.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+          "hex": null
+        }
+      ],
+      "name": "empty_data_7"
+    },
+    {
+      "source": " abytez 1 \"\"\n",
+      "stages": [
+        {
+          "side": "native",
+          "argv": [
+            "/usr/local/bin/sjasmplus",
+            "--raw=native.bin",
+            "input.asm"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: Empty string: \"\"\ninput.asm(1): error: no arguments\nPass 3 complete\nErrors: 1, warnings: 1, compiled: 2 lines, work time: 0.001 seconds\n",
+          "hex": ""
+        },
+        {
+          "side": "assembler",
+          "argv": [
+            "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "input.asm",
+            "-o",
+            "asm.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 1 byte(s) at $0000 -> asm.bin\n",
+          "hex": "00"
+        }
+      ],
+      "name": "empty_data_8"
+    }
+  ]
+}
