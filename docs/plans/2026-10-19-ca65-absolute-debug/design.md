@@ -1,6 +1,6 @@
 # Proposed logical debug sections for absolute ca65 spans
 
-Status: proposal awaiting design agreement. No implementation yet.
+Status: logical debug section design approved on 2026-10-19. No implementation yet.
 
 The existing producer emits one debug section per touched configured segment.
 Labels, lines and cycle records share those section-relative offsets. After
@@ -55,5 +55,5 @@ and five-host qualification remain required.
 
 This changes the present one-debug-section-per-configured-segment convention.
 The supplied AGENTS.md requires asking before significant deviations from
-existing conventions; agreement is needed before implementation. Independent
+existing conventions; that agreement was received on 2026-10-19. Independent
 origin-validation research (#815) can continue while this proposal is reviewed.
