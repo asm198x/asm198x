@@ -54,14 +54,40 @@ use crate::span::FileId;
 /// Native scanner.c bounds those tokens independently of expression arithmetic.
 pub(crate) fn parse_number(token: &str, line: usize) -> Result<i64, AsmError> {
     let token = token.trim();
-    if token.as_bytes().first().is_some_and(u8::is_ascii_digit)
-        && let Some(digits) = token.strip_suffix(['h', 'H'])
-    {
-        return u32::from_str_radix(digits, 16)
-            .map(i64::from)
-            .map_err(|_| AsmError::new(line, format!("invalid hexadecimal number `{token}`")));
+    let (digits, radix) = if let Some(digits) = token.strip_prefix('$') {
+        (digits, 16)
+    } else if let Some(digits) = token.strip_prefix('%') {
+        (digits, 2)
+    } else if token.as_bytes().first().is_some_and(u8::is_ascii_digit) {
+        if let Some(digits) = token.strip_suffix(['h', 'H']) {
+            (digits, 16)
+        } else {
+            (token, 10)
+        }
+    } else {
+        // Character constants retain the shared parser's existing semantics.
+        return super::mos6502::parse_number(token, line);
+    };
+    let invalid = || AsmError::new(line, format!("invalid number `{token}`"));
+    if digits.is_empty() {
+        return Err(invalid());
     }
-    super::mos6502::parse_number(token, line)
+    // Native scanner.c checks the previous partial value, before the next
+    // multiply/add. Decimal consequently admits 4294967296 through 4294967299;
+    // a final u32 conversion would incorrectly refuse those native tokens.
+    let limit = i64::from(u32::MAX) / i64::from(radix);
+    let mut value = 0i64;
+    for digit in digits.chars() {
+        if value > limit {
+            return Err(AsmError::new(
+                line,
+                format!("number `{token}` is outside the native lexical range"),
+            ));
+        }
+        let digit = digit.to_digit(radix).ok_or_else(invalid)?;
+        value = value * i64::from(radix) + i64::from(digit);
+    }
+    Ok(value)
 }
 
 /// A walk-handled `.include`/`.incbin` line found by a dialect's per-line

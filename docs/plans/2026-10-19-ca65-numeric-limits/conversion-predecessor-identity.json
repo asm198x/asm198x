@@ -1,0 +1,11 @@
+{
+  "source_commit": "21627ec7e7a2e8b617222abeb5449e44da78bdf9",
+  "source_tree": "d83d9f092b76f3d239ef9e3b519ab24e2aa7006c",
+  "sha256": "d46553eac702a4dcc0ffcf0c2cca7188f368da80eae68f2fc5e46f2e132e7490",
+  "profile": "debug",
+  "features": [
+    "lua"
+  ],
+  "build_log": "/private/tmp/asm198x-numeric-conversion-predecessor-build.log",
+  "source_clean": true
+}

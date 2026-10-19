@@ -1,0 +1,918 @@
+{
+  "binary": "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+  "sha256": "c8044db0a9cdfe04d50c63b8f51234a3bb6952d78319110eb52e4b9d38900230",
+  "results": [
+    {
+      "name": "quoted_4294967296",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 10 byte(s) -> out.bin\n",
+      "hex": "34323934393637323936",
+      "native_hex": "34323934393637323936",
+      "matches": true
+    },
+    {
+      "name": "comment_4294967296",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": "07",
+      "matches": true
+    },
+    {
+      "name": "unused_macro_4294967296",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": "07",
+      "matches": true
+    },
+    {
+      "name": "called_macro_4294967296",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "00",
+      "native_hex": "00",
+      "matches": true
+    },
+    {
+      "name": "macro_argument_4294967296",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "00",
+      "native_hex": "00",
+      "matches": true
+    },
+    {
+      "name": "unused_define_4294967296",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": "07",
+      "matches": true
+    },
+    {
+      "name": "used_define_4294967296",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "00",
+      "native_hex": "00",
+      "matches": true
+    },
+    {
+      "name": "zero_repeat_4294967296",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": "07",
+      "matches": true
+    },
+    {
+      "name": "one_repeat_4294967296",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "00",
+      "native_hex": "00",
+      "matches": true
+    },
+    {
+      "name": "after_end_4294967296",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": "07",
+      "matches": true
+    },
+    {
+      "name": "skipped_define_4294967296",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": "07",
+      "matches": true
+    },
+    {
+      "name": "nested_inactive_4294967296",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": "07",
+      "matches": true
+    },
+    {
+      "name": "inactive_include_4294967296",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": "07",
+      "matches": true
+    },
+    {
+      "name": "quoted_define_4294967296",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 10 byte(s) -> out.bin\n",
+      "hex": "34323934393637323936",
+      "native_hex": "34323934393637323936",
+      "matches": true
+    },
+    {
+      "name": "cpu_65816_4294967296",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: `65816` is a different opcode set, and asm198x assembles a 6502 here \u2014 the source is valid and the gap is ours (asm198x#302)\n",
+      "hex": null,
+      "native_hex": "07",
+      "matches": false
+    },
+    {
+      "name": "cpu_65c02_4294967296",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: `65c02` is a different opcode set, and asm198x assembles a 6502 here \u2014 the source is valid and the gap is ours (asm198x#302)\n",
+      "hex": null,
+      "native_hex": "07",
+      "matches": false
+    },
+    {
+      "name": "quoted_4294967300",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 10 byte(s) -> out.bin\n",
+      "hex": "34323934393637333030",
+      "native_hex": "34323934393637333030",
+      "matches": true
+    },
+    {
+      "name": "comment_4294967300",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": "07",
+      "matches": true
+    },
+    {
+      "name": "unused_macro_4294967300",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "called_macro_4294967300",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "04",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "macro_argument_4294967300",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "04",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "unused_define_4294967300",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "used_define_4294967300",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "04",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "zero_repeat_4294967300",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "one_repeat_4294967300",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "04",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "after_end_4294967300",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": "07",
+      "matches": true
+    },
+    {
+      "name": "skipped_define_4294967300",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "nested_inactive_4294967300",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "inactive_include_4294967300",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": "07",
+      "matches": true
+    },
+    {
+      "name": "quoted_define_4294967300",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 10 byte(s) -> out.bin\n",
+      "hex": "34323934393637333030",
+      "native_hex": "34323934393637333030",
+      "matches": true
+    },
+    {
+      "name": "cpu_65816_4294967300",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: `65816` is a different opcode set, and asm198x assembles a 6502 here \u2014 the source is valid and the gap is ours (asm198x#302)\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "cpu_65c02_4294967300",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: `65c02` is a different opcode set, and asm198x assembles a 6502 here \u2014 the source is valid and the gap is ours (asm198x#302)\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "quoted_$100000000",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 10 byte(s) -> out.bin\n",
+      "hex": "24313030303030303030",
+      "native_hex": "24313030303030303030",
+      "matches": true
+    },
+    {
+      "name": "comment_$100000000",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": "07",
+      "matches": true
+    },
+    {
+      "name": "unused_macro_$100000000",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "called_macro_$100000000",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "00",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "macro_argument_$100000000",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "00",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "unused_define_$100000000",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "used_define_$100000000",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "00",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "zero_repeat_$100000000",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "one_repeat_$100000000",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "00",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "after_end_$100000000",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": "07",
+      "matches": true
+    },
+    {
+      "name": "skipped_define_$100000000",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "nested_inactive_$100000000",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "inactive_include_$100000000",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": "07",
+      "matches": true
+    },
+    {
+      "name": "quoted_define_$100000000",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 10 byte(s) -> out.bin\n",
+      "hex": "24313030303030303030",
+      "native_hex": "24313030303030303030",
+      "matches": true
+    },
+    {
+      "name": "cpu_65816_$100000000",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: `65816` is a different opcode set, and asm198x assembles a 6502 here \u2014 the source is valid and the gap is ours (asm198x#302)\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "cpu_65c02_$100000000",
+      "argv": [
+        "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: `65c02` is a different opcode set, and asm198x assembles a 6502 here \u2014 the source is valid and the gap is ours (asm198x#302)\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    }
+  ]
+}
