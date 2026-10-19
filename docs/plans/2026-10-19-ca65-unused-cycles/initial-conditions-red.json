@@ -1,0 +1,120 @@
+{
+  "binary": "/private/tmp/asm198x-unused-cycles-build/debug/asm198x",
+  "sha256": "43a7df888fc9418d78ee81e9059d57fddc6c776788325ff93898ca8c4efbd94b",
+  "results": [
+    {
+      "name": ".ifconst_inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": ".ifconst_0&&inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "07",
+      "matches": false
+    },
+    {
+      "name": ".ifconst_1||inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "07",
+      "matches": false
+    },
+    {
+      "name": ".ifnconst_inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": ".ifnconst_0&&inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": "09",
+      "matches": false
+    },
+    {
+      "name": ".ifnconst_1||inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": "09",
+      "matches": false
+    }
+  ]
+}

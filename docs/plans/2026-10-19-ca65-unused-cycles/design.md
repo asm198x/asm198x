@@ -44,3 +44,11 @@ metadata/evaluation paths without a dependency, shared IR or public schema
 change. The first forced-width report lacked a ZEROPAGE config assignment; it
 is retained as missing-zp-config evidence, and the batch was rerun with a
 supported config before interpretation.
+
+Source-time .ifconst/.ifnconst also study a value expression. Six additional
+controls pin circular refusals and constant results from short-circuited
+expressions; classification first tries the existing shared constant evaluator
+before the existing label-weight path. The broader #795 constancy/text-order
+gaps remain separate. Scoped export lookup overlaps one accepted control and
+is explicitly deferred to #803; qualified export names are rejected, matching
+native syntax, so newly successful constant folds cannot mask that refusal.

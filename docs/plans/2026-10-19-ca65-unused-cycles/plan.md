@@ -32,3 +32,9 @@ routing enum initializers through the same queue without introducing refusals.
 The user delegated routine decisions and requested continuous audit/fix work.
 This follows existing private expression and width seams, with no new public
 shape or architectural pattern. No code changes precede the native evidence.
+
+The concrete private design is in design.md. The selected scope closes #800
+and #802; #801 linker output and #803 scoped export lookup stay explicit
+follow-ups. Native crash observations are excluded from semantic expectations.
+The final selected count is 164, with three include/formatter/debug tests and
+a mandatory 353-command package replay.

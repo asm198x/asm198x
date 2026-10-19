@@ -233,6 +233,41 @@ struct Placed {
     item: Resolved,
 }
 
+/// Ask the shared evaluator which unresolved numeric values are actually
+/// demanded after ready aliases have values. Logical branches stay lazy.
+fn demanded_values(placed: &[Placed], values: &BTreeMap<String, i64>) -> BTreeSet<String> {
+    let demanded = RefCell::new(BTreeSet::new());
+    let lookup = |name: &str| {
+        values.get(name).copied().or_else(|| {
+            demanded.borrow_mut().insert(name.to_string());
+            None
+        })
+    };
+    for at in placed {
+        match &at.item {
+            Resolved::Bytes(exprs)
+            | Resolved::Words(exprs)
+            | Resolved::DBytes(exprs)
+            | Resolved::DWords(exprs)
+            | Resolved::Insn {
+                operands: exprs, ..
+            } => {
+                for value in exprs {
+                    let _ = value.eval_with(&lookup, Some(i64::from(at.addr)), at.line);
+                }
+            }
+            Resolved::Assert(value, ..) => {
+                let _ = value.eval_with(&lookup, Some(i64::from(at.addr)), at.line);
+            }
+            Resolved::Visible(rule, _, names) if *rule != VisRule::MustNotBeDefined => {
+                demanded.borrow_mut().extend(names.iter().cloned());
+            }
+            _ => {}
+        }
+    }
+    demanded.into_inner()
+}
+
 fn statement_error(
     error: AsmError,
     file: FileId,
@@ -748,13 +783,17 @@ fn assemble_program(
     }
     parsed
         .deferred
-        .finish(&mut addr_env, &definition_positions)?;
+        .finish(&mut addr_env, &definition_positions, &|values| {
+            demanded_values(&placed, values)
+        })?;
     for name in parsed.deferred.definitions.keys() {
-        if !parsed.consts.contains_key(name) {
+        if !parsed.consts.contains_key(name)
+            && let Some(value) = addr_env.get(name)
+        {
             dbg_symbols.push(debug198x::Symbol {
                 name: parsed.const_names.get(name).unwrap_or(name).clone(),
                 kind: debug198x::SymbolKind::Const {
-                    value: addr_env[name] as u64,
+                    value: *value as u64,
                 },
             });
         }
@@ -3502,6 +3541,13 @@ fn parse_visible(
         let part = part.trim();
         if part.is_empty() {
             continue;
+        }
+        let name = part.split_once(":=").map_or(part, |(name, _)| name).trim();
+        if name.contains("::") {
+            return Err(AsmError::new(
+                line,
+                "a visibility directive needs an unqualified name",
+            ));
         }
         if let Some((name, value)) = part.split_once(":=") {
             if rule != VisRule::MustBeDefined {

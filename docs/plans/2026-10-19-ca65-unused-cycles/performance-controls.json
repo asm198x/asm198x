@@ -1,0 +1,284 @@
+{
+  "binaries": {
+    "predecessor": {
+      "path": "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+      "sha256": "60c0619bb5d092fe3512a9b2f96529bd38e06198a5d0058f188ee8d9051108c7"
+    },
+    "current": {
+      "path": "/private/tmp/asm198x-unused-cycles-build/debug/asm198x",
+      "sha256": "51aed25f0666cbceab189ecb2bc48761bf932589c7509b989f21e8a5ac0b5478"
+    }
+  },
+  "results": [
+    {
+      "kind": "instructions",
+      "count": 500,
+      "binary": "predecessor",
+      "trial": 0,
+      "seconds": 0.03738862508907914,
+      "exit": 0,
+      "output_sha256": "d76186d46d270ee937e8638fe053e93f2f7260c84c63510244ab18cb9b0b26f8",
+      "source_sha256": "e65536d8a0062363ba0eb98b73827e8cf7da15bfac09b71ec226c0b14dacd5c5"
+    },
+    {
+      "kind": "instructions",
+      "count": 500,
+      "binary": "predecessor",
+      "trial": 1,
+      "seconds": 0.012660209089517593,
+      "exit": 0,
+      "output_sha256": "d76186d46d270ee937e8638fe053e93f2f7260c84c63510244ab18cb9b0b26f8",
+      "source_sha256": "e65536d8a0062363ba0eb98b73827e8cf7da15bfac09b71ec226c0b14dacd5c5"
+    },
+    {
+      "kind": "instructions",
+      "count": 500,
+      "binary": "predecessor",
+      "trial": 2,
+      "seconds": 0.012938000028952956,
+      "exit": 0,
+      "output_sha256": "d76186d46d270ee937e8638fe053e93f2f7260c84c63510244ab18cb9b0b26f8",
+      "source_sha256": "e65536d8a0062363ba0eb98b73827e8cf7da15bfac09b71ec226c0b14dacd5c5"
+    },
+    {
+      "kind": "instructions",
+      "count": 500,
+      "binary": "current",
+      "trial": 0,
+      "seconds": 0.01285154209472239,
+      "exit": 0,
+      "output_sha256": "d76186d46d270ee937e8638fe053e93f2f7260c84c63510244ab18cb9b0b26f8",
+      "source_sha256": "e65536d8a0062363ba0eb98b73827e8cf7da15bfac09b71ec226c0b14dacd5c5"
+    },
+    {
+      "kind": "instructions",
+      "count": 500,
+      "binary": "current",
+      "trial": 1,
+      "seconds": 0.01315008313395083,
+      "exit": 0,
+      "output_sha256": "d76186d46d270ee937e8638fe053e93f2f7260c84c63510244ab18cb9b0b26f8",
+      "source_sha256": "e65536d8a0062363ba0eb98b73827e8cf7da15bfac09b71ec226c0b14dacd5c5"
+    },
+    {
+      "kind": "instructions",
+      "count": 500,
+      "binary": "current",
+      "trial": 2,
+      "seconds": 0.013437208021059632,
+      "exit": 0,
+      "output_sha256": "d76186d46d270ee937e8638fe053e93f2f7260c84c63510244ab18cb9b0b26f8",
+      "source_sha256": "e65536d8a0062363ba0eb98b73827e8cf7da15bfac09b71ec226c0b14dacd5c5"
+    },
+    {
+      "kind": "known_width_cycles",
+      "count": 500,
+      "binary": "current",
+      "trial": 0,
+      "seconds": 0.040140290977433324,
+      "exit": 0,
+      "output_sha256": "ca358758f6d27e6cf45272937977a748fd88391db679ceda7dc7bf1f005ee879",
+      "source_sha256": "f7596b35d833cc5ecac99f9afe64266f5cbce8fa3b442d5e3ce2678c8c007d0e"
+    },
+    {
+      "kind": "known_width_cycles",
+      "count": 500,
+      "binary": "current",
+      "trial": 1,
+      "seconds": 0.04014370893128216,
+      "exit": 0,
+      "output_sha256": "ca358758f6d27e6cf45272937977a748fd88391db679ceda7dc7bf1f005ee879",
+      "source_sha256": "f7596b35d833cc5ecac99f9afe64266f5cbce8fa3b442d5e3ce2678c8c007d0e"
+    },
+    {
+      "kind": "known_width_cycles",
+      "count": 500,
+      "binary": "current",
+      "trial": 2,
+      "seconds": 0.04095629183575511,
+      "exit": 0,
+      "output_sha256": "ca358758f6d27e6cf45272937977a748fd88391db679ceda7dc7bf1f005ee879",
+      "source_sha256": "f7596b35d833cc5ecac99f9afe64266f5cbce8fa3b442d5e3ce2678c8c007d0e"
+    },
+    {
+      "kind": "instructions",
+      "count": 2000,
+      "binary": "predecessor",
+      "trial": 0,
+      "seconds": 0.03713920898735523,
+      "exit": 0,
+      "output_sha256": "bf0155f35a9eb10ad541b13da0a9babd178117c7e3aa11c15a7563a2a4bcaac7",
+      "source_sha256": "34526be2342768b4f92aa441e80d1dffa375ccc77619c7b4324ac9ec987b56b7"
+    },
+    {
+      "kind": "instructions",
+      "count": 2000,
+      "binary": "predecessor",
+      "trial": 1,
+      "seconds": 0.03692645882256329,
+      "exit": 0,
+      "output_sha256": "bf0155f35a9eb10ad541b13da0a9babd178117c7e3aa11c15a7563a2a4bcaac7",
+      "source_sha256": "34526be2342768b4f92aa441e80d1dffa375ccc77619c7b4324ac9ec987b56b7"
+    },
+    {
+      "kind": "instructions",
+      "count": 2000,
+      "binary": "predecessor",
+      "trial": 2,
+      "seconds": 0.03619254194200039,
+      "exit": 0,
+      "output_sha256": "bf0155f35a9eb10ad541b13da0a9babd178117c7e3aa11c15a7563a2a4bcaac7",
+      "source_sha256": "34526be2342768b4f92aa441e80d1dffa375ccc77619c7b4324ac9ec987b56b7"
+    },
+    {
+      "kind": "instructions",
+      "count": 2000,
+      "binary": "current",
+      "trial": 0,
+      "seconds": 0.03662804211489856,
+      "exit": 0,
+      "output_sha256": "bf0155f35a9eb10ad541b13da0a9babd178117c7e3aa11c15a7563a2a4bcaac7",
+      "source_sha256": "34526be2342768b4f92aa441e80d1dffa375ccc77619c7b4324ac9ec987b56b7"
+    },
+    {
+      "kind": "instructions",
+      "count": 2000,
+      "binary": "current",
+      "trial": 1,
+      "seconds": 0.03652470908127725,
+      "exit": 0,
+      "output_sha256": "bf0155f35a9eb10ad541b13da0a9babd178117c7e3aa11c15a7563a2a4bcaac7",
+      "source_sha256": "34526be2342768b4f92aa441e80d1dffa375ccc77619c7b4324ac9ec987b56b7"
+    },
+    {
+      "kind": "instructions",
+      "count": 2000,
+      "binary": "current",
+      "trial": 2,
+      "seconds": 0.03606924996711314,
+      "exit": 0,
+      "output_sha256": "bf0155f35a9eb10ad541b13da0a9babd178117c7e3aa11c15a7563a2a4bcaac7",
+      "source_sha256": "34526be2342768b4f92aa441e80d1dffa375ccc77619c7b4324ac9ec987b56b7"
+    },
+    {
+      "kind": "known_width_cycles",
+      "count": 2000,
+      "binary": "current",
+      "trial": 0,
+      "seconds": 0.1648287088610232,
+      "exit": 0,
+      "output_sha256": "ca358758f6d27e6cf45272937977a748fd88391db679ceda7dc7bf1f005ee879",
+      "source_sha256": "546be3957450da7ca82d6fe7d0b98936109db20cfbbc64ae5f5fc3aa5af084e8"
+    },
+    {
+      "kind": "known_width_cycles",
+      "count": 2000,
+      "binary": "current",
+      "trial": 1,
+      "seconds": 0.15794237493537366,
+      "exit": 0,
+      "output_sha256": "ca358758f6d27e6cf45272937977a748fd88391db679ceda7dc7bf1f005ee879",
+      "source_sha256": "546be3957450da7ca82d6fe7d0b98936109db20cfbbc64ae5f5fc3aa5af084e8"
+    },
+    {
+      "kind": "known_width_cycles",
+      "count": 2000,
+      "binary": "current",
+      "trial": 2,
+      "seconds": 0.14955070917494595,
+      "exit": 0,
+      "output_sha256": "ca358758f6d27e6cf45272937977a748fd88391db679ceda7dc7bf1f005ee879",
+      "source_sha256": "546be3957450da7ca82d6fe7d0b98936109db20cfbbc64ae5f5fc3aa5af084e8"
+    },
+    {
+      "kind": "instructions",
+      "count": 8000,
+      "binary": "predecessor",
+      "trial": 0,
+      "seconds": 0.13058504182845354,
+      "exit": 0,
+      "output_sha256": "23b6713ab1722ea69de5cd20abb31e04cf8835dbd586e909e2ea74977fc7e918",
+      "source_sha256": "638b20d3ba6caacde4b38d083bb33bbbb4bf6790e1c3b7ab29e22a4a267ec738"
+    },
+    {
+      "kind": "instructions",
+      "count": 8000,
+      "binary": "predecessor",
+      "trial": 1,
+      "seconds": 0.13285212498158216,
+      "exit": 0,
+      "output_sha256": "23b6713ab1722ea69de5cd20abb31e04cf8835dbd586e909e2ea74977fc7e918",
+      "source_sha256": "638b20d3ba6caacde4b38d083bb33bbbb4bf6790e1c3b7ab29e22a4a267ec738"
+    },
+    {
+      "kind": "instructions",
+      "count": 8000,
+      "binary": "predecessor",
+      "trial": 2,
+      "seconds": 0.1315592909231782,
+      "exit": 0,
+      "output_sha256": "23b6713ab1722ea69de5cd20abb31e04cf8835dbd586e909e2ea74977fc7e918",
+      "source_sha256": "638b20d3ba6caacde4b38d083bb33bbbb4bf6790e1c3b7ab29e22a4a267ec738"
+    },
+    {
+      "kind": "instructions",
+      "count": 8000,
+      "binary": "current",
+      "trial": 0,
+      "seconds": 0.1343923748936504,
+      "exit": 0,
+      "output_sha256": "23b6713ab1722ea69de5cd20abb31e04cf8835dbd586e909e2ea74977fc7e918",
+      "source_sha256": "638b20d3ba6caacde4b38d083bb33bbbb4bf6790e1c3b7ab29e22a4a267ec738"
+    },
+    {
+      "kind": "instructions",
+      "count": 8000,
+      "binary": "current",
+      "trial": 1,
+      "seconds": 0.1370701661799103,
+      "exit": 0,
+      "output_sha256": "23b6713ab1722ea69de5cd20abb31e04cf8835dbd586e909e2ea74977fc7e918",
+      "source_sha256": "638b20d3ba6caacde4b38d083bb33bbbb4bf6790e1c3b7ab29e22a4a267ec738"
+    },
+    {
+      "kind": "instructions",
+      "count": 8000,
+      "binary": "current",
+      "trial": 2,
+      "seconds": 0.1366153748240322,
+      "exit": 0,
+      "output_sha256": "23b6713ab1722ea69de5cd20abb31e04cf8835dbd586e909e2ea74977fc7e918",
+      "source_sha256": "638b20d3ba6caacde4b38d083bb33bbbb4bf6790e1c3b7ab29e22a4a267ec738"
+    },
+    {
+      "kind": "known_width_cycles",
+      "count": 8000,
+      "binary": "current",
+      "trial": 0,
+      "seconds": 0.6240447498857975,
+      "exit": 0,
+      "output_sha256": "ca358758f6d27e6cf45272937977a748fd88391db679ceda7dc7bf1f005ee879",
+      "source_sha256": "f95fc6812f05f3b104782656c28413546ba62ba904dee62a02c9b260b9260fcf"
+    },
+    {
+      "kind": "known_width_cycles",
+      "count": 8000,
+      "binary": "current",
+      "trial": 1,
+      "seconds": 0.6076272919308394,
+      "exit": 0,
+      "output_sha256": "ca358758f6d27e6cf45272937977a748fd88391db679ceda7dc7bf1f005ee879",
+      "source_sha256": "f95fc6812f05f3b104782656c28413546ba62ba904dee62a02c9b260b9260fcf"
+    },
+    {
+      "kind": "known_width_cycles",
+      "count": 8000,
+      "binary": "current",
+      "trial": 2,
+      "seconds": 0.6144738749135286,
+      "exit": 0,
+      "output_sha256": "ca358758f6d27e6cf45272937977a748fd88391db679ceda7dc7bf1f005ee879",
+      "source_sha256": "f95fc6812f05f3b104782656c28413546ba62ba904dee62a02c9b260b9260fcf"
+    }
+  ]
+}
