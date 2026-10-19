@@ -1,0 +1,2590 @@
+{
+  "binary": "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+  "sha256": "51aed25f0666cbceab189ecb2bc48761bf932589c7509b989f21e8a5ac0b5478",
+  "results": [
+    {
+      "name": "defaults",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000102",
+      "native_hex": "000102",
+      "matches": true
+    },
+    {
+      "name": "previous",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: undefined symbol `RED`\n",
+      "hex": null,
+      "native_hex": "020304",
+      "matches": false
+    },
+    {
+      "name": "forward",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `GREEN`\n",
+      "hex": null,
+      "native_hex": "05060405",
+      "matches": false
+    },
+    {
+      "name": "outer_fallback",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0203",
+      "native_hex": "0203",
+      "matches": true
+    },
+    {
+      "name": "local_shadow",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0203",
+      "native_hex": "0405",
+      "matches": false
+    },
+    {
+      "name": "root_explicit",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: undefined symbol `::VALUE`\n",
+      "hex": null,
+      "native_hex": "0203",
+      "matches": false
+    },
+    {
+      "name": "outer_self_cycle",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": "07",
+      "matches": true
+    },
+    {
+      "name": "cycle_unused",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `GREEN`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "undefined_unused",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `MISSING`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "defined_self",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: undefined symbol `\u0001defined\u0001RED`\n",
+      "hex": null,
+      "native_hex": "0001",
+      "matches": false
+    },
+    {
+      "name": "queries",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: undefined symbol `\u0001defined\u0001VALUE`\n",
+      "hex": null,
+      "native_hex": "01040001",
+      "matches": false
+    },
+    {
+      "name": "source_fold_inside",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0203",
+      "native_hex": "0203",
+      "matches": true
+    },
+    {
+      "name": "source_fold_after",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `GREEN`\n",
+      "hex": null,
+      "native_hex": "000000",
+      "matches": false
+    },
+    {
+      "name": "source_fold_later_outer",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `VALUE`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "source_fold_unresolved",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0000",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "global_alias",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `GREEN`\n",
+      "hex": null,
+      "native_hex": "03",
+      "matches": false
+    },
+    {
+      "name": "label",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: undefined symbol `target`\n",
+      "hex": null,
+      "native_hex": "0700100110",
+      "matches": false
+    },
+    {
+      "name": "pc",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `*` cannot be used here\n",
+      "hex": null,
+      "native_hex": "0701100210",
+      "matches": false
+    },
+    {
+      "name": "nested_enum",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: undefined symbol `RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "anonymous",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:7: error: undefined symbol `RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "nested_scope",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0203",
+      "native_hex": "0405",
+      "matches": false
+    },
+    {
+      "name": "size_empty",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0000",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "size_defaults",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: size of `Colors::GREEN` is unknown\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "size_forward",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `GREEN`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "size_reset",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0400",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "duplicate",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "cheap_anchor",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0203",
+      "native_hex": "0203",
+      "matches": true
+    },
+    {
+      "name": "record_coexist",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0203",
+      "native_hex": "0203",
+      "matches": true
+    },
+    {
+      "name": "boundary_-2_values",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: range error (-2 not in [0..4294967295])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "boundary_-2_size",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+      "hex": "00000000",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "boundary_-1_values",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: range error (-1 not in [0..4294967295])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "boundary_-1_size",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+      "hex": "01000000",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "boundary_0_values",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+      "hex": "0000000001000000",
+      "native_hex": "0000000001000000",
+      "matches": true
+    },
+    {
+      "name": "boundary_0_size",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+      "hex": "02000000",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "boundary_255_values",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+      "hex": "ff00000000010000",
+      "native_hex": "ff00000000010000",
+      "matches": true
+    },
+    {
+      "name": "boundary_255_size",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+      "hex": "01010000",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "boundary_256_values",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+      "hex": "0001000001010000",
+      "native_hex": "0001000001010000",
+      "matches": true
+    },
+    {
+      "name": "boundary_256_size",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+      "hex": "02010000",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "boundary_65535_values",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+      "hex": "ffff000000000100",
+      "native_hex": "ffff000000000100",
+      "matches": true
+    },
+    {
+      "name": "boundary_65535_size",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+      "hex": "01000100",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "boundary_65536_values",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+      "hex": "0000010001000100",
+      "native_hex": "0000010001000100",
+      "matches": true
+    },
+    {
+      "name": "boundary_65536_size",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+      "hex": "02000100",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "boundary_$7FFFFFFF_values",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+      "hex": "ffffff7f00000080",
+      "native_hex": "ffffff7f00000080",
+      "matches": true
+    },
+    {
+      "name": "boundary_$7FFFFFFF_size",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+      "hex": "01000080",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "boundary_$FFFFFFFF_values",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: range error (4294967296 not in [0..4294967295])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "boundary_$FFFFFFFF_size",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: range error (4294967297 not in [0..4294967295])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "boundary_4294967296_values",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: range error (4294967296 not in [0..4294967295])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "boundary_4294967296_size",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: range error (4294967298 not in [0..4294967295])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "anonymous_defaults",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: undefined symbol `RED`\n",
+      "hex": null,
+      "native_hex": "0001",
+      "matches": false
+    },
+    {
+      "name": "anonymous_previous",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: undefined symbol `RED`\n",
+      "hex": null,
+      "native_hex": "0203",
+      "matches": false
+    },
+    {
+      "name": "anonymous_forward",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `GREEN`\n",
+      "hex": null,
+      "native_hex": "0303",
+      "matches": false
+    },
+    {
+      "name": "anonymous_scope",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: undefined symbol `GREEN`\n",
+      "hex": null,
+      "native_hex": "0303",
+      "matches": false
+    },
+    {
+      "name": "named_scope_reopen",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: duplicate scope `Colors`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "default_after_undefined",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `MISSING`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "size_member_only",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: size of `Colors::RED` is unknown\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "enum_nested_struct",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "02",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "struct_nested_enum",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "02",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "plain_assignment_in_enum",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: undefined symbol `RED`\n",
+      "hex": null,
+      "native_hex": "020304",
+      "matches": false
+    },
+    {
+      "name": "self_False__RED_.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1:1: error: circular definition of symbol `RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "self_False__RED+1_.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1:1: error: circular definition of symbol `RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "self_False__RED+1_.byte RED",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1:1: error: circular definition of symbol `RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "self_False__RED-RED_.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1:1: error: circular definition of symbol `RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "self_False__RED-RED_.byte RED",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1:1: error: circular definition of symbol `RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "self_False__.defined(RED)_.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": "07",
+      "matches": true
+    },
+    {
+      "name": "self_False__.defined(RED)_.byte RED",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "00",
+      "native_hex": "00",
+      "matches": true
+    },
+    {
+      "name": "self_False_.enum Colors_RED_.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "self_False_.enum Colors_RED+1_.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "self_False_.enum Colors_RED+1_.byte Colors::RED",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "self_False_.enum Colors_RED-RED_.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "self_False_.enum Colors_RED-RED_.byte Colors::RED",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "self_False_.enum Colors_.defined(RED)_.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `\u0001defined\u0001RED`\n",
+      "hex": null,
+      "native_hex": "07",
+      "matches": false
+    },
+    {
+      "name": "self_False_.enum Colors_.defined(RED)_.byte Colors::RED",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `\u0001defined\u0001RED`\n",
+      "hex": null,
+      "native_hex": "00",
+      "matches": false
+    },
+    {
+      "name": "self_False_.enum_RED_.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "self_False_.enum_RED+1_.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "self_False_.enum_RED+1_.byte RED",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "self_False_.enum_RED-RED_.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "self_False_.enum_RED-RED_.byte RED",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "self_False_.enum_.defined(RED)_.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `\u0001defined\u0001RED`\n",
+      "hex": null,
+      "native_hex": "07",
+      "matches": false
+    },
+    {
+      "name": "self_False_.enum_.defined(RED)_.byte RED",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `\u0001defined\u0001RED`\n",
+      "hex": null,
+      "native_hex": "00",
+      "matches": false
+    },
+    {
+      "name": "self_True_.enum Colors_RED_.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": "07",
+      "matches": true
+    },
+    {
+      "name": "self_True_.enum Colors_RED+1_.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": "07",
+      "matches": true
+    },
+    {
+      "name": "self_True_.enum Colors_RED+1_.byte Colors::RED",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "0a",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "self_True_.enum Colors_RED-RED_.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": "07",
+      "matches": true
+    },
+    {
+      "name": "self_True_.enum Colors_RED-RED_.byte Colors::RED",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "00",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "self_True_.enum Colors_.defined(RED)_.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: undefined symbol `\u0001defined\u0001RED`\n",
+      "hex": null,
+      "native_hex": "07",
+      "matches": false
+    },
+    {
+      "name": "self_True_.enum Colors_.defined(RED)_.byte Colors::RED",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: undefined symbol `\u0001defined\u0001RED`\n",
+      "hex": null,
+      "native_hex": "00",
+      "matches": false
+    },
+    {
+      "name": "self_True_.enum_RED_.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "self_True_.enum_RED_.byte RED",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "self_True_.enum_RED+1_.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "self_True_.enum_RED+1_.byte RED",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "self_True_.enum_RED-RED_.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "self_True_.enum_RED-RED_.byte RED",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "self_True_.enum_.defined(RED)_.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: undefined symbol `\u0001defined\u0001RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "self_True_.enum_.defined(RED)_.byte RED",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: undefined symbol `\u0001defined\u0001RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "enum_include",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0203",
+      "native_hex": "0405",
+      "matches": false
+    },
+    {
+      "name": "enum_include_after_macro",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0203",
+      "native_hex": "0405",
+      "matches": false
+    },
+    {
+      "name": "enum_macro_fields",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0203",
+      "native_hex": "0203",
+      "matches": true
+    },
+    {
+      "name": "enum_macro_namespace",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0203",
+      "native_hex": "0203",
+      "matches": true
+    },
+    {
+      "name": "enum_repeated_namespace",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+      "hex": "02030304",
+      "native_hex": "02030304",
+      "matches": true
+    },
+    {
+      "name": "enum_captured_query_base",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: undefined symbol `\u0001defined\u0001VALUE`\n",
+      "hex": null,
+      "native_hex": "01020405",
+      "matches": false
+    },
+    {
+      "name": "enum_constancy_updates",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "020705",
+      "native_hex": "040905",
+      "matches": false
+    },
+    {
+      "name": "enum_closing_cheap_anchor",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "03",
+      "native_hex": "03",
+      "matches": true
+    },
+    {
+      "name": "enum_include_inside_refuses",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: invalid enum member `.include \"enums.inc\"`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "enum_reset_cursor",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `LATE`\n",
+      "hex": null,
+      "native_hex": "04050a0b0405",
+      "matches": false
+    },
+    {
+      "name": "enum_member_token_False_A",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "enum_header_token_False_A",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "enum_member_token_False_X",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "enum_header_token_False_X",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "enum_member_token_False_Y",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "enum_header_token_False_Y",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "enum_member_token_False_LDA",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": "07",
+      "matches": true
+    },
+    {
+      "name": "enum_header_token_False_LDA",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": "07",
+      "matches": true
+    },
+    {
+      "name": "enum_member_token_False_RED",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": "07",
+      "matches": true
+    },
+    {
+      "name": "enum_header_token_False_RED",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": "07",
+      "matches": true
+    },
+    {
+      "name": "enum_member_token_False_SP",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": "07",
+      "matches": true
+    },
+    {
+      "name": "enum_header_token_False_SP",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": "07",
+      "matches": true
+    },
+    {
+      "name": "enum_member_token_False_Z",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": "07",
+      "matches": true
+    },
+    {
+      "name": "enum_header_token_False_Z",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": "07",
+      "matches": true
+    },
+    {
+      "name": "enum_member_token_False_BRU",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": "07",
+      "matches": true
+    },
+    {
+      "name": "enum_header_token_False_BRU",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": "07",
+      "matches": true
+    },
+    {
+      "name": "enum_member_token_True_A",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "enum_header_token_True_A",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "enum_member_token_True_X",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "enum_header_token_True_X",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "enum_member_token_True_Y",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "enum_header_token_True_Y",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "enum_member_token_True_LDA",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": "07",
+      "matches": true
+    },
+    {
+      "name": "enum_header_token_True_LDA",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": "07",
+      "matches": true
+    },
+    {
+      "name": "enum_member_token_True_RED",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": "07",
+      "matches": true
+    },
+    {
+      "name": "enum_header_token_True_RED",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": "07",
+      "matches": true
+    },
+    {
+      "name": "enum_member_token_True_SP",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "enum_header_token_True_SP",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "enum_member_token_True_Z",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "enum_header_token_True_Z",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "enum_member_token_True_BRU",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": "07",
+      "matches": true
+    },
+    {
+      "name": "enum_header_token_True_BRU",
+      "argv": [
+        "/private/tmp/asm198x-enum-execution-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": "07",
+      "matches": true
+    }
+  ]
+}

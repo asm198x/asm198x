@@ -181,6 +181,7 @@ pub(super) fn resolve(
         // The sweep reads every unread line before projection ends; one
         // reaching layout is a driver bug, not a source error.
         Kind::Unread => unreachable!("an unread line survived the projection sweep"),
+        Kind::EnumValue(..) => unreachable!("an enum expression survived constant projection"),
         // The only statement whose size depends on where it stands: pad to the
         // next multiple of the boundary, measured from the segment's start.
         Kind::Align(boundary, fill) => {
