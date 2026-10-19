@@ -377,3 +377,9 @@ test('Pasmo character-literal boundaries are mandatory package evidence', () => 
   assert(qualifies(complete)); assert(requiredCases.includes('pasmo_character_literals'));
   assert.equal(qualifies(complete.filter(r => r.name !== 'pasmo_character_literals')), false);
 });
+
+test('SjASMPlus packed quotes are mandatory package evidence', () => {
+  const complete = requiredCases.map(name => ({ name, status: 'pass' }));
+  assert(qualifies(complete)); assert(requiredCases.includes('sjasmplus_packed_single'));
+  assert.equal(qualifies(complete.filter(r => r.name !== 'sjasmplus_packed_single')), false);
+});

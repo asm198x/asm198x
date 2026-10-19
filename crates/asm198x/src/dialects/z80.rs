@@ -3521,9 +3521,8 @@ mod define_substitution_tests {
 
     #[test]
     fn numeric_identifiers_expand_without_rewriting_packed_single_quotes() {
-        // Native DD 'FF' emits 0x4646, regardless of DEFINE FF 7. The
-        // expression parser's separate packed-single-quote gap must not
-        // allow this stage to turn it into an accepted, incorrect '7'.
+        // Native DD 'FF' emits 0x4646, regardless of DEFINE FF 7. Numeric
+        // substitutions must not replace text inside the packed literal.
         let defines = BTreeMap::from([
             ("FF".to_string(), "7".to_string()),
             ("X".to_string(), "3".to_string()),
@@ -4802,6 +4801,28 @@ fn tokenize_impl<S: Z80Syntax>(
             ')' => {
                 tokens.push(Tok::RParen);
                 i += 1;
+            }
+            '\'' if syntax.sjasmplus_expressions() => {
+                let start = i;
+                i += 1;
+                let mut closed = false;
+                while i < chars.len() {
+                    let ch = chars[i];
+                    i += 1;
+                    if ch == '\'' {
+                        if chars.get(i) == Some(&'\'') {
+                            i += 1;
+                        } else {
+                            closed = true;
+                            break;
+                        }
+                    }
+                }
+                if !closed {
+                    return Err(AsmError::new(line, "unterminated single-quoted literal"));
+                }
+                let token: String = chars[start..i].iter().collect();
+                tokens.push(Tok::Num(syntax.parse_number(&token, line)?));
             }
             '\'' => {
                 if i + 2 < chars.len() && chars[i + 1] != '\'' && chars[i + 2] == '\'' {
