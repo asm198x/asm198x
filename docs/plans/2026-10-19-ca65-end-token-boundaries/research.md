@@ -34,3 +34,5 @@ round-trip invariant by this slice.
 
 Local verification: 1582 Rust tests pass (38 ignored), 87 Node tests,
 Clippy with Lua/all targets, fmt/Ruff and docs pass.
+
+Clean producer cc8a56a9fd1a8d5931a1f765862fc23a5658191b has executable SHA-256 0388cb0e93f585f8d95d783a683877008c17caf5057dcdb533945079a8c71995. All 25 native comparisons match. Its actual local archive passes all 72 required cohorts; altered bytes fail the three byte controls and an altered archive fails SHA-256. The preceding 71-cohort binary fails only ca65_end_tokens under the current harness. The clean pinned 4510 replay matches all 564 bytes and retains seven processes and fourteen streams; the changed-byte control fails.
