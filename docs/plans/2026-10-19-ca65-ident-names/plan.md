@@ -1,4 +1,4 @@
-# Validate native .ident names before emitting source tokens
+# Validate native .ident names before emitting source tokens (#874)
 
 Native rejects a leading-space identifier string, but the text function currently
 returns it verbatim and the source reader trims it into a different valid name.
@@ -23,3 +23,10 @@ separate. Both differences also exist with adjacent argument parentheses.
 4. Ship isolated task commits on current main after #873, inspect exact-head CI,
    all five actual package reports/receipts and ten controls, rebase merge and
    clean/reuse owned workspaces. Resume #862 on these qualified prerequisites.
+
+Exact implementation files: `crates/asm198x/src/dialects/ca65_flat.rs`
+(`Ca65Text::function`), `crates/asm198x/tests/ca65_ident_names.rs`,
+`crates/asm198x/tests/fixtures/ca65-ident-names.json`,
+`scripts/test-candidate-package.cjs` and `scripts/candidate-package.test.cjs`.
+The fixture includes 163 of 165 native cases: #875 owns the two missing-anchor
+inputs; two native-valid generated A constant gaps remain explicitly #876.

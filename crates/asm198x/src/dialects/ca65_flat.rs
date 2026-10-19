@@ -1898,7 +1898,19 @@ impl text::TextSyntax for Ca65Text<'_> {
             // resolve — forward references included, as in ca65.
             ".ident" => {
                 one(args)?;
-                Folded::Bare(args[0].text(name, line)?.to_string())
+                let value = args[0].text(name, line)?;
+                let mut bytes = value.strip_prefix('@').unwrap_or(value).bytes();
+                if !bytes
+                    .next()
+                    .is_some_and(|byte| byte.is_ascii_alphabetic() || byte == b'_')
+                    || !bytes.all(|byte| byte.is_ascii_alphanumeric() || byte == b'_')
+                {
+                    return Err(AsmError::new(
+                        line,
+                        "`.ident` argument is not a valid identifier",
+                    ));
+                }
+                Folded::Bare(value.to_string())
             }
             other => unreachable!("`{other}` was matched as known and then not folded"),
         }))

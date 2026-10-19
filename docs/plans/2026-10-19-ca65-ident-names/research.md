@@ -35,3 +35,26 @@ at the existing selected text-function seam, without eager branch/body reading.
 The next fixture should retain all syntax contexts, name/address values and
 explicit native-valid A constant gaps, while the two known missing-anchor inputs
 remain separately named audit controls for their own issue.
+
+The focused fix resolves all 25 invalid-name acceptances. It validates the
+untrimmed string at Ca65Text::function(.ident), preserving one legal cheap-local
+prefix and leaving register/mnemonic context to later binding. The full 165-case
+CLI comparison now differs only on #875's two missing anchors and #876's two
+native-valid A constant definitions.
+
+The 163-case fixture accounts for the two separately named #875 controls against
+the complete retained audit; the A constant gaps remain explicit. Rust checks
+real address labels with the official debug reader, constant kind/value, bytes,
+formatter idempotence/symbol-section shape and preserved failed outputs. Additional
+human/JSON include and macro checks preserve five outputs, sources and frames.
+Native .tcount/.match/.blank also reject an invalid nested .ident, as retained in
+the supplemental token-list controls. Lazy skipped/unused/zero-repeat cases pass.
+Full Rust, Node/lints, actual archives and clean producer/replay remain pending.
+
+Final full Rust passes all 1,603 tests (38 ignored). All 97 Node tests, Clippy,
+rustfmt, Ruff and generated docs pass. Native formatting preserves all 163
+outcomes and 61 accepted images; only the two explicit #876 original/formatted
+assembly gaps remain in this fixture. The actual archive passes all 82 cohorts,
+including 340 identifier commands, and both corruption controls fail. The
+preceding archive fails exactly the new cohort. Freeze this verified source and
+retain a complete clean 4510 replay before opening the shipping PR.
