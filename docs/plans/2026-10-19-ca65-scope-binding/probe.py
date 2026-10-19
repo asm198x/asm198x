@@ -67,7 +67,7 @@ def main() -> None:
     parser.add_argument("output", type=Path)
     args = parser.parse_args()
     tools = {n: Path("/opt/homebrew/bin") / n for n in ["ca65", "ld65"]}
-    files = {}
+    files = globals().get("FILES", {})
     records = []
     with tempfile.TemporaryDirectory(prefix="asm198x-attached-label-probe-") as temp:
         root = Path(temp)

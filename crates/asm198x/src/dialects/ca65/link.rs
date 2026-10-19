@@ -292,6 +292,16 @@ pub(super) fn resolve(
                     form,
                     operands,
                     unsigned_word: address_size == Some(AddressSize::Absolute)
+                        || matches!(
+                            mode,
+                            "absolute"
+                                | "absolute,x"
+                                | "absolute,y"
+                                | "indirect"
+                                | "(absolute)"
+                                | "(absolute,x)"
+                                | "(indirect)"
+                        )
                         || (extension.is_some() && mnemonic == "PHW"),
                 },
                 size,

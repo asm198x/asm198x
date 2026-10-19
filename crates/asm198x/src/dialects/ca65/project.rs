@@ -15,11 +15,10 @@ use super::super::ca65_flat::{self, FlatWalk};
 use super::super::mos6502;
 use super::macros::{self, MacroSyntax};
 use super::{
-    AnonCtx, AsmError, Expr, FileId, Kind, Parsed, SegSwitch, SourceLoader, SourceMap, Stmt,
-    Walker, fold_const, is_ident, parse_value, resolve_defined, resolve_ref, segment_switch,
-    split_first_word,
+    AsmError, Expr, FileId, Kind, Parsed, SegSwitch, SourceLoader, SourceMap, Stmt, Walker,
+    fold_const, is_ident, resolve_defined, resolve_ref, segment_switch, split_first_word,
 };
-use super::{cheap_key, is_cheap_ident, vis_name};
+use super::{cheap_key, is_cheap_ident};
 
 /// Project the semantic [`Program`](crate::ast::Program) into the assembler's
 /// [`Parsed`] — the assemble+link driver runs on an owned `Vec<Stmt>` plus the
@@ -324,14 +323,7 @@ fn project_nodes(
             }) => {
                 let line = node.span.line as usize;
                 let head = read_block_head(node, head, st, sw)?;
-                if fold_condition(
-                    &head,
-                    st,
-                    sw.reader.extension,
-                    sw.reader.scope_env.anchor_str(),
-                    line,
-                )
-                .map_err(|e| {
+                if fold_condition(&head, st, &sw.reader, line).map_err(|e| {
                     super::statement_error(e, node.span.file, &node.span.expansion_frames)
                 })? {
                     project_nodes(then_body, st, sw)?;
@@ -353,8 +345,7 @@ fn project_nodes(
             Some(Item::Repeat { head, body, .. }) => {
                 let line = node.span.line as usize;
                 let head = read_block_head(node, head, st, sw)?;
-                let (count, var) = fold_repeat(&head, st, sw.reader.scope_env.anchor_str(), line)
-                    .map_err(|e| {
+                let (count, var) = fold_repeat(&head, st, &sw.reader, line).map_err(|e| {
                     super::statement_error(e, node.span.file, &node.span.expansion_frames)
                 })?;
                 let watermark = pending_len(sw);
@@ -459,6 +450,8 @@ fn bind_head_label<'a>(
         .block_open(source, line)
         .map_err(|e| super::statement_error(e, file, &node.span.expansion_frames))?;
     if let Some(symbol) = symbol {
+        sw.reader.source_known.insert(symbol.qualified.clone());
+        st.deferred.invalidate_size(&symbol.qualified);
         st.label_seg
             .insert(symbol.qualified.clone(), st.seg.clone());
         st.stmts.push(Stmt {
@@ -802,8 +795,7 @@ fn consume_include(
 fn fold_condition(
     head: &str,
     st: &Projection,
-    extension: Option<&'static isa::InstructionSet>,
-    anchor: &str,
+    reader: &Walker,
     line: usize,
 ) -> Result<bool, AsmError> {
     let (word, args) = split_first_word(head.trim());
@@ -821,8 +813,13 @@ fn fold_condition(
             // `Identifier expected`, not with a membership test.
             let key =
                 if let Some(local) = name.strip_prefix('@').filter(|name| is_cheap_ident(name)) {
-                    cheap_key(anchor, local)
-                } else if is_ident(name) {
+                    cheap_key(reader.scope_env.anchor_str(), local)
+                } else if name
+                    .strip_prefix("::")
+                    .unwrap_or(name)
+                    .split("::")
+                    .all(is_ident)
+                {
                     name.to_string()
                 } else {
                     return Err(AsmError::new(
@@ -830,9 +827,7 @@ fn fold_condition(
                         format!("`{word}` needs an identifier, got `{name}`"),
                     ));
                 };
-            let defined = env.contains_key(&key)
-                || st.label_seg.contains_key(&key)
-                || st.equ_definitions.contains(&key);
+            let defined = reader.name_defined(&key, line)?;
             Ok(if word == ".ifdef" { defined } else { !defined })
         }
         // `.ifblank` asks whether anything follows it on the line — which is
@@ -847,10 +842,10 @@ fn fold_condition(
                 .split_whitespace()
                 .next()
                 .ok_or_else(|| AsmError::new(line, format!("`{word}` needs a name")))?;
-            Ok((word == ".ifref") == st.referenced.contains(&vis_name(anchor, name)))
+            Ok((word == ".ifref") == reader.name_referenced(name, line)?)
         }
-        ".ifp02" => Ok(extension.is_none()),
-        ".ifp4510" => Ok(extension.is_some()),
+        ".ifp02" => Ok(reader.extension.is_none()),
+        ".ifp4510" => Ok(reader.extension.is_some()),
         ".ifp816" | ".ifpc02" | ".ifpsc02" => Ok(false),
         // `.ifconst` is not `.if`: it asks whether the expression *is* a
         // constant, not what it comes to, and answers rather than failing when
@@ -867,7 +862,7 @@ fn fold_condition(
             if args.is_empty() {
                 return Err(AsmError::new(line, format!("`{word}` needs an expression")));
             }
-            let expr = parse_value(&AnonCtx::default(), anchor, args, line)?;
+            let expr = reader.source_value(args, line)?;
             let expr = map_expr_syms(&expr, &resolve_defined(&st.consts, &st.label_seg));
             Ok((word == ".ifconst") == weighs_nothing(&expr, st))
         }
@@ -875,7 +870,7 @@ fn fold_condition(
             if args.is_empty() {
                 return Err(AsmError::new(line, format!("`{word}` needs a condition")));
             }
-            let expr = parse_value(&AnonCtx::default(), anchor, args, line)?;
+            let expr = reader.source_value(args, line)?;
             // `.if .defined(X)` — answered against what stands above this line,
             // which is what makes `.defined` positional in the first place.
             let expr = map_expr_syms(&expr, &resolve_defined(&st.consts, &st.label_seg));
@@ -972,7 +967,7 @@ fn walk_weights(
 fn fold_repeat(
     head: &str,
     st: &Projection,
-    anchor: &str,
+    reader: &Walker,
     line: usize,
 ) -> Result<(i64, Option<String>), AsmError> {
     let (_, args) = split_first_word(head.trim());
@@ -983,7 +978,7 @@ fn fold_repeat(
     if count_text.is_empty() {
         return Err(AsmError::new(line, "`.repeat` needs a count"));
     }
-    let expr = parse_value(&AnonCtx::default(), anchor, count_text, line)?;
+    let expr = reader.source_value(count_text, line)?;
     let count = fold_const(&expr, &st.consts, line)?;
     // ca65: a negative count is `Range error`, where zero is no iterations.
     if count < 0 {
@@ -1122,6 +1117,10 @@ fn project_selected(
     reader: &mut Walker,
 ) -> Result<(), AsmError> {
     let start = st.stmts.len();
+    if let Some(label) = &node.label {
+        reader.source_known.insert(label.qualified.clone());
+        st.deferred.invalidate_size(&label.qualified);
+    }
     project_one(node, st)?;
     let updates = st
         .deferred
@@ -1279,6 +1278,10 @@ fn project_one(node: &crate::ast::Node, st: &mut Projection) -> Result<(), AsmEr
                 if let Kind::Constant(name, value) = &kind {
                     consts.insert(name.clone(), *value);
                     st.constant_updates.push((name.clone(), *value));
+                    if let Some(owner) = name.strip_suffix(super::SIZE_SUFFIX) {
+                        st.const_names
+                            .insert(name.clone(), format!("{owner}{}size", super::LABEL_SEP));
+                    }
                 }
                 // `.export foo := 7` defines `foo` as well as exporting it, so
                 // it is collected here with the `=` constants rather than left
@@ -1319,14 +1322,17 @@ fn project_one(node: &crate::ast::Node, st: &mut Projection) -> Result<(), AsmEr
                         consts.contains_key(name)
                             || label_seg.contains_key(name)
                             || st.zero_page_names.contains(name)
+                            || st.deferred.definitions.contains_key(name)
                     });
                     let env: BTreeMap<String, i64> = names
                         .into_iter()
                         .filter_map(|name| {
                             let target = targets.get(&name).unwrap_or(&name);
-                            let value = st.deferred.size_value(target, consts, &|key| {
-                                st.zero_page_names.contains(key)
-                                    || label_seg.get(key).map(String::as_str) == Some("ZEROPAGE")
+                            let value = consts.get(target).copied().or_else(|| {
+                                (st.zero_page_names.contains(target)
+                                    || label_seg.get(target).map(String::as_str)
+                                        == Some("ZEROPAGE"))
+                                .then_some(0)
                             })?;
                             Some((name, value))
                         })
@@ -1337,13 +1343,50 @@ fn project_one(node: &crate::ast::Node, st: &mut Projection) -> Result<(), AsmEr
                                 super::statement_error(e, file, &node.span.expansion_frames)
                             })?;
                     let super::Resolved::Insn {
-                        form,
+                        mut form,
                         operands,
-                        unsigned_word,
+                        mut unsigned_word,
                     } = resolved
                     else {
                         unreachable!("an instruction resolved to a non-instruction")
                     };
+                    if let Kind::Insn {
+                        operand,
+                        address_size: None,
+                        mnemonic,
+                        extension,
+                    } = &kind
+                    {
+                        use mos6502::{Index, OperandSyntax};
+                        let memory = match operand {
+                            OperandSyntax::Direct(value) => Some((value, None)),
+                            OperandSyntax::Indexed(value, index) => Some((value, Some(*index))),
+                            _ => None,
+                        };
+                        if let Some((value, index)) = memory {
+                            let byte = st
+                                .deferred
+                                .size_hint(value, consts, label_seg, &st.zero_page_names, line)
+                                .unwrap_or(false);
+                            let mode = match (byte, index) {
+                                (true, None) => "zeropage",
+                                (true, Some(Index::X)) => "zeropage,x",
+                                (true, Some(Index::Y)) => "zeropage,y",
+                                (false, None) => "absolute",
+                                (false, Some(Index::X)) => "absolute,x",
+                                (false, Some(Index::Y)) => "absolute,y",
+                            };
+                            if let Some(selected) = extension
+                                .and_then(|set| set.find_form(mnemonic, mode))
+                                .or_else(|| isa::mos6502::SET.find_form(mnemonic, mode))
+                            {
+                                form = selected;
+                                if !byte {
+                                    unsigned_word = true;
+                                }
+                            }
+                        }
+                    }
                     Some(super::BoundInsn {
                         form,
                         operands,

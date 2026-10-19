@@ -1,0 +1,2001 @@
+{
+  "binary": "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+  "sha256": "4db177ba0061a69f3aca650d411444cfb0566de04fabc876b57dfece0ece3389",
+  "results": [
+    {
+      "name": "value_$12_later_None_VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_None_VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_None_::VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_None_::VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_None_VALUE+250_False",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad0c01",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "value_$12_later_None_VALUE+250_True",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad0c01",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "value_$12_later_None_VALUE*2_False",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a524",
+      "native_hex": "a524",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_None_VALUE*2_True",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a524",
+      "native_hex": "a524",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_None_<VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_None_<VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_None_>VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a500",
+      "native_hex": "a500",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_None_>VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a500",
+      "native_hex": "a500",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_$34_VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a534",
+      "matches": false
+    },
+    {
+      "name": "value_$12_later_$34_VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a534",
+      "matches": false
+    },
+    {
+      "name": "value_$12_later_$34_::VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_$34_::VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_$34_VALUE+250_False",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad0c01",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "value_$12_later_$34_VALUE+250_True",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad0c01",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "value_$12_later_$34_VALUE*2_False",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a524",
+      "native_hex": "a568",
+      "matches": false
+    },
+    {
+      "name": "value_$12_later_$34_VALUE*2_True",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a524",
+      "native_hex": "a568",
+      "matches": false
+    },
+    {
+      "name": "value_$12_later_$34_<VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a534",
+      "matches": false
+    },
+    {
+      "name": "value_$12_later_$34_<VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a534",
+      "matches": false
+    },
+    {
+      "name": "value_$12_later_$34_>VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a500",
+      "native_hex": "a500",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_$34_>VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a500",
+      "native_hex": "a500",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_$1234_VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "value_$12_later_$1234_VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "value_$12_later_$1234_::VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_$1234_::VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_$1234_VALUE+250_False",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad0c01",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "value_$12_later_$1234_VALUE+250_True",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad0c01",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "value_$12_later_$1234_VALUE*2_False",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a524",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "value_$12_later_$1234_VALUE*2_True",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a524",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "value_$12_later_$1234_<VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a534",
+      "matches": false
+    },
+    {
+      "name": "value_$12_later_$1234_<VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a534",
+      "matches": false
+    },
+    {
+      "name": "value_$12_later_$1234_>VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a500",
+      "native_hex": "a512",
+      "matches": false
+    },
+    {
+      "name": "value_$12_later_$1234_>VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a500",
+      "native_hex": "a512",
+      "matches": false
+    },
+    {
+      "name": "value_$1234_later_None_VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3412",
+      "native_hex": "ad3412",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_None_VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3412",
+      "native_hex": "ad3412",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_None_::VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3412",
+      "native_hex": "ad3412",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_None_::VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3412",
+      "native_hex": "ad3412",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_None_VALUE+250_False",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad2e13",
+      "native_hex": "ad2e13",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_None_VALUE+250_True",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad2e13",
+      "native_hex": "ad2e13",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_None_VALUE*2_False",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad6824",
+      "native_hex": "ad6824",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_None_VALUE*2_True",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad6824",
+      "native_hex": "ad6824",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_None_<VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a534",
+      "native_hex": "a534",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_None_<VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a534",
+      "native_hex": "a534",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_None_>VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_None_>VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$34_VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3412",
+      "native_hex": "ad3400",
+      "matches": false
+    },
+    {
+      "name": "value_$1234_later_$34_VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3412",
+      "native_hex": "ad3400",
+      "matches": false
+    },
+    {
+      "name": "value_$1234_later_$34_::VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3412",
+      "native_hex": "ad3412",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$34_::VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3412",
+      "native_hex": "ad3412",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$34_VALUE+250_False",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad2e13",
+      "native_hex": "ad2e01",
+      "matches": false
+    },
+    {
+      "name": "value_$1234_later_$34_VALUE+250_True",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad2e13",
+      "native_hex": "ad2e01",
+      "matches": false
+    },
+    {
+      "name": "value_$1234_later_$34_VALUE*2_False",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad6824",
+      "native_hex": "ad6800",
+      "matches": false
+    },
+    {
+      "name": "value_$1234_later_$34_VALUE*2_True",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad6824",
+      "native_hex": "ad6800",
+      "matches": false
+    },
+    {
+      "name": "value_$1234_later_$34_<VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a534",
+      "native_hex": "a534",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$34_<VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a534",
+      "native_hex": "a534",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$34_>VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a500",
+      "matches": false
+    },
+    {
+      "name": "value_$1234_later_$34_>VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a500",
+      "matches": false
+    },
+    {
+      "name": "value_$1234_later_$1234_VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3412",
+      "native_hex": "ad3412",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$1234_VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3412",
+      "native_hex": "ad3412",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$1234_::VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3412",
+      "native_hex": "ad3412",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$1234_::VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3412",
+      "native_hex": "ad3412",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$1234_VALUE+250_False",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad2e13",
+      "native_hex": "ad2e13",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$1234_VALUE+250_True",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad2e13",
+      "native_hex": "ad2e13",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$1234_VALUE*2_False",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad6824",
+      "native_hex": "ad6824",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$1234_VALUE*2_True",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad6824",
+      "native_hex": "ad6824",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$1234_<VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a534",
+      "native_hex": "a534",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$1234_<VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a534",
+      "native_hex": "a534",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$1234_>VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$1234_>VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "phase_False_VALUE_.byte {x}",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "02",
+      "native_hex": "02",
+      "matches": true
+    },
+    {
+      "name": "phase_False_VALUE_.res {x}",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: `.res` count must be a constant\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "phase_False_VALUE_.if {x}=2\n.byte 7\n.endif",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "phase_False_VALUE_.byte .defined({x}),.const({x}),.referenced({x})",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: `.const` cannot answer for `VALUE`: this pass keeps no scope stack, so a constant inside a `.proc` or `.scope` is invisible to it\n",
+      "hex": null,
+      "native_hex": "000001",
+      "matches": false
+    },
+    {
+      "name": "phase_False_::VALUE_.byte {x}",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "02",
+      "native_hex": "02",
+      "matches": true
+    },
+    {
+      "name": "phase_False_::VALUE_.res {x}",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0000",
+      "native_hex": "0000",
+      "matches": true
+    },
+    {
+      "name": "phase_False_::VALUE_.if {x}=2\n.byte 7\n.endif",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: `::VALUE=2` must be a constant here \u2014 ca65 folds a condition against the                          `=` constants above it, and refuses a label or a forward reference\n",
+      "hex": null,
+      "native_hex": "07",
+      "matches": false
+    },
+    {
+      "name": "phase_False_::VALUE_.byte .defined({x}),.const({x}),.referenced({x})",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: `.const` cannot answer for `::VALUE`: this pass keeps no scope stack, so a constant inside a `.proc` or `.scope` is invisible to it\n",
+      "hex": null,
+      "native_hex": "010101",
+      "matches": false
+    },
+    {
+      "name": "phase_False_OTHER_.byte {x}",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "02",
+      "native_hex": "02",
+      "matches": true
+    },
+    {
+      "name": "phase_False_OTHER_.res {x}",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0000",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "phase_False_OTHER_.if {x}=2\n.byte 7\n.endif",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: `OTHER=2` must be a constant here \u2014 ca65 folds a condition against the                          `=` constants above it, and refuses a label or a forward reference\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "phase_False_OTHER_.byte .defined({x}),.const({x}),.referenced({x})",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: `.const` cannot answer for `OTHER`: this pass keeps no scope stack, so a constant inside a `.proc` or `.scope` is invisible to it\n",
+      "hex": null,
+      "native_hex": "010001",
+      "matches": false
+    },
+    {
+      "name": "phase_True_VALUE_.byte {x}",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "02",
+      "native_hex": "03",
+      "matches": false
+    },
+    {
+      "name": "phase_True_VALUE_.res {x}",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: `.res` count must be a constant\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "phase_True_VALUE_.if {x}=2\n.byte 7\n.endif",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "phase_True_VALUE_.byte .defined({x}),.const({x}),.referenced({x})",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: `.const` cannot answer for `VALUE`: this pass keeps no scope stack, so a constant inside a `.proc` or `.scope` is invisible to it\n",
+      "hex": null,
+      "native_hex": "000001",
+      "matches": false
+    },
+    {
+      "name": "phase_True_::VALUE_.byte {x}",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "02",
+      "native_hex": "02",
+      "matches": true
+    },
+    {
+      "name": "phase_True_::VALUE_.res {x}",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0000",
+      "native_hex": "0000",
+      "matches": true
+    },
+    {
+      "name": "phase_True_::VALUE_.if {x}=2\n.byte 7\n.endif",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: `::VALUE=2` must be a constant here \u2014 ca65 folds a condition against the                          `=` constants above it, and refuses a label or a forward reference\n",
+      "hex": null,
+      "native_hex": "07",
+      "matches": false
+    },
+    {
+      "name": "phase_True_::VALUE_.byte .defined({x}),.const({x}),.referenced({x})",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: `.const` cannot answer for `::VALUE`: this pass keeps no scope stack, so a constant inside a `.proc` or `.scope` is invisible to it\n",
+      "hex": null,
+      "native_hex": "010101",
+      "matches": false
+    },
+    {
+      "name": "phase_True_OTHER_.byte {x}",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "02",
+      "native_hex": "03",
+      "matches": false
+    },
+    {
+      "name": "phase_True_OTHER_.res {x}",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0000",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "phase_True_OTHER_.if {x}=2\n.byte 7\n.endif",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: `OTHER=2` must be a constant here \u2014 ca65 folds a condition against the                          `=` constants above it, and refuses a label or a forward reference\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "phase_True_OTHER_.byte .defined({x}),.const({x}),.referenced({x})",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: `.const` cannot answer for `OTHER`: this pass keeps no scope stack, so a constant inside a `.proc` or `.scope` is invisible to it\n",
+      "hex": null,
+      "native_hex": "010001",
+      "matches": false
+    },
+    {
+      "name": "alias_updates",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0000",
+      "native_hex": "0000",
+      "matches": true
+    },
+    {
+      "name": "alias_chain_updates",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0000",
+      "native_hex": "0000",
+      "matches": true
+    },
+    {
+      "name": "unused_undefined",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1:1: error: undefined symbol `MISSING`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "unused_cycle",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1:1: error: circular definition of symbol `FIRST`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "alias_pc",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0010",
+      "native_hex": "0010",
+      "matches": true
+    },
+    {
+      "name": "alias_forward_label",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "021007",
+      "native_hex": "021007",
+      "matches": true
+    },
+    {
+      "name": "nested_fallback",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "02",
+      "native_hex": "03",
+      "matches": false
+    },
+    {
+      "name": "defined_before_ref",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: `.const` cannot answer for `VALUE`: this pass keeps no scope stack, so a constant inside a `.proc` or `.scope` is invisible to it\n",
+      "hex": null,
+      "native_hex": "0103000001",
+      "matches": false
+    },
+    {
+      "name": "alias_const_after",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: `.const` cannot answer for `OTHER`: this pass keeps no scope stack, so a constant inside a `.proc` or `.scope` is invisible to it\n",
+      "hex": null,
+      "native_hex": "01000103",
+      "matches": false
+    }
+  ]
+}

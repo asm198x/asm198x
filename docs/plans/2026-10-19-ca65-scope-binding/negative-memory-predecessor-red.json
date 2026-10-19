@@ -1,0 +1,538 @@
+{
+  "binary": "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+  "sha256": "4db177ba0061a69f3aca650d411444cfb0566de04fabc876b57dfece0ece3389",
+  "results": [
+    {
+      "name": "negative_memory_lda {x}_-1",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "adffff",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "negative_memory_lda {x}_-128",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad80ff",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "negative_memory_lda {x}_-32768",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad0080",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "negative_memory_lda {x}_$FFFF",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "adffff",
+      "native_hex": "adffff",
+      "matches": true
+    },
+    {
+      "name": "negative_memory_lda {x},x_-1",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "bdffff",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "negative_memory_lda {x},x_-128",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "bd80ff",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "negative_memory_lda {x},x_-32768",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "bd0080",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "negative_memory_lda {x},x_$FFFF",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "bdffff",
+      "native_hex": "bdffff",
+      "matches": true
+    },
+    {
+      "name": "negative_memory_sta {x},y_-1",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "99ffff",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "negative_memory_sta {x},y_-128",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "9980ff",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "negative_memory_sta {x},y_-32768",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "990080",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "negative_memory_sta {x},y_$FFFF",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "99ffff",
+      "native_hex": "99ffff",
+      "matches": true
+    },
+    {
+      "name": "negative_memory_jmp {x}_-1",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "4cffff",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "negative_memory_jmp {x}_-128",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "4c80ff",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "negative_memory_jmp {x}_-32768",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "4c0080",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "negative_memory_jmp {x}_$FFFF",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "4cffff",
+      "native_hex": "4cffff",
+      "matches": true
+    },
+    {
+      "name": "negative_memory_jmp ({x})_-1",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "6cffff",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "negative_memory_jmp ({x})_-128",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "6c80ff",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "negative_memory_jmp ({x})_-32768",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "6c0080",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "negative_memory_jmp ({x})_$FFFF",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "6cffff",
+      "native_hex": "6cffff",
+      "matches": true
+    },
+    {
+      "name": "negative_memory_lda #{x}_-1",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: range error (-1 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "negative_memory_lda #{x}_-128",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: range error (-128 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "negative_memory_lda #{x}_-32768",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: range error (-32768 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "negative_memory_lda #{x}_$FFFF",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: range error (65535 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "negative_memory_.word {x}_-1",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: range error (-1 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "negative_memory_.word {x}_-128",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: range error (-128 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "negative_memory_.word {x}_-32768",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: range error (-32768 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "negative_memory_.word {x}_$FFFF",
+      "argv": [
+        "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "ffff",
+      "native_hex": "ffff",
+      "matches": true
+    }
+  ]
+}

@@ -29,7 +29,7 @@ emits 34, and incorrectly accept native source-time errors.
    checks with a mandatory omission control. Retain predecessor red evidence.
    Run isolated full Rust/Lua, Clippy, fmt, Ruff, docs, Node and archive controls.
    Measure any hot-path cost against the preceding executable.
-5. Rebase onto completed parent fixes, audit a clean unchanged 4510 producer,
+5. Merge completed parent fixes without rewriting published history, audit a clean unchanged 4510 producer,
    inspect all exact-head checks and five actual reports/ten controls, squash
    through a PR, verify retention/closure, clean and continue the next issue.
 
@@ -49,10 +49,25 @@ Implementation order after the measured phase batch:
 - Then correct `Walker::scoped_name` and each scoped source-time fold in
   `ca65/mod.rs` plus conditional/repeat lookup in `ca65/project.rs`. Retain
   placeholders and address-size hints independently from numeric values.
-- The linked text-query path in `ca65_flat.rs` currently explicitly refuses
-  scoped `.const`; probe and resolve that measured boundary through the live
-  scope context instead of flattening names or suppressing the refusal.
+- Keep the measured constancy/text-query boundary as #795. It requires ordered
+  expression parsing effects; eagerly folding function arguments would change
+  the order of `.ref` observations. Deferred enum initializers stay #796, and
+  ordinary label/procedure sizes stay #798. Preserve those explicit refusals
+  rather than claiming full parity.
 - Add `crates/asm198x/tests/ca65_scope_binding.rs`, its retained native fixture,
   and mandatory replay/omission coverage in `scripts/test-candidate-package.cjs`
   and `scripts/candidate-package.test.cjs`. Keep the timed-out native cycle as
   research evidence, outside byte/status test expectations.
+
+Selected implementation scope after the expanded probes:
+
+- Close #785 with lexical value placeholders, positional name-query events,
+  source-time folds and independent private address-size hints. Native include,
+  macro/repeat, alias invalidation and same-line label controls pin ordering.
+- Close #794 in `ca65/link.rs`: implicit 16-bit memory operands require unsigned
+  addresses; relative branch offsets keep their existing signed encoding.
+- Close #797 in `ca65/mod.rs` and `ca65/project.rs`: use a private size-property
+  suffix impossible in cheap names, retaining existing auxiliary debug names.
+- The fixture builder accounts for every completed probe: 312 selected controls
+  and 28 cases explicitly assigned to #795/#796/#798. Retain raw native reports
+  and actual predecessor red. No existing expectation is removed or weakened.
