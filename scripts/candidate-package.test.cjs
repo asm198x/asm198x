@@ -431,3 +431,9 @@ test('selected cheap-local anchor checks are mandatory package evidence', () => 
   assert(qualifies(complete)); assert(requiredCases.includes('ca65_cheap_root'));
   assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_cheap_root')), false);
 });
+
+test('selected generated-name constancy is mandatory package evidence', () => {
+  const complete = requiredCases.map(name => ({ name, status: 'pass' }));
+  assert(qualifies(complete)); assert(requiredCases.includes('ca65_generated_name_constancy'));
+  assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_generated_name_constancy')), false);
+});
