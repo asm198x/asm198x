@@ -38,3 +38,21 @@ emits wrong bytes; rejecting later local definitions would reject valid native
 source. This is a correction inside the existing private selected projection
 and native linker, with no new dependency or public shape. The user delegated
 routine design decisions. Probe results refine the private representation.
+
+Implementation order after the measured phase batch:
+
+- Resolve #791 first in `crates/asm198x/src/dialects/ca65/project.rs` and
+  `ca65/mod.rs`: retain private alias expressions/spans, propagate source-time
+  constants only to affected dependants and resolve remaining expressions
+  against final labels/definition PCs through `Expr::eval_with`. Undefined and
+  circular aliases must refuse even when unused. Keep the shared AST unchanged.
+- Then correct `Walker::scoped_name` and each scoped source-time fold in
+  `ca65/mod.rs` plus conditional/repeat lookup in `ca65/project.rs`. Retain
+  placeholders and address-size hints independently from numeric values.
+- The linked text-query path in `ca65_flat.rs` currently explicitly refuses
+  scoped `.const`; probe and resolve that measured boundary through the live
+  scope context instead of flattening names or suppressing the refusal.
+- Add `crates/asm198x/tests/ca65_scope_binding.rs`, its retained native fixture,
+  and mandatory replay/omission coverage in `scripts/test-candidate-package.cjs`
+  and `scripts/candidate-package.test.cjs`. Keep the timed-out native cycle as
+  research evidence, outside byte/status test expectations.
