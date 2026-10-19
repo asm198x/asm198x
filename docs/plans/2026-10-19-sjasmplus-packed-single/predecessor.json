@@ -1,0 +1,3440 @@
+{
+  "binary": "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+  "sha256": "04cd785990ddfcb28a3f7ef250ae85ff3052b176b8422894934ac3f8859bb63b",
+  "results": [
+    {
+      "name": "data_db_0",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "data_dw_0",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_d24_0",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_dd_0",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_dc_0",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "scalar_0",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "arithmetic_0",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "parenthesized_0",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_db_1",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "46",
+      "matches_native": true
+    },
+    {
+      "name": "data_dw_1",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "4600",
+      "matches_native": true
+    },
+    {
+      "name": "data_d24_1",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 3 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "460000",
+      "matches_native": true
+    },
+    {
+      "name": "data_dd_1",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "46000000",
+      "matches_native": true
+    },
+    {
+      "name": "data_dc_1",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "46",
+      "matches_native": true
+    },
+    {
+      "name": "scalar_1",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "46000000",
+      "matches_native": true
+    },
+    {
+      "name": "arithmetic_1",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "47000000",
+      "matches_native": true
+    },
+    {
+      "name": "parenthesized_1",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "46000000",
+      "matches_native": true
+    },
+    {
+      "name": "data_db_2",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_dw_2",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_d24_2",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_dd_2",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_dc_2",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "scalar_2",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "arithmetic_2",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "parenthesized_2",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_db_3",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_dw_3",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_d24_3",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_dd_3",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_dc_3",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "scalar_3",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "arithmetic_3",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "parenthesized_3",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_db_4",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_dw_4",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_d24_4",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_dd_4",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_dc_4",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "scalar_4",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "arithmetic_4",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "parenthesized_4",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_db_5",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_dw_5",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_d24_5",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_dd_5",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_dc_5",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "scalar_5",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "arithmetic_5",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "parenthesized_5",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_db_6",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_dw_6",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_d24_6",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_dd_6",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_dc_6",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "scalar_6",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "arithmetic_6",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "parenthesized_6",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_db_7",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_dw_7",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_d24_7",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_dd_7",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_dc_7",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "scalar_7",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "arithmetic_7",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "parenthesized_7",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_db_8",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: unexpected trailing tokens in `'a''b'`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_dw_8",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: unexpected trailing tokens in `'a''b'`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_d24_8",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: unexpected trailing tokens in `'a''b'`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_dd_8",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: unexpected trailing tokens in `'a''b'`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_dc_8",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: unexpected trailing tokens in `'a''b'`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "scalar_8",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: unexpected trailing tokens in `'a''b'`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "arithmetic_8",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: unexpected trailing tokens in `'a''b'+1`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "parenthesized_8",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: expected `)`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_db_9",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "5c",
+      "matches_native": true
+    },
+    {
+      "name": "data_dw_9",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "5c00",
+      "matches_native": true
+    },
+    {
+      "name": "data_d24_9",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 3 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "5c0000",
+      "matches_native": true
+    },
+    {
+      "name": "data_dd_9",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "5c000000",
+      "matches_native": true
+    },
+    {
+      "name": "data_dc_9",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "5c",
+      "matches_native": true
+    },
+    {
+      "name": "scalar_9",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "5c000000",
+      "matches_native": true
+    },
+    {
+      "name": "arithmetic_9",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "5d000000",
+      "matches_native": true
+    },
+    {
+      "name": "parenthesized_9",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "5c000000",
+      "matches_native": true
+    },
+    {
+      "name": "data_db_10",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_dw_10",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_d24_10",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_dd_10",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_dc_10",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "scalar_10",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "arithmetic_10",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "parenthesized_10",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_db_11",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "e9",
+      "matches_native": false
+    },
+    {
+      "name": "data_dw_11",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "e900",
+      "matches_native": false
+    },
+    {
+      "name": "data_d24_11",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 3 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "e90000",
+      "matches_native": false
+    },
+    {
+      "name": "data_dd_11",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "e9000000",
+      "matches_native": false
+    },
+    {
+      "name": "data_dc_11",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "e9",
+      "matches_native": false
+    },
+    {
+      "name": "scalar_11",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "e9000000",
+      "matches_native": false
+    },
+    {
+      "name": "arithmetic_11",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ea000000",
+      "matches_native": false
+    },
+    {
+      "name": "parenthesized_11",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "e9000000",
+      "matches_native": false
+    },
+    {
+      "name": "data_db_12",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_dw_12",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_d24_12",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_dd_12",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_dc_12",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "scalar_12",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "arithmetic_12",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "parenthesized_12",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_db_13",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "asm198x: input.asm: line 1: warning: value 128512 truncated to a byte\nassembled 1 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00",
+      "matches_native": false
+    },
+    {
+      "name": "data_dw_13",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "asm198x: input.asm: line 1: warning: value 128512 truncated to a word\nassembled 2 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00f6",
+      "matches_native": false
+    },
+    {
+      "name": "data_d24_13",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 3 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00f601",
+      "matches_native": false
+    },
+    {
+      "name": "data_dd_13",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00f60100",
+      "matches_native": false
+    },
+    {
+      "name": "data_dc_13",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "asm198x: input.asm: line 1: warning: value 128512 truncated to a byte\nassembled 1 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00",
+      "matches_native": false
+    },
+    {
+      "name": "scalar_13",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00f60100",
+      "matches_native": false
+    },
+    {
+      "name": "arithmetic_13",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "01f60100",
+      "matches_native": false
+    },
+    {
+      "name": "parenthesized_13",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00f60100",
+      "matches_native": false
+    },
+    {
+      "name": "data_db_14",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "3b",
+      "matches_native": true
+    },
+    {
+      "name": "data_dw_14",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "3b00",
+      "matches_native": true
+    },
+    {
+      "name": "data_d24_14",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 3 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "3b0000",
+      "matches_native": true
+    },
+    {
+      "name": "data_dd_14",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "3b000000",
+      "matches_native": true
+    },
+    {
+      "name": "data_dc_14",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "3b",
+      "matches_native": true
+    },
+    {
+      "name": "scalar_14",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "3b000000",
+      "matches_native": true
+    },
+    {
+      "name": "arithmetic_14",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "3c000000",
+      "matches_native": true
+    },
+    {
+      "name": "parenthesized_14",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "3b000000",
+      "matches_native": true
+    },
+    {
+      "name": "data_db_15",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_dw_15",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_d24_15",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_dd_15",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_dc_15",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "scalar_15",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "arithmetic_15",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "parenthesized_15",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_db_16",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "2c",
+      "matches_native": true
+    },
+    {
+      "name": "data_dw_16",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "2c00",
+      "matches_native": true
+    },
+    {
+      "name": "data_d24_16",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 3 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "2c0000",
+      "matches_native": true
+    },
+    {
+      "name": "data_dd_16",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "2c000000",
+      "matches_native": true
+    },
+    {
+      "name": "data_dc_16",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "2c",
+      "matches_native": true
+    },
+    {
+      "name": "scalar_16",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "2c000000",
+      "matches_native": true
+    },
+    {
+      "name": "arithmetic_16",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "2d000000",
+      "matches_native": true
+    },
+    {
+      "name": "parenthesized_16",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "2c000000",
+      "matches_native": true
+    },
+    {
+      "name": "data_db_17",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_dw_17",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_d24_17",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_dd_17",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_dc_17",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "scalar_17",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "arithmetic_17",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "parenthesized_17",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "data_db_18",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "22",
+      "matches_native": true
+    },
+    {
+      "name": "data_dw_18",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "2200",
+      "matches_native": true
+    },
+    {
+      "name": "data_d24_18",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 3 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "220000",
+      "matches_native": true
+    },
+    {
+      "name": "data_dd_18",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "22000000",
+      "matches_native": true
+    },
+    {
+      "name": "data_dc_18",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "22",
+      "matches_native": true
+    },
+    {
+      "name": "scalar_18",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "22000000",
+      "matches_native": true
+    },
+    {
+      "name": "arithmetic_18",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "23000000",
+      "matches_native": true
+    },
+    {
+      "name": "parenthesized_18",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "22000000",
+      "matches_native": true
+    },
+    {
+      "name": "tail_db_0_'F'+1",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "47",
+      "matches_native": true
+    },
+    {
+      "name": "tail_db_0_('F'+1)",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "47",
+      "matches_native": true
+    },
+    {
+      "name": "tail_dw_0_'F'+1",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "4700",
+      "matches_native": true
+    },
+    {
+      "name": "tail_dw_0_('F'+1)",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "4700",
+      "matches_native": true
+    },
+    {
+      "name": "tail_dd_0_'F'+1",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "47000000",
+      "matches_native": true
+    },
+    {
+      "name": "tail_dd_0_('F'+1)",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "47000000",
+      "matches_native": true
+    },
+    {
+      "name": "tail_db_1_'AB'+1",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "tail_db_1_('AB'+1)",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "tail_dw_1_'AB'+1",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "tail_dw_1_('AB'+1)",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "tail_dd_1_'AB'+1",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "tail_dd_1_('AB'+1)",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "tail_db_2_''''+1",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "tail_db_2_(''''+1)",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "tail_dw_2_''''+1",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "tail_dw_2_(''''+1)",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "tail_dd_2_''''+1",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "tail_dd_2_(''''+1)",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "tail_db_3_'\u00e9\u00e9'+1",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "tail_db_3_('\u00e9\u00e9'+1)",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "tail_dw_3_'\u00e9\u00e9'+1",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "tail_dw_3_('\u00e9\u00e9'+1)",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "tail_dd_3_'\u00e9\u00e9'+1",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "tail_dd_3_('\u00e9\u00e9'+1)",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "apostrophes_2",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "apostrophes_3",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: unterminated quoted data\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "apostrophes_4",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "apostrophes_5",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: unterminated quoted data\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "apostrophes_6",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: unexpected trailing tokens in `''''''`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "apostrophes_7",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: unterminated quoted data\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "apostrophes_8",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "apostrophes_9",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: unterminated quoted data\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "apostrophes_10",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "if_value",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "shift_sign",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "instruction",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "define_literal",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:2: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "define_numeric",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 8 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07000000e8030000",
+      "matches_native": true
+    },
+    {
+      "name": "af_register",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:2: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "macro_argument",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:4: error: malformed character literal\nin expansion of macro `put` defined at input.asm:1, invoked at input.asm:4\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "repeat",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:2: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "delimiter_comment",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "malformed_unclosed",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: unterminated quoted data\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "malformed_single",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: unterminated quoted data\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "malformed_adjacent",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "malformed_after",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "quoted_pair",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "backslash_pair",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "abyte",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: unexpected character `,` in expression\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "abytec",
+      "argv": [
+        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: unexpected character `,` in expression\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    }
+  ]
+}
