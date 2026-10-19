@@ -1,0 +1,3042 @@
+[
+  {
+    "name": "struct_byte_anonymous_default",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "01000000",
+    "native_hex": "01000000",
+    "matches": true
+  },
+  {
+    "name": "struct_byte_anonymous_-1",
+    "exit": 1,
+    "stderr": "asm198x: input.s:4: error: range error (-1 not in [0..4294967295])\n",
+    "hex": null,
+    "native_hex": null,
+    "matches": true
+  },
+  {
+    "name": "struct_byte_anonymous_0",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_byte_anonymous_1",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "01000000",
+    "native_hex": "01000000",
+    "matches": true
+  },
+  {
+    "name": "struct_byte_anonymous_2",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "02000000",
+    "native_hex": "02000000",
+    "matches": true
+  },
+  {
+    "name": "struct_byte_anonymous_65535",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "ffff0000",
+    "native_hex": "ffff0000",
+    "matches": true
+  },
+  {
+    "name": "struct_byte_anonymous_65536",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000100",
+    "native_hex": "00000100",
+    "matches": true
+  },
+  {
+    "name": "struct_byte_anonymous_16777215",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "ffffff00",
+    "native_hex": "ffffff00",
+    "matches": true
+  },
+  {
+    "name": "struct_byte_anonymous_16777216",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000001",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_byte_named_default",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0100000001000000",
+    "native_hex": "0100000001000000",
+    "matches": true
+  },
+  {
+    "name": "struct_byte_named_-1",
+    "exit": 1,
+    "stderr": "asm198x: input.s:4: error: range error (-1 not in [0..4294967295])\n",
+    "hex": null,
+    "native_hex": null,
+    "matches": true
+  },
+  {
+    "name": "struct_byte_named_0",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000000000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_byte_named_1",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0100000001000000",
+    "native_hex": "0100000001000000",
+    "matches": true
+  },
+  {
+    "name": "struct_byte_named_2",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0200000002000000",
+    "native_hex": "0200000002000000",
+    "matches": true
+  },
+  {
+    "name": "struct_byte_named_65535",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "ffff0000ffff0000",
+    "native_hex": "ffff0000ffff0000",
+    "matches": true
+  },
+  {
+    "name": "struct_byte_named_65536",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000010000000100",
+    "native_hex": "0000010000000100",
+    "matches": true
+  },
+  {
+    "name": "struct_byte_named_16777215",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "ffffff00ffffff00",
+    "native_hex": "ffffff00ffffff00",
+    "matches": true
+  },
+  {
+    "name": "struct_byte_named_16777216",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000100000001",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_word_anonymous_default",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "02000000",
+    "native_hex": "02000000",
+    "matches": true
+  },
+  {
+    "name": "struct_word_anonymous_-1",
+    "exit": 1,
+    "stderr": "asm198x: input.s:4: error: range error (-2 not in [0..4294967295])\n",
+    "hex": null,
+    "native_hex": null,
+    "matches": true
+  },
+  {
+    "name": "struct_word_anonymous_0",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_word_anonymous_1",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "02000000",
+    "native_hex": "02000000",
+    "matches": true
+  },
+  {
+    "name": "struct_word_anonymous_2",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "04000000",
+    "native_hex": "04000000",
+    "matches": true
+  },
+  {
+    "name": "struct_word_anonymous_65535",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "feff0100",
+    "native_hex": "feff0100",
+    "matches": true
+  },
+  {
+    "name": "struct_word_anonymous_65536",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000200",
+    "native_hex": "00000200",
+    "matches": true
+  },
+  {
+    "name": "struct_word_anonymous_16777215",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "feffff01",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_word_anonymous_16777216",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000002",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_word_named_default",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0200000002000000",
+    "native_hex": "0200000002000000",
+    "matches": true
+  },
+  {
+    "name": "struct_word_named_-1",
+    "exit": 1,
+    "stderr": "asm198x: input.s:4: error: range error (-2 not in [0..4294967295])\n",
+    "hex": null,
+    "native_hex": null,
+    "matches": true
+  },
+  {
+    "name": "struct_word_named_0",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000000000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_word_named_1",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0200000002000000",
+    "native_hex": "0200000002000000",
+    "matches": true
+  },
+  {
+    "name": "struct_word_named_2",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0400000004000000",
+    "native_hex": "0400000004000000",
+    "matches": true
+  },
+  {
+    "name": "struct_word_named_65535",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "feff0100feff0100",
+    "native_hex": "feff0100feff0100",
+    "matches": true
+  },
+  {
+    "name": "struct_word_named_65536",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000020000000200",
+    "native_hex": "0000020000000200",
+    "matches": true
+  },
+  {
+    "name": "struct_word_named_16777215",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "feffff01feffff01",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_word_named_16777216",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000200000002",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_addr_anonymous_default",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "02000000",
+    "native_hex": "02000000",
+    "matches": true
+  },
+  {
+    "name": "struct_addr_anonymous_-1",
+    "exit": 1,
+    "stderr": "asm198x: input.s:4: error: range error (-2 not in [0..4294967295])\n",
+    "hex": null,
+    "native_hex": null,
+    "matches": true
+  },
+  {
+    "name": "struct_addr_anonymous_0",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_addr_anonymous_1",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "02000000",
+    "native_hex": "02000000",
+    "matches": true
+  },
+  {
+    "name": "struct_addr_anonymous_2",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "04000000",
+    "native_hex": "04000000",
+    "matches": true
+  },
+  {
+    "name": "struct_addr_anonymous_65535",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "feff0100",
+    "native_hex": "feff0100",
+    "matches": true
+  },
+  {
+    "name": "struct_addr_anonymous_65536",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000200",
+    "native_hex": "00000200",
+    "matches": true
+  },
+  {
+    "name": "struct_addr_anonymous_16777215",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "feffff01",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_addr_anonymous_16777216",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000002",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_addr_named_default",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0200000002000000",
+    "native_hex": "0200000002000000",
+    "matches": true
+  },
+  {
+    "name": "struct_addr_named_-1",
+    "exit": 1,
+    "stderr": "asm198x: input.s:4: error: range error (-2 not in [0..4294967295])\n",
+    "hex": null,
+    "native_hex": null,
+    "matches": true
+  },
+  {
+    "name": "struct_addr_named_0",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000000000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_addr_named_1",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0200000002000000",
+    "native_hex": "0200000002000000",
+    "matches": true
+  },
+  {
+    "name": "struct_addr_named_2",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0400000004000000",
+    "native_hex": "0400000004000000",
+    "matches": true
+  },
+  {
+    "name": "struct_addr_named_65535",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "feff0100feff0100",
+    "native_hex": "feff0100feff0100",
+    "matches": true
+  },
+  {
+    "name": "struct_addr_named_65536",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000020000000200",
+    "native_hex": "0000020000000200",
+    "matches": true
+  },
+  {
+    "name": "struct_addr_named_16777215",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "feffff01feffff01",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_addr_named_16777216",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000200000002",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_dbyt_anonymous_default",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "02000000",
+    "native_hex": "02000000",
+    "matches": true
+  },
+  {
+    "name": "struct_dbyt_anonymous_-1",
+    "exit": 1,
+    "stderr": "asm198x: input.s:4: error: range error (-2 not in [0..4294967295])\n",
+    "hex": null,
+    "native_hex": null,
+    "matches": true
+  },
+  {
+    "name": "struct_dbyt_anonymous_0",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_dbyt_anonymous_1",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "02000000",
+    "native_hex": "02000000",
+    "matches": true
+  },
+  {
+    "name": "struct_dbyt_anonymous_2",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "04000000",
+    "native_hex": "04000000",
+    "matches": true
+  },
+  {
+    "name": "struct_dbyt_anonymous_65535",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "feff0100",
+    "native_hex": "feff0100",
+    "matches": true
+  },
+  {
+    "name": "struct_dbyt_anonymous_65536",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000200",
+    "native_hex": "00000200",
+    "matches": true
+  },
+  {
+    "name": "struct_dbyt_anonymous_16777215",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "feffff01",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_dbyt_anonymous_16777216",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000002",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_dbyt_named_default",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0200000002000000",
+    "native_hex": "0200000002000000",
+    "matches": true
+  },
+  {
+    "name": "struct_dbyt_named_-1",
+    "exit": 1,
+    "stderr": "asm198x: input.s:4: error: range error (-2 not in [0..4294967295])\n",
+    "hex": null,
+    "native_hex": null,
+    "matches": true
+  },
+  {
+    "name": "struct_dbyt_named_0",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000000000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_dbyt_named_1",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0200000002000000",
+    "native_hex": "0200000002000000",
+    "matches": true
+  },
+  {
+    "name": "struct_dbyt_named_2",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0400000004000000",
+    "native_hex": "0400000004000000",
+    "matches": true
+  },
+  {
+    "name": "struct_dbyt_named_65535",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "feff0100feff0100",
+    "native_hex": "feff0100feff0100",
+    "matches": true
+  },
+  {
+    "name": "struct_dbyt_named_65536",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000020000000200",
+    "native_hex": "0000020000000200",
+    "matches": true
+  },
+  {
+    "name": "struct_dbyt_named_16777215",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "feffff01feffff01",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_dbyt_named_16777216",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000200000002",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_faraddr_anonymous_default",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "03000000",
+    "native_hex": "03000000",
+    "matches": true
+  },
+  {
+    "name": "struct_faraddr_anonymous_-1",
+    "exit": 1,
+    "stderr": "asm198x: input.s:4: error: range error (-3 not in [0..4294967295])\n",
+    "hex": null,
+    "native_hex": null,
+    "matches": true
+  },
+  {
+    "name": "struct_faraddr_anonymous_0",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_faraddr_anonymous_1",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "03000000",
+    "native_hex": "03000000",
+    "matches": true
+  },
+  {
+    "name": "struct_faraddr_anonymous_2",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "06000000",
+    "native_hex": "06000000",
+    "matches": true
+  },
+  {
+    "name": "struct_faraddr_anonymous_65535",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "fdff0200",
+    "native_hex": "fdff0200",
+    "matches": true
+  },
+  {
+    "name": "struct_faraddr_anonymous_65536",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000300",
+    "native_hex": "00000300",
+    "matches": true
+  },
+  {
+    "name": "struct_faraddr_anonymous_16777215",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "fdffff02",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_faraddr_anonymous_16777216",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000003",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_faraddr_named_default",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0300000003000000",
+    "native_hex": "0300000003000000",
+    "matches": true
+  },
+  {
+    "name": "struct_faraddr_named_-1",
+    "exit": 1,
+    "stderr": "asm198x: input.s:4: error: range error (-3 not in [0..4294967295])\n",
+    "hex": null,
+    "native_hex": null,
+    "matches": true
+  },
+  {
+    "name": "struct_faraddr_named_0",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000000000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_faraddr_named_1",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0300000003000000",
+    "native_hex": "0300000003000000",
+    "matches": true
+  },
+  {
+    "name": "struct_faraddr_named_2",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0600000006000000",
+    "native_hex": "0600000006000000",
+    "matches": true
+  },
+  {
+    "name": "struct_faraddr_named_65535",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "fdff0200fdff0200",
+    "native_hex": "fdff0200fdff0200",
+    "matches": true
+  },
+  {
+    "name": "struct_faraddr_named_65536",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000030000000300",
+    "native_hex": "0000030000000300",
+    "matches": true
+  },
+  {
+    "name": "struct_faraddr_named_16777215",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "fdffff02fdffff02",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_faraddr_named_16777216",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000300000003",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_dword_anonymous_default",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "04000000",
+    "native_hex": "04000000",
+    "matches": true
+  },
+  {
+    "name": "struct_dword_anonymous_-1",
+    "exit": 1,
+    "stderr": "asm198x: input.s:4: error: range error (-4 not in [0..4294967295])\n",
+    "hex": null,
+    "native_hex": null,
+    "matches": true
+  },
+  {
+    "name": "struct_dword_anonymous_0",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_dword_anonymous_1",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "04000000",
+    "native_hex": "04000000",
+    "matches": true
+  },
+  {
+    "name": "struct_dword_anonymous_2",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "08000000",
+    "native_hex": "08000000",
+    "matches": true
+  },
+  {
+    "name": "struct_dword_anonymous_65535",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "fcff0300",
+    "native_hex": "fcff0300",
+    "matches": true
+  },
+  {
+    "name": "struct_dword_anonymous_65536",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000400",
+    "native_hex": "00000400",
+    "matches": true
+  },
+  {
+    "name": "struct_dword_anonymous_16777215",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "fcffff03",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_dword_anonymous_16777216",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000004",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_dword_named_default",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0400000004000000",
+    "native_hex": "0400000004000000",
+    "matches": true
+  },
+  {
+    "name": "struct_dword_named_-1",
+    "exit": 1,
+    "stderr": "asm198x: input.s:4: error: range error (-4 not in [0..4294967295])\n",
+    "hex": null,
+    "native_hex": null,
+    "matches": true
+  },
+  {
+    "name": "struct_dword_named_0",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000000000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_dword_named_1",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0400000004000000",
+    "native_hex": "0400000004000000",
+    "matches": true
+  },
+  {
+    "name": "struct_dword_named_2",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0800000008000000",
+    "native_hex": "0800000008000000",
+    "matches": true
+  },
+  {
+    "name": "struct_dword_named_65535",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "fcff0300fcff0300",
+    "native_hex": "fcff0300fcff0300",
+    "matches": true
+  },
+  {
+    "name": "struct_dword_named_65536",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000040000000400",
+    "native_hex": "0000040000000400",
+    "matches": true
+  },
+  {
+    "name": "struct_dword_named_16777215",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "fcffff03fcffff03",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_dword_named_16777216",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000400000004",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_res_anonymous_default",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "01000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_res_anonymous_-1",
+    "exit": 1,
+    "stderr": "asm198x: input.s:4: error: range error (-1 not in [0..4294967295])\n",
+    "hex": null,
+    "native_hex": null,
+    "matches": true
+  },
+  {
+    "name": "struct_res_anonymous_0",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_res_anonymous_1",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "01000000",
+    "native_hex": "01000000",
+    "matches": true
+  },
+  {
+    "name": "struct_res_anonymous_2",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "02000000",
+    "native_hex": "02000000",
+    "matches": true
+  },
+  {
+    "name": "struct_res_anonymous_65535",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "ffff0000",
+    "native_hex": "ffff0000",
+    "matches": true
+  },
+  {
+    "name": "struct_res_anonymous_65536",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000100",
+    "native_hex": "00000100",
+    "matches": true
+  },
+  {
+    "name": "struct_res_anonymous_16777215",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "ffffff00",
+    "native_hex": "ffffff00",
+    "matches": true
+  },
+  {
+    "name": "struct_res_anonymous_16777216",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000001",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_res_named_default",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0100000001000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_res_named_-1",
+    "exit": 1,
+    "stderr": "asm198x: input.s:4: error: range error (-1 not in [0..4294967295])\n",
+    "hex": null,
+    "native_hex": null,
+    "matches": true
+  },
+  {
+    "name": "struct_res_named_0",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000000000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_res_named_1",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0100000001000000",
+    "native_hex": "0100000001000000",
+    "matches": true
+  },
+  {
+    "name": "struct_res_named_2",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0200000002000000",
+    "native_hex": "0200000002000000",
+    "matches": true
+  },
+  {
+    "name": "struct_res_named_65535",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "ffff0000ffff0000",
+    "native_hex": "ffff0000ffff0000",
+    "matches": true
+  },
+  {
+    "name": "struct_res_named_65536",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000010000000100",
+    "native_hex": "0000010000000100",
+    "matches": true
+  },
+  {
+    "name": "struct_res_named_16777215",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "ffffff00ffffff00",
+    "native_hex": "ffffff00ffffff00",
+    "matches": true
+  },
+  {
+    "name": "struct_res_named_16777216",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000100000001",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_tag_empty_anonymous_default",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000000",
+    "native_hex": "00000000",
+    "matches": true
+  },
+  {
+    "name": "struct_tag_empty_anonymous_-1",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_tag_empty_anonymous_0",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_tag_empty_anonymous_1",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000000",
+    "native_hex": "00000000",
+    "matches": true
+  },
+  {
+    "name": "struct_tag_empty_anonymous_2",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000000",
+    "native_hex": "00000000",
+    "matches": true
+  },
+  {
+    "name": "struct_tag_empty_anonymous_65535",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000000",
+    "native_hex": "00000000",
+    "matches": true
+  },
+  {
+    "name": "struct_tag_empty_anonymous_65536",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000000",
+    "native_hex": "00000000",
+    "matches": true
+  },
+  {
+    "name": "struct_tag_empty_anonymous_16777215",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000000",
+    "native_hex": "00000000",
+    "matches": true
+  },
+  {
+    "name": "struct_tag_empty_anonymous_16777216",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000000",
+    "native_hex": "00000000",
+    "matches": true
+  },
+  {
+    "name": "struct_tag_empty_named_default",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000000000000",
+    "native_hex": "0000000000000000",
+    "matches": true
+  },
+  {
+    "name": "struct_tag_empty_named_-1",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000000000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_tag_empty_named_0",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000000000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_tag_empty_named_1",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000000000000",
+    "native_hex": "0000000000000000",
+    "matches": true
+  },
+  {
+    "name": "struct_tag_empty_named_2",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000000000000",
+    "native_hex": "0000000000000000",
+    "matches": true
+  },
+  {
+    "name": "struct_tag_empty_named_65535",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000000000000",
+    "native_hex": "0000000000000000",
+    "matches": true
+  },
+  {
+    "name": "struct_tag_empty_named_65536",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000000000000",
+    "native_hex": "0000000000000000",
+    "matches": true
+  },
+  {
+    "name": "struct_tag_empty_named_16777215",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000000000000",
+    "native_hex": "0000000000000000",
+    "matches": true
+  },
+  {
+    "name": "struct_tag_empty_named_16777216",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000000000000",
+    "native_hex": "0000000000000000",
+    "matches": true
+  },
+  {
+    "name": "struct_tag_item_anonymous_default",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "02000000",
+    "native_hex": "02000000",
+    "matches": true
+  },
+  {
+    "name": "struct_tag_item_anonymous_-1",
+    "exit": 1,
+    "stderr": "asm198x: input.s:9: error: range error (-2 not in [0..4294967295])\n",
+    "hex": null,
+    "native_hex": null,
+    "matches": true
+  },
+  {
+    "name": "struct_tag_item_anonymous_0",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_tag_item_anonymous_1",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "02000000",
+    "native_hex": "02000000",
+    "matches": true
+  },
+  {
+    "name": "struct_tag_item_anonymous_2",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "04000000",
+    "native_hex": "04000000",
+    "matches": true
+  },
+  {
+    "name": "struct_tag_item_anonymous_65535",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "feff0100",
+    "native_hex": "feff0100",
+    "matches": true
+  },
+  {
+    "name": "struct_tag_item_anonymous_65536",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000200",
+    "native_hex": "00000200",
+    "matches": true
+  },
+  {
+    "name": "struct_tag_item_anonymous_16777215",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "feffff01",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_tag_item_anonymous_16777216",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000002",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_tag_item_named_default",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0200000002000000",
+    "native_hex": "0200000002000000",
+    "matches": true
+  },
+  {
+    "name": "struct_tag_item_named_-1",
+    "exit": 1,
+    "stderr": "asm198x: input.s:9: error: range error (-2 not in [0..4294967295])\n",
+    "hex": null,
+    "native_hex": null,
+    "matches": true
+  },
+  {
+    "name": "struct_tag_item_named_0",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000000000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_tag_item_named_1",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0200000002000000",
+    "native_hex": "0200000002000000",
+    "matches": true
+  },
+  {
+    "name": "struct_tag_item_named_2",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0400000004000000",
+    "native_hex": "0400000004000000",
+    "matches": true
+  },
+  {
+    "name": "struct_tag_item_named_65535",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "feff0100feff0100",
+    "native_hex": "feff0100feff0100",
+    "matches": true
+  },
+  {
+    "name": "struct_tag_item_named_65536",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000020000000200",
+    "native_hex": "0000020000000200",
+    "matches": true
+  },
+  {
+    "name": "struct_tag_item_named_16777215",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "feffff01feffff01",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_tag_item_named_16777216",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000200000002",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_byte_anonymous_default",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "01000000",
+    "native_hex": "01000000",
+    "matches": true
+  },
+  {
+    "name": "union_byte_anonymous_-1",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_byte_anonymous_0",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_byte_anonymous_1",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "01000000",
+    "native_hex": "01000000",
+    "matches": true
+  },
+  {
+    "name": "union_byte_anonymous_2",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "02000000",
+    "native_hex": "02000000",
+    "matches": true
+  },
+  {
+    "name": "union_byte_anonymous_65535",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "ffff0000",
+    "native_hex": "ffff0000",
+    "matches": true
+  },
+  {
+    "name": "union_byte_anonymous_65536",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000100",
+    "native_hex": "00000100",
+    "matches": true
+  },
+  {
+    "name": "union_byte_anonymous_16777215",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "ffffff00",
+    "native_hex": "ffffff00",
+    "matches": true
+  },
+  {
+    "name": "union_byte_anonymous_16777216",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000001",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_byte_named_default",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0100000001000000",
+    "native_hex": "0100000001000000",
+    "matches": true
+  },
+  {
+    "name": "union_byte_named_-1",
+    "exit": 1,
+    "stderr": "asm198x: input.s:5: error: range error (-1 not in [0..4294967295])\n",
+    "hex": null,
+    "native_hex": null,
+    "matches": true
+  },
+  {
+    "name": "union_byte_named_0",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000000000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_byte_named_1",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0100000001000000",
+    "native_hex": "0100000001000000",
+    "matches": true
+  },
+  {
+    "name": "union_byte_named_2",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0200000002000000",
+    "native_hex": "0200000002000000",
+    "matches": true
+  },
+  {
+    "name": "union_byte_named_65535",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "ffff0000ffff0000",
+    "native_hex": "ffff0000ffff0000",
+    "matches": true
+  },
+  {
+    "name": "union_byte_named_65536",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000010000000100",
+    "native_hex": "0000010000000100",
+    "matches": true
+  },
+  {
+    "name": "union_byte_named_16777215",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "ffffff00ffffff00",
+    "native_hex": "ffffff00ffffff00",
+    "matches": true
+  },
+  {
+    "name": "union_byte_named_16777216",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000100000001",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_word_anonymous_default",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "02000000",
+    "native_hex": "02000000",
+    "matches": true
+  },
+  {
+    "name": "union_word_anonymous_-1",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_word_anonymous_0",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_word_anonymous_1",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "02000000",
+    "native_hex": "02000000",
+    "matches": true
+  },
+  {
+    "name": "union_word_anonymous_2",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "04000000",
+    "native_hex": "04000000",
+    "matches": true
+  },
+  {
+    "name": "union_word_anonymous_65535",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "feff0100",
+    "native_hex": "feff0100",
+    "matches": true
+  },
+  {
+    "name": "union_word_anonymous_65536",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000200",
+    "native_hex": "00000200",
+    "matches": true
+  },
+  {
+    "name": "union_word_anonymous_16777215",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "feffff01",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_word_anonymous_16777216",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000002",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_word_named_default",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0200000002000000",
+    "native_hex": "0200000002000000",
+    "matches": true
+  },
+  {
+    "name": "union_word_named_-1",
+    "exit": 1,
+    "stderr": "asm198x: input.s:5: error: range error (-2 not in [0..4294967295])\n",
+    "hex": null,
+    "native_hex": null,
+    "matches": true
+  },
+  {
+    "name": "union_word_named_0",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000000000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_word_named_1",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0200000002000000",
+    "native_hex": "0200000002000000",
+    "matches": true
+  },
+  {
+    "name": "union_word_named_2",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0400000004000000",
+    "native_hex": "0400000004000000",
+    "matches": true
+  },
+  {
+    "name": "union_word_named_65535",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "feff0100feff0100",
+    "native_hex": "feff0100feff0100",
+    "matches": true
+  },
+  {
+    "name": "union_word_named_65536",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000020000000200",
+    "native_hex": "0000020000000200",
+    "matches": true
+  },
+  {
+    "name": "union_word_named_16777215",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "feffff01feffff01",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_word_named_16777216",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000200000002",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_addr_anonymous_default",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "02000000",
+    "native_hex": "02000000",
+    "matches": true
+  },
+  {
+    "name": "union_addr_anonymous_-1",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_addr_anonymous_0",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_addr_anonymous_1",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "02000000",
+    "native_hex": "02000000",
+    "matches": true
+  },
+  {
+    "name": "union_addr_anonymous_2",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "04000000",
+    "native_hex": "04000000",
+    "matches": true
+  },
+  {
+    "name": "union_addr_anonymous_65535",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "feff0100",
+    "native_hex": "feff0100",
+    "matches": true
+  },
+  {
+    "name": "union_addr_anonymous_65536",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000200",
+    "native_hex": "00000200",
+    "matches": true
+  },
+  {
+    "name": "union_addr_anonymous_16777215",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "feffff01",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_addr_anonymous_16777216",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000002",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_addr_named_default",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0200000002000000",
+    "native_hex": "0200000002000000",
+    "matches": true
+  },
+  {
+    "name": "union_addr_named_-1",
+    "exit": 1,
+    "stderr": "asm198x: input.s:5: error: range error (-2 not in [0..4294967295])\n",
+    "hex": null,
+    "native_hex": null,
+    "matches": true
+  },
+  {
+    "name": "union_addr_named_0",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000000000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_addr_named_1",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0200000002000000",
+    "native_hex": "0200000002000000",
+    "matches": true
+  },
+  {
+    "name": "union_addr_named_2",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0400000004000000",
+    "native_hex": "0400000004000000",
+    "matches": true
+  },
+  {
+    "name": "union_addr_named_65535",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "feff0100feff0100",
+    "native_hex": "feff0100feff0100",
+    "matches": true
+  },
+  {
+    "name": "union_addr_named_65536",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000020000000200",
+    "native_hex": "0000020000000200",
+    "matches": true
+  },
+  {
+    "name": "union_addr_named_16777215",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "feffff01feffff01",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_addr_named_16777216",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000200000002",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_dbyt_anonymous_default",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "02000000",
+    "native_hex": "02000000",
+    "matches": true
+  },
+  {
+    "name": "union_dbyt_anonymous_-1",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_dbyt_anonymous_0",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_dbyt_anonymous_1",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "02000000",
+    "native_hex": "02000000",
+    "matches": true
+  },
+  {
+    "name": "union_dbyt_anonymous_2",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "04000000",
+    "native_hex": "04000000",
+    "matches": true
+  },
+  {
+    "name": "union_dbyt_anonymous_65535",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "feff0100",
+    "native_hex": "feff0100",
+    "matches": true
+  },
+  {
+    "name": "union_dbyt_anonymous_65536",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000200",
+    "native_hex": "00000200",
+    "matches": true
+  },
+  {
+    "name": "union_dbyt_anonymous_16777215",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "feffff01",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_dbyt_anonymous_16777216",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000002",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_dbyt_named_default",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0200000002000000",
+    "native_hex": "0200000002000000",
+    "matches": true
+  },
+  {
+    "name": "union_dbyt_named_-1",
+    "exit": 1,
+    "stderr": "asm198x: input.s:5: error: range error (-2 not in [0..4294967295])\n",
+    "hex": null,
+    "native_hex": null,
+    "matches": true
+  },
+  {
+    "name": "union_dbyt_named_0",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000000000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_dbyt_named_1",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0200000002000000",
+    "native_hex": "0200000002000000",
+    "matches": true
+  },
+  {
+    "name": "union_dbyt_named_2",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0400000004000000",
+    "native_hex": "0400000004000000",
+    "matches": true
+  },
+  {
+    "name": "union_dbyt_named_65535",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "feff0100feff0100",
+    "native_hex": "feff0100feff0100",
+    "matches": true
+  },
+  {
+    "name": "union_dbyt_named_65536",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000020000000200",
+    "native_hex": "0000020000000200",
+    "matches": true
+  },
+  {
+    "name": "union_dbyt_named_16777215",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "feffff01feffff01",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_dbyt_named_16777216",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000200000002",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_faraddr_anonymous_default",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "03000000",
+    "native_hex": "03000000",
+    "matches": true
+  },
+  {
+    "name": "union_faraddr_anonymous_-1",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_faraddr_anonymous_0",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_faraddr_anonymous_1",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "03000000",
+    "native_hex": "03000000",
+    "matches": true
+  },
+  {
+    "name": "union_faraddr_anonymous_2",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "06000000",
+    "native_hex": "06000000",
+    "matches": true
+  },
+  {
+    "name": "union_faraddr_anonymous_65535",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "fdff0200",
+    "native_hex": "fdff0200",
+    "matches": true
+  },
+  {
+    "name": "union_faraddr_anonymous_65536",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000300",
+    "native_hex": "00000300",
+    "matches": true
+  },
+  {
+    "name": "union_faraddr_anonymous_16777215",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "fdffff02",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_faraddr_anonymous_16777216",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000003",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_faraddr_named_default",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0300000003000000",
+    "native_hex": "0300000003000000",
+    "matches": true
+  },
+  {
+    "name": "union_faraddr_named_-1",
+    "exit": 1,
+    "stderr": "asm198x: input.s:5: error: range error (-3 not in [0..4294967295])\n",
+    "hex": null,
+    "native_hex": null,
+    "matches": true
+  },
+  {
+    "name": "union_faraddr_named_0",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000000000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_faraddr_named_1",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0300000003000000",
+    "native_hex": "0300000003000000",
+    "matches": true
+  },
+  {
+    "name": "union_faraddr_named_2",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0600000006000000",
+    "native_hex": "0600000006000000",
+    "matches": true
+  },
+  {
+    "name": "union_faraddr_named_65535",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "fdff0200fdff0200",
+    "native_hex": "fdff0200fdff0200",
+    "matches": true
+  },
+  {
+    "name": "union_faraddr_named_65536",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000030000000300",
+    "native_hex": "0000030000000300",
+    "matches": true
+  },
+  {
+    "name": "union_faraddr_named_16777215",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "fdffff02fdffff02",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_faraddr_named_16777216",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000300000003",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_dword_anonymous_default",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "04000000",
+    "native_hex": "04000000",
+    "matches": true
+  },
+  {
+    "name": "union_dword_anonymous_-1",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_dword_anonymous_0",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_dword_anonymous_1",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "04000000",
+    "native_hex": "04000000",
+    "matches": true
+  },
+  {
+    "name": "union_dword_anonymous_2",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "08000000",
+    "native_hex": "08000000",
+    "matches": true
+  },
+  {
+    "name": "union_dword_anonymous_65535",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "fcff0300",
+    "native_hex": "fcff0300",
+    "matches": true
+  },
+  {
+    "name": "union_dword_anonymous_65536",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000400",
+    "native_hex": "00000400",
+    "matches": true
+  },
+  {
+    "name": "union_dword_anonymous_16777215",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "fcffff03",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_dword_anonymous_16777216",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000004",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_dword_named_default",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0400000004000000",
+    "native_hex": "0400000004000000",
+    "matches": true
+  },
+  {
+    "name": "union_dword_named_-1",
+    "exit": 1,
+    "stderr": "asm198x: input.s:5: error: range error (-4 not in [0..4294967295])\n",
+    "hex": null,
+    "native_hex": null,
+    "matches": true
+  },
+  {
+    "name": "union_dword_named_0",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000000000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_dword_named_1",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0400000004000000",
+    "native_hex": "0400000004000000",
+    "matches": true
+  },
+  {
+    "name": "union_dword_named_2",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0800000008000000",
+    "native_hex": "0800000008000000",
+    "matches": true
+  },
+  {
+    "name": "union_dword_named_65535",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "fcff0300fcff0300",
+    "native_hex": "fcff0300fcff0300",
+    "matches": true
+  },
+  {
+    "name": "union_dword_named_65536",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000040000000400",
+    "native_hex": "0000040000000400",
+    "matches": true
+  },
+  {
+    "name": "union_dword_named_16777215",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "fcffff03fcffff03",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_dword_named_16777216",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000400000004",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_res_anonymous_default",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "01000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_res_anonymous_-1",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_res_anonymous_0",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_res_anonymous_1",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "01000000",
+    "native_hex": "01000000",
+    "matches": true
+  },
+  {
+    "name": "union_res_anonymous_2",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "02000000",
+    "native_hex": "02000000",
+    "matches": true
+  },
+  {
+    "name": "union_res_anonymous_65535",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "ffff0000",
+    "native_hex": "ffff0000",
+    "matches": true
+  },
+  {
+    "name": "union_res_anonymous_65536",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000100",
+    "native_hex": "00000100",
+    "matches": true
+  },
+  {
+    "name": "union_res_anonymous_16777215",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "ffffff00",
+    "native_hex": "ffffff00",
+    "matches": true
+  },
+  {
+    "name": "union_res_anonymous_16777216",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000001",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_res_named_default",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0100000001000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_res_named_-1",
+    "exit": 1,
+    "stderr": "asm198x: input.s:5: error: range error (-1 not in [0..4294967295])\n",
+    "hex": null,
+    "native_hex": null,
+    "matches": true
+  },
+  {
+    "name": "union_res_named_0",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000000000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_res_named_1",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0100000001000000",
+    "native_hex": "0100000001000000",
+    "matches": true
+  },
+  {
+    "name": "union_res_named_2",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0200000002000000",
+    "native_hex": "0200000002000000",
+    "matches": true
+  },
+  {
+    "name": "union_res_named_65535",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "ffff0000ffff0000",
+    "native_hex": "ffff0000ffff0000",
+    "matches": true
+  },
+  {
+    "name": "union_res_named_65536",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000010000000100",
+    "native_hex": "0000010000000100",
+    "matches": true
+  },
+  {
+    "name": "union_res_named_16777215",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "ffffff00ffffff00",
+    "native_hex": "ffffff00ffffff00",
+    "matches": true
+  },
+  {
+    "name": "union_res_named_16777216",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000100000001",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_tag_empty_anonymous_default",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000000",
+    "native_hex": "00000000",
+    "matches": true
+  },
+  {
+    "name": "union_tag_empty_anonymous_-1",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_tag_empty_anonymous_0",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_tag_empty_anonymous_1",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000000",
+    "native_hex": "00000000",
+    "matches": true
+  },
+  {
+    "name": "union_tag_empty_anonymous_2",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000000",
+    "native_hex": "00000000",
+    "matches": true
+  },
+  {
+    "name": "union_tag_empty_anonymous_65535",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000000",
+    "native_hex": "00000000",
+    "matches": true
+  },
+  {
+    "name": "union_tag_empty_anonymous_65536",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000000",
+    "native_hex": "00000000",
+    "matches": true
+  },
+  {
+    "name": "union_tag_empty_anonymous_16777215",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000000",
+    "native_hex": "00000000",
+    "matches": true
+  },
+  {
+    "name": "union_tag_empty_anonymous_16777216",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000000",
+    "native_hex": "00000000",
+    "matches": true
+  },
+  {
+    "name": "union_tag_empty_named_default",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000000000000",
+    "native_hex": "0000000000000000",
+    "matches": true
+  },
+  {
+    "name": "union_tag_empty_named_-1",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000000000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_tag_empty_named_0",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000000000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_tag_empty_named_1",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000000000000",
+    "native_hex": "0000000000000000",
+    "matches": true
+  },
+  {
+    "name": "union_tag_empty_named_2",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000000000000",
+    "native_hex": "0000000000000000",
+    "matches": true
+  },
+  {
+    "name": "union_tag_empty_named_65535",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000000000000",
+    "native_hex": "0000000000000000",
+    "matches": true
+  },
+  {
+    "name": "union_tag_empty_named_65536",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000000000000",
+    "native_hex": "0000000000000000",
+    "matches": true
+  },
+  {
+    "name": "union_tag_empty_named_16777215",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000000000000",
+    "native_hex": "0000000000000000",
+    "matches": true
+  },
+  {
+    "name": "union_tag_empty_named_16777216",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000000000000",
+    "native_hex": "0000000000000000",
+    "matches": true
+  },
+  {
+    "name": "union_tag_item_anonymous_default",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "02000000",
+    "native_hex": "02000000",
+    "matches": true
+  },
+  {
+    "name": "union_tag_item_anonymous_-1",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_tag_item_anonymous_0",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_tag_item_anonymous_1",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "02000000",
+    "native_hex": "02000000",
+    "matches": true
+  },
+  {
+    "name": "union_tag_item_anonymous_2",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "04000000",
+    "native_hex": "04000000",
+    "matches": true
+  },
+  {
+    "name": "union_tag_item_anonymous_65535",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "feff0100",
+    "native_hex": "feff0100",
+    "matches": true
+  },
+  {
+    "name": "union_tag_item_anonymous_65536",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000200",
+    "native_hex": "00000200",
+    "matches": true
+  },
+  {
+    "name": "union_tag_item_anonymous_16777215",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "feffff01",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_tag_item_anonymous_16777216",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000002",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_tag_item_named_default",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0200000002000000",
+    "native_hex": "0200000002000000",
+    "matches": true
+  },
+  {
+    "name": "union_tag_item_named_-1",
+    "exit": 1,
+    "stderr": "asm198x: input.s:10: error: range error (-2 not in [0..4294967295])\n",
+    "hex": null,
+    "native_hex": null,
+    "matches": true
+  },
+  {
+    "name": "union_tag_item_named_0",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000000000000",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_tag_item_named_1",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0200000002000000",
+    "native_hex": "0200000002000000",
+    "matches": true
+  },
+  {
+    "name": "union_tag_item_named_2",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0400000004000000",
+    "native_hex": "0400000004000000",
+    "matches": true
+  },
+  {
+    "name": "union_tag_item_named_65535",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "feff0100feff0100",
+    "native_hex": "feff0100feff0100",
+    "matches": true
+  },
+  {
+    "name": "union_tag_item_named_65536",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000020000000200",
+    "native_hex": "0000020000000200",
+    "matches": true
+  },
+  {
+    "name": "union_tag_item_named_16777215",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "feffff01feffff01",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_tag_item_named_16777216",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000200000002",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_word_anonymous_boundary_8388607",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "feffff00",
+    "native_hex": "feffff00",
+    "matches": true
+  },
+  {
+    "name": "struct_word_anonymous_boundary_8388608",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000001",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_word_named_boundary_8388607",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "feffff00feffff00",
+    "native_hex": "feffff00feffff00",
+    "matches": true
+  },
+  {
+    "name": "struct_word_named_boundary_8388608",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000100000001",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_addr_anonymous_boundary_8388607",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "feffff00",
+    "native_hex": "feffff00",
+    "matches": true
+  },
+  {
+    "name": "struct_addr_anonymous_boundary_8388608",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000001",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_addr_named_boundary_8388607",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "feffff00feffff00",
+    "native_hex": "feffff00feffff00",
+    "matches": true
+  },
+  {
+    "name": "struct_addr_named_boundary_8388608",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000100000001",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_dbyt_anonymous_boundary_8388607",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "feffff00",
+    "native_hex": "feffff00",
+    "matches": true
+  },
+  {
+    "name": "struct_dbyt_anonymous_boundary_8388608",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000001",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_dbyt_named_boundary_8388607",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "feffff00feffff00",
+    "native_hex": "feffff00feffff00",
+    "matches": true
+  },
+  {
+    "name": "struct_dbyt_named_boundary_8388608",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000100000001",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_faraddr_anonymous_boundary_5592405",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "ffffff00",
+    "native_hex": "ffffff00",
+    "matches": true
+  },
+  {
+    "name": "struct_faraddr_anonymous_boundary_5592406",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "02000001",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_faraddr_named_boundary_5592405",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "ffffff00ffffff00",
+    "native_hex": "ffffff00ffffff00",
+    "matches": true
+  },
+  {
+    "name": "struct_faraddr_named_boundary_5592406",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0200000102000001",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_dword_anonymous_boundary_4194303",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "fcffff00",
+    "native_hex": "fcffff00",
+    "matches": true
+  },
+  {
+    "name": "struct_dword_anonymous_boundary_4194304",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000001",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_dword_named_boundary_4194303",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "fcffff00fcffff00",
+    "native_hex": "fcffff00fcffff00",
+    "matches": true
+  },
+  {
+    "name": "struct_dword_named_boundary_4194304",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000100000001",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_tag_item_anonymous_boundary_8388607",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "feffff00",
+    "native_hex": "feffff00",
+    "matches": true
+  },
+  {
+    "name": "struct_tag_item_anonymous_boundary_8388608",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000001",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_tag_item_named_boundary_8388607",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "feffff00feffff00",
+    "native_hex": "feffff00feffff00",
+    "matches": true
+  },
+  {
+    "name": "struct_tag_item_named_boundary_8388608",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000100000001",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "struct_tag_empty_anonymous_boundary_2147483647",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000000",
+    "native_hex": "00000000",
+    "matches": true
+  },
+  {
+    "name": "struct_tag_empty_anonymous_boundary_2147483648",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000000",
+    "native_hex": "00000000",
+    "matches": true
+  },
+  {
+    "name": "struct_tag_empty_named_boundary_2147483647",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000000000000",
+    "native_hex": "0000000000000000",
+    "matches": true
+  },
+  {
+    "name": "struct_tag_empty_named_boundary_2147483648",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000000000000",
+    "native_hex": "0000000000000000",
+    "matches": true
+  },
+  {
+    "name": "union_word_anonymous_boundary_8388607",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "feffff00",
+    "native_hex": "feffff00",
+    "matches": true
+  },
+  {
+    "name": "union_word_anonymous_boundary_8388608",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000001",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_word_named_boundary_8388607",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "feffff00feffff00",
+    "native_hex": "feffff00feffff00",
+    "matches": true
+  },
+  {
+    "name": "union_word_named_boundary_8388608",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000100000001",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_addr_anonymous_boundary_8388607",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "feffff00",
+    "native_hex": "feffff00",
+    "matches": true
+  },
+  {
+    "name": "union_addr_anonymous_boundary_8388608",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000001",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_addr_named_boundary_8388607",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "feffff00feffff00",
+    "native_hex": "feffff00feffff00",
+    "matches": true
+  },
+  {
+    "name": "union_addr_named_boundary_8388608",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000100000001",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_dbyt_anonymous_boundary_8388607",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "feffff00",
+    "native_hex": "feffff00",
+    "matches": true
+  },
+  {
+    "name": "union_dbyt_anonymous_boundary_8388608",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000001",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_dbyt_named_boundary_8388607",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "feffff00feffff00",
+    "native_hex": "feffff00feffff00",
+    "matches": true
+  },
+  {
+    "name": "union_dbyt_named_boundary_8388608",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000100000001",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_faraddr_anonymous_boundary_5592405",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "ffffff00",
+    "native_hex": "ffffff00",
+    "matches": true
+  },
+  {
+    "name": "union_faraddr_anonymous_boundary_5592406",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "02000001",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_faraddr_named_boundary_5592405",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "ffffff00ffffff00",
+    "native_hex": "ffffff00ffffff00",
+    "matches": true
+  },
+  {
+    "name": "union_faraddr_named_boundary_5592406",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0200000102000001",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_dword_anonymous_boundary_4194303",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "fcffff00",
+    "native_hex": "fcffff00",
+    "matches": true
+  },
+  {
+    "name": "union_dword_anonymous_boundary_4194304",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000001",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_dword_named_boundary_4194303",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "fcffff00fcffff00",
+    "native_hex": "fcffff00fcffff00",
+    "matches": true
+  },
+  {
+    "name": "union_dword_named_boundary_4194304",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000100000001",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_tag_item_anonymous_boundary_8388607",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "feffff00",
+    "native_hex": "feffff00",
+    "matches": true
+  },
+  {
+    "name": "union_tag_item_anonymous_boundary_8388608",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000001",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_tag_item_named_boundary_8388607",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "feffff00feffff00",
+    "native_hex": "feffff00feffff00",
+    "matches": true
+  },
+  {
+    "name": "union_tag_item_named_boundary_8388608",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000100000001",
+    "native_hex": null,
+    "matches": false
+  },
+  {
+    "name": "union_tag_empty_anonymous_boundary_2147483647",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000000",
+    "native_hex": "00000000",
+    "matches": true
+  },
+  {
+    "name": "union_tag_empty_anonymous_boundary_2147483648",
+    "exit": 0,
+    "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+    "hex": "00000000",
+    "native_hex": "00000000",
+    "matches": true
+  },
+  {
+    "name": "union_tag_empty_named_boundary_2147483647",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000000000000",
+    "native_hex": "0000000000000000",
+    "matches": true
+  },
+  {
+    "name": "union_tag_empty_named_boundary_2147483648",
+    "exit": 0,
+    "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+    "hex": "0000000000000000",
+    "native_hex": "0000000000000000",
+    "matches": true
+  }
+]
