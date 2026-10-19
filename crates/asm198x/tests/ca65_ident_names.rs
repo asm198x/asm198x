@@ -52,7 +52,7 @@ fn native_ident_names_validate_before_source_token_emission() {
     let facts: serde_json::Value =
         serde_json::from_str(include_str!("fixtures/ca65-ident-names.json")).expect("native facts");
     let cases = facts["cases"].as_array().expect("cases");
-    assert_eq!(cases.len(), 163);
+    assert_eq!(cases.len(), 165);
     let audit: serde_json::Value = serde_json::from_str(include_str!(
         "../../../docs/plans/2026-10-19-ca65-ident-names/native.json"
     ))
@@ -64,16 +64,15 @@ fn native_ident_names_validate_before_source_token_emission() {
         .filter(|original| !cases.iter().any(|case| case["name"] == original["name"]))
         .map(|case| case["name"].as_str().expect("name"))
         .collect();
-    assert_eq!(
-        omitted,
-        std::collections::BTreeSet::from(["plain_missing_anchor", "generated_missing_anchor"])
+    assert!(
+        omitted.is_empty(),
+        "all restored native controls are included"
     );
-    assert_eq!(
+    assert!(
         facts["excluded_cases"]
             .as_array()
             .expect("separate controls")
-            .len(),
-        2
+            .is_empty()
     );
     for case in cases {
         let original = all

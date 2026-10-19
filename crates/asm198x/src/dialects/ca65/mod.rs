@@ -1932,7 +1932,7 @@ impl Walker {
             return Ok(key.to_string());
         }
         if let Some(local) = name.strip_prefix('@').filter(|name| is_cheap_ident(name)) {
-            return Ok(cheap_key(self.scope_env.anchor_str(), local));
+            return checked_cheap_key(self.scope_env.anchor_str(), local, line);
         }
         if let Some(global) = name.strip_prefix("::") {
             return Ok(global.to_string());
@@ -2035,15 +2035,17 @@ impl Walker {
         statement_head: bool,
     ) -> Result<String, AsmError> {
         if let Some(local) = name.strip_prefix('@') {
-            if !is_cheap_ident(local)
-                || (self.expand_text_defines && self.scope_env.anchor_str().is_empty())
-            {
+            if !is_cheap_ident(local) {
                 return Err(AsmError::new(
                     line,
                     format!("invalid cheap-local constant `{name}`"),
                 ));
             }
-            return Ok(cheap_key(self.scope_env.anchor_str(), local));
+            return if self.expand_text_defines {
+                checked_cheap_key(self.scope_env.anchor_str(), local, line)
+            } else {
+                Ok(cheap_key(self.scope_env.anchor_str(), local))
+            };
         }
         let plain = name.strip_prefix("::").unwrap_or(name);
         // The shared MOS helper permits dots for other dialects' local
@@ -2966,7 +2968,7 @@ fn split_label_symbol<'a>(
     // `@cheap:` — a cheap local. The `@cheap` source form round-trips; assembly
     // uses the `global@cheap` key.
     if let Some(cheap) = name.strip_prefix('@') {
-        if !is_ident(cheap) {
+        if !is_cheap_ident(cheap) {
             return Err(AsmError::new(
                 line,
                 format!("invalid cheap-local label `{name}`"),
@@ -2978,7 +2980,7 @@ fn split_label_symbol<'a>(
                 scope: Scope::Local {
                     in_global: env.anchor_str().to_string(),
                 },
-                qualified: cheap_key(env.anchor_str(), cheap),
+                qualified: checked_cheap_key(env.anchor_str(), cheap, line)?,
             }),
             remainder,
         ));
@@ -4113,7 +4115,8 @@ fn parse_value(anons: &AnonCtx, anchor: &str, raw: &str, line: usize) -> Result<
     )?;
     // Bare names, arithmetic and name-query markers all share the same
     // cheap namespace. Binding only a bare operand loses that context.
-    Ok(map_expr_syms(&expr, &|name| {
+    let failure = RefCell::new(None);
+    let value = map_expr_syms(&expr, &|name| {
         let (prefix, symbol) = if let Some(symbol) = name.strip_prefix(DEFINED_MARK) {
             (DEFINED_MARK, symbol)
         } else if let Some(symbol) = name.strip_prefix(REF_MARK) {
@@ -4124,11 +4127,19 @@ fn parse_value(anons: &AnonCtx, anchor: &str, raw: &str, line: usize) -> Result<
         let local = symbol
             .strip_prefix('@')
             .filter(|name| is_cheap_ident(name))?;
-        Some(Expr::Sym(format!(
-            "{prefix}{CHEAP_REF_MARK}{}",
-            cheap_key(anchor, local)
-        )))
-    }))
+        match checked_cheap_key(anchor, local, line) {
+            Ok(key) => Some(Expr::Sym(format!("{prefix}{CHEAP_REF_MARK}{key}"))),
+            Err(error) => {
+                *failure.borrow_mut() = Some(error);
+                None
+            }
+        }
+    });
+    if let Some(error) = failure.into_inner() {
+        Err(error)
+    } else {
+        Ok(value)
+    }
 }
 
 // The colon is not a cheap identifier character, so this property key cannot
@@ -4298,6 +4309,17 @@ fn is_cheap_ident(name: &str) -> bool {
 /// A collision-proof symbol key for a cheap local, scoped to its global.
 fn cheap_key(global: &str, name: &str) -> String {
     format!("{global}\u{1}{name}")
+}
+
+fn checked_cheap_key(global: &str, name: &str, line: usize) -> Result<String, AsmError> {
+    if global.is_empty() {
+        Err(AsmError::new(
+            line,
+            format!("no preceding global symbol for `@{name}`"),
+        ))
+    } else {
+        Ok(cheap_key(global, name))
+    }
 }
 
 /// The internal separator inside anonymous (`\u{1}:#N`) and cheap

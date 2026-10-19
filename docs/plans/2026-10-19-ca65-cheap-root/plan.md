@@ -1,4 +1,4 @@
-# Require native cheap-local anchors at selected binding/lookup (#875)
+# Require native cheap-local anchors at selected binding/lookup (#875/#878)
 
 Native rejects a cheap label before any global symbol exists. The current label
 splitter and query resolver manufacture an empty-anchor key; constants already
@@ -27,3 +27,7 @@ state, preserving the native definition events settled by #774/#778.
 5. After #877 merges, ship isolated commits on current main. Inspect exact-head
    CI, five actual package reports/receipts and all ten controls before rebase
    merge; clean or reuse owned workspaces after source/evidence retention checks.
+
+The label token correction is #878. Fourteen anchored undefined .ifconst
+controls are accounted separately under #879; the new native fixture has 315
+of 329 cases. The previous identifier cohort regains its two #875 controls.
