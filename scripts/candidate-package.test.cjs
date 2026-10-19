@@ -413,3 +413,9 @@ test('labelled scope and proc openings are mandatory package evidence', () => {
   assert(qualifies(complete)); assert(requiredCases.includes('ca65_labelled_scopes'));
   assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_labelled_scopes')), false);
 });
+
+test('native text function argument spacing is mandatory package evidence', () => {
+  const complete = requiredCases.map(name => ({ name, status: 'pass' }));
+  assert(qualifies(complete)); assert(requiredCases.includes('ca65_text_call_spacing'));
+  assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_text_call_spacing')), false);
+});

@@ -157,6 +157,11 @@ pub(crate) trait TextSyntax {
         line: usize,
     ) -> Result<Option<Folded>, AsmError>;
 
+    /// Whether spaces or tabs may separate a function name from its arguments.
+    fn permits_function_space(&self) -> bool {
+        false
+    }
+
     /// The delimiters around an interpolated string-symbol name. rgbasm uses
     /// `{name}`; lwasm uses `%(name)`.
     fn interpolation(&self) -> Option<(&'static str, char)> {
@@ -439,14 +444,14 @@ fn fold_once<S: TextSyntax>(
                     j += 1;
                 }
                 let name = &line[i..j];
-                if bytes.get(j) == Some(&b'(')
-                    && let Some(close) = matching_paren(line, j)
+                if let Some(open) = call_open(syntax, line, j)
+                    && let Some(close) = matching_paren(line, open)
                 {
-                    let inner = &line[j + 1..close];
+                    let inner = &line[open + 1..close];
                     // Innermost first: a call inside the arguments is folded
                     // before this one, so every argument is already a literal.
                     if has_call(syntax, scope, inner) {
-                        i = j + 1;
+                        i = open + 1;
                         continue;
                     }
                     let args = split_args(inner);
@@ -493,7 +498,8 @@ fn has_call<S: TextSyntax>(syntax: &S, scope: &Scope, text: &str) -> bool {
             while j < bytes.len() && word(bytes[j]) {
                 j += 1;
             }
-            if bytes.get(j) == Some(&b'(')
+            let open = call_open(syntax, text, j);
+            if open.is_some()
                 && syntax
                     .function(&text[i..j], &[], scope, 0)
                     .is_ok_and(|f| f.is_some())
@@ -502,7 +508,7 @@ fn has_call<S: TextSyntax>(syntax: &S, scope: &Scope, text: &str) -> bool {
             }
             // A name the dialect knows but which refused an empty argument
             // list is still a call.
-            if bytes.get(j) == Some(&b'(') && syntax.function(&text[i..j], &[], scope, 0).is_err() {
+            if open.is_some() && syntax.function(&text[i..j], &[], scope, 0).is_err() {
                 return true;
             }
             i = j;
@@ -511,6 +517,18 @@ fn has_call<S: TextSyntax>(syntax: &S, scope: &Scope, text: &str) -> bool {
         i += 1;
     }
     false
+}
+
+/// Locate the argument opener with the same token boundary for both scans.
+fn call_open<S: TextSyntax>(syntax: &S, text: &str, end: usize) -> Option<usize> {
+    let bytes = text.as_bytes();
+    let mut open = end;
+    if syntax.permits_function_space() {
+        while bytes.get(open).is_some_and(|c| matches!(c, b' ' | b'\t')) {
+            open += 1;
+        }
+    }
+    (bytes.get(open) == Some(&b'(')).then_some(open)
 }
 
 /// The index of the `)` closing the `(` at `open`.
