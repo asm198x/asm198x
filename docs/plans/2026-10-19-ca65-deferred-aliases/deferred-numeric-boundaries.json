@@ -1,0 +1,1595 @@
+{
+  "tools": {
+    "ca65": {
+      "path": "/opt/homebrew/bin/ca65",
+      "sha256": "1a57997819fd98814e4601b5160df589e7a1a24e1888a80fee51ae450d8fd0ea",
+      "version": {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "--version"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "ca65 V2.18 - N/A\n"
+      }
+    },
+    "ld65": {
+      "path": "/opt/homebrew/bin/ld65",
+      "sha256": "36bb196207a6b2c90a4aa991b419d6113885303951b14b60b455f51c777b3339",
+      "version": {
+        "argv": [
+          "/opt/homebrew/bin/ld65",
+          "--version"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "ld65 V2.18 - N/A\n"
+      }
+    }
+  },
+  "files": {},
+  "cases": [
+    {
+      "name": "unused_alias_decimal_4294967294",
+      "source": "OTHER=4294967294\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "empty_tag_decimal_4294967294",
+      "source": ".struct Empty\n.endstruct\n.struct Record\nfield .tag Empty 4294967294\n.endstruct\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "unused_alias_hex_prefix_4294967294",
+      "source": "OTHER=$FFFFFFFE\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "empty_tag_hex_prefix_4294967294",
+      "source": ".struct Empty\n.endstruct\n.struct Record\nfield .tag Empty $FFFFFFFE\n.endstruct\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "unused_alias_hex_suffix_4294967294",
+      "source": "OTHER=0FFFFFFFEh\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "empty_tag_hex_suffix_4294967294",
+      "source": ".struct Empty\n.endstruct\n.struct Record\nfield .tag Empty 0FFFFFFFEh\n.endstruct\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "unused_alias_binary_4294967294",
+      "source": "OTHER=%11111111111111111111111111111110\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "empty_tag_binary_4294967294",
+      "source": ".struct Empty\n.endstruct\n.struct Record\nfield .tag Empty %11111111111111111111111111111110\n.endstruct\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "unused_alias_decimal_4294967295",
+      "source": "OTHER=4294967295\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "empty_tag_decimal_4294967295",
+      "source": ".struct Empty\n.endstruct\n.struct Record\nfield .tag Empty 4294967295\n.endstruct\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "unused_alias_hex_prefix_4294967295",
+      "source": "OTHER=$FFFFFFFF\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "empty_tag_hex_prefix_4294967295",
+      "source": ".struct Empty\n.endstruct\n.struct Record\nfield .tag Empty $FFFFFFFF\n.endstruct\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "unused_alias_hex_suffix_4294967295",
+      "source": "OTHER=0FFFFFFFFh\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "empty_tag_hex_suffix_4294967295",
+      "source": ".struct Empty\n.endstruct\n.struct Record\nfield .tag Empty 0FFFFFFFFh\n.endstruct\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "unused_alias_binary_4294967295",
+      "source": "OTHER=%11111111111111111111111111111111\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "empty_tag_binary_4294967295",
+      "source": ".struct Empty\n.endstruct\n.struct Record\nfield .tag Empty %11111111111111111111111111111111\n.endstruct\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "unused_alias_decimal_4294967296",
+      "source": "OTHER=4294967296\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "empty_tag_decimal_4294967296",
+      "source": ".struct Empty\n.endstruct\n.struct Record\nfield .tag Empty 4294967296\n.endstruct\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "unused_alias_hex_prefix_4294967296",
+      "source": "OTHER=$100000000\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Overflow in hexadecimal number\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "empty_tag_hex_prefix_4294967296",
+      "source": ".struct Empty\n.endstruct\n.struct Record\nfield .tag Empty $100000000\n.endstruct\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(4): Error: Overflow in hexadecimal number\ninput.s(4): Error: Range error\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "unused_alias_hex_suffix_4294967296",
+      "source": "OTHER=0100000000h\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Number out of range\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "empty_tag_hex_suffix_4294967296",
+      "source": ".struct Empty\n.endstruct\n.struct Record\nfield .tag Empty 0100000000h\n.endstruct\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(4): Error: Number out of range\ninput.s(4): Error: Range error\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "unused_alias_binary_4294967296",
+      "source": "OTHER=%100000000000000000000000000000000\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Overflow in binary number\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "empty_tag_binary_4294967296",
+      "source": ".struct Empty\n.endstruct\n.struct Record\nfield .tag Empty %100000000000000000000000000000000\n.endstruct\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(4): Error: Overflow in binary number\ninput.s(4): Error: Range error\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "unused_alias_decimal_4294967299",
+      "source": "OTHER=4294967299\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "empty_tag_decimal_4294967299",
+      "source": ".struct Empty\n.endstruct\n.struct Record\nfield .tag Empty 4294967299\n.endstruct\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "unused_alias_hex_prefix_4294967299",
+      "source": "OTHER=$100000003\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Overflow in hexadecimal number\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "empty_tag_hex_prefix_4294967299",
+      "source": ".struct Empty\n.endstruct\n.struct Record\nfield .tag Empty $100000003\n.endstruct\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(4): Error: Overflow in hexadecimal number\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "unused_alias_hex_suffix_4294967299",
+      "source": "OTHER=0100000003h\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Number out of range\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "empty_tag_hex_suffix_4294967299",
+      "source": ".struct Empty\n.endstruct\n.struct Record\nfield .tag Empty 0100000003h\n.endstruct\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(4): Error: Number out of range\ninput.s(4): Error: Range error\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "unused_alias_binary_4294967299",
+      "source": "OTHER=%100000000000000000000000000000011\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Overflow in binary number\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "empty_tag_binary_4294967299",
+      "source": ".struct Empty\n.endstruct\n.struct Record\nfield .tag Empty %100000000000000000000000000000011\n.endstruct\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(4): Error: Overflow in binary number\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "unused_alias_decimal_4294967300",
+      "source": "OTHER=4294967300\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Number out of range\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "empty_tag_decimal_4294967300",
+      "source": ".struct Empty\n.endstruct\n.struct Record\nfield .tag Empty 4294967300\n.endstruct\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(4): Error: Number out of range\ninput.s(4): Error: Range error\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "unused_alias_hex_prefix_4294967300",
+      "source": "OTHER=$100000004\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Overflow in hexadecimal number\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "empty_tag_hex_prefix_4294967300",
+      "source": ".struct Empty\n.endstruct\n.struct Record\nfield .tag Empty $100000004\n.endstruct\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(4): Error: Overflow in hexadecimal number\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "unused_alias_hex_suffix_4294967300",
+      "source": "OTHER=0100000004h\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Number out of range\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "empty_tag_hex_suffix_4294967300",
+      "source": ".struct Empty\n.endstruct\n.struct Record\nfield .tag Empty 0100000004h\n.endstruct\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(4): Error: Number out of range\ninput.s(4): Error: Range error\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "unused_alias_binary_4294967300",
+      "source": "OTHER=%100000000000000000000000000000100\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Overflow in binary number\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "empty_tag_binary_4294967300",
+      "source": ".struct Empty\n.endstruct\n.struct Record\nfield .tag Empty %100000000000000000000000000000100\n.endstruct\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(4): Error: Overflow in binary number\ninput.s(4): Error: Range error\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "unused_alias_decimal_4294967305",
+      "source": "OTHER=4294967305\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Number out of range\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "empty_tag_decimal_4294967305",
+      "source": ".struct Empty\n.endstruct\n.struct Record\nfield .tag Empty 4294967305\n.endstruct\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(4): Error: Number out of range\ninput.s(4): Error: Range error\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "unused_alias_hex_prefix_4294967305",
+      "source": "OTHER=$100000009\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Overflow in hexadecimal number\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "empty_tag_hex_prefix_4294967305",
+      "source": ".struct Empty\n.endstruct\n.struct Record\nfield .tag Empty $100000009\n.endstruct\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(4): Error: Overflow in hexadecimal number\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "unused_alias_hex_suffix_4294967305",
+      "source": "OTHER=0100000009h\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Number out of range\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "empty_tag_hex_suffix_4294967305",
+      "source": ".struct Empty\n.endstruct\n.struct Record\nfield .tag Empty 0100000009h\n.endstruct\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(4): Error: Number out of range\ninput.s(4): Error: Range error\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "unused_alias_binary_4294967305",
+      "source": "OTHER=%100000000000000000000000000001001\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Overflow in binary number\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "empty_tag_binary_4294967305",
+      "source": ".struct Empty\n.endstruct\n.struct Record\nfield .tag Empty %100000000000000000000000000001001\n.endstruct\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(4): Error: Overflow in binary number\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "unused_alias_decimal_4294967306",
+      "source": "OTHER=4294967306\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Number out of range\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "empty_tag_decimal_4294967306",
+      "source": ".struct Empty\n.endstruct\n.struct Record\nfield .tag Empty 4294967306\n.endstruct\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(4): Error: Number out of range\ninput.s(4): Error: Range error\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "unused_alias_hex_prefix_4294967306",
+      "source": "OTHER=$10000000A\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Overflow in hexadecimal number\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "empty_tag_hex_prefix_4294967306",
+      "source": ".struct Empty\n.endstruct\n.struct Record\nfield .tag Empty $10000000A\n.endstruct\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(4): Error: Overflow in hexadecimal number\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "unused_alias_hex_suffix_4294967306",
+      "source": "OTHER=010000000Ah\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Number out of range\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "empty_tag_hex_suffix_4294967306",
+      "source": ".struct Empty\n.endstruct\n.struct Record\nfield .tag Empty 010000000Ah\n.endstruct\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(4): Error: Number out of range\ninput.s(4): Error: Range error\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "unused_alias_binary_4294967306",
+      "source": "OTHER=%100000000000000000000000000001010\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Overflow in binary number\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "empty_tag_binary_4294967306",
+      "source": ".struct Empty\n.endstruct\n.struct Record\nfield .tag Empty %100000000000000000000000000001010\n.endstruct\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(4): Error: Overflow in binary number\ninput.s(4): Error: Range error\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "unused_alias_decimal_9223372036854775807",
+      "source": "OTHER=9223372036854775807\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Number out of range\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "empty_tag_decimal_9223372036854775807",
+      "source": ".struct Empty\n.endstruct\n.struct Record\nfield .tag Empty 9223372036854775807\n.endstruct\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(4): Error: Number out of range\ninput.s(4): Error: Range error\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "unused_alias_hex_prefix_9223372036854775807",
+      "source": "OTHER=$7FFFFFFFFFFFFFFF\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Overflow in hexadecimal number\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "empty_tag_hex_prefix_9223372036854775807",
+      "source": ".struct Empty\n.endstruct\n.struct Record\nfield .tag Empty $7FFFFFFFFFFFFFFF\n.endstruct\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(4): Error: Overflow in hexadecimal number\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "unused_alias_hex_suffix_9223372036854775807",
+      "source": "OTHER=07FFFFFFFFFFFFFFFh\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Number out of range\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "empty_tag_hex_suffix_9223372036854775807",
+      "source": ".struct Empty\n.endstruct\n.struct Record\nfield .tag Empty 07FFFFFFFFFFFFFFFh\n.endstruct\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(4): Error: Number out of range\ninput.s(4): Error: Range error\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "unused_alias_binary_9223372036854775807",
+      "source": "OTHER=%111111111111111111111111111111111111111111111111111111111111111\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Overflow in binary number\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "empty_tag_binary_9223372036854775807",
+      "source": ".struct Empty\n.endstruct\n.struct Record\nfield .tag Empty %111111111111111111111111111111111111111111111111111111111111111\n.endstruct\n.byte 7\n",
+      "config": "MEMORY { ZP:start=$20,size=$E0,file=\"\"; MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { ZEROPAGE:load=ZP,type=zp,optional=yes; CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(4): Error: Overflow in binary number\n"
+        }
+      ],
+      "native_hex": null
+    }
+  ]
+}

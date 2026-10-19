@@ -43,6 +43,8 @@ pub(super) fn parsed_from_program(
         consts: BTreeMap::new(),
         const_names: BTreeMap::new(),
         equ_definitions: BTreeSet::new(),
+        deferred: super::deferred::Deferred::default(),
+        constant_updates: Vec::new(),
         zero_page_names: BTreeSet::new(),
         referenced: BTreeSet::new(),
         loop_vars: Vec::new(),
@@ -62,6 +64,7 @@ pub(super) fn parsed_from_program(
         label_seg: st.label_seg,
         consts: st.consts,
         const_names: st.const_names,
+        deferred: st.deferred,
     })
 }
 
@@ -136,6 +139,8 @@ struct Projection {
     /// Immutable declarations, even when their RHS cannot fold yet. Populated
     /// only by selected nodes, so alternate branches do not redefine a name.
     equ_definitions: BTreeSet<String>,
+    deferred: super::deferred::Deferred,
+    constant_updates: Vec<(String, i64)>,
     /// Source-time address-size declarations; exports alone do not hint.
     zero_page_names: BTreeSet<String>,
     /// Every name the statements *above this point* have mentioned, which is
@@ -825,7 +830,9 @@ fn fold_condition(
                         format!("`{word}` needs an identifier, got `{name}`"),
                     ));
                 };
-            let defined = env.contains_key(&key) || st.label_seg.contains_key(&key);
+            let defined = env.contains_key(&key)
+                || st.label_seg.contains_key(&key)
+                || st.equ_definitions.contains(&key);
             Ok(if word == ".ifdef" { defined } else { !defined })
         }
         // `.ifblank` asks whether anything follows it on the line — which is
@@ -1116,6 +1123,12 @@ fn project_selected(
 ) -> Result<(), AsmError> {
     let start = st.stmts.len();
     project_one(node, st)?;
+    let updates = st
+        .deferred
+        .advance(std::mem::take(&mut st.constant_updates), &mut st.consts);
+    for (name, value) in updates {
+        reader.consts.insert(name, value);
+    }
     for stmt in &st.stmts[start..] {
         let off = reader.source_offsets.entry(stmt.seg.clone()).or_default();
         let size = match &stmt.kind {
@@ -1168,13 +1181,30 @@ fn project_one(node: &crate::ast::Node, st: &mut Projection) -> Result<(), AsmEr
                             format!("symbol `{}` is already defined", sym.name),
                         ));
                     }
-                    if let Ok(v) = fold_const(value, consts, line) {
-                        consts.insert(sym.qualified.clone(), v);
-                        if sym.name.starts_with('@') {
-                            st.const_names
-                                .insert(sym.qualified.clone(), sym.name.clone());
-                        }
+                    let updates = st.deferred.insert(
+                        sym.qualified.clone(),
+                        value.clone(),
+                        node.span.clone(),
+                        stmts.len(),
+                        consts,
+                    );
+                    st.constant_updates.extend(updates);
+                    collect_syms(&Kind::Bytes(vec![value.clone()]), referenced);
+                    if sym.name.starts_with('@') {
+                        st.const_names
+                            .insert(sym.qualified.clone(), sym.name.clone());
                     }
+                    // A zero-size private placement retains the definition PC
+                    // without adding lexical state to the shared statement.
+                    stmts.push(Stmt {
+                        line,
+                        file,
+                        expansion_frames: node.span.expansion_frames.clone(),
+                        seg: seg.clone(),
+                        label: None,
+                        kind: Kind::Empty,
+                        bound_insn: None,
+                    });
                 }
             }
             // An unresolved include/incbin cannot assemble: it needs a loader,
@@ -1227,7 +1257,16 @@ fn project_one(node: &crate::ast::Node, st: &mut Projection) -> Result<(), AsmEr
                 // `.defined` is answered here, in source order, against what
                 // this point in the file has seen — which is the question ca65
                 // asks.
-                let kind = map_kind_syms(kind, &resolve_defined(consts, label_seg));
+                let kind = map_kind_syms(kind, &|name| {
+                    if name
+                        .strip_prefix(super::DEFINED_MARK)
+                        .is_some_and(|key| st.equ_definitions.contains(key))
+                    {
+                        Some(Expr::Num(1))
+                    } else {
+                        resolve_defined(consts, label_seg)(name)
+                    }
+                });
                 // `.ref` is the same question about uses rather than
                 // definitions, so it is answered from the same place.
                 let kind = map_kind_syms(&kind, &resolve_ref(referenced));
@@ -1239,6 +1278,7 @@ fn project_one(node: &crate::ast::Node, st: &mut Projection) -> Result<(), AsmEr
                 // map, in the same order, as every `=` in the file.
                 if let Kind::Constant(name, value) = &kind {
                     consts.insert(name.clone(), *value);
+                    st.constant_updates.push((name.clone(), *value));
                 }
                 // `.export foo := 7` defines `foo` as well as exporting it, so
                 // it is collected here with the `=` constants rather than left
@@ -1252,6 +1292,7 @@ fn project_one(node: &crate::ast::Node, st: &mut Projection) -> Result<(), AsmEr
                     && let Ok(v) = fold_const(value, consts, line)
                 {
                     consts.insert(name.clone(), v);
+                    st.constant_updates.push((name.clone(), v));
                 }
                 if let Kind::Visible {
                     rule,
@@ -1283,11 +1324,9 @@ fn project_one(node: &crate::ast::Node, st: &mut Projection) -> Result<(), AsmEr
                         .into_iter()
                         .filter_map(|name| {
                             let target = targets.get(&name).unwrap_or(&name);
-                            let value = consts.get(target).copied().or_else(|| {
-                                (st.zero_page_names.contains(target)
-                                    || label_seg.get(target).map(String::as_str)
-                                        == Some("ZEROPAGE"))
-                                .then_some(0)
+                            let value = st.deferred.size_value(target, consts, &|key| {
+                                st.zero_page_names.contains(key)
+                                    || label_seg.get(key).map(String::as_str) == Some("ZEROPAGE")
                             })?;
                             Some((name, value))
                         })

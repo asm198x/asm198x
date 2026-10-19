@@ -1,0 +1,257 @@
+{
+  "binaries": {
+    "predecessor": {
+      "path": "/private/tmp/asm198x-record-allocators-build/debug/asm198x",
+      "sha256": "4e45f0030625202f7bcfd152f4c87e8fb29513f556ad6a0daa128dce1eac8ea7"
+    },
+    "current": {
+      "path": "/private/tmp/asm198x-deferred-aliases-build/debug/asm198x",
+      "sha256": "4db177ba0061a69f3aca650d411444cfb0566de04fabc876b57dfece0ece3389"
+    }
+  },
+  "results": [
+    {
+      "kind": "independent",
+      "definitions": 500,
+      "binary": "predecessor",
+      "trial": 0,
+      "seconds": 0.03630062495358288,
+      "exit": 0,
+      "hex": "f3"
+    },
+    {
+      "kind": "independent",
+      "definitions": 500,
+      "binary": "predecessor",
+      "trial": 1,
+      "seconds": 0.01629324979148805,
+      "exit": 0,
+      "hex": "f3"
+    },
+    {
+      "kind": "independent",
+      "definitions": 500,
+      "binary": "predecessor",
+      "trial": 2,
+      "seconds": 0.015968792140483856,
+      "exit": 0,
+      "hex": "f3"
+    },
+    {
+      "kind": "independent",
+      "definitions": 500,
+      "binary": "current",
+      "trial": 0,
+      "seconds": 0.03894733311608434,
+      "exit": 0,
+      "hex": "f3"
+    },
+    {
+      "kind": "independent",
+      "definitions": 500,
+      "binary": "current",
+      "trial": 1,
+      "seconds": 0.01927504106424749,
+      "exit": 0,
+      "hex": "f3"
+    },
+    {
+      "kind": "independent",
+      "definitions": 500,
+      "binary": "current",
+      "trial": 2,
+      "seconds": 0.019586540991440415,
+      "exit": 0,
+      "hex": "f3"
+    },
+    {
+      "kind": "forward_chain",
+      "definitions": 500,
+      "binary": "current",
+      "trial": 0,
+      "seconds": 0.02228737506084144,
+      "exit": 0,
+      "hex": "34"
+    },
+    {
+      "kind": "forward_chain",
+      "definitions": 500,
+      "binary": "current",
+      "trial": 1,
+      "seconds": 0.02233579196035862,
+      "exit": 0,
+      "hex": "34"
+    },
+    {
+      "kind": "forward_chain",
+      "definitions": 500,
+      "binary": "current",
+      "trial": 2,
+      "seconds": 0.021878790808841586,
+      "exit": 0,
+      "hex": "34"
+    },
+    {
+      "kind": "independent",
+      "definitions": 2000,
+      "binary": "predecessor",
+      "trial": 0,
+      "seconds": 0.04883937491104007,
+      "exit": 0,
+      "hex": "cf"
+    },
+    {
+      "kind": "independent",
+      "definitions": 2000,
+      "binary": "predecessor",
+      "trial": 1,
+      "seconds": 0.04992591612972319,
+      "exit": 0,
+      "hex": "cf"
+    },
+    {
+      "kind": "independent",
+      "definitions": 2000,
+      "binary": "predecessor",
+      "trial": 2,
+      "seconds": 0.05009691696614027,
+      "exit": 0,
+      "hex": "cf"
+    },
+    {
+      "kind": "independent",
+      "definitions": 2000,
+      "binary": "current",
+      "trial": 0,
+      "seconds": 0.06378774996846914,
+      "exit": 0,
+      "hex": "cf"
+    },
+    {
+      "kind": "independent",
+      "definitions": 2000,
+      "binary": "current",
+      "trial": 1,
+      "seconds": 0.06367870792746544,
+      "exit": 0,
+      "hex": "cf"
+    },
+    {
+      "kind": "independent",
+      "definitions": 2000,
+      "binary": "current",
+      "trial": 2,
+      "seconds": 0.06287991697899997,
+      "exit": 0,
+      "hex": "cf"
+    },
+    {
+      "kind": "forward_chain",
+      "definitions": 2000,
+      "binary": "current",
+      "trial": 0,
+      "seconds": 0.07666691695339978,
+      "exit": 0,
+      "hex": "34"
+    },
+    {
+      "kind": "forward_chain",
+      "definitions": 2000,
+      "binary": "current",
+      "trial": 1,
+      "seconds": 0.07612479198724031,
+      "exit": 0,
+      "hex": "34"
+    },
+    {
+      "kind": "forward_chain",
+      "definitions": 2000,
+      "binary": "current",
+      "trial": 2,
+      "seconds": 0.07642316608689725,
+      "exit": 0,
+      "hex": "34"
+    },
+    {
+      "kind": "independent",
+      "definitions": 8000,
+      "binary": "predecessor",
+      "trial": 0,
+      "seconds": 0.18758824979886413,
+      "exit": 0,
+      "hex": "3f"
+    },
+    {
+      "kind": "independent",
+      "definitions": 8000,
+      "binary": "predecessor",
+      "trial": 1,
+      "seconds": 0.18746062484569848,
+      "exit": 0,
+      "hex": "3f"
+    },
+    {
+      "kind": "independent",
+      "definitions": 8000,
+      "binary": "predecessor",
+      "trial": 2,
+      "seconds": 0.18481050012633204,
+      "exit": 0,
+      "hex": "3f"
+    },
+    {
+      "kind": "independent",
+      "definitions": 8000,
+      "binary": "current",
+      "trial": 0,
+      "seconds": 0.2443213330116123,
+      "exit": 0,
+      "hex": "3f"
+    },
+    {
+      "kind": "independent",
+      "definitions": 8000,
+      "binary": "current",
+      "trial": 1,
+      "seconds": 0.24356149998493493,
+      "exit": 0,
+      "hex": "3f"
+    },
+    {
+      "kind": "independent",
+      "definitions": 8000,
+      "binary": "current",
+      "trial": 2,
+      "seconds": 0.2451422498561442,
+      "exit": 0,
+      "hex": "3f"
+    },
+    {
+      "kind": "forward_chain",
+      "definitions": 8000,
+      "binary": "current",
+      "trial": 0,
+      "seconds": 0.30223475000821054,
+      "exit": 0,
+      "hex": "34"
+    },
+    {
+      "kind": "forward_chain",
+      "definitions": 8000,
+      "binary": "current",
+      "trial": 1,
+      "seconds": 0.30211387504823506,
+      "exit": 0,
+      "hex": "34"
+    },
+    {
+      "kind": "forward_chain",
+      "definitions": 8000,
+      "binary": "current",
+      "trial": 2,
+      "seconds": 0.30171200004406273,
+      "exit": 0,
+      "hex": "34"
+    }
+  ]
+}

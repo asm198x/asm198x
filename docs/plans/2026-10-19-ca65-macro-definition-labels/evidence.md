@@ -23,3 +23,10 @@ checks plus five actual platform reports before merge.
 The next native audit retains wrong-byte/scoped-fold examples for #785 and
 nonpositive struct/union allocator refusals for #786. They remain separate
 from macro-definition label binding. No public shape or dependency changed.
+
+The rebase onto merged #789 preserved all four tested source subtrees
+(crates, scripts, workflows and Cargo.lock). Generated docs pass again. Clean
+producer `06979fb89a43c0181f7fa093a50880943f6c4cf1` matches all 564 unchanged
+4510 bytes; all seven processes and fourteen streams are retained, and the
+changed-byte guard fails as required. The qualified source is retained on the
+task branch. Five-host exact-head qualification remains the merge gate.
