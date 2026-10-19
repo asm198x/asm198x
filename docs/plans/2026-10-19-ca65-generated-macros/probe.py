@@ -68,6 +68,19 @@ def cases() -> dict[str, str]:
             "argument_text": '.define VALUE 9\n.macro emit arg\n.byte arg\n.endmacro\n.ident("mark"):emit VALUE\n.word mark\n',
         }
     )
+    for kind, build in [("definition", definition), ("call", invocation)]:
+        for index, value in enumerate([" mark", "mark ", "a.b", ""]):
+            out[f"{kind}_invalid_name_{index}"] = build(
+                f'.ident("{value}")', args="arg"
+            )
+        out[f"{kind}_root_plain_cheap"] = build("@near", args="arg")
+        out[f"{kind}_root_generated_cheap"] = build('.ident("@near")', args="arg")
+        out[f"{kind}_anchored_digit_cheap"] = (
+            "anchor:.byte 6\n" + build("@1", args="arg") + ".word @1\n"
+        )
+        out[f"{kind}_invalid_generated_digit_cheap"] = "anchor:.byte 6\n" + build(
+            '.ident("@1")', args="arg"
+        )
     return out
 
 
