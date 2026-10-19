@@ -47,6 +47,7 @@ requiredCases.push('ca65_org_labels');
 requiredCases.push('ca65_origin_bounds');
 requiredCases.push('ca65_hex_suffix');
 requiredCases.push('ca65_absolute_counter');
+requiredCases.push('ca65_absolute_debug');
 const sourceFiles = {
   'LICENSE': '62cd567bc9270c722abcaa6ad88b6a1fe861698d63890f787cc557d2395be203',
   'helloworld.asm': '9e57c82435c0cf35e56089d56d6b83991c61624c2b3448ab6c66fb13a884a0a5',
@@ -1062,6 +1063,95 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
           assert.equal(p.status, 1, fact.name + ': ' + p.stderr); assert.equal(read('cpu.bin').toString(), 'previous image', fact.name);
         }
       }
+    });
+    test('ca65_absolute_debug', () => {
+      const facts = require('../crates/asm198x/tests/fixtures/ca65-absolute-debug.json');
+      assert.equal(facts.cases.length, 39);
+      let labelCount = 0, lineCount = 0;
+      for (const [name, text] of Object.entries(facts.files)) {
+        fs.mkdirSync(path.dirname(path.join(root, name)), { recursive: true }); write(name, text);
+      }
+      const assemble = input => run(['--dialect', 'ca65', '-C', 'cpu.cfg', input, '-o', 'cpu.bin', '--debug=scope.debug198x', '--listing=scope.lst', '--listing-json=scope.lst.json']);
+      const records = () => read('scope.debug198x').toString().trim().split('\n').map(s => JSON.parse(s));
+      const shape = rows => rows.filter(r => r.t === 'symbol' || r.t === 'section');
+      const relative = name => {
+        name = name.replaceAll('\\', '/');
+        return ['cpu.s', ...Object.keys(facts.files)].find(p => name === p || name.endsWith('/' + p))?.replace(/^cpu\.s$/, 'input.s') ?? name;
+      };
+      for (const fact of facts.cases) {
+        write('cpu.cfg', fact.config); write('cpu.s', fact.source); write('cpu.bin', 'previous image');
+        const p = assemble('cpu.s');
+        if (fact.native.at(-1).exit !== 0) {
+          assert.equal(p.status, 1, fact.name + ': ' + p.stderr); assert.equal(read('cpu.bin').toString(), 'previous image'); continue;
+        }
+        assert.equal(p.status, 0, fact.name + ': ' + p.stderr);
+        const bytes = read('cpu.bin'); assert.deepEqual(bytes, Buffer.from(fact.native_hex, 'hex'), fact.name);
+        const rows = records();
+        const sections = new Map(rows.filter(r => r.t === 'section').map(r => [r.id, r]));
+        const labels = new Map(rows.filter(r => r.t === 'symbol' && r.kind === 'label').map(r => [r.name, r]));
+        assert.deepEqual([...labels.keys()].sort(), Object.keys(fact.symbol_values).sort(), fact.name + ': label kinds');
+        for (const [name, value] of Object.entries(fact.symbol_values)) {
+          labelCount++;
+          const label = labels.get(name), section = sections.get(label.section);
+          assert(section); assert.equal(label.space, undefined); assert.equal(section.space, undefined);
+          assert.equal(section.base == null ? null : section.base + label.offset, Object.hasOwn(fact.non_cpu_symbols, name) ? null : value, fact.name + ': ' + name);
+        }
+        for (const section of sections.values()) {
+          assert(Object.hasOwn(facts.config_ids, section.name));
+          if (section.id < 7) assert.equal(section.id, facts.config_ids[section.name]);
+        }
+        const constants = new Map(rows.filter(r => r.t === 'symbol' && r.kind === 'const').map(r => [r.name, r.value]));
+        assert.deepEqual([...constants].sort(), Object.entries(fact.constant_values).sort(), fact.name + ': constants');
+        const listing = JSON.parse(read('scope.lst.json'));
+        const projected = listing.lines.map(l => ({file: relative(l.file), line: l.line, file_offset: l.file_offset, length: l.bytes, cycles: l.cycles ?? null}));
+        lineCount += projected.length;
+        const sorted = values => values.map(v => JSON.stringify(v)).sort();
+        assert.deepEqual(sorted(projected), sorted(fact.expected_lines), fact.name + ': physical source spans and cycles');
+        for (const line of listing.lines) {
+          assert(fact.physical_lines.some(s => s.file === relative(line.file) && s.line === line.line && s.file_offset != null && s.file_offset <= line.file_offset && s.file_offset + s.length >= line.file_offset + line.bytes), fact.name + ': native physical span');
+          if (fact.name === 'pc_data_lines') assert.equal(line.address, bytes.readUInt16LE(line.file_offset));
+        }
+        for (const name of [...fact.no_file_symbols, ...fact.metadata_only_symbols]) {
+          const label = labels.get(name);
+          assert(listing.lines.every(l => l.section !== label.section));
+          if (fact.no_file_symbols.includes(name)) assert.equal(listing.sections.find(s => s.id === label.section).file_offset, null);
+        }
+        for (const [name, cost] of Object.entries(fact.cycle_costs)) {
+          const actual = listing.labels.find(l => l.name === name); assert(actual);
+          assert.deepEqual(actual.cycles, {min: cost.min, max: cost.max}); assert.equal(actual.bytes, cost.bytes);
+          assert(read('scope.lst').toString().split('\n').some(line => line.startsWith('  ' + name + ' (+$') && line.endsWith(': ' + cost.bytes + ' bytes, ' + cost.max + ' cycles (straight-line)')));
+        }
+        if (fact.name === 'no_origin') {
+          const normalized = rows.map(r => r.t === 'header' ? {...r, sources: r.sources.map(relative)} : r.t === 'line' ? {...r, file: relative(r.file)} : r);
+          const baseline = structuredClone(facts.no_origin_records);
+          baseline[0].tool_version = normalized[0].tool_version;
+          assert.deepEqual(normalized, baseline);
+        }
+        const before = shape(rows);
+        const formatted = run(['fmt', '--dialect', 'ca65', 'cpu.s']); assert.equal(formatted.status, 0, fact.name + ': ' + formatted.stderr);
+        write('scope-formatted.s', formatted.stdout);
+        const again = run(['fmt', '--dialect', 'ca65', 'scope-formatted.s']); assert.equal(again.status, 0); assert.equal(again.stdout, formatted.stdout);
+        const roundtrip = assemble('scope-formatted.s'); assert.equal(roundtrip.status, 0, fact.name + ': ' + roundtrip.stderr);
+        assert.deepEqual(read('cpu.bin'), bytes); assert.deepEqual(shape(records()), before, fact.name + ': formatted coordinates');
+      }
+      assert.equal(labelCount, 121); assert.equal(lineCount, 213);
+      let budgets = 0;
+      for (const fact of facts.cases) {
+        for (const [name, cost] of Object.entries(fact.cycle_costs)) {
+          if (name.includes('::')) continue; // Existing budget grammar excludes qualified names.
+          budgets++;
+          write('cpu.cfg', fact.config);
+          for (const limit of [cost.max, cost.max - 1]) {
+            write('cpu.s', fact.source + '; asm198x: cycles(' + name + ') <= ' + limit + '\n');
+            const p = assemble('cpu.s'); assert.equal(p.status, limit === cost.max ? 0 : 1, fact.name + ': ' + p.stderr);
+            if (limit !== cost.max) assert(p.stderr.includes('exceeds its cycle budget'));
+          }
+        }
+      }
+      assert.equal(budgets, 9);
+      const unmapped = facts.cases.find(c => c.name === 'no_file');
+      write('cpu.cfg', unmapped.config); write('cpu.s', unmapped.source + '; asm198x: cycles(buffer) <= 0\n');
+      const unknown = assemble('cpu.s'); assert.equal(unknown.status, 1); assert(unknown.stderr.includes('names no label with instructions'));
     });
     test('ca65_origin_bounds', () => {
       const facts = require('../crates/asm198x/tests/fixtures/ca65-origin-bounds.json');

@@ -19,6 +19,7 @@ use crate::engine::{AsmError, CycleCoverage};
 /// between two labels in address order. It does not follow control flow, so a
 /// loop body counts once — Emu198x executes; this measures.
 pub(crate) struct LabelCost {
+    pub(crate) section: debug198x::SectionId,
     pub(crate) name: String,
     /// Section-relative offset of the label.
     pub(crate) start: u64,
@@ -42,21 +43,25 @@ pub(crate) fn label_costs_debug(
     debug: &crate::engine::DebugData,
     addr_unit: u64,
 ) -> Vec<LabelCost> {
-    let mut labels: Vec<(u64, &str)> = debug
+    let mut labels: Vec<(u64, &str, debug198x::SectionId)> = debug
         .symbols
         .iter()
         .filter_map(|s| match &s.kind {
-            debug198x::SymbolKind::Label { offset, .. }
-            | debug198x::SymbolKind::Entry { offset, .. } => Some((*offset, s.name.as_str())),
+            debug198x::SymbolKind::Label {
+                section, offset, ..
+            }
+            | debug198x::SymbolKind::Entry {
+                section, offset, ..
+            } => Some((*offset, s.name.as_str(), *section)),
             debug198x::SymbolKind::Const { .. } => None,
         })
         .collect();
     labels.sort_by(|a, b| a.0.cmp(&b.0).then(a.1.cmp(b.1)));
     let mut out = Vec::new();
-    for &(start, name) in &labels {
+    for &(start, name, section) in &labels {
         let end = labels
             .iter()
-            .map(|&(o, _)| o)
+            .map(|&(o, _, _)| o)
             .find(|&o| o > start)
             .unwrap_or(u64::MAX);
         let in_span = |offset: u64| offset >= start && offset < end;
@@ -76,12 +81,114 @@ pub(crate) fn label_costs_debug(
                 .map(|l| l.length * addr_unit)
                 .sum();
             out.push(LabelCost {
+                section,
                 name: name.to_string(),
                 start,
                 bytes,
                 min: cost.0,
                 max: cost.1,
             });
+        }
+    }
+    out
+}
+
+/// Logical spans of one native source segment share its physical routine ranges.
+/// Qualified and unmapped sections retain independent accounting.
+pub(crate) fn native_label_costs(
+    sections: &[crate::contract::SectionDebug],
+    unit: u64,
+) -> Vec<LabelCost> {
+    let mut groups: Vec<Vec<&crate::contract::SectionDebug>> = Vec::new();
+    let mut names = std::collections::BTreeMap::new();
+    for section in sections {
+        let unqualified = section.section.space.is_none()
+            && section.debug.symbols.iter().all(|symbol| {
+                !matches!(
+                    &symbol.kind,
+                    debug198x::SymbolKind::Label { space: Some(_), .. }
+                        | debug198x::SymbolKind::Entry { space: Some(_), .. }
+                )
+            });
+        if section.file_offset.is_some() && unqualified {
+            let next = groups.len();
+            let index = *names.entry(section.section.name.as_str()).or_insert(next);
+            if index == groups.len() {
+                groups.push(Vec::new());
+            }
+            groups[index].push(section);
+        } else {
+            groups.push(vec![section]);
+        }
+    }
+    let mut out = Vec::new();
+    for group in groups {
+        if group.len() == 1 {
+            out.extend(label_costs_debug(&group[0].debug, unit));
+            continue;
+        }
+        // Work in byte positions, then restore the label's logical coordinate.
+        let mut physical = crate::engine::DebugData::default();
+        let mut origins = std::collections::BTreeMap::new();
+        let mut valid = true;
+        for span in group {
+            let Some(base) = span.file_offset else {
+                valid = false;
+                break;
+            };
+            origins.insert(span.section.id, base);
+            let position = |offset: u64| offset.checked_mul(unit)?.checked_add(base);
+            for symbol in &span.debug.symbols {
+                let mut symbol = symbol.clone();
+                if let debug198x::SymbolKind::Label {
+                    offset, section, ..
+                }
+                | debug198x::SymbolKind::Entry {
+                    offset, section, ..
+                } = &mut symbol.kind
+                {
+                    let Some(at) = position(*offset) else {
+                        valid = false;
+                        break;
+                    };
+                    *offset = at;
+                    *section = span.section.id;
+                    physical.symbols.push(symbol);
+                }
+            }
+            for line in &span.debug.lines {
+                let (Some(offset), Some(length)) =
+                    (position(line.offset), line.length.checked_mul(unit))
+                else {
+                    valid = false;
+                    break;
+                };
+                let mut line = line.clone();
+                line.offset = offset;
+                line.length = length;
+                physical.lines.push(line);
+            }
+            for cycle in &span.debug.cycles {
+                let Some(offset) = position(cycle.offset) else {
+                    valid = false;
+                    break;
+                };
+                let mut cycle = *cycle;
+                cycle.offset = offset;
+                physical.cycles.push(cycle);
+            }
+        }
+        if !valid || unit == 0 {
+            continue;
+        }
+        for mut cost in label_costs_debug(&physical, 1) {
+            if let Some(offset) = origins
+                .get(&cost.section)
+                .and_then(|base| cost.start.checked_sub(*base))
+            {
+                cost.start = offset / unit;
+                out.push(cost);
+            }
         }
     }
     out

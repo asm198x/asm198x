@@ -30,6 +30,7 @@ fn coverage(section: &SectionDebug) -> &'static str {
 pub(super) fn json(input: &str, result: &AssemblyResult, unit: u64) -> String {
     let mut lines = Vec::new();
     let mut labels = Vec::new();
+    let costs = crate::cycles::native_label_costs(&result.section_debug, unit);
     for s in &result.section_debug {
         for l in &s.debug.lines {
             let mut row = json!({
@@ -44,7 +45,7 @@ pub(super) fn json(input: &str, result: &AssemblyResult, unit: u64) -> String {
             }
             lines.push(row);
         }
-        for c in crate::cycles::label_costs_debug(&s.debug, unit) {
+        for c in costs.iter().filter(|c| c.section == s.section.id) {
             labels.push(json!({
                 "section": s.section.id, "name": c.name, "offset": c.start,
                 "address": s.section.base.and_then(|b| b.checked_add(c.start)),
@@ -69,6 +70,7 @@ pub(super) fn json(input: &str, result: &AssemblyResult, unit: u64) -> String {
 
 pub(super) fn text(files: &[ListingFile], result: &AssemblyResult, unit: u64) -> String {
     let mut out = String::new();
+    let costs = crate::cycles::native_label_costs(&result.section_debug, unit);
     for s in &result.section_debug {
         let base = s
             .section
@@ -114,7 +116,7 @@ pub(super) fn text(files: &[ListingFile], result: &AssemblyResult, unit: u64) ->
                 l.line
             );
         }
-        for c in crate::cycles::label_costs_debug(&s.debug, unit) {
+        for c in costs.iter().filter(|c| c.section == s.section.id) {
             let _ = writeln!(
                 out,
                 "  {} (+${:04X}): {} bytes, {} cycles (straight-line)",
