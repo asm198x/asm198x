@@ -25,4 +25,11 @@ assembled, while assembling its original attached spelling remains #830.
 These assembly gaps are explicit fixture fields/outcomes, not native parity
 claims. All 75 preceding actual-archive cohorts and the new 76-cohort archive
 pass. All 91 Node tests, Lua/all-target Clippy, rustfmt, Ruff and generated-doc checks
-pass. Full Rust verdict replay and clean producer/project qualification follow.
+pass. Full Rust verification passes: 1,591 tests, with 38 ignored. Clean producer
+cafe5cd1d8510679f87607b7cf36d106a11913c0 (CLI SHA-256
+371235c2826db37e56ba006a39b5469905d3ba49740e25a15a5df7adff28a25c)
+passes all 76 actual-archive cohorts, including 78 new commands; both corruption
+controls fail. All 26 native formatter outcomes were rechecked with that frozen
+CLI. A clean pinned 4510 replay matches all 564 bytes, with seven successful
+processes, fourteen streams and a failing changed-byte control. Exact-head CI
+and five actual host packages remain required before merge.
