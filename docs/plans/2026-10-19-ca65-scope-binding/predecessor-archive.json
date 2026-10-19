@@ -1,0 +1,9 @@
+{
+  "archive": "/private/tmp/asm198x-deferred-aliases-local-package/asm198x-aarch64-apple-darwin.tar.xz",
+  "archive_sha256": "f048992fe03ca5a08b7657e6b9ab61a1b2ace335e9b71b78e63e3c805f815038",
+  "executable": "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+  "executable_sha256": "4db177ba0061a69f3aca650d411444cfb0566de04fabc876b57dfece0ece3389",
+  "receipt_scope": "artifact-only",
+  "qualified_cohorts": 56,
+  "parent_head": "d5ec5670437e5e41d3da36739fdfb45708005fd4"
+}

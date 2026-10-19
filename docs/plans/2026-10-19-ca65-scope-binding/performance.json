@@ -1,0 +1,338 @@
+{
+  "binaries": {
+    "predecessor": {
+      "path": "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+      "sha256": "4db177ba0061a69f3aca650d411444cfb0566de04fabc876b57dfece0ece3389"
+    },
+    "current": {
+      "path": "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+      "sha256": "d50daed57886493fe4036ec0bdcf62f2cb3919401ec2a3b6478615a6b6c4cb7b"
+    }
+  },
+  "results": [
+    {
+      "kind": "independent",
+      "definitions": 500,
+      "binary": "predecessor",
+      "trial": 0,
+      "seconds": 0.04021912510506809,
+      "exit": 0,
+      "hex": "f3"
+    },
+    {
+      "kind": "independent",
+      "definitions": 500,
+      "binary": "predecessor",
+      "trial": 1,
+      "seconds": 0.019387332955375314,
+      "exit": 0,
+      "hex": "f3"
+    },
+    {
+      "kind": "independent",
+      "definitions": 500,
+      "binary": "predecessor",
+      "trial": 2,
+      "seconds": 0.020358416950330138,
+      "exit": 0,
+      "hex": "f3"
+    },
+    {
+      "kind": "independent",
+      "definitions": 500,
+      "binary": "current",
+      "trial": 0,
+      "seconds": 0.02358324988745153,
+      "exit": 0,
+      "hex": "f3"
+    },
+    {
+      "kind": "independent",
+      "definitions": 500,
+      "binary": "current",
+      "trial": 1,
+      "seconds": 0.021364666987210512,
+      "exit": 0,
+      "hex": "f3"
+    },
+    {
+      "kind": "independent",
+      "definitions": 500,
+      "binary": "current",
+      "trial": 2,
+      "seconds": 0.025488374987617135,
+      "exit": 0,
+      "hex": "f3"
+    },
+    {
+      "kind": "forward_chain",
+      "definitions": 500,
+      "binary": "predecessor",
+      "trial": 0,
+      "seconds": 0.024987792130559683,
+      "exit": 0,
+      "hex": "34"
+    },
+    {
+      "kind": "forward_chain",
+      "definitions": 500,
+      "binary": "predecessor",
+      "trial": 1,
+      "seconds": 0.025735625065863132,
+      "exit": 0,
+      "hex": "34"
+    },
+    {
+      "kind": "forward_chain",
+      "definitions": 500,
+      "binary": "predecessor",
+      "trial": 2,
+      "seconds": 0.024344875011593103,
+      "exit": 0,
+      "hex": "34"
+    },
+    {
+      "kind": "forward_chain",
+      "definitions": 500,
+      "binary": "current",
+      "trial": 0,
+      "seconds": 0.025352332973852754,
+      "exit": 0,
+      "hex": "34"
+    },
+    {
+      "kind": "forward_chain",
+      "definitions": 500,
+      "binary": "current",
+      "trial": 1,
+      "seconds": 0.026518958853557706,
+      "exit": 0,
+      "hex": "34"
+    },
+    {
+      "kind": "forward_chain",
+      "definitions": 500,
+      "binary": "current",
+      "trial": 2,
+      "seconds": 0.028904540929943323,
+      "exit": 0,
+      "hex": "34"
+    },
+    {
+      "kind": "independent",
+      "definitions": 2000,
+      "binary": "predecessor",
+      "trial": 0,
+      "seconds": 0.07886024983599782,
+      "exit": 0,
+      "hex": "cf"
+    },
+    {
+      "kind": "independent",
+      "definitions": 2000,
+      "binary": "predecessor",
+      "trial": 1,
+      "seconds": 0.0767054168973118,
+      "exit": 0,
+      "hex": "cf"
+    },
+    {
+      "kind": "independent",
+      "definitions": 2000,
+      "binary": "predecessor",
+      "trial": 2,
+      "seconds": 0.06853258307091892,
+      "exit": 0,
+      "hex": "cf"
+    },
+    {
+      "kind": "independent",
+      "definitions": 2000,
+      "binary": "current",
+      "trial": 0,
+      "seconds": 0.07368445908650756,
+      "exit": 0,
+      "hex": "cf"
+    },
+    {
+      "kind": "independent",
+      "definitions": 2000,
+      "binary": "current",
+      "trial": 1,
+      "seconds": 0.07537033292464912,
+      "exit": 0,
+      "hex": "cf"
+    },
+    {
+      "kind": "independent",
+      "definitions": 2000,
+      "binary": "current",
+      "trial": 2,
+      "seconds": 0.07356329192407429,
+      "exit": 0,
+      "hex": "cf"
+    },
+    {
+      "kind": "forward_chain",
+      "definitions": 2000,
+      "binary": "predecessor",
+      "trial": 0,
+      "seconds": 0.08457125001586974,
+      "exit": 0,
+      "hex": "34"
+    },
+    {
+      "kind": "forward_chain",
+      "definitions": 2000,
+      "binary": "predecessor",
+      "trial": 1,
+      "seconds": 0.08381979214027524,
+      "exit": 0,
+      "hex": "34"
+    },
+    {
+      "kind": "forward_chain",
+      "definitions": 2000,
+      "binary": "predecessor",
+      "trial": 2,
+      "seconds": 0.08213683310896158,
+      "exit": 0,
+      "hex": "34"
+    },
+    {
+      "kind": "forward_chain",
+      "definitions": 2000,
+      "binary": "current",
+      "trial": 0,
+      "seconds": 0.09366933302953839,
+      "exit": 0,
+      "hex": "34"
+    },
+    {
+      "kind": "forward_chain",
+      "definitions": 2000,
+      "binary": "current",
+      "trial": 1,
+      "seconds": 0.10096458299085498,
+      "exit": 0,
+      "hex": "34"
+    },
+    {
+      "kind": "forward_chain",
+      "definitions": 2000,
+      "binary": "current",
+      "trial": 2,
+      "seconds": 0.09808270912617445,
+      "exit": 0,
+      "hex": "34"
+    },
+    {
+      "kind": "independent",
+      "definitions": 8000,
+      "binary": "predecessor",
+      "trial": 0,
+      "seconds": 0.2688822499476373,
+      "exit": 0,
+      "hex": "3f"
+    },
+    {
+      "kind": "independent",
+      "definitions": 8000,
+      "binary": "predecessor",
+      "trial": 1,
+      "seconds": 0.26543595804832876,
+      "exit": 0,
+      "hex": "3f"
+    },
+    {
+      "kind": "independent",
+      "definitions": 8000,
+      "binary": "predecessor",
+      "trial": 2,
+      "seconds": 0.269199209054932,
+      "exit": 0,
+      "hex": "3f"
+    },
+    {
+      "kind": "independent",
+      "definitions": 8000,
+      "binary": "current",
+      "trial": 0,
+      "seconds": 0.2815847920719534,
+      "exit": 0,
+      "hex": "3f"
+    },
+    {
+      "kind": "independent",
+      "definitions": 8000,
+      "binary": "current",
+      "trial": 1,
+      "seconds": 0.27035324997268617,
+      "exit": 0,
+      "hex": "3f"
+    },
+    {
+      "kind": "independent",
+      "definitions": 8000,
+      "binary": "current",
+      "trial": 2,
+      "seconds": 0.28754266700707376,
+      "exit": 0,
+      "hex": "3f"
+    },
+    {
+      "kind": "forward_chain",
+      "definitions": 8000,
+      "binary": "predecessor",
+      "trial": 0,
+      "seconds": 0.3170026249717921,
+      "exit": 0,
+      "hex": "34"
+    },
+    {
+      "kind": "forward_chain",
+      "definitions": 8000,
+      "binary": "predecessor",
+      "trial": 1,
+      "seconds": 0.32666187500581145,
+      "exit": 0,
+      "hex": "34"
+    },
+    {
+      "kind": "forward_chain",
+      "definitions": 8000,
+      "binary": "predecessor",
+      "trial": 2,
+      "seconds": 0.3374237499665469,
+      "exit": 0,
+      "hex": "34"
+    },
+    {
+      "kind": "forward_chain",
+      "definitions": 8000,
+      "binary": "current",
+      "trial": 0,
+      "seconds": 0.3532526660710573,
+      "exit": 0,
+      "hex": "34"
+    },
+    {
+      "kind": "forward_chain",
+      "definitions": 8000,
+      "binary": "current",
+      "trial": 1,
+      "seconds": 0.3567556249909103,
+      "exit": 0,
+      "hex": "34"
+    },
+    {
+      "kind": "forward_chain",
+      "definitions": 8000,
+      "binary": "current",
+      "trial": 2,
+      "seconds": 0.35997699992731214,
+      "exit": 0,
+      "hex": "34"
+    }
+  ]
+}

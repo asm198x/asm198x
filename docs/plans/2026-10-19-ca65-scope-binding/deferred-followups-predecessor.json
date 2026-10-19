@@ -1,0 +1,424 @@
+{
+  "binary": "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+  "sha256": "4db177ba0061a69f3aca650d411444cfb0566de04fabc876b57dfece0ece3389",
+  "results": [
+    {
+      "name": "const_global_refs",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000100",
+      "native_hex": "000101",
+      "matches": false
+    },
+    {
+      "name": "const_scoped_order",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `.const` cannot answer for `VALUE`: this pass keeps no scope stack, so a constant inside a `.proc` or `.scope` is invisible to it\n",
+      "hex": null,
+      "native_hex": "01000001",
+      "matches": false
+    },
+    {
+      "name": "const_scoped_known",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `.const` cannot answer for `VALUE`: this pass keeps no scope stack, so a constant inside a `.proc` or `.scope` is invisible to it\n",
+      "hex": null,
+      "native_hex": "01",
+      "matches": false
+    },
+    {
+      "name": "const_scoped_root",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `.const` cannot answer for `::VALUE`: this pass keeps no scope stack, so a constant inside a `.proc` or `.scope` is invisible to it\n",
+      "hex": null,
+      "native_hex": "01",
+      "matches": false
+    },
+    {
+      "name": "const_nested_text",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "003100",
+      "native_hex": "003101",
+      "matches": false
+    },
+    {
+      "name": "numeric_text_refs",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "003200",
+      "native_hex": "003201",
+      "matches": false
+    },
+    {
+      "name": "alias_difference_constancy",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0000",
+      "native_hex": "000007",
+      "matches": false
+    },
+    {
+      "name": "enum_forward_shadow",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "02",
+      "native_hex": "03",
+      "matches": false
+    },
+    {
+      "name": "enum_previous_member",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: undefined symbol `RED`\n",
+      "hex": null,
+      "native_hex": "03",
+      "matches": false
+    },
+    {
+      "name": "enum_self_parent",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "0a",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "enum_self_query",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: undefined symbol `\u0001defined\u0001RED`\n",
+      "hex": null,
+      "native_hex": "00",
+      "matches": false
+    },
+    {
+      "name": "record_size_cheap_constant",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5:1: error: symbol `@size` is already defined\n",
+      "hex": null,
+      "native_hex": "07",
+      "matches": false
+    },
+    {
+      "name": "record_size_cheap_label",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: duplicate symbol `Record@size`\n",
+      "hex": null,
+      "native_hex": "0007",
+      "matches": false
+    },
+    {
+      "name": "proc_size_cheap_constant",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+      "hex": "00070700",
+      "native_hex": "00070200",
+      "matches": false
+    },
+    {
+      "name": "proc_size_cheap_label",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: size of `start` is unknown\n",
+      "hex": null,
+      "native_hex": "00070200",
+      "matches": false
+    },
+    {
+      "name": "proc_size_large_body",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 259 byte(s) -> out.bin\n",
+      "hex": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000070700",
+      "native_hex": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000070101",
+      "matches": false
+    },
+    {
+      "name": "size_cheap_definition",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0007",
+      "native_hex": "0007",
+      "matches": true
+    },
+    {
+      "name": "size_cheap_undefined",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: size of `start` is unknown\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "size_cheap_query",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000000",
+      "native_hex": "000000",
+      "matches": true
+    },
+    {
+      "name": "size_forward_label",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: size of `later` is unknown\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "size_scoped_forward",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: size of `later` is unknown\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "size_outer_label_shadow",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: size of `later` is unknown\n",
+      "hex": null,
+      "native_hex": "0701000900",
+      "matches": false
+    }
+  ]
+}

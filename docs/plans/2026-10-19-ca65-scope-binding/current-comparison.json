@@ -1,0 +1,5934 @@
+{
+  "binary": "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+  "sha256": "d50daed57886493fe4036ec0bdcf62f2cb3919401ec2a3b6478615a6b6c4cb7b",
+  "results": [
+    {
+      "name": "value_$12_later_None_VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_None_VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_None_::VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_None_::VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_None_VALUE+250_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: range error (268 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_None_VALUE+250_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: range error (268 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_None_VALUE*2_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a524",
+      "native_hex": "a524",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_None_VALUE*2_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a524",
+      "native_hex": "a524",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_None_<VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_None_<VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_None_>VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a500",
+      "native_hex": "a500",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_None_>VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a500",
+      "native_hex": "a500",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_$34_VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a534",
+      "native_hex": "a534",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_$34_VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a534",
+      "native_hex": "a534",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_$34_::VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_$34_::VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_$34_VALUE+250_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: range error (302 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_$34_VALUE+250_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: range error (302 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_$34_VALUE*2_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a568",
+      "native_hex": "a568",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_$34_VALUE*2_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a568",
+      "native_hex": "a568",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_$34_<VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a534",
+      "native_hex": "a534",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_$34_<VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a534",
+      "native_hex": "a534",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_$34_>VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a500",
+      "native_hex": "a500",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_$34_>VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a500",
+      "native_hex": "a500",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_$1234_VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: range error (4660 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_$1234_VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: range error (4660 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_$1234_::VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_$1234_::VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_$1234_VALUE+250_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: range error (4910 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_$1234_VALUE+250_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: range error (4910 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_$1234_VALUE*2_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: range error (9320 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_$1234_VALUE*2_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: range error (9320 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_$1234_<VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a534",
+      "native_hex": "a534",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_$1234_<VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a534",
+      "native_hex": "a534",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_$1234_>VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_$1234_>VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_None_VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3412",
+      "native_hex": "ad3412",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_None_VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3412",
+      "native_hex": "ad3412",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_None_::VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3412",
+      "native_hex": "ad3412",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_None_::VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3412",
+      "native_hex": "ad3412",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_None_VALUE+250_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad2e13",
+      "native_hex": "ad2e13",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_None_VALUE+250_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad2e13",
+      "native_hex": "ad2e13",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_None_VALUE*2_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad6824",
+      "native_hex": "ad6824",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_None_VALUE*2_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad6824",
+      "native_hex": "ad6824",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_None_<VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a534",
+      "native_hex": "a534",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_None_<VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a534",
+      "native_hex": "a534",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_None_>VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_None_>VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$34_VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3400",
+      "native_hex": "ad3400",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$34_VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3400",
+      "native_hex": "ad3400",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$34_::VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3412",
+      "native_hex": "ad3412",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$34_::VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3412",
+      "native_hex": "ad3412",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$34_VALUE+250_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad2e01",
+      "native_hex": "ad2e01",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$34_VALUE+250_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad2e01",
+      "native_hex": "ad2e01",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$34_VALUE*2_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad6800",
+      "native_hex": "ad6800",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$34_VALUE*2_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad6800",
+      "native_hex": "ad6800",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$34_<VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a534",
+      "native_hex": "a534",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$34_<VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a534",
+      "native_hex": "a534",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$34_>VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a500",
+      "native_hex": "a500",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$34_>VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a500",
+      "native_hex": "a500",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$1234_VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3412",
+      "native_hex": "ad3412",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$1234_VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3412",
+      "native_hex": "ad3412",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$1234_::VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3412",
+      "native_hex": "ad3412",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$1234_::VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3412",
+      "native_hex": "ad3412",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$1234_VALUE+250_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad2e13",
+      "native_hex": "ad2e13",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$1234_VALUE+250_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad2e13",
+      "native_hex": "ad2e13",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$1234_VALUE*2_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad6824",
+      "native_hex": "ad6824",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$1234_VALUE*2_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad6824",
+      "native_hex": "ad6824",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$1234_<VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a534",
+      "native_hex": "a534",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$1234_<VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a534",
+      "native_hex": "a534",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$1234_>VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$1234_>VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "phase_False_VALUE_.byte {x}",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "02",
+      "native_hex": "02",
+      "matches": true
+    },
+    {
+      "name": "phase_False_VALUE_.res {x}",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: `.res` count must be a constant\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "phase_False_VALUE_.if {x}=2\n.byte 7\n.endif",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: `VALUE=2` must be a constant here \u2014 ca65 folds a condition against the                          `=` constants above it, and refuses a label or a forward reference\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "phase_False_::VALUE_.byte {x}",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "02",
+      "native_hex": "02",
+      "matches": true
+    },
+    {
+      "name": "phase_False_::VALUE_.res {x}",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0000",
+      "native_hex": "0000",
+      "matches": true
+    },
+    {
+      "name": "phase_False_::VALUE_.if {x}=2\n.byte 7\n.endif",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": "07",
+      "matches": true
+    },
+    {
+      "name": "phase_False_OTHER_.byte {x}",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "02",
+      "native_hex": "02",
+      "matches": true
+    },
+    {
+      "name": "phase_False_OTHER_.res {x}",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: `.res` count must be a constant\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "phase_False_OTHER_.if {x}=2\n.byte 7\n.endif",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: `OTHER=2` must be a constant here \u2014 ca65 folds a condition against the                          `=` constants above it, and refuses a label or a forward reference\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "phase_True_VALUE_.byte {x}",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "03",
+      "native_hex": "03",
+      "matches": true
+    },
+    {
+      "name": "phase_True_VALUE_.res {x}",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: `.res` count must be a constant\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "phase_True_VALUE_.if {x}=2\n.byte 7\n.endif",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: `VALUE=2` must be a constant here \u2014 ca65 folds a condition against the                          `=` constants above it, and refuses a label or a forward reference\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "phase_True_::VALUE_.byte {x}",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "02",
+      "native_hex": "02",
+      "matches": true
+    },
+    {
+      "name": "phase_True_::VALUE_.res {x}",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0000",
+      "native_hex": "0000",
+      "matches": true
+    },
+    {
+      "name": "phase_True_::VALUE_.if {x}=2\n.byte 7\n.endif",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": "07",
+      "matches": true
+    },
+    {
+      "name": "phase_True_OTHER_.byte {x}",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "03",
+      "native_hex": "03",
+      "matches": true
+    },
+    {
+      "name": "phase_True_OTHER_.res {x}",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: `.res` count must be a constant\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "phase_True_OTHER_.if {x}=2\n.byte 7\n.endif",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: `OTHER=2` must be a constant here \u2014 ca65 folds a condition against the                          `=` constants above it, and refuses a label or a forward reference\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "alias_updates",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0000",
+      "native_hex": "0000",
+      "matches": true
+    },
+    {
+      "name": "alias_chain_updates",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0000",
+      "native_hex": "0000",
+      "matches": true
+    },
+    {
+      "name": "unused_undefined",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1:1: error: undefined symbol `MISSING`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "unused_cycle",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1:1: error: circular definition of symbol `FIRST`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "alias_pc",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0010",
+      "native_hex": "0010",
+      "matches": true
+    },
+    {
+      "name": "alias_forward_label",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "021007",
+      "native_hex": "021007",
+      "matches": true
+    },
+    {
+      "name": "nested_fallback",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "03",
+      "native_hex": "03",
+      "matches": true
+    },
+    {
+      "name": "width_$12_None_VALUE+255+1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: range error (274 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$12_None_VALUE+255+1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: range error (274 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$12_None_VALUE-1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a511",
+      "native_hex": "a511",
+      "matches": true
+    },
+    {
+      "name": "width_$12_None_VALUE-1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a511",
+      "native_hex": "a511",
+      "matches": true
+    },
+    {
+      "name": "width_$12_None_VALUE-250_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: range error (-232 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$12_None_VALUE-250_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: range error (-232 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$12_None_VALUE*20_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: range error (360 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$12_None_VALUE*20_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: range error (360 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$12_None_VALUE&255_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "width_$12_None_VALUE&255_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "width_$12_None_VALUE|256_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1201",
+      "native_hex": "ad1201",
+      "matches": true
+    },
+    {
+      "name": "width_$12_None_VALUE|256_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1201",
+      "native_hex": "ad1201",
+      "matches": true
+    },
+    {
+      "name": "width_$12_None_VALUE^256_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1201",
+      "native_hex": "ad1201",
+      "matches": true
+    },
+    {
+      "name": "width_$12_None_VALUE^256_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1201",
+      "native_hex": "ad1201",
+      "matches": true
+    },
+    {
+      "name": "width_$12_None_VALUE<<1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a524",
+      "native_hex": "a524",
+      "matches": true
+    },
+    {
+      "name": "width_$12_None_VALUE<<1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a524",
+      "native_hex": "a524",
+      "matches": true
+    },
+    {
+      "name": "width_$12_None_VALUE>>1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a509",
+      "native_hex": "a509",
+      "matches": true
+    },
+    {
+      "name": "width_$12_None_VALUE>>1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a509",
+      "native_hex": "a509",
+      "matches": true
+    },
+    {
+      "name": "width_$12_None_-VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: range error (-18 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$12_None_-VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: range error (-18 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$12_None_~VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: range error (-19 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$12_None_~VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: range error (-19 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$12_None_VALUE/2_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a509",
+      "native_hex": "a509",
+      "matches": true
+    },
+    {
+      "name": "width_$12_None_VALUE/2_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a509",
+      "native_hex": "a509",
+      "matches": true
+    },
+    {
+      "name": "width_$12_$34_VALUE+255+1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: range error (308 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$12_$34_VALUE+255+1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: range error (308 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$12_$34_VALUE-1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a533",
+      "native_hex": "a533",
+      "matches": true
+    },
+    {
+      "name": "width_$12_$34_VALUE-1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a533",
+      "native_hex": "a533",
+      "matches": true
+    },
+    {
+      "name": "width_$12_$34_VALUE-250_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: range error (-198 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$12_$34_VALUE-250_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: range error (-198 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$12_$34_VALUE*20_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: range error (1040 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$12_$34_VALUE*20_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: range error (1040 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$12_$34_VALUE&255_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a534",
+      "native_hex": "a534",
+      "matches": true
+    },
+    {
+      "name": "width_$12_$34_VALUE&255_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a534",
+      "native_hex": "a534",
+      "matches": true
+    },
+    {
+      "name": "width_$12_$34_VALUE|256_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3401",
+      "native_hex": "ad3401",
+      "matches": true
+    },
+    {
+      "name": "width_$12_$34_VALUE|256_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3401",
+      "native_hex": "ad3401",
+      "matches": true
+    },
+    {
+      "name": "width_$12_$34_VALUE^256_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3401",
+      "native_hex": "ad3401",
+      "matches": true
+    },
+    {
+      "name": "width_$12_$34_VALUE^256_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3401",
+      "native_hex": "ad3401",
+      "matches": true
+    },
+    {
+      "name": "width_$12_$34_VALUE<<1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a568",
+      "native_hex": "a568",
+      "matches": true
+    },
+    {
+      "name": "width_$12_$34_VALUE<<1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a568",
+      "native_hex": "a568",
+      "matches": true
+    },
+    {
+      "name": "width_$12_$34_VALUE>>1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a51a",
+      "native_hex": "a51a",
+      "matches": true
+    },
+    {
+      "name": "width_$12_$34_VALUE>>1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a51a",
+      "native_hex": "a51a",
+      "matches": true
+    },
+    {
+      "name": "width_$12_$34_-VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: range error (-52 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$12_$34_-VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: range error (-52 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$12_$34_~VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: range error (-53 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$12_$34_~VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: range error (-53 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$12_$34_VALUE/2_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a51a",
+      "native_hex": "a51a",
+      "matches": true
+    },
+    {
+      "name": "width_$12_$34_VALUE/2_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a51a",
+      "native_hex": "a51a",
+      "matches": true
+    },
+    {
+      "name": "width_$12_$1234_VALUE+255+1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: range error (4916 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$12_$1234_VALUE+255+1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: range error (4916 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$12_$1234_VALUE-1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: range error (4659 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$12_$1234_VALUE-1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: range error (4659 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$12_$1234_VALUE-250_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: range error (4410 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$12_$1234_VALUE-250_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: range error (4410 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$12_$1234_VALUE*20_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: range error (93200 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$12_$1234_VALUE*20_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: range error (93200 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$12_$1234_VALUE&255_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a534",
+      "native_hex": "a534",
+      "matches": true
+    },
+    {
+      "name": "width_$12_$1234_VALUE&255_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a534",
+      "native_hex": "a534",
+      "matches": true
+    },
+    {
+      "name": "width_$12_$1234_VALUE|256_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3413",
+      "native_hex": "ad3413",
+      "matches": true
+    },
+    {
+      "name": "width_$12_$1234_VALUE|256_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3413",
+      "native_hex": "ad3413",
+      "matches": true
+    },
+    {
+      "name": "width_$12_$1234_VALUE^256_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3413",
+      "native_hex": "ad3413",
+      "matches": true
+    },
+    {
+      "name": "width_$12_$1234_VALUE^256_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3413",
+      "native_hex": "ad3413",
+      "matches": true
+    },
+    {
+      "name": "width_$12_$1234_VALUE<<1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: range error (9320 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$12_$1234_VALUE<<1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: range error (9320 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$12_$1234_VALUE>>1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: range error (2330 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$12_$1234_VALUE>>1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: range error (2330 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$12_$1234_-VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: range error (-4660 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$12_$1234_-VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: range error (-4660 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$12_$1234_~VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: range error (-4661 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$12_$1234_~VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: range error (-4661 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$12_$1234_VALUE/2_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: range error (2330 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$12_$1234_VALUE/2_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: range error (2330 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$1234_None_VALUE+255+1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3413",
+      "native_hex": "ad3413",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_None_VALUE+255+1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3413",
+      "native_hex": "ad3413",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_None_VALUE-1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3312",
+      "native_hex": "ad3312",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_None_VALUE-1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3312",
+      "native_hex": "ad3312",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_None_VALUE-250_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3a11",
+      "native_hex": "ad3a11",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_None_VALUE-250_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3a11",
+      "native_hex": "ad3a11",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_None_VALUE*20_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: range error (93200 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$1234_None_VALUE*20_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: range error (93200 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$1234_None_VALUE&255_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3400",
+      "native_hex": "ad3400",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_None_VALUE&255_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3400",
+      "native_hex": "ad3400",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_None_VALUE|256_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3413",
+      "native_hex": "ad3413",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_None_VALUE|256_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3413",
+      "native_hex": "ad3413",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_None_VALUE^256_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3413",
+      "native_hex": "ad3413",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_None_VALUE^256_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3413",
+      "native_hex": "ad3413",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_None_VALUE<<1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad6824",
+      "native_hex": "ad6824",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_None_VALUE<<1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad6824",
+      "native_hex": "ad6824",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_None_VALUE>>1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1a09",
+      "native_hex": "ad1a09",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_None_VALUE>>1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1a09",
+      "native_hex": "ad1a09",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_None_-VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: range error (-4660 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$1234_None_-VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: range error (-4660 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$1234_None_~VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: range error (-4661 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$1234_None_~VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: range error (-4661 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$1234_None_VALUE/2_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1a09",
+      "native_hex": "ad1a09",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_None_VALUE/2_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1a09",
+      "native_hex": "ad1a09",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$34_VALUE+255+1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3401",
+      "native_hex": "ad3401",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$34_VALUE+255+1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3401",
+      "native_hex": "ad3401",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$34_VALUE-1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3300",
+      "native_hex": "ad3300",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$34_VALUE-1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3300",
+      "native_hex": "ad3300",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$34_VALUE-250_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: range error (-198 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$34_VALUE-250_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: range error (-198 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$34_VALUE*20_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1004",
+      "native_hex": "ad1004",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$34_VALUE*20_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1004",
+      "native_hex": "ad1004",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$34_VALUE&255_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3400",
+      "native_hex": "ad3400",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$34_VALUE&255_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3400",
+      "native_hex": "ad3400",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$34_VALUE|256_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3401",
+      "native_hex": "ad3401",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$34_VALUE|256_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3401",
+      "native_hex": "ad3401",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$34_VALUE^256_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3401",
+      "native_hex": "ad3401",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$34_VALUE^256_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3401",
+      "native_hex": "ad3401",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$34_VALUE<<1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad6800",
+      "native_hex": "ad6800",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$34_VALUE<<1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad6800",
+      "native_hex": "ad6800",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$34_VALUE>>1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1a00",
+      "native_hex": "ad1a00",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$34_VALUE>>1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1a00",
+      "native_hex": "ad1a00",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$34_-VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: range error (-52 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$34_-VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: range error (-52 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$34_~VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: range error (-53 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$34_~VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: range error (-53 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$34_VALUE/2_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1a00",
+      "native_hex": "ad1a00",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$34_VALUE/2_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1a00",
+      "native_hex": "ad1a00",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$1234_VALUE+255+1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3413",
+      "native_hex": "ad3413",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$1234_VALUE+255+1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3413",
+      "native_hex": "ad3413",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$1234_VALUE-1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3312",
+      "native_hex": "ad3312",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$1234_VALUE-1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3312",
+      "native_hex": "ad3312",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$1234_VALUE-250_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3a11",
+      "native_hex": "ad3a11",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$1234_VALUE-250_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3a11",
+      "native_hex": "ad3a11",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$1234_VALUE*20_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: range error (93200 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$1234_VALUE*20_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: range error (93200 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$1234_VALUE&255_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3400",
+      "native_hex": "ad3400",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$1234_VALUE&255_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3400",
+      "native_hex": "ad3400",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$1234_VALUE|256_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3413",
+      "native_hex": "ad3413",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$1234_VALUE|256_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3413",
+      "native_hex": "ad3413",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$1234_VALUE^256_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3413",
+      "native_hex": "ad3413",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$1234_VALUE^256_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3413",
+      "native_hex": "ad3413",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$1234_VALUE<<1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad6824",
+      "native_hex": "ad6824",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$1234_VALUE<<1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad6824",
+      "native_hex": "ad6824",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$1234_VALUE>>1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1a09",
+      "native_hex": "ad1a09",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$1234_VALUE>>1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1a09",
+      "native_hex": "ad1a09",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$1234_-VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: range error (-4660 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$1234_-VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: range error (-4660 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$1234_~VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: range error (-4661 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$1234_~VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: range error (-4661 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$1234_VALUE/2_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1a09",
+      "native_hex": "ad1a09",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$1234_VALUE/2_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1a09",
+      "native_hex": "ad1a09",
+      "matches": true
+    },
+    {
+      "name": "negative_memory_lda {x}_-1",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: range error (-1 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "negative_memory_lda {x}_-128",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: range error (-128 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "negative_memory_lda {x}_-32768",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: range error (-32768 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "negative_memory_lda {x}_$FFFF",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "adffff",
+      "native_hex": "adffff",
+      "matches": true
+    },
+    {
+      "name": "negative_memory_lda {x},x_-1",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: range error (-1 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "negative_memory_lda {x},x_-128",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: range error (-128 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "negative_memory_lda {x},x_-32768",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: range error (-32768 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "negative_memory_lda {x},x_$FFFF",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "bdffff",
+      "native_hex": "bdffff",
+      "matches": true
+    },
+    {
+      "name": "negative_memory_sta {x},y_-1",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: range error (-1 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "negative_memory_sta {x},y_-128",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: range error (-128 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "negative_memory_sta {x},y_-32768",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: range error (-32768 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "negative_memory_sta {x},y_$FFFF",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "99ffff",
+      "native_hex": "99ffff",
+      "matches": true
+    },
+    {
+      "name": "negative_memory_jmp {x}_-1",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: range error (-1 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "negative_memory_jmp {x}_-128",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: range error (-128 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "negative_memory_jmp {x}_-32768",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: range error (-32768 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "negative_memory_jmp {x}_$FFFF",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "4cffff",
+      "native_hex": "4cffff",
+      "matches": true
+    },
+    {
+      "name": "negative_memory_jmp ({x})_-1",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: range error (-1 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "negative_memory_jmp ({x})_-128",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: range error (-128 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "negative_memory_jmp ({x})_-32768",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: range error (-32768 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "negative_memory_jmp ({x})_$FFFF",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "6cffff",
+      "native_hex": "6cffff",
+      "matches": true
+    },
+    {
+      "name": "negative_memory_lda #{x}_-1",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: range error (-1 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "negative_memory_lda #{x}_-128",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: range error (-128 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "negative_memory_lda #{x}_-32768",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: range error (-32768 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "negative_memory_lda #{x}_$FFFF",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: range error (65535 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "negative_memory_.word {x}_-1",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: range error (-1 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "negative_memory_.word {x}_-128",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: range error (-128 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "negative_memory_.word {x}_-32768",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: range error (-32768 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "negative_memory_.word {x}_$FFFF",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "ffff",
+      "native_hex": "ffff",
+      "matches": true
+    },
+    {
+      "name": "query_before_value",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "010200",
+      "native_hex": "010200",
+      "matches": true
+    },
+    {
+      "name": "query_after_value",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0200",
+      "native_hex": "0200",
+      "matches": true
+    },
+    {
+      "name": "ref_before_value",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000201",
+      "native_hex": "000201",
+      "matches": true
+    },
+    {
+      "name": "alias_allocates",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\n",
+      "hex": "0001010002",
+      "native_hex": "0001010002",
+      "matches": true
+    },
+    {
+      "name": "self_definition_query",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "00",
+      "native_hex": "00",
+      "matches": true
+    },
+    {
+      "name": "if_defined_order",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0702",
+      "native_hex": "0702",
+      "matches": true
+    },
+    {
+      "name": "if_ref_order",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0208",
+      "native_hex": "0208",
+      "matches": true
+    },
+    {
+      "name": "if_const_allocates",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0001",
+      "native_hex": "0001",
+      "matches": true
+    },
+    {
+      "name": "root_ifdef",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": "07",
+      "matches": true
+    },
+    {
+      "name": "root_ifref",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0207",
+      "native_hex": "0207",
+      "matches": true
+    },
+    {
+      "name": "label_query",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "01",
+      "native_hex": "01",
+      "matches": true
+    },
+    {
+      "name": "root_value_ref",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0201",
+      "native_hex": "0201",
+      "matches": true
+    },
+    {
+      "name": "root_value_after_ref",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000201",
+      "native_hex": "000201",
+      "matches": true
+    },
+    {
+      "name": "root_alias_ref",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0100",
+      "native_hex": "0100",
+      "matches": true
+    },
+    {
+      "name": "root_alias_use_ref",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "020101",
+      "native_hex": "020101",
+      "matches": true
+    },
+    {
+      "name": "scope_known_ref",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0201",
+      "native_hex": "0201",
+      "matches": true
+    },
+    {
+      "name": "root_expression_ref",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "03",
+      "native_hex": "03",
+      "matches": true
+    },
+    {
+      "name": "root_expression_before_ref",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "02",
+      "native_hex": "02",
+      "matches": true
+    },
+    {
+      "name": "cheap_scoped_fold",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\n",
+      "hex": "000000070101",
+      "native_hex": "000000070101",
+      "matches": true
+    },
+    {
+      "name": "root_record_count",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: undefined symbol `\u0001scope\u0001Record\u0002COUNT`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "scoped_record_count",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: undefined symbol `\u0001scope\u0001inner::Record\u0002COUNT`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "outer_record_count",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: undefined symbol `\u0001scope\u0001inner::Record\u0002COUNT`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "record_size_scope",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0000",
+      "native_hex": "0000",
+      "matches": true
+    },
+    {
+      "name": "record_name_query",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\n",
+      "hex": "000002000000",
+      "native_hex": "000002000000",
+      "matches": true
+    },
+    {
+      "name": "enum_reference",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "00",
+      "native_hex": "00",
+      "matches": true
+    },
+    {
+      "name": "enum_outer_count",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "02",
+      "native_hex": "02",
+      "matches": true
+    },
+    {
+      "name": "query_function_argument",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: name query needs an identifier\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "ref_function_argument",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: name query needs an identifier\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "query_query_argument",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: name query needs an identifier\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "masked_negative",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\n",
+      "hex": "adffff07d0fd",
+      "native_hex": "adffff07d0fd",
+      "matches": true
+    },
+    {
+      "name": "record_size_cheap_constant",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": "07",
+      "matches": true
+    },
+    {
+      "name": "record_size_cheap_label",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0007",
+      "native_hex": "0007",
+      "matches": true
+    },
+    {
+      "name": "size_cheap_definition",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0007",
+      "native_hex": "0007",
+      "matches": true
+    },
+    {
+      "name": "size_cheap_undefined",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `start\u0001size`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "size_cheap_query",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000000",
+      "native_hex": "000000",
+      "matches": true
+    },
+    {
+      "name": "size_forward_label",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: size of `later` is unknown\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "size_scoped_forward",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: size of `later` is unknown\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "included_scoped_label",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\n",
+      "hex": "0700100010",
+      "native_hex": "0700100010",
+      "matches": true
+    },
+    {
+      "name": "included_alias_state",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0003",
+      "native_hex": "0003",
+      "matches": true
+    },
+    {
+      "name": "macro_scoped_queries",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\n",
+      "hex": "010300010300",
+      "native_hex": "010300010300",
+      "matches": true
+    },
+    {
+      "name": "repeat_scoped_queries",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\n",
+      "hex": "010300010300",
+      "native_hex": "010300010300",
+      "matches": true
+    },
+    {
+      "name": "alias_size_changes",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\n",
+      "hex": "ad2000a520",
+      "native_hex": "ad2000a520",
+      "matches": true
+    },
+    {
+      "name": "alias_size_changes_on_label_line",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\n",
+      "hex": "ad20002200",
+      "native_hex": "ad20002200",
+      "matches": true
+    }
+  ]
+}

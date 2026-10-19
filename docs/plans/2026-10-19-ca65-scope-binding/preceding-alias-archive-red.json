@@ -1,0 +1,5934 @@
+{
+  "binary": "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+  "sha256": "4db177ba0061a69f3aca650d411444cfb0566de04fabc876b57dfece0ece3389",
+  "results": [
+    {
+      "name": "value_$12_later_None_VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_None_VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_None_::VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_None_::VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_None_VALUE+250_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad0c01",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "value_$12_later_None_VALUE+250_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad0c01",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "value_$12_later_None_VALUE*2_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a524",
+      "native_hex": "a524",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_None_VALUE*2_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a524",
+      "native_hex": "a524",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_None_<VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_None_<VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_None_>VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a500",
+      "native_hex": "a500",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_None_>VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a500",
+      "native_hex": "a500",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_$34_VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a534",
+      "matches": false
+    },
+    {
+      "name": "value_$12_later_$34_VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a534",
+      "matches": false
+    },
+    {
+      "name": "value_$12_later_$34_::VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_$34_::VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_$34_VALUE+250_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad0c01",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "value_$12_later_$34_VALUE+250_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad0c01",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "value_$12_later_$34_VALUE*2_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a524",
+      "native_hex": "a568",
+      "matches": false
+    },
+    {
+      "name": "value_$12_later_$34_VALUE*2_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a524",
+      "native_hex": "a568",
+      "matches": false
+    },
+    {
+      "name": "value_$12_later_$34_<VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a534",
+      "matches": false
+    },
+    {
+      "name": "value_$12_later_$34_<VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a534",
+      "matches": false
+    },
+    {
+      "name": "value_$12_later_$34_>VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a500",
+      "native_hex": "a500",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_$34_>VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a500",
+      "native_hex": "a500",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_$1234_VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "value_$12_later_$1234_VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "value_$12_later_$1234_::VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_$1234_::VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "value_$12_later_$1234_VALUE+250_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad0c01",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "value_$12_later_$1234_VALUE+250_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad0c01",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "value_$12_later_$1234_VALUE*2_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a524",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "value_$12_later_$1234_VALUE*2_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a524",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "value_$12_later_$1234_<VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a534",
+      "matches": false
+    },
+    {
+      "name": "value_$12_later_$1234_<VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a534",
+      "matches": false
+    },
+    {
+      "name": "value_$12_later_$1234_>VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a500",
+      "native_hex": "a512",
+      "matches": false
+    },
+    {
+      "name": "value_$12_later_$1234_>VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a500",
+      "native_hex": "a512",
+      "matches": false
+    },
+    {
+      "name": "value_$1234_later_None_VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3412",
+      "native_hex": "ad3412",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_None_VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3412",
+      "native_hex": "ad3412",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_None_::VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3412",
+      "native_hex": "ad3412",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_None_::VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3412",
+      "native_hex": "ad3412",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_None_VALUE+250_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad2e13",
+      "native_hex": "ad2e13",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_None_VALUE+250_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad2e13",
+      "native_hex": "ad2e13",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_None_VALUE*2_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad6824",
+      "native_hex": "ad6824",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_None_VALUE*2_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad6824",
+      "native_hex": "ad6824",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_None_<VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a534",
+      "native_hex": "a534",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_None_<VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a534",
+      "native_hex": "a534",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_None_>VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_None_>VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$34_VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3412",
+      "native_hex": "ad3400",
+      "matches": false
+    },
+    {
+      "name": "value_$1234_later_$34_VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3412",
+      "native_hex": "ad3400",
+      "matches": false
+    },
+    {
+      "name": "value_$1234_later_$34_::VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3412",
+      "native_hex": "ad3412",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$34_::VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3412",
+      "native_hex": "ad3412",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$34_VALUE+250_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad2e13",
+      "native_hex": "ad2e01",
+      "matches": false
+    },
+    {
+      "name": "value_$1234_later_$34_VALUE+250_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad2e13",
+      "native_hex": "ad2e01",
+      "matches": false
+    },
+    {
+      "name": "value_$1234_later_$34_VALUE*2_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad6824",
+      "native_hex": "ad6800",
+      "matches": false
+    },
+    {
+      "name": "value_$1234_later_$34_VALUE*2_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad6824",
+      "native_hex": "ad6800",
+      "matches": false
+    },
+    {
+      "name": "value_$1234_later_$34_<VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a534",
+      "native_hex": "a534",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$34_<VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a534",
+      "native_hex": "a534",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$34_>VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a500",
+      "matches": false
+    },
+    {
+      "name": "value_$1234_later_$34_>VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a500",
+      "matches": false
+    },
+    {
+      "name": "value_$1234_later_$1234_VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3412",
+      "native_hex": "ad3412",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$1234_VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3412",
+      "native_hex": "ad3412",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$1234_::VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3412",
+      "native_hex": "ad3412",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$1234_::VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3412",
+      "native_hex": "ad3412",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$1234_VALUE+250_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad2e13",
+      "native_hex": "ad2e13",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$1234_VALUE+250_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad2e13",
+      "native_hex": "ad2e13",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$1234_VALUE*2_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad6824",
+      "native_hex": "ad6824",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$1234_VALUE*2_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad6824",
+      "native_hex": "ad6824",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$1234_<VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a534",
+      "native_hex": "a534",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$1234_<VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a534",
+      "native_hex": "a534",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$1234_>VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "value_$1234_later_$1234_>VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "phase_False_VALUE_.byte {x}",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "02",
+      "native_hex": "02",
+      "matches": true
+    },
+    {
+      "name": "phase_False_VALUE_.res {x}",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: `.res` count must be a constant\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "phase_False_VALUE_.if {x}=2\n.byte 7\n.endif",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "phase_False_::VALUE_.byte {x}",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "02",
+      "native_hex": "02",
+      "matches": true
+    },
+    {
+      "name": "phase_False_::VALUE_.res {x}",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0000",
+      "native_hex": "0000",
+      "matches": true
+    },
+    {
+      "name": "phase_False_::VALUE_.if {x}=2\n.byte 7\n.endif",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: `::VALUE=2` must be a constant here \u2014 ca65 folds a condition against the                          `=` constants above it, and refuses a label or a forward reference\n",
+      "hex": null,
+      "native_hex": "07",
+      "matches": false
+    },
+    {
+      "name": "phase_False_OTHER_.byte {x}",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "02",
+      "native_hex": "02",
+      "matches": true
+    },
+    {
+      "name": "phase_False_OTHER_.res {x}",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0000",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "phase_False_OTHER_.if {x}=2\n.byte 7\n.endif",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: `OTHER=2` must be a constant here \u2014 ca65 folds a condition against the                          `=` constants above it, and refuses a label or a forward reference\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "phase_True_VALUE_.byte {x}",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "02",
+      "native_hex": "03",
+      "matches": false
+    },
+    {
+      "name": "phase_True_VALUE_.res {x}",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: `.res` count must be a constant\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "phase_True_VALUE_.if {x}=2\n.byte 7\n.endif",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "phase_True_::VALUE_.byte {x}",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "02",
+      "native_hex": "02",
+      "matches": true
+    },
+    {
+      "name": "phase_True_::VALUE_.res {x}",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0000",
+      "native_hex": "0000",
+      "matches": true
+    },
+    {
+      "name": "phase_True_::VALUE_.if {x}=2\n.byte 7\n.endif",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: `::VALUE=2` must be a constant here \u2014 ca65 folds a condition against the                          `=` constants above it, and refuses a label or a forward reference\n",
+      "hex": null,
+      "native_hex": "07",
+      "matches": false
+    },
+    {
+      "name": "phase_True_OTHER_.byte {x}",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "02",
+      "native_hex": "03",
+      "matches": false
+    },
+    {
+      "name": "phase_True_OTHER_.res {x}",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0000",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "phase_True_OTHER_.if {x}=2\n.byte 7\n.endif",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: `OTHER=2` must be a constant here \u2014 ca65 folds a condition against the                          `=` constants above it, and refuses a label or a forward reference\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "alias_updates",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0000",
+      "native_hex": "0000",
+      "matches": true
+    },
+    {
+      "name": "alias_chain_updates",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0000",
+      "native_hex": "0000",
+      "matches": true
+    },
+    {
+      "name": "unused_undefined",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1:1: error: undefined symbol `MISSING`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "unused_cycle",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1:1: error: circular definition of symbol `FIRST`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "alias_pc",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0010",
+      "native_hex": "0010",
+      "matches": true
+    },
+    {
+      "name": "alias_forward_label",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "021007",
+      "native_hex": "021007",
+      "matches": true
+    },
+    {
+      "name": "nested_fallback",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "02",
+      "native_hex": "03",
+      "matches": false
+    },
+    {
+      "name": "width_$12_None_VALUE+255+1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1201",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$12_None_VALUE+255+1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1201",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$12_None_VALUE-1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a511",
+      "native_hex": "a511",
+      "matches": true
+    },
+    {
+      "name": "width_$12_None_VALUE-1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a511",
+      "native_hex": "a511",
+      "matches": true
+    },
+    {
+      "name": "width_$12_None_VALUE-250_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad18ff",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$12_None_VALUE-250_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad18ff",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$12_None_VALUE*20_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad6801",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$12_None_VALUE*20_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad6801",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$12_None_VALUE&255_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "width_$12_None_VALUE&255_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a512",
+      "matches": true
+    },
+    {
+      "name": "width_$12_None_VALUE|256_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1201",
+      "native_hex": "ad1201",
+      "matches": true
+    },
+    {
+      "name": "width_$12_None_VALUE|256_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1201",
+      "native_hex": "ad1201",
+      "matches": true
+    },
+    {
+      "name": "width_$12_None_VALUE^256_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1201",
+      "native_hex": "ad1201",
+      "matches": true
+    },
+    {
+      "name": "width_$12_None_VALUE^256_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1201",
+      "native_hex": "ad1201",
+      "matches": true
+    },
+    {
+      "name": "width_$12_None_VALUE<<1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a524",
+      "native_hex": "a524",
+      "matches": true
+    },
+    {
+      "name": "width_$12_None_VALUE<<1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a524",
+      "native_hex": "a524",
+      "matches": true
+    },
+    {
+      "name": "width_$12_None_VALUE>>1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a509",
+      "native_hex": "a509",
+      "matches": true
+    },
+    {
+      "name": "width_$12_None_VALUE>>1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a509",
+      "native_hex": "a509",
+      "matches": true
+    },
+    {
+      "name": "width_$12_None_-VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "adeeff",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$12_None_-VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "adeeff",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$12_None_~VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "adedff",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$12_None_~VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "adedff",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$12_None_VALUE/2_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a509",
+      "native_hex": "a509",
+      "matches": true
+    },
+    {
+      "name": "width_$12_None_VALUE/2_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a509",
+      "native_hex": "a509",
+      "matches": true
+    },
+    {
+      "name": "width_$12_$34_VALUE+255+1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1201",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$12_$34_VALUE+255+1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1201",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$12_$34_VALUE-1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a511",
+      "native_hex": "a533",
+      "matches": false
+    },
+    {
+      "name": "width_$12_$34_VALUE-1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a511",
+      "native_hex": "a533",
+      "matches": false
+    },
+    {
+      "name": "width_$12_$34_VALUE-250_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad18ff",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$12_$34_VALUE-250_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad18ff",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$12_$34_VALUE*20_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad6801",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$12_$34_VALUE*20_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad6801",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$12_$34_VALUE&255_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a534",
+      "matches": false
+    },
+    {
+      "name": "width_$12_$34_VALUE&255_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a534",
+      "matches": false
+    },
+    {
+      "name": "width_$12_$34_VALUE|256_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1201",
+      "native_hex": "ad3401",
+      "matches": false
+    },
+    {
+      "name": "width_$12_$34_VALUE|256_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1201",
+      "native_hex": "ad3401",
+      "matches": false
+    },
+    {
+      "name": "width_$12_$34_VALUE^256_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1201",
+      "native_hex": "ad3401",
+      "matches": false
+    },
+    {
+      "name": "width_$12_$34_VALUE^256_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1201",
+      "native_hex": "ad3401",
+      "matches": false
+    },
+    {
+      "name": "width_$12_$34_VALUE<<1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a524",
+      "native_hex": "a568",
+      "matches": false
+    },
+    {
+      "name": "width_$12_$34_VALUE<<1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a524",
+      "native_hex": "a568",
+      "matches": false
+    },
+    {
+      "name": "width_$12_$34_VALUE>>1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a509",
+      "native_hex": "a51a",
+      "matches": false
+    },
+    {
+      "name": "width_$12_$34_VALUE>>1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a509",
+      "native_hex": "a51a",
+      "matches": false
+    },
+    {
+      "name": "width_$12_$34_-VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "adeeff",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$12_$34_-VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "adeeff",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$12_$34_~VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "adedff",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$12_$34_~VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "adedff",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$12_$34_VALUE/2_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a509",
+      "native_hex": "a51a",
+      "matches": false
+    },
+    {
+      "name": "width_$12_$34_VALUE/2_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a509",
+      "native_hex": "a51a",
+      "matches": false
+    },
+    {
+      "name": "width_$12_$1234_VALUE+255+1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1201",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$12_$1234_VALUE+255+1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1201",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$12_$1234_VALUE-1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a511",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$12_$1234_VALUE-1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a511",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$12_$1234_VALUE-250_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad18ff",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$12_$1234_VALUE-250_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad18ff",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$12_$1234_VALUE*20_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad6801",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$12_$1234_VALUE*20_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad6801",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$12_$1234_VALUE&255_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a534",
+      "matches": false
+    },
+    {
+      "name": "width_$12_$1234_VALUE&255_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a512",
+      "native_hex": "a534",
+      "matches": false
+    },
+    {
+      "name": "width_$12_$1234_VALUE|256_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1201",
+      "native_hex": "ad3413",
+      "matches": false
+    },
+    {
+      "name": "width_$12_$1234_VALUE|256_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1201",
+      "native_hex": "ad3413",
+      "matches": false
+    },
+    {
+      "name": "width_$12_$1234_VALUE^256_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1201",
+      "native_hex": "ad3413",
+      "matches": false
+    },
+    {
+      "name": "width_$12_$1234_VALUE^256_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1201",
+      "native_hex": "ad3413",
+      "matches": false
+    },
+    {
+      "name": "width_$12_$1234_VALUE<<1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a524",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$12_$1234_VALUE<<1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a524",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$12_$1234_VALUE>>1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a509",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$12_$1234_VALUE>>1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a509",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$12_$1234_-VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "adeeff",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$12_$1234_-VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "adeeff",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$12_$1234_~VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "adedff",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$12_$1234_~VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "adedff",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$12_$1234_VALUE/2_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a509",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$12_$1234_VALUE/2_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a509",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$1234_None_VALUE+255+1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3413",
+      "native_hex": "ad3413",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_None_VALUE+255+1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3413",
+      "native_hex": "ad3413",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_None_VALUE-1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3312",
+      "native_hex": "ad3312",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_None_VALUE-1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3312",
+      "native_hex": "ad3312",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_None_VALUE-250_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3a11",
+      "native_hex": "ad3a11",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_None_VALUE-250_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3a11",
+      "native_hex": "ad3a11",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_None_VALUE*20_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad106c",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$1234_None_VALUE*20_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad106c",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$1234_None_VALUE&255_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a534",
+      "native_hex": "ad3400",
+      "matches": false
+    },
+    {
+      "name": "width_$1234_None_VALUE&255_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a534",
+      "native_hex": "ad3400",
+      "matches": false
+    },
+    {
+      "name": "width_$1234_None_VALUE|256_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3413",
+      "native_hex": "ad3413",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_None_VALUE|256_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3413",
+      "native_hex": "ad3413",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_None_VALUE^256_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3413",
+      "native_hex": "ad3413",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_None_VALUE^256_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3413",
+      "native_hex": "ad3413",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_None_VALUE<<1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad6824",
+      "native_hex": "ad6824",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_None_VALUE<<1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad6824",
+      "native_hex": "ad6824",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_None_VALUE>>1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1a09",
+      "native_hex": "ad1a09",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_None_VALUE>>1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1a09",
+      "native_hex": "ad1a09",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_None_-VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "adcced",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$1234_None_-VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "adcced",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$1234_None_~VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "adcbed",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$1234_None_~VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "adcbed",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$1234_None_VALUE/2_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1a09",
+      "native_hex": "ad1a09",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_None_VALUE/2_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1a09",
+      "native_hex": "ad1a09",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$34_VALUE+255+1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3413",
+      "native_hex": "ad3401",
+      "matches": false
+    },
+    {
+      "name": "width_$1234_$34_VALUE+255+1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3413",
+      "native_hex": "ad3401",
+      "matches": false
+    },
+    {
+      "name": "width_$1234_$34_VALUE-1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3312",
+      "native_hex": "ad3300",
+      "matches": false
+    },
+    {
+      "name": "width_$1234_$34_VALUE-1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3312",
+      "native_hex": "ad3300",
+      "matches": false
+    },
+    {
+      "name": "width_$1234_$34_VALUE-250_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3a11",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$1234_$34_VALUE-250_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3a11",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$1234_$34_VALUE*20_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad106c",
+      "native_hex": "ad1004",
+      "matches": false
+    },
+    {
+      "name": "width_$1234_$34_VALUE*20_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad106c",
+      "native_hex": "ad1004",
+      "matches": false
+    },
+    {
+      "name": "width_$1234_$34_VALUE&255_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a534",
+      "native_hex": "ad3400",
+      "matches": false
+    },
+    {
+      "name": "width_$1234_$34_VALUE&255_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a534",
+      "native_hex": "ad3400",
+      "matches": false
+    },
+    {
+      "name": "width_$1234_$34_VALUE|256_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3413",
+      "native_hex": "ad3401",
+      "matches": false
+    },
+    {
+      "name": "width_$1234_$34_VALUE|256_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3413",
+      "native_hex": "ad3401",
+      "matches": false
+    },
+    {
+      "name": "width_$1234_$34_VALUE^256_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3413",
+      "native_hex": "ad3401",
+      "matches": false
+    },
+    {
+      "name": "width_$1234_$34_VALUE^256_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3413",
+      "native_hex": "ad3401",
+      "matches": false
+    },
+    {
+      "name": "width_$1234_$34_VALUE<<1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad6824",
+      "native_hex": "ad6800",
+      "matches": false
+    },
+    {
+      "name": "width_$1234_$34_VALUE<<1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad6824",
+      "native_hex": "ad6800",
+      "matches": false
+    },
+    {
+      "name": "width_$1234_$34_VALUE>>1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1a09",
+      "native_hex": "ad1a00",
+      "matches": false
+    },
+    {
+      "name": "width_$1234_$34_VALUE>>1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1a09",
+      "native_hex": "ad1a00",
+      "matches": false
+    },
+    {
+      "name": "width_$1234_$34_-VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "adcced",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$1234_$34_-VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "adcced",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$1234_$34_~VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "adcbed",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$1234_$34_~VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "adcbed",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$1234_$34_VALUE/2_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1a09",
+      "native_hex": "ad1a00",
+      "matches": false
+    },
+    {
+      "name": "width_$1234_$34_VALUE/2_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1a09",
+      "native_hex": "ad1a00",
+      "matches": false
+    },
+    {
+      "name": "width_$1234_$1234_VALUE+255+1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3413",
+      "native_hex": "ad3413",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$1234_VALUE+255+1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3413",
+      "native_hex": "ad3413",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$1234_VALUE-1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3312",
+      "native_hex": "ad3312",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$1234_VALUE-1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3312",
+      "native_hex": "ad3312",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$1234_VALUE-250_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3a11",
+      "native_hex": "ad3a11",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$1234_VALUE-250_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3a11",
+      "native_hex": "ad3a11",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$1234_VALUE*20_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad106c",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$1234_$1234_VALUE*20_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad106c",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$1234_$1234_VALUE&255_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a534",
+      "native_hex": "ad3400",
+      "matches": false
+    },
+    {
+      "name": "width_$1234_$1234_VALUE&255_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a534",
+      "native_hex": "ad3400",
+      "matches": false
+    },
+    {
+      "name": "width_$1234_$1234_VALUE|256_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3413",
+      "native_hex": "ad3413",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$1234_VALUE|256_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3413",
+      "native_hex": "ad3413",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$1234_VALUE^256_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3413",
+      "native_hex": "ad3413",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$1234_VALUE^256_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad3413",
+      "native_hex": "ad3413",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$1234_VALUE<<1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad6824",
+      "native_hex": "ad6824",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$1234_VALUE<<1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad6824",
+      "native_hex": "ad6824",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$1234_VALUE>>1_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1a09",
+      "native_hex": "ad1a09",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$1234_VALUE>>1_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1a09",
+      "native_hex": "ad1a09",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$1234_-VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "adcced",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$1234_$1234_-VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "adcced",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$1234_$1234_~VALUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "adcbed",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$1234_$1234_~VALUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "adcbed",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "width_$1234_$1234_VALUE/2_False",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1a09",
+      "native_hex": "ad1a09",
+      "matches": true
+    },
+    {
+      "name": "width_$1234_$1234_VALUE/2_True",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad1a09",
+      "native_hex": "ad1a09",
+      "matches": true
+    },
+    {
+      "name": "negative_memory_lda {x}_-1",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "adffff",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "negative_memory_lda {x}_-128",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad80ff",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "negative_memory_lda {x}_-32768",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad0080",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "negative_memory_lda {x}_$FFFF",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "adffff",
+      "native_hex": "adffff",
+      "matches": true
+    },
+    {
+      "name": "negative_memory_lda {x},x_-1",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "bdffff",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "negative_memory_lda {x},x_-128",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "bd80ff",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "negative_memory_lda {x},x_-32768",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "bd0080",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "negative_memory_lda {x},x_$FFFF",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "bdffff",
+      "native_hex": "bdffff",
+      "matches": true
+    },
+    {
+      "name": "negative_memory_sta {x},y_-1",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "99ffff",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "negative_memory_sta {x},y_-128",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "9980ff",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "negative_memory_sta {x},y_-32768",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "990080",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "negative_memory_sta {x},y_$FFFF",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "99ffff",
+      "native_hex": "99ffff",
+      "matches": true
+    },
+    {
+      "name": "negative_memory_jmp {x}_-1",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "4cffff",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "negative_memory_jmp {x}_-128",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "4c80ff",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "negative_memory_jmp {x}_-32768",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "4c0080",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "negative_memory_jmp {x}_$FFFF",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "4cffff",
+      "native_hex": "4cffff",
+      "matches": true
+    },
+    {
+      "name": "negative_memory_jmp ({x})_-1",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "6cffff",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "negative_memory_jmp ({x})_-128",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "6c80ff",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "negative_memory_jmp ({x})_-32768",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "6c0080",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "negative_memory_jmp ({x})_$FFFF",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "6cffff",
+      "native_hex": "6cffff",
+      "matches": true
+    },
+    {
+      "name": "negative_memory_lda #{x}_-1",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: range error (-1 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "negative_memory_lda #{x}_-128",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: range error (-128 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "negative_memory_lda #{x}_-32768",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: range error (-32768 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "negative_memory_lda #{x}_$FFFF",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: range error (65535 not in [0..255])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "negative_memory_.word {x}_-1",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: range error (-1 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "negative_memory_.word {x}_-128",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: range error (-128 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "negative_memory_.word {x}_-32768",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: range error (-32768 not in [0..65535])\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "negative_memory_.word {x}_$FFFF",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "ffff",
+      "native_hex": "ffff",
+      "matches": true
+    },
+    {
+      "name": "query_before_value",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "010201",
+      "native_hex": "010200",
+      "matches": false
+    },
+    {
+      "name": "query_after_value",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0201",
+      "native_hex": "0200",
+      "matches": false
+    },
+    {
+      "name": "ref_before_value",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000200",
+      "native_hex": "000201",
+      "matches": false
+    },
+    {
+      "name": "alias_allocates",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\n",
+      "hex": "0100010002",
+      "native_hex": "0001010002",
+      "matches": false
+    },
+    {
+      "name": "self_definition_query",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3:1: error: undefined symbol `\u0001defined\u0001VALUE`\n",
+      "hex": null,
+      "native_hex": "00",
+      "matches": false
+    },
+    {
+      "name": "if_defined_order",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "070208",
+      "native_hex": "0702",
+      "matches": false
+    },
+    {
+      "name": "if_ref_order",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0208",
+      "native_hex": "0208",
+      "matches": true
+    },
+    {
+      "name": "if_const_allocates",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "070100",
+      "native_hex": "0001",
+      "matches": false
+    },
+    {
+      "name": "root_ifdef",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `.ifdef` needs an identifier, got `::VALUE`\n",
+      "hex": null,
+      "native_hex": "07",
+      "matches": false
+    },
+    {
+      "name": "root_ifref",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "02",
+      "native_hex": "0207",
+      "matches": false
+    },
+    {
+      "name": "label_query",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "00",
+      "native_hex": "01",
+      "matches": false
+    },
+    {
+      "name": "root_value_ref",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0200",
+      "native_hex": "0201",
+      "matches": false
+    },
+    {
+      "name": "root_value_after_ref",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000201",
+      "native_hex": "000201",
+      "matches": true
+    },
+    {
+      "name": "root_alias_ref",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0100",
+      "native_hex": "0100",
+      "matches": true
+    },
+    {
+      "name": "root_alias_use_ref",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "020101",
+      "native_hex": "020101",
+      "matches": true
+    },
+    {
+      "name": "scope_known_ref",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0200",
+      "native_hex": "0201",
+      "matches": false
+    },
+    {
+      "name": "root_expression_ref",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "02",
+      "native_hex": "03",
+      "matches": false
+    },
+    {
+      "name": "root_expression_before_ref",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "02",
+      "native_hex": "02",
+      "matches": true
+    },
+    {
+      "name": "cheap_scoped_fold",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\n",
+      "hex": "000000070100",
+      "native_hex": "000000070101",
+      "matches": false
+    },
+    {
+      "name": "root_record_count",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0400",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "scoped_record_count",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: undefined symbol `COUNT`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "outer_record_count",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0400",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "record_size_scope",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0000",
+      "native_hex": "0000",
+      "matches": true
+    },
+    {
+      "name": "record_name_query",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\n",
+      "hex": "000002000000",
+      "native_hex": "000002000000",
+      "matches": true
+    },
+    {
+      "name": "enum_reference",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "00",
+      "native_hex": "00",
+      "matches": true
+    },
+    {
+      "name": "enum_outer_count",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "02",
+      "native_hex": "02",
+      "matches": true
+    },
+    {
+      "name": "query_function_argument",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0700",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "ref_function_argument",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0700",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "query_query_argument",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "00",
+      "native_hex": null,
+      "matches": false
+    },
+    {
+      "name": "masked_negative",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\n",
+      "hex": "adffff07d0fd",
+      "native_hex": "adffff07d0fd",
+      "matches": true
+    },
+    {
+      "name": "record_size_cheap_constant",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5:1: error: symbol `@size` is already defined\n",
+      "hex": null,
+      "native_hex": "07",
+      "matches": false
+    },
+    {
+      "name": "record_size_cheap_label",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: duplicate symbol `Record@size`\n",
+      "hex": null,
+      "native_hex": "0007",
+      "matches": false
+    },
+    {
+      "name": "size_cheap_definition",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0007",
+      "native_hex": "0007",
+      "matches": true
+    },
+    {
+      "name": "size_cheap_undefined",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: size of `start` is unknown\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "size_cheap_query",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000000",
+      "native_hex": "000000",
+      "matches": true
+    },
+    {
+      "name": "size_forward_label",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: size of `later` is unknown\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "size_scoped_forward",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: size of `later` is unknown\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "included_scoped_label",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\n",
+      "hex": "0700100010",
+      "native_hex": "0700100010",
+      "matches": true
+    },
+    {
+      "name": "included_alias_state",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0102",
+      "native_hex": "0003",
+      "matches": false
+    },
+    {
+      "name": "macro_scoped_queries",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\n",
+      "hex": "010201010201",
+      "native_hex": "010300010300",
+      "matches": false
+    },
+    {
+      "name": "repeat_scoped_queries",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\n",
+      "hex": "010201010201",
+      "native_hex": "010300010300",
+      "matches": false
+    },
+    {
+      "name": "alias_size_changes",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\n",
+      "hex": "ad3412ad3412",
+      "native_hex": "ad2000a520",
+      "matches": false
+    },
+    {
+      "name": "alias_size_changes_on_label_line",
+      "argv": [
+        "/private/tmp/asm198x-scope-binding-predecessor/asm198x-aarch64-apple-darwin/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\n",
+      "hex": "ad34122300",
+      "native_hex": "ad20002200",
+      "matches": false
+    }
+  ]
+}

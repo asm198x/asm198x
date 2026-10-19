@@ -18,13 +18,113 @@ pub(super) struct Deferred {
     pub definitions: BTreeMap<String, Definition>,
     waiting: BTreeMap<String, BTreeSet<String>>,
     remaining: BTreeMap<String, BTreeSet<String>>,
-    size_cache: std::cell::RefCell<BTreeMap<String, i64>>,
+    size_cache: std::cell::RefCell<BTreeMap<String, SizeHint>>,
 }
 
 fn symbols(value: &Expr) -> BTreeSet<String> {
     let mut names = BTreeSet::new();
     collect_syms(&Kind::Bytes(vec![value.clone()]), &mut names);
     names
+}
+
+#[derive(Clone, Copy, Default)]
+struct SizeHint {
+    value: Option<i64>,
+    byte: Option<bool>,
+}
+
+impl SizeHint {
+    fn known(value: i64) -> Self {
+        Self {
+            value: Some(value),
+            byte: Some((0..=255).contains(&value)),
+        }
+    }
+
+    fn sized(byte: bool) -> Self {
+        Self {
+            value: None,
+            byte: Some(byte),
+        }
+    }
+}
+
+// Width analysis never evaluates a symbolic value. When children are numeric,
+// the shared evaluator supplies the result, including its overflow rules.
+fn expression_hint(value: &Expr, names: &BTreeMap<String, SizeHint>, line: usize) -> SizeHint {
+    use crate::engine::BinOp;
+    match value {
+        Expr::Num(value) => SizeHint::known(*value),
+        Expr::Sym(name) => names.get(name).copied().unwrap_or_default(),
+        Expr::Pc => SizeHint::default(),
+        Expr::Bin(op, left, right) => {
+            let left = expression_hint(left, names, line);
+            let right = expression_hint(right, names, line);
+            if let (Some(left), Some(right)) = (left.value, right.value) {
+                let numeric = Expr::Bin(*op, Box::new(Expr::Num(left)), Box::new(Expr::Num(right)));
+                return numeric
+                    .eval_with(&|_| None, None, line)
+                    .map(SizeHint::known)
+                    .unwrap_or_default();
+            }
+            let byte = if matches!(
+                op,
+                BinOp::LogAnd
+                    | BinOp::LogOr
+                    | BinOp::LogXor
+                    | BinOp::Eq
+                    | BinOp::Ne
+                    | BinOp::Lt
+                    | BinOp::Gt
+                    | BinOp::Le
+                    | BinOp::Ge
+            ) {
+                Some(true)
+            } else {
+                left.byte.zip(right.byte).map(|(left, right)| left && right)
+            };
+            SizeHint { value: None, byte }
+        }
+        Expr::Lo(child)
+        | Expr::Hi(child)
+        | Expr::Bank(child)
+        | Expr::Neg(child)
+        | Expr::BitNot(child)
+        | Expr::LogNot(child)
+        | Expr::FixRound(child)
+        | Expr::TrailingZeros(child) => {
+            let child = expression_hint(child, names, line);
+            if let Some(number) = child.value {
+                let number = Box::new(Expr::Num(number));
+                let numeric = match value {
+                    Expr::Lo(_) => Expr::Lo(number),
+                    Expr::Hi(_) => Expr::Hi(number),
+                    Expr::Bank(_) => Expr::Bank(number),
+                    Expr::Neg(_) => Expr::Neg(number),
+                    Expr::BitNot(_) => Expr::BitNot(number),
+                    Expr::LogNot(_) => Expr::LogNot(number),
+                    Expr::FixRound(_) => Expr::FixRound(number),
+                    Expr::TrailingZeros(_) => Expr::TrailingZeros(number),
+                    _ => unreachable!("unary expression"),
+                };
+                return numeric
+                    .eval_with(&|_| None, None, line)
+                    .map(SizeHint::known)
+                    .unwrap_or_default();
+            }
+            if matches!(
+                value,
+                Expr::Lo(_) | Expr::Hi(_) | Expr::Bank(_) | Expr::LogNot(_)
+            ) {
+                SizeHint::sized(true)
+            } else {
+                SizeHint {
+                    value: None,
+                    byte: child.byte,
+                }
+            }
+        }
+    }
 }
 
 impl Deferred {
@@ -36,6 +136,7 @@ impl Deferred {
         position: usize,
         values: &mut BTreeMap<String, i64>,
     ) -> Vec<(String, i64)> {
+        self.invalidate_size(&name);
         // A source-time fold can use the current scope only. Outward fallback
         // belongs to final binding; retain the original expression for it.
         let source_value = map_expr_syms(&value, &|key| {
@@ -99,6 +200,7 @@ impl Deferred {
         let mut queue: VecDeque<_> = changes.into();
         let mut updates = Vec::new();
         while let Some((name, value)) = queue.pop_front() {
+            self.invalidate_size(&name);
             updates.push((name.clone(), value));
             if let Some(dependants) = self.waiting.remove(&name) {
                 for dependant in dependants {
@@ -113,66 +215,108 @@ impl Deferred {
         updates
     }
 
-    /// A sparse, cached operand-size view. These placeholder values select
-    /// forms only; the retained expressions still emit their final values.
-    pub fn size_value(
+    /// Invalidate only cached dependants of the source event. Uncached chains
+    /// are skipped, so propagating a long numeric chain remains linear.
+    pub fn invalidate_size(&mut self, name: &str) {
+        if self.size_cache.borrow().is_empty() {
+            return;
+        }
+        let mut queue = VecDeque::from([name.to_string()]);
+        self.size_cache.borrow_mut().remove(name);
+        while let Some(name) = queue.pop_front() {
+            if let Some(dependants) = self.waiting.get(&name) {
+                for dependant in dependants {
+                    if self.size_cache.borrow_mut().remove(dependant).is_some() {
+                        queue.push_back(dependant.clone());
+                    }
+                }
+            }
+        }
+    }
+
+    /// Read source-time widths through the existing scoped reference keys.
+    /// An outward size hint is not a numeric value in the current scope.
+    pub fn size_hint(
         &self,
-        name: &str,
+        value: &Expr,
         values: &BTreeMap<String, i64>,
-        zero_page: &impl Fn(&str) -> bool,
-    ) -> Option<i64> {
-        let mut found: BTreeMap<String, Option<i64>> = BTreeMap::new();
+        labels: &BTreeMap<String, String>,
+        zero_page: &BTreeSet<String>,
+        line: usize,
+    ) -> Option<bool> {
+        let mut found: BTreeMap<String, SizeHint> = BTreeMap::new();
         let mut visiting = BTreeSet::new();
-        let mut stack = vec![(name.to_string(), false)];
+        let mut stack: Vec<_> = symbols(value).into_iter().map(|key| (key, false)).collect();
         while let Some((key, after)) = stack.pop() {
             if found.contains_key(&key) {
                 continue;
             }
-            if let Some(value) = values
-                .get(&key)
-                .copied()
-                .or_else(|| self.size_cache.borrow().get(&key).copied())
-                .or_else(|| zero_page(&key).then_some(0))
-            {
-                found.insert(key, Some(value));
+            let target = super::scope_targets(&BTreeSet::from([key.clone()]), &|name| {
+                values.contains_key(name)
+                    || labels.contains_key(name)
+                    || zero_page.contains(name)
+                    || self.definitions.contains_key(name)
+            })
+            .remove(&key)
+            .unwrap_or_else(|| key.clone());
+            if target != key {
+                let current = split_scope_ref(&key).map(|(path, name)| {
+                    if path.is_empty() {
+                        name.to_string()
+                    } else {
+                        format!("{path}::{name}")
+                    }
+                });
+                if after {
+                    let mut hint = found.get(&target).copied().unwrap_or_default();
+                    if current.as_ref() != Some(&target) {
+                        hint.value = None;
+                    }
+                    found.insert(key, hint);
+                } else {
+                    stack.push((key, true));
+                    stack.push((target, false));
+                }
+                continue;
+            }
+            if let Some(number) = values.get(&key) {
+                found.insert(key, SizeHint::known(*number));
+                continue;
+            }
+            if let Some(hint) = self.size_cache.borrow().get(&key).copied() {
+                found.insert(key, hint);
+                continue;
+            }
+            if zero_page.contains(&key) || labels.get(&key).is_some_and(|seg| seg == "ZEROPAGE") {
+                found.insert(key, SizeHint::sized(true));
+                continue;
+            }
+            if labels.contains_key(&key) {
+                found.insert(key, SizeHint::sized(false));
                 continue;
             }
             let Some(definition) = self.definitions.get(&key) else {
-                found.insert(key, None);
+                found.insert(key, SizeHint::default());
                 continue;
             };
-            if matches!(
-                definition.source_value,
-                Expr::Lo(_) | Expr::Hi(_) | Expr::Bank(_)
-            ) {
-                found.insert(key.clone(), Some(0));
-                self.size_cache.borrow_mut().insert(key, 0);
-                continue;
-            }
             if after {
-                let value = definition
-                    .source_value
-                    .eval_with(
-                        &|dependency| found.get(dependency).copied().flatten(),
-                        None,
-                        definition.span.line as usize,
-                    )
-                    .ok();
-                if let Some(value) = value {
-                    self.size_cache.borrow_mut().insert(key.clone(), value);
+                let hint =
+                    expression_hint(&definition.value, &found, definition.span.line as usize);
+                if hint.byte.is_some() {
+                    self.size_cache.borrow_mut().insert(key.clone(), hint);
                 }
                 visiting.remove(&key);
-                found.insert(key, value);
+                found.insert(key, hint);
             } else if visiting.insert(key.clone()) {
                 stack.push((key, true));
-                for dependency in symbols(&definition.source_value) {
+                for dependency in symbols(&definition.value) {
                     if !visiting.contains(&dependency) {
                         stack.push((dependency, false));
                     }
                 }
             }
         }
-        found.get(name).copied().flatten()
+        expression_hint(value, &found, line).byte
     }
 
     /// Resolve the remaining graph once labels and definition PCs are placed.

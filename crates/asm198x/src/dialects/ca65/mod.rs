@@ -265,8 +265,8 @@ struct Parsed {
     label_seg: BTreeMap<String, String>,
     /// `=` constants, folded in source order.
     consts: BTreeMap<String, i64>,
-    /// Authored cheap constant names for debug output; canonical keys remain
-    /// available to expression resolution and symbol exports.
+    /// Authored constants and stable auxiliary names for debug output;
+    /// canonical keys remain private to expression resolution.
     const_names: BTreeMap<String, String>,
     deferred: deferred::Deferred,
 }
@@ -438,7 +438,7 @@ fn assemble_program(
             let mut named = BTreeSet::new();
             collect_syms(&stmt.kind, &mut named);
             for key in &named {
-                let Some(name) = key.strip_suffix(&format!("{LABEL_SEP}size")) else {
+                let Some(name) = key.strip_suffix(SIZE_SUFFIX) else {
                     continue;
                 };
                 if !parsed.consts.contains_key(key) {
@@ -1048,6 +1048,11 @@ struct Walker {
     /// (`Duplicate scope 'sa'`), and a `sa::v` reference may only name a scope
     /// already opened above it (`No such scope: 'sa'`) — both positional.
     opened: BTreeSet<String>,
+    /// Source-time symbol events. Unknown expression references allocate in
+    /// the current scope and mask outer names for subsequent name queries.
+    source_known: BTreeSet<String>,
+    source_unresolved: RefCell<BTreeSet<String>>,
+    source_referenced: RefCell<BTreeSet<String>>,
     /// Counts unnamed scopes, so each gets a path segment of its own.
     unnamed: usize,
     /// Set by `.end`, which stops the assembler reading: every line after it
@@ -1155,6 +1160,9 @@ impl Walker {
             nodes: Vec::new(),
             scopes: Vec::new(),
             opened: BTreeSet::new(),
+            source_known: BTreeSet::new(),
+            source_unresolved: RefCell::new(BTreeSet::new()),
+            source_referenced: RefCell::new(BTreeSet::new()),
             unnamed: 0,
             ended: false,
             records: Vec::new(),
@@ -1379,7 +1387,7 @@ impl Walker {
     /// ordinary constant under a key source cannot spell, so it resolves
     /// through the same scope lookup every other name uses.
     fn record_size_key(path: &str) -> String {
-        format!("{path}{LABEL_SEP}size")
+        format!("{path}{SIZE_SUFFIX}")
     }
 
     /// The size of the record `name` stands for here, looked up outward
@@ -1510,7 +1518,7 @@ impl Walker {
                 return Ok(default);
             }
             let expr = parse_value(&self.anons, self.scope_env.anchor_str(), text, line)?;
-            fold_const(&expr, &self.consts, line)
+            SourceConstants(self).fold(&expr, line)
         };
         if self.expand_text_defines && allocator.eq_ignore_ascii_case(".res") && args.is_empty() {
             return Err(AsmError::new(line, "`.res` needs a field size"));
@@ -1585,7 +1593,10 @@ impl Walker {
             Some((name, expr)) => {
                 let expr =
                     parse_value(&self.anons, self.scope_env.anchor_str(), expr.trim(), line)?;
-                (name.trim(), Some(fold_const(&expr, &self.consts, line)?))
+                (
+                    name.trim(),
+                    Some(fold_const(&plain_references(&expr), &self.consts, line)?),
+                )
             }
             None => (text, None),
         };
@@ -1639,25 +1650,104 @@ impl Walker {
         Ok(Some(Kind::Res(bytes, None)))
     }
 
-    /// A name written here, as the key it is stored or looked up under.
-    ///
-    /// A constant is answered now: ca65 requires an `=` above the line that
-    /// uses it, so the innermost enclosing scope holding one is already known,
-    /// and answering here keeps `.if`, `.res` and every other parse-time fold
-    /// working inside a scope. A label cannot be, so it becomes a
-    /// [`scope_ref`] for [`scope_targets`] to answer once the file is read.
+    /// Bind a known current-scope constant immediately. An unresolved name
+    /// remains in its lexical scope until final outward binding, even when an
+    /// outer constant currently has the same spelling.
     fn scoped_name(&self, name: &str) -> String {
-        let mut segments = self.path();
+        let path = self.path();
+        let current = qualify(&path, name);
+        if self.consts.contains_key(&current) || self.source_known.contains(&current) {
+            current
+        } else {
+            scope_ref(&path, name)
+        }
+    }
+
+    /// Size properties consult enclosing declarations, rather than allocating
+    /// an ordinary value symbol in the current scope.
+    fn scoped_property_name(&self, name: &str) -> String {
+        let mut path = self.path();
         loop {
-            let candidate = qualify(&segments, name);
-            if self.consts.contains_key(&candidate) {
-                return candidate;
+            let key = qualify(&path, name);
+            if self.consts.contains_key(&key) {
+                return key;
             }
-            if segments.pop().is_none() {
+            if path.pop().is_none() {
                 break;
             }
         }
         scope_ref(&self.path(), name)
+    }
+
+    /// Look up a name without allocating a value reference. A current
+    /// unresolved placeholder masks an already-defined outer symbol.
+    fn query_key(&self, name: &str, line: usize) -> Result<String, AsmError> {
+        if let Some(key) = name.strip_prefix(CHEAP_REF_MARK) {
+            return Ok(key.to_string());
+        }
+        if let Some(local) = name.strip_prefix('@').filter(|name| is_cheap_ident(name)) {
+            return Ok(cheap_key(self.scope_env.anchor_str(), local));
+        }
+        if let Some(global) = name.strip_prefix("::") {
+            return Ok(global.to_string());
+        }
+        if name.contains("::") {
+            return self.resolve_qualified(name, line);
+        }
+        if name.contains(LABEL_SEP) {
+            return Ok(name.to_string());
+        }
+        let mut path = self.path();
+        loop {
+            let key = qualify(&path, name);
+            if self.consts.contains_key(&key)
+                || self.source_known.contains(&key)
+                || self.source_unresolved.borrow().contains(&key)
+            {
+                return Ok(key);
+            }
+            if path.pop().is_none() {
+                return Ok(name.to_string());
+            }
+        }
+    }
+
+    fn name_defined(&self, name: &str, line: usize) -> Result<bool, AsmError> {
+        let key = self.query_key(name, line)?;
+        Ok(self.consts.contains_key(&key) || self.source_known.contains(&key))
+    }
+
+    fn name_referenced(&self, name: &str, line: usize) -> Result<bool, AsmError> {
+        let key = self.query_key(name, line)?;
+        Ok(self.source_referenced.borrow().contains(&key))
+    }
+
+    fn record_reference(&self, key: &str) {
+        if !self.expand_text_defines {
+            return;
+        }
+        let key = split_scope_ref(key).map_or_else(
+            || key.to_string(),
+            |(path, name)| {
+                if path.is_empty() {
+                    name.to_string()
+                } else {
+                    format!("{path}::{name}")
+                }
+            },
+        );
+        if !self.consts.contains_key(&key) && !self.source_known.contains(&key) {
+            self.source_unresolved.borrow_mut().insert(key.clone());
+        }
+        self.source_referenced.borrow_mut().insert(key);
+    }
+
+    fn source_value(&self, text: &str, line: usize) -> Result<Expr, AsmError> {
+        let value = parse_value(&self.anons, self.scope_env.anchor_str(), text, line)?;
+        match self.scope_syms(&Kind::Bytes(vec![value]), line)? {
+            Kind::Bytes(mut values) => Ok(values.pop().expect("one source expression")),
+            _ => unreachable!("source expression remains bytes"),
+        }
     }
 
     /// `sa::v` — the scope named must already be open or closed above this
@@ -1759,33 +1849,66 @@ impl Walker {
     /// outside a scope, except for the `::name` spelling, which means the top
     /// level from anywhere.
     fn scope_syms(&self, kind: &Kind, line: usize) -> Result<Kind, AsmError> {
-        let failure: std::cell::RefCell<Option<AsmError>> = std::cell::RefCell::new(None);
+        let failure: RefCell<Option<AsmError>> = RefCell::new(None);
         let out = map_kind_syms(kind, &|name: &str| {
-            // Anonymous labels, cheap locals and the `.defined` marker are
-            // already keys rather than source names.
+            if self.expand_text_defines {
+                let argument = name
+                    .strip_prefix(DEFINED_MARK)
+                    .or_else(|| name.strip_prefix(REF_MARK));
+                if argument
+                    .is_some_and(|key| key.contains(LABEL_SEP) && !key.starts_with(CHEAP_REF_MARK))
+                {
+                    *failure.borrow_mut() =
+                        Some(AsmError::new(line, "name query needs an identifier"));
+                    return None;
+                }
+                let query = if let Some(symbol) = name.strip_prefix(DEFINED_MARK) {
+                    Some(self.name_defined(symbol, line))
+                } else {
+                    name.strip_prefix(REF_MARK)
+                        .map(|symbol| self.name_referenced(symbol, line))
+                };
+                if let Some(query) = query {
+                    return match query {
+                        Ok(value) => Some(Expr::Num(i64::from(value))),
+                        Err(error) => {
+                            *failure.borrow_mut() = Some(error);
+                            None
+                        }
+                    };
+                }
+            }
+            if let Some(key) = name.strip_prefix(CHEAP_REF_MARK) {
+                self.record_reference(key);
+                return Some(Expr::Sym(key.to_string()));
+            }
             if name.starts_with(LABEL_SEP) {
                 return None;
             }
-            if let Some(global) = name.strip_prefix("::") {
-                return Some(Expr::Sym(global.to_string()));
-            }
-            if name.contains("::") {
-                return match self.resolve_qualified(name, line) {
-                    Ok(key) => Some(Expr::Sym(key)),
-                    Err(e) => {
-                        *failure.borrow_mut() = Some(e);
-                        None
+            let key = if let Some(global) = name.strip_prefix("::") {
+                global.to_string()
+            } else if name.contains("::") {
+                match self.resolve_qualified(name, line) {
+                    Ok(key) => key,
+                    Err(error) => {
+                        *failure.borrow_mut() = Some(error);
+                        return None;
                     }
-                };
-            }
-            if self.scopes.is_empty() {
-                None
+                }
+            } else if self.scopes.is_empty() {
+                name.to_string()
+            } else if name.ends_with(SIZE_SUFFIX) {
+                self.scoped_property_name(name)
             } else {
-                Some(Expr::Sym(self.scoped_name(name)))
+                self.scoped_name(name)
+            };
+            if !name.ends_with(SIZE_SUFFIX) {
+                self.record_reference(&key);
             }
+            (key != name).then_some(Expr::Sym(key))
         });
         match failure.into_inner() {
-            Some(e) => Err(e),
+            Some(error) => Err(error),
             None => Ok(out),
         }
     }
@@ -1801,9 +1924,8 @@ impl Walker {
             })),
             ".incbin" => {
                 let fold = |piece: &str| {
-                    fold_const(
+                    SourceConstants(self).fold(
                         &parse_value(&self.anons, self.scope_env.anchor_str(), piece, line)?,
-                        &self.consts,
                         line,
                     )
                 };
@@ -2113,6 +2235,11 @@ impl FlatWalk for Walker {
         if let Some(eq) = assignment_split(trimmed) {
             let name = trimmed[..eq].trim();
             let qualified = self.constant_key(name, line)?;
+            if self.expand_text_defines {
+                self.source_unresolved
+                    .borrow_mut()
+                    .insert(qualified.clone());
+            }
             let expr = parse_value(
                 &self.anons,
                 self.scope_env.anchor_str(),
@@ -2127,6 +2254,9 @@ impl FlatWalk for Walker {
             // `pa::v`, and `::v` outside is a different symbol.
             if let Ok(v) = fold_const(&expr, &self.consts, line) {
                 self.consts.insert(qualified.clone(), v);
+            }
+            if self.expand_text_defines {
+                self.source_known.insert(qualified.clone());
             }
             let scope = if name.starts_with('@') {
                 Scope::Local {
@@ -2158,6 +2288,25 @@ impl FlatWalk for Walker {
 
         // An optional `name:` / `@cheap:` / `:` label, then an optional operation.
         let (symbol, rest) = split_label_symbol(&self.anons, line, &mut self.scope_env, trimmed)?;
+        let symbol = symbol.map(|mut s| {
+            // Only a plain label: a cheap local is already keyed on its global
+            // (which is itself qualified, so two procs' `@l` stay apart), and an
+            // anonymous one is positional rather than named.
+            if !self.scopes.is_empty()
+                && matches!(s.scope, crate::ast::Scope::Global)
+                && !s.qualified.starts_with(LABEL_SEP)
+            {
+                s.qualified = qualify(&self.path(), &s.qualified);
+                self.scope_env.set_anchor(s.qualified.clone());
+            }
+            s
+        });
+        if self.expand_text_defines
+            && let Some(symbol) = &symbol
+        {
+            self.source_known.insert(symbol.qualified.clone());
+        }
+
         // `.include`/`.incbin` are walk-handled, not parsed here: the target
         // must not be opened by the parse (KTD1 — `--fmt` succeeds with a
         // missing target), so hand them back for the driver to resolve (or
@@ -2239,21 +2388,6 @@ impl FlatWalk for Walker {
         };
         // Every name the statement mentions, as the key it resolves under.
         let kind = self.scope_syms(&kind, line)?;
-        // A label inside a scope is defined in it, and takes the cheap-local
-        // scope with it so `@l` in two procs is two labels.
-        let symbol = symbol.map(|mut s| {
-            // Only a plain label: a cheap local is already keyed on its global
-            // (which is itself qualified, so two procs' `@l` stay apart), and an
-            // anonymous one is positional rather than named.
-            if !self.scopes.is_empty()
-                && matches!(s.scope, crate::ast::Scope::Global)
-                && !s.qualified.starts_with(LABEL_SEP)
-            {
-                s.qualified = qualify(&self.path(), &s.qualified);
-                self.scope_env.set_anchor(s.qualified.clone());
-            }
-            s
-        });
         let trivia = Trivia {
             leading: std::mem::take(&mut self.pending_leading),
             trailing,
@@ -2457,23 +2591,31 @@ struct SourceConstants<'a>(&'a Walker);
 
 impl SourceConstants<'_> {
     fn fold(&self, value: &Expr, line: usize) -> Result<i64, AsmError> {
-        value.eval_with(
+        let reader = self.0;
+        let scoped = reader.scope_syms(&Kind::Bytes(vec![value.clone()]), line)?;
+        let Kind::Bytes(mut values) = scoped else {
+            unreachable!("source allocation expression")
+        };
+        let scoped_value = values.pop().expect("one allocation expression");
+        let result = scoped_value.eval_with(
             &|name| {
-                let reader = self.0;
-                let key = if name.contains(LABEL_SEP) {
-                    name.to_string()
-                } else if let Some(global) = name.strip_prefix("::") {
-                    global.to_string()
-                } else if name.contains("::") {
-                    reader.resolve_qualified(name, line).ok()?
-                } else {
-                    qualify(&reader.path(), name)
-                };
-                reader.consts.get(&key).copied()
+                let key = split_scope_ref(name).map(|(path, name)| {
+                    if path.is_empty() {
+                        name.to_string()
+                    } else {
+                        format!("{path}::{name}")
+                    }
+                });
+                reader.consts.get(key.as_deref().unwrap_or(name)).copied()
             },
             None,
             line,
-        )
+        );
+        if !reader.expand_text_defines {
+            result.or_else(|_| fold_const(value, &reader.consts, line))
+        } else {
+            result
+        }
     }
 }
 
@@ -3518,7 +3660,15 @@ fn parse_value_list(
 /// cheap local against. Both of those are label references, and a label's
 /// address is not something that pass can reach anyway.
 pub(crate) fn constant_value(raw: &str, line: usize) -> Result<Expr, AsmError> {
-    parse_value(&AnonCtx::default(), "", raw, line)
+    let value = parse_value(&AnonCtx::default(), "", raw, line)?;
+    Ok(plain_references(&value))
+}
+
+fn plain_references(value: &Expr) -> Expr {
+    map_expr_syms(value, &|name| {
+        name.strip_prefix(CHEAP_REF_MARK)
+            .map(|key| Expr::Sym(key.to_string()))
+    })
 }
 
 fn parse_value(anons: &AnonCtx, anchor: &str, raw: &str, line: usize) -> Result<Expr, AsmError> {
@@ -3565,9 +3715,18 @@ fn parse_value(anons: &AnonCtx, anchor: &str, raw: &str, line: usize) -> Result<
         let local = symbol
             .strip_prefix('@')
             .filter(|name| is_cheap_ident(name))?;
-        Some(Expr::Sym(format!("{prefix}{}", cheap_key(anchor, local))))
+        Some(Expr::Sym(format!(
+            "{prefix}{CHEAP_REF_MARK}{}",
+            cheap_key(anchor, local)
+        )))
     }))
 }
+
+// The colon is not a cheap identifier character, so this property key cannot
+// collide with an authored @size constant or label.
+const SIZE_SUFFIX: &str = "\u{1}:size";
+
+const CHEAP_REF_MARK: &str = "\u{1}cheap-ref\u{1}";
 
 /// Marks a `.defined(NAME)` the projection has yet to answer. `\u{1}` cannot
 /// appear in source, the same property `cheap_key` relies on.

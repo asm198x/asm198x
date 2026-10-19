@@ -259,3 +259,10 @@ test('ca65 deferred aliases are mandatory package evidence', () => {
   assert(qualifies(complete)); assert(requiredCases.includes('ca65_deferred_aliases'));
   assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_deferred_aliases')), false);
 });
+
+
+test('ca65 scoped bindings are mandatory package evidence', () => {
+  const complete = requiredCases.map(name => ({ name, status: 'pass' }));
+  assert(qualifies(complete)); assert(requiredCases.includes('ca65_scope_binding'));
+  assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_scope_binding')), false);
+});
