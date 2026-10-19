@@ -1,0 +1,32 @@
+[
+  {
+    "name": "generated_A",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:1: error: invalid label `.ident(\"A\")`\n"
+  },
+  {
+    "name": "generated_X",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:1: error: invalid label `.ident(\"X\")`\n"
+  },
+  {
+    "name": "generated_Y",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:1: error: invalid label `.ident(\"Y\")`\n"
+  },
+  {
+    "name": "generated_Z",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:1: error: invalid label `.ident(\"Z\")`\n"
+  },
+  {
+    "name": "generated_F",
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:1: error: invalid label `.ident(\"F\")`\n"
+  }
+]
