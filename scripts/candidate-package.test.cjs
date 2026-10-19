@@ -371,3 +371,9 @@ test('ca65 reserved label tokens are mandatory package evidence', () => {
   assert(qualifies(complete)); assert(requiredCases.includes('ca65_reserved_labels'));
   assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_reserved_labels')), false);
 });
+
+test('Pasmo character-literal boundaries are mandatory package evidence', () => {
+  const complete = requiredCases.map(name => ({ name, status: 'pass' }));
+  assert(qualifies(complete)); assert(requiredCases.includes('pasmo_character_literals'));
+  assert.equal(qualifies(complete.filter(r => r.name !== 'pasmo_character_literals')), false);
+});
