@@ -1,0 +1,213 @@
+{
+  "schema": 1,
+  "captured_unix_seconds": 1792418193,
+  "manifest_sha256": "a853f20bf150f97a3238c3c92bbd12e68f9a63363ce189aa42abb52e3892a8ef",
+  "assembler": {
+    "source_commit": "2eaad70d2a68b38e363529150eca79c45f31ff8a",
+    "cargo_lock_sha256": "0ee4b612d610b2d581a5b32e1666f431bdfcf55b99cfaed65841aa48e369958a",
+    "executable_sha256": "69097478c7caa1606e1846ff858b895092840e1661db223ae35df2a798b3f4d8",
+    "build": {
+      "argv": [
+        "/Users/stevehill/.cargo/bin/cargo",
+        "build",
+        "--locked",
+        "--release",
+        "-p",
+        "asm198x",
+        "--features",
+        "lua",
+        "--target-dir",
+        "/private/tmp/asm198x-absolute-counter-4510-audit/work/asm-build"
+      ],
+      "cwd": "/Users/stevehill/Projects/198x/Asm198x/asm198x-ca65-absolute-counter",
+      "exit": 0,
+      "failure": null,
+      "stdout": "",
+      "stderr": "   Compiling libc v0.2.189\n   Compiling proc-macro2 v1.0.107\n   Compiling shlex v2.0.1\n   Compiling find-msvc-tools v0.1.12\n   Compiling unicode-ident v1.0.24\n   Compiling quote v1.0.47\n   Compiling serde_core v1.0.229\n   Compiling zmij v1.0.23\n   Compiling cfg-if v1.0.4\n   Compiling parking_lot_core v0.9.12\n   Compiling memchr v2.8.3\n   Compiling autocfg v1.5.1\n   Compiling pkg-config v0.3.34\n   Compiling cc v1.4.5\n   Compiling scopeguard v1.2.0\n   Compiling serde_json v1.0.151\n   Compiling serde v1.0.229\n   Compiling smallvec v1.16.0\n   Compiling num-traits v0.2.19\n   Compiling lock_api v0.4.14\n   Compiling itoa v1.0.18\n   Compiling bstr v1.13.1\n   Compiling isa198x v0.1.7\n   Compiling either v1.18.0\n   Compiling rustc-hash v2.1.3\n   Compiling format198x-tzx v0.1.0\n   Compiling format198x-sinclair-zx-spectrum-tap v0.1.1\n   Compiling lua-src v551.0.1\n   Compiling which v8.0.6\n   Compiling syn v3.0.4\n   Compiling luajit-src v210.7.3+1ee778a\n   Compiling parking_lot v0.12.5\n   Compiling mlua-sys v0.12.0\n   Compiling isa198x-disasm v0.1.7\n   Compiling serde_derive v1.0.229\n   Compiling debug198x v0.1.0\n   Compiling mlua v0.12.1\n   Compiling asm198x v0.0.71 (/Users/stevehill/Projects/198x/Asm198x/asm198x-ca65-absolute-counter/crates/asm198x)\n    Finished `release` profile [optimized] target(s) in 1m 06s\n",
+      "elapsed_millis": 66616
+    },
+    "version": {
+      "argv": [
+        "/private/tmp/asm198x-absolute-counter-4510-audit/work/asm-build/release/asm198x",
+        "--version"
+      ],
+      "cwd": "/Users/stevehill/Projects/198x/Asm198x/asm198x-ca65-absolute-counter",
+      "exit": 0,
+      "failure": null,
+      "stdout": "",
+      "stderr": "asm198x v0.0.71\n",
+      "elapsed_millis": 27
+    }
+  },
+  "reference_report_sha256": null,
+  "reference_captured_unix_seconds": null,
+  "selected": [
+    "cc65-4510-opcodes/opcode-space"
+  ],
+  "records": [
+    {
+      "project": "cc65-4510-opcodes",
+      "target": "opcode-space",
+      "source_commit": "e11fb5c39371046ebe25485f984f644c5a0d65d3",
+      "source_tree_sha256": "a42e966dc46ff520c2817923c02282a9a5ca3f6542a9c207808cf880ab4d82fb",
+      "license": {
+        "spdx": "Zlib",
+        "path": "LICENSE",
+        "sha256": "8e87ae93bbc45dbe3def75c8b20ba2905b052ddf766fe61d55b8e16a807d57f3",
+        "text": "This software is provided 'as-is', without any express or implied warranty.\nIn no event will the authors be held liable for any damages arising from\nthe use of this software.\n\nPermission is granted to anyone to use this software for any purpose,\nincluding commercial applications, and to alter it and redistribute it\nfreely, subject to the following restrictions:\n\n1. The origin of this software must not be misrepresented; you must not\nclaim that you wrote the original software. If you use this software in\na product, an acknowledgment in the product documentation would be\nappreciated but is not required.\n\n2. Altered source versions must be plainly marked as such, and must not\nbe misrepresented as being the original software.\n\n3. This notice may not be removed or altered from any source distribution.\n"
+      },
+      "plan_sha256": "8303aee07ed2dc7e90b33f0d18d0e98545de76aa12fb3ce5e2805b57bd8cc01f",
+      "outcome": "equivalent",
+      "first_failure": null,
+      "tools": {
+        "ca65": {
+          "path": "/opt/homebrew/bin/ca65",
+          "sha256": "1a57997819fd98814e4601b5160df589e7a1a24e1888a80fee51ae450d8fd0ea",
+          "version": {
+            "argv": [
+              "/opt/homebrew/bin/ca65",
+              "--version"
+            ],
+            "cwd": "/private/tmp/asm198x-absolute-counter-4510-audit/work/cc65-4510-opcodes--opcode-space-version-probes/ca65",
+            "exit": 0,
+            "failure": null,
+            "stdout": "",
+            "stderr": "ca65 V2.18 - N/A\n",
+            "elapsed_millis": 26
+          }
+        },
+        "ld65": {
+          "path": "/opt/homebrew/bin/ld65",
+          "sha256": "36bb196207a6b2c90a4aa991b419d6113885303951b14b60b455f51c777b3339",
+          "version": {
+            "argv": [
+              "/opt/homebrew/bin/ld65",
+              "--version"
+            ],
+            "cwd": "/private/tmp/asm198x-absolute-counter-4510-audit/work/cc65-4510-opcodes--opcode-space-version-probes/ld65",
+            "exit": 0,
+            "failure": null,
+            "stdout": "",
+            "stderr": "ld65 V2.18 - N/A\n",
+            "elapsed_millis": 23
+          }
+        }
+      },
+      "adapters": [
+        {
+          "path": "ecosystem/adapters/cc65-opcodes.cfg",
+          "length": 412,
+          "sha256": "e2ed542368d9e81f132e2305741d74a9572c5900818ccc8140a3d6d0677b5f43",
+          "hex": null
+        }
+      ],
+      "reference_steps": [
+        {
+          "stage": "assemble",
+          "process": {
+            "argv": [
+              "/opt/homebrew/bin/ca65",
+              "--cpu",
+              "4510",
+              "-o",
+              "4510-opcodes.o",
+              "4510-opcodes.s"
+            ],
+            "cwd": "/private/tmp/asm198x-absolute-counter-4510-audit/work/cc65-4510-opcodes--opcode-space/reference/test/asm/opcodes",
+            "exit": 0,
+            "failure": null,
+            "stdout": "",
+            "stderr": "",
+            "elapsed_millis": 27
+          },
+          "outputs": [
+            {
+              "path": "test/asm/opcodes/4510-opcodes.o",
+              "length": 3680,
+              "sha256": "03bc571e7237f0a121c537c6325f7327c7e225476ca2324a7974fe9be4e8335f",
+              "hex": null
+            }
+          ]
+        },
+        {
+          "stage": "link",
+          "process": {
+            "argv": [
+              "/opt/homebrew/bin/ld65",
+              "-C",
+              "/private/tmp/asm198x-absolute-counter-4510-audit/work/cc65-4510-opcodes--opcode-space/reference/.asm198x-adapters/ecosystem/adapters/cc65-opcodes.cfg",
+              "-o",
+              "4510-opcodes.bin",
+              "4510-opcodes.o"
+            ],
+            "cwd": "/private/tmp/asm198x-absolute-counter-4510-audit/work/cc65-4510-opcodes--opcode-space/reference/test/asm/opcodes",
+            "exit": 0,
+            "failure": null,
+            "stdout": "",
+            "stderr": "",
+            "elapsed_millis": 28
+          },
+          "outputs": [
+            {
+              "path": "test/asm/opcodes/4510-opcodes.bin",
+              "length": 564,
+              "sha256": "8a5fcde630e55dd49403f7c6ffed25d8786e65e3d0a2723531b7ca3e2c0509ec",
+              "hex": "000105020304020502060207020809010a0b0c34120d34120e34120f02331030110612071331311402150316031702181956141a1b1c34121d45131e45131f0233203412210522452323562424022502260227022829012a2b2c34122d34122e34122f02333030310632073331313403350336033702383956143a3b3c45133d45133e45133f0233404105424344024502460247024849014a4b4c34124d34124e34124f02335030510652075331315403550356035702585956145a5b5c5d45135e45135f0233606105620963313164026502660267026869016a6b6c45236d34126e34126f02337030710672077331317403750376037702787956147a7b7c56247d45137e45137f023380308105820f820f83313184028502860287028889018a8b45138c34128d34128e34128f02339030910692079331319403950396049702989956149a9b56149c34129d45139e45139f0233a001a105a201a301a402a502a602a702a8a901aaab3412ac3412ad3412ae3412af0233b030b106b207b33131b403b503b604b702b8b95614babb4513bc4513bd4513be5614bf0233c001c105c201c302c402c502c602c702c8c901cacb3412cc3412cd3412ce3412cf0233d030d106d207d33131d402d503d603d702d8d95614dadbdc3412dd4513de4513df0233e001e105e20fe20fe302e402e502e602e702e8e901eaeaeb3412ec3412ed3412ee3412ef0233f030f106f207f33131f49a08f49a08f503f603f702f8f95614fafbfc3412fc3412fd4513fe4513ff0233"
+            }
+          ]
+        }
+      ],
+      "assembler_steps": [
+        {
+          "stage": "assemble",
+          "process": {
+            "argv": [
+              "/private/tmp/asm198x-absolute-counter-4510-audit/work/asm-build/release/asm198x",
+              "--dialect",
+              "ca65",
+              "-C",
+              "/private/tmp/asm198x-absolute-counter-4510-audit/work/cc65-4510-opcodes--opcode-space/assembler/.asm198x-adapters/ecosystem/adapters/cc65-opcodes.cfg",
+              "4510-opcodes.s",
+              "-o",
+              "4510-opcodes.bin"
+            ],
+            "cwd": "/private/tmp/asm198x-absolute-counter-4510-audit/work/cc65-4510-opcodes--opcode-space/assembler/test/asm/opcodes",
+            "exit": 0,
+            "failure": null,
+            "stdout": "",
+            "stderr": "assembled + linked 564 byte(s) -> 4510-opcodes.bin\n",
+            "elapsed_millis": 27
+          },
+          "outputs": [
+            {
+              "path": "test/asm/opcodes/4510-opcodes.bin",
+              "length": 564,
+              "sha256": "8a5fcde630e55dd49403f7c6ffed25d8786e65e3d0a2723531b7ca3e2c0509ec",
+              "hex": null
+            }
+          ]
+        }
+      ],
+      "comparisons": [
+        {
+          "reference": {
+            "path": "test/asm/opcodes/4510-opcodes.bin",
+            "length": 564,
+            "sha256": "8a5fcde630e55dd49403f7c6ffed25d8786e65e3d0a2723531b7ca3e2c0509ec",
+            "hex": "000105020304020502060207020809010a0b0c34120d34120e34120f02331030110612071331311402150316031702181956141a1b1c34121d45131e45131f0233203412210522452323562424022502260227022829012a2b2c34122d34122e34122f02333030310632073331313403350336033702383956143a3b3c45133d45133e45133f0233404105424344024502460247024849014a4b4c34124d34124e34124f02335030510652075331315403550356035702585956145a5b5c5d45135e45135f0233606105620963313164026502660267026869016a6b6c45236d34126e34126f02337030710672077331317403750376037702787956147a7b7c56247d45137e45137f023380308105820f820f83313184028502860287028889018a8b45138c34128d34128e34128f02339030910692079331319403950396049702989956149a9b56149c34129d45139e45139f0233a001a105a201a301a402a502a602a702a8a901aaab3412ac3412ad3412ae3412af0233b030b106b207b33131b403b503b604b702b8b95614babb4513bc4513bd4513be5614bf0233c001c105c201c302c402c502c602c702c8c901cacb3412cc3412cd3412ce3412cf0233d030d106d207d33131d402d503d603d702d8d95614dadbdc3412dd4513de4513df0233e001e105e20fe20fe302e402e502e602e702e8e901eaeaeb3412ec3412ed3412ee3412ef0233f030f106f207f33131f49a08f49a08f503f603f702f8f95614fafbfc3412fc3412fd4513fe4513ff0233"
+          },
+          "assembler": {
+            "path": "test/asm/opcodes/4510-opcodes.bin",
+            "length": 564,
+            "sha256": "8a5fcde630e55dd49403f7c6ffed25d8786e65e3d0a2723531b7ca3e2c0509ec",
+            "hex": "000105020304020502060207020809010a0b0c34120d34120e34120f02331030110612071331311402150316031702181956141a1b1c34121d45131e45131f0233203412210522452323562424022502260227022829012a2b2c34122d34122e34122f02333030310632073331313403350336033702383956143a3b3c45133d45133e45133f0233404105424344024502460247024849014a4b4c34124d34124e34124f02335030510652075331315403550356035702585956145a5b5c5d45135e45135f0233606105620963313164026502660267026869016a6b6c45236d34126e34126f02337030710672077331317403750376037702787956147a7b7c56247d45137e45137f023380308105820f820f83313184028502860287028889018a8b45138c34128d34128e34128f02339030910692079331319403950396049702989956149a9b56149c34129d45139e45139f0233a001a105a201a301a402a502a602a702a8a901aaab3412ac3412ad3412ae3412af0233b030b106b207b33131b403b503b604b702b8b95614babb4513bc4513bd4513be5614bf0233c001c105c201c302c402c502c602c702c8c901cacb3412cc3412cd3412ce3412cf0233d030d106d207d33131d402d503d603d702d8d95614dadbdc3412dd4513de4513df0233e001e105e20fe20fe302e402e502e602e702e8e901eaeaeb3412ec3412ed3412ee3412ef0233f030f106f207f33131f49a08f49a08f503f603f702f8f95614fafbfc3412fc3412fd4513fe4513ff0233"
+          },
+          "equal": true
+        }
+      ],
+      "issues": [
+        "https://github.com/asm198x/asm198x/issues/722"
+      ]
+    }
+  ]
+}

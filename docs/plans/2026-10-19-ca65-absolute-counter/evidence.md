@@ -35,5 +35,11 @@ intended. The actual preceding archive fails only this cohort; its other
 This corrects byte values before the approved #814 logical-debug-section work.
 Debug coordinates remain physical here; #814 is still open. Source-time origin
 constancy remains #815, and #788's approved lexical exception remains separate.
-Clean unchanged 4510 producer replay and all five actual host package reports/
-receipts with ten controls remain required before merge.
+Clean unchanged producer 2eaad70d2a68b38e363529150eca79c45f31ff8a replays
+pinned cc65-4510-opcodes e11fb5c39371046ebe25485f984f644c5a0d65d3.
+All 564 bytes match native SHA-256
+8a5fcde630e55dd49403f7c6ffed25d8786e65e3d0a2723531b7ca3e2c0509ec.
+Seven processes and fourteen streams verify; changed-byte corruption is
+rejected. The source tree stayed clean and unchanged during replay.
+All five actual host package reports/receipts with ten controls remain
+required before merge.
