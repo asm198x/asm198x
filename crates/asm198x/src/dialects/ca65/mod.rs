@@ -710,6 +710,14 @@ fn assemble_program(
                 let target = e
                     .eval(&addr_env, i64::from(addr) + pseudo, stmt.line)
                     .map_err(|e| statement_error(e, stmt.file, &stmt.expansion_frames))?;
+                // Native DoOrg validates the 24-bit origin before changing mode.
+                if !(0..=0xFF_FFFF).contains(&target) {
+                    return Err(statement_error(
+                        AsmError::new(stmt.line, "origin is outside the 24-bit range"),
+                        stmt.file,
+                        &stmt.expansion_frames,
+                    ));
+                }
                 pseudo = target - i64::from(addr);
                 absolute_mode = true;
             }
