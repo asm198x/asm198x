@@ -1818,13 +1818,9 @@ impl FlatWalk for Walker {
             return None;
         }
         use ca65_flat::BlockKw;
-        let (first, rest) = split_first_word(code.trim());
-        let word = if first.ends_with(':') {
-            split_first_word(rest).0
-        } else {
-            first
-        }
-        .to_ascii_lowercase();
+        let code = code.trim();
+        let code = split_label_head(code).map_or(code, |(_, rest)| rest);
+        let word = split_first_word(code).0.to_ascii_lowercase();
         Some(match word.as_str() {
             ".if" | ".ifdef" | ".ifndef" | ".ifblank" | ".ifnblank" | ".ifconst" | ".ifnconst"
             | ".ifref" | ".ifnref" => BlockKw::CondOpen,
@@ -2298,6 +2294,22 @@ fn strip_comment(line: &str) -> &str {
     line
 }
 
+/// Split the initial label token at a single colon. A scope's `::` pair
+/// stays inside the token; quoted/operand colons never become label heads.
+fn split_label_head(text: &str) -> Option<(&str, &str)> {
+    let bytes = text.as_bytes();
+    let mut at = 0;
+    while at < bytes.len() {
+        match bytes[at] {
+            b':' if bytes.get(at + 1) == Some(&b':') => at += 2,
+            b':' => return Some((&text[..at + 1], text[at + 1..].trim_start())),
+            c if c.is_ascii_alphanumeric() || matches!(c, b'_' | b'@' | b'.') => at += 1,
+            _ => return None,
+        }
+    }
+    None
+}
+
 /// Split a leading `name:`, `@cheap:`, or bare `:` (anonymous) label into an AST
 /// [`Symbol`](crate::ast::Symbol) carrying both the **source form** (`name` /
 /// `@cheap` / empty for anonymous — what the formatter re-emits) and the
@@ -2311,7 +2323,7 @@ fn split_label_symbol<'a>(
     trimmed: &'a str,
 ) -> Result<(Option<crate::ast::Symbol>, &'a str), AsmError> {
     use crate::ast::{Scope, Symbol};
-    let (word, remainder) = split_first_word(trimmed);
+    let (word, remainder) = split_label_head(trimmed).unwrap_or_else(|| split_first_word(trimmed));
     // A bare `:` is an anonymous label: the empty source name re-emits as a lone
     // `:` (emit appends the colon), while assembly binds the next index in the
     // evaluation-order stream.

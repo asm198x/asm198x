@@ -231,3 +231,10 @@ test('ca65 CPU-specific reserved names are mandatory package evidence', () => {
   assert(qualifies(complete)); assert(requiredCases.includes('ca65_reserved_constants'));
   assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_reserved_constants')), false);
 });
+
+
+test('ca65 label delimiters are mandatory package evidence', () => {
+  const complete = requiredCases.map(name => ({ name, status: 'pass' }));
+  assert(qualifies(complete)); assert(requiredCases.includes('ca65_label_delimiters'));
+  assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_label_delimiters')), false);
+});

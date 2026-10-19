@@ -1,0 +1,34 @@
+[
+  {
+    "source": "entry:.macro emit\n.byte 7\n.endmacro\nemit\n.word entry\n",
+    "argv": [
+      "/private/tmp/asm198x-address-size-build/debug/asm198x",
+      "--dialect",
+      "ca65",
+      "-C",
+      "input.cfg",
+      "input.s",
+      "-o",
+      "out.bin"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:1: error: unknown instruction `ENTRY:.MACRO`\n"
+  },
+  {
+    "source": "entry: .macro emit\n.byte 7\n.endmacro\nemit\n.word entry\n",
+    "argv": [
+      "/private/tmp/asm198x-address-size-build/debug/asm198x",
+      "--dialect",
+      "ca65",
+      "-C",
+      "input.cfg",
+      "input.s",
+      "-o",
+      "out.bin"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "asm198x: input.s:1: error: unsupported directive `.macro`\n"
+  }
+]
