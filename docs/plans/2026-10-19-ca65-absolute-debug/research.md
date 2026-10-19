@@ -42,3 +42,9 @@ is byte-for-byte the tested patch on top of that concurrent CI commit; its
 post-merge run was cancelled by newer CI work. Its completed exact-head
 pre-merge five-host qualification remains retained. No foreign worktrees were
 changed or removed.
+
+Clean producer 1714d3a704dd57647c18860a318ebf30c8b099fd retains all 564
+unchanged native/upstream 4510 bytes (SHA-256
+8a5fcde630e55dd49403f7c6ffed25d8786e65e3d0a2723531b7ca3e2c0509ec).
+The verifier reads seven actual processes and fourteen streams and proves a
+changed byte is rejected.

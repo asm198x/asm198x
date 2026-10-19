@@ -19,7 +19,7 @@
    Run isolated Rust/Lua, Clippy, fmt, Node, Ruff/docs and preceding/current real
    archives with both corruption controls. Push verified commits and retain a
    clean unchanged 4510 producer replay.
-5. Wait for #816; inspect every exact-head workflow/check and five actual package
+5. Wait for #824; inspect every exact-head workflow/check and five actual package
    reports/receipts plus ten controls. Squash, verify closure/retention, clean the
    finished workspace/cache and continue the next confirmed issue.
 
@@ -58,3 +58,14 @@ section design is approved; the source byte prerequisite remains separate.
 The byte prerequisite is now locally complete on #824, with all 63 native
 controls and the unchanged 4510 replay retained. Merge qualification still
 precedes final #814 merge.
+
+## Local verification complete
+
+All 1570 Rust tests passed (38 ignored), all 82 Node tests passed, and
+Clippy/fmt/Ruff/docs passed. Source commit 48a3e0e plus the merge of current
+CI conventions gives clean producer 1714d3a704dd57647c18860a318ebf30c8b099fd.
+The unchanged 4510 replay verifies all 564 bytes, seven processes/fourteen
+streams, with a changed-byte rejection control. No source changed during it.
+The preceding/current actual archives prove the new metadata cohort can fail;
+all 67 mandatory cohorts and both local corruption controls passed as expected.
+Five-host PR qualification remains required before merge.
