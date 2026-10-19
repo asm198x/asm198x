@@ -111,8 +111,8 @@ pub(crate) trait MacroSyntax {
     /// declared parameters, so a macro with two parameters called with one
     /// answers 1.
     ///
-    /// A plain textual swap, like [`expansion_token`](Self::expansion_token),
-    /// and for the same reason: the word is not a symbol.
+    /// A reserved token, matched outside strings/comments with ASCII-insensitive
+    /// keyword casing. User symbols retain case-sensitive matching.
     fn argument_count_word(&self) -> Option<&'static str> {
         None
     }
@@ -412,34 +412,81 @@ fn split_args(text: &str, separator: impl Fn(usize) -> bool) -> Vec<String> {
     args
 }
 
-/// Collect macro definitions and expand their invocations.
-///
-/// Two passes, because a macro may invoke one defined **later** in the file —
-/// the references resolve a name when they expand, not when they read.
-/// Answer every `word(name)` using the caller's visibility rule. The file
-/// expander accounts for source position; a live namespace also includes
-/// definitions registered by earlier fragments without copying their keys.
-fn fold_defined_macro(word: &str, line: &str, known: &dyn Fn(&str) -> bool) -> String {
+/// Rewrite a reserved macro word outside strings/comments. Reserved keywords
+/// are ASCII-insensitive; user symbols still use the dialect's own matching.
+fn rewrite_macro_word<S: MacroSyntax>(
+    syntax: &S,
+    word: &str,
+    line: &str,
+    replacement: impl Fn(&str) -> Option<(usize, String)>,
+) -> String {
+    let code = without_comment_impl(line, |at| syntax.numeric_separator(line, at));
+    let bytes = code.as_bytes();
     let mut out = String::with_capacity(line.len());
-    let mut rest = line;
-    while let Some(start) = rest.find(word) {
-        let after = &rest[start + word.len()..];
-        let Some(open) = after.find('(').filter(|i| after[..*i].trim().is_empty()) else {
-            out.push_str(&rest[..start + word.len()]);
-            rest = after;
-            continue;
-        };
-        let Some(close) = after[open..].find(')').map(|i| open + i) else {
-            break;
-        };
-        let name = after[open + 1..close].trim();
-        let known = known(name);
-        out.push_str(&rest[..start]);
-        out.push(if known { '1' } else { '0' });
-        rest = &after[close + 1..];
+    let mut quote = None;
+    let mut i = 0;
+    while i < bytes.len() {
+        let c = bytes[i];
+        if let Some(q) = quote {
+            let ch = code[i..].chars().next().expect("valid UTF-8 boundary");
+            out.push(ch);
+            if c == q {
+                quote = None;
+            }
+            i += ch.len_utf8();
+        } else if c == b'"' || (c == b'\'' && !syntax.numeric_separator(code, i)) {
+            quote = Some(c);
+            out.push(c as char);
+            i += 1;
+        } else if syntax.is_symbol_char(c) {
+            let mut end = i + 1;
+            while end < bytes.len() && syntax.is_symbol_char(bytes[end]) {
+                end += 1;
+            }
+            let token = &code[i..end];
+            if token.eq_ignore_ascii_case(word)
+                && let Some((consumed, value)) = replacement(&code[end..])
+            {
+                out.push_str(&value);
+                end += consumed;
+            } else {
+                out.push_str(token);
+            }
+            i = end;
+        } else {
+            let ch = code[i..].chars().next().expect("valid UTF-8 boundary");
+            out.push(ch);
+            i += ch.len_utf8();
+        }
     }
-    out.push_str(rest);
+    out.push_str(&line[code.len()..]);
     out
+}
+
+/// Answer complete `word(name)` tokens using the caller's visibility rule.
+/// Invalid operands stay intact so the ordinary parser can diagnose them.
+fn fold_defined_macro<S: MacroSyntax>(
+    syntax: &S,
+    word: &str,
+    line: &str,
+    known: &dyn Fn(&str) -> bool,
+) -> String {
+    rewrite_macro_word(syntax, word, line, |after| {
+        let trimmed = after.trim_start();
+        let operand = trimmed.strip_prefix('(')?;
+        let close = operand.find(')')?;
+        let name = operand[..close].trim();
+        let mut chars = name.bytes();
+        if !chars
+            .next()
+            .is_some_and(|c| c.is_ascii_alphabetic() || c == b'_')
+            || !chars.all(|c| c.is_ascii_alphanumeric() || c == b'_')
+        {
+            return None;
+        }
+        let consumed = after.len() - trimmed.len() + close + 2;
+        Some((consumed, if known(name) { "1" } else { "0" }.to_owned()))
+    })
 }
 
 pub(crate) fn expand<S: MacroSyntax>(syntax: &S, source: &str) -> Result<Expanded, AsmError> {
@@ -624,7 +671,8 @@ fn expand_at_inner<S: MacroSyntax>(
                 if let Some(word) = syntax.argument_count_word() {
                     // The call site's count, not the fitted one: a macro with
                     // two parameters called with one answers 1.
-                    text = text.replace(word, &given.to_string());
+                    text =
+                        rewrite_macro_word(syntax, word, &text, |_| Some((0, given.to_string())));
                 }
                 if let Some(token) = syntax.expansion_token() {
                     // A plain textual swap: the token is not a symbol, so the
@@ -649,11 +697,17 @@ fn expand_at_inner<S: MacroSyntax>(
     let mut text = String::with_capacity(source.len());
     let mut origins = Vec::with_capacity(body.len());
     for (origin, line) in body {
+        // A live reader must first substitute text names in each generated
+        // body line. Its next read folds the query; a recursive file pre-pass
+        // has no such later layer and keeps its existing source-position rule.
         let line = match syntax.defined_macro_word() {
-            Some(word) => fold_defined_macro(word, &line, &|name| {
-                state.defines(name) && defined_at.get(name).is_none_or(|line| *line < origin.line)
-            }),
-            None => line,
+            Some(word) if recursive || origin.frames.is_empty() => {
+                fold_defined_macro(syntax, word, &line, &|name| {
+                    state.defines(name)
+                        && defined_at.get(name).is_none_or(|line| *line < origin.line)
+                })
+            }
+            _ => line,
         };
         text.push_str(&line);
         text.push('\n');

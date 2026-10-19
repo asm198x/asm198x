@@ -1,0 +1,104 @@
+[
+  {
+    "name": "dotted_constant",
+    "source": ".bogus=7\n.byte .bogus\n",
+    "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+    "runs": [
+      {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "input.s",
+          "-o",
+          "native.o"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "input.s(1): Error: '.BOGUS' is not a recognized control command\ninput.s(1): Error: Unexpected trailing garbage characters\ninput.s(2): Error: '.BOGUS' is not a recognized control command\ninput.s(2): Error: Syntax error\n"
+      },
+      {
+        "argv": [
+          "/private/tmp/asm198x-address-size-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 1 byte(s) -> out.bin\n"
+      }
+    ],
+    "asm_hex": "07"
+  },
+  {
+    "name": "definedmacro_suffix_constant",
+    "source": ".definedmacroSuffix=7\n.byte .definedmacroSuffix\n",
+    "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+    "runs": [
+      {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "input.s",
+          "-o",
+          "native.o"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "input.s(1): Error: '.DEFINEDMACROSUFFIX' is not a recognized control command\ninput.s(1): Error: Unexpected trailing garbage characters\ninput.s(2): Error: '.DEFINEDMACROSUFFIX' is not a recognized control command\ninput.s(2): Error: Syntax error\n"
+      },
+      {
+        "argv": [
+          "/private/tmp/asm198x-address-size-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 1 byte(s) -> out.bin\n"
+      }
+    ],
+    "asm_hex": "07"
+  },
+  {
+    "name": "ordinary_control",
+    "source": "VALUE=7\n.byte VALUE\n",
+    "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+    "runs": [
+      {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "input.s",
+          "-o",
+          "native.o"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "/private/tmp/asm198x-address-size-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 1 byte(s) -> out.bin\n"
+      }
+    ],
+    "asm_hex": "07"
+  }
+]
