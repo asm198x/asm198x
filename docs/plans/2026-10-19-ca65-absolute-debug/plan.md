@@ -22,3 +22,12 @@
 5. Wait for #816; inspect every exact-head workflow/check and five actual package
    reports/receipts plus ten controls. Squash, verify closure/retention, clean the
    finished workspace/cache and continue the next confirmed issue.
+
+## Verified prerequisite
+
+The 16-case native address audit exposes three cross-segment byte differences
+under the default global absolute counter. Correct that separate #822 issue
+before qualifying cross-segment metadata. Native segment.c GetPC and fragment
+accounting use global AbsPC, independent of the active segment's linked base.
+Do not introduce per-segment absolute mode as the default. The #814 logical
+section design is approved; the source byte prerequisite remains separate.

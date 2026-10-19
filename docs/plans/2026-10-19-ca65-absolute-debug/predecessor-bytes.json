@@ -1,0 +1,310 @@
+{
+  "binary": "/private/tmp/asm198x-hex-suffix-predecessor/asm198x",
+  "sha256": "c8044db0a9cdfe04d50c63b8f51234a3bb6952d78319110eb52e4b9d38900230",
+  "results": [
+    {
+      "name": "$20_global",
+      "argv": [
+        "/private/tmp/asm198x-hex-suffix-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "072000",
+      "native_hex": "072000",
+      "matches": true
+    },
+    {
+      "name": "$20_cheap",
+      "argv": [
+        "/private/tmp/asm198x-hex-suffix-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "072000",
+      "native_hex": "072000",
+      "matches": true
+    },
+    {
+      "name": "$20_scope",
+      "argv": [
+        "/private/tmp/asm198x-hex-suffix-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "072000",
+      "native_hex": "072000",
+      "matches": true
+    },
+    {
+      "name": "$1000_global",
+      "argv": [
+        "/private/tmp/asm198x-hex-suffix-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "070010",
+      "native_hex": "070010",
+      "matches": true
+    },
+    {
+      "name": "$1000_cheap",
+      "argv": [
+        "/private/tmp/asm198x-hex-suffix-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "070010",
+      "native_hex": "070010",
+      "matches": true
+    },
+    {
+      "name": "$1000_scope",
+      "argv": [
+        "/private/tmp/asm198x-hex-suffix-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "070010",
+      "native_hex": "070010",
+      "matches": true
+    },
+    {
+      "name": "$2000_global",
+      "argv": [
+        "/private/tmp/asm198x-hex-suffix-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "070020",
+      "native_hex": "070020",
+      "matches": true
+    },
+    {
+      "name": "$2000_cheap",
+      "argv": [
+        "/private/tmp/asm198x-hex-suffix-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "070020",
+      "native_hex": "070020",
+      "matches": true
+    },
+    {
+      "name": "$2000_scope",
+      "argv": [
+        "/private/tmp/asm198x-hex-suffix-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "070020",
+      "native_hex": "070020",
+      "matches": true
+    },
+    {
+      "name": "metadata_only",
+      "argv": [
+        "/private/tmp/asm198x-hex-suffix-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0020",
+      "native_hex": "0020",
+      "matches": true
+    },
+    {
+      "name": "mode_label",
+      "argv": [
+        "/private/tmp/asm198x-hex-suffix-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0020",
+      "native_hex": "0020",
+      "matches": true
+    },
+    {
+      "name": "multiple_origins",
+      "argv": [
+        "/private/tmp/asm198x-hex-suffix-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\n",
+      "hex": "070800200030",
+      "native_hex": "070800200030",
+      "matches": true
+    },
+    {
+      "name": "segment_change",
+      "argv": [
+        "/private/tmp/asm198x-hex-suffix-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+      "hex": "0100200720052002",
+      "native_hex": "0100200120062002",
+      "matches": false
+    },
+    {
+      "name": "other_segment_reloc",
+      "argv": [
+        "/private/tmp/asm198x-hex-suffix-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+      "hex": "0100200710051002",
+      "native_hex": "0100200710051002",
+      "matches": true
+    },
+    {
+      "name": "each_segment_origin",
+      "argv": [
+        "/private/tmp/asm198x-hex-suffix-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+      "hex": "0100200030fe2f02",
+      "native_hex": "0100200030053002",
+      "matches": false
+    },
+    {
+      "name": "return_relative_segment",
+      "argv": [
+        "/private/tmp/asm198x-hex-suffix-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 8 byte(s) -> out.bin\n",
+      "hex": "0100100030fe2f02",
+      "native_hex": "0100100030053002",
+      "matches": false
+    }
+  ]
+}
