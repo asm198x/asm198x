@@ -569,6 +569,7 @@ fn bind_head_label<'a>(
         .map_err(|e| super::statement_error(e, file, &node.span.expansion_frames))?;
     if let Some(symbol) = symbol {
         sw.reader.source_known.insert(symbol.qualified.clone());
+        sw.reader.text_names.insert(symbol.qualified.clone());
         st.deferred.invalidate_size(&symbol.qualified);
         st.label_seg
             .insert(symbol.qualified.clone(), st.seg.clone());
@@ -1331,6 +1332,7 @@ fn project_selected(
     let start = st.stmts.len();
     if let Some(label) = &node.label {
         reader.source_known.insert(label.qualified.clone());
+        reader.text_names.insert(label.qualified.clone());
         st.deferred.invalidate_size(&label.qualified);
     }
     project_one(node, st)?;
