@@ -1,0 +1,12 @@
+{
+  "rust_passed": 1575,
+  "rust_ignored": 38,
+  "node_passed": 84,
+  "native_cases": 317,
+  "native_accepted": 172,
+  "native_refused": 145,
+  "formatter_roundtrips": 155,
+  "package_cohorts": 69,
+  "package_commands": 782,
+  "binary_sha256": "0b60bd0e87998aad392be0d72b09b9ef1aaf189559c79d5c0f7fd73fbec042aa"
+}

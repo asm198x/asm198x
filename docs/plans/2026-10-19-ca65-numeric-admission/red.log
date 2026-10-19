@@ -1,0 +1,25 @@
+   Compiling verdict-corpus v0.0.71 (/Users/stevehill/Projects/198x/Asm198x/asm198x-ca65-numeric-admission/crates/verdict-corpus)
+   Compiling asm198x v0.0.71 (/Users/stevehill/Projects/198x/Asm198x/asm198x-ca65-numeric-admission/crates/asm198x)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 6.97s
+     Running tests/ca65_numeric_admission.rs (/private/tmp/asm198x-numeric-admission-build/debug/deps/ca65_numeric_admission-ff1000533da88207)
+
+running 1 test
+test native_numeric_admission_preserves_lexical_limits_before_arithmetic ... FAILED
+
+failures:
+
+---- native_numeric_admission_preserves_lexical_limits_before_arithmetic stdout ----
+
+thread 'native_numeric_admission_preserves_lexical_limits_before_arithmetic' (129243412) panicked at crates/asm198x/tests/ca65_numeric_admission.rs:92:9:
+assertion `left == right` failed: core_inactive_4294967300: Output { status: ExitStatus(unix_wait_status(0)), stdout: "", stderr: "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n" }
+  left: true
+ right: false
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    native_numeric_admission_preserves_lexical_limits_before_arithmetic
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.09s
+
+error: test failed, to rerun pass `-p asm198x --test ca65_numeric_admission`

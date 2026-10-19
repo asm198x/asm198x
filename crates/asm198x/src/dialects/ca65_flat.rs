@@ -90,6 +90,74 @@ pub(crate) fn parse_number(token: &str, line: usize) -> Result<i64, AsmError> {
     Ok(value)
 }
 
+/// Check native numeric tokens without interpreting skipped source.
+pub(crate) fn validate_numeric_tokens(source: &str, at: &Span) -> Result<(), AsmError> {
+    let bytes = source.as_bytes();
+    let mut i = 0;
+    while i < bytes.len() {
+        let start = i;
+        match bytes[i] {
+            b';' => break,
+            b'"' => {
+                i += 1;
+                while i < bytes.len() && bytes[i] != b'"' {
+                    i += 1;
+                }
+                i += usize::from(i < bytes.len());
+                continue;
+            }
+            b'\'' => {
+                // Default ca65 characters consume one byte. Three consecutive
+                // apostrophes represent the apostrophe character itself.
+                i = (i + 2).min(bytes.len());
+                if bytes.get(i) == Some(&b'\'') {
+                    i += 1;
+                }
+                continue;
+            }
+            b'$' | b'%' => {
+                let binary = bytes[i] == b'%';
+                i += 1;
+                while i < bytes.len()
+                    && if binary {
+                        matches!(bytes[i], b'0' | b'1')
+                    } else {
+                        bytes[i].is_ascii_hexdigit()
+                    }
+                {
+                    i += 1;
+                }
+            }
+            b'0'..=b'9' => {
+                i += 1;
+                while i < bytes.len() && bytes[i].is_ascii_hexdigit() {
+                    i += 1;
+                }
+                if matches!(bytes.get(i), Some(b'h' | b'H')) {
+                    i += 1;
+                }
+            }
+            b'a'..=b'z' | b'A'..=b'Z' | b'_' | b'@' | b'.' => {
+                i += 1;
+                while i < bytes.len() && (bytes[i].is_ascii_alphanumeric() || bytes[i] == b'_') {
+                    i += 1;
+                }
+                continue;
+            }
+            _ => {
+                i += 1;
+                continue;
+            }
+        }
+        parse_number(&source[start..i], at.line as usize).map_err(|error| {
+            let mut span = at.clone();
+            span.col = start as u32 + 1;
+            AsmError::at(span, error.message)
+        })?;
+    }
+    Ok(())
+}
+
 /// A walk-handled `.include`/`.incbin` line found by a dialect's per-line
 /// parse, handed back for the driver to decide: the single-source parse keeps
 /// it as an unresolved verbatim item (KTD1 — `--fmt` never opens the target);
@@ -327,7 +395,9 @@ pub(crate) fn walk_file<W: FlatWalk>(
     // include boundary, which is a deliberate hold rather than a measured
     // answer. This is an assembly path, so it always expands — the formatter
     // parses through `parse_program`, which asks separately.
-    let expanded = w.expand_source(source)?;
+    let expanded = w
+        .expand_source(source)
+        .map_err(|error| stamp_file(error, file))?;
     let text = macros::expanded_text(&expanded, source);
     let origins = macros::line_origins(&expanded);
     let lines: Vec<&str> = text.lines().collect();
@@ -1201,6 +1271,10 @@ pub(crate) fn directive_operand_span(
 pub(crate) struct Ca65Macros;
 
 impl macros::MacroSyntax for Ca65Macros {
+    fn admit_line(&self, source: &str, at: &Span) -> Result<(), AsmError> {
+        validate_numeric_tokens(source, at)
+    }
+
     fn is_symbol_char(&self, c: u8) -> bool {
         // ca65 tokenises @value independently of a parameter named value.
         c.is_ascii_alphanumeric() || matches!(c, b'_' | b'.' | b'@')

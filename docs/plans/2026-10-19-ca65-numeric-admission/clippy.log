@@ -1,0 +1,4 @@
+    Checking verdict-corpus v0.0.71 (/Users/stevehill/Projects/198x/Asm198x/asm198x-ca65-numeric-admission/crates/verdict-corpus)
+    Checking asm198x v0.0.71 (/Users/stevehill/Projects/198x/Asm198x/asm198x-ca65-numeric-admission/crates/asm198x)
+    Checking xtask v0.0.71 (/Users/stevehill/Projects/198x/Asm198x/asm198x-ca65-numeric-admission/xtask)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 6.25s

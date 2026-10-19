@@ -1,0 +1,5 @@
+{
+  "number": 833,
+  "url": "https://github.com/asm198x/asm198x/issues/833",
+  "title": "ca65 formatting truncates source at .end inside a macro"
+}

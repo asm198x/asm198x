@@ -41,6 +41,11 @@ const MAX_EXPANSION_DEPTH: usize = 64;
 
 /// One dialect's macro grammar.
 pub(crate) trait MacroSyntax {
+    /// Native lexical checks when original source enters a macro token stream.
+    fn admit_line(&self, _source: &str, _at: &Span) -> Result<(), AsmError> {
+        Ok(())
+    }
+
     /// Enter/leave a foreign-language block whose body is not assembler text.
     /// SjASMPlus Lua reads macro arguments through sj.get_define instead of
     /// substituting identifiers in the script (probe #532).
@@ -554,12 +559,16 @@ fn expand_at_inner<S: MacroSyntax>(
     while i < lines.len() {
         let raw = lines[i];
         let line_no = first_line + i;
+        syntax.admit_line(raw, &Span::in_file(file, line_no as u32, 1))?;
         if let Some(collected) = syntax.collect(&lines, i) {
             let Definition {
                 name,
                 def,
                 last_line,
             } = collected.map_err(|msg| AsmError::new(line_no, msg))?;
+            for (offset, raw) in lines[i + 1..=last_line].iter().enumerate() {
+                syntax.admit_line(raw, &Span::in_file(file, (line_no + offset + 1) as u32, 1))?;
+            }
             // Existing live definitions are visible already. Only new
             // fragment definitions need a positional boundary; an ordinary
             // line never copies the whole live namespace.
