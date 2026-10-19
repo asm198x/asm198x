@@ -1,0 +1,1621 @@
+{
+  "tools": {
+    "ca65": {
+      "path": "/opt/homebrew/bin/ca65",
+      "sha256": "1a57997819fd98814e4601b5160df589e7a1a24e1888a80fee51ae450d8fd0ea",
+      "version": {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "--version"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "ca65 V2.18 - N/A\n"
+      }
+    },
+    "ld65": {
+      "path": "/opt/homebrew/bin/ld65",
+      "sha256": "36bb196207a6b2c90a4aa991b419d6113885303951b14b60b455f51c777b3339",
+      "version": {
+        "argv": [
+          "/opt/homebrew/bin/ld65",
+          "--version"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "ld65 V2.18 - N/A\n"
+      }
+    }
+  },
+  "files": {
+    "counter.inc": ".segment \"RODATA\"\nsecond:.byte 2\n.segment \"CODE\"\n"
+  },
+  "cases": [
+    {
+      "name": "RODATA_0_keep",
+      "source": ".org $2000\nfirst:.byte 1\n.segment \"RODATA\"\nsecond:.res 0\n.segment \"CODE\"\n.word first,second,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "01002001200520"
+    },
+    {
+      "name": "RODATA_0_org",
+      "source": ".org $2000\nfirst:.byte 1\n.segment \"RODATA\"\n.org $3000\nsecond:.res 0\n.segment \"CODE\"\n.word first,second,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "01002000300430"
+    },
+    {
+      "name": "RODATA_0_reloc",
+      "source": ".org $2000\nfirst:.byte 1\n.segment \"RODATA\"\n.reloc\nsecond:.res 0\n.segment \"CODE\"\n.word first,second,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "01002007100510"
+    },
+    {
+      "name": "RODATA_0_align",
+      "source": ".org $2000\nfirst:.byte 1\n.segment \"RODATA\"\n.res 0\n.align 4\nsecond:\n.segment \"CODE\"\n.word first,second,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(2): Segment 'RODATA' isn't aligned properly; the resulting executable might not be functional.\n"
+        }
+      ],
+      "native_hex": "01002001200520"
+    },
+    {
+      "name": "RODATA_1_keep",
+      "source": ".org $2000\nfirst:.byte 1\n.segment \"RODATA\"\nsecond:.res 1\n.segment \"CODE\"\n.word first,second,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0100200120062000"
+    },
+    {
+      "name": "RODATA_1_org",
+      "source": ".org $2000\nfirst:.byte 1\n.segment \"RODATA\"\n.org $3000\nsecond:.res 1\n.segment \"CODE\"\n.word first,second,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0100200030053000"
+    },
+    {
+      "name": "RODATA_1_reloc",
+      "source": ".org $2000\nfirst:.byte 1\n.segment \"RODATA\"\n.reloc\nsecond:.res 1\n.segment \"CODE\"\n.word first,second,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0100200710051000"
+    },
+    {
+      "name": "RODATA_1_align",
+      "source": ".org $2000\nfirst:.byte 1\n.segment \"RODATA\"\n.res 1\n.align 4\nsecond:\n.segment \"CODE\"\n.word first,second,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(2): Segment 'RODATA' isn't aligned properly; the resulting executable might not be functional.\n"
+        }
+      ],
+      "native_hex": "0100200520092000000000"
+    },
+    {
+      "name": "RODATA_3_keep",
+      "source": ".org $2000\nfirst:.byte 1\n.segment \"RODATA\"\nsecond:.res 3\n.segment \"CODE\"\n.word first,second,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "01002001200820000000"
+    },
+    {
+      "name": "RODATA_3_org",
+      "source": ".org $2000\nfirst:.byte 1\n.segment \"RODATA\"\n.org $3000\nsecond:.res 3\n.segment \"CODE\"\n.word first,second,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "01002000300730000000"
+    },
+    {
+      "name": "RODATA_3_reloc",
+      "source": ".org $2000\nfirst:.byte 1\n.segment \"RODATA\"\n.reloc\nsecond:.res 3\n.segment \"CODE\"\n.word first,second,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "01002007100510000000"
+    },
+    {
+      "name": "RODATA_3_align",
+      "source": ".org $2000\nfirst:.byte 1\n.segment \"RODATA\"\n.res 3\n.align 4\nsecond:\n.segment \"CODE\"\n.word first,second,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(2): Segment 'RODATA' isn't aligned properly; the resulting executable might not be functional.\n"
+        }
+      ],
+      "native_hex": "0100200520092000000000"
+    },
+    {
+      "name": "BSS_0_keep",
+      "source": ".org $2000\nfirst:.byte 1\n.segment \"BSS\"\nsecond:.res 0\n.segment \"CODE\"\n.word first,second,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "01002001200520"
+    },
+    {
+      "name": "BSS_0_org",
+      "source": ".org $2000\nfirst:.byte 1\n.segment \"BSS\"\n.org $3000\nsecond:.res 0\n.segment \"CODE\"\n.word first,second,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "01002000300430"
+    },
+    {
+      "name": "BSS_0_reloc",
+      "source": ".org $2000\nfirst:.byte 1\n.segment \"BSS\"\n.reloc\nsecond:.res 0\n.segment \"CODE\"\n.word first,second,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "01002020000510"
+    },
+    {
+      "name": "BSS_0_align",
+      "source": ".org $2000\nfirst:.byte 1\n.segment \"BSS\"\n.res 0\n.align 4\nsecond:\n.segment \"CODE\"\n.word first,second,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(2): Segment 'BSS' isn't aligned properly; the resulting executable might not be functional.\n"
+        }
+      ],
+      "native_hex": "01002001200520"
+    },
+    {
+      "name": "BSS_1_keep",
+      "source": ".org $2000\nfirst:.byte 1\n.segment \"BSS\"\nsecond:.res 1\n.segment \"CODE\"\n.word first,second,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "01002001200620"
+    },
+    {
+      "name": "BSS_1_org",
+      "source": ".org $2000\nfirst:.byte 1\n.segment \"BSS\"\n.org $3000\nsecond:.res 1\n.segment \"CODE\"\n.word first,second,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "01002000300530"
+    },
+    {
+      "name": "BSS_1_reloc",
+      "source": ".org $2000\nfirst:.byte 1\n.segment \"BSS\"\n.reloc\nsecond:.res 1\n.segment \"CODE\"\n.word first,second,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "01002020000510"
+    },
+    {
+      "name": "BSS_1_align",
+      "source": ".org $2000\nfirst:.byte 1\n.segment \"BSS\"\n.res 1\n.align 4\nsecond:\n.segment \"CODE\"\n.word first,second,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(2): Segment 'BSS' isn't aligned properly; the resulting executable might not be functional.\n"
+        }
+      ],
+      "native_hex": "01002005200920"
+    },
+    {
+      "name": "BSS_3_keep",
+      "source": ".org $2000\nfirst:.byte 1\n.segment \"BSS\"\nsecond:.res 3\n.segment \"CODE\"\n.word first,second,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "01002001200820"
+    },
+    {
+      "name": "BSS_3_org",
+      "source": ".org $2000\nfirst:.byte 1\n.segment \"BSS\"\n.org $3000\nsecond:.res 3\n.segment \"CODE\"\n.word first,second,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "01002000300730"
+    },
+    {
+      "name": "BSS_3_reloc",
+      "source": ".org $2000\nfirst:.byte 1\n.segment \"BSS\"\n.reloc\nsecond:.res 3\n.segment \"CODE\"\n.word first,second,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "01002020000510"
+    },
+    {
+      "name": "BSS_3_align",
+      "source": ".org $2000\nfirst:.byte 1\n.segment \"BSS\"\n.res 3\n.align 4\nsecond:\n.segment \"CODE\"\n.word first,second,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(2): Segment 'BSS' isn't aligned properly; the resulting executable might not be functional.\n"
+        }
+      ],
+      "native_hex": "01002005200920"
+    },
+    {
+      "name": "ZEROPAGE_0_keep",
+      "source": ".org $2000\nfirst:.byte 1\n.segment \"ZEROPAGE\"\nsecond:.res 0\n.segment \"CODE\"\n.word first,second,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "01002001200520"
+    },
+    {
+      "name": "ZEROPAGE_0_org",
+      "source": ".org $2000\nfirst:.byte 1\n.segment \"ZEROPAGE\"\n.org $3000\nsecond:.res 0\n.segment \"CODE\"\n.word first,second,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "01002000300430"
+    },
+    {
+      "name": "ZEROPAGE_0_reloc",
+      "source": ".org $2000\nfirst:.byte 1\n.segment \"ZEROPAGE\"\n.reloc\nsecond:.res 0\n.segment \"CODE\"\n.word first,second,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "01002020000510"
+    },
+    {
+      "name": "ZEROPAGE_0_align",
+      "source": ".org $2000\nfirst:.byte 1\n.segment \"ZEROPAGE\"\n.res 0\n.align 4\nsecond:\n.segment \"CODE\"\n.word first,second,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(2): Segment 'ZEROPAGE' isn't aligned properly; the resulting executable might not be functional.\n"
+        }
+      ],
+      "native_hex": "01002001200520"
+    },
+    {
+      "name": "ZEROPAGE_1_keep",
+      "source": ".org $2000\nfirst:.byte 1\n.segment \"ZEROPAGE\"\nsecond:.res 1\n.segment \"CODE\"\n.word first,second,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "01002001200620"
+    },
+    {
+      "name": "ZEROPAGE_1_org",
+      "source": ".org $2000\nfirst:.byte 1\n.segment \"ZEROPAGE\"\n.org $3000\nsecond:.res 1\n.segment \"CODE\"\n.word first,second,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "01002000300530"
+    },
+    {
+      "name": "ZEROPAGE_1_reloc",
+      "source": ".org $2000\nfirst:.byte 1\n.segment \"ZEROPAGE\"\n.reloc\nsecond:.res 1\n.segment \"CODE\"\n.word first,second,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "01002020000510"
+    },
+    {
+      "name": "ZEROPAGE_1_align",
+      "source": ".org $2000\nfirst:.byte 1\n.segment \"ZEROPAGE\"\n.res 1\n.align 4\nsecond:\n.segment \"CODE\"\n.word first,second,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(2): Segment 'ZEROPAGE' isn't aligned properly; the resulting executable might not be functional.\n"
+        }
+      ],
+      "native_hex": "01002005200920"
+    },
+    {
+      "name": "ZEROPAGE_3_keep",
+      "source": ".org $2000\nfirst:.byte 1\n.segment \"ZEROPAGE\"\nsecond:.res 3\n.segment \"CODE\"\n.word first,second,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "01002001200820"
+    },
+    {
+      "name": "ZEROPAGE_3_org",
+      "source": ".org $2000\nfirst:.byte 1\n.segment \"ZEROPAGE\"\n.org $3000\nsecond:.res 3\n.segment \"CODE\"\n.word first,second,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "01002000300730"
+    },
+    {
+      "name": "ZEROPAGE_3_reloc",
+      "source": ".org $2000\nfirst:.byte 1\n.segment \"ZEROPAGE\"\n.reloc\nsecond:.res 3\n.segment \"CODE\"\n.word first,second,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "01002020000510"
+    },
+    {
+      "name": "ZEROPAGE_3_align",
+      "source": ".org $2000\nfirst:.byte 1\n.segment \"ZEROPAGE\"\n.res 3\n.align 4\nsecond:\n.segment \"CODE\"\n.word first,second,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(2): Segment 'ZEROPAGE' isn't aligned properly; the resulting executable might not be functional.\n"
+        }
+      ],
+      "native_hex": "01002005200920"
+    },
+    {
+      "name": "data_byte",
+      "source": ".org $2000\n.segment \"RODATA\"\n.byte <*,<*\n.segment \"CODE\"\n.word *\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "02200001"
+    },
+    {
+      "name": "data_word",
+      "source": ".org $2000\n.segment \"RODATA\"\n.word *,*\n.segment \"CODE\"\n.word *\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "042000200220"
+    },
+    {
+      "name": "data_dbyt",
+      "source": ".org $2000\n.segment \"RODATA\"\n.dbyt *,*\n.segment \"CODE\"\n.word *\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "042020002002"
+    },
+    {
+      "name": "data_dword",
+      "source": ".org $2000\n.segment \"RODATA\"\n.dword *,*\n.segment \"CODE\"\n.word *\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "08200020000004200000"
+    },
+    {
+      "name": "push_pop",
+      "source": ".org $2000\nfirst:.byte 1\n.pushseg\n.segment \"RODATA\"\n.res 3\n.popseg\n.word first,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0100200620000000"
+    },
+    {
+      "name": "include",
+      "source": ".org $2000\nfirst:.byte 1\n.include \"counter.inc\"\n.word first,second,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0100200120062002"
+    },
+    {
+      "name": "macro",
+      "source": ".macro emit\n.segment \"RODATA\"\nsecond:.byte 2\n.segment \"CODE\"\n.endmacro\n.org $2000\nfirst:.byte 1\nemit\n.word first,second,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0100200120062002"
+    },
+    {
+      "name": "repeat",
+      "source": ".org $2000\n.repeat 2,I\n.segment \"RODATA\"\n.byte I\n.segment \"CODE\"\n.word *\n.endrepeat\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "012004200001"
+    },
+    {
+      "name": "alias_definition_pc",
+      "source": ".org $2000\n.byte 1\n.segment \"RODATA\"\nALIAS=*\n.byte 2\n.segment \"CODE\"\n.word ALIAS,*\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "010120042002"
+    },
+    {
+      "name": "absolute_bit_branch",
+      "source": ".setcpu \"4510\"\n.org $2000\n.segment \"RODATA\"\n.byte 1\n.segment \"CODE\"\nbbr0 $20,$2004\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0f200001"
+    },
+    {
+      "name": "relative_bit_branch",
+      "source": ".setcpu \"4510\"\n.org $2000\n.segment \"RODATA\"\n.reloc\n.segment \"CODE\"\nbbr0 $20,$2000\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; RAM:start=$20,size=$100,file=\"\"; }\nSEGMENTS { CODE:load=MAIN,type=ro; RODATA:load=MAIN,type=ro; ZEROPAGE:load=RAM,type=zp; BSS:load=RAM,type=bss; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-vgotut6_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(6): Error: Range error\n"
+        }
+      ],
+      "native_hex": null
+    }
+  ]
+}

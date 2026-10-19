@@ -34,6 +34,7 @@ jobs:
   preflight:
     name: Stand down while a growth PR is open
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     outputs:
       proceed: ${{ steps.check.outputs.proceed }}
     steps:
@@ -56,6 +57,7 @@ jobs:
     needs: preflight
     if: needs.preflight.outputs.proceed == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     container:
       image: ghcr.io/${{ github.repository_owner }}/arbiter:latest
       credentials:
@@ -140,6 +142,7 @@ jobs:
     needs: grow
     if: needs.grow.outputs.pushed == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Open or refresh the pull request
         env:

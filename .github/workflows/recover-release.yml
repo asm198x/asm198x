@@ -19,6 +19,7 @@ permissions:
 jobs:
   recover:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     env:
       GH_TOKEN: ${{ secrets.RELEASE_PLZ_TOKEN || secrets.GITHUB_TOKEN }}
     steps:

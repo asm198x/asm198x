@@ -47,6 +47,7 @@ jobs:
   notify:
     name: Notify the site
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     # A `workflow_run` fires for every Release run, including the dry-run plan
     # on a pull request and any that failed. Only a successful release from a
     # tag push has published anything for the site to pick up. A `push` to

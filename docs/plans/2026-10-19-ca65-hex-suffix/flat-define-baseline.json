@@ -1,0 +1,66 @@
+[
+  {
+    "cpu": "65816",
+    "source": ".define VALUE $FF\n.byte VALUE\n",
+    "processes": [
+      {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "--cpu",
+          "65816",
+          "input.s",
+          "-o",
+          "native.o"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+          "--dialect",
+          "65816",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:1: error: unsupported directive `.define`\n"
+      }
+    ]
+  },
+  {
+    "cpu": "huc6280",
+    "source": ".define VALUE $FF\n.byte VALUE\n",
+    "processes": [
+      {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "--cpu",
+          "huc6280",
+          "input.s",
+          "-o",
+          "native.o"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "/private/tmp/asm198x-origin-validation-build/debug/asm198x",
+          "--dialect",
+          "huc6280",
+          "input.s",
+          "-o",
+          "out.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:1: error: unsupported directive `.define`\n"
+      }
+    ]
+  }
+]

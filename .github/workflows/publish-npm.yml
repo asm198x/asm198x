@@ -32,6 +32,7 @@ jobs:
   publish:
     name: ${{ matrix.package }}
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: read
       # The whole point: this is what replaces the token.
