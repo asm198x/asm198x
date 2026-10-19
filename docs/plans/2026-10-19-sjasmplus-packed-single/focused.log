@@ -1,0 +1,27 @@
+   Compiling asm198x v0.0.71 (/Users/stevehill/Projects/198x/Asm198x/asm198x-ca65-format-end/crates/asm198x)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.45s
+     Running tests/pasmo_character_literals.rs (/private/tmp/asm198x-format-build/debug/deps/pasmo_character_literals-2ebbea32e7333a28)
+
+running 2 tests
+test native_pasmo_character_boundaries_match_both_frontends ... ok
+test invalid_included_pasmo_literal_preserves_outputs_and_source ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.13s
+
+     Running tests/sjasmplus_define_numbers.rs (/private/tmp/asm198x-format-build/debug/deps/sjasmplus_define_numbers-6f8092a1970081d2)
+
+running 3 tests
+test pasmo_keeps_its_number_and_literal_rules ... ok
+test native_define_numbers_and_quoted_literals_match_both_frontends ... ok
+test define_refusals_keep_include_diagnostics_and_previous_artifacts ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/sjasmplus_packed_single.rs (/private/tmp/asm198x-format-build/debug/deps/sjasmplus_packed_single-aa5793e21848f3dd)
+
+running 2 tests
+test native_single_quotes_and_empty_lists_follow_their_context ... ok
+test invalid_included_quotes_and_empty_lists_preserve_outputs_and_source ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.25s
+
