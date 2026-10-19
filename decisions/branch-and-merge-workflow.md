@@ -1,7 +1,13 @@
 # Decision: work lands through a pull request, and merges are squashes
 
-**Status:** Active. Binding for Asm198x (accepted 2026-08-24). Supplies the
-premise [`changelog-is-authored.md`](changelog-is-authored.md) already relies on.
+**Status:** Superseded on 2026-10-07 by the approved rebase-merge update in
+[`releasing-published-crates.md`](../../../decisions/releasing-published-crates.md).
+Work still lands through checked pull requests. Rebase-merge them, with a
+conventional-commit subject on every shipping commit and on the PR title; do
+not put merge commits in a task branch. Changelogs remain authored.
+
+The historical squash decision below records the earlier reasoning; its
+squash-only rule and conflicting drift triggers no longer bind Asm198x.
 
 **Date:** 2026-08-24.
 
