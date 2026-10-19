@@ -538,8 +538,18 @@ fn read_block_head(
         &mut st.macro_state,
     )?
     .text;
+    let generated_label = super::split_generated_label_head(processed.trim()).is_some();
     let processed = live_text(&processed, st, &sw.reader, line)
         .map_err(|e| super::statement_error(e, file, &node.span.expansion_frames))?;
+    if let Some((label, _)) = super::split_label_head(processed.trim()) {
+        let name = label.trim_end_matches(':');
+        if sw.reader.reserved_head_label(name, generated_label) {
+            return Err(AsmError::at(
+                node.span.clone(),
+                format!("reserved label name `{name}`"),
+            ));
+        }
+    }
     bind_head_label(&processed, node, st, sw).map(str::to_string)
 }
 
@@ -674,14 +684,7 @@ fn sweep_line(
         .map(|(label, _)| label);
     if let Some(label) = end_label {
         let name = label.trim_end_matches(':');
-        let upper = name.to_ascii_uppercase();
-        // Literal registers and F/Z size prefixes are not identifier tokens.
-        // .ident explicitly manufactures an identifier, including a register's
-        // spelling. Keep this new end-label admission separate from #853.
-        if !generated_label
-            && (matches!(upper.as_str(), "A" | "X" | "Y" | "F" | "Z")
-                || (sw.reader.extension.is_some() && matches!(upper.as_str(), "S" | "SP")))
-        {
+        if sw.reader.reserved_head_label(name, generated_label) {
             return Err(AsmError::at(
                 node.span.clone(),
                 format!("reserved label name `{name}`"),

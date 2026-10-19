@@ -2106,6 +2106,16 @@ impl Walker {
         }
     }
 
+    /// Statement-head token policy after text processing. Explicit .ident
+    /// creates an identifier with a register spelling; mnemonics stay reserved.
+    fn reserved_head_label(&self, name: &str, generated: bool) -> bool {
+        let upper = name.to_ascii_uppercase();
+        self.instruction_name(&upper)
+            || (!generated
+                && (matches!(upper.as_str(), "A" | "X" | "Y" | "F" | "Z")
+                    || (self.extension.is_some() && matches!(upper.as_str(), "S" | "SP"))))
+    }
+
     /// Rewrite every name in a statement to the key it resolves under. A no-op
     /// outside a scope, except for the `::name` spelling, which means the top
     /// level from anywhere.
@@ -2318,9 +2328,12 @@ impl FlatWalk for Walker {
         if end_token_len(code).is_some() {
             return None;
         }
-        let code = split_label_head(code).map_or(code, |(_, rest)| rest);
+        let generated = split_generated_label_head(code);
+        let code = split_label_head(code)
+            .or(generated)
+            .map_or(code, |(_, rest)| rest);
         let word = split_first_word(code).0.to_ascii_lowercase();
-        Some(match word.as_str() {
+        let keyword = match word.as_str() {
             ".if" | ".ifdef" | ".ifndef" | ".ifblank" | ".ifnblank" | ".ifconst" | ".ifnconst"
             | ".ifref" | ".ifnref" => BlockKw::CondOpen,
             // Processor tests open ordinary conditional blocks. Their live
@@ -2332,7 +2345,13 @@ impl FlatWalk for Walker {
             ".repeat" => BlockKw::RepeatOpen,
             ".endrepeat" => BlockKw::RepeatClose,
             _ => return None,
-        })
+        };
+        // Closing-delimiter labels need their own native binding events (#866).
+        // Recognize generated opening heads here without consuming those labels.
+        if generated.is_some() && !matches!(keyword, BlockKw::CondOpen | BlockKw::RepeatOpen) {
+            return None;
+        }
+        Some(keyword)
     }
 
     fn block_open<'a>(

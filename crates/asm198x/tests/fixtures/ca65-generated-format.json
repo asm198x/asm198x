@@ -895,7 +895,6 @@
       "generated_heads": [
         ".ident(\"mark\")"
       ],
-      "original_assembly_gap": 861,
       "symbol_values": {
         "mark": 4096
       },
@@ -937,7 +936,6 @@
       "generated_heads": [
         ".ident(\"mark\")"
       ],
-      "original_assembly_gap": 861,
       "symbol_values": {
         "mark": 4096
       },
@@ -979,7 +977,6 @@
       "generated_heads": [
         ".ident(\"mark\")"
       ],
-      "original_assembly_gap": 861,
       "symbol_values": {
         "mark": 4096
       },

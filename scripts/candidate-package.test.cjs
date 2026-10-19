@@ -401,3 +401,9 @@ test('canonical generated labels are mandatory package evidence', () => {
   assert(qualifies(complete)); assert(requiredCases.includes('ca65_generated_format'));
   assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_generated_format')), false);
 });
+
+test('generated conditional and repeat heads are mandatory package evidence', () => {
+  const complete = requiredCases.map(name => ({ name, status: 'pass' }));
+  assert(qualifies(complete)); assert(requiredCases.includes('ca65_generated_blocks'));
+  assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_generated_blocks')), false);
+});

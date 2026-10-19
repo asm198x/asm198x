@@ -1,0 +1,24 @@
+[
+  {
+    "number": 865,
+    "url": "https://github.com/asm198x/asm198x/issues/865",
+    "cases": [
+      "6502_LDA_plain_.if 1",
+      "6502_LDA_plain_.repeat 1",
+      "4510_LDA_plain_.if 1",
+      "4510_LDA_plain_.repeat 1"
+    ]
+  },
+  {
+    "number": 866,
+    "url": "https://github.com/asm198x/asm198x/issues/866",
+    "cases": [
+      "static_labelled_endif",
+      "static_labelled_endrepeat",
+      "static_labelled_else",
+      "labelled_endif",
+      "labelled_endrepeat",
+      "labelled_else"
+    ]
+  }
+]

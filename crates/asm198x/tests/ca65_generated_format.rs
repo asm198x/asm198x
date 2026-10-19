@@ -158,7 +158,7 @@ fn generated_label_source_gets_canonical_label_placement() {
             }
         }
     }
-    assert_eq!(known_original_gaps, 17);
+    assert_eq!(known_original_gaps, 14);
 }
 
 #[test]
