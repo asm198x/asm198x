@@ -323,8 +323,11 @@ fn project_nodes(
             }) => {
                 let line = node.span.line as usize;
                 let head = read_block_head(node, head, st, sw)?;
-                if fold_condition(&head, st, &sw.reader, line).map_err(|e| {
-                    super::statement_error(e, node.span.file, &node.span.expansion_frames)
+                if fold_condition(&head, st, &sw.reader, line).map_err(|error| match error {
+                    ConditionError::Use(error) => {
+                        super::statement_error(error, node.span.file, &node.span.expansion_frames)
+                    }
+                    ConditionError::Definition(error) => error,
                 })? {
                     project_nodes(then_body, st, sw)?;
                 } else if let Some(body) = else_body {
@@ -792,12 +795,24 @@ fn consume_include(
 }
 
 /// Fold a `.if` / `.ifdef` / `.ifndef` / `.elseif` head.
+/// Cycle diagnostics retain the definition's file and expansion frames.
+enum ConditionError {
+    Use(AsmError),
+    Definition(AsmError),
+}
+
+impl From<AsmError> for ConditionError {
+    fn from(error: AsmError) -> Self {
+        Self::Use(error)
+    }
+}
+
 fn fold_condition(
     head: &str,
     st: &Projection,
     reader: &Walker,
     line: usize,
-) -> Result<bool, AsmError> {
+) -> Result<bool, ConditionError> {
     let (word, args) = split_first_word(head.trim());
     let word = word.to_ascii_lowercase();
     let args = args.trim();
@@ -825,7 +840,8 @@ fn fold_condition(
                     return Err(AsmError::new(
                         line,
                         format!("`{word}` needs an identifier, got `{name}`"),
-                    ));
+                    )
+                    .into());
                 };
             let defined = reader.name_defined(&key, line)?;
             Ok(if word == ".ifdef" { defined } else { !defined })
@@ -860,15 +876,26 @@ fn fold_condition(
         // not. See [`segment_weights`].
         ".ifconst" | ".ifnconst" => {
             if args.is_empty() {
-                return Err(AsmError::new(line, format!("`{word}` needs an expression")));
+                return Err(AsmError::new(line, format!("`{word}` needs an expression")).into());
             }
             let expr = reader.source_value(args, line)?;
             let expr = map_expr_syms(&expr, &resolve_defined(&st.consts, &st.label_seg));
-            Ok((word == ".ifconst") == weighs_nothing(&expr, st))
+            st.deferred
+                .study_source(
+                    &expr,
+                    &st.consts,
+                    &st.label_seg,
+                    &st.zero_page_names,
+                    st.seg == "ZEROPAGE",
+                    line,
+                )
+                .map_err(ConditionError::Definition)?;
+            let constant = fold_const(&expr, env, line).is_ok() || weighs_nothing(&expr, st);
+            Ok((word == ".ifconst") == constant)
         }
         ".if" | ".elseif" => {
             if args.is_empty() {
-                return Err(AsmError::new(line, format!("`{word}` needs a condition")));
+                return Err(AsmError::new(line, format!("`{word}` needs a condition")).into());
             }
             let expr = reader.source_value(args, line)?;
             // `.if .defined(X)` — answered against what stands above this line,
@@ -889,7 +916,8 @@ fn fold_condition(
         _ => Err(AsmError::new(
             line,
             format!("internal error: `{head}` is not a conditional head"),
-        )),
+        )
+        .into()),
     }
 }
 
@@ -1180,11 +1208,20 @@ fn project_one(node: &crate::ast::Node, st: &mut Projection) -> Result<(), AsmEr
                             format!("symbol `{}` is already defined", sym.name),
                         ));
                     }
+                    let source = st.deferred.study_source(
+                        value,
+                        consts,
+                        label_seg,
+                        &st.zero_page_names,
+                        seg == "ZEROPAGE",
+                        line,
+                    )?;
                     let updates = st.deferred.insert(
                         sym.qualified.clone(),
                         value.clone(),
                         node.span.clone(),
                         stmts.len(),
+                        source,
                         consts,
                     );
                     st.constant_updates.extend(updates);

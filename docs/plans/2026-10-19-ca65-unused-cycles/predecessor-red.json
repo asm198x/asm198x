@@ -1,0 +1,3122 @@
+{
+  "binary": "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+  "sha256": "60c0619bb5d092fe3512a9b2f96529bd38e06198a5d0058f188ee8d9051108c7",
+  "results": [
+    {
+      "name": "None_before_1_.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "None_before_1_.word inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "None_before_1_OTHER=inner::RED\n.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `OTHER`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "None_before_1_.byte .defined(inner::RED),.ref(inner::RED)",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "None_before_2_.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3:1: error: circular definition of symbol `inner::GREEN`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "None_before_2_.word inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3:1: error: circular definition of symbol `inner::GREEN`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "None_before_2_OTHER=inner::RED\n.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5:1: error: circular definition of symbol `OTHER`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "None_before_2_.byte .defined(inner::RED),.ref(inner::RED)",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3:1: error: circular definition of symbol `inner::GREEN`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "None_before_3_.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::BLUE`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "None_before_3_.word inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::BLUE`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "None_before_3_OTHER=inner::RED\n.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6:1: error: circular definition of symbol `OTHER`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "None_before_3_.byte .defined(inner::RED),.ref(inner::RED)",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::BLUE`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "None_after_1_.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "None_after_1_.word inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "None_after_1_OTHER=inner::RED\n.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `OTHER`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "None_after_1_.byte .defined(inner::RED),.ref(inner::RED)",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "None_after_2_.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3:1: error: circular definition of symbol `inner::GREEN`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "None_after_2_.word inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3:1: error: circular definition of symbol `inner::GREEN`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "None_after_2_OTHER=inner::RED\n.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5:1: error: circular definition of symbol `OTHER`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "None_after_2_.byte .defined(inner::RED),.ref(inner::RED)",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3:1: error: circular definition of symbol `inner::GREEN`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "None_after_3_.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::BLUE`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "None_after_3_.word inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::BLUE`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "None_after_3_OTHER=inner::RED\n.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6:1: error: circular definition of symbol `OTHER`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "None_after_3_.byte .defined(inner::RED),.ref(inner::RED)",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::BLUE`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "9_before_1_.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "07",
+      "matches": false
+    },
+    {
+      "name": "9_before_1_.word inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "9_before_1_OTHER=inner::RED\n.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5:1: error: circular definition of symbol `OTHER`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "9_before_1_.byte .defined(inner::RED),.ref(inner::RED)",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "0101",
+      "matches": false
+    },
+    {
+      "name": "9_before_2_.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::GREEN`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "9_before_2_.word inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::GREEN`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "9_before_2_OTHER=inner::RED\n.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6:1: error: circular definition of symbol `OTHER`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "9_before_2_.byte .defined(inner::RED),.ref(inner::RED)",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::GREEN`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "9_before_3_.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5:1: error: circular definition of symbol `inner::BLUE`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "9_before_3_.word inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5:1: error: circular definition of symbol `inner::BLUE`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "9_before_3_OTHER=inner::RED\n.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:7:1: error: circular definition of symbol `OTHER`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "9_before_3_.byte .defined(inner::RED),.ref(inner::RED)",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5:1: error: circular definition of symbol `inner::BLUE`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "9_after_1_.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "9_after_1_.word inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "9_after_1_OTHER=inner::RED\n.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5:1: error: circular definition of symbol `OTHER`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "9_after_1_.byte .defined(inner::RED),.ref(inner::RED)",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "9_after_2_.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3:1: error: circular definition of symbol `inner::GREEN`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "9_after_2_.word inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3:1: error: circular definition of symbol `inner::GREEN`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "9_after_2_OTHER=inner::RED\n.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6:1: error: circular definition of symbol `OTHER`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "9_after_2_.byte .defined(inner::RED),.ref(inner::RED)",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3:1: error: circular definition of symbol `inner::GREEN`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "9_after_3_.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::BLUE`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "9_after_3_.word inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::BLUE`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "9_after_3_OTHER=inner::RED\n.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:7:1: error: circular definition of symbol `OTHER`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "9_after_3_.byte .defined(inner::RED),.ref(inner::RED)",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::BLUE`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "$1234_before_1_.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "07",
+      "matches": false
+    },
+    {
+      "name": "$1234_before_1_.word inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "$1234_before_1_OTHER=inner::RED\n.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5:1: error: circular definition of symbol `OTHER`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "$1234_before_1_.byte .defined(inner::RED),.ref(inner::RED)",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "0101",
+      "matches": false
+    },
+    {
+      "name": "$1234_before_2_.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::GREEN`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "$1234_before_2_.word inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::GREEN`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "$1234_before_2_OTHER=inner::RED\n.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6:1: error: circular definition of symbol `OTHER`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "$1234_before_2_.byte .defined(inner::RED),.ref(inner::RED)",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::GREEN`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "$1234_before_3_.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5:1: error: circular definition of symbol `inner::BLUE`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "$1234_before_3_.word inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5:1: error: circular definition of symbol `inner::BLUE`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "$1234_before_3_OTHER=inner::RED\n.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:7:1: error: circular definition of symbol `OTHER`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "$1234_before_3_.byte .defined(inner::RED),.ref(inner::RED)",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5:1: error: circular definition of symbol `inner::BLUE`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "$1234_after_1_.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "$1234_after_1_.word inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "$1234_after_1_OTHER=inner::RED\n.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5:1: error: circular definition of symbol `OTHER`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "$1234_after_1_.byte .defined(inner::RED),.ref(inner::RED)",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "$1234_after_2_.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3:1: error: circular definition of symbol `inner::GREEN`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "$1234_after_2_.word inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3:1: error: circular definition of symbol `inner::GREEN`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "$1234_after_2_OTHER=inner::RED\n.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6:1: error: circular definition of symbol `OTHER`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "$1234_after_2_.byte .defined(inner::RED),.ref(inner::RED)",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3:1: error: circular definition of symbol `inner::GREEN`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "$1234_after_3_.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::BLUE`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "$1234_after_3_.word inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::BLUE`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "$1234_after_3_OTHER=inner::RED\n.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:7:1: error: circular definition of symbol `OTHER`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "$1234_after_3_.byte .defined(inner::RED),.ref(inner::RED)",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::BLUE`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "9_RED+1",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "0707",
+      "matches": false
+    },
+    {
+      "name": "9_RED-RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "0707",
+      "matches": false
+    },
+    {
+      "name": "9_RED/0",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "0707",
+      "matches": false
+    },
+    {
+      "name": "9_RED%0",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: unexpected trailing tokens in `RED%0`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "9_RED/(2-2)",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "0707",
+      "matches": false
+    },
+    {
+      "name": "9_RED+MISSING",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: undefined symbol `MISSING`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "9_RED+<MISSING",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: undefined symbol `MISSING`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "9_RED<<-1",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "0707",
+      "matches": false
+    },
+    {
+      "name": "9_RED<<64",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "0707",
+      "matches": false
+    },
+    {
+      "name": "9_RED*0",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "0707",
+      "matches": false
+    },
+    {
+      "name": "9_RED&0",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "0707",
+      "matches": false
+    },
+    {
+      "name": "9_RED|0",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "0707",
+      "matches": false
+    },
+    {
+      "name": "9_RED=RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "0707",
+      "matches": false
+    },
+    {
+      "name": "9_RED&&0",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "0707",
+      "matches": false
+    },
+    {
+      "name": "9_!RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "0707",
+      "matches": false
+    },
+    {
+      "name": "9_<RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "0707",
+      "matches": false
+    },
+    {
+      "name": "9_>RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "0707",
+      "matches": false
+    },
+    {
+      "name": "9_RED+*",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "0707",
+      "matches": false
+    },
+    {
+      "name": "9_RED+target",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "0707",
+      "matches": false
+    },
+    {
+      "name": "$1234_RED+1",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "0707",
+      "matches": false
+    },
+    {
+      "name": "$1234_RED-RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "0707",
+      "matches": false
+    },
+    {
+      "name": "$1234_RED/0",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "0707",
+      "matches": false
+    },
+    {
+      "name": "$1234_RED%0",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: unexpected trailing tokens in `RED%0`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "$1234_RED/(2-2)",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "0707",
+      "matches": false
+    },
+    {
+      "name": "$1234_RED+MISSING",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: undefined symbol `MISSING`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "$1234_RED+<MISSING",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: undefined symbol `MISSING`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "$1234_RED<<-1",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "0707",
+      "matches": false
+    },
+    {
+      "name": "$1234_RED<<64",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "0707",
+      "matches": false
+    },
+    {
+      "name": "$1234_RED*0",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "0707",
+      "matches": false
+    },
+    {
+      "name": "$1234_RED&0",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "0707",
+      "matches": false
+    },
+    {
+      "name": "$1234_RED|0",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "0707",
+      "matches": false
+    },
+    {
+      "name": "$1234_RED=RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "0707",
+      "matches": false
+    },
+    {
+      "name": "$1234_RED&&0",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "0707",
+      "matches": false
+    },
+    {
+      "name": "$1234_!RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "0707",
+      "matches": false
+    },
+    {
+      "name": "$1234_<RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "0707",
+      "matches": false
+    },
+    {
+      "name": "$1234_>RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "0707",
+      "matches": false
+    },
+    {
+      "name": "$1234_RED+*",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "0707",
+      "matches": false
+    },
+    {
+      "name": "$1234_RED+target",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "0707",
+      "matches": false
+    },
+    {
+      "name": "RED=<RED_.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "07",
+      "matches": false
+    },
+    {
+      "name": "RED=<RED_.word inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "RED=<RED_OTHER=inner::RED\n.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `OTHER`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "RED=<RED_.export inner::RED\n.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "RED=>RED_.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "07",
+      "matches": false
+    },
+    {
+      "name": "RED=>RED_.word inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "RED=>RED_OTHER=inner::RED\n.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `OTHER`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "RED=>RED_.export inner::RED\n.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "RED=0&&RED_.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "07",
+      "matches": false
+    },
+    {
+      "name": "RED=0&&RED_.word inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "0000",
+      "matches": false
+    },
+    {
+      "name": "RED=0&&RED_OTHER=inner::RED\n.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `OTHER`\n",
+      "hex": null,
+      "native_hex": "07",
+      "matches": false
+    },
+    {
+      "name": "RED=0&&RED_.export inner::RED\n.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "RED=1||RED_.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "07",
+      "matches": false
+    },
+    {
+      "name": "RED=1||RED_.word inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "0100",
+      "matches": false
+    },
+    {
+      "name": "RED=1||RED_OTHER=inner::RED\n.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: circular definition of symbol `OTHER`\n",
+      "hex": null,
+      "native_hex": "07",
+      "matches": false
+    },
+    {
+      "name": "RED=1||RED_.export inner::RED\n.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "RED=<GREEN\nGREEN=RED+1_.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3:1: error: circular definition of symbol `inner::GREEN`\n",
+      "hex": null,
+      "native_hex": "07",
+      "matches": false
+    },
+    {
+      "name": "RED=<GREEN\nGREEN=RED+1_.word inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3:1: error: circular definition of symbol `inner::GREEN`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "RED=<GREEN\nGREEN=RED+1_OTHER=inner::RED\n.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5:1: error: circular definition of symbol `OTHER`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "RED=<GREEN\nGREEN=RED+1_.export inner::RED\n.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3:1: error: circular definition of symbol `inner::GREEN`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "RED=<GREEN\nGREEN=<RED_.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3:1: error: circular definition of symbol `inner::GREEN`\n",
+      "hex": null,
+      "native_hex": "07",
+      "matches": false
+    },
+    {
+      "name": "RED=<GREEN\nGREEN=<RED_.word inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3:1: error: circular definition of symbol `inner::GREEN`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "RED=<GREEN\nGREEN=<RED_OTHER=inner::RED\n.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5:1: error: circular definition of symbol `OTHER`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "RED=<GREEN\nGREEN=<RED_.export inner::RED\n.byte 7",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3:1: error: circular definition of symbol `inner::GREEN`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "invalid_RED=MISSING",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: undefined symbol `MISSING`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "invalid_RED=<MISSING",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: undefined symbol `MISSING`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "invalid_RED=0&&MISSING",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: undefined symbol `MISSING`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "invalid_RED=1||MISSING",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: undefined symbol `MISSING`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "invalid_RED=1/0",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: division by zero in expression\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "pc_width_CODE",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "pc_form_CODE",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad0010",
+      "native_hex": "ad0010",
+      "matches": true
+    },
+    {
+      "name": "pc_width_ZEROPAGE",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "lazy_RED=<RED_.byte 0&&inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "00",
+      "matches": false
+    },
+    {
+      "name": "lazy_RED=<RED_.byte 1||inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "01",
+      "matches": false
+    },
+    {
+      "name": "lazy_RED=<RED_.byte 1&&inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "lazy_RED=<RED_.byte 0||inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "lazy_RED=<GREEN\nGREEN=<RED_.byte 0&&inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3:1: error: circular definition of symbol `inner::GREEN`\n",
+      "hex": null,
+      "native_hex": "00",
+      "matches": false
+    },
+    {
+      "name": "lazy_RED=<GREEN\nGREEN=<RED_.byte 1||inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3:1: error: circular definition of symbol `inner::GREEN`\n",
+      "hex": null,
+      "native_hex": "01",
+      "matches": false
+    },
+    {
+      "name": "lazy_RED=<GREEN\nGREEN=<RED_.byte 1&&inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3:1: error: circular definition of symbol `inner::GREEN`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "lazy_RED=<GREEN\nGREEN=<RED_.byte 0||inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3:1: error: circular definition of symbol `inner::GREEN`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "lazy_RED=0&&RED_.byte 0&&inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "00",
+      "matches": false
+    },
+    {
+      "name": "lazy_RED=0&&RED_.byte 1||inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "01",
+      "matches": false
+    },
+    {
+      "name": "lazy_RED=0&&RED_.byte 1&&inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "00",
+      "matches": false
+    },
+    {
+      "name": "lazy_RED=0&&RED_.byte 0||inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "00",
+      "matches": false
+    },
+    {
+      "name": "global_RED=0&&RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "07",
+      "matches": false
+    },
+    {
+      "name": "pc_alias_CODE",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad0010",
+      "native_hex": "ad0010",
+      "matches": true
+    },
+    {
+      "name": "segment_data_CODE",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0709",
+      "native_hex": "0709",
+      "matches": true
+    },
+    {
+      "name": "pc_alias_ZEROPAGE",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad2000",
+      "native_hex": "a520",
+      "matches": false
+    },
+    {
+      "name": ".ifconst_inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": ".ifconst_0&&inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "07",
+      "matches": false
+    },
+    {
+      "name": ".ifconst_1||inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "07",
+      "matches": false
+    },
+    {
+      "name": ".ifnconst_inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": ".ifnconst_0&&inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "09",
+      "matches": false
+    },
+    {
+      "name": ".ifnconst_1||inner::RED",
+      "argv": [
+        "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: circular definition of symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "09",
+      "matches": false
+    }
+  ]
+}

@@ -11,6 +11,7 @@ pub(super) struct Definition {
     source_value: Expr,
     pub span: Span,
     pub position: usize,
+    source: DefinitionSource,
 }
 
 #[derive(Default)]
@@ -27,10 +28,17 @@ fn symbols(value: &Expr) -> BTreeSet<String> {
     names
 }
 
+#[derive(Clone, Copy)]
+pub(super) struct DefinitionSource {
+    pc_byte: bool,
+    byte: Option<bool>,
+}
+
 #[derive(Clone, Copy, Default)]
 struct SizeHint {
     value: Option<i64>,
     byte: Option<bool>,
+    cycle: Option<usize>,
 }
 
 impl SizeHint {
@@ -38,6 +46,7 @@ impl SizeHint {
         Self {
             value: Some(value),
             byte: Some((0..=255).contains(&value)),
+            cycle: None,
         }
     }
 
@@ -45,21 +54,41 @@ impl SizeHint {
         Self {
             value: None,
             byte: Some(byte),
+            cycle: None,
         }
     }
 }
 
 // Width analysis never evaluates a symbolic value. When children are numeric,
 // the shared evaluator supplies the result, including its overflow rules.
-fn expression_hint(value: &Expr, names: &BTreeMap<String, SizeHint>, line: usize) -> SizeHint {
+fn expression_hint(
+    value: &Expr,
+    names: &BTreeMap<String, SizeHint>,
+    pc_byte: Option<bool>,
+    line: usize,
+) -> SizeHint {
     use crate::engine::BinOp;
     match value {
         Expr::Num(value) => SizeHint::known(*value),
         Expr::Sym(name) => names.get(name).copied().unwrap_or_default(),
-        Expr::Pc => SizeHint::default(),
+        Expr::Pc => pc_byte.map(SizeHint::sized).unwrap_or_default(),
         Expr::Bin(op, left, right) => {
-            let left = expression_hint(left, names, line);
-            let right = expression_hint(right, names, line);
+            let left = expression_hint(left, names, pc_byte, line);
+            if left.value.is_some_and(|number| {
+                (matches!(op, BinOp::LogAnd) && number == 0)
+                    || (matches!(op, BinOp::LogOr) && number != 0)
+            }) {
+                let numeric = Expr::Bin(
+                    *op,
+                    Box::new(Expr::Num(left.value.expect("known left"))),
+                    Box::new(Expr::Num(0)),
+                );
+                return numeric
+                    .eval_with(&|_| None, None, line)
+                    .map(SizeHint::known)
+                    .unwrap_or_default();
+            }
+            let right = expression_hint(right, names, pc_byte, line);
             if let (Some(left), Some(right)) = (left.value, right.value) {
                 let numeric = Expr::Bin(*op, Box::new(Expr::Num(left)), Box::new(Expr::Num(right)));
                 return numeric
@@ -83,7 +112,11 @@ fn expression_hint(value: &Expr, names: &BTreeMap<String, SizeHint>, line: usize
             } else {
                 left.byte.zip(right.byte).map(|(left, right)| left && right)
             };
-            SizeHint { value: None, byte }
+            SizeHint {
+                value: None,
+                byte,
+                cycle: left.cycle.or(right.cycle),
+            }
         }
         Expr::Lo(child)
         | Expr::Hi(child)
@@ -93,7 +126,7 @@ fn expression_hint(value: &Expr, names: &BTreeMap<String, SizeHint>, line: usize
         | Expr::LogNot(child)
         | Expr::FixRound(child)
         | Expr::TrailingZeros(child) => {
-            let child = expression_hint(child, names, line);
+            let child = expression_hint(child, names, pc_byte, line);
             if let Some(number) = child.value {
                 let number = Box::new(Expr::Num(number));
                 let numeric = match value {
@@ -116,11 +149,15 @@ fn expression_hint(value: &Expr, names: &BTreeMap<String, SizeHint>, line: usize
                 value,
                 Expr::Lo(_) | Expr::Hi(_) | Expr::Bank(_) | Expr::LogNot(_)
             ) {
-                SizeHint::sized(true)
+                SizeHint {
+                    cycle: child.cycle,
+                    ..SizeHint::sized(true)
+                }
             } else {
                 SizeHint {
                     value: None,
                     byte: child.byte,
+                    cycle: child.cycle,
                 }
             }
         }
@@ -134,6 +171,7 @@ impl Deferred {
         value: Expr,
         span: Span,
         position: usize,
+        source: DefinitionSource,
         values: &mut BTreeMap<String, i64>,
     ) -> Vec<(String, i64)> {
         self.invalidate_size(&name);
@@ -165,10 +203,11 @@ impl Deferred {
                 source_value,
                 span,
                 position,
+                source,
             },
         );
         let mut updates = Vec::new();
-        self.fold_ready(&name, values, &mut updates);
+        self.fold_ready(&name, values, &mut updates, true);
         updates
     }
 
@@ -177,8 +216,11 @@ impl Deferred {
         name: &str,
         values: &mut BTreeMap<String, i64>,
         updates: &mut Vec<(String, i64)>,
+        initial: bool,
     ) {
-        if self.remaining.get(name).is_some_and(|v| v.is_empty()) {
+        // One initial evaluation permits numeric short-circuit folds. Later
+        // propagation waits for all dependencies to avoid rescanning fan-in.
+        if initial || self.remaining.get(name).is_some_and(|v| v.is_empty()) {
             let definition = &self.definitions[name];
             if let Ok(value) = definition.source_value.eval_with(
                 &|key| values.get(key).copied(),
@@ -207,7 +249,7 @@ impl Deferred {
                     let remaining = self.remaining.get_mut(&dependant).expect("waiting alias");
                     remaining.remove(&name);
                     let mut ready = Vec::new();
-                    self.fold_ready(&dependant, values, &mut ready);
+                    self.fold_ready(&dependant, values, &mut ready, false);
                     queue.extend(ready);
                 }
             }
@@ -244,6 +286,47 @@ impl Deferred {
         zero_page: &BTreeSet<String>,
         line: usize,
     ) -> Option<bool> {
+        self.hint(value, values, labels, zero_page, None, line).byte
+    }
+
+    /// Freeze width before installing the new definition. Source references to
+    /// already-complete cycles must refuse even when the new alias is unused.
+    pub fn study_source(
+        &self,
+        value: &Expr,
+        values: &BTreeMap<String, i64>,
+        labels: &BTreeMap<String, String>,
+        zero_page: &BTreeSet<String>,
+        pc_byte: bool,
+        line: usize,
+    ) -> Result<DefinitionSource, AsmError> {
+        let hint = self.hint(value, values, labels, zero_page, Some(pc_byte), line);
+        if let Some(position) = hint.cycle {
+            let (name, definition) = self
+                .definitions
+                .iter()
+                .find(|(_, d)| d.position == position)
+                .expect("cycle definition position");
+            return Err(AsmError::at(
+                definition.span.clone(),
+                format!("circular definition of symbol `{name}`"),
+            ));
+        }
+        Ok(DefinitionSource {
+            pc_byte,
+            byte: hint.byte,
+        })
+    }
+
+    fn hint(
+        &self,
+        value: &Expr,
+        values: &BTreeMap<String, i64>,
+        labels: &BTreeMap<String, String>,
+        zero_page: &BTreeSet<String>,
+        pc_byte: Option<bool>,
+        line: usize,
+    ) -> SizeHint {
         let mut found: BTreeMap<String, SizeHint> = BTreeMap::new();
         let mut visiting = BTreeSet::new();
         let mut stack: Vec<_> = symbols(value).into_iter().map(|key| (key, false)).collect();
@@ -300,8 +383,12 @@ impl Deferred {
                 continue;
             };
             if after {
-                let hint =
-                    expression_hint(&definition.value, &found, definition.span.line as usize);
+                let hint = expression_hint(
+                    &definition.value,
+                    &found,
+                    Some(definition.source.pc_byte),
+                    definition.span.line as usize,
+                );
                 if hint.byte.is_some() {
                     self.size_cache.borrow_mut().insert(key.clone(), hint);
                 }
@@ -310,13 +397,19 @@ impl Deferred {
             } else if visiting.insert(key.clone()) {
                 stack.push((key, true));
                 for dependency in symbols(&definition.value) {
-                    if !visiting.contains(&dependency) {
-                        stack.push((dependency, false));
-                    }
+                    stack.push((dependency, false));
                 }
+            } else {
+                let hint = SizeHint {
+                    value: None,
+                    byte: definition.source.byte,
+                    cycle: Some(definition.position),
+                };
+                self.size_cache.borrow_mut().insert(key.clone(), hint);
+                found.insert(key, hint);
             }
         }
-        expression_hint(value, &found, line).byte
+        expression_hint(value, &found, pc_byte, line)
     }
 
     /// Resolve the remaining graph once labels and definition PCs are placed.
@@ -325,6 +418,7 @@ impl Deferred {
         &self,
         values: &mut BTreeMap<String, i64>,
         positions: &BTreeMap<usize, i64>,
+        demanded: &impl Fn(&BTreeMap<String, i64>) -> BTreeSet<String>,
     ) -> Result<(), AsmError> {
         let mut waiting: BTreeMap<String, BTreeSet<String>> = BTreeMap::new();
         let mut remaining = BTreeMap::new();
@@ -379,7 +473,10 @@ impl Deferred {
                 }
             }
         }
-        if let Some((name, _)) = remaining.first_key_value() {
+        let demanded = demanded(values);
+        if let Some((name, _)) = remaining.iter().find(|(name, _)| {
+            self.definitions[*name].source.byte.is_none() || demanded.contains(*name)
+        }) {
             return Err(AsmError::at(
                 self.definitions[name].span.clone(),
                 format!("circular definition of symbol `{name}`"),

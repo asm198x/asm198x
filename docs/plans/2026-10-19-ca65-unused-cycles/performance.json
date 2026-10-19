@@ -1,0 +1,338 @@
+{
+  "binaries": {
+    "predecessor": {
+      "path": "/private/tmp/asm198x-unused-cycles-predecessor/asm198x",
+      "sha256": "60c0619bb5d092fe3512a9b2f96529bd38e06198a5d0058f188ee8d9051108c7"
+    },
+    "current": {
+      "path": "/private/tmp/asm198x-unused-cycles-build/debug/asm198x",
+      "sha256": "43a7df888fc9418d78ee81e9059d57fddc6c776788325ff93898ca8c4efbd94b"
+    }
+  },
+  "results": [
+    {
+      "kind": "independent",
+      "definitions": 500,
+      "binary": "predecessor",
+      "trial": 0,
+      "seconds": 0.06654758309014142,
+      "exit": 0,
+      "hex": "f3"
+    },
+    {
+      "kind": "independent",
+      "definitions": 500,
+      "binary": "predecessor",
+      "trial": 1,
+      "seconds": 0.020466333022341132,
+      "exit": 0,
+      "hex": "f3"
+    },
+    {
+      "kind": "independent",
+      "definitions": 500,
+      "binary": "predecessor",
+      "trial": 2,
+      "seconds": 0.020710207987576723,
+      "exit": 0,
+      "hex": "f3"
+    },
+    {
+      "kind": "independent",
+      "definitions": 500,
+      "binary": "current",
+      "trial": 0,
+      "seconds": 0.05513137485831976,
+      "exit": 0,
+      "hex": "f3"
+    },
+    {
+      "kind": "independent",
+      "definitions": 500,
+      "binary": "current",
+      "trial": 1,
+      "seconds": 0.020403709029778838,
+      "exit": 0,
+      "hex": "f3"
+    },
+    {
+      "kind": "independent",
+      "definitions": 500,
+      "binary": "current",
+      "trial": 2,
+      "seconds": 0.020823792088776827,
+      "exit": 0,
+      "hex": "f3"
+    },
+    {
+      "kind": "forward_chain",
+      "definitions": 500,
+      "binary": "predecessor",
+      "trial": 0,
+      "seconds": 0.024886375060305,
+      "exit": 0,
+      "hex": "34"
+    },
+    {
+      "kind": "forward_chain",
+      "definitions": 500,
+      "binary": "predecessor",
+      "trial": 1,
+      "seconds": 0.024450791999697685,
+      "exit": 0,
+      "hex": "34"
+    },
+    {
+      "kind": "forward_chain",
+      "definitions": 500,
+      "binary": "predecessor",
+      "trial": 2,
+      "seconds": 0.024355874862521887,
+      "exit": 0,
+      "hex": "34"
+    },
+    {
+      "kind": "forward_chain",
+      "definitions": 500,
+      "binary": "current",
+      "trial": 0,
+      "seconds": 0.025687415851280093,
+      "exit": 0,
+      "hex": "34"
+    },
+    {
+      "kind": "forward_chain",
+      "definitions": 500,
+      "binary": "current",
+      "trial": 1,
+      "seconds": 0.02496570791117847,
+      "exit": 0,
+      "hex": "34"
+    },
+    {
+      "kind": "forward_chain",
+      "definitions": 500,
+      "binary": "current",
+      "trial": 2,
+      "seconds": 0.025742375059053302,
+      "exit": 0,
+      "hex": "34"
+    },
+    {
+      "kind": "independent",
+      "definitions": 2000,
+      "binary": "predecessor",
+      "trial": 0,
+      "seconds": 0.06735108303837478,
+      "exit": 0,
+      "hex": "cf"
+    },
+    {
+      "kind": "independent",
+      "definitions": 2000,
+      "binary": "predecessor",
+      "trial": 1,
+      "seconds": 0.06644033407792449,
+      "exit": 0,
+      "hex": "cf"
+    },
+    {
+      "kind": "independent",
+      "definitions": 2000,
+      "binary": "predecessor",
+      "trial": 2,
+      "seconds": 0.06753058289177716,
+      "exit": 0,
+      "hex": "cf"
+    },
+    {
+      "kind": "independent",
+      "definitions": 2000,
+      "binary": "current",
+      "trial": 0,
+      "seconds": 0.06630887486971915,
+      "exit": 0,
+      "hex": "cf"
+    },
+    {
+      "kind": "independent",
+      "definitions": 2000,
+      "binary": "current",
+      "trial": 1,
+      "seconds": 0.06549587496556342,
+      "exit": 0,
+      "hex": "cf"
+    },
+    {
+      "kind": "independent",
+      "definitions": 2000,
+      "binary": "current",
+      "trial": 2,
+      "seconds": 0.06715029198676348,
+      "exit": 0,
+      "hex": "cf"
+    },
+    {
+      "kind": "forward_chain",
+      "definitions": 2000,
+      "binary": "predecessor",
+      "trial": 0,
+      "seconds": 0.08550662477500737,
+      "exit": 0,
+      "hex": "34"
+    },
+    {
+      "kind": "forward_chain",
+      "definitions": 2000,
+      "binary": "predecessor",
+      "trial": 1,
+      "seconds": 0.0902795831207186,
+      "exit": 0,
+      "hex": "34"
+    },
+    {
+      "kind": "forward_chain",
+      "definitions": 2000,
+      "binary": "predecessor",
+      "trial": 2,
+      "seconds": 0.0843209580052644,
+      "exit": 0,
+      "hex": "34"
+    },
+    {
+      "kind": "forward_chain",
+      "definitions": 2000,
+      "binary": "current",
+      "trial": 0,
+      "seconds": 0.08935662498697639,
+      "exit": 0,
+      "hex": "34"
+    },
+    {
+      "kind": "forward_chain",
+      "definitions": 2000,
+      "binary": "current",
+      "trial": 1,
+      "seconds": 0.08829933404922485,
+      "exit": 0,
+      "hex": "34"
+    },
+    {
+      "kind": "forward_chain",
+      "definitions": 2000,
+      "binary": "current",
+      "trial": 2,
+      "seconds": 0.08953658305108547,
+      "exit": 0,
+      "hex": "34"
+    },
+    {
+      "kind": "independent",
+      "definitions": 8000,
+      "binary": "predecessor",
+      "trial": 0,
+      "seconds": 0.2600136660039425,
+      "exit": 0,
+      "hex": "3f"
+    },
+    {
+      "kind": "independent",
+      "definitions": 8000,
+      "binary": "predecessor",
+      "trial": 1,
+      "seconds": 0.2703840001486242,
+      "exit": 0,
+      "hex": "3f"
+    },
+    {
+      "kind": "independent",
+      "definitions": 8000,
+      "binary": "predecessor",
+      "trial": 2,
+      "seconds": 0.26866979198530316,
+      "exit": 0,
+      "hex": "3f"
+    },
+    {
+      "kind": "independent",
+      "definitions": 8000,
+      "binary": "current",
+      "trial": 0,
+      "seconds": 0.2677204580977559,
+      "exit": 0,
+      "hex": "3f"
+    },
+    {
+      "kind": "independent",
+      "definitions": 8000,
+      "binary": "current",
+      "trial": 1,
+      "seconds": 0.2604175840970129,
+      "exit": 0,
+      "hex": "3f"
+    },
+    {
+      "kind": "independent",
+      "definitions": 8000,
+      "binary": "current",
+      "trial": 2,
+      "seconds": 0.25991904200054705,
+      "exit": 0,
+      "hex": "3f"
+    },
+    {
+      "kind": "forward_chain",
+      "definitions": 8000,
+      "binary": "predecessor",
+      "trial": 0,
+      "seconds": 0.33219004212878644,
+      "exit": 0,
+      "hex": "34"
+    },
+    {
+      "kind": "forward_chain",
+      "definitions": 8000,
+      "binary": "predecessor",
+      "trial": 1,
+      "seconds": 0.335017167031765,
+      "exit": 0,
+      "hex": "34"
+    },
+    {
+      "kind": "forward_chain",
+      "definitions": 8000,
+      "binary": "predecessor",
+      "trial": 2,
+      "seconds": 0.3368096658959985,
+      "exit": 0,
+      "hex": "34"
+    },
+    {
+      "kind": "forward_chain",
+      "definitions": 8000,
+      "binary": "current",
+      "trial": 0,
+      "seconds": 0.3597221248783171,
+      "exit": 0,
+      "hex": "34"
+    },
+    {
+      "kind": "forward_chain",
+      "definitions": 8000,
+      "binary": "current",
+      "trial": 1,
+      "seconds": 0.3571345410309732,
+      "exit": 0,
+      "hex": "34"
+    },
+    {
+      "kind": "forward_chain",
+      "definitions": 8000,
+      "binary": "current",
+      "trial": 2,
+      "seconds": 0.36443070811219513,
+      "exit": 0,
+      "hex": "34"
+    }
+  ]
+}
