@@ -24,9 +24,12 @@ jobs:
   # (stevehill1981/198x-workflows). Project jobs follow.
   rust:
     name: Rust
-    uses: stevehill1981/198x-workflows/.github/workflows/rust-ci.yml@feat/rust-ci-inputs
+    uses: stevehill1981/198x-workflows/.github/workflows/rust-ci.yml@v1
     with:
       coverage-floor: 60
+      # Windows test failures surfaced by the shared CI are tracked in asm198x/asm198x#845;
+      # until they're fixed, macOS and Windows run `cargo check` only, as before.
+      platform-test: false
       coverage-args: --lib --tests
       # The verdict replay tests read the curriculum at its pinned revision.
       coverage-setup-command: >-
