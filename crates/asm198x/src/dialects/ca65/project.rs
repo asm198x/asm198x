@@ -18,7 +18,7 @@ use super::{
     AsmError, Expr, FileId, Kind, Parsed, SegSwitch, SourceLoader, SourceMap, Stmt, Walker,
     fold_const, is_ident, resolve_defined, resolve_ref, segment_switch, split_first_word,
 };
-use super::{cheap_key, is_cheap_ident};
+use super::{checked_cheap_key, is_cheap_ident};
 
 /// Project the semantic [`Program`](crate::ast::Program) into the assembler's
 /// [`Parsed`] — the assemble+link driver runs on an owned `Vec<Stmt>` plus the
@@ -1011,7 +1011,7 @@ fn fold_condition(
             // `Identifier expected`, not with a membership test.
             let key =
                 if let Some(local) = name.strip_prefix('@').filter(|name| is_cheap_ident(name)) {
-                    cheap_key(reader.scope_env.anchor_str(), local)
+                    checked_cheap_key(reader.scope_env.anchor_str(), local, line)?
                 } else if name
                     .strip_prefix("::")
                     .unwrap_or(name)
