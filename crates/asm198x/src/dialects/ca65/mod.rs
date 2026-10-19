@@ -438,6 +438,11 @@ fn assemble_program(
         let mut refs: BTreeSet<String> = BTreeSet::new();
         for stmt in &parsed.stmts {
             collect_syms(&stmt.kind, &mut refs);
+            if let Kind::Visible { rule, names, .. } = &stmt.kind
+                && *rule != VisRule::MustNotBeDefined
+            {
+                refs.extend(names.iter().cloned());
+            }
         }
         for definition in parsed.deferred.definitions.values() {
             collect_syms(&Kind::Bytes(vec![definition.value.clone()]), &mut refs);
@@ -463,6 +468,15 @@ fn assemble_program(
             stmt.kind = map_kind_syms(&stmt.kind, &|name| {
                 targets.get(name).map(|t| Expr::Sym(t.clone()))
             });
+            if let Kind::Visible { rule, names, .. } = &mut stmt.kind
+                && *rule != VisRule::MustNotBeDefined
+            {
+                for name in names {
+                    if let Some(target) = targets.get(name) {
+                        *name = target.clone();
+                    }
+                }
+            }
             if let Some(bound) = &mut stmt.bound_insn {
                 for operand in &mut bound.operands {
                     *operand = map_expr_syms(operand, &|name| {
@@ -844,6 +858,7 @@ fn assemble_program(
         .map(|s| s.name.as_str())
         .collect();
     let mut warned_segments = BTreeSet::new();
+    let mut exports: BTreeMap<String, String> = BTreeMap::new();
     for Placed {
         seg,
         addr,
@@ -854,6 +869,22 @@ fn assemble_program(
         has_initializer,
     } in placed
     {
+        if let Resolved::Visible(rule, _, names) = &item
+            && *rule != VisRule::MustNotBeDefined
+        {
+            for name in names.iter().filter(|name| addr_env.contains_key(*name)) {
+                let external = name.rsplit("::").next().unwrap_or(name).to_string();
+                if let Some(previous) = exports.insert(external.clone(), name.clone())
+                    && previous != *name
+                {
+                    return Err(statement_error(
+                        AsmError::new(line, format!("duplicate external identifier `{external}`")),
+                        file,
+                        &expansion_frames,
+                    ));
+                }
+            }
+        }
         // A diagnostic carries no bytes, so it is answered before the segment
         // filter: an `.out` written inside BSS still prints.
         let diagnostic = matches!(item, Resolved::Message(..) | Resolved::Assert(..));
@@ -2006,8 +2037,21 @@ impl Walker {
     /// outside a scope, except for the `::name` spelling, which means the top
     /// level from anywhere.
     fn scope_syms(&self, kind: &Kind, line: usize) -> Result<Kind, AsmError> {
+        if let Kind::Visible {
+            rule: VisRule::MustBeDefined,
+            names,
+            ..
+        } = kind
+        {
+            for name in names {
+                let key = self.constant_key_at(name, line, false)?;
+                if self.expand_text_defines {
+                    self.source_unresolved.borrow_mut().insert(key);
+                }
+            }
+        }
         let failure: RefCell<Option<AsmError>> = RefCell::new(None);
-        let out = map_kind_syms(kind, &|name: &str| {
+        let mut out = map_kind_syms(kind, &|name: &str| {
             if self.expand_text_defines {
                 let argument = name
                     .strip_prefix(DEFINED_MARK)
@@ -2064,6 +2108,28 @@ impl Walker {
             }
             (key != name).then_some(Expr::Sym(key))
         });
+        if let Kind::Visible {
+            rule,
+            names,
+            define,
+            ..
+        } = &mut out
+        {
+            for name in names {
+                if *rule == VisRule::MustNotBeDefined {
+                    continue;
+                }
+                let key = if define.is_none() {
+                    self.scoped_name(name)
+                } else {
+                    self.constant_key_at(name, line, false)?
+                };
+                if *rule == VisRule::MustBeDefined {
+                    self.record_reference(&key);
+                }
+                *name = key;
+            }
+        }
         match failure.into_inner() {
             Some(error) => Err(error),
             None => Ok(out),
@@ -2545,6 +2611,15 @@ impl FlatWalk for Walker {
         };
         // Every name the statement mentions, as the key it resolves under.
         let kind = self.scope_syms(&kind, line)?;
+        if self.expand_text_defines
+            && let Kind::Visible {
+                names,
+                define: Some(_),
+                ..
+            } = &kind
+        {
+            self.source_known.extend(names.iter().cloned());
+        }
         let trivia = Trivia {
             leading: std::mem::take(&mut self.pending_leading),
             trailing,
@@ -3630,16 +3705,6 @@ fn parse_res(
     Ok(Kind::Res(count, fill))
 }
 
-/// A visibility operand as the symbol table keys it: a cheap local (`@name`)
-/// is scoped to its global the way its definition is, so the check looks the
-/// same name up that the label pass stored.
-fn vis_name(anchor: &str, raw: &str) -> String {
-    match raw.strip_prefix('@') {
-        Some(local) => cheap_key(anchor, local),
-        None => raw.to_string(),
-    }
-}
-
 /// `.export name[, name...]`, and the `:= expr` form that defines as it
 /// exports. ca65 takes the value form only on the export spellings and only for
 /// a single name; `.global bar := 9` and `.import baz := 3` are both
@@ -3661,7 +3726,7 @@ fn parse_visible(
             continue;
         }
         let name = part.split_once(":=").map_or(part, |(name, _)| name).trim();
-        if name.contains("::") {
+        if name.contains("::") || name.starts_with('@') {
             return Err(AsmError::new(
                 line,
                 "a visibility directive needs an unqualified name",
@@ -3677,10 +3742,10 @@ fn parse_visible(
             if parts.len() > 1 {
                 return Err(AsmError::new(line, "`:=` exports one name"));
             }
-            names.push(vis_name(anchor, name.trim()));
+            names.push(name.trim().to_string());
             define = Some(parse_value(anons, anchor, value.trim(), line)?);
         } else {
-            names.push(vis_name(anchor, part));
+            names.push(part.to_string());
         }
     }
     if names.is_empty() {

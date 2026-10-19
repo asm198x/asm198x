@@ -1,0 +1,481 @@
+{
+  "binary": "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+  "sha256": "ba2f2fe3d23576815d05e9f248716884b1b501b1ee762ba77a42142a94620c8b",
+  "results": [
+    {
+      "name": "external_import_2_.word RED",
+      "argv": [
+        "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: undefined symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "0200",
+      "matches": false
+    },
+    {
+      "name": "external_import_2_lda RED",
+      "argv": [
+        "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: undefined symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "ad0200",
+      "matches": false
+    },
+    {
+      "name": "external_import_$1234_.word RED",
+      "argv": [
+        "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: undefined symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "3412",
+      "matches": false
+    },
+    {
+      "name": "external_import_$1234_lda RED",
+      "argv": [
+        "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: undefined symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "ad3412",
+      "matches": false
+    },
+    {
+      "name": "external_importzp_2_.word RED",
+      "argv": [
+        "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: undefined symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "0200",
+      "matches": false
+    },
+    {
+      "name": "external_importzp_2_lda RED",
+      "argv": [
+        "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: undefined symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "a502",
+      "matches": false
+    },
+    {
+      "name": "external_importzp_$1234_.word RED",
+      "argv": [
+        "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: undefined symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "3412",
+      "matches": false
+    },
+    {
+      "name": "external_importzp_$1234_lda RED",
+      "argv": [
+        "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: undefined symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "a5",
+      "matches": true
+    },
+    {
+      "name": "external_global_2_.word RED",
+      "argv": [
+        "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: undefined symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "0200",
+      "matches": false
+    },
+    {
+      "name": "external_global_2_lda RED",
+      "argv": [
+        "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: undefined symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "ad0200",
+      "matches": false
+    },
+    {
+      "name": "external_global_$1234_.word RED",
+      "argv": [
+        "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: undefined symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "3412",
+      "matches": false
+    },
+    {
+      "name": "external_global_$1234_lda RED",
+      "argv": [
+        "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: undefined symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "ad3412",
+      "matches": false
+    },
+    {
+      "name": "external_globalzp_2_.word RED",
+      "argv": [
+        "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: undefined symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "0200",
+      "matches": false
+    },
+    {
+      "name": "external_globalzp_2_lda RED",
+      "argv": [
+        "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: undefined symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "a502",
+      "matches": false
+    },
+    {
+      "name": "external_globalzp_$1234_.word RED",
+      "argv": [
+        "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: undefined symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "3412",
+      "matches": false
+    },
+    {
+      "name": "external_globalzp_$1234_lda RED",
+      "argv": [
+        "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: undefined symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": "a5",
+      "matches": true
+    },
+    {
+      "name": "mixed_import_import",
+      "argv": [
+        "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: undefined symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "mixed_import_global",
+      "argv": [
+        "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: undefined symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "mixed_import_export",
+      "argv": [
+        "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: exported symbol `inner::RED` was never defined\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "mixed_global_import",
+      "argv": [
+        "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: undefined symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "mixed_global_global",
+      "argv": [
+        "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: undefined symbol `inner::RED`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "mixed_global_export",
+      "argv": [
+        "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: exported symbol `inner::RED` was never defined\n",
+      "hex": null,
+      "native_hex": "02",
+      "matches": false
+    },
+    {
+      "name": "mixed_export_import",
+      "argv": [
+        "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: exported symbol `inner::RED` was never defined\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "mixed_export_global",
+      "argv": [
+        "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: exported symbol `inner::RED` was never defined\n",
+      "hex": null,
+      "native_hex": "02",
+      "matches": false
+    },
+    {
+      "name": "mixed_export_export",
+      "argv": [
+        "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "02",
+      "native_hex": "02",
+      "matches": true
+    }
+  ]
+}

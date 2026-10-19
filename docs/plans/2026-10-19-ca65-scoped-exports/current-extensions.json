@@ -1,0 +1,386 @@
+{
+  "binary": "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+  "sha256": "ba2f2fe3d23576815d05e9f248716884b1b501b1ee762ba77a42142a94620c8b",
+  "results": [
+    {
+      "name": "allocation_export_queries_before_definition",
+      "argv": [
+        "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+      "hex": "00010101",
+      "native_hex": "00010101",
+      "matches": true
+    },
+    {
+      "name": "allocation_export_queries_with_outer",
+      "argv": [
+        "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0001",
+      "native_hex": "0001",
+      "matches": true
+    },
+    {
+      "name": "allocation_exportzp_queries_before_definition",
+      "argv": [
+        "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+      "hex": "00010101",
+      "native_hex": "00010101",
+      "matches": true
+    },
+    {
+      "name": "allocation_exportzp_queries_with_outer",
+      "argv": [
+        "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0001",
+      "native_hex": "0001",
+      "matches": true
+    },
+    {
+      "name": "allocation_global_queries_before_definition",
+      "argv": [
+        "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+      "hex": "00000100",
+      "native_hex": "00000100",
+      "matches": true
+    },
+    {
+      "name": "allocation_global_queries_with_outer",
+      "argv": [
+        "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0000",
+      "native_hex": "0000",
+      "matches": true
+    },
+    {
+      "name": "allocation_globalzp_queries_before_definition",
+      "argv": [
+        "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+      "hex": "00000100",
+      "native_hex": "00000100",
+      "matches": true
+    },
+    {
+      "name": "allocation_globalzp_queries_with_outer",
+      "argv": [
+        "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0000",
+      "native_hex": "0000",
+      "matches": true
+    },
+    {
+      "name": "width_export_2_False",
+      "argv": [
+        "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a502",
+      "native_hex": "a502",
+      "matches": true
+    },
+    {
+      "name": "width_export_2_True",
+      "argv": [
+        "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a502",
+      "native_hex": "a502",
+      "matches": true
+    },
+    {
+      "name": "width_export_BLUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a502",
+      "native_hex": "a502",
+      "matches": true
+    },
+    {
+      "name": "width_export_BLUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a502",
+      "native_hex": "a502",
+      "matches": true
+    },
+    {
+      "name": "width_export_*_False",
+      "argv": [
+        "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad0010",
+      "native_hex": "ad0010",
+      "matches": true
+    },
+    {
+      "name": "width_export_*_True",
+      "argv": [
+        "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad0010",
+      "native_hex": "ad0010",
+      "matches": true
+    },
+    {
+      "name": "width_exportzp_2_False",
+      "argv": [
+        "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a502",
+      "native_hex": "a502",
+      "matches": true
+    },
+    {
+      "name": "width_exportzp_2_True",
+      "argv": [
+        "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a502",
+      "native_hex": "a502",
+      "matches": true
+    },
+    {
+      "name": "width_exportzp_BLUE_False",
+      "argv": [
+        "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a502",
+      "native_hex": "a502",
+      "matches": true
+    },
+    {
+      "name": "width_exportzp_BLUE_True",
+      "argv": [
+        "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "a502",
+      "native_hex": "a502",
+      "matches": true
+    },
+    {
+      "name": "width_exportzp_*_False",
+      "argv": [
+        "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad0010",
+      "native_hex": "ad0010",
+      "matches": true
+    },
+    {
+      "name": "width_exportzp_*_True",
+      "argv": [
+        "/private/tmp/asm198x-scoped-exports-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "ad0010",
+      "native_hex": "ad0010",
+      "matches": true
+    }
+  ]
+}
