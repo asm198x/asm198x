@@ -15,3 +15,19 @@
    replay, inspect every exact-head CI run and five actual package reports.
 5. Merge only the qualified head, verify closure and retained commits, remove
    task worktree/cache and continue remaining confirmed issues.
+
+## Implementation sequence
+
+Land the shared selected-number conversion first: `ca65_flat::parse_number`
+serves the linked reader and both flat CPU paths. Retain native decimal's
+4294967299 endpoint and leading zeros, reject oversized literal tokens before
+arithmetic cancellation or zero-sized tag multiplication, and preserve current
+character parsing. Use the 54 arithmetic/constant/tag cases from native.json
+plus explicit CPU checks. This stage references #788 without closing it.
+
+The following stage adds lexical source admission for skipped/token-captured
+source. It must also cover token-list introspection and text definitions,
+exclude quoted/comment digits and unopened includes, and preserve all measured
+.end boundaries including operands on its own line. Do not call an expression
+parser on skipped source or claim the whole issue is fixed by conversion alone.
+The repeat-execution false refusal is tracked separately from numeric limits.

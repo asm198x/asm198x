@@ -333,3 +333,10 @@ test('ca65 logical debug coordinates are mandatory package evidence', () => {
   assert(qualifies(complete)); assert(requiredCases.includes('ca65_absolute_debug'));
   assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_absolute_debug')), false);
 });
+
+
+test('ca65 numeric conversion bounds are mandatory package evidence', () => {
+  const complete = requiredCases.map(name => ({ name, status: 'pass' }));
+  assert(qualifies(complete)); assert(requiredCases.includes('ca65_numeric_conversion'));
+  assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_numeric_conversion')), false);
+});
