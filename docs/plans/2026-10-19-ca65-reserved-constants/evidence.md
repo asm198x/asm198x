@@ -22,3 +22,8 @@ predecessor-fetch-red evidence; no qualification failure was bypassed.
 No dependency, shared AST/API/schema/trait or source-reference shape changed.
 Mutable definitions, attached labels and remaining phase differences are tracked
 separately with native evidence.
+
+After incorporating the complete #783 correction, the full isolated run passes
+1,536 Rust tests (38 ignored), 67 Node tests and Clippy/fmt/Ruff/docs. The
+combined Lua archive passes all 52 required cohorts and both negative controls.
+These combined checks supersede the staged counts above.
