@@ -1,0 +1,9 @@
+   Compiling asm198x v0.0.71 (/Users/stevehill/Projects/198x/Asm198x/asm198x-ca65-format-end/crates/asm198x)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.55s
+     Running tests/ca65_format_includes.rs (/private/tmp/asm198x-format-build/debug/deps/ca65_format_includes-c19fe627facd8d2b)
+
+running 1 test
+test formatter_keeps_native_include_operands_without_evaluating_them ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.74s
+

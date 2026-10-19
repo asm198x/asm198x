@@ -3,13 +3,17 @@
 1. Retain native and clean-predecessor outcomes for skipped include/incbin
    operands, computed names, forward offsets, labels and ordinary directives.
    Confirm the formatter failure happens before the no-resolution boundary.
-2. In crates/asm198x/src/dialects/ca65/mod.rs, keep include/incbin operands as
+2. In crates/asm198x/src/dialects/ca65/mod.rs and the ca65_816.rs /
+   ca65_huc6280.rs readers, keep include/incbin operands as
    source-only AST nodes in the existing unexpanded formatter mode, after label
    binding but before request/window evaluation. Assembly parsing and include
-   loading remain unchanged. No public AST/schema or dependency change.
+   loading remain unchanged. Share pure filename-token classification in
+   crates/asm198x/src/dialects/ca65_flat.rs, retaining existing Include/Incbin
+   AST items for known literal requests and Verbatim for opaque operands.
+   No public AST/schema or dependency change.
 3. Add crates/asm198x/tests/ca65_format_includes.rs and a retained native fixture.
    Verify idempotence, native bytes and symbol/section shape, including labels
-   and anonymous references. Check formatter write/check modes preserve source
+   and anonymous references. Check formatter stdout / -o modes preserve source
    and create no include files; assembly refusals preserve all five outputs.
 4. Add a mandatory cohort/omission control in scripts/test-candidate-package.cjs
    and scripts/candidate-package.test.cjs. Verify full Rust/Lua, Node, Clippy,
