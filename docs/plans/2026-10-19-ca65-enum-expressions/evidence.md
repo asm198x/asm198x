@@ -36,6 +36,52 @@ size-analysis behavior before routing enum expressions through the existing
 deferred queue. Do not generalize this into skipping unused undefined names or
 cycles: the other completed controls refuse those.
 
-No implementation changes are included in this research commit. The concrete
-representation must preserve the accepted unused controls as well as correcting
-used member binding, defaults, anonymous scope, queries and unknown size.
+The implementation now retains member expressions in a private native event
+and lowers it through the existing Equ projection. The same source-width,
+queue, PC-placement, final-binding and debug paths handle ordinary and enum
+constants. The enum reader keeps a base expression plus an offset, captures
+query results once, and distinguishes named from anonymous scopes. Closure
+publishes no invented size property. No shared AST or public contract changed.
+
+The final fixture combines all 94 completed outcomes with 42 stream/token
+controls: 136 cases, 64 accepted and 72 refused. The actual preceding #804
+executable disagrees on 65; the corrected executable matches all 136. The
+fixture builder retains every completed case, with the four native timeouts
+still outside expectations. No existing expectation was removed or weakened.
+
+The source-preserving formatter retains enum member text without evaluating
+macro parameters or repeat counters. Dynamic headers use private placeholders
+only for balanced formatting scopes. Mnemonics such as LDA are identifiers in
+an enum parser; register tokens remain reserved. The first token-context check
+caught four mnemonic refusals, and the expanded controls pin the correction.
+An initial formatter run reported an invalid generated record name; retaining
+the unexpanded source fixes that without executing the counter.
+
+Formatter idempotence, reassembly and stable debug sections/symbols hold for
+every accepted case. A final numeric use and a root-file constancy query both
+report the included enum definition and preserve five outputs plus both sources
+in human/JSON modes. The accepted unused-cycle control has no fabricated debug
+value; ordinary known constants retain their real values.
+
+An actual local Lua archive passes all 59 required cohorts, including 328
+commands in this cohort, and both corruption controls. The preceding actual
+archive fails only this cohort; its other 58 cohorts pass. Local archive reports
+remain artifact-only; clean producer and five-host qualification are separate
+requirements before merge.
+
+Twenty-seven bounded performance observations cover 500/2,000/8,000 default
+members and forward chains. At 8,000, defaults take 0.306–0.351 seconds versus
+0.213–0.297 in the predecessor. Current forward chains take 0.499–1.884 seconds
+while other verification runs; that range includes an outlier. These local
+observations are not a runtime guarantee. Default expressions do not grow into
+a chain of previous members, and no namespace is copied per member.
+
+Final isolated checks pass 1,553 Rust tests (38 ignored), 74 Node tests,
+Clippy/all workspace targets/features with warnings denied, fmt, Ruff and
+generated docs. Full logs, process records and actual archive controls are
+retained alongside the native/predecessor evidence.
+
+Clean producer `3221329b555abc1b02f4a7d8b0e9be522d83eb44` matches all
+564 unchanged native/upstream 4510 bytes. Seven successful processes/fourteen
+streams and complete output identities are retained; changed bytes fail the
+same verification guard.

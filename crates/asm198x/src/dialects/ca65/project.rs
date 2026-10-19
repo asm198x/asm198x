@@ -259,7 +259,10 @@ fn live_text(
                 ca65_flat::Target::Mos6502
             }
         }),
-        reader.scopes.len().saturating_sub(reader.records.len()),
+        reader
+            .scopes
+            .len()
+            .saturating_sub(reader.records.iter().filter(|open| open.owns_scope).count()),
         line,
     )
 }
@@ -1117,6 +1120,7 @@ pub(super) fn map_kind_syms(k: &Kind, f: &dyn Fn(&str) -> Option<Expr>) -> Kind 
         Kind::Empty => Kind::Empty,
         Kind::Res(n, f) => Kind::Res(*n, *f),
         Kind::Constant(name, value) => Kind::Constant(name.clone(), *value),
+        Kind::EnumValue(name, value) => Kind::EnumValue(name.clone(), map_expr_syms(value, f)),
         Kind::Org(e) => Kind::Org(map_expr_syms(e, f)),
         Kind::Reloc => Kind::Reloc,
         Kind::Align(m, f) => Kind::Align(*m, *f),
@@ -1187,6 +1191,27 @@ fn project_selected(
 /// Project one ordinary node — the body of the original projection loop.
 fn project_one(node: &crate::ast::Node, st: &mut Projection) -> Result<(), AsmError> {
     use crate::ast::{Item, Operand};
+    if let Some(Item::Native(payload)) = &node.item
+        && let Some(Kind::EnumValue(name, value)) = payload.as_any().downcast_ref::<Kind>()
+    {
+        // Lower the retained enum event through the same constant path. This
+        // private node is never exposed to the source-preserving formatter.
+        let definition = crate::ast::Node {
+            label: Some(crate::ast::Symbol {
+                name: name.rsplit("::").next().unwrap_or(name).to_string(),
+                qualified: name.clone(),
+                scope: crate::ast::Scope::Global,
+            }),
+            item: Some(crate::ast::item_from_operation(
+                crate::engine::Operation::Equ(value.clone()),
+            )),
+            source: String::new(),
+            span: node.span.clone(),
+            operand_span: node.operand_span.clone(),
+            trivia: crate::ast::Trivia::default(),
+        };
+        return project_one(&definition, st);
+    }
     let seg = &mut st.seg;
     let seg_stack = &mut st.seg_stack;
     let stmts = &mut st.stmts;

@@ -147,12 +147,14 @@ enum Kind {
     /// its bytes land. `.reloc` ends it.
     Org(Expr),
     Reloc,
-    /// A constant a record declaration defines: a field's offset, a member's
-    /// value, or a record's own size. It emits nothing and is carried as a
+    /// A constant a record declaration defines: a field's offset or size,
+    /// or a record's own size. It emits nothing and is carried as a
     /// statement so the projection folds it **in source order**, which is where
     /// every other constant here is folded and what makes `.if` and `.res` see
     /// the same file the reference does.
     Constant(String, i64),
+    /// An enum member retains its expression until the existing Equ projection.
+    EnumValue(String, Expr),
     /// `.out`, `.warning`, `.error` and `.fatal` — say something and emit
     /// nothing. The severity decides what happens next: a note or a warning
     /// carries on, an error stops. ca65 reports every `.error` and only the
@@ -1122,9 +1124,13 @@ struct RecordBuild {
     kind: RecordKind,
     /// The scope its names are defined in — the path opened by the header.
     path: String,
-    /// A struct's next offset, an enum's next value. A union lays every field
+    /// A struct's next offset, or an enum's offset from its base. A union lays every field
     /// at zero, so this stays there and the size is the widest member.
     cursor: i64,
+    /// Explicit enum base; the cursor is its relative offset, not its value.
+    enum_base: Option<Expr>,
+    /// Anonymous enums declare in the enclosing scope.
+    owns_scope: bool,
     /// The widest field, for a union.
     widest: i64,
     line: usize,
@@ -1470,18 +1476,20 @@ impl Walker {
                 ));
             }
             let done = self.records.pop().expect("just matched");
+            if done.owns_scope {
+                self.scopes.pop();
+            }
+            // Enum values have no native size property. Keep their last member
+            // as the cheap anchor, without inventing a physical size anchor.
+            if done.kind == RecordKind::Enum {
+                return Ok(Some(Vec::new()));
+            }
             let key = Self::record_size_key(&done.path);
             self.consts.insert(key.clone(), done.size());
-            self.scopes.pop();
-            if done.kind != RecordKind::Enum {
-                self.scope_env
-                    .replace_anchor(format!("scope-size{LABEL_SEP}{}", done.path));
-            }
-            // A record declared inside another allocates its size there, the
-            // way an unnamed field of that type would.
-            if done.kind != RecordKind::Enum {
-                self.allocate(done.size());
-            }
+            self.scope_env
+                .replace_anchor(format!("scope-size{LABEL_SEP}{}", done.path));
+            // A nested record allocates its size in the enclosing record.
+            self.allocate(done.size());
             return Ok(Some(vec![Kind::Constant(key, done.size())]));
         }
         // An opener, whether or not one is already open.
@@ -1492,21 +1500,50 @@ impl Walker {
             _ => None,
         };
         if let Some(kind) = kind {
+            if self.expand_text_defines
+                && self
+                    .records
+                    .last()
+                    .is_some_and(|open| kind == RecordKind::Enum || open.kind == RecordKind::Enum)
+            {
+                return Err(AsmError::new(
+                    line,
+                    "an enum cannot nest a record or be nested in one",
+                ));
+            }
+            let owns_scope = kind != RecordKind::Enum || !rest.trim().is_empty();
             let name = rest.trim();
             let name = if name.is_empty() {
                 self.unnamed += 1;
                 format!("{LABEL_SEP}rec#{}", self.unnamed)
             } else {
                 if !is_ident(name) {
-                    return Err(AsmError::new(line, format!("invalid record name `{name}`")));
+                    if kind == RecordKind::Enum && !self.expand_text_defines {
+                        // A repeat or macro may produce the name through
+                        // .ident. Formatting retains the unexpanded header.
+                        self.unnamed += 1;
+                        format!("{LABEL_SEP}rec#{}", self.unnamed)
+                    } else {
+                        return Err(AsmError::new(line, format!("invalid record name `{name}`")));
+                    }
+                } else {
+                    name.to_string()
                 }
-                name.to_string()
             };
-            let path = self.push_scope(&name, line)?;
+            let path = if owns_scope {
+                if kind == RecordKind::Enum && self.expand_text_defines {
+                    self.constant_key_at(&name, line, false)?;
+                }
+                self.push_scope(&name, line)?
+            } else {
+                self.path().join("::")
+            };
             self.records.push(RecordBuild {
                 kind,
                 path,
                 cursor: 0,
+                enum_base: (kind == RecordKind::Enum).then_some(Expr::Num(0)),
+                owns_scope,
                 widest: 0,
                 line,
             });
@@ -1625,30 +1662,54 @@ impl Walker {
         Ok(defined)
     }
 
-    /// `name` or `name = expr`. The counter carries on from the last member, so
-    /// `a = 5` followed by a bare `b` is 5 then 6.
+    /// An explicit initializer resets the base; defaults clone that base plus
+    /// an offset. Query results and lexical references are captured only once.
     fn enum_member(&mut self, text: &str, line: usize) -> Result<Vec<Kind>, AsmError> {
-        let (name, value) = match text.split_once('=') {
-            Some((name, expr)) => {
-                let expr =
-                    parse_value(&self.anons, self.scope_env.anchor_str(), expr.trim(), line)?;
-                (
-                    name.trim(),
-                    Some(fold_const(&plain_references(&expr), &self.consts, line)?),
-                )
-            }
-            None => (text, None),
-        };
+        // The authored member line is already retained by record_line.
+        // Formatting does not execute repeat counters or macro expressions.
+        if !self.expand_text_defines {
+            return Ok(Vec::new());
+        }
+        let (name, initializer) = text.split_once('=').map_or((text, None), |(name, value)| {
+            (name.trim(), Some(value.trim()))
+        });
         if !is_ident(name) {
             return Err(AsmError::new(line, format!("invalid enum member `{name}`")));
         }
-        let open = self.records.last_mut().expect("a record is open");
-        let value = value.unwrap_or(open.cursor);
-        open.cursor = value + 1;
-        let key = qualify(&self.path(), name);
-        self.consts.insert(key.clone(), value);
+        let key = self.constant_key_at(name, line, false)?;
+        if self.expand_text_defines {
+            if self.source_known.contains(&key) || self.consts.contains_key(&key) {
+                return Err(AsmError::new(
+                    line,
+                    format!("symbol `{name}` is already defined"),
+                ));
+            }
+            self.source_unresolved.borrow_mut().insert(key.clone());
+        }
+        let explicit = initializer
+            .map(|value| self.source_value(value, line))
+            .transpose()?;
+        let open = self.records.last_mut().expect("an enum is open");
+        let value = if let Some(value) = explicit {
+            open.enum_base = Some(value.clone());
+            open.cursor = 0;
+            value
+        } else {
+            Expr::Bin(
+                crate::engine::BinOp::Add,
+                Box::new(open.enum_base.as_ref().expect("enum base").clone()),
+                Box::new(Expr::Num(open.cursor)),
+            )
+        };
+        open.cursor = open
+            .cursor
+            .checked_add(1)
+            .ok_or_else(|| AsmError::new(line, "too many enum members"))?;
+        if self.expand_text_defines {
+            self.source_known.insert(key.clone());
+        }
         self.scope_env.replace_anchor(key.clone());
-        Ok(vec![Kind::Constant(key, value)])
+        Ok(vec![Kind::EnumValue(key, value)])
     }
 
     /// `.tag Record [count]` outside a record declaration: reserve one
@@ -1816,6 +1877,17 @@ impl Walker {
     /// for an unqualified name, and a qualified target's entire parent must
     /// exist (finding just its first component is insufficient).
     fn constant_key(&self, name: &str, line: usize) -> Result<String, AsmError> {
+        self.constant_key_at(name, line, true)
+    }
+
+    /// Mnemonics are instruction heads in ordinary assignments, but native
+    /// enum headers/members read them as identifiers. Register tokens stay reserved.
+    fn constant_key_at(
+        &self,
+        name: &str,
+        line: usize,
+        statement_head: bool,
+    ) -> Result<String, AsmError> {
         if let Some(local) = name.strip_prefix('@') {
             if !is_cheap_ident(local)
                 || (self.expand_text_defines && self.scope_env.anchor_str().is_empty())
@@ -1850,7 +1922,8 @@ impl Walker {
         // ca65 checks an instruction at the statement head, before reading
         // a scoped definition. A leading :: bypasses that check. Register
         // tokens remain reserved in every component.
-        let instruction = !name.starts_with("::")
+        let instruction = statement_head
+            && !name.starts_with("::")
             && if extended && matches!(head.as_str(), "BRU" | "LBRU") {
                 // ISA aliases that native ca65 leaves available as names.
                 false

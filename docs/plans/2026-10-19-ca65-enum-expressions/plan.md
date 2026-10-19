@@ -2,8 +2,8 @@
 
 The current enum reader folds each initializer immediately and drops its
 expression. Native retains references in the enum namespace: a later local
-member can change an earlier member, while an unresolved/cyclic unused member
-must refuse. This task starts with research while #799 qualifies.
+member can change an earlier member, while undefined members and value uses still require native validation.
+Known-width unused cycles follow the separately measured #800 rules. This task starts with research while #799 qualifies.
 
 1. Re-consult syntax-stance, scoped-symbol-environment, selected-reader and
    native AST payload decisions. Inspect `ca65/mod.rs` record handling and
@@ -34,3 +34,11 @@ must refuse. This task starts with research while #799 qualifies.
 The user delegated routine decisions and asked the audit/fix campaign to
 continue. No dependency, public contract change or new architecture is proposed.
 If the probes require one, stop implementation at that boundary and explain it.
+
+The concrete design is in design.md. The source-validation prerequisite merged in #804. Enum execution uses that
+unchanged parent code and will incorporate its merged history before
+qualification.
+
+The final reviewed fixture has 136 completed native controls (64 accepted,
+72 refused). Four native timeouts are retained separately. The new package
+cohort is mandatory and executes 328 commands; the required total is 59.
