@@ -1,0 +1,49 @@
+{
+  "source": ".byte .tcount ({a,b})\n.byte .blank ({})\n",
+  "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+  "producer": "1cacfa5d42d42522e4e2e036cb95653d81845f41",
+  "cli_sha256": "99a47d49e1730577c0c3a5294724c626c3aa29036dd6f11d1f0b9621e01f2d48",
+  "processes": [
+    {
+      "argv": [
+        "/opt/homebrew/bin/ca65",
+        "input.s",
+        "-o",
+        "input.o"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/opt/homebrew/bin/ld65",
+        "-C",
+        "input.cfg",
+        "input.o",
+        "-o",
+        "native.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/private/tmp/asm198x-labelled-scopes-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 0 byte(s) -> out.bin\n"
+    }
+  ],
+  "native_hex": "0301",
+  "asm_hex": ""
+}
