@@ -626,12 +626,11 @@ fn sweep_line(
         return Ok(());
     };
     let processed = repeat_text(&processed, &node.span, st);
-    // The shared expander separates an optional label by whitespace. ca65
-    // owns the colon token, including attached/indented call-site labels.
-    let separated = super::split_label_head(processed.trim_start())
-        .filter(|(_, rest)| !rest.is_empty())
-        .map(|(label, rest)| format!("{label} {rest}"));
-    let macro_source = separated.as_deref().unwrap_or(&processed);
+    // Recognise the macro word without evaluating a generated label. Only a
+    // selected invocation binds its head, before reading the expanded body.
+    let call_head = super::split_label_head(processed.trim_start())
+        .or_else(|| super::split_generated_label_head(processed.trim_start()));
+    let macro_source = call_head.map_or(processed.as_str(), |(_, rest)| rest);
     let invokes = matches!(
         macros::macro_line(&ca65_flat::Ca65Macros, macro_source.trim_start(), &|name| {
             st.macro_state.defines(name)
@@ -645,10 +644,16 @@ fn sweep_line(
             format!("macro `{name}` is still expanding after 64 levels — is it recursive?"),
         ));
     }
+    let call_source = if invokes && call_head.is_some() {
+        let head = read_macro_label(&processed, node, st, sw)?;
+        bind_head_label(&head, node, st, sw)?.to_string()
+    } else {
+        processed.clone()
+    };
     let mut expanded = macros::expand_one_at(
         &ca65_flat::Ca65Macros,
         if invokes {
-            macro_source.trim_start()
+            call_source.trim_start()
         } else {
             &processed
         },
@@ -877,6 +882,36 @@ fn capture_text(source: &str, at: &crate::span::Span, st: &Projection) -> Result
     Ok(text)
 }
 
+/// Read only an optional macro head label. Definition bodies and call
+/// arguments keep their existing capture/expansion timing.
+fn read_macro_label(
+    source: &str,
+    node: &crate::ast::Node,
+    st: &Projection,
+    sw: &Sweep<'_>,
+) -> Result<String, AsmError> {
+    let generated = super::split_generated_label_head(source.trim());
+    let source = if let Some((label, rest)) = generated {
+        let label = live_text(label, st, &sw.reader, node.span.line as usize)
+            .map_err(|e| super::statement_error(e, node.span.file, &node.span.expansion_frames))?;
+        // The native identifier token may be separated from its colon. Keep
+        // authored spacing in the AST; bind the folded identifier as one head.
+        format!("{}: {rest}", label.trim().trim_end_matches(':').trim_end())
+    } else {
+        source.to_string()
+    };
+    if let Some((label, _)) = super::split_label_head(source.trim()) {
+        let name = label.trim_end_matches(':');
+        if sw.reader.reserved_head_label(name, generated.is_some()) {
+            return Err(AsmError::at(
+                node.span.clone(),
+                format!("reserved label name `{name}`"),
+            ));
+        }
+    }
+    Ok(source)
+}
+
 fn register_macro(
     node: &crate::ast::Node,
     body: &[crate::ast::Node],
@@ -891,6 +926,7 @@ fn register_macro(
         Ok(repeat_text(&raw, at, st))
     };
     let head = capture(&node.source, &node.span)?;
+    let head = read_macro_label(&head, node, st, sw)?;
     let (name, params) = super::macro_header(&head)
         .ok_or_else(|| AsmError::at(node.span.clone(), "invalid macro definition"))?;
     if !is_ident(&name) || params.iter().any(|name| !is_ident(name)) {
