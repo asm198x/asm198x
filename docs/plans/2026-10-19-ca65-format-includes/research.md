@@ -35,3 +35,10 @@ ca65_format_includes cohort has 63 cases and 252 commands: original assembly,
 two formatter passes, and reassembly for each accepted or refused source.
 The separate #833 source-preservation design remains pending approval; no .end
 formatter behaviour was changed in this slice.
+
+Clean producer 8aa067938c5900a1ccd0a39b18a9ae28bd45d54e preserves all native
+assemblies, has no formatter refusals, and retains all 564 unchanged 4510
+bytes. Seven replay processes/fourteen streams and a changed-byte control
+pass. The actual current package passes all 71 cohorts and the two corruption
+controls fail correctly; the clean predecessor package fails only the new
+ca65_format_includes cohort. Exact executable identities are retained.
