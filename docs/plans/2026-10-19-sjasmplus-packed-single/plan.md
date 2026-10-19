@@ -1,4 +1,4 @@
-# Admit native SjASMPlus packed single-quoted literals (#737)
+# Admit native SjASMPlus packed single-quoted literals (#737/#856)
 
 The Z80 tokenizer currently accepts only three-character single-quoted tokens,
 and SjASMPlus data_items treats only double-quoted input as string data. Native
@@ -26,7 +26,9 @@ These are separate admission paths using the existing numeric/string seams.
 5. Replay the pinned affected SpecNext project from a clean source, retaining
    source/tool identities, all process streams and full bytes or an explicit
    remaining boundary. Do not claim this project uses the quoted form unless
-   measured. Existing packed-overflow warning gap #715 stays separate.
+   measured. Existing packed-overflow warning gap #715 and empty-value warning gap #857 stay separate.
+   Byte-context validation must reject only wholly empty lists, preserving mixed
+   empty items and wide zero values under #856.
 6. Push checked work, inspect current exact-head checks and five actual packages
    with receipts and ten corruption controls, rebase-merge, then clean owned
    workspaces/builds/processes after verifying retained commits and evidence.
