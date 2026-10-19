@@ -1,0 +1,375 @@
+{
+  "tools": {
+    "ca65": {
+      "path": "/opt/homebrew/bin/ca65",
+      "sha256": "1a57997819fd98814e4601b5160df589e7a1a24e1888a80fee51ae450d8fd0ea",
+      "version": {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "--version"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-qg1p7zt8",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "ca65 V2.18 - N/A\n"
+      }
+    },
+    "ld65": {
+      "path": "/opt/homebrew/bin/ld65",
+      "sha256": "36bb196207a6b2c90a4aa991b419d6113885303951b14b60b455f51c777b3339",
+      "version": {
+        "argv": [
+          "/opt/homebrew/bin/ld65",
+          "--version"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-qg1p7zt8",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "ld65 V2.18 - N/A\n"
+      }
+    }
+  },
+  "cases": [
+    {
+      "name": "byte_later",
+      "source": "VALUE=$12\n.scope inner\n.byte VALUE\nVALUE=$34\n.endscope\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "34",
+      "asm": {
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+        "hex": "12"
+      }
+    },
+    {
+      "name": "word_later",
+      "source": "VALUE=$12\n.scope inner\n.word VALUE\nVALUE=$1234\n.endscope\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "3412",
+      "asm": {
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+        "hex": "1200"
+      }
+    },
+    {
+      "name": "width_later",
+      "source": "VALUE=$12\n.scope inner\nlda VALUE\nVALUE=$1234\n.endscope\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Range error (4660 not in [0..255])\n"
+        }
+      ],
+      "native_hex": null,
+      "asm": {
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+        "hex": "a512"
+      }
+    },
+    {
+      "name": "alias_later",
+      "source": "VALUE=$12\n.scope inner\nOTHER=VALUE\nVALUE=$34\n.byte OTHER\n.endscope\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "34",
+      "asm": {
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+        "hex": "12"
+      }
+    },
+    {
+      "name": "alias_before",
+      "source": "VALUE=$12\n.scope inner\nOTHER=VALUE\n.byte OTHER\nVALUE=$34\n.endscope\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "34",
+      "asm": {
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+        "hex": "12"
+      }
+    },
+    {
+      "name": "reserve_later",
+      "source": "VALUE=2\n.scope inner\n.res VALUE\nVALUE=4\n.endscope\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Constant expression expected\n"
+        }
+      ],
+      "native_hex": null,
+      "asm": {
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+        "hex": "0000"
+      }
+    },
+    {
+      "name": "if_later",
+      "source": "VALUE=2\n.scope inner\n.if VALUE=2\n.byte 1\n.else\n.byte 0\n.endif\nVALUE=4\n.endscope\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Constant expression expected\n"
+        }
+      ],
+      "native_hex": null,
+      "asm": {
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+        "hex": "01"
+      }
+    },
+    {
+      "name": "root_explicit",
+      "source": "VALUE=$12\n.scope inner\n.byte ::VALUE\nVALUE=$34\n.endscope\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "12",
+      "asm": {
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+        "hex": "12"
+      }
+    },
+    {
+      "name": "defined_later",
+      "source": "VALUE=$12\n.scope inner\n.byte .defined(VALUE)\nVALUE=$34\n.endscope\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "01",
+      "asm": {
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+        "hex": "01"
+      }
+    },
+    {
+      "name": "const_before",
+      "source": "VALUE=$12\n.scope inner\nVALUE=$34\n.byte VALUE\n.endscope\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "34",
+      "asm": {
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+        "hex": "34"
+      }
+    }
+  ]
+}
