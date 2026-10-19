@@ -224,3 +224,10 @@ test('ca65 source-time scope and width evidence is mandatory', () => {
   assert(qualifies(complete)); assert(requiredCases.includes('ca65_scope_anchors'));
   assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_scope_anchors')), false);
 });
+
+
+test('ca65 CPU-specific reserved names are mandatory package evidence', () => {
+  const complete = requiredCases.map(name => ({ name, status: 'pass' }));
+  assert(qualifies(complete)); assert(requiredCases.includes('ca65_reserved_constants'));
+  assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_reserved_constants')), false);
+});
