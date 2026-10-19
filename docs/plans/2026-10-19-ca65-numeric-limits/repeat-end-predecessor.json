@@ -1,0 +1,49 @@
+{
+  "case": {
+    "name": "one_repeat_end_after",
+    "source": ".repeat 1\n.end\n.endrepeat\n.byte <$100000000\n",
+    "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+    "native": [
+      {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "input.s",
+          "-o",
+          "input.o"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-9g2jwb2p",
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "/opt/homebrew/bin/ld65",
+          "-C",
+          "input.cfg",
+          "input.o",
+          "-o",
+          "native.bin"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-9g2jwb2p",
+        "exit": 0,
+        "stdout": "",
+        "stderr": ""
+      }
+    ],
+    "native_hex": ""
+  },
+  "argv": [
+    "/private/tmp/asm198x-absolute-debug-predecessor/asm198x",
+    "--dialect",
+    "ca65",
+    "-C",
+    "input.cfg",
+    "input.s",
+    "-o",
+    "out.bin"
+  ],
+  "exit": 1,
+  "stdout": "",
+  "stderr": "asm198x: input.s:1:1: error: repetition block is never closed\n"
+}

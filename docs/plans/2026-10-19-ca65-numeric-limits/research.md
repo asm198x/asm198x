@@ -38,3 +38,21 @@ Prefix hex/bin scanners stop at the first non-digit of their radix. This is
 why validating the existing coarse token as a full expression would over-reject
 skipped source. Leading decimal zeros are skipped before the bounded buffer;
 range detection examines the previous partial value before multiplying.
+
+## Capture and stopping order
+
+Seventeen additional controls accept six and refuse eleven. Native `.end`
+stops before oversized tokens both on its own line and on later lines. A
+selected conditional still reports an unclosed conditional if it reaches `.end`.
+Macro and repeat capture validates the whole captured body before execution:
+an oversized token after `.end` inside a zero/one-repeat or unused macro is
+rejected. An executed `.end` inside a repeat, however, succeeds and ignores
+the source after the closer; the preceding executable's unclosed-repeat refusal
+is a separate confirmed gap, retained in repeat-end-predecessor.json.
+Oversized tokens on macro/repeat/conditional closer lines are also read.
+
+These results rule out an eager whole-file numeric prepass and a check attached
+only to selected expression parsing. Keep the active numeric conversion and
+the source-admission boundaries independently testable; preserve `.end` token
+stopping and captured-source validation rather than inferring them from final
+expression values.
