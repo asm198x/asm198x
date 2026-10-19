@@ -597,10 +597,7 @@ fn sweep_line(
     // stops before text evaluation can read its unused operand tail.
     let source = {
         let code = super::strip_comment(&source).trim_start();
-        let end = super::end_token_len(code).or_else(|| {
-            let (_, head) = super::split_label_head(code)?;
-            super::end_token_len(head).map(|len| code.len() - head.len() + len)
-        });
+        let end = literal_end(code);
         if let Some(end) = end {
             code[..end].to_string()
         } else {
@@ -669,17 +666,42 @@ fn sweep_line(
         return project_nodes(&program.nodes, st, sw);
     }
     let processed = expanded.text.trim_end_matches('\n');
+    let generated_label = ident_arguments(processed.trim_start()).is_some();
     let processed = live_text(processed, st, &sw.reader, line)
         .map_err(|e| super::statement_error(e, file, &node.span.expansion_frames))?;
-    let start = sw.reader.nodes.len();
-    let walked = sw.reader.walk_line(&processed, line, file).map_err(|e| {
-        let mut error = super::statement_error(e, file, &node.span.expansion_frames);
-        if let Some(span) = error.span.as_mut() {
-            span.expansion_frames
-                .clone_from(&node.span.expansion_frames);
+    let end_label = super::split_label_head(processed.trim())
+        .filter(|(_, rest)| super::end_token_len(rest).is_some())
+        .map(|(label, _)| label);
+    if let Some(label) = end_label {
+        let name = label.trim_end_matches(':');
+        let upper = name.to_ascii_uppercase();
+        // Literal registers and F/Z size prefixes are not identifier tokens.
+        // .ident explicitly manufactures an identifier, including a register's
+        // spelling. Keep this new end-label admission separate from #853.
+        if !generated_label
+            && (matches!(upper.as_str(), "A" | "X" | "Y" | "F" | "Z")
+                || (sw.reader.extension.is_some() && matches!(upper.as_str(), "S" | "SP")))
+        {
+            return Err(AsmError::at(
+                node.span.clone(),
+                format!("reserved label name `{name}`"),
+            ));
         }
-        error
-    });
+    }
+    let start = sw.reader.nodes.len();
+    // Bind through the ordinary label-only walk before stopping. Parsing the
+    // remaining .end as an operation would instead report unsupported syntax.
+    let walked = sw
+        .reader
+        .walk_line(end_label.unwrap_or(&processed), line, file)
+        .map_err(|e| {
+            let mut error = super::statement_error(e, file, &node.span.expansion_frames);
+            if let Some(span) = error.span.as_mut() {
+                span.expansion_frames
+                    .clone_from(&node.span.expansion_frames);
+            }
+            error
+        });
     let mut drained: Vec<crate::ast::Node> = sw.reader.nodes.split_off(start);
     let walked = walked?;
     // A macro-expanded line carries its author's frames on the structural
@@ -692,6 +714,9 @@ fn sweep_line(
             sp.expansion_frames.clone_from(&node.span.expansion_frames);
         }
         project_selected(n, st, &mut sw.reader)?;
+    }
+    if end_label.is_some() {
+        sw.reader.ended = true;
     }
     let Some(mut d) = walked else {
         return Ok(());
@@ -708,6 +733,51 @@ fn sweep_line(
         return project_selected(&ca65_flat::unresolved_node(d), st, &mut sw.reader);
     }
     resolve_at_sweep(d, st, sw)
+}
+
+/// The opening parenthesis of a syntactic .ident call, without evaluating it.
+fn ident_arguments(source: &str) -> Option<usize> {
+    if !source.get(..6)?.eq_ignore_ascii_case(".ident") {
+        return None;
+    }
+    let rest = source[6..].trim_start_matches([' ', '\t']);
+    rest.starts_with('(').then_some(source.len() - rest.len())
+}
+
+/// A literal terminator is read before its unused tail. A generated label's
+/// expression still needs evaluation; only the source after .end is unread.
+fn literal_end(code: &str) -> Option<usize> {
+    if let Some(end) = super::end_token_len(code) {
+        return Some(end);
+    }
+    if let Some((_, rest)) = super::split_label_head(code) {
+        return super::end_token_len(rest).map(|len| code.len() - rest.len() + len);
+    }
+    let open = ident_arguments(code)?;
+    let mut depth = 0usize;
+    let mut quote = None;
+    for (at, byte) in code.bytes().enumerate().skip(open) {
+        if let Some(delimiter) = quote {
+            if byte == delimiter {
+                quote = None;
+            }
+            continue;
+        }
+        match byte {
+            b'\'' | b'"' => quote = Some(byte),
+            b'(' => depth += 1,
+            b')' => {
+                depth -= 1;
+                if depth == 0 {
+                    let after = code[at + 1..].trim_start_matches([' ', '\t']);
+                    let rest = after.strip_prefix(':')?.trim_start_matches([' ', '\t']);
+                    return super::end_token_len(rest).map(|len| code.len() - rest.len() + len);
+                }
+            }
+            _ => {}
+        }
+    }
+    None
 }
 
 /// Resolve an `.include`/`.incbin` the sweep just read, under the same depth,
