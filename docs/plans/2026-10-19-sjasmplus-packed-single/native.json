@@ -24,7 +24,7 @@
         ],
         "exit": 1,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: Empty string: ''\ninput.asm(1): error: no arguments\nPass 3 complete\nErrors: 1, warnings: 1, compiled: 2 lines, work time: 0.000 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: Empty string: ''\ninput.asm(1): error: no arguments\nPass 3 complete\nErrors: 1, warnings: 1, compiled: 2 lines, work time: 0.001 seconds\n"
       },
       "native_hex": ""
     },
@@ -39,7 +39,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: Empty string literal converted to value 0!: ''\nPass 3 complete\nErrors: 0, warnings: 1, compiled: 2 lines, work time: 0.000 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: Empty string literal converted to value 0!: ''\nPass 3 complete\nErrors: 0, warnings: 1, compiled: 2 lines, work time: 0.001 seconds\n"
       },
       "native_hex": "0000"
     },
@@ -54,7 +54,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: Empty string literal converted to value 0!: ''\nPass 3 complete\nErrors: 0, warnings: 1, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: Empty string literal converted to value 0!: ''\nPass 3 complete\nErrors: 0, warnings: 1, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "000000"
     },
@@ -84,7 +84,7 @@
         ],
         "exit": 1,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: Empty string: ''\ninput.asm(1): error: no arguments\nPass 3 complete\nErrors: 1, warnings: 1, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: Empty string: ''\ninput.asm(1): error: no arguments\nPass 3 complete\nErrors: 1, warnings: 1, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": ""
     },
@@ -99,7 +99,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: Empty string literal converted to value 0!: ''\nPass 3 complete\nErrors: 0, warnings: 1, compiled: 3 lines, work time: 0.000 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: Empty string literal converted to value 0!: ''\nPass 3 complete\nErrors: 0, warnings: 1, compiled: 3 lines, work time: 0.001 seconds\n"
       },
       "native_hex": "00000000"
     },
@@ -114,7 +114,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: Empty string literal converted to value 0!: ''+1\nPass 3 complete\nErrors: 0, warnings: 1, compiled: 3 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: Empty string literal converted to value 0!: ''+1\nPass 3 complete\nErrors: 0, warnings: 1, compiled: 3 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "01000000"
     },
@@ -129,7 +129,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: Empty string literal converted to value 0!: '')\nPass 3 complete\nErrors: 0, warnings: 1, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: Empty string literal converted to value 0!: '')\nPass 3 complete\nErrors: 0, warnings: 1, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "00000000"
     },
@@ -159,7 +159,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
       },
       "native_hex": "4600"
     },
@@ -204,7 +204,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
       },
       "native_hex": "46"
     },
@@ -219,7 +219,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n"
       },
       "native_hex": "46000000"
     },
@@ -234,7 +234,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n"
       },
       "native_hex": "47000000"
     },
@@ -279,7 +279,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.002 seconds\n"
       },
       "native_hex": "4646"
     },
@@ -324,7 +324,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
       },
       "native_hex": "46c6"
     },
@@ -339,7 +339,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n"
       },
       "native_hex": "46460000"
     },
@@ -354,7 +354,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n"
       },
       "native_hex": "47460000"
     },
@@ -399,7 +399,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: value 0x414243 is truncated to 16bit value: 0x4243\nPass 3 complete\nErrors: 0, warnings: 1, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: value 0x414243 is truncated to 16bit value: 0x4243\nPass 3 complete\nErrors: 0, warnings: 1, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "4342"
     },
@@ -414,7 +414,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
       },
       "native_hex": "434241"
     },
@@ -474,7 +474,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "44424100"
     },
@@ -489,7 +489,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.002 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
       },
       "native_hex": "43424100"
     },
@@ -504,7 +504,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
       },
       "native_hex": "41424344"
     },
@@ -519,7 +519,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: value 0x41424344 is truncated to 16bit value: 0x4344\nPass 3 complete\nErrors: 0, warnings: 1, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: value 0x41424344 is truncated to 16bit value: 0x4344\nPass 3 complete\nErrors: 0, warnings: 1, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "4443"
     },
@@ -579,7 +579,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n"
       },
       "native_hex": "44434241"
     },
@@ -609,7 +609,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "44434241"
     },
@@ -624,7 +624,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
       },
       "native_hex": "4142434445"
     },
@@ -654,7 +654,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: String literal truncated to 0x42434445: 'ABCDE'\ninput.asm(1): warning: value 0x42434445 is truncated to 24bit value: 0x434445\nPass 3 complete\nErrors: 0, warnings: 2, compiled: 2 lines, work time: 0.000 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: String literal truncated to 0x42434445: 'ABCDE'\ninput.asm(1): warning: value 0x42434445 is truncated to 24bit value: 0x434445\nPass 3 complete\nErrors: 0, warnings: 2, compiled: 2 lines, work time: 0.001 seconds\n"
       },
       "native_hex": "454443"
     },
@@ -684,7 +684,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "41424344c5"
     },
@@ -699,7 +699,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: String literal truncated to 0x42434445: 'ABCDE'\nPass 3 complete\nErrors: 0, warnings: 1, compiled: 3 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: String literal truncated to 0x42434445: 'ABCDE'\nPass 3 complete\nErrors: 0, warnings: 1, compiled: 3 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "45444342"
     },
@@ -729,7 +729,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: String literal truncated to 0x42434445: 'ABCDE'\nPass 3 complete\nErrors: 0, warnings: 1, compiled: 2 lines, work time: 0.005 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: String literal truncated to 0x42434445: 'ABCDE'\nPass 3 complete\nErrors: 0, warnings: 1, compiled: 2 lines, work time: 0.001 seconds\n"
       },
       "native_hex": "45444342"
     },
@@ -744,7 +744,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.022 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "4142434445464748"
     },
@@ -759,7 +759,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: String literal truncated to 0x45464748: 'ABCDEFGH'\ninput.asm(1): warning: value 0x45464748 is truncated to 16bit value: 0x4748\nPass 3 complete\nErrors: 0, warnings: 2, compiled: 2 lines, work time: 0.003 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: String literal truncated to 0x45464748: 'ABCDEFGH'\ninput.asm(1): warning: value 0x45464748 is truncated to 16bit value: 0x4748\nPass 3 complete\nErrors: 0, warnings: 2, compiled: 2 lines, work time: 0.001 seconds\n"
       },
       "native_hex": "4847"
     },
@@ -774,7 +774,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: String literal truncated to 0x45464748: 'ABCDEFGH'\ninput.asm(1): warning: value 0x45464748 is truncated to 24bit value: 0x464748\nPass 3 complete\nErrors: 0, warnings: 2, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: String literal truncated to 0x45464748: 'ABCDEFGH'\ninput.asm(1): warning: value 0x45464748 is truncated to 24bit value: 0x464748\nPass 3 complete\nErrors: 0, warnings: 2, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "484746"
     },
@@ -819,7 +819,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: String literal truncated to 0x45464748: 'ABCDEFGH'\nPass 3 complete\nErrors: 0, warnings: 1, compiled: 3 lines, work time: 0.000 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: String literal truncated to 0x45464748: 'ABCDEFGH'\nPass 3 complete\nErrors: 0, warnings: 1, compiled: 3 lines, work time: 0.001 seconds\n"
       },
       "native_hex": "48474645"
     },
@@ -879,7 +879,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
       },
       "native_hex": "2700"
     },
@@ -924,7 +924,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
       },
       "native_hex": "27"
     },
@@ -999,7 +999,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: value 0x612762 is truncated to 16bit value: 0x2762\nPass 3 complete\nErrors: 0, warnings: 1, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: value 0x612762 is truncated to 16bit value: 0x2762\nPass 3 complete\nErrors: 0, warnings: 1, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "6227"
     },
@@ -1029,7 +1029,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.003 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
       },
       "native_hex": "62276100"
     },
@@ -1044,7 +1044,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.002 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "6127e2"
     },
@@ -1089,7 +1089,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "62276100"
     },
@@ -1104,7 +1104,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "5c"
     },
@@ -1119,7 +1119,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "5c00"
     },
@@ -1134,7 +1134,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
       },
       "native_hex": "5c0000"
     },
@@ -1164,7 +1164,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "5c"
     },
@@ -1179,7 +1179,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "5c000000"
     },
@@ -1194,7 +1194,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "5d000000"
     },
@@ -1209,7 +1209,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.002 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "5c000000"
     },
@@ -1269,7 +1269,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
       },
       "native_hex": "6e5c0000"
     },
@@ -1284,7 +1284,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "5cee"
     },
@@ -1299,7 +1299,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "6e5c0000"
     },
@@ -1314,7 +1314,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "6f5c0000"
     },
@@ -1389,7 +1389,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "a9c30000"
     },
@@ -1404,7 +1404,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.002 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "c3a9"
     },
@@ -1479,7 +1479,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: value 0xC3A9C3A9 is truncated to 16bit value: 0xC3A9\nPass 3 complete\nErrors: 0, warnings: 1, compiled: 2 lines, work time: 0.000 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: value 0xC3A9C3A9 is truncated to 16bit value: 0xC3A9\nPass 3 complete\nErrors: 0, warnings: 1, compiled: 2 lines, work time: 0.001 seconds\n"
       },
       "native_hex": "a9c3"
     },
@@ -1524,7 +1524,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "c3a9c3a9"
     },
@@ -1554,7 +1554,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "aac3a9c3"
     },
@@ -1569,7 +1569,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
       },
       "native_hex": "a9c3a9c3"
     },
@@ -1584,7 +1584,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "f09f9880"
     },
@@ -1659,7 +1659,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "80989ff0"
     },
@@ -1689,7 +1689,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "80989ff0"
     },
@@ -1719,7 +1719,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "3b00"
     },
@@ -1749,7 +1749,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "3b000000"
     },
@@ -1794,7 +1794,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "3c000000"
     },
@@ -1809,7 +1809,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "3b000000"
     },
@@ -1854,7 +1854,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "2f2f00"
     },
@@ -1884,7 +1884,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "2faf"
     },
@@ -1899,7 +1899,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "2f2f0000"
     },
@@ -1959,7 +1959,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "2c00"
     },
@@ -1974,7 +1974,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.002 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
       },
       "native_hex": "2c0000"
     },
@@ -2034,7 +2034,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.003 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "2d000000"
     },
@@ -2049,7 +2049,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.002 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
       },
       "native_hex": "2c000000"
     },
@@ -2094,7 +2094,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.003 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
       },
       "native_hex": "623a61"
     },
@@ -2109,7 +2109,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.002 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "623a6100"
     },
@@ -2139,7 +2139,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.002 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n"
       },
       "native_hex": "623a6100"
     },
@@ -2154,7 +2154,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "633a6100"
     },
@@ -2169,7 +2169,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.002 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "623a6100"
     },
@@ -2184,7 +2184,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "22"
     },
@@ -2214,7 +2214,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "220000"
     },
@@ -2229,7 +2229,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "22000000"
     },
@@ -2304,7 +2304,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "47"
     },
@@ -2334,7 +2334,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "4700"
     },
@@ -2364,7 +2364,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "47000000"
     },
@@ -2379,7 +2379,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "47000000"
     },
@@ -2439,7 +2439,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "4341"
     },
@@ -2454,7 +2454,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "43410000"
     },
@@ -2469,7 +2469,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "43410000"
     },
@@ -2499,7 +2499,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.002 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "28"
     },
@@ -2589,7 +2589,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: value 0xC3A9C3AA is truncated to 8bit value: 0xAA\nPass 3 complete\nErrors: 0, warnings: 1, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: value 0xC3A9C3AA is truncated to 8bit value: 0xAA\nPass 3 complete\nErrors: 0, warnings: 1, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "aa"
     },
@@ -2619,7 +2619,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: value 0xC3A9C3AA is truncated to 16bit value: 0xC3AA\nPass 3 complete\nErrors: 0, warnings: 1, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: value 0xC3A9C3AA is truncated to 16bit value: 0xC3AA\nPass 3 complete\nErrors: 0, warnings: 1, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "aac3"
     },
@@ -2664,7 +2664,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: Empty string literal converted to value 0!: ''\nPass 3 complete\nErrors: 0, warnings: 1, compiled: 2 lines, work time: 0.000 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: Empty string literal converted to value 0!: ''\nPass 3 complete\nErrors: 0, warnings: 1, compiled: 2 lines, work time: 0.001 seconds\n"
       },
       "native_hex": "00000000"
     },
@@ -2679,7 +2679,7 @@
         ],
         "exit": 1,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Syntax error: '''\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Syntax error: '''\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": ""
     },
@@ -2694,7 +2694,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.002 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
       },
       "native_hex": "27000000"
     },
@@ -2709,7 +2709,7 @@
         ],
         "exit": 1,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Syntax error: '''''\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Syntax error: '''''\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": ""
     },
@@ -2754,7 +2754,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
       },
       "native_hex": "27272700"
     },
@@ -2769,7 +2769,7 @@
         ],
         "exit": 1,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Syntax error: '''''''''\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Syntax error: '''''''''\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": ""
     },
@@ -2799,7 +2799,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.002 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "4142"
     },
@@ -2814,7 +2814,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "4142"
     },
@@ -2829,7 +2829,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "4142"
     },
@@ -2859,7 +2859,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "4241"
     },
@@ -2874,7 +2874,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "4241"
     },
@@ -2889,7 +2889,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "42410000"
     },
@@ -2904,7 +2904,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "42410000"
     },
@@ -2922,6 +2922,1131 @@
         "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
       },
       "native_hex": "414200"
+    },
+    {
+      "name": "control_0_db",
+      "source": " db 'A\u0000B'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Syntax error: 'A\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
+      },
+      "native_hex": "41"
+    },
+    {
+      "name": "control_0_dd",
+      "source": " dd 'A\u0000B'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Syntax error: 'A\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+      },
+      "native_hex": ""
+    },
+    {
+      "name": "control_1_db",
+      "source": " db 'A\u0001B'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
+      },
+      "native_hex": "410142"
+    },
+    {
+      "name": "control_1_dd",
+      "source": " dd 'A\u0001B'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+      },
+      "native_hex": "42014100"
+    },
+    {
+      "name": "control_2_db",
+      "source": " db 'A\u0002B'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+      },
+      "native_hex": "410242"
+    },
+    {
+      "name": "control_2_dd",
+      "source": " dd 'A\u0002B'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+      },
+      "native_hex": "42024100"
+    },
+    {
+      "name": "control_3_db",
+      "source": " db 'A\u0003B'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+      },
+      "native_hex": "410342"
+    },
+    {
+      "name": "control_3_dd",
+      "source": " dd 'A\u0003B'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
+      },
+      "native_hex": "42034100"
+    },
+    {
+      "name": "control_4_db",
+      "source": " db 'A\u0004B'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+      },
+      "native_hex": "410442"
+    },
+    {
+      "name": "control_4_dd",
+      "source": " dd 'A\u0004B'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+      },
+      "native_hex": "42044100"
+    },
+    {
+      "name": "control_5_db",
+      "source": " db 'A\u0005B'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.005 seconds\n"
+      },
+      "native_hex": "410542"
+    },
+    {
+      "name": "control_5_dd",
+      "source": " dd 'A\u0005B'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
+      },
+      "native_hex": "42054100"
+    },
+    {
+      "name": "control_6_db",
+      "source": " db 'A\u0006B'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+      },
+      "native_hex": "410642"
+    },
+    {
+      "name": "control_6_dd",
+      "source": " dd 'A\u0006B'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+      },
+      "native_hex": "42064100"
+    },
+    {
+      "name": "control_7_db",
+      "source": " db 'A\u0007B'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+      },
+      "native_hex": "410742"
+    },
+    {
+      "name": "control_7_dd",
+      "source": " dd 'A\u0007B'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+      },
+      "native_hex": "42074100"
+    },
+    {
+      "name": "control_8_db",
+      "source": " db 'A\bB'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+      },
+      "native_hex": "410842"
+    },
+    {
+      "name": "control_8_dd",
+      "source": " dd 'A\bB'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+      },
+      "native_hex": "42084100"
+    },
+    {
+      "name": "control_9_db",
+      "source": " db 'A\tB'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
+      },
+      "native_hex": "410942"
+    },
+    {
+      "name": "control_9_dd",
+      "source": " dd 'A\tB'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
+      },
+      "native_hex": "42094100"
+    },
+    {
+      "name": "control_10_db",
+      "source": " db 'A\nB'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Syntax error: 'A\ninput.asm(2): error: Invalid labelname: B'\nPass 3 complete\nErrors: 2, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n"
+      },
+      "native_hex": "41"
+    },
+    {
+      "name": "control_10_dd",
+      "source": " dd 'A\nB'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Syntax error: 'A\ninput.asm(2): error: Invalid labelname: B'\nPass 3 complete\nErrors: 2, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n"
+      },
+      "native_hex": ""
+    },
+    {
+      "name": "control_11_db",
+      "source": " db 'A\u000bB'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
+      },
+      "native_hex": "410b42"
+    },
+    {
+      "name": "control_11_dd",
+      "source": " dd 'A\u000bB'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+      },
+      "native_hex": "420b4100"
+    },
+    {
+      "name": "control_12_db",
+      "source": " db 'A\fB'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+      },
+      "native_hex": "410c42"
+    },
+    {
+      "name": "control_12_dd",
+      "source": " dd 'A\fB'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+      },
+      "native_hex": "420c4100"
+    },
+    {
+      "name": "control_13_db",
+      "source": " db 'A\rB'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Syntax error: 'A\ninput.asm(2): error: Invalid labelname: B'\nPass 3 complete\nErrors: 2, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n"
+      },
+      "native_hex": "41"
+    },
+    {
+      "name": "control_13_dd",
+      "source": " dd 'A\rB'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Syntax error: 'A\ninput.asm(2): error: Invalid labelname: B'\nPass 3 complete\nErrors: 2, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n"
+      },
+      "native_hex": ""
+    },
+    {
+      "name": "control_14_db",
+      "source": " db 'A\u000eB'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+      },
+      "native_hex": "410e42"
+    },
+    {
+      "name": "control_14_dd",
+      "source": " dd 'A\u000eB'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+      },
+      "native_hex": "420e4100"
+    },
+    {
+      "name": "control_15_db",
+      "source": " db 'A\u000fB'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
+      },
+      "native_hex": "410f42"
+    },
+    {
+      "name": "control_15_dd",
+      "source": " dd 'A\u000fB'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
+      },
+      "native_hex": "420f4100"
+    },
+    {
+      "name": "control_16_db",
+      "source": " db 'A\u0010B'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
+      },
+      "native_hex": "411042"
+    },
+    {
+      "name": "control_16_dd",
+      "source": " dd 'A\u0010B'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
+      },
+      "native_hex": "42104100"
+    },
+    {
+      "name": "control_17_db",
+      "source": " db 'A\u0011B'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+      },
+      "native_hex": "411142"
+    },
+    {
+      "name": "control_17_dd",
+      "source": " dd 'A\u0011B'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
+      },
+      "native_hex": "42114100"
+    },
+    {
+      "name": "control_18_db",
+      "source": " db 'A\u0012B'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+      },
+      "native_hex": "411242"
+    },
+    {
+      "name": "control_18_dd",
+      "source": " dd 'A\u0012B'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+      },
+      "native_hex": "42124100"
+    },
+    {
+      "name": "control_19_db",
+      "source": " db 'A\u0013B'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
+      },
+      "native_hex": "411342"
+    },
+    {
+      "name": "control_19_dd",
+      "source": " dd 'A\u0013B'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+      },
+      "native_hex": "42134100"
+    },
+    {
+      "name": "control_20_db",
+      "source": " db 'A\u0014B'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+      },
+      "native_hex": "411442"
+    },
+    {
+      "name": "control_20_dd",
+      "source": " dd 'A\u0014B'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+      },
+      "native_hex": "42144100"
+    },
+    {
+      "name": "control_21_db",
+      "source": " db 'A\u0015B'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
+      },
+      "native_hex": "411542"
+    },
+    {
+      "name": "control_21_dd",
+      "source": " dd 'A\u0015B'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
+      },
+      "native_hex": "42154100"
+    },
+    {
+      "name": "control_22_db",
+      "source": " db 'A\u0016B'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+      },
+      "native_hex": "411642"
+    },
+    {
+      "name": "control_22_dd",
+      "source": " dd 'A\u0016B'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+      },
+      "native_hex": "42164100"
+    },
+    {
+      "name": "control_23_db",
+      "source": " db 'A\u0017B'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
+      },
+      "native_hex": "411742"
+    },
+    {
+      "name": "control_23_dd",
+      "source": " dd 'A\u0017B'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
+      },
+      "native_hex": "42174100"
+    },
+    {
+      "name": "control_24_db",
+      "source": " db 'A\u0018B'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+      },
+      "native_hex": "411842"
+    },
+    {
+      "name": "control_24_dd",
+      "source": " dd 'A\u0018B'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
+      },
+      "native_hex": "42184100"
+    },
+    {
+      "name": "control_25_db",
+      "source": " db 'A\u0019B'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
+      },
+      "native_hex": "411942"
+    },
+    {
+      "name": "control_25_dd",
+      "source": " dd 'A\u0019B'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+      },
+      "native_hex": "42194100"
+    },
+    {
+      "name": "control_26_db",
+      "source": " db 'A\u001aB'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
+      },
+      "native_hex": "411a42"
+    },
+    {
+      "name": "control_26_dd",
+      "source": " dd 'A\u001aB'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+      },
+      "native_hex": "421a4100"
+    },
+    {
+      "name": "control_27_db",
+      "source": " db 'A\u001bB'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+      },
+      "native_hex": "411b42"
+    },
+    {
+      "name": "control_27_dd",
+      "source": " dd 'A\u001bB'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+      },
+      "native_hex": "421b4100"
+    },
+    {
+      "name": "control_28_db",
+      "source": " db 'A\u001cB'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
+      },
+      "native_hex": "411c42"
+    },
+    {
+      "name": "control_28_dd",
+      "source": " dd 'A\u001cB'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
+      },
+      "native_hex": "421c4100"
+    },
+    {
+      "name": "control_29_db",
+      "source": " db 'A\u001dB'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+      },
+      "native_hex": "411d42"
+    },
+    {
+      "name": "control_29_dd",
+      "source": " dd 'A\u001dB'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+      },
+      "native_hex": "421d4100"
+    },
+    {
+      "name": "control_30_db",
+      "source": " db 'A\u001eB'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
+      },
+      "native_hex": "411e42"
+    },
+    {
+      "name": "control_30_dd",
+      "source": " dd 'A\u001eB'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
+      },
+      "native_hex": "421e4100"
+    },
+    {
+      "name": "control_31_db",
+      "source": " db 'A\u001fB'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+      },
+      "native_hex": "411f42"
+    },
+    {
+      "name": "control_31_dd",
+      "source": " dd 'A\u001fB'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+      },
+      "native_hex": "421f4100"
+    },
+    {
+      "name": "control_127_db",
+      "source": " db 'A\u007fB'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
+      },
+      "native_hex": "417f42"
+    },
+    {
+      "name": "control_127_dd",
+      "source": " dd 'A\u007fB'\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
+      },
+      "native_hex": "427f4100"
+    },
+    {
+      "name": "empty_data_0",
+      "source": " db \"\"\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: Empty string: \"\"\ninput.asm(1): error: no arguments\nPass 3 complete\nErrors: 1, warnings: 1, compiled: 2 lines, work time: 0.001 seconds\n"
+      },
+      "native_hex": ""
+    },
+    {
+      "name": "empty_data_1",
+      "source": " dc \"\"\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: Empty string: \"\"\ninput.asm(1): error: no arguments\nPass 3 complete\nErrors: 1, warnings: 1, compiled: 2 lines, work time: 0.000 seconds\n"
+      },
+      "native_hex": ""
+    },
+    {
+      "name": "empty_data_2",
+      "source": " dz \"\"\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: Empty string: \"\"\ninput.asm(1): error: no arguments\nPass 3 complete\nErrors: 1, warnings: 1, compiled: 2 lines, work time: 0.000 seconds\n"
+      },
+      "native_hex": ""
+    },
+    {
+      "name": "empty_data_3",
+      "source": " dd \"\"\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: Empty string literal converted to value 0!: \"\"\nPass 3 complete\nErrors: 0, warnings: 1, compiled: 2 lines, work time: 0.001 seconds\n"
+      },
+      "native_hex": "00000000"
+    },
+    {
+      "name": "empty_data_4",
+      "source": " db \"\",1\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: Empty string: \"\",1\nPass 3 complete\nErrors: 0, warnings: 1, compiled: 2 lines, work time: 0.001 seconds\n"
+      },
+      "native_hex": "01"
+    },
+    {
+      "name": "empty_data_5",
+      "source": " db \"\",\"\"\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: Empty string: \"\",\"\"\ninput.asm(1): warning: Empty string: \"\"\ninput.asm(1): error: no arguments\nPass 3 complete\nErrors: 1, warnings: 2, compiled: 2 lines, work time: 0.001 seconds\n"
+      },
+      "native_hex": ""
+    },
+    {
+      "name": "empty_data_6",
+      "source": " dz ''\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: Empty string: ''\ninput.asm(1): error: no arguments\nPass 3 complete\nErrors: 1, warnings: 1, compiled: 2 lines, work time: 0.000 seconds\n"
+      },
+      "native_hex": ""
+    },
+    {
+      "name": "empty_data_7",
+      "source": " db '',1\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: Empty string: '',1\nPass 3 complete\nErrors: 0, warnings: 1, compiled: 2 lines, work time: 0.000 seconds\n"
+      },
+      "native_hex": "01"
+    },
+    {
+      "name": "empty_data_8",
+      "source": " abytez 1 \"\"\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: Empty string: \"\"\ninput.asm(1): error: no arguments\nPass 3 complete\nErrors: 1, warnings: 1, compiled: 2 lines, work time: 0.000 seconds\n"
+      },
+      "native_hex": ""
     },
     {
       "name": "abyte_spaced",
@@ -2949,7 +4074,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
       },
       "native_hex": "42c3"
     },
@@ -2964,7 +4089,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "424300"
     },
@@ -3009,7 +4134,7 @@
         ],
         "exit": 1,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: Empty string: ''+1\ninput.asm(1): error: no arguments\ninput.asm(1): error: Unexpected: +1\nPass 3 complete\nErrors: 2, warnings: 1, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: Empty string: ''+1\ninput.asm(1): error: no arguments\ninput.asm(1): error: Unexpected: +1\nPass 3 complete\nErrors: 2, warnings: 1, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": ""
     },
@@ -3039,7 +4164,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "07"
     },
@@ -3054,7 +4179,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "c3ffffffffffffff"
     },
@@ -3084,7 +4209,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "46460000"
     },
@@ -3099,7 +4224,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "07000000e8030000"
     },
@@ -3129,7 +4254,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 7 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 7 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "42410000"
     },
@@ -3159,7 +4284,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: String literal truncated to 0x2C3A2F2F: ';,://'\nPass 3 complete\nErrors: 0, warnings: 1, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: String literal truncated to 0x2C3A2F2F: ';,://'\nPass 3 complete\nErrors: 0, warnings: 1, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "2f2f3a2c42410000"
     },
@@ -3174,7 +4299,7 @@
         ],
         "exit": 1,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Syntax error: 'ABC\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Syntax error: 'ABC\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": ""
     },
@@ -3189,7 +4314,7 @@
         ],
         "exit": 1,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Syntax error: '\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Syntax error: '\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": ""
     },
@@ -3219,7 +4344,7 @@
         ],
         "exit": 1,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Unexpected: garbage\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Unexpected: garbage\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": "42410000"
     },
@@ -3234,7 +4359,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.002 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
       },
       "native_hex": "4142414207"
     },
@@ -3249,7 +4374,7 @@
         ],
         "exit": 0,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
       },
       "native_hex": "5c6e0a"
     },
@@ -3264,7 +4389,7 @@
         ],
         "exit": 1,
         "stdout": "",
-        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Syntax error: ,'AB'\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n"
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Syntax error: ,'AB'\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n"
       },
       "native_hex": ""
     },

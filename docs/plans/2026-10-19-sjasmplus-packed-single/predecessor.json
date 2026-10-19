@@ -1,11 +1,11 @@
 {
-  "binary": "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
-  "sha256": "04cd785990ddfcb28a3f7ef250ae85ff3052b176b8422894934ac3f8859bb63b",
+  "binary": "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+  "sha256": "c6a28a48ec8b51a2ede3cc6b379a97f027c3d8e047ca3c32312283492eaf8e75",
   "results": [
     {
       "name": "data_db_0",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -22,7 +22,7 @@
     {
       "name": "data_dw_0",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -39,7 +39,7 @@
     {
       "name": "data_d24_0",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -56,7 +56,7 @@
     {
       "name": "data_dd_0",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -73,7 +73,7 @@
     {
       "name": "data_dc_0",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -90,7 +90,7 @@
     {
       "name": "scalar_0",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -107,7 +107,7 @@
     {
       "name": "arithmetic_0",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -124,7 +124,7 @@
     {
       "name": "parenthesized_0",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -141,7 +141,7 @@
     {
       "name": "data_db_1",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -158,7 +158,7 @@
     {
       "name": "data_dw_1",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -175,7 +175,7 @@
     {
       "name": "data_d24_1",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -192,7 +192,7 @@
     {
       "name": "data_dd_1",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -209,7 +209,7 @@
     {
       "name": "data_dc_1",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -226,7 +226,7 @@
     {
       "name": "scalar_1",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -243,7 +243,7 @@
     {
       "name": "arithmetic_1",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -260,7 +260,7 @@
     {
       "name": "parenthesized_1",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -277,7 +277,7 @@
     {
       "name": "data_db_2",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -294,7 +294,7 @@
     {
       "name": "data_dw_2",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -311,7 +311,7 @@
     {
       "name": "data_d24_2",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -328,7 +328,7 @@
     {
       "name": "data_dd_2",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -345,7 +345,7 @@
     {
       "name": "data_dc_2",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -362,7 +362,7 @@
     {
       "name": "scalar_2",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -379,7 +379,7 @@
     {
       "name": "arithmetic_2",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -396,7 +396,7 @@
     {
       "name": "parenthesized_2",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -413,7 +413,7 @@
     {
       "name": "data_db_3",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -430,7 +430,7 @@
     {
       "name": "data_dw_3",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -447,7 +447,7 @@
     {
       "name": "data_d24_3",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -464,7 +464,7 @@
     {
       "name": "data_dd_3",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -481,7 +481,7 @@
     {
       "name": "data_dc_3",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -498,7 +498,7 @@
     {
       "name": "scalar_3",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -515,7 +515,7 @@
     {
       "name": "arithmetic_3",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -532,7 +532,7 @@
     {
       "name": "parenthesized_3",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -549,7 +549,7 @@
     {
       "name": "data_db_4",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -566,7 +566,7 @@
     {
       "name": "data_dw_4",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -583,7 +583,7 @@
     {
       "name": "data_d24_4",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -600,7 +600,7 @@
     {
       "name": "data_dd_4",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -617,7 +617,7 @@
     {
       "name": "data_dc_4",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -634,7 +634,7 @@
     {
       "name": "scalar_4",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -651,7 +651,7 @@
     {
       "name": "arithmetic_4",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -668,7 +668,7 @@
     {
       "name": "parenthesized_4",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -685,7 +685,7 @@
     {
       "name": "data_db_5",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -702,7 +702,7 @@
     {
       "name": "data_dw_5",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -719,7 +719,7 @@
     {
       "name": "data_d24_5",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -736,7 +736,7 @@
     {
       "name": "data_dd_5",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -753,7 +753,7 @@
     {
       "name": "data_dc_5",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -770,7 +770,7 @@
     {
       "name": "scalar_5",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -787,7 +787,7 @@
     {
       "name": "arithmetic_5",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -804,7 +804,7 @@
     {
       "name": "parenthesized_5",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -821,7 +821,7 @@
     {
       "name": "data_db_6",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -838,7 +838,7 @@
     {
       "name": "data_dw_6",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -855,7 +855,7 @@
     {
       "name": "data_d24_6",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -872,7 +872,7 @@
     {
       "name": "data_dd_6",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -889,7 +889,7 @@
     {
       "name": "data_dc_6",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -906,7 +906,7 @@
     {
       "name": "scalar_6",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -923,7 +923,7 @@
     {
       "name": "arithmetic_6",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -940,7 +940,7 @@
     {
       "name": "parenthesized_6",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -957,7 +957,7 @@
     {
       "name": "data_db_7",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -974,7 +974,7 @@
     {
       "name": "data_dw_7",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -991,7 +991,7 @@
     {
       "name": "data_d24_7",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1008,7 +1008,7 @@
     {
       "name": "data_dd_7",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1025,7 +1025,7 @@
     {
       "name": "data_dc_7",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1042,7 +1042,7 @@
     {
       "name": "scalar_7",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1059,7 +1059,7 @@
     {
       "name": "arithmetic_7",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1076,7 +1076,7 @@
     {
       "name": "parenthesized_7",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1093,7 +1093,7 @@
     {
       "name": "data_db_8",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1110,7 +1110,7 @@
     {
       "name": "data_dw_8",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1127,7 +1127,7 @@
     {
       "name": "data_d24_8",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1144,7 +1144,7 @@
     {
       "name": "data_dd_8",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1161,7 +1161,7 @@
     {
       "name": "data_dc_8",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1178,7 +1178,7 @@
     {
       "name": "scalar_8",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1195,7 +1195,7 @@
     {
       "name": "arithmetic_8",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1212,7 +1212,7 @@
     {
       "name": "parenthesized_8",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1229,7 +1229,7 @@
     {
       "name": "data_db_9",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1246,7 +1246,7 @@
     {
       "name": "data_dw_9",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1263,7 +1263,7 @@
     {
       "name": "data_d24_9",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1280,7 +1280,7 @@
     {
       "name": "data_dd_9",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1297,7 +1297,7 @@
     {
       "name": "data_dc_9",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1314,7 +1314,7 @@
     {
       "name": "scalar_9",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1331,7 +1331,7 @@
     {
       "name": "arithmetic_9",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1348,7 +1348,7 @@
     {
       "name": "parenthesized_9",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1365,7 +1365,7 @@
     {
       "name": "data_db_10",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1382,7 +1382,7 @@
     {
       "name": "data_dw_10",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1399,7 +1399,7 @@
     {
       "name": "data_d24_10",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1416,7 +1416,7 @@
     {
       "name": "data_dd_10",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1433,7 +1433,7 @@
     {
       "name": "data_dc_10",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1450,7 +1450,7 @@
     {
       "name": "scalar_10",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1467,7 +1467,7 @@
     {
       "name": "arithmetic_10",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1484,7 +1484,7 @@
     {
       "name": "parenthesized_10",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1501,7 +1501,7 @@
     {
       "name": "data_db_11",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1518,7 +1518,7 @@
     {
       "name": "data_dw_11",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1535,7 +1535,7 @@
     {
       "name": "data_d24_11",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1552,7 +1552,7 @@
     {
       "name": "data_dd_11",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1569,7 +1569,7 @@
     {
       "name": "data_dc_11",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1586,7 +1586,7 @@
     {
       "name": "scalar_11",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1603,7 +1603,7 @@
     {
       "name": "arithmetic_11",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1620,7 +1620,7 @@
     {
       "name": "parenthesized_11",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1637,7 +1637,7 @@
     {
       "name": "data_db_12",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1654,7 +1654,7 @@
     {
       "name": "data_dw_12",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1671,7 +1671,7 @@
     {
       "name": "data_d24_12",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1688,7 +1688,7 @@
     {
       "name": "data_dd_12",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1705,7 +1705,7 @@
     {
       "name": "data_dc_12",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1722,7 +1722,7 @@
     {
       "name": "scalar_12",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1739,7 +1739,7 @@
     {
       "name": "arithmetic_12",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1756,7 +1756,7 @@
     {
       "name": "parenthesized_12",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1773,7 +1773,7 @@
     {
       "name": "data_db_13",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1790,7 +1790,7 @@
     {
       "name": "data_dw_13",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1807,7 +1807,7 @@
     {
       "name": "data_d24_13",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1824,7 +1824,7 @@
     {
       "name": "data_dd_13",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1841,7 +1841,7 @@
     {
       "name": "data_dc_13",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1858,7 +1858,7 @@
     {
       "name": "scalar_13",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1875,7 +1875,7 @@
     {
       "name": "arithmetic_13",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1892,7 +1892,7 @@
     {
       "name": "parenthesized_13",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1909,7 +1909,7 @@
     {
       "name": "data_db_14",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1926,7 +1926,7 @@
     {
       "name": "data_dw_14",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1943,7 +1943,7 @@
     {
       "name": "data_d24_14",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1960,7 +1960,7 @@
     {
       "name": "data_dd_14",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1977,7 +1977,7 @@
     {
       "name": "data_dc_14",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -1994,7 +1994,7 @@
     {
       "name": "scalar_14",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2011,7 +2011,7 @@
     {
       "name": "arithmetic_14",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2028,7 +2028,7 @@
     {
       "name": "parenthesized_14",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2045,7 +2045,7 @@
     {
       "name": "data_db_15",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2062,7 +2062,7 @@
     {
       "name": "data_dw_15",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2079,7 +2079,7 @@
     {
       "name": "data_d24_15",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2096,7 +2096,7 @@
     {
       "name": "data_dd_15",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2113,7 +2113,7 @@
     {
       "name": "data_dc_15",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2130,7 +2130,7 @@
     {
       "name": "scalar_15",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2147,7 +2147,7 @@
     {
       "name": "arithmetic_15",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2164,7 +2164,7 @@
     {
       "name": "parenthesized_15",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2181,7 +2181,7 @@
     {
       "name": "data_db_16",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2198,7 +2198,7 @@
     {
       "name": "data_dw_16",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2215,7 +2215,7 @@
     {
       "name": "data_d24_16",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2232,7 +2232,7 @@
     {
       "name": "data_dd_16",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2249,7 +2249,7 @@
     {
       "name": "data_dc_16",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2266,7 +2266,7 @@
     {
       "name": "scalar_16",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2283,7 +2283,7 @@
     {
       "name": "arithmetic_16",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2300,7 +2300,7 @@
     {
       "name": "parenthesized_16",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2317,7 +2317,7 @@
     {
       "name": "data_db_17",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2334,7 +2334,7 @@
     {
       "name": "data_dw_17",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2351,7 +2351,7 @@
     {
       "name": "data_d24_17",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2368,7 +2368,7 @@
     {
       "name": "data_dd_17",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2385,7 +2385,7 @@
     {
       "name": "data_dc_17",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2402,7 +2402,7 @@
     {
       "name": "scalar_17",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2419,7 +2419,7 @@
     {
       "name": "arithmetic_17",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2436,7 +2436,7 @@
     {
       "name": "parenthesized_17",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2453,7 +2453,7 @@
     {
       "name": "data_db_18",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2470,7 +2470,7 @@
     {
       "name": "data_dw_18",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2487,7 +2487,7 @@
     {
       "name": "data_d24_18",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2504,7 +2504,7 @@
     {
       "name": "data_dd_18",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2521,7 +2521,7 @@
     {
       "name": "data_dc_18",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2538,7 +2538,7 @@
     {
       "name": "scalar_18",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2555,7 +2555,7 @@
     {
       "name": "arithmetic_18",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2572,7 +2572,7 @@
     {
       "name": "parenthesized_18",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2589,7 +2589,7 @@
     {
       "name": "tail_db_0_'F'+1",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2606,7 +2606,7 @@
     {
       "name": "tail_db_0_('F'+1)",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2623,7 +2623,7 @@
     {
       "name": "tail_dw_0_'F'+1",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2640,7 +2640,7 @@
     {
       "name": "tail_dw_0_('F'+1)",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2657,7 +2657,7 @@
     {
       "name": "tail_dd_0_'F'+1",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2674,7 +2674,7 @@
     {
       "name": "tail_dd_0_('F'+1)",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2691,7 +2691,7 @@
     {
       "name": "tail_db_1_'AB'+1",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2708,7 +2708,7 @@
     {
       "name": "tail_db_1_('AB'+1)",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2725,7 +2725,7 @@
     {
       "name": "tail_dw_1_'AB'+1",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2742,7 +2742,7 @@
     {
       "name": "tail_dw_1_('AB'+1)",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2759,7 +2759,7 @@
     {
       "name": "tail_dd_1_'AB'+1",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2776,7 +2776,7 @@
     {
       "name": "tail_dd_1_('AB'+1)",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2793,7 +2793,7 @@
     {
       "name": "tail_db_2_''''+1",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2810,7 +2810,7 @@
     {
       "name": "tail_db_2_(''''+1)",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2827,7 +2827,7 @@
     {
       "name": "tail_dw_2_''''+1",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2844,7 +2844,7 @@
     {
       "name": "tail_dw_2_(''''+1)",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2861,7 +2861,7 @@
     {
       "name": "tail_dd_2_''''+1",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2878,7 +2878,7 @@
     {
       "name": "tail_dd_2_(''''+1)",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2895,7 +2895,7 @@
     {
       "name": "tail_db_3_'\u00e9\u00e9'+1",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2912,7 +2912,7 @@
     {
       "name": "tail_db_3_('\u00e9\u00e9'+1)",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2929,7 +2929,7 @@
     {
       "name": "tail_dw_3_'\u00e9\u00e9'+1",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2946,7 +2946,7 @@
     {
       "name": "tail_dw_3_('\u00e9\u00e9'+1)",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2963,7 +2963,7 @@
     {
       "name": "tail_dd_3_'\u00e9\u00e9'+1",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2980,7 +2980,7 @@
     {
       "name": "tail_dd_3_('\u00e9\u00e9'+1)",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -2997,7 +2997,7 @@
     {
       "name": "apostrophes_2",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -3014,7 +3014,7 @@
     {
       "name": "apostrophes_3",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -3031,7 +3031,7 @@
     {
       "name": "apostrophes_4",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -3048,7 +3048,7 @@
     {
       "name": "apostrophes_5",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -3065,7 +3065,7 @@
     {
       "name": "apostrophes_6",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -3075,14 +3075,14 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: input.asm:1: error: unexpected trailing tokens in `''''''`\n",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": false
     },
     {
       "name": "apostrophes_7",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -3099,7 +3099,7 @@
     {
       "name": "apostrophes_8",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -3116,7 +3116,7 @@
     {
       "name": "apostrophes_9",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -3133,7 +3133,1554 @@
     {
       "name": "apostrophes_10",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "alias_defb",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "alias_byte",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "alias_defm",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "alias_dm",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "alias_defw",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "alias_word",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "alias_dword",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "alias_defd",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "alias_dz",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_0_db",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "control_0_dd",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "control_1_db",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_1_dd",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_2_db",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_2_dd",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_3_db",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_3_dd",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_4_db",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_4_dd",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_5_db",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_5_dd",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_6_db",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_6_dd",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_7_db",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_7_dd",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_8_db",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_8_dd",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_9_db",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_9_dd",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_10_db",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: unterminated quoted data\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "control_10_dd",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: unterminated quoted data\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "control_11_db",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_11_dd",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_12_db",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_12_dd",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_13_db",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "control_13_dd",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "control_14_db",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_14_dd",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_15_db",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_15_dd",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_16_db",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_16_dd",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_17_db",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_17_dd",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_18_db",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_18_dd",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_19_db",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_19_dd",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_20_db",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_20_dd",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_21_db",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_21_dd",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_22_db",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_22_dd",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_23_db",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_23_dd",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_24_db",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_24_dd",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_25_db",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_25_dd",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_26_db",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_26_dd",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_27_db",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_27_dd",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_28_db",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_28_dd",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_29_db",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_29_dd",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_30_db",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_30_dd",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_31_db",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_31_dd",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_127_db",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "control_127_dd",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "empty_data_0",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 0 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "",
+      "matches_native": false
+    },
+    {
+      "name": "empty_data_1",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 0 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "",
+      "matches_native": false
+    },
+    {
+      "name": "empty_data_2",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00",
+      "matches_native": false
+    },
+    {
+      "name": "empty_data_3",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00000000",
+      "matches_native": true
+    },
+    {
+      "name": "empty_data_4",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "empty_data_5",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 0 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "",
+      "matches_native": false
+    },
+    {
+      "name": "empty_data_6",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "empty_data_7",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "empty_data_8",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00",
+      "matches_native": false
+    },
+    {
+      "name": "abyte_spaced",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "abytec_spaced",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "abytez_spaced",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "abytec_single",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "47",
+      "matches_native": true
+    },
+    {
+      "name": "byte_empty_parenthesized",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "byte_empty_plus",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "dword_empty_plus",
+      "argv": [
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -3150,7 +4697,7 @@
     {
       "name": "if_value",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -3167,7 +4714,7 @@
     {
       "name": "shift_sign",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -3184,7 +4731,7 @@
     {
       "name": "instruction",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -3201,7 +4748,7 @@
     {
       "name": "define_literal",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -3218,7 +4765,7 @@
     {
       "name": "define_numeric",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -3235,7 +4782,7 @@
     {
       "name": "af_register",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -3252,7 +4799,7 @@
     {
       "name": "macro_argument",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -3269,7 +4816,7 @@
     {
       "name": "repeat",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -3286,7 +4833,7 @@
     {
       "name": "delimiter_comment",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -3303,7 +4850,7 @@
     {
       "name": "malformed_unclosed",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -3320,7 +4867,7 @@
     {
       "name": "malformed_single",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -3337,7 +4884,7 @@
     {
       "name": "malformed_adjacent",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -3354,7 +4901,7 @@
     {
       "name": "malformed_after",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -3371,7 +4918,7 @@
     {
       "name": "quoted_pair",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -3388,7 +4935,7 @@
     {
       "name": "backslash_pair",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -3405,7 +4952,7 @@
     {
       "name": "abyte",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
@@ -3422,7 +4969,7 @@
     {
       "name": "abytec",
       "argv": [
-        "/private/tmp/asm198x-instruction-labels-clean-producer/asm198x",
+        "/private/tmp/asm198x-pasmo-character-clean-producer/asm198x",
         "--dialect",
         "sjasmplus",
         "input.asm",
