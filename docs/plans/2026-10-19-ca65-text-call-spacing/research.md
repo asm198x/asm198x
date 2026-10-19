@@ -48,3 +48,18 @@ Final full Rust passes 1,601 tests (38 ignored). The sequential focused rerun,
 Clippy, rustfmt and generated docs pass; all 96 Node tests and Ruff checks pass.
 The focused build-output race is superseded by this clean rerun. Source is ready
 for a clean producer and complete replay before shipping.
+
+Final clean producer: `551ec01e5c4f511f4d8758b7124dc8f8c7269b6a`, tree
+`6211df2d3b933d8c814b292607d5d98d7af91dfd`, CLI SHA-256
+`1fdcbf84dace5acad9ee6d11f5677a83906937cfbe3cc846ca2be9903646905d`.
+The actual archive passes all 81 cohorts and 244 spacing commands. Changed
+bytes fail exactly three reference controls; corrupt archives fail SHA validation.
+A clean 4510 replay matches all 564 native bytes across seven processes and
+fourteen retained streams, with a changed-byte guard. Disposable audit work was
+removed. Shipping code and harness match the clean producer exactly.
+
+A subsequent 40-case name audit found existing adjacent/spaced .ident argument
+validation and missing cheap-local-anchor differences. Those are separate
+semantic scopes; this token-boundary slice preserves their adjacent-form posture.
+They need retained dedicated issues and native name/anchor probes before the
+macro-head work resumes. No source from the withdrawn macro trial is shipped.
