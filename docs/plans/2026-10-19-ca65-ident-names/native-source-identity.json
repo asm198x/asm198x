@@ -1,0 +1,38 @@
+[
+  {
+    "path": "src/ca65/scanner.c",
+    "git_blob": "361a817c1383dc0b0aee9c5fa8fcb78f3e66501a",
+    "url": "https://github.com/cc65/cc65/blob/V2.18/src/ca65/scanner.c",
+    "sha256": "eea593534c8211287437e6acf9042e74eb5714c08ebe255e16ae5a74096844f8"
+  },
+  {
+    "path": "src/ca65/expr.c",
+    "git_blob": "8703b2a5500e7fcdcefa2a433fea09de72c1ed3e",
+    "url": "https://github.com/cc65/cc65/blob/V2.18/src/ca65/expr.c",
+    "sha256": "2074e310376c0aa8627bed26c5dd4bf6b8c6b4a22624939247621eee72f3633a"
+  },
+  {
+    "path": "src/ca65/pseudo.c",
+    "git_blob": "a0eb286993088f0a8e4c1963e50ebe74e414f2c0",
+    "url": "https://github.com/cc65/cc65/blob/V2.18/src/ca65/pseudo.c",
+    "sha256": "788c6190589f964e46e57cfa9340c2ecddd0304548f4bf1ae245de61f67dba0b"
+  },
+  {
+    "path": "src/ca65/nexttok.c",
+    "git_blob": "54733740e89e552353b852d0a1d09b06aa6916d9",
+    "url": "https://github.com/cc65/cc65/blob/V2.18/src/ca65/nexttok.c",
+    "sha256": "9458bd4fe087f72943e8b2d8cf0ef162a7bb030acb9ad70747477a41053b8f38"
+  },
+  {
+    "path": "src/ca65/symbol.c",
+    "git_blob": "3b06fd1a2bdac3910bdbcd5ce7108da06176851a",
+    "url": "https://github.com/cc65/cc65/blob/V2.18/src/ca65/symbol.c",
+    "sha256": "39e47d39f9d8169b313374f8e2dc4dc53294890892f6c5a13617c13337b05445"
+  },
+  {
+    "path": "src/ca65/scanner.h",
+    "git_blob": "4fd9041c105974630f1c4edb1a508489caed2b2a",
+    "url": "https://github.com/cc65/cc65/blob/V2.18/src/ca65/scanner.h",
+    "sha256": "12831ac8cb2bf4486d729fb7afbde34cb7a55f608baef127bd1da8a6310f920f"
+  }
+]
