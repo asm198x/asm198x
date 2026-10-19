@@ -1,0 +1,1531 @@
+{
+  "tools": {
+    "ca65": {
+      "path": "/opt/homebrew/bin/ca65",
+      "sha256": "1a57997819fd98814e4601b5160df589e7a1a24e1888a80fee51ae450d8fd0ea",
+      "version": {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "--version"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "ca65 V2.18 - N/A\n"
+      }
+    },
+    "ld65": {
+      "path": "/opt/homebrew/bin/ld65",
+      "sha256": "36bb196207a6b2c90a4aa991b419d6113885303951b14b60b455f51c777b3339",
+      "version": {
+        "argv": [
+          "/opt/homebrew/bin/ld65",
+          "--version"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "ld65 V2.18 - N/A\n"
+      }
+    }
+  },
+  "files": {},
+  "cases": [
+    {
+      "name": "None_before_1_.byte 7",
+      "source": ".scope inner\nRED=RED+1\n.endscope\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "None_before_1_.word inner::RED",
+      "source": ".scope inner\nRED=RED+1\n.endscope\n.word inner::RED\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "None_before_1_OTHER=inner::RED\n.byte 7",
+      "source": ".scope inner\nRED=RED+1\n.endscope\nOTHER=inner::RED\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "None_before_1_.byte .defined(inner::RED),.ref(inner::RED)",
+      "source": ".scope inner\nRED=RED+1\n.endscope\n.byte .defined(inner::RED),.ref(inner::RED)\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "None_before_2_.byte 7",
+      "source": ".scope inner\nRED=GREEN+1\nGREEN=RED+1\n.endscope\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\ninput.s(3): Error: Circular reference in definition of symbol 'GREEN'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "None_before_2_.word inner::RED",
+      "source": ".scope inner\nRED=GREEN+1\nGREEN=RED+1\n.endscope\n.word inner::RED\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\ninput.s(3): Error: Circular reference in definition of symbol 'GREEN'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "None_before_2_OTHER=inner::RED\n.byte 7",
+      "source": ".scope inner\nRED=GREEN+1\nGREEN=RED+1\n.endscope\nOTHER=inner::RED\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "None_before_2_.byte .defined(inner::RED),.ref(inner::RED)",
+      "source": ".scope inner\nRED=GREEN+1\nGREEN=RED+1\n.endscope\n.byte .defined(inner::RED),.ref(inner::RED)\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\ninput.s(3): Error: Circular reference in definition of symbol 'GREEN'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "None_before_3_.byte 7",
+      "source": ".scope inner\nRED=GREEN+1\nGREEN=BLUE+1\nBLUE=RED+1\n.endscope\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\ninput.s(4): Error: Circular reference in definition of symbol 'BLUE'\ninput.s(3): Error: Circular reference in definition of symbol 'GREEN'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "None_before_3_.word inner::RED",
+      "source": ".scope inner\nRED=GREEN+1\nGREEN=BLUE+1\nBLUE=RED+1\n.endscope\n.word inner::RED\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\ninput.s(4): Error: Circular reference in definition of symbol 'BLUE'\ninput.s(3): Error: Circular reference in definition of symbol 'GREEN'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "None_before_3_OTHER=inner::RED\n.byte 7",
+      "source": ".scope inner\nRED=GREEN+1\nGREEN=BLUE+1\nBLUE=RED+1\n.endscope\nOTHER=inner::RED\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "None_before_3_.byte .defined(inner::RED),.ref(inner::RED)",
+      "source": ".scope inner\nRED=GREEN+1\nGREEN=BLUE+1\nBLUE=RED+1\n.endscope\n.byte .defined(inner::RED),.ref(inner::RED)\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\ninput.s(4): Error: Circular reference in definition of symbol 'BLUE'\ninput.s(3): Error: Circular reference in definition of symbol 'GREEN'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "None_after_1_.byte 7",
+      "source": ".scope inner\nRED=RED+1\n.endscope\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "None_after_1_.word inner::RED",
+      "source": ".scope inner\nRED=RED+1\n.endscope\n.word inner::RED\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "None_after_1_OTHER=inner::RED\n.byte 7",
+      "source": ".scope inner\nRED=RED+1\n.endscope\nOTHER=inner::RED\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "None_after_1_.byte .defined(inner::RED),.ref(inner::RED)",
+      "source": ".scope inner\nRED=RED+1\n.endscope\n.byte .defined(inner::RED),.ref(inner::RED)\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "None_after_2_.byte 7",
+      "source": ".scope inner\nRED=GREEN+1\nGREEN=RED+1\n.endscope\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\ninput.s(3): Error: Circular reference in definition of symbol 'GREEN'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "None_after_2_.word inner::RED",
+      "source": ".scope inner\nRED=GREEN+1\nGREEN=RED+1\n.endscope\n.word inner::RED\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\ninput.s(3): Error: Circular reference in definition of symbol 'GREEN'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "None_after_2_OTHER=inner::RED\n.byte 7",
+      "source": ".scope inner\nRED=GREEN+1\nGREEN=RED+1\n.endscope\nOTHER=inner::RED\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "None_after_2_.byte .defined(inner::RED),.ref(inner::RED)",
+      "source": ".scope inner\nRED=GREEN+1\nGREEN=RED+1\n.endscope\n.byte .defined(inner::RED),.ref(inner::RED)\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\ninput.s(3): Error: Circular reference in definition of symbol 'GREEN'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "None_after_3_.byte 7",
+      "source": ".scope inner\nRED=GREEN+1\nGREEN=BLUE+1\nBLUE=RED+1\n.endscope\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\ninput.s(4): Error: Circular reference in definition of symbol 'BLUE'\ninput.s(3): Error: Circular reference in definition of symbol 'GREEN'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "None_after_3_.word inner::RED",
+      "source": ".scope inner\nRED=GREEN+1\nGREEN=BLUE+1\nBLUE=RED+1\n.endscope\n.word inner::RED\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\ninput.s(4): Error: Circular reference in definition of symbol 'BLUE'\ninput.s(3): Error: Circular reference in definition of symbol 'GREEN'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "None_after_3_OTHER=inner::RED\n.byte 7",
+      "source": ".scope inner\nRED=GREEN+1\nGREEN=BLUE+1\nBLUE=RED+1\n.endscope\nOTHER=inner::RED\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "None_after_3_.byte .defined(inner::RED),.ref(inner::RED)",
+      "source": ".scope inner\nRED=GREEN+1\nGREEN=BLUE+1\nBLUE=RED+1\n.endscope\n.byte .defined(inner::RED),.ref(inner::RED)\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\ninput.s(4): Error: Circular reference in definition of symbol 'BLUE'\ninput.s(3): Error: Circular reference in definition of symbol 'GREEN'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "9_before_1_.byte 7",
+      "source": "RED=9\n.scope inner\nRED=RED+1\n.endscope\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "9_before_1_.word inner::RED",
+      "source": "RED=9\n.scope inner\nRED=RED+1\n.endscope\n.word inner::RED\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "9_before_1_OTHER=inner::RED\n.byte 7",
+      "source": "RED=9\n.scope inner\nRED=RED+1\n.endscope\nOTHER=inner::RED\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "9_before_1_.byte .defined(inner::RED),.ref(inner::RED)",
+      "source": "RED=9\n.scope inner\nRED=RED+1\n.endscope\n.byte .defined(inner::RED),.ref(inner::RED)\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0101"
+    },
+    {
+      "name": "9_before_2_.byte 7",
+      "source": "RED=9\n.scope inner\nRED=GREEN+1\nGREEN=RED+1\n.endscope\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Circular reference in definition of symbol 'RED'\ninput.s(4): Error: Circular reference in definition of symbol 'GREEN'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "9_before_2_.word inner::RED",
+      "source": "RED=9\n.scope inner\nRED=GREEN+1\nGREEN=RED+1\n.endscope\n.word inner::RED\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Circular reference in definition of symbol 'RED'\ninput.s(4): Error: Circular reference in definition of symbol 'GREEN'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "9_before_2_OTHER=inner::RED\n.byte 7",
+      "source": "RED=9\n.scope inner\nRED=GREEN+1\nGREEN=RED+1\n.endscope\nOTHER=inner::RED\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "9_before_2_.byte .defined(inner::RED),.ref(inner::RED)",
+      "source": "RED=9\n.scope inner\nRED=GREEN+1\nGREEN=RED+1\n.endscope\n.byte .defined(inner::RED),.ref(inner::RED)\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Circular reference in definition of symbol 'RED'\ninput.s(4): Error: Circular reference in definition of symbol 'GREEN'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "9_before_3_.byte 7",
+      "source": "RED=9\n.scope inner\nRED=GREEN+1\nGREEN=BLUE+1\nBLUE=RED+1\n.endscope\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Circular reference in definition of symbol 'RED'\ninput.s(5): Error: Circular reference in definition of symbol 'BLUE'\ninput.s(4): Error: Circular reference in definition of symbol 'GREEN'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "9_before_3_.word inner::RED",
+      "source": "RED=9\n.scope inner\nRED=GREEN+1\nGREEN=BLUE+1\nBLUE=RED+1\n.endscope\n.word inner::RED\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Circular reference in definition of symbol 'RED'\ninput.s(5): Error: Circular reference in definition of symbol 'BLUE'\ninput.s(4): Error: Circular reference in definition of symbol 'GREEN'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "9_before_3_OTHER=inner::RED\n.byte 7",
+      "source": "RED=9\n.scope inner\nRED=GREEN+1\nGREEN=BLUE+1\nBLUE=RED+1\n.endscope\nOTHER=inner::RED\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "9_before_3_.byte .defined(inner::RED),.ref(inner::RED)",
+      "source": "RED=9\n.scope inner\nRED=GREEN+1\nGREEN=BLUE+1\nBLUE=RED+1\n.endscope\n.byte .defined(inner::RED),.ref(inner::RED)\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Circular reference in definition of symbol 'RED'\ninput.s(5): Error: Circular reference in definition of symbol 'BLUE'\ninput.s(4): Error: Circular reference in definition of symbol 'GREEN'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "9_after_1_.byte 7",
+      "source": ".scope inner\nRED=RED+1\n.endscope\nRED=9\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "9_after_1_.word inner::RED",
+      "source": ".scope inner\nRED=RED+1\n.endscope\nRED=9\n.word inner::RED\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "9_after_1_OTHER=inner::RED\n.byte 7",
+      "source": ".scope inner\nRED=RED+1\n.endscope\nRED=9\nOTHER=inner::RED\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "9_after_1_.byte .defined(inner::RED),.ref(inner::RED)",
+      "source": ".scope inner\nRED=RED+1\n.endscope\nRED=9\n.byte .defined(inner::RED),.ref(inner::RED)\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "9_after_2_.byte 7",
+      "source": ".scope inner\nRED=GREEN+1\nGREEN=RED+1\n.endscope\nRED=9\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\ninput.s(3): Error: Circular reference in definition of symbol 'GREEN'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "9_after_2_.word inner::RED",
+      "source": ".scope inner\nRED=GREEN+1\nGREEN=RED+1\n.endscope\nRED=9\n.word inner::RED\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\ninput.s(3): Error: Circular reference in definition of symbol 'GREEN'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "9_after_2_OTHER=inner::RED\n.byte 7",
+      "source": ".scope inner\nRED=GREEN+1\nGREEN=RED+1\n.endscope\nRED=9\nOTHER=inner::RED\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "9_after_2_.byte .defined(inner::RED),.ref(inner::RED)",
+      "source": ".scope inner\nRED=GREEN+1\nGREEN=RED+1\n.endscope\nRED=9\n.byte .defined(inner::RED),.ref(inner::RED)\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\ninput.s(3): Error: Circular reference in definition of symbol 'GREEN'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "9_after_3_.byte 7",
+      "source": ".scope inner\nRED=GREEN+1\nGREEN=BLUE+1\nBLUE=RED+1\n.endscope\nRED=9\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\ninput.s(4): Error: Circular reference in definition of symbol 'BLUE'\ninput.s(3): Error: Circular reference in definition of symbol 'GREEN'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "9_after_3_.word inner::RED",
+      "source": ".scope inner\nRED=GREEN+1\nGREEN=BLUE+1\nBLUE=RED+1\n.endscope\nRED=9\n.word inner::RED\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\ninput.s(4): Error: Circular reference in definition of symbol 'BLUE'\ninput.s(3): Error: Circular reference in definition of symbol 'GREEN'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "9_after_3_OTHER=inner::RED\n.byte 7",
+      "source": ".scope inner\nRED=GREEN+1\nGREEN=BLUE+1\nBLUE=RED+1\n.endscope\nRED=9\nOTHER=inner::RED\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "9_after_3_.byte .defined(inner::RED),.ref(inner::RED)",
+      "source": ".scope inner\nRED=GREEN+1\nGREEN=BLUE+1\nBLUE=RED+1\n.endscope\nRED=9\n.byte .defined(inner::RED),.ref(inner::RED)\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\ninput.s(4): Error: Circular reference in definition of symbol 'BLUE'\ninput.s(3): Error: Circular reference in definition of symbol 'GREEN'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "$1234_before_1_.byte 7",
+      "source": "RED=$1234\n.scope inner\nRED=RED+1\n.endscope\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "$1234_before_1_.word inner::RED",
+      "source": "RED=$1234\n.scope inner\nRED=RED+1\n.endscope\n.word inner::RED\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "$1234_before_1_OTHER=inner::RED\n.byte 7",
+      "source": "RED=$1234\n.scope inner\nRED=RED+1\n.endscope\nOTHER=inner::RED\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "$1234_before_1_.byte .defined(inner::RED),.ref(inner::RED)",
+      "source": "RED=$1234\n.scope inner\nRED=RED+1\n.endscope\n.byte .defined(inner::RED),.ref(inner::RED)\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0101"
+    },
+    {
+      "name": "$1234_before_2_.byte 7",
+      "source": "RED=$1234\n.scope inner\nRED=GREEN+1\nGREEN=RED+1\n.endscope\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Circular reference in definition of symbol 'RED'\ninput.s(4): Error: Circular reference in definition of symbol 'GREEN'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "$1234_before_2_.word inner::RED",
+      "source": "RED=$1234\n.scope inner\nRED=GREEN+1\nGREEN=RED+1\n.endscope\n.word inner::RED\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Circular reference in definition of symbol 'RED'\ninput.s(4): Error: Circular reference in definition of symbol 'GREEN'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "$1234_before_2_OTHER=inner::RED\n.byte 7",
+      "source": "RED=$1234\n.scope inner\nRED=GREEN+1\nGREEN=RED+1\n.endscope\nOTHER=inner::RED\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "$1234_before_2_.byte .defined(inner::RED),.ref(inner::RED)",
+      "source": "RED=$1234\n.scope inner\nRED=GREEN+1\nGREEN=RED+1\n.endscope\n.byte .defined(inner::RED),.ref(inner::RED)\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Circular reference in definition of symbol 'RED'\ninput.s(4): Error: Circular reference in definition of symbol 'GREEN'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "$1234_before_3_.byte 7",
+      "source": "RED=$1234\n.scope inner\nRED=GREEN+1\nGREEN=BLUE+1\nBLUE=RED+1\n.endscope\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Circular reference in definition of symbol 'RED'\ninput.s(5): Error: Circular reference in definition of symbol 'BLUE'\ninput.s(4): Error: Circular reference in definition of symbol 'GREEN'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "$1234_before_3_.word inner::RED",
+      "source": "RED=$1234\n.scope inner\nRED=GREEN+1\nGREEN=BLUE+1\nBLUE=RED+1\n.endscope\n.word inner::RED\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Circular reference in definition of symbol 'RED'\ninput.s(5): Error: Circular reference in definition of symbol 'BLUE'\ninput.s(4): Error: Circular reference in definition of symbol 'GREEN'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "$1234_before_3_OTHER=inner::RED\n.byte 7",
+      "source": "RED=$1234\n.scope inner\nRED=GREEN+1\nGREEN=BLUE+1\nBLUE=RED+1\n.endscope\nOTHER=inner::RED\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "$1234_before_3_.byte .defined(inner::RED),.ref(inner::RED)",
+      "source": "RED=$1234\n.scope inner\nRED=GREEN+1\nGREEN=BLUE+1\nBLUE=RED+1\n.endscope\n.byte .defined(inner::RED),.ref(inner::RED)\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Circular reference in definition of symbol 'RED'\ninput.s(5): Error: Circular reference in definition of symbol 'BLUE'\ninput.s(4): Error: Circular reference in definition of symbol 'GREEN'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "$1234_after_1_.byte 7",
+      "source": ".scope inner\nRED=RED+1\n.endscope\nRED=$1234\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "$1234_after_1_.word inner::RED",
+      "source": ".scope inner\nRED=RED+1\n.endscope\nRED=$1234\n.word inner::RED\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "$1234_after_1_OTHER=inner::RED\n.byte 7",
+      "source": ".scope inner\nRED=RED+1\n.endscope\nRED=$1234\nOTHER=inner::RED\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "$1234_after_1_.byte .defined(inner::RED),.ref(inner::RED)",
+      "source": ".scope inner\nRED=RED+1\n.endscope\nRED=$1234\n.byte .defined(inner::RED),.ref(inner::RED)\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "$1234_after_2_.byte 7",
+      "source": ".scope inner\nRED=GREEN+1\nGREEN=RED+1\n.endscope\nRED=$1234\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\ninput.s(3): Error: Circular reference in definition of symbol 'GREEN'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "$1234_after_2_.word inner::RED",
+      "source": ".scope inner\nRED=GREEN+1\nGREEN=RED+1\n.endscope\nRED=$1234\n.word inner::RED\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\ninput.s(3): Error: Circular reference in definition of symbol 'GREEN'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "$1234_after_2_OTHER=inner::RED\n.byte 7",
+      "source": ".scope inner\nRED=GREEN+1\nGREEN=RED+1\n.endscope\nRED=$1234\nOTHER=inner::RED\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "$1234_after_2_.byte .defined(inner::RED),.ref(inner::RED)",
+      "source": ".scope inner\nRED=GREEN+1\nGREEN=RED+1\n.endscope\nRED=$1234\n.byte .defined(inner::RED),.ref(inner::RED)\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\ninput.s(3): Error: Circular reference in definition of symbol 'GREEN'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "$1234_after_3_.byte 7",
+      "source": ".scope inner\nRED=GREEN+1\nGREEN=BLUE+1\nBLUE=RED+1\n.endscope\nRED=$1234\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\ninput.s(4): Error: Circular reference in definition of symbol 'BLUE'\ninput.s(3): Error: Circular reference in definition of symbol 'GREEN'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "$1234_after_3_.word inner::RED",
+      "source": ".scope inner\nRED=GREEN+1\nGREEN=BLUE+1\nBLUE=RED+1\n.endscope\nRED=$1234\n.word inner::RED\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\ninput.s(4): Error: Circular reference in definition of symbol 'BLUE'\ninput.s(3): Error: Circular reference in definition of symbol 'GREEN'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "$1234_after_3_OTHER=inner::RED\n.byte 7",
+      "source": ".scope inner\nRED=GREEN+1\nGREEN=BLUE+1\nBLUE=RED+1\n.endscope\nRED=$1234\nOTHER=inner::RED\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "$1234_after_3_.byte .defined(inner::RED),.ref(inner::RED)",
+      "source": ".scope inner\nRED=GREEN+1\nGREEN=BLUE+1\nBLUE=RED+1\n.endscope\nRED=$1234\n.byte .defined(inner::RED),.ref(inner::RED)\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ke8ztgt_",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\ninput.s(4): Error: Circular reference in definition of symbol 'BLUE'\ninput.s(3): Error: Circular reference in definition of symbol 'GREEN'\n"
+        }
+      ],
+      "native_hex": null
+    }
+  ]
+}
