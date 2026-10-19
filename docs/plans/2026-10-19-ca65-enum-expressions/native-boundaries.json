@@ -1,0 +1,1263 @@
+{
+  "tools": {
+    "ca65": {
+      "path": "/opt/homebrew/bin/ca65",
+      "sha256": "1a57997819fd98814e4601b5160df589e7a1a24e1888a80fee51ae450d8fd0ea",
+      "version": {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "--version"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "ca65 V2.18 - N/A\n"
+      }
+    },
+    "ld65": {
+      "path": "/opt/homebrew/bin/ld65",
+      "sha256": "36bb196207a6b2c90a4aa991b419d6113885303951b14b60b455f51c777b3339",
+      "version": {
+        "argv": [
+          "/opt/homebrew/bin/ld65",
+          "--version"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "ld65 V2.18 - N/A\n"
+      }
+    }
+  },
+  "files": {},
+  "cases": [
+    {
+      "name": "anonymous_defaults",
+      "source": ".enum\nRED\nGREEN\n.endenum\n.byte RED,GREEN\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0001"
+    },
+    {
+      "name": "anonymous_previous",
+      "source": ".enum\nRED=2\nGREEN=RED+1\n.endenum\n.byte RED,GREEN\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0203"
+    },
+    {
+      "name": "anonymous_forward",
+      "source": ".enum\nRED=GREEN\nGREEN=3\n.endenum\n.byte RED,GREEN\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0303"
+    },
+    {
+      "name": "anonymous_scope",
+      "source": ".scope inner\n.enum\nRED=GREEN\nGREEN=3\n.endenum\n.byte RED,GREEN\n.endscope\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0303"
+    },
+    {
+      "name": "named_scope_reopen",
+      "source": ".enum Colors\nRED=2\n.endenum\n.scope Colors\nGREEN=3\n.endscope\n.byte Colors::RED,Colors::GREEN\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(4): Error: Duplicate scope 'Colors'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "default_after_undefined",
+      "source": ".enum Colors\nRED=MISSING\nGREEN\n.endenum\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Symbol 'MISSING' is undefined\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "size_member_only",
+      "source": ".enum Colors\nRED=2\n.endenum\n.word .sizeof(Colors::RED)\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(4): Error: Size of 'Colors::RED' is unknown\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "enum_nested_struct",
+      "source": ".struct Record\n.enum Colors\nRED=2\n.endenum\nfield .word\n.endstruct\n.byte Record::Colors::RED\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Invalid storage allocator in struct/union\ninput.s(3): Error: Invalid storage allocator in struct/union\ninput.s(4): Error: Invalid storage allocator in struct/union\ninput.s(7): Error: No such scope: 'Record::Colors'\ninput.s(7): Error: Unexpected trailing garbage characters\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "struct_nested_enum",
+      "source": ".enum Colors\n.struct Record\nfield .word\n.endstruct\nRED=2\n.endenum\n.byte Colors::RED\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Identifier expected\ninput.s(3): Error: Unexpected trailing garbage characters\ninput.s(4): Error: Identifier expected\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "plain_assignment_in_enum",
+      "source": ".enum Colors\nRED=2\nVALUE=RED+1\nGREEN\n.endenum\n.byte Colors::RED,Colors::VALUE,Colors::GREEN\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "020304"
+    },
+    {
+      "name": "self_False__RED_.byte 7",
+      "source": "RED=RED\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "self_False__RED_.byte RED",
+      "source": "RED=RED\n.byte RED\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 124,
+          "timeout_seconds": 10,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "self_False__RED+1_.byte 7",
+      "source": "RED=RED+1\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "self_False__RED+1_.byte RED",
+      "source": "RED=RED+1\n.byte RED\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "self_False__RED-RED_.byte 7",
+      "source": "RED=RED-RED\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Circular reference in definition of symbol 'RED'\ninput.s(1): Error: Circular reference in definition of symbol 'RED'\ninput.s(1): Error: Circular reference in definition of symbol 'RED'\ninput.s(1): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "self_False__RED-RED_.byte RED",
+      "source": "RED=RED-RED\n.byte RED\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(1): Error: Circular reference in definition of symbol 'RED'\ninput.s(1): Error: Circular reference in definition of symbol 'RED'\ninput.s(1): Error: Circular reference in definition of symbol 'RED'\ninput.s(1): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "self_False__.defined(RED)_.byte 7",
+      "source": "RED=.defined(RED)\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "self_False__.defined(RED)_.byte RED",
+      "source": "RED=.defined(RED)\n.byte RED\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "00"
+    },
+    {
+      "name": "self_False_.enum Colors_RED_.byte 7",
+      "source": ".enum Colors\nRED=RED\n.endenum\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "self_False_.enum Colors_RED_.byte Colors::RED",
+      "source": ".enum Colors\nRED=RED\n.endenum\n.byte Colors::RED\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 124,
+          "timeout_seconds": 10,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "self_False_.enum Colors_RED+1_.byte 7",
+      "source": ".enum Colors\nRED=RED+1\n.endenum\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "self_False_.enum Colors_RED+1_.byte Colors::RED",
+      "source": ".enum Colors\nRED=RED+1\n.endenum\n.byte Colors::RED\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "self_False_.enum Colors_RED-RED_.byte 7",
+      "source": ".enum Colors\nRED=RED-RED\n.endenum\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\ninput.s(2): Error: Circular reference in definition of symbol 'RED'\ninput.s(2): Error: Circular reference in definition of symbol 'RED'\ninput.s(2): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "self_False_.enum Colors_RED-RED_.byte Colors::RED",
+      "source": ".enum Colors\nRED=RED-RED\n.endenum\n.byte Colors::RED\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\ninput.s(2): Error: Circular reference in definition of symbol 'RED'\ninput.s(2): Error: Circular reference in definition of symbol 'RED'\ninput.s(2): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "self_False_.enum Colors_.defined(RED)_.byte 7",
+      "source": ".enum Colors\nRED=.defined(RED)\n.endenum\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "self_False_.enum Colors_.defined(RED)_.byte Colors::RED",
+      "source": ".enum Colors\nRED=.defined(RED)\n.endenum\n.byte Colors::RED\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "00"
+    },
+    {
+      "name": "self_False_.enum_RED_.byte 7",
+      "source": ".enum\nRED=RED\n.endenum\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "self_False_.enum_RED_.byte RED",
+      "source": ".enum\nRED=RED\n.endenum\n.byte RED\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 124,
+          "timeout_seconds": 10,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "self_False_.enum_RED+1_.byte 7",
+      "source": ".enum\nRED=RED+1\n.endenum\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "self_False_.enum_RED+1_.byte RED",
+      "source": ".enum\nRED=RED+1\n.endenum\n.byte RED\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "self_False_.enum_RED-RED_.byte 7",
+      "source": ".enum\nRED=RED-RED\n.endenum\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\ninput.s(2): Error: Circular reference in definition of symbol 'RED'\ninput.s(2): Error: Circular reference in definition of symbol 'RED'\ninput.s(2): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "self_False_.enum_RED-RED_.byte RED",
+      "source": ".enum\nRED=RED-RED\n.endenum\n.byte RED\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\ninput.s(2): Error: Circular reference in definition of symbol 'RED'\ninput.s(2): Error: Circular reference in definition of symbol 'RED'\ninput.s(2): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "self_False_.enum_.defined(RED)_.byte 7",
+      "source": ".enum\nRED=.defined(RED)\n.endenum\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "self_False_.enum_.defined(RED)_.byte RED",
+      "source": ".enum\nRED=.defined(RED)\n.endenum\n.byte RED\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "00"
+    },
+    {
+      "name": "self_True_.enum Colors_RED_.byte 7",
+      "source": "RED=9\n.enum Colors\nRED=RED\n.endenum\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "self_True_.enum Colors_RED_.byte Colors::RED",
+      "source": "RED=9\n.enum Colors\nRED=RED\n.endenum\n.byte Colors::RED\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 124,
+          "timeout_seconds": 10,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "self_True_.enum Colors_RED+1_.byte 7",
+      "source": "RED=9\n.enum Colors\nRED=RED+1\n.endenum\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "self_True_.enum Colors_RED+1_.byte Colors::RED",
+      "source": "RED=9\n.enum Colors\nRED=RED+1\n.endenum\n.byte Colors::RED\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "self_True_.enum Colors_RED-RED_.byte 7",
+      "source": "RED=9\n.enum Colors\nRED=RED-RED\n.endenum\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "self_True_.enum Colors_RED-RED_.byte Colors::RED",
+      "source": "RED=9\n.enum Colors\nRED=RED-RED\n.endenum\n.byte Colors::RED\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Circular reference in definition of symbol 'RED'\ninput.s(3): Error: Circular reference in definition of symbol 'RED'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "self_True_.enum Colors_.defined(RED)_.byte 7",
+      "source": "RED=9\n.enum Colors\nRED=.defined(RED)\n.endenum\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "self_True_.enum Colors_.defined(RED)_.byte Colors::RED",
+      "source": "RED=9\n.enum Colors\nRED=.defined(RED)\n.endenum\n.byte Colors::RED\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "00"
+    },
+    {
+      "name": "self_True_.enum_RED_.byte 7",
+      "source": "RED=9\n.enum\nRED=RED\n.endenum\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Symbol 'RED' is already defined\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "self_True_.enum_RED_.byte RED",
+      "source": "RED=9\n.enum\nRED=RED\n.endenum\n.byte RED\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Symbol 'RED' is already defined\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "self_True_.enum_RED+1_.byte 7",
+      "source": "RED=9\n.enum\nRED=RED+1\n.endenum\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Symbol 'RED' is already defined\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "self_True_.enum_RED+1_.byte RED",
+      "source": "RED=9\n.enum\nRED=RED+1\n.endenum\n.byte RED\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Symbol 'RED' is already defined\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "self_True_.enum_RED-RED_.byte 7",
+      "source": "RED=9\n.enum\nRED=RED-RED\n.endenum\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Symbol 'RED' is already defined\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "self_True_.enum_RED-RED_.byte RED",
+      "source": "RED=9\n.enum\nRED=RED-RED\n.endenum\n.byte RED\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Symbol 'RED' is already defined\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "self_True_.enum_.defined(RED)_.byte 7",
+      "source": "RED=9\n.enum\nRED=.defined(RED)\n.endenum\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Symbol 'RED' is already defined\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "self_True_.enum_.defined(RED)_.byte RED",
+      "source": "RED=9\n.enum\nRED=.defined(RED)\n.endenum\n.byte RED\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-j8b5ju91",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Symbol 'RED' is already defined\n"
+        }
+      ],
+      "native_hex": null
+    }
+  ]
+}

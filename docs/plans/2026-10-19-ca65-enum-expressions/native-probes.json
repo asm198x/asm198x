@@ -1,0 +1,1317 @@
+{
+  "tools": {
+    "ca65": {
+      "path": "/opt/homebrew/bin/ca65",
+      "sha256": "1a57997819fd98814e4601b5160df589e7a1a24e1888a80fee51ae450d8fd0ea",
+      "version": {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "--version"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "ca65 V2.18 - N/A\n"
+      }
+    },
+    "ld65": {
+      "path": "/opt/homebrew/bin/ld65",
+      "sha256": "36bb196207a6b2c90a4aa991b419d6113885303951b14b60b455f51c777b3339",
+      "version": {
+        "argv": [
+          "/opt/homebrew/bin/ld65",
+          "--version"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "ld65 V2.18 - N/A\n"
+      }
+    }
+  },
+  "files": {},
+  "cases": [
+    {
+      "name": "defaults",
+      "source": ".enum Colors\nRED\nGREEN\nBLUE\n.endenum\n.byte Colors::RED,Colors::GREEN,Colors::BLUE\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "000102"
+    },
+    {
+      "name": "previous",
+      "source": ".enum Colors\nRED=2\nGREEN=RED+1\nBLUE\n.endenum\n.byte Colors::RED,Colors::GREEN,Colors::BLUE\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "020304"
+    },
+    {
+      "name": "forward",
+      "source": ".enum Colors\nRED=GREEN+1\nBLUE\nGREEN=4\nWHITE\n.endenum\n.byte Colors::RED,Colors::BLUE,Colors::GREEN,Colors::WHITE\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "05060405"
+    },
+    {
+      "name": "outer_fallback",
+      "source": "VALUE=2\n.enum Colors\nRED=VALUE\nGREEN\n.endenum\n.byte Colors::RED,Colors::GREEN\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0203"
+    },
+    {
+      "name": "local_shadow",
+      "source": "VALUE=2\n.enum Colors\nRED=VALUE\nGREEN\nVALUE=4\n.endenum\n.byte Colors::RED,Colors::GREEN\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0405"
+    },
+    {
+      "name": "root_explicit",
+      "source": "VALUE=2\n.enum Colors\nRED=::VALUE\nGREEN\nVALUE=4\n.endenum\n.byte Colors::RED,Colors::GREEN\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0203"
+    },
+    {
+      "name": "outer_self_cycle",
+      "source": "RED=9\n.enum Colors\nRED=RED+1\n.endenum\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07"
+    },
+    {
+      "name": "cycle_unused",
+      "source": ".enum Colors\nRED=GREEN\nGREEN=RED\n.endenum\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Circular reference in definition of symbol 'RED'\ninput.s(3): Error: Circular reference in definition of symbol 'GREEN'\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "undefined_unused",
+      "source": ".enum Colors\nRED=MISSING\n.endenum\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(2): Error: Symbol 'MISSING' is undefined\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "defined_self",
+      "source": "RED=9\n.enum Colors\nRED=.defined(RED)\nGREEN=.defined(RED)\n.endenum\n.byte Colors::RED,Colors::GREEN\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0001"
+    },
+    {
+      "name": "queries",
+      "source": "VALUE=2\n.enum Colors\nRED=.defined(VALUE)\nGREEN=VALUE\nBLUE=.defined(VALUE)\nWHITE=.ref(VALUE)\nVALUE=4\n.endenum\n.byte Colors::RED,Colors::GREEN,Colors::BLUE,Colors::WHITE\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "01040001"
+    },
+    {
+      "name": "source_fold_inside",
+      "source": ".enum Colors\nRED=2\n.if RED=2\nGREEN=3\n.endif\n.endenum\n.byte Colors::RED,Colors::GREEN\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0203"
+    },
+    {
+      "name": "source_fold_after",
+      "source": ".enum Colors\nRED=GREEN\nGREEN=3\n.endenum\n.res Colors::RED\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "000000"
+    },
+    {
+      "name": "source_fold_later_outer",
+      "source": ".enum Colors\nRED=VALUE\n.endenum\nVALUE=3\n.res Colors::RED\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(5): Error: Constant expression expected\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "source_fold_unresolved",
+      "source": "VALUE=2\n.enum Colors\nRED=VALUE\n.endenum\n.res Colors::RED\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(5): Error: Constant expression expected\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "global_alias",
+      "source": ".enum Colors\nRED=GREEN\nGREEN=3\n.endenum\nOTHER=Colors::RED\n.byte OTHER\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "03"
+    },
+    {
+      "name": "label",
+      "source": "target: .byte 7\n.enum Colors\nRED=target\nGREEN\n.endenum\n.word Colors::RED,Colors::GREEN\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0700100110"
+    },
+    {
+      "name": "pc",
+      "source": ".byte 7\n.enum Colors\nRED=*\nGREEN\n.endenum\n.word Colors::RED,Colors::GREEN\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0701100210"
+    },
+    {
+      "name": "nested_enum",
+      "source": ".enum Outer\nRED=2\n.enum Inner\nGREEN=RED\n.endenum\nBLUE\n.endenum\n.byte Outer::RED,Outer::BLUE,Outer::Inner::GREEN\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Identifier expected\ninput.s(6): Error: ':' expected\ninput.s(7): Error: Unexpected '.ENDENUM'\ninput.s(8): Error: No such scope: 'Outer::Inner'\ninput.s(8): Error: Unexpected trailing garbage characters\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "anonymous",
+      "source": "VALUE=2\n.enum\nRED=VALUE\nGREEN\nVALUE=4\n.endenum\n.byte RED,GREEN,VALUE\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(5): Error: Symbol 'VALUE' is already defined\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "nested_scope",
+      "source": "VALUE=2\n.scope inner\n.enum Colors\nRED=VALUE\nGREEN\nVALUE=4\n.endenum\n.byte Colors::RED,Colors::GREEN\n.endscope\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0405"
+    },
+    {
+      "name": "size_empty",
+      "source": ".enum Colors\n.endenum\n.word .sizeof(Colors)\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Size of 'Colors' is unknown\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "size_defaults",
+      "source": ".enum Colors\nRED\nGREEN\n.endenum\n.word .sizeof(Colors),.sizeof(Colors::RED),.sizeof(Colors::GREEN)\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(5): Error: Size of 'Colors' is unknown\ninput.s(5): Error: Size of 'Colors::RED' is unknown\ninput.s(5): Error: Size of 'Colors::GREEN' is unknown\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "size_forward",
+      "source": ".enum Colors\nRED=GREEN\nGREEN=4\nBLUE\n.endenum\n.word .sizeof(Colors),.sizeof(Colors::RED),.sizeof(Colors::BLUE)\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(6): Error: Size of 'Colors' is unknown\ninput.s(6): Error: Size of 'Colors::RED' is unknown\ninput.s(6): Error: Size of 'Colors::BLUE' is unknown\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "size_reset",
+      "source": ".enum Colors\nRED=100\nGREEN=2\nBLUE\n.endenum\n.word .sizeof(Colors)\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(6): Error: Size of 'Colors' is unknown\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "duplicate",
+      "source": ".enum Colors\nRED=2\nRED=3\n.endenum\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Symbol 'RED' is already defined\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "cheap_anchor",
+      "source": "root:\n@value=2\n.enum Colors\nRED=@value\nGREEN\n.endenum\n.byte Colors::RED,Colors::GREEN\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0203"
+    },
+    {
+      "name": "record_coexist",
+      "source": ".struct Record\nfield .word\n.endstruct\n.enum Colors\nRED=.sizeof(Record)\nGREEN\n.endenum\n.byte Colors::RED,Colors::GREEN\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0203"
+    },
+    {
+      "name": "boundary_-2_values",
+      "source": ".enum Colors\nRED=-2\nGREEN\n.endenum\n.dword Colors::RED,Colors::GREEN\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(5): Error: Range error (18446744073709551614 not in [0..4294967295])\ninput.s(5): Error: Range error (18446744073709551615 not in [0..4294967295])\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "boundary_-2_size",
+      "source": ".enum Colors\nRED=-2\nGREEN\n.endenum\n.dword .sizeof(Colors)\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(5): Error: Size of 'Colors' is unknown\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "boundary_-1_values",
+      "source": ".enum Colors\nRED=-1\nGREEN\n.endenum\n.dword Colors::RED,Colors::GREEN\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(5): Error: Range error (18446744073709551615 not in [0..4294967295])\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "boundary_-1_size",
+      "source": ".enum Colors\nRED=-1\nGREEN\n.endenum\n.dword .sizeof(Colors)\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(5): Error: Size of 'Colors' is unknown\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "boundary_0_values",
+      "source": ".enum Colors\nRED=0\nGREEN\n.endenum\n.dword Colors::RED,Colors::GREEN\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0000000001000000"
+    },
+    {
+      "name": "boundary_0_size",
+      "source": ".enum Colors\nRED=0\nGREEN\n.endenum\n.dword .sizeof(Colors)\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(5): Error: Size of 'Colors' is unknown\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "boundary_255_values",
+      "source": ".enum Colors\nRED=255\nGREEN\n.endenum\n.dword Colors::RED,Colors::GREEN\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "ff00000000010000"
+    },
+    {
+      "name": "boundary_255_size",
+      "source": ".enum Colors\nRED=255\nGREEN\n.endenum\n.dword .sizeof(Colors)\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(5): Error: Size of 'Colors' is unknown\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "boundary_256_values",
+      "source": ".enum Colors\nRED=256\nGREEN\n.endenum\n.dword Colors::RED,Colors::GREEN\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0001000001010000"
+    },
+    {
+      "name": "boundary_256_size",
+      "source": ".enum Colors\nRED=256\nGREEN\n.endenum\n.dword .sizeof(Colors)\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(5): Error: Size of 'Colors' is unknown\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "boundary_65535_values",
+      "source": ".enum Colors\nRED=65535\nGREEN\n.endenum\n.dword Colors::RED,Colors::GREEN\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "ffff000000000100"
+    },
+    {
+      "name": "boundary_65535_size",
+      "source": ".enum Colors\nRED=65535\nGREEN\n.endenum\n.dword .sizeof(Colors)\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(5): Error: Size of 'Colors' is unknown\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "boundary_65536_values",
+      "source": ".enum Colors\nRED=65536\nGREEN\n.endenum\n.dword Colors::RED,Colors::GREEN\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0000010001000100"
+    },
+    {
+      "name": "boundary_65536_size",
+      "source": ".enum Colors\nRED=65536\nGREEN\n.endenum\n.dword .sizeof(Colors)\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(5): Error: Size of 'Colors' is unknown\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "boundary_$7FFFFFFF_values",
+      "source": ".enum Colors\nRED=$7FFFFFFF\nGREEN\n.endenum\n.dword Colors::RED,Colors::GREEN\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "ffffff7f00000080"
+    },
+    {
+      "name": "boundary_$7FFFFFFF_size",
+      "source": ".enum Colors\nRED=$7FFFFFFF\nGREEN\n.endenum\n.dword .sizeof(Colors)\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(5): Error: Size of 'Colors' is unknown\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "boundary_$FFFFFFFF_values",
+      "source": ".enum Colors\nRED=$FFFFFFFF\nGREEN\n.endenum\n.dword Colors::RED,Colors::GREEN\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(5): Error: Range error (4294967296 not in [0..4294967295])\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "boundary_$FFFFFFFF_size",
+      "source": ".enum Colors\nRED=$FFFFFFFF\nGREEN\n.endenum\n.dword .sizeof(Colors)\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(5): Error: Size of 'Colors' is unknown\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "boundary_4294967296_values",
+      "source": ".enum Colors\nRED=4294967296\nGREEN\n.endenum\n.dword Colors::RED,Colors::GREEN\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(5): Error: Range error (4294967296 not in [0..4294967295])\ninput.s(5): Error: Range error (4294967297 not in [0..4294967295])\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "boundary_4294967296_size",
+      "source": ".enum Colors\nRED=4294967296\nGREEN\n.endenum\n.dword .sizeof(Colors)\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-nk3fckb3",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(5): Error: Size of 'Colors' is unknown\n"
+        }
+      ],
+      "native_hex": null
+    }
+  ]
+}
