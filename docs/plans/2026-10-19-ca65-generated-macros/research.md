@@ -33,3 +33,11 @@ The next slice must probe/fix the text-function token boundary independently,
 then return to macro heads with explicit address-symbol assertions for every
 spaced/concatenated/sprintf head. Do not treat successful bytes from a body that
 never references its head label as evidence that the label was bound.
+
+The resumed matrix supersedes the 102-case capture with 118 cases: 65 accepted
+and 53 refused. It adds eight invalid identifier-string cases, four unanchored
+cheap heads and four anchored digit-cheap boundary cases. The frozen clean
+prerequisite producer is 12af1dae8d81d8be968f717f5a2b3fb5870b5690, CLI SHA-256
+e43eb5c6a1cab293f97d50cdf802aca055e8da840c1905437582d7edd7c4a1f6.
+Rebuild tests with explicit global address assertions for concat/sprintf/spaced
+heads; the old trial's successful body bytes did not prove those bindings.
