@@ -126,7 +126,7 @@ def main() -> None:
                     "assembled": assembled,
                 }
             )
-    assert len(rows) == 118
+    assert len(rows) == 96
     args.output.write_text(
         json.dumps(
             {
@@ -142,7 +142,7 @@ def main() -> None:
         )
         + "\n"
     )
-    print("118 native formatter outcomes retained; all 65 accepted images match")
+    print("96 native formatter outcomes retained; all 67 accepted images match")
     print(
         "pre-existing formatted register false acceptances:",
         [

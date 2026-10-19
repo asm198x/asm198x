@@ -53,30 +53,66 @@ fn native_macro_heads_bind_labels_before_definition_or_expansion() {
         serde_json::from_str(include_str!("fixtures/ca65-generated-macros.json"))
             .expect("native facts");
     let cases = facts["cases"].as_array().expect("cases");
-    assert_eq!(cases.len(), 118);
+    assert_eq!(cases.len(), 96);
     let audit: serde_json::Value = serde_json::from_str(include_str!(
         "../../../docs/plans/2026-10-20-ca65-generated-macros/native.json"
     ))
     .expect("complete native audit");
     let all = audit["cases"].as_array().expect("native cases");
-    assert_eq!(all.len(), cases.len());
+    assert_eq!(all.len(), 120);
+    let excluded = facts["excluded_cases"]
+        .as_array()
+        .expect("separate register controls");
+    assert_eq!(excluded.len(), 24);
+    let predecessor: serde_json::Value = serde_json::from_str(include_str!(
+        "../../../docs/plans/2026-10-20-ca65-generated-macros/predecessor.json"
+    ))
+    .expect("retained predecessor outcomes");
+    for item in excluded {
+        assert_eq!(item["issue"], 853);
+        let original = all
+            .iter()
+            .find(|c| c["name"] == item["name"])
+            .expect("excluded native input");
+        assert_eq!(
+            original["native"]
+                .as_array()
+                .expect("stages")
+                .last()
+                .expect("native outcome")["exit"],
+            1
+        );
+        let before = predecessor["results"]
+            .as_array()
+            .expect("predecessor results")
+            .iter()
+            .find(|r| r["name"] == item["name"])
+            .expect("positive preceding acceptance");
+        assert_eq!(before["exit"], 0);
+    }
     for original in all {
         let matched: Vec<_> = cases
             .iter()
             .filter(|case| case["name"] == original["name"])
             .collect();
         assert_eq!(
-            matched.len(),
+            matched.len()
+                + excluded
+                    .iter()
+                    .filter(|c| c["name"] == original["name"])
+                    .count(),
             1,
             "{}: coverage accounting",
             original["name"]
         );
-        for field in ["source", "config", "native", "native_hex"] {
-            assert_eq!(
-                matched[0][field], original[field],
-                "{}: {field}",
-                original["name"]
-            );
+        for case in matched {
+            for field in ["source", "config", "native", "native_hex"] {
+                assert_eq!(
+                    case[field], original[field],
+                    "{}: {field}",
+                    original["name"]
+                );
+            }
         }
     }
     let root = scratch::dir("ca65-generated-macros");
@@ -240,7 +276,10 @@ fn macro_head_failures_keep_include_and_macro_locations() {
                 "; include context\n.ident(\"LDA\"):.macro emit\n.byte 7\n.endmacro\n",
                 2,
             ),
-            ("; include context\nA:.macro emit\n.byte 7\n.endmacro\n", 2),
+            (
+                "; include context\nLDA:.macro emit\n.byte 7\n.endmacro\n",
+                2,
+            ),
             ("; include context\n.ident(7):.macro emit\n.endmacro\n", 2),
             (
                 "; include context\n.ident(\"mark\"):.macro emit\n.byte <$100000000\n.endmacro\n",

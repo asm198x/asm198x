@@ -1450,7 +1450,7 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
     });
     test('ca65_generated_macros', () => {
       const facts = require('../crates/asm198x/tests/fixtures/ca65-generated-macros.json');
-      assert.equal(facts.cases.length, 118);
+      assert.equal(facts.cases.length, 96);
       for (const [name, text] of Object.entries(facts.files)) {
         fs.mkdirSync(path.dirname(path.join(root, name)), { recursive: true }); write(name, text);
       }
@@ -1487,7 +1487,7 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
           assert.equal(read('cpu.bin').toString(), 'previous image', fact.name);
         }
       }
-      assert.equal(labelCount, 59);
+      assert.equal(labelCount, 61);
     });
     test('ca65_text_call_spacing', () => {
       const facts = require('../crates/asm198x/tests/fixtures/ca65-text-call-spacing.json');
