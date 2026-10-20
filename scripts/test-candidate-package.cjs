@@ -868,8 +868,8 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
     });
     test('ca65_source_constancy', () => {
       const facts = require('../crates/asm198x/tests/fixtures/ca65-source-constancy.json');
-      assert.equal(facts.cases.length, 297);
-      assert.equal(facts.audit_case_count, 298);
+      assert.equal(facts.cases.length, 313);
+      assert.equal(facts.audit_case_count, 314);
       assert.deepEqual(facts.excluded_audit_cases, { explicit_outer_alias_scope: [795] });
       for (const [name, text] of Object.entries(facts.files)) {
         fs.mkdirSync(path.dirname(path.join(root, name)), { recursive: true }); write(name, text);

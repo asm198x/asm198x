@@ -1,0 +1,38 @@
+[
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-fmt.log",
+    "retained": "fmt.log.gz",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-focused.log",
+    "retained": "focused.log.gz",
+    "sha256": "928cc649ae73bd5a7fca191fa66c876b914d0a40eb1bbf2d2e5f151662c337af",
+    "size": 649
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-clippy.log",
+    "retained": "clippy.log.gz",
+    "sha256": "3a6c234d1fba1a622f5343678286c06ce212adb24711b969cb8207052a4483b4",
+    "size": 287
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-node.log",
+    "retained": "node.log.gz",
+    "sha256": "d64398f4602afbcf4cbd7fe4c03d130ed9aceaea1e9baaef0d1cb5b147db81c8",
+    "size": 9378
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-docs.log",
+    "retained": "docs.log.gz",
+    "sha256": "850fb02c80b3af4d7c04ac1360de437f687bcf6b9a2f733160e4bd10ce98a165",
+    "size": 118
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-versions.log",
+    "retained": "versions.log.gz",
+    "sha256": "86573d0aa21805a5bc8f1f7d113a12d243521d1907836723f37df91a52d66bd6",
+    "size": 66
+  }
+]

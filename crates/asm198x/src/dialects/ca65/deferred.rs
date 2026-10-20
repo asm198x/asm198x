@@ -168,7 +168,7 @@ impl Deferred {
     /// Source expressions in dependency order, without expanding shared alias
     /// subtrees or reaching outward through an unresolved source reference.
     /// Cycle diagnostics remain the responsibility of `study_source`.
-    pub fn source_definitions(&self, value: &Expr) -> Vec<(&str, &Expr)> {
+    pub fn source_definitions(&self, value: &Expr) -> Vec<(&str, &Expr, usize)> {
         let mut stack: Vec<_> = symbols(value)
             .into_iter()
             .map(|key| {
@@ -192,7 +192,7 @@ impl Deferred {
                 continue;
             };
             if after {
-                ordered.push((name.as_str(), &definition.source_value));
+                ordered.push((name.as_str(), &definition.source_value, definition.position));
             } else if visited.insert(key.clone()) {
                 stack.push((key, true));
                 stack.extend(

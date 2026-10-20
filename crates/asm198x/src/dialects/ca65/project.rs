@@ -1146,20 +1146,22 @@ fn fold_condition(
 /// and long chains do not become recursively expanded expression trees.
 fn segment_weights(expr: &Expr, st: &Projection) -> Option<BTreeMap<String, i64>> {
     let mut aliases = BTreeMap::new();
-    for (name, value) in st.deferred.source_definitions(expr) {
-        let weights = expression_weights(value, st, &aliases);
+    for (name, value, position) in st.deferred.source_definitions(expr) {
+        let pc_seg = &st.stmts.get(position)?.seg;
+        let weights = expression_weights(value, st, &aliases, pc_seg);
         aliases.insert(name.to_string(), weights);
     }
-    expression_weights(expr, st, &aliases)
+    expression_weights(expr, st, &aliases, &st.seg)
 }
 
 fn expression_weights(
     expr: &Expr,
     st: &Projection,
     aliases: &BTreeMap<String, Option<BTreeMap<String, i64>>>,
+    pc_seg: &str,
 ) -> Option<BTreeMap<String, i64>> {
     let mut weights = BTreeMap::new();
-    walk_weights(expr, 1, st, aliases, &mut weights)?;
+    walk_weights(expr, 1, st, aliases, pc_seg, &mut weights)?;
     Some(weights)
 }
 
@@ -1174,6 +1176,7 @@ fn walk_weights(
     sign: i64,
     st: &Projection,
     aliases: &BTreeMap<String, Option<BTreeMap<String, i64>>>,
+    pc_seg: &str,
     weights: &mut BTreeMap<String, i64>,
 ) -> Option<()> {
     use crate::engine::BinOp as Op;
@@ -1183,7 +1186,7 @@ fn walk_weights(
         Some(())
     };
     let constant = |value: &Expr| {
-        expression_weights(value, st, aliases).is_some_and(|w| w.values().all(|&n| n == 0))
+        expression_weights(value, st, aliases, pc_seg).is_some_and(|w| w.values().all(|&n| n == 0))
     };
     let number = |value: &Expr| {
         value
@@ -1205,7 +1208,7 @@ fn walk_weights(
     };
     match expr {
         Expr::Num(_) => Some(()),
-        Expr::Pc => carry(st.seg.clone(), sign),
+        Expr::Pc => carry(pc_seg.to_string(), sign),
         Expr::Sym(name) => {
             let key = super::split_scope_ref(name).map_or_else(
                 || name.clone(),
@@ -1229,23 +1232,23 @@ fn walk_weights(
             carry(st.label_seg.get(&key)?.clone(), sign)
         }
         Expr::Bin(Op::Add, a, b) => {
-            walk_weights(a, sign, st, aliases, weights)?;
-            walk_weights(b, sign, st, aliases, weights)
+            walk_weights(a, sign, st, aliases, pc_seg, weights)?;
+            walk_weights(b, sign, st, aliases, pc_seg, weights)
         }
         Expr::Bin(Op::Sub, a, b) => {
-            walk_weights(a, sign, st, aliases, weights)?;
-            walk_weights(b, sign.checked_neg()?, st, aliases, weights)
+            walk_weights(a, sign, st, aliases, pc_seg, weights)?;
+            walk_weights(b, sign.checked_neg()?, st, aliases, pc_seg, weights)
         }
-        Expr::Neg(value) => walk_weights(value, sign.checked_neg()?, st, aliases, weights),
+        Expr::Neg(value) => walk_weights(value, sign.checked_neg()?, st, aliases, pc_seg, weights),
         Expr::Bin(Op::Mul, a, b) => {
             let left = number(a);
             let right = number(b);
             if left == Some(0) || right == Some(0) {
                 Some(())
             } else if let Some(factor) = right {
-                walk_weights(a, sign.checked_mul(factor)?, st, aliases, weights)
+                walk_weights(a, sign.checked_mul(factor)?, st, aliases, pc_seg, weights)
             } else if let Some(factor) = left {
-                walk_weights(b, sign.checked_mul(factor)?, st, aliases, weights)
+                walk_weights(b, sign.checked_mul(factor)?, st, aliases, pc_seg, weights)
             } else {
                 (constant(a) && constant(b)).then_some(())
             }

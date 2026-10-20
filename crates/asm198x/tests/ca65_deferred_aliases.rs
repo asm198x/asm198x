@@ -56,12 +56,12 @@ fn native_deferred_aliases_resolve_without_changing_source_time_forms() {
 fn source_constancy_follows_native_alias_classification() {
     let fixture = include_str!("fixtures/ca65-source-constancy.json");
     let facts: serde_json::Value = serde_json::from_str(fixture).expect("native captures");
-    assert_eq!(facts["audit_case_count"], 298);
+    assert_eq!(facts["audit_case_count"], 314);
     assert_eq!(
         facts["excluded_audit_cases"],
         serde_json::json!({"explicit_outer_alias_scope": [795]})
     );
-    verify_fixture(fixture, 297);
+    verify_fixture(fixture, 313);
 }
 
 fn verify_fixture(fixture: &str, count: usize) {
