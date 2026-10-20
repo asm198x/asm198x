@@ -68,8 +68,7 @@
         }
       ],
       "native_hex": "08",
-      "dialect": "ca65",
-      "formatter_gap": "833"
+      "dialect": "ca65"
     },
     {
       "name": "count_1",
@@ -104,8 +103,7 @@
         }
       ],
       "native_hex": "",
-      "dialect": "ca65",
-      "formatter_gap": "833"
+      "dialect": "ca65"
     },
     {
       "name": "count_2",
@@ -140,8 +138,7 @@
         }
       ],
       "native_hex": "",
-      "dialect": "ca65",
-      "formatter_gap": "833"
+      "dialect": "ca65"
     },
     {
       "name": "count_1000000",
@@ -176,8 +173,7 @@
         }
       ],
       "native_hex": "",
-      "dialect": "ca65",
-      "formatter_gap": "833"
+      "dialect": "ca65"
     },
     {
       "name": "count_4294967295",
@@ -212,8 +208,7 @@
         }
       ],
       "native_hex": "",
-      "dialect": "ca65",
-      "formatter_gap": "833"
+      "dialect": "ca65"
     },
     {
       "name": "emitted_before_end",
@@ -248,8 +243,7 @@
         }
       ],
       "native_hex": "07",
-      "dialect": "ca65",
-      "formatter_gap": "833"
+      "dialect": "ca65"
     },
     {
       "name": "nested_repeat",
@@ -284,8 +278,7 @@
         }
       ],
       "native_hex": "07",
-      "dialect": "ca65",
-      "formatter_gap": "833"
+      "dialect": "ca65"
     },
     {
       "name": "nested_conditional",
@@ -362,8 +355,7 @@
         }
       ],
       "native_hex": "07",
-      "dialect": "ca65",
-      "formatter_gap": "833"
+      "dialect": "ca65"
     },
     {
       "name": "deferred_oversized_include",
@@ -398,8 +390,7 @@
         }
       ],
       "native_hex": "",
-      "dialect": "ca65",
-      "formatter_gap": "833"
+      "dialect": "ca65"
     },
     {
       "name": "missing_include_before_end",
@@ -455,8 +446,7 @@
         }
       ],
       "native_hex": "",
-      "dialect": "ca65",
-      "formatter_gap": "833"
+      "dialect": "ca65"
     },
     {
       "name": "zero_repeat_missing_include",
@@ -491,8 +481,7 @@
         }
       ],
       "native_hex": "08",
-      "dialect": "ca65",
-      "formatter_gap": "833"
+      "dialect": "ca65"
     },
     {
       "name": "oversized_capture_after_end",
@@ -569,8 +558,7 @@
         }
       ],
       "native_hex": "070708",
-      "dialect": "ca65",
-      "formatter_gap": "833"
+      "dialect": "ca65"
     },
     {
       "name": "macro_end_inside_repeat",
@@ -605,8 +593,7 @@
         }
       ],
       "native_hex": "07",
-      "dialect": "ca65",
-      "formatter_gap": "833"
+      "dialect": "ca65"
     },
     {
       "name": "include_ends_reader",
