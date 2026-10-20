@@ -1,0 +1,416 @@
+[
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-producer/before-strings-lifetime-native.json",
+    "retained": "asm198x-source-constancy-final-producer--before-strings-lifetime-native.json.gz",
+    "sha256": "9b02f26fe850f2d02c9da9636fb9eed75765d3324867741f6deb63717466ab02",
+    "size": 17349
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-producer/after-scope-native-query-probes.json",
+    "retained": "asm198x-source-constancy-final-producer--after-scope-native-query-probes.json.gz",
+    "sha256": "e85c0d4271456fc837d6b48c1e1928eb1e669fc3f45e15a8fed3d1652e905897",
+    "size": 17334
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-producer/before-scope-native-width-probes.json",
+    "retained": "asm198x-source-constancy-final-producer--before-scope-native-width-probes.json.gz",
+    "sha256": "3241e19c37cb7369fffb089572e446b6ccdb69b921ea9b5abb8e00d7e003981c",
+    "size": 71196
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-producer/before-strings-flat-native.json",
+    "retained": "asm198x-source-constancy-final-producer--before-strings-flat-native.json.gz",
+    "sha256": "336357eca7ddec5dc5c9c60fe3d5e2da271f3876781499ea6b7048a0a68637e1",
+    "size": 257968
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-producer/after-scope-deferred-followups-native.json",
+    "retained": "asm198x-source-constancy-final-producer--after-scope-deferred-followups-native.json.gz",
+    "sha256": "e51cda0b79f2f4db538238c7513ac4030c9ebb9d9ffc3d9d95c35226e1614621",
+    "size": 11288
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-producer/replay-summary.json",
+    "retained": "asm198x-source-constancy-final-producer--replay-summary.json.gz",
+    "sha256": "f802f5e8d2ee70e9e038348dae17e67e68a20c1734c32097120dd5b03acf904a",
+    "size": 10111
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-producer/before-text-native.json",
+    "retained": "asm198x-source-constancy-final-producer--before-text-native.json.gz",
+    "sha256": "16a3221bdeb5ac05c04a81a17fe4598749e74a576e687a08cd57132e3e967519",
+    "size": 196021
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-producer/before-query-original.json",
+    "retained": "asm198x-source-constancy-final-producer--before-query-original.json.gz",
+    "sha256": "bf6c4bfd81f572482003ff162be0d8956179a8b07908d1f548e55fefb7f17961",
+    "size": 28125
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-producer/before-source-constancy.json",
+    "retained": "asm198x-source-constancy-final-producer--before-source-constancy.json.gz",
+    "sha256": "3467681b5b490f05536f032d7078ddefe14c881cd61d0570dc4747fddc06cd17",
+    "size": 154871
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-producer/before-scope-native-completed-phase-probes.json",
+    "retained": "asm198x-source-constancy-final-producer--before-scope-native-completed-phase-probes.json.gz",
+    "sha256": "3101cdf70a362686072d3e8e4ff3bd7ac4c3f18f04dc07d55cee530747252175",
+    "size": 53513
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-producer/after-strings-flat-native.json",
+    "retained": "asm198x-source-constancy-final-producer--after-strings-flat-native.json.gz",
+    "sha256": "a8563931260b67bc3bb20bbb554814668d5cdfec444c67c7d0222c77fe9f2143",
+    "size": 263718
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-producer/before-scope-native-phase-probes.json",
+    "retained": "asm198x-source-constancy-final-producer--before-scope-native-phase-probes.json.gz",
+    "sha256": "2250139d0a5042994e4b4dee3fa84efd844f4bf796d873e11dcb9fe8977a151f",
+    "size": 54017
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-producer/before-scope-deferred-followups-native.json",
+    "retained": "asm198x-source-constancy-final-producer--before-scope-deferred-followups-native.json.gz",
+    "sha256": "bf8c8ad7bcfb7836f41feb9efcf1c9f7d612cade8c66a9eba8e9cd2234041c24",
+    "size": 11057
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-producer/after-strings-consumer-native.json",
+    "retained": "asm198x-source-constancy-final-producer--after-strings-consumer-native.json.gz",
+    "sha256": "abac64d0bb418b375b4d9a60792555295b765f4567e9845976c6009f54749187",
+    "size": 33800
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-producer/after-scope-native-completed-phase-probes.json",
+    "retained": "asm198x-source-constancy-final-producer--after-scope-native-completed-phase-probes.json.gz",
+    "sha256": "104bb66a031f8e2400c307a87a1b7282e4d5a7a2fbffcf84c26d5204a119fd61",
+    "size": 54573
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-producer/before-query-extended.json",
+    "retained": "asm198x-source-constancy-final-producer--before-query-extended.json.gz",
+    "sha256": "66301b7618078584dbc9f0217de16810d7a1f2b94e52e4a61ea8cd3599143ccb",
+    "size": 69693
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-producer/before-text-assertion-native.json",
+    "retained": "asm198x-source-constancy-final-producer--before-text-assertion-native.json.gz",
+    "sha256": "00bbd311391623f7957a8eea623f56dd673fde43197aa4f9790ad7301f860e02",
+    "size": 60148
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-producer/after-strings-index-scope-native.json",
+    "retained": "asm198x-source-constancy-final-producer--after-strings-index-scope-native.json.gz",
+    "sha256": "dceaf32872a9a970093c0369c440e67aed6dbc55bf2906c76429e4925aec05c9",
+    "size": 2172
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-producer/after-source-constancy.json",
+    "retained": "asm198x-source-constancy-final-producer--after-source-constancy.json.gz",
+    "sha256": "09d789f5436b0bf4fcb9294b490256840301ae207f2c1282a497031cd9eaf8eb",
+    "size": 157860
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-producer/after-scope-native-width-probes.json",
+    "retained": "asm198x-source-constancy-final-producer--after-scope-native-width-probes.json.gz",
+    "sha256": "fe726e7d2f2c618fbed97cc97cbf67ce64f9f9b4523dd5ecc950c276a42ab840",
+    "size": 72646
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-producer/before-scope-native-negative-memory-probes.json",
+    "retained": "asm198x-source-constancy-final-producer--before-scope-native-negative-memory-probes.json.gz",
+    "sha256": "6bb698da57d54e9e510589f5ee99ee68693c89e934dd795f40a2e152862daa3f",
+    "size": 14092
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-producer/before-strings-text-consumer-native.json",
+    "retained": "asm198x-source-constancy-final-producer--before-strings-text-consumer-native.json.gz",
+    "sha256": "853f5dd1e41db03a5aea3a77b7d4d2077ec7a1b856141ae98fb53b1e04eff418",
+    "size": 3029
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-producer/identity.json",
+    "retained": "asm198x-source-constancy-final-producer--identity.json.gz",
+    "sha256": "c857d7b5de3d1c1531aac096b59967381f2127bf6c2e74376142c0e32ef36ae7",
+    "size": 295
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-producer/before-scope-native-query-probes.json",
+    "retained": "asm198x-source-constancy-final-producer--before-scope-native-query-probes.json.gz",
+    "sha256": "cde81916c1fe63c297762c77e5322ac5c154566447e3e2e97f915d995ca23d2a",
+    "size": 16974
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-producer/after-scope-native-negative-memory-probes.json",
+    "retained": "asm198x-source-constancy-final-producer--after-scope-native-negative-memory-probes.json.gz",
+    "sha256": "380edfc890b12d3e33a7519a60a190f881af106711b7ea207682147add8dcddc",
+    "size": 14382
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-producer/after-query-original.json",
+    "retained": "asm198x-source-constancy-final-producer--after-query-original.json.gz",
+    "sha256": "ae52188ac4219b20690e3696705a257fd4712cc5d88456cbf30e9c11dc901e4c",
+    "size": 28692
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-producer/after-scope-native-stream-probes.json",
+    "retained": "asm198x-source-constancy-final-producer--after-scope-native-stream-probes.json.gz",
+    "sha256": "a12415f0864189459b6ccbb1f406decc8fed99af248c394377a726e9ba3480c8",
+    "size": 3253
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-producer/after-strings-guard-native.json",
+    "retained": "asm198x-source-constancy-final-producer--after-strings-guard-native.json.gz",
+    "sha256": "27b754e2db2ae3b948fa3c9426ccbd11157b4ede4b859dff382b6eeeb876bcda",
+    "size": 3367
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-producer/after-strings-lifetime-native.json",
+    "retained": "asm198x-source-constancy-final-producer--after-strings-lifetime-native.json.gz",
+    "sha256": "5d22fdb62e54b3d5b4af6d24ae923c8cd4e5e925d7d063895ce98a0ef26a5c98",
+    "size": 17719
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-producer/after-query-extended.json",
+    "retained": "asm198x-source-constancy-final-producer--after-query-extended.json.gz",
+    "sha256": "52fe8aae440bda57b433f188e879486c7b5e861f7bb18fb403490193b164da5f",
+    "size": 70980
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-producer/before-strings-index-scope-native.json",
+    "retained": "asm198x-source-constancy-final-producer--before-strings-index-scope-native.json.gz",
+    "sha256": "df971233fd21709be010fa5b71463df8bdbf3e4154025f8169c3318787f9531d",
+    "size": 2122
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-producer/after-alias.json",
+    "retained": "asm198x-source-constancy-final-producer--after-alias.json.gz",
+    "sha256": "d65da9a5c0e44b95ae7e5ff201ffbf52e061993977cf696aea9d3ab1ce2704b9",
+    "size": 4506
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-producer/before-alias.json",
+    "retained": "asm198x-source-constancy-final-producer--before-alias.json.gz",
+    "sha256": "8e1a1e74ce62666ca17bc59fd447d3f8750a06f08a12bda7b33e75753b4d3b6b",
+    "size": 4411
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-producer/after-text-assertion-native.json",
+    "retained": "asm198x-source-constancy-final-producer--after-text-assertion-native.json.gz",
+    "sha256": "c5252c6b24eca13d277b80833834d790990139543f4120d2e30283eeccdb699f",
+    "size": 61398
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-producer/before-strings-consumer-native.json",
+    "retained": "asm198x-source-constancy-final-producer--before-strings-consumer-native.json.gz",
+    "sha256": "a30a0462e6e8b560388659ac7cd935de379d4032f3b9defd93ecd1bb4ee12d60",
+    "size": 33100
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-producer/before-strings-numeric-string-arity-native.json",
+    "retained": "asm198x-source-constancy-final-producer--before-strings-numeric-string-arity-native.json.gz",
+    "sha256": "7a1dc383f5d116580636b74330462f616dee4f91d40302b85b71740380370745",
+    "size": 12662
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-producer/after-text-native.json",
+    "retained": "asm198x-source-constancy-final-producer--after-text-native.json.gz",
+    "sha256": "08afeb969a0f1cf3890cb29181d316725a1a9687de71da205b9ba30970863763",
+    "size": 199991
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-producer/before-scope-native-stream-probes.json",
+    "retained": "asm198x-source-constancy-final-producer--before-scope-native-stream-probes.json.gz",
+    "sha256": "b7851fcb51953bab7b956e382c15ee284e1ce2603005bcd54970a9f4164fca94",
+    "size": 3183
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-producer/after-strings-numeric-string-arity-native.json",
+    "retained": "asm198x-source-constancy-final-producer--after-strings-numeric-string-arity-native.json.gz",
+    "sha256": "5d52507610f3693a29412454f8b52c03bf95f781dcc14ebedf8cf68cb2a2ba7e",
+    "size": 12932
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-producer/after-strings-text-consumer-native.json",
+    "retained": "asm198x-source-constancy-final-producer--after-strings-text-consumer-native.json.gz",
+    "sha256": "33d63b69ceed4a7ca96361b05d39be79d0fca4fa3e5b3184595e3ce0fe576df4",
+    "size": 3099
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-producer/before-strings-guard-native.json",
+    "retained": "asm198x-source-constancy-final-producer--before-strings-guard-native.json.gz",
+    "sha256": "3955b6441a9d2910009fdcc9652cdd54917eb4c3cd9804d06fb0433e996a660c",
+    "size": 3297
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-producer/build.log",
+    "retained": "asm198x-source-constancy-final-producer--build.log.gz",
+    "sha256": "9a30d54c8b16d7e49510b182028079bca120aeebb7d662e88f8566e6196a49f6",
+    "size": 72
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-producer/after-scope-native-phase-probes.json",
+    "retained": "asm198x-source-constancy-final-producer--after-scope-native-phase-probes.json.gz",
+    "sha256": "5ae12dcb5123cb64d5e8a3bd76fcaf4889c522c73bfa43f36a9982a1a385e4b4",
+    "size": 55087
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-local-package/wrong-bytes.log",
+    "retained": "asm198x-source-constancy-final-local-package--wrong-bytes.log.gz",
+    "sha256": "87605dbd66ffc1e358388a268c8be494a1f623f56e088be8fa85f139f044e53a",
+    "size": 130
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-local-package/wrong-bytes.json",
+    "retained": "asm198x-source-constancy-final-local-package--wrong-bytes.json.gz",
+    "sha256": "b6df9830afd61562e72a56d08912f5fbadb942c2c90caf626e65e76eb9ff9a53",
+    "size": 25184488
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-local-package/corrupt-archive.json",
+    "retained": "asm198x-source-constancy-final-local-package--corrupt-archive.json.gz",
+    "sha256": "d293f944fdd29a56aeb5c4e9e44a8acd99fbbb3d9552a90cc9eb8aad1dc1d6d1",
+    "size": 172
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-local-package/predecessor.json",
+    "retained": "asm198x-source-constancy-final-local-package--predecessor.json.gz",
+    "sha256": "f37e125315cfbaaa1fd30c7b80d99f4ee49414ec603143717995fcd99594a4d8",
+    "size": 23929080
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-local-package/report.log",
+    "retained": "asm198x-source-constancy-final-local-package--report.log.gz",
+    "sha256": "900e7dd637ca14c2ef4f6874219f9dc8c67987d4e9ed2832eceb24f29378a5aa",
+    "size": 77
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-local-package/report.json",
+    "retained": "asm198x-source-constancy-final-local-package--report.json.gz",
+    "sha256": "76b3e5f82854b725f3a2ff25df4875656e086e26d1a81c9d2e18a3e0a7deb83c",
+    "size": 25183693
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-local-package/corrupt-archive.log",
+    "retained": "asm198x-source-constancy-final-local-package--corrupt-archive.log.gz",
+    "sha256": "3550aa9d511637203739d8851e07f919cc59970f4cabfb370654246285ff1680",
+    "size": 973
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-local-package/asm198x-aarch64-apple-darwin.tar.xz.sha256",
+    "retained": "asm198x-source-constancy-final-local-package--asm198x-aarch64-apple-darwin.tar.xz.sha256.gz",
+    "sha256": "ef8f1f5e0ddc3f8efabc22273d5ebe9bc4eae790d784957b2a48b98e4e0df30a",
+    "size": 102
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-local-package/predecessor.log",
+    "retained": "asm198x-source-constancy-final-local-package--predecessor.log.gz",
+    "sha256": "fad025c270dbe0f2c2d4f5940c995cfa86dc9f5800319844feb9d56bf93117d7",
+    "size": 101
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-clean-4510/report.json",
+    "retained": "asm198x-source-constancy-final-clean-4510--report.json.gz",
+    "sha256": "d3c1ad0b90d33587129ffa2924a42f591798cfaf071c63287f51db6fd03b0cd9",
+    "size": 12726
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-clean-4510/verification.json",
+    "retained": "asm198x-source-constancy-final-clean-4510--verification.json.gz",
+    "sha256": "3c5d1626bd15384a1451df7ba61f9b94dc83593e07ea592ef236bd51dce9ed58",
+    "size": 209
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-clean-4510/logs/cc65-4510-opcodes--opcode-space-version-ld65.stdout",
+    "retained": "asm198x-source-constancy-final-clean-4510--logs--cc65-4510-opcodes--opcode-space-version-ld65.stdout.gz",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-clean-4510/logs/build-assembler.stdout",
+    "retained": "asm198x-source-constancy-final-clean-4510--logs--build-assembler.stdout.gz",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-clean-4510/logs/assembler-version.stderr",
+    "retained": "asm198x-source-constancy-final-clean-4510--logs--assembler-version.stderr.gz",
+    "sha256": "cd9267fb50974330b2596f8f7d386346ec0227b2e2b702cb761d363dfa13a8c2",
+    "size": 16
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-clean-4510/logs/cc65-4510-opcodes--opcode-space-version-ca65.stderr",
+    "retained": "asm198x-source-constancy-final-clean-4510--logs--cc65-4510-opcodes--opcode-space-version-ca65.stderr.gz",
+    "sha256": "5c22de95322cb1d858e9690b5e3c6e83984c27c5120ff12c49f8dc9679ed2dbc",
+    "size": 17
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-clean-4510/logs/cc65-4510-opcodes--opcode-space-reference-0.stdout",
+    "retained": "asm198x-source-constancy-final-clean-4510--logs--cc65-4510-opcodes--opcode-space-reference-0.stdout.gz",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-clean-4510/logs/cc65-4510-opcodes--opcode-space-reference-0.stderr",
+    "retained": "asm198x-source-constancy-final-clean-4510--logs--cc65-4510-opcodes--opcode-space-reference-0.stderr.gz",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-clean-4510/logs/cc65-4510-opcodes--opcode-space-version-ca65.stdout",
+    "retained": "asm198x-source-constancy-final-clean-4510--logs--cc65-4510-opcodes--opcode-space-version-ca65.stdout.gz",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-clean-4510/logs/assembler-version.stdout",
+    "retained": "asm198x-source-constancy-final-clean-4510--logs--assembler-version.stdout.gz",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-clean-4510/logs/cc65-4510-opcodes--opcode-space-version-ld65.stderr",
+    "retained": "asm198x-source-constancy-final-clean-4510--logs--cc65-4510-opcodes--opcode-space-version-ld65.stderr.gz",
+    "sha256": "acf0ea5dbac2ff34c3733f092c38a357dd02d80c0d1edf0e05e8a36b92b62445",
+    "size": 17
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-clean-4510/logs/build-assembler.stderr",
+    "retained": "asm198x-source-constancy-final-clean-4510--logs--build-assembler.stderr.gz",
+    "sha256": "7419fc52c463b5a63805cb66f019bdeeb46e72759bd2a78d557ebf022bae26f0",
+    "size": 1320
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-clean-4510/logs/cc65-4510-opcodes--opcode-space-assembler-0.stdout",
+    "retained": "asm198x-source-constancy-final-clean-4510--logs--cc65-4510-opcodes--opcode-space-assembler-0.stdout.gz",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-clean-4510/logs/cc65-4510-opcodes--opcode-space-reference-1.stdout",
+    "retained": "asm198x-source-constancy-final-clean-4510--logs--cc65-4510-opcodes--opcode-space-reference-1.stdout.gz",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-clean-4510/logs/cc65-4510-opcodes--opcode-space-reference-1.stderr",
+    "retained": "asm198x-source-constancy-final-clean-4510--logs--cc65-4510-opcodes--opcode-space-reference-1.stderr.gz",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-clean-4510/logs/cc65-4510-opcodes--opcode-space-assembler-0.stderr",
+    "retained": "asm198x-source-constancy-final-clean-4510--logs--cc65-4510-opcodes--opcode-space-assembler-0.stderr.gz",
+    "sha256": "d0f2bb0a758878171f47aca2c415910cd2bb55a06fb1b89e28d6e8ced2d21477",
+    "size": 51
+  },
+  {
+    "source": "/private/tmp/asm198x-source-constancy-final-tests.log",
+    "retained": "asm198x-source-constancy-final-tests.log.gz",
+    "sha256": "b14d45157ff6acd54ee6e02225a517f6e0ad3849e3c547747b44c77ad49c24ce",
+    "size": 152034
+  }
+]
