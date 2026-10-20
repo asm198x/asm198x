@@ -1,0 +1,170 @@
+[
+  {
+    "source": "/private/tmp/asm198x-flat-counter-ci.json",
+    "retained": "asm198x-flat-counter-ci.json.gz",
+    "sha256": "60b23590bee5eca81f4408568656ce243d91b600763d381a1b3a46946b7fafd1",
+    "size": 237616
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-counter-summary.json",
+    "retained": "asm198x-flat-counter-summary.json.gz",
+    "sha256": "43c3067392eca4e9d79d4121391723694450d706b8267b4b2ab1d67258f73ed8",
+    "size": 2782
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-counter-merge.json",
+    "retained": "asm198x-flat-counter-merge.json.gz",
+    "sha256": "4de6ab40e9894d491ee4238597fd9312207dd13de6c060f09c7d61c11547f95e",
+    "size": 123
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-counter-candidates/candidate-qualification-aarch64-apple-darwin-1/acquisition.json",
+    "retained": "candidates--candidate-qualification-aarch64-apple-darwin-1--acquisition.json.gz",
+    "sha256": "6a1e52079a184b796eab41c7aa6e97d7281e6a5d83b2df1722a36c64158c6899",
+    "size": 126
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-counter-candidates/candidate-qualification-aarch64-apple-darwin-1/corrupt-archive.json",
+    "retained": "candidates--candidate-qualification-aarch64-apple-darwin-1--corrupt-archive.json.gz",
+    "sha256": "d293f944fdd29a56aeb5c4e9e44a8acd99fbbb3d9552a90cc9eb8aad1dc1d6d1",
+    "size": 172
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-counter-candidates/candidate-qualification-aarch64-apple-darwin-1/plan.json",
+    "retained": "candidates--candidate-qualification-aarch64-apple-darwin-1--plan.json.gz",
+    "sha256": "aae56a69259430e0a5aa83bc036e953570dd25a286fad39cd2da6e485591ef3a",
+    "size": 13916
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-counter-candidates/candidate-qualification-aarch64-apple-darwin-1/report.json",
+    "retained": "candidates--candidate-qualification-aarch64-apple-darwin-1--report.json.gz",
+    "sha256": "3a54bed896fec27ed5f7a73ce76def05e9d4c5ed4af1b90fcdecab9db3a3e19e",
+    "size": 23895501
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-counter-candidates/candidate-qualification-aarch64-apple-darwin-1/wrong-bytes.json",
+    "retained": "candidates--candidate-qualification-aarch64-apple-darwin-1--wrong-bytes.json.gz",
+    "sha256": "b5b0d96b95e14600190e815726a86e1514e5ead767daf06f4443c4eaa0b11abd",
+    "size": 23896296
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-counter-candidates/candidate-qualification-aarch64-unknown-linux-gnu-1/acquisition.json",
+    "retained": "candidates--candidate-qualification-aarch64-unknown-linux-gnu-1--acquisition.json.gz",
+    "sha256": "6a1e52079a184b796eab41c7aa6e97d7281e6a5d83b2df1722a36c64158c6899",
+    "size": 126
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-counter-candidates/candidate-qualification-aarch64-unknown-linux-gnu-1/corrupt-archive.json",
+    "retained": "candidates--candidate-qualification-aarch64-unknown-linux-gnu-1--corrupt-archive.json.gz",
+    "sha256": "82cc3298ec0de54957a653ff1ad769a06adc7ecf95a36894ea9d1bf3b618952d",
+    "size": 182
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-counter-candidates/candidate-qualification-aarch64-unknown-linux-gnu-1/plan.json",
+    "retained": "candidates--candidate-qualification-aarch64-unknown-linux-gnu-1--plan.json.gz",
+    "sha256": "998be1811c772cee8ae18022d1a04b7f97288d243a80ccf40687856f72e44638",
+    "size": 13973
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-counter-candidates/candidate-qualification-aarch64-unknown-linux-gnu-1/report.json",
+    "retained": "candidates--candidate-qualification-aarch64-unknown-linux-gnu-1--report.json.gz",
+    "sha256": "4b207cc3b01d448ea7410d0b7c1303bac1bcd77d7831749e2d4396b70da65bc2",
+    "size": 21127023
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-counter-candidates/candidate-qualification-aarch64-unknown-linux-gnu-1/wrong-bytes.json",
+    "retained": "candidates--candidate-qualification-aarch64-unknown-linux-gnu-1--wrong-bytes.json.gz",
+    "sha256": "e3c8267fd158910c1e1d43476e11fc6fc887e7902c0b0afa1a77c1e60939e4d6",
+    "size": 21127818
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-counter-candidates/candidate-qualification-x86_64-apple-darwin-1/acquisition.json",
+    "retained": "candidates--candidate-qualification-x86_64-apple-darwin-1--acquisition.json.gz",
+    "sha256": "6a1e52079a184b796eab41c7aa6e97d7281e6a5d83b2df1722a36c64158c6899",
+    "size": 126
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-counter-candidates/candidate-qualification-x86_64-apple-darwin-1/corrupt-archive.json",
+    "retained": "candidates--candidate-qualification-x86_64-apple-darwin-1--corrupt-archive.json.gz",
+    "sha256": "2e5a8c2e13cf7c92b79606177bf5c326bf1dadd6f43bf7f4f7023897c4a8101c",
+    "size": 170
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-counter-candidates/candidate-qualification-x86_64-apple-darwin-1/plan.json",
+    "retained": "candidates--candidate-qualification-x86_64-apple-darwin-1--plan.json.gz",
+    "sha256": "5e1969ffe55f895ec0babd29f44c06805f02fbd3666f68f904bbe8ee30876b3b",
+    "size": 13916
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-counter-candidates/candidate-qualification-x86_64-apple-darwin-1/report.json",
+    "retained": "candidates--candidate-qualification-x86_64-apple-darwin-1--report.json.gz",
+    "sha256": "0f1fab2cec794c07257b595b7d549ae885a67624510a200e240f04dbca03ad77",
+    "size": 23895494
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-counter-candidates/candidate-qualification-x86_64-apple-darwin-1/wrong-bytes.json",
+    "retained": "candidates--candidate-qualification-x86_64-apple-darwin-1--wrong-bytes.json.gz",
+    "sha256": "00103c729a2d4e82ac9efa513d3895d95f8d09ce77c1cd204f81b73381683ebb",
+    "size": 23896289
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-counter-candidates/candidate-qualification-x86_64-pc-windows-msvc-1/acquisition.json",
+    "retained": "candidates--candidate-qualification-x86_64-pc-windows-msvc-1--acquisition.json.gz",
+    "sha256": "6a1e52079a184b796eab41c7aa6e97d7281e6a5d83b2df1722a36c64158c6899",
+    "size": 126
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-counter-candidates/candidate-qualification-x86_64-pc-windows-msvc-1/corrupt-archive.json",
+    "retained": "candidates--candidate-qualification-x86_64-pc-windows-msvc-1--corrupt-archive.json.gz",
+    "sha256": "14917b0dd5c0d132a39a1b8a988625000b26d8c9f83f57c358445d524d227fbf",
+    "size": 173
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-counter-candidates/candidate-qualification-x86_64-pc-windows-msvc-1/plan.json",
+    "retained": "candidates--candidate-qualification-x86_64-pc-windows-msvc-1--plan.json.gz",
+    "sha256": "23fd648373e15b7d33d34c7ddf4efa736eb59b92e47d6c41d27119174c0acda8",
+    "size": 13854
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-counter-candidates/candidate-qualification-x86_64-pc-windows-msvc-1/report.json",
+    "retained": "candidates--candidate-qualification-x86_64-pc-windows-msvc-1--report.json.gz",
+    "sha256": "e90e22c4d3b596166e51bdd8497beafb920d566dd768207cc749e6d98412bab8",
+    "size": 23684851
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-counter-candidates/candidate-qualification-x86_64-pc-windows-msvc-1/wrong-bytes.json",
+    "retained": "candidates--candidate-qualification-x86_64-pc-windows-msvc-1--wrong-bytes.json.gz",
+    "sha256": "2ee60aee8751a09d16434853e14163bc753b70a7a096f5ed310f56d9464a654c",
+    "size": 23685646
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-counter-candidates/candidate-qualification-x86_64-unknown-linux-gnu-1/acquisition.json",
+    "retained": "candidates--candidate-qualification-x86_64-unknown-linux-gnu-1--acquisition.json.gz",
+    "sha256": "6a1e52079a184b796eab41c7aa6e97d7281e6a5d83b2df1722a36c64158c6899",
+    "size": 126
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-counter-candidates/candidate-qualification-x86_64-unknown-linux-gnu-1/corrupt-archive.json",
+    "retained": "candidates--candidate-qualification-x86_64-unknown-linux-gnu-1--corrupt-archive.json.gz",
+    "sha256": "0b4d2d082c9b8af180fc479d18fb2de3e8d2e64a19155e533d87f86ef97ccf07",
+    "size": 180
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-counter-candidates/candidate-qualification-x86_64-unknown-linux-gnu-1/plan.json",
+    "retained": "candidates--candidate-qualification-x86_64-unknown-linux-gnu-1--plan.json.gz",
+    "sha256": "998be1811c772cee8ae18022d1a04b7f97288d243a80ccf40687856f72e44638",
+    "size": 13973
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-counter-candidates/candidate-qualification-x86_64-unknown-linux-gnu-1/report.json",
+    "retained": "candidates--candidate-qualification-x86_64-unknown-linux-gnu-1--report.json.gz",
+    "sha256": "5ea33732ed80b4ad2ac13e1eb7aca0b8e33b36329842b55a954027a730c077a4",
+    "size": 21127016
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-counter-candidates/candidate-qualification-x86_64-unknown-linux-gnu-1/wrong-bytes.json",
+    "retained": "candidates--candidate-qualification-x86_64-unknown-linux-gnu-1--wrong-bytes.json.gz",
+    "sha256": "5ac3badd70aebf1778c0d8709e478f6ba50468a3fb46583eddf616b4fd2209d1",
+    "size": 21127811
+  }
+]
