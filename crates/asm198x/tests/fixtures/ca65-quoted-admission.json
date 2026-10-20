@@ -8251,10 +8251,7 @@
       ],
       "native_hex": "062c07",
       "dialect": "ca65",
-      "native_error_line": null,
-      "assembly_gaps": [
-        900
-      ]
+      "native_error_line": null
     },
     {
       "name": "ascii_44_inactive",

@@ -29,8 +29,8 @@ use std::collections::BTreeMap;
 
 use super::ca65_flat::{self, DirectiveLine, FlatWalk, WalkDirective, parse_number};
 use super::mos6502::{
-    self, BytePrec, Index, OperandSyntax, fold_const, is_ident, split_data_items, split_first_word,
-    split_top_level, top_level_rfind,
+    self, BytePrec, Index, OperandSyntax, fold_const, is_ident, split_first_word, split_top_level,
+    top_level_rfind,
 };
 use crate::ast::{Comment, Node, Program, Scope, Span, Symbol, Trivia};
 use crate::dialect::Dialect;
@@ -711,7 +711,7 @@ fn parse_directive(
         }
         "asciiz" => {
             let out = strings
-                .asciiz(split_data_items(rest), line)?
+                .asciiz(ca65_flat::split_fields(rest, usize::MAX), line)?
                 .into_iter()
                 .map(|b| Expr::Num(i64::from(b)))
                 .collect();
@@ -758,7 +758,7 @@ fn byte_list(
         return Err(AsmError::new(line, "`.byte` needs a value"));
     }
     let mut out = Vec::new();
-    for piece in split_data_items(rest) {
+    for piece in ca65_flat::split_fields(rest, usize::MAX) {
         if let Some(bytes) = strings.data(piece, line)? {
             out.extend(bytes.into_iter().map(|b| Expr::Num(i64::from(b))));
         } else {
@@ -772,7 +772,7 @@ fn value_list(rest: &str, line: usize) -> Result<Vec<Expr>, AsmError> {
     if rest.trim().is_empty() {
         return Err(AsmError::new(line, "`.word` needs a value"));
     }
-    split_top_level(rest, ',')
+    ca65_flat::split_fields(rest, usize::MAX)
         .iter()
         .map(|p| value(p, line))
         .collect()
