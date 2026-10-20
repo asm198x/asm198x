@@ -123,6 +123,15 @@ fn verify(facts: serde_json::Value, count: usize) {
                     "{name}: {output}"
                 );
             }
+            if let Some(expected) = fact.get("native_error") {
+                let span = &payload[0]["span"];
+                assert!(
+                    Path::new(span["path"].as_str().expect("path"))
+                        .ends_with(expected["path"].as_str().expect("native path")),
+                    "{name}"
+                );
+                assert_eq!(span["line"], expected["line"], "{name}");
+            }
             if let Some(expected) = fact.get("expected_context") {
                 let span = &payload[0]["span"];
                 assert!(
@@ -168,5 +177,13 @@ fn flat_far_addresses_match_native_unsigned_limits_and_roundtrips() {
     verify(
         serde_json::from_str(include_str!("fixtures/ca65-flat-faraddr.json")).expect("facts"),
         132,
+    );
+}
+
+#[test]
+fn flat_wide_data_matches_native_unsigned_limits_and_roundtrips() {
+    verify(
+        serde_json::from_str(include_str!("fixtures/ca65-flat-wide-data.json")).expect("facts"),
+        104,
     );
 }
