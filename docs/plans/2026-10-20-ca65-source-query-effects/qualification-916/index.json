@@ -1,0 +1,380 @@
+[
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-candidates/artifacts.json",
+    "retained": "candidates--artifacts.json.gz",
+    "length": 3635,
+    "sha256": "2db295c53436ee933337fc543c27b8b9113f6d0bc3f4fb522e8e51b952e8cf0f"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-x86_64-unknown-linux-gnu-1/wrong-bytes.json",
+    "retained": "candidates--candidate-qualification-x86_64-unknown-linux-gnu-1--wrong-bytes.json.gz",
+    "length": 23045250,
+    "sha256": "431821ff22daa033ba3edd4ae7ffae6f9267123be4c9bdd204605782d0291d9b"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-x86_64-unknown-linux-gnu-1/corrupt-archive.json",
+    "retained": "candidates--candidate-qualification-x86_64-unknown-linux-gnu-1--corrupt-archive.json.gz",
+    "length": 180,
+    "sha256": "0b4d2d082c9b8af180fc479d18fb2de3e8d2e64a19155e533d87f86ef97ccf07"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-x86_64-unknown-linux-gnu-1/plan.json",
+    "retained": "candidates--candidate-qualification-x86_64-unknown-linux-gnu-1--plan.json.gz",
+    "length": 13973,
+    "sha256": "998be1811c772cee8ae18022d1a04b7f97288d243a80ccf40687856f72e44638"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-x86_64-unknown-linux-gnu-1/report.json",
+    "retained": "candidates--candidate-qualification-x86_64-unknown-linux-gnu-1--report.json.gz",
+    "length": 23044455,
+    "sha256": "5debfc875cc3f45b270fae458a5e67f5b86cefd0d0d61e9084b88b7632321647"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-x86_64-unknown-linux-gnu-1/acquisition.json",
+    "retained": "candidates--candidate-qualification-x86_64-unknown-linux-gnu-1--acquisition.json.gz",
+    "length": 126,
+    "sha256": "caae8b5ce416eff16321d0e0deee5bc6d577c211970e1cfb92e94eb822dd2d25"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-x86_64-apple-darwin-1/wrong-bytes.json",
+    "retained": "candidates--candidate-qualification-x86_64-apple-darwin-1--wrong-bytes.json.gz",
+    "length": 26012616,
+    "sha256": "dcb5c069545e3debef95fbd9351ad9a47ecbc7c1cadc3858c0a6695ea88606c7"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-x86_64-apple-darwin-1/corrupt-archive.json",
+    "retained": "candidates--candidate-qualification-x86_64-apple-darwin-1--corrupt-archive.json.gz",
+    "length": 170,
+    "sha256": "2e5a8c2e13cf7c92b79606177bf5c326bf1dadd6f43bf7f4f7023897c4a8101c"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-x86_64-apple-darwin-1/plan.json",
+    "retained": "candidates--candidate-qualification-x86_64-apple-darwin-1--plan.json.gz",
+    "length": 13916,
+    "sha256": "5e1969ffe55f895ec0babd29f44c06805f02fbd3666f68f904bbe8ee30876b3b"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-x86_64-apple-darwin-1/report.json",
+    "retained": "candidates--candidate-qualification-x86_64-apple-darwin-1--report.json.gz",
+    "length": 26011821,
+    "sha256": "ab039bc1a1c85f26f4979d0853e089b6b72f3bbe37f57d3b2985093610505140"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-x86_64-apple-darwin-1/acquisition.json",
+    "retained": "candidates--candidate-qualification-x86_64-apple-darwin-1--acquisition.json.gz",
+    "length": 126,
+    "sha256": "caae8b5ce416eff16321d0e0deee5bc6d577c211970e1cfb92e94eb822dd2d25"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-aarch64-apple-darwin-1/wrong-bytes.json",
+    "retained": "candidates--candidate-qualification-aarch64-apple-darwin-1--wrong-bytes.json.gz",
+    "length": 26012623,
+    "sha256": "706245acafe1bd8b7b032758ee29ba5be921f9fb8ba871bccf219f26a0a18b71"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-aarch64-apple-darwin-1/corrupt-archive.json",
+    "retained": "candidates--candidate-qualification-aarch64-apple-darwin-1--corrupt-archive.json.gz",
+    "length": 172,
+    "sha256": "d293f944fdd29a56aeb5c4e9e44a8acd99fbbb3d9552a90cc9eb8aad1dc1d6d1"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-aarch64-apple-darwin-1/plan.json",
+    "retained": "candidates--candidate-qualification-aarch64-apple-darwin-1--plan.json.gz",
+    "length": 13916,
+    "sha256": "aae56a69259430e0a5aa83bc036e953570dd25a286fad39cd2da6e485591ef3a"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-aarch64-apple-darwin-1/report.json",
+    "retained": "candidates--candidate-qualification-aarch64-apple-darwin-1--report.json.gz",
+    "length": 26011828,
+    "sha256": "18ab3effddc8e47f9739db57d4521d2eb3df1c038a09710796347d242e4fe029"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-aarch64-apple-darwin-1/acquisition.json",
+    "retained": "candidates--candidate-qualification-aarch64-apple-darwin-1--acquisition.json.gz",
+    "length": 126,
+    "sha256": "caae8b5ce416eff16321d0e0deee5bc6d577c211970e1cfb92e94eb822dd2d25"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-aarch64-unknown-linux-gnu-1/wrong-bytes.json",
+    "retained": "candidates--candidate-qualification-aarch64-unknown-linux-gnu-1--wrong-bytes.json.gz",
+    "length": 23045257,
+    "sha256": "023713ffac15f0a500a185e9ebba9cf3371c1073bec89fc9e6cbbb1ff4e573be"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-aarch64-unknown-linux-gnu-1/corrupt-archive.json",
+    "retained": "candidates--candidate-qualification-aarch64-unknown-linux-gnu-1--corrupt-archive.json.gz",
+    "length": 182,
+    "sha256": "82cc3298ec0de54957a653ff1ad769a06adc7ecf95a36894ea9d1bf3b618952d"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-aarch64-unknown-linux-gnu-1/plan.json",
+    "retained": "candidates--candidate-qualification-aarch64-unknown-linux-gnu-1--plan.json.gz",
+    "length": 13973,
+    "sha256": "998be1811c772cee8ae18022d1a04b7f97288d243a80ccf40687856f72e44638"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-aarch64-unknown-linux-gnu-1/report.json",
+    "retained": "candidates--candidate-qualification-aarch64-unknown-linux-gnu-1--report.json.gz",
+    "length": 23044462,
+    "sha256": "59457169bc62c2d418721a8baee287240c5a24e71df073cb62fe79b33bf07d9f"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-aarch64-unknown-linux-gnu-1/acquisition.json",
+    "retained": "candidates--candidate-qualification-aarch64-unknown-linux-gnu-1--acquisition.json.gz",
+    "length": 126,
+    "sha256": "caae8b5ce416eff16321d0e0deee5bc6d577c211970e1cfb92e94eb822dd2d25"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-x86_64-pc-windows-msvc-1/wrong-bytes.json",
+    "retained": "candidates--candidate-qualification-x86_64-pc-windows-msvc-1--wrong-bytes.json.gz",
+    "length": 25791521,
+    "sha256": "56b6f1631202cf801cd87be7a43a9c44e8070bc6af3683afda9882d73a00e0aa"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-x86_64-pc-windows-msvc-1/corrupt-archive.json",
+    "retained": "candidates--candidate-qualification-x86_64-pc-windows-msvc-1--corrupt-archive.json.gz",
+    "length": 173,
+    "sha256": "14917b0dd5c0d132a39a1b8a988625000b26d8c9f83f57c358445d524d227fbf"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-x86_64-pc-windows-msvc-1/plan.json",
+    "retained": "candidates--candidate-qualification-x86_64-pc-windows-msvc-1--plan.json.gz",
+    "length": 13854,
+    "sha256": "23fd648373e15b7d33d34c7ddf4efa736eb59b92e47d6c41d27119174c0acda8"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-x86_64-pc-windows-msvc-1/report.json",
+    "retained": "candidates--candidate-qualification-x86_64-pc-windows-msvc-1--report.json.gz",
+    "length": 25790726,
+    "sha256": "0624f032bdb62005c562120985fe7ab9ab1eb6da8f47d0fe9fba356f85425928"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-x86_64-pc-windows-msvc-1/acquisition.json",
+    "retained": "candidates--candidate-qualification-x86_64-pc-windows-msvc-1--acquisition.json.gz",
+    "length": 126,
+    "sha256": "caae8b5ce416eff16321d0e0deee5bc6d577c211970e1cfb92e94eb822dd2d25"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-merge.json",
+    "retained": "asm198x-conditional-context-final-merge.json.gz",
+    "length": 123,
+    "sha256": "875999e38f1d2f5d15f87309bf817d4811f26ce14fa38d407daaa7e0368775c9"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-native200.json",
+    "retained": "asm198x-conditional-context-native200.json.gz",
+    "length": 207738,
+    "sha256": "54044373816513ed35af6ff233a9eb2bc73f34f2ed6929b16e11ed7a29fb9cfe"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-checked-node.log",
+    "retained": "asm198x-conditional-context-checked-node.log.gz",
+    "length": 9384,
+    "sha256": "d1c2847c71001b69f6c4d7f61f26af8605716558b0f58b5a6f7e536fe6ab044c"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-size-native.json",
+    "retained": "asm198x-conditional-context-size-native.json.gz",
+    "length": 3439,
+    "sha256": "88cf69aeb1d8b07f09a8f138e14129c15bde1730d8fd82ef4337125430d4a7ea"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-span-green.log",
+    "retained": "asm198x-conditional-context-span-green.log.gz",
+    "length": 513,
+    "sha256": "c92af26b0cc6603012173904ee360f974da7b44b57dae6826a662c2d4c1a4cb1"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-clippy.log",
+    "retained": "asm198x-conditional-context-clippy.log.gz",
+    "length": 1353,
+    "sha256": "cea2c0f28c5ba6e6239a8503ed28727432638a84ccfc51e09da54c18c5c7bdf8"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-replay-checked.py",
+    "retained": "asm198x-conditional-context-replay-checked.py.gz",
+    "length": 2581,
+    "sha256": "da6b3bc66155df4f32b26724adc9c6951b6fa8d0c3dc0698519308e56e029fad"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-build.log",
+    "retained": "asm198x-conditional-context-final-build.log.gz",
+    "length": 185,
+    "sha256": "e711616b28cc8e2efaf0d1d4958e6f240f690e5d0ee9314bf90eaf0eaf9be6fc"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-focused.log",
+    "retained": "asm198x-conditional-context-focused.log.gz",
+    "length": 711,
+    "sha256": "75ac57c0e3459d73dd3110d8a5143cf72e123cbe7dd9db47f965b14007fccf4f"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-summary.json",
+    "retained": "asm198x-conditional-context-final-summary.json.gz",
+    "length": 2777,
+    "sha256": "4089cdda8fbbc6b42f94d7d88c82c078846d6189a69e3d9601de1c51a5aa55fc"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-merge-retry-note.json",
+    "retained": "asm198x-conditional-context-final-merge-retry-note.json.gz",
+    "length": 330,
+    "sha256": "16b334833b8f55045455191b2e232742d092c63da34763138d561098901288ab"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-node.log",
+    "retained": "asm198x-conditional-context-final-node.log.gz",
+    "length": 9372,
+    "sha256": "03e692c66bb022f9db3d1a026b106e5fb3bfc0613a961fc6e42b89db5f0732be"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-after.json",
+    "retained": "asm198x-conditional-context-after.json.gz",
+    "length": 64028,
+    "sha256": "690cdc95bdbb50381133e69350d6562728c7fc91f36ec73a808b99ea00a10356"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-generated-before.json",
+    "retained": "asm198x-conditional-context-generated-before.json.gz",
+    "length": 82754,
+    "sha256": "7f7186d7873efe7c65640bc391eba6c404efe6f0242c495e2e212b48c6ac784b"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-span-red.log",
+    "retained": "asm198x-conditional-context-span-red.log.gz",
+    "length": 1405,
+    "sha256": "1543d6e9dc41badb24ed50a9864eaf45bace93560f82ed37cbb32f2252934710"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-qualified-replay.log",
+    "retained": "asm198x-conditional-context-qualified-replay.log.gz",
+    "length": 608,
+    "sha256": "d3d70e87743f7c86daea2ddcec6f75bd8384410588e65607ce1d8d941f738a3e"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-checked-full.log",
+    "retained": "asm198x-conditional-context-checked-full.log.gz",
+    "length": 70206,
+    "sha256": "35ea184bc68f1872c94a58041bd9b5567ff6b572d3545bfdc572ccda76422f7e"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-incomplete-full.log",
+    "retained": "asm198x-conditional-context-incomplete-full.log.gz",
+    "length": 63362,
+    "sha256": "cff2aece1a902646cb6629db6548ccc20670ad3a3af4bd05d9db5efad93ad43c"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-clippy.log",
+    "retained": "asm198x-conditional-context-final-clippy.log.gz",
+    "length": 288,
+    "sha256": "c35e683184cd6ed67e7c7e4ef5d4178a963601c5a6bad387937e8a9fdd3ada62"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-pr.md",
+    "retained": "asm198x-conditional-context-final-pr.md.gz",
+    "length": 1422,
+    "sha256": "98f2af42f57c38265117c88197dc1eb6af136b4d30c11c445b4d360c2c944b19"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-checked-clippy.log",
+    "retained": "asm198x-conditional-context-checked-clippy.log.gz",
+    "length": 288,
+    "sha256": "4f297535de602c1088d200f3b19f93c63e25cea67da292890cc8de78de984992"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-pre-size-guard-full.log",
+    "retained": "asm198x-conditional-context-pre-size-guard-full.log.gz",
+    "length": 68181,
+    "sha256": "f7ac26f414a44e00c103f7260e840619e06a3c054a810ca74c826b53e1f97c4b"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-checked-build.log",
+    "retained": "asm198x-conditional-context-checked-build.log.gz",
+    "length": 185,
+    "sha256": "ee40edd1f594537ace8417e9f1df430c72ea74bad959a9e11b480f57085d2d9b"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-after.json",
+    "retained": "asm198x-conditional-context-final-after.json.gz",
+    "length": 81734,
+    "sha256": "11ff8d9c367b54f9dad7c08e1cc4e7a112fa32c62663c86221129dd1fd115e82"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-size-after.json",
+    "retained": "asm198x-conditional-context-size-after.json.gz",
+    "length": 1636,
+    "sha256": "352937881a4449b1a9bb5dcc207f696b64096488e75f752644f35ef8bdee007d"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-4510.log",
+    "retained": "asm198x-conditional-context-final-4510.log.gz",
+    "length": 157,
+    "sha256": "1c1ce04484a7e9b16a2a6407590c8b20213f5284ea8f1d1ffd12ec9500e391c3"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-merge-verification.json",
+    "retained": "asm198x-conditional-context-final-merge-verification.json.gz",
+    "length": 283,
+    "sha256": "7e86608b2b859874cfe00f22423bba7268d9bfee87c124eaa3bf9148fd037327"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-fixture.log",
+    "retained": "asm198x-conditional-context-fixture.log.gz",
+    "length": 775,
+    "sha256": "abda6ffb8ed5d0cadccdcc5fa31f3713623091f7498ab6d1f22b286773378033"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-head",
+    "retained": "asm198x-conditional-context-final-head.gz",
+    "length": 41,
+    "sha256": "cd0d02596b75dd6dea826227119218d08ee352a8933f415d2ffb6740ce723398"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-merge-status.json",
+    "retained": "asm198x-conditional-context-final-merge-status.json.gz",
+    "length": 19583,
+    "sha256": "20d645eb79f72fd1fecda0b5e4acb5a48f3a1c93faba8e7ab90996283c40bd9e"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-build.log",
+    "retained": "asm198x-conditional-context-build.log.gz",
+    "length": 185,
+    "sha256": "0e067de00cceef850d670c5da393299da41f55e955113acbb2a811afad73b379"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-qualified-full.log",
+    "retained": "asm198x-conditional-context-qualified-full.log.gz",
+    "length": 152259,
+    "sha256": "51e1a44a747585e88e9fdf6e1994b3d9df81afdc401aff3b4c7aec24d4079f46"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-native185.json",
+    "retained": "asm198x-conditional-context-native185.json.gz",
+    "length": 193320,
+    "sha256": "98ebfbbd3b90a09cf017ca44917afe26b8a27af5b0f6886c3395ccffd7734d1c"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-checked-focused.log",
+    "retained": "asm198x-conditional-context-checked-focused.log.gz",
+    "length": 1169,
+    "sha256": "b530944bfef0263eb8ff82a69501147bfcba9ee1960f8c8b5b45cc42d8dcf6cd"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-qualified-clippy.log",
+    "retained": "asm198x-conditional-context-qualified-clippy.log.gz",
+    "length": 288,
+    "sha256": "ad669498fd0b8430819053d9e6719a8aa61701383ca9707a4a62a90a45b90177"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-ci.log",
+    "retained": "asm198x-conditional-context-final-ci.log.gz",
+    "length": 7388,
+    "sha256": "ba8ffba1711953007998210accf08f2d5e307ae8a051b82e8a7844bee10a24da"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-ci.json",
+    "retained": "asm198x-conditional-context-final-ci.json.gz",
+    "length": 237679,
+    "sha256": "a2cd05b63a493eca82fa64cd0c83d9ca460d248262dee8cda3747c347dff4449"
+  }
+]

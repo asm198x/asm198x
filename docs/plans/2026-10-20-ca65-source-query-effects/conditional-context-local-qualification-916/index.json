@@ -1,0 +1,818 @@
+[
+  {
+    "source": "/private/tmp/asm198x-conditional-context-producer/query-original-after.json",
+    "retained": "asm198x-conditional-context-producer--query-original-after.json.gz",
+    "length": 28521,
+    "sha256": "89eea88dcfc151a1d32e87a3e70495109c131bf8cc7db74b7e8762edb925ac0e"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-producer/strings-consumer-native-after.json",
+    "retained": "asm198x-conditional-context-producer--strings-consumer-native-after.json.gz",
+    "length": 33590,
+    "sha256": "cd9b178b2702a988cac42d59ac1076beef37716d862483543a6b1a39771d5774"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-producer/strings-numeric-string-arity-native-after.json",
+    "retained": "asm198x-conditional-context-producer--strings-numeric-string-arity-native-after.json.gz",
+    "length": 12851,
+    "sha256": "baacf9a516c60afb0168e069359c8a9a0d899eccdaf12507cfc1a0f789fcfbba"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-producer/scope-deferred-followups-native-after.json",
+    "retained": "asm198x-conditional-context-producer--scope-deferred-followups-native-after.json.gz",
+    "length": 11219,
+    "sha256": "3f272c6aa5e1c4d866f245441ff6056de8766ea896767157331b8dc578ce3a0a"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-producer/strings-index-scope-native-after.json",
+    "retained": "asm198x-conditional-context-producer--strings-index-scope-native-after.json.gz",
+    "length": 2157,
+    "sha256": "b2e13b7991027bcdf581287ce50150db74289845217fa869745511dec839ed42"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-producer/query-short-circuit-after.json",
+    "retained": "asm198x-conditional-context-producer--query-short-circuit-after.json.gz",
+    "length": 9654,
+    "sha256": "5712b41503ac1691bb9d68b36ae385425e777b666f8546a56934fb5c70921cb5"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-producer/strings-lifetime-native-after.json",
+    "retained": "asm198x-conditional-context-producer--strings-lifetime-native-after.json.gz",
+    "length": 17608,
+    "sha256": "1778288c686d71560ddc2f098d1363f44f4063271e764a2c31aa83fab59e54a6"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-producer/text-assertion-native-after.json",
+    "retained": "asm198x-conditional-context-producer--text-assertion-native-after.json.gz",
+    "length": 61023,
+    "sha256": "4216e2674612b5676b006e374c21e8b78d978acbdb21338f25d590e166d638be"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-producer/replay-summary.json",
+    "retained": "asm198x-conditional-context-producer--replay-summary.json.gz",
+    "length": 7134,
+    "sha256": "5f80980426ab8e4b79bec28d0abfa78ddc79b875245e8520755c7ad0f5ef0c4c"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-producer/query-admission-after.json",
+    "retained": "asm198x-conditional-context-producer--query-admission-after.json.gz",
+    "length": 27679,
+    "sha256": "47fe096d5ee1c0563d2f1a246a876447a5e49be31799be6f55ef87ef795ba21a"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-producer/text-native-after.json",
+    "retained": "asm198x-conditional-context-producer--text-native-after.json.gz",
+    "length": 198800,
+    "sha256": "15e16b7d7c023aabc46ae9f118ef626d9aa2eaf354c2b5dad53d9f0b12650eab"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-producer/scope-native-width-probes-after.json",
+    "retained": "asm198x-conditional-context-producer--scope-native-width-probes-after.json.gz",
+    "length": 72211,
+    "sha256": "fdc59c4ee9c58b7d86be45be3bb9d73070a84959ad41ba6e01dcfd34e38dc440"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-producer/scope-native-negative-memory-probes-after.json",
+    "retained": "asm198x-conditional-context-producer--scope-native-negative-memory-probes-after.json.gz",
+    "length": 14295,
+    "sha256": "23c578ea91ef6836fa73bfe08517176d387b79cb2c157b256cea335fce453011"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-producer/scope-native-query-probes-after.json",
+    "retained": "asm198x-conditional-context-producer--scope-native-query-probes-after.json.gz",
+    "length": 17226,
+    "sha256": "f4692644c1d578fe2fd162da1c3beed8774a004cd712e0f28721a2bc3b4e12e6"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-producer/source-constancy-after.json",
+    "retained": "asm198x-conditional-context-producer--source-constancy-after.json.gz",
+    "length": 156913,
+    "sha256": "5afc22c821ef4da119316ce98972f319af57e7e11a77ff599af66c03170aecec"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-producer/query-extended-after.json",
+    "retained": "asm198x-conditional-context-producer--query-extended-after.json.gz",
+    "length": 70593,
+    "sha256": "60a7a031a60187eb409715663814d2c45cea006d0635f5f38df2a0f29dab613d"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-producer/scope-native-phase-probes-after.json",
+    "retained": "asm198x-conditional-context-producer--scope-native-phase-probes-after.json.gz",
+    "length": 54766,
+    "sha256": "9e80759680984d9a52263adc683f0854cb135a12238c174e88fe1f5d266387a4"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-producer/strings-text-consumer-native-after.json",
+    "retained": "asm198x-conditional-context-producer--strings-text-consumer-native-after.json.gz",
+    "length": 3078,
+    "sha256": "3be46397bfaea043a24c2238a9a7fd7d0174dddc5b671c2285f74f0463012825"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-producer/scope-native-stream-probes-after.json",
+    "retained": "asm198x-conditional-context-producer--scope-native-stream-probes-after.json.gz",
+    "length": 3232,
+    "sha256": "c247a66097572bafb0de84d1c7519a8b6f45680f371e1aa1db386f271d3be57b"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-producer/strings-flat-native-after.json",
+    "retained": "asm198x-conditional-context-producer--strings-flat-native-after.json.gz",
+    "length": 261993,
+    "sha256": "75f15e042985e59f42fa457f0cb8546a8e1e3ce657cf292a569ad982c55a5212"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-producer/binary-sha256",
+    "retained": "asm198x-conditional-context-producer--binary-sha256.gz",
+    "length": 65,
+    "sha256": "da60320135e04dec9cf63fc295e6fd1d15af6a20ed40f2fdf0050319a48912dd"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-producer/strings-guard-native-after.json",
+    "retained": "asm198x-conditional-context-producer--strings-guard-native-after.json.gz",
+    "length": 3346,
+    "sha256": "d3ee3823afda7f09bf9fc72fb3b12c82253a1403079bed2dac8da5629a58dfd5"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-producer/alias-after.json",
+    "retained": "asm198x-conditional-context-producer--alias-after.json.gz",
+    "length": 4476,
+    "sha256": "29251366d61b7cd7a27eb17c0ad769618fa8689c6f9aaade392a64ce077ac956"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-producer/scope-native-completed-phase-probes-after.json",
+    "retained": "asm198x-conditional-context-producer--scope-native-completed-phase-probes-after.json.gz",
+    "length": 54255,
+    "sha256": "edf70c603d7d8bf8a736f0ddf86f2e199262e25c7eeb3e755a54a0fe9cf1e93c"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-size-trial-producer/query-original-after.json",
+    "retained": "asm198x-conditional-context-size-trial-producer--query-original-after.json.gz",
+    "length": 28863,
+    "sha256": "25a61dea7ea766cb5fd57b07f925590d14086f8a496b12589d272f9558ab4375"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-size-trial-producer/strings-consumer-native-after.json",
+    "retained": "asm198x-conditional-context-size-trial-producer--strings-consumer-native-after.json.gz",
+    "length": 34010,
+    "sha256": "a735f1f0e15499c2e0673d7f111ec962f1174d40282cbac1a26771e216a4ed55"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-size-trial-producer/strings-numeric-string-arity-native-after.json",
+    "retained": "asm198x-conditional-context-size-trial-producer--strings-numeric-string-arity-native-after.json.gz",
+    "length": 13013,
+    "sha256": "f502a29b63bf060e53e28703c881993f567572e560cc926e0e3f64aec6bcbdb7"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-size-trial-producer/scope-deferred-followups-native-after.json",
+    "retained": "asm198x-conditional-context-size-trial-producer--scope-deferred-followups-native-after.json.gz",
+    "length": 11357,
+    "sha256": "58fd232590846cb3283d9660d1d827824cc81d8b0b8eb251c6d710367e74fd40"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-size-trial-producer/strings-index-scope-native-after.json",
+    "retained": "asm198x-conditional-context-size-trial-producer--strings-index-scope-native-after.json.gz",
+    "length": 2187,
+    "sha256": "e5d53c203368ae95b11c66f1c9f3fc01c6975480d79a8ad0d49c08e3844396ae"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-size-trial-producer/query-short-circuit-after.json",
+    "retained": "asm198x-conditional-context-size-trial-producer--query-short-circuit-after.json.gz",
+    "length": 9768,
+    "sha256": "aa7c8253edb7fb6bb833d25a4d9c370ed5882626b004c545863fc3634c63b110"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-size-trial-producer/strings-lifetime-native-after.json",
+    "retained": "asm198x-conditional-context-size-trial-producer--strings-lifetime-native-after.json.gz",
+    "length": 17830,
+    "sha256": "6d93a4253a1b87ce3884fa82973fee0ec117bb5110d4f362e5694fbec11d7874"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-size-trial-producer/text-assertion-native-after.json",
+    "retained": "asm198x-conditional-context-size-trial-producer--text-assertion-native-after.json.gz",
+    "length": 61773,
+    "sha256": "84bb00c5ff55616100a69c150eaa6641296bfb5689773ce799d46522698da012"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-size-trial-producer/replay-summary.json",
+    "retained": "asm198x-conditional-context-size-trial-producer--replay-summary.json.gz",
+    "length": 7134,
+    "sha256": "5f80980426ab8e4b79bec28d0abfa78ddc79b875245e8520755c7ad0f5ef0c4c"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-size-trial-producer/query-admission-after.json",
+    "retained": "asm198x-conditional-context-size-trial-producer--query-admission-after.json.gz",
+    "length": 28009,
+    "sha256": "45b58eff6192d09420d561a38dca0fb9afd39d4cac7924c560de3405e456f080"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-size-trial-producer/text-native-after.json",
+    "retained": "asm198x-conditional-context-size-trial-producer--text-native-after.json.gz",
+    "length": 201182,
+    "sha256": "19d2393cf9a12e3b3e58939f0bf8c6c531cb563266bbf9b0847e42e9854da606"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-size-trial-producer/scope-native-width-probes-after.json",
+    "retained": "asm198x-conditional-context-size-trial-producer--scope-native-width-probes-after.json.gz",
+    "length": 73081,
+    "sha256": "f50e17d84aa6f2f8598c69c3acd37b8e2d5f29c62d77ca480e067d0e8ec28db0"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-size-trial-producer/scope-native-negative-memory-probes-after.json",
+    "retained": "asm198x-conditional-context-size-trial-producer--scope-native-negative-memory-probes-after.json.gz",
+    "length": 14469,
+    "sha256": "28a1696735c3c1edfb9e117f0968118f1f832d193c0161abdcd046260f719c64"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-size-trial-producer/scope-native-query-probes-after.json",
+    "retained": "asm198x-conditional-context-size-trial-producer--scope-native-query-probes-after.json.gz",
+    "length": 17442,
+    "sha256": "9043f038be28c3b8cc05cd39ea7bea80272b11d49a882a0724b01c145e60a965"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-size-trial-producer/source-constancy-after.json",
+    "retained": "asm198x-conditional-context-size-trial-producer--source-constancy-after.json.gz",
+    "length": 158803,
+    "sha256": "c5da0e494fa37d4bb14fc5e97996f78ff0275a21cfd36886d668599fde3713d5"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-size-trial-producer/conditional-after.json",
+    "retained": "asm198x-conditional-context-size-trial-producer--conditional-after.json.gz",
+    "length": 93193,
+    "sha256": "e9ba8b24a13ff33181d7aa24091168161d67619a988e2719322c4eb8693cadd5"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-size-trial-producer/query-extended-after.json",
+    "retained": "asm198x-conditional-context-size-trial-producer--query-extended-after.json.gz",
+    "length": 71367,
+    "sha256": "eea14d9e57ac980ec74e1374fa35e3ed0e5baebcf6ea55fb8c5aea86ed82730f"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-size-trial-producer/scope-native-phase-probes-after.json",
+    "retained": "asm198x-conditional-context-size-trial-producer--scope-native-phase-probes-after.json.gz",
+    "length": 55408,
+    "sha256": "7699774958062af9930ecb9d287f289dfa2683caa65917cabe5e352df29589fb"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-size-trial-producer/strings-text-consumer-native-after.json",
+    "retained": "asm198x-conditional-context-size-trial-producer--strings-text-consumer-native-after.json.gz",
+    "length": 3120,
+    "sha256": "b037971f49655108f341afb15831a8436f52302faaffe5dec2daee7ec548dc33"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-size-trial-producer/scope-native-stream-probes-after.json",
+    "retained": "asm198x-conditional-context-size-trial-producer--scope-native-stream-probes-after.json.gz",
+    "length": 3274,
+    "sha256": "e864deccb0341c55e13de374b038642813fa1d3216cbd4bed868f47761a2dbc7"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-size-trial-producer/strings-flat-native-after.json",
+    "retained": "asm198x-conditional-context-size-trial-producer--strings-flat-native-after.json.gz",
+    "length": 265443,
+    "sha256": "e7940e0ae6957415fe554b7dd6eb368e65c5a4d8d5cab97176bfa34f4e72e7dd"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-size-trial-producer/binary-sha256",
+    "retained": "asm198x-conditional-context-size-trial-producer--binary-sha256.gz",
+    "length": 65,
+    "sha256": "98998d83ce5e01d228a6f287ea39cd80b7a277beba042aa65aec1ecbe03c6046"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-size-trial-producer/strings-guard-native-after.json",
+    "retained": "asm198x-conditional-context-size-trial-producer--strings-guard-native-after.json.gz",
+    "length": 3388,
+    "sha256": "fa889e10fc015e94b5999be51434a536601c7e78c296a94a2ce33b8dbdc77bc6"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-size-trial-producer/alias-after.json",
+    "retained": "asm198x-conditional-context-size-trial-producer--alias-after.json.gz",
+    "length": 4536,
+    "sha256": "bcccfdcc382246223eecfd6283947b7b478ef9ce93781d8bd3a10a63d6968394"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-size-trial-producer/scope-native-completed-phase-probes-after.json",
+    "retained": "asm198x-conditional-context-size-trial-producer--scope-native-completed-phase-probes-after.json.gz",
+    "length": 54891,
+    "sha256": "00ff0848a972748be9b8e5a9ef7151524a20b3ddf3ade6e5d5616166b1e19cfc"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/query-original-after.json",
+    "retained": "asm198x-conditional-context-final-producer--query-original-after.json.gz",
+    "length": 28863,
+    "sha256": "72e523633486a1af2b21e1f7535db9b4333ef8c669c78df41f9c749f0b56d790"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/strings-consumer-native-after.json",
+    "retained": "asm198x-conditional-context-final-producer--strings-consumer-native-after.json.gz",
+    "length": 34010,
+    "sha256": "1d4181340faf25917ca512c3ee7a53e6531b376c927e807043af34e11846b500"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/strings-numeric-string-arity-native-after.json",
+    "retained": "asm198x-conditional-context-final-producer--strings-numeric-string-arity-native-after.json.gz",
+    "length": 13013,
+    "sha256": "a64bd17ff3265206d1812736d8c8aad1fb16308de28379d2222d3ba3adec1936"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/scope-deferred-followups-native-after.json",
+    "retained": "asm198x-conditional-context-final-producer--scope-deferred-followups-native-after.json.gz",
+    "length": 11357,
+    "sha256": "225c69650423a6fbf6860849fd065b394609fd8dec5ad8f79ac44f203041069d"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/strings-index-scope-native-after.json",
+    "retained": "asm198x-conditional-context-final-producer--strings-index-scope-native-after.json.gz",
+    "length": 2187,
+    "sha256": "254878aaa53183383a8b5f4d0a42d56cac1cbb3fc2a7bf3bdf5adfc969f171f0"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/format.log",
+    "retained": "asm198x-conditional-context-final-producer--format.log.gz",
+    "length": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/query-short-circuit-after.json",
+    "retained": "asm198x-conditional-context-final-producer--query-short-circuit-after.json.gz",
+    "length": 9768,
+    "sha256": "385866cf03797de1f52750d30b8ea2ab9e1ca0aef50dc29be168e89098864be5"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/strings-lifetime-native-after.json",
+    "retained": "asm198x-conditional-context-final-producer--strings-lifetime-native-after.json.gz",
+    "length": 17830,
+    "sha256": "c79bb3acea6684a02ac08b213c6c40de8b226dfc9e97c45ae4d241b096d70b86"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/text-assertion-native-after.json",
+    "retained": "asm198x-conditional-context-final-producer--text-assertion-native-after.json.gz",
+    "length": 61773,
+    "sha256": "730c762baabe5ba6fa0fd32004715bbf648ecc4e82d8583991226f0d928d761e"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/replay-summary.json",
+    "retained": "asm198x-conditional-context-final-producer--replay-summary.json.gz",
+    "length": 7134,
+    "sha256": "5f80980426ab8e4b79bec28d0abfa78ddc79b875245e8520755c7ad0f5ef0c4c"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/query-admission-after.json",
+    "retained": "asm198x-conditional-context-final-producer--query-admission-after.json.gz",
+    "length": 28009,
+    "sha256": "1f9d0dd20dc9dd4e3eec850884bae178c83ce9b7e4ece1c999f3912eab028c39"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/text-native-after.json",
+    "retained": "asm198x-conditional-context-final-producer--text-native-after.json.gz",
+    "length": 201182,
+    "sha256": "2376499967f8eea1d4797273771512c25e4746bc089acfc7c4f5f696b8e1524a"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/scope-native-width-probes-after.json",
+    "retained": "asm198x-conditional-context-final-producer--scope-native-width-probes-after.json.gz",
+    "length": 73081,
+    "sha256": "445aa83af2f9eb94a2acfab4bf18a0d8e92b95c44954c802dd4f1dcae18d07ac"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/scope-native-negative-memory-probes-after.json",
+    "retained": "asm198x-conditional-context-final-producer--scope-native-negative-memory-probes-after.json.gz",
+    "length": 14469,
+    "sha256": "6522cb89164925a977127c10294b980c5df8caee28d8e574483a150c61cec7e4"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/scope-native-query-probes-after.json",
+    "retained": "asm198x-conditional-context-final-producer--scope-native-query-probes-after.json.gz",
+    "length": 17442,
+    "sha256": "fe565983db9d5c2ed9d0ca878bc6c6821229ea2458cfff12e6100769bfa695ee"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/source-constancy-after.json",
+    "retained": "asm198x-conditional-context-final-producer--source-constancy-after.json.gz",
+    "length": 158803,
+    "sha256": "56726bc97bec02847ed627f54694edd353879d5d7b1a0aa55db1a43195fd8b0a"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/conditional-after.json",
+    "retained": "asm198x-conditional-context-final-producer--conditional-after.json.gz",
+    "length": 100525,
+    "sha256": "f4098560188527af612831b861c745b2d1712844b4f6e127bee1d23f59e7bd1e"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/docs.log",
+    "retained": "asm198x-conditional-context-final-producer--docs.log.gz",
+    "length": 118,
+    "sha256": "850fb02c80b3af4d7c04ac1360de437f687bcf6b9a2f733160e4bd10ce98a165"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/query-extended-after.json",
+    "retained": "asm198x-conditional-context-final-producer--query-extended-after.json.gz",
+    "length": 71367,
+    "sha256": "e673f79a24c9919428425299c7b006189a1d38ef1ac5257300bd89c31aaea7e2"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/scope-native-phase-probes-after.json",
+    "retained": "asm198x-conditional-context-final-producer--scope-native-phase-probes-after.json.gz",
+    "length": 55408,
+    "sha256": "b06f9597780ae9a16ff57115206ca63d37e500e781c88a7035a27c32538138e8"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/strings-text-consumer-native-after.json",
+    "retained": "asm198x-conditional-context-final-producer--strings-text-consumer-native-after.json.gz",
+    "length": 3120,
+    "sha256": "a59d1e2c2aedb89acc2cbbab65738a8bf3ad904f4df124fdfeb7fdce910e150f"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/identity.json",
+    "retained": "asm198x-conditional-context-final-producer--identity.json.gz",
+    "length": 295,
+    "sha256": "5eafa1a3f6f784c8da759529c4f66953b4182a871bc2131186d6247f026f7ca3"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/full-summary.json",
+    "retained": "asm198x-conditional-context-final-producer--full-summary.json.gz",
+    "length": 208,
+    "sha256": "0e2d423460cd7136dfa30c746e12e70b9af3ad9804fd6a4768ead69f68a720b8"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/ruff-format.log",
+    "retained": "asm198x-conditional-context-final-producer--ruff-format.log.gz",
+    "length": 25,
+    "sha256": "fd2299c9f1c6dc869070883e281051bfe93aacf66c1a3b0069f45b4aa410ca50"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/ruff.log",
+    "retained": "asm198x-conditional-context-final-producer--ruff.log.gz",
+    "length": 19,
+    "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/versions.log",
+    "retained": "asm198x-conditional-context-final-producer--versions.log.gz",
+    "length": 66,
+    "sha256": "86573d0aa21805a5bc8f1f7d113a12d243521d1907836723f37df91a52d66bd6"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/scope-native-stream-probes-after.json",
+    "retained": "asm198x-conditional-context-final-producer--scope-native-stream-probes-after.json.gz",
+    "length": 3274,
+    "sha256": "9d927216d0b57cf85807e41e7abb1ca9fb07d71dbd55f02359127ca43c127272"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/strings-flat-native-after.json",
+    "retained": "asm198x-conditional-context-final-producer--strings-flat-native-after.json.gz",
+    "length": 265443,
+    "sha256": "e718b73ba94bd79e3aadd3d0dfd7936d2806d3c2af9936bc54c71733228b7a34"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/binary-sha256",
+    "retained": "asm198x-conditional-context-final-producer--binary-sha256.gz",
+    "length": 65,
+    "sha256": "56ca01c465c2fb07896480aff0942c567eba07018a0455907b6a68d4da03bca1"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/strings-guard-native-after.json",
+    "retained": "asm198x-conditional-context-final-producer--strings-guard-native-after.json.gz",
+    "length": 3388,
+    "sha256": "6a81b3f6c913376bf9c275faa4ee2f07034ad8a30e318f735acc02b21781202a"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/alias-after.json",
+    "retained": "asm198x-conditional-context-final-producer--alias-after.json.gz",
+    "length": 4536,
+    "sha256": "94aa1c8afaffd8acc65bc3e32ce8b88bd3ae97e948cfd3da807b7edfa9329b0f"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/scope-native-completed-phase-probes-after.json",
+    "retained": "asm198x-conditional-context-final-producer--scope-native-completed-phase-probes-after.json.gz",
+    "length": 54891,
+    "sha256": "c274d386d4a84c0e8152ac65ad066ffac8f7b4433286f6b2fe77ade7b4b06dda"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-local-package/wrong-bytes.log",
+    "retained": "asm198x-conditional-context-final-local-package--wrong-bytes.log.gz",
+    "length": 130,
+    "sha256": "7d92219b3991fd3ee994f8982264ab3d66ca77430c3b24683f6061203f4a0ceb"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-local-package/wrong-bytes.json",
+    "retained": "asm198x-conditional-context-final-local-package--wrong-bytes.json.gz",
+    "length": 26011522,
+    "sha256": "68d2b6803a1c2727e3cd2ce9268429cbb947c8dc5cbc660f3856221baf89da8f"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-local-package/corrupt-archive.json",
+    "retained": "asm198x-conditional-context-final-local-package--corrupt-archive.json.gz",
+    "length": 172,
+    "sha256": "d293f944fdd29a56aeb5c4e9e44a8acd99fbbb3d9552a90cc9eb8aad1dc1d6d1"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-local-package/predecessor.json",
+    "retained": "asm198x-conditional-context-final-local-package--predecessor.json.gz",
+    "length": 25330268,
+    "sha256": "a01d9ff06aa41140505296a229e748d8d6d0ec7bac4d29c75cc3252ce45e70cd"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-local-package/report.log",
+    "retained": "asm198x-conditional-context-final-local-package--report.log.gz",
+    "length": 77,
+    "sha256": "84cbe62aa412bba6542cb5014fcdf4359a44b4981e039a5217aecb09ef2034c4"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-local-package/report.json",
+    "retained": "asm198x-conditional-context-final-local-package--report.json.gz",
+    "length": 26010727,
+    "sha256": "1236a9ec5085e703bb1dad3d4c17653ea3aa53d85ed7e4c88b4f04d9c85779d1"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-local-package/corrupt-archive.log",
+    "retained": "asm198x-conditional-context-final-local-package--corrupt-archive.log.gz",
+    "length": 973,
+    "sha256": "f278aa3fabfea7d2d2f28224ed2ae3519880ef93d33c31cc7ec66633812377ad"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-local-package/asm198x-aarch64-apple-darwin.tar.xz.sha256",
+    "retained": "asm198x-conditional-context-final-local-package--asm198x-aarch64-apple-darwin.tar.xz.sha256.gz",
+    "length": 102,
+    "sha256": "35e7db0e011f6976dbb22d2fe28f29290dcf51d26f54cf940898c3f7016af090"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-local-package/predecessor.log",
+    "retained": "asm198x-conditional-context-final-local-package--predecessor.log.gz",
+    "length": 104,
+    "sha256": "2de8b35afeb5f3ed142088150d40e8f6852ff41677cfa5965c5249d8556c1c49"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-clean-4510/report.json",
+    "retained": "asm198x-conditional-context-final-clean-4510--report.json.gz",
+    "length": 12756,
+    "sha256": "6bf8ba9e8c4fd5b4aac867899f4f9ac6eebaaaefaa986d2808444b6019f0dfd7"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-clean-4510/logs/cc65-4510-opcodes--opcode-space-version-ld65.stdout",
+    "retained": "asm198x-conditional-context-final-clean-4510--logs--cc65-4510-opcodes--opcode-space-version-ld65.stdout.gz",
+    "length": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-clean-4510/logs/build-assembler.stdout",
+    "retained": "asm198x-conditional-context-final-clean-4510--logs--build-assembler.stdout.gz",
+    "length": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-clean-4510/logs/assembler-version.stderr",
+    "retained": "asm198x-conditional-context-final-clean-4510--logs--assembler-version.stderr.gz",
+    "length": 16,
+    "sha256": "cd9267fb50974330b2596f8f7d386346ec0227b2e2b702cb761d363dfa13a8c2"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-clean-4510/logs/cc65-4510-opcodes--opcode-space-version-ca65.stderr",
+    "retained": "asm198x-conditional-context-final-clean-4510--logs--cc65-4510-opcodes--opcode-space-version-ca65.stderr.gz",
+    "length": 17,
+    "sha256": "5c22de95322cb1d858e9690b5e3c6e83984c27c5120ff12c49f8dc9679ed2dbc"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-clean-4510/logs/cc65-4510-opcodes--opcode-space-reference-0.stdout",
+    "retained": "asm198x-conditional-context-final-clean-4510--logs--cc65-4510-opcodes--opcode-space-reference-0.stdout.gz",
+    "length": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-clean-4510/logs/cc65-4510-opcodes--opcode-space-reference-0.stderr",
+    "retained": "asm198x-conditional-context-final-clean-4510--logs--cc65-4510-opcodes--opcode-space-reference-0.stderr.gz",
+    "length": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-clean-4510/logs/cc65-4510-opcodes--opcode-space-version-ca65.stdout",
+    "retained": "asm198x-conditional-context-final-clean-4510--logs--cc65-4510-opcodes--opcode-space-version-ca65.stdout.gz",
+    "length": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-clean-4510/logs/assembler-version.stdout",
+    "retained": "asm198x-conditional-context-final-clean-4510--logs--assembler-version.stdout.gz",
+    "length": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-clean-4510/logs/cc65-4510-opcodes--opcode-space-version-ld65.stderr",
+    "retained": "asm198x-conditional-context-final-clean-4510--logs--cc65-4510-opcodes--opcode-space-version-ld65.stderr.gz",
+    "length": 17,
+    "sha256": "acf0ea5dbac2ff34c3733f092c38a357dd02d80c0d1edf0e05e8a36b92b62445"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-clean-4510/logs/build-assembler.stderr",
+    "retained": "asm198x-conditional-context-final-clean-4510--logs--build-assembler.stderr.gz",
+    "length": 1320,
+    "sha256": "40a8e21716457e3eb9ee0ca58526ad113776bb30f1926f1c5f3a684094952944"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-clean-4510/logs/cc65-4510-opcodes--opcode-space-assembler-0.stdout",
+    "retained": "asm198x-conditional-context-final-clean-4510--logs--cc65-4510-opcodes--opcode-space-assembler-0.stdout.gz",
+    "length": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-clean-4510/logs/cc65-4510-opcodes--opcode-space-reference-1.stdout",
+    "retained": "asm198x-conditional-context-final-clean-4510--logs--cc65-4510-opcodes--opcode-space-reference-1.stdout.gz",
+    "length": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-clean-4510/logs/cc65-4510-opcodes--opcode-space-reference-1.stderr",
+    "retained": "asm198x-conditional-context-final-clean-4510--logs--cc65-4510-opcodes--opcode-space-reference-1.stderr.gz",
+    "length": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-clean-4510/logs/cc65-4510-opcodes--opcode-space-assembler-0.stderr",
+    "retained": "asm198x-conditional-context-final-clean-4510--logs--cc65-4510-opcodes--opcode-space-assembler-0.stderr.gz",
+    "length": 51,
+    "sha256": "d0f2bb0a758878171f47aca2c415910cd2bb55a06fb1b89e28d6e8ced2d21477"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-native200.json",
+    "retained": "asm198x-conditional-context-native200.json.gz",
+    "length": 207738,
+    "sha256": "54044373816513ed35af6ff233a9eb2bc73f34f2ed6929b16e11ed7a29fb9cfe"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-checked-node.log",
+    "retained": "asm198x-conditional-context-checked-node.log.gz",
+    "length": 9384,
+    "sha256": "d1c2847c71001b69f6c4d7f61f26af8605716558b0f58b5a6f7e536fe6ab044c"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-size-native.json",
+    "retained": "asm198x-conditional-context-size-native.json.gz",
+    "length": 3439,
+    "sha256": "88cf69aeb1d8b07f09a8f138e14129c15bde1730d8fd82ef4337125430d4a7ea"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-span-green.log",
+    "retained": "asm198x-conditional-context-span-green.log.gz",
+    "length": 513,
+    "sha256": "c92af26b0cc6603012173904ee360f974da7b44b57dae6826a662c2d4c1a4cb1"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-clippy.log",
+    "retained": "asm198x-conditional-context-clippy.log.gz",
+    "length": 1353,
+    "sha256": "cea2c0f28c5ba6e6239a8503ed28727432638a84ccfc51e09da54c18c5c7bdf8"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-replay-checked.py",
+    "retained": "asm198x-conditional-context-replay-checked.py.gz",
+    "length": 2581,
+    "sha256": "da6b3bc66155df4f32b26724adc9c6951b6fa8d0c3dc0698519308e56e029fad"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-build.log",
+    "retained": "asm198x-conditional-context-final-build.log.gz",
+    "length": 185,
+    "sha256": "e711616b28cc8e2efaf0d1d4958e6f240f690e5d0ee9314bf90eaf0eaf9be6fc"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-focused.log",
+    "retained": "asm198x-conditional-context-focused.log.gz",
+    "length": 711,
+    "sha256": "75ac57c0e3459d73dd3110d8a5143cf72e123cbe7dd9db47f965b14007fccf4f"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-node.log",
+    "retained": "asm198x-conditional-context-final-node.log.gz",
+    "length": 9372,
+    "sha256": "03e692c66bb022f9db3d1a026b106e5fb3bfc0613a961fc6e42b89db5f0732be"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-after.json",
+    "retained": "asm198x-conditional-context-after.json.gz",
+    "length": 64028,
+    "sha256": "690cdc95bdbb50381133e69350d6562728c7fc91f36ec73a808b99ea00a10356"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-generated-before.json",
+    "retained": "asm198x-conditional-context-generated-before.json.gz",
+    "length": 82754,
+    "sha256": "7f7186d7873efe7c65640bc391eba6c404efe6f0242c495e2e212b48c6ac784b"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-span-red.log",
+    "retained": "asm198x-conditional-context-span-red.log.gz",
+    "length": 1405,
+    "sha256": "1543d6e9dc41badb24ed50a9864eaf45bace93560f82ed37cbb32f2252934710"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-qualified-replay.log",
+    "retained": "asm198x-conditional-context-qualified-replay.log.gz",
+    "length": 608,
+    "sha256": "d3d70e87743f7c86daea2ddcec6f75bd8384410588e65607ce1d8d941f738a3e"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-checked-full.log",
+    "retained": "asm198x-conditional-context-checked-full.log.gz",
+    "length": 70206,
+    "sha256": "35ea184bc68f1872c94a58041bd9b5567ff6b572d3545bfdc572ccda76422f7e"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-incomplete-full.log",
+    "retained": "asm198x-conditional-context-incomplete-full.log.gz",
+    "length": 63362,
+    "sha256": "cff2aece1a902646cb6629db6548ccc20670ad3a3af4bd05d9db5efad93ad43c"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-clippy.log",
+    "retained": "asm198x-conditional-context-final-clippy.log.gz",
+    "length": 288,
+    "sha256": "c35e683184cd6ed67e7c7e4ef5d4178a963601c5a6bad387937e8a9fdd3ada62"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-pr.md",
+    "retained": "asm198x-conditional-context-final-pr.md.gz",
+    "length": 1164,
+    "sha256": "7faaa74772afcc4059523edaa5e5a94ac1333e4b847be049833ff9dded55830b"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-checked-clippy.log",
+    "retained": "asm198x-conditional-context-checked-clippy.log.gz",
+    "length": 288,
+    "sha256": "4f297535de602c1088d200f3b19f93c63e25cea67da292890cc8de78de984992"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-pre-size-guard-full.log",
+    "retained": "asm198x-conditional-context-pre-size-guard-full.log.gz",
+    "length": 68181,
+    "sha256": "f7ac26f414a44e00c103f7260e840619e06a3c054a810ca74c826b53e1f97c4b"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-checked-build.log",
+    "retained": "asm198x-conditional-context-checked-build.log.gz",
+    "length": 185,
+    "sha256": "ee40edd1f594537ace8417e9f1df430c72ea74bad959a9e11b480f57085d2d9b"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-after.json",
+    "retained": "asm198x-conditional-context-final-after.json.gz",
+    "length": 81734,
+    "sha256": "11ff8d9c367b54f9dad7c08e1cc4e7a112fa32c62663c86221129dd1fd115e82"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-size-after.json",
+    "retained": "asm198x-conditional-context-size-after.json.gz",
+    "length": 1636,
+    "sha256": "352937881a4449b1a9bb5dcc207f696b64096488e75f752644f35ef8bdee007d"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-4510.log",
+    "retained": "asm198x-conditional-context-final-4510.log.gz",
+    "length": 157,
+    "sha256": "1c1ce04484a7e9b16a2a6407590c8b20213f5284ea8f1d1ffd12ec9500e391c3"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-fixture.log",
+    "retained": "asm198x-conditional-context-fixture.log.gz",
+    "length": 775,
+    "sha256": "abda6ffb8ed5d0cadccdcc5fa31f3713623091f7498ab6d1f22b286773378033"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-head",
+    "retained": "asm198x-conditional-context-final-head.gz",
+    "length": 41,
+    "sha256": "cd0d02596b75dd6dea826227119218d08ee352a8933f415d2ffb6740ce723398"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-build.log",
+    "retained": "asm198x-conditional-context-build.log.gz",
+    "length": 185,
+    "sha256": "0e067de00cceef850d670c5da393299da41f55e955113acbb2a811afad73b379"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-qualified-full.log",
+    "retained": "asm198x-conditional-context-qualified-full.log.gz",
+    "length": 152259,
+    "sha256": "51e1a44a747585e88e9fdf6e1994b3d9df81afdc401aff3b4c7aec24d4079f46"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-native185.json",
+    "retained": "asm198x-conditional-context-native185.json.gz",
+    "length": 193320,
+    "sha256": "98ebfbbd3b90a09cf017ca44917afe26b8a27af5b0f6886c3395ccffd7734d1c"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-checked-focused.log",
+    "retained": "asm198x-conditional-context-checked-focused.log.gz",
+    "length": 1169,
+    "sha256": "b530944bfef0263eb8ff82a69501147bfcba9ee1960f8c8b5b45cc42d8dcf6cd"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-qualified-clippy.log",
+    "retained": "asm198x-conditional-context-qualified-clippy.log.gz",
+    "length": 288,
+    "sha256": "ad669498fd0b8430819053d9e6719a8aa61701383ca9707a4a62a90a45b90177"
+  },
+  {
+    "source": "/private/tmp/asm198x-audit-conditional-context-candidates.py",
+    "retained": "asm198x-audit-conditional-context-candidates.py.gz",
+    "length": 14832,
+    "sha256": "9221413a2892c39a4bf8104dd2954248afe914a76175d361030bbf3eda312caf"
+  }
+]
