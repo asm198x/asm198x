@@ -25,7 +25,9 @@ def cases() -> dict[str, str]:
             else ""
         )
         source = (
-            prefix + "ALIAS=" + expression
+            prefix
+            + "ALIAS="
+            + expression
             + "\n.ifconst ALIAS\n.byte 7\n.else\n.byte 9\n.endif\n"
         )
         if name.startswith("forward"):

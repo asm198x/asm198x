@@ -1,0 +1,32 @@
+[
+  {
+    "source": "/private/tmp/asm198x-source-context-fmt.log",
+    "retained": "fmt.log.gz",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0
+  },
+  {
+    "source": "/private/tmp/asm198x-source-context-unit.log",
+    "retained": "unit.log.gz",
+    "sha256": "cc7e70b0c790ac7ee29f614c0b34a1436830f3bcc60cc9c8e932a250702a989b",
+    "size": 702
+  },
+  {
+    "source": "/private/tmp/asm198x-source-context-clippy.log",
+    "retained": "clippy.log.gz",
+    "sha256": "1cde62a2476401c9331863c0976027ce7f1b0152f74313f5c89ec17a0e0ea265",
+    "size": 287
+  },
+  {
+    "source": "/private/tmp/asm198x-source-context-tests.log",
+    "retained": "tests.log.gz",
+    "sha256": "0741b32b43f18dd379c13a5e6e55ad51cda0156f47dc9d827b817d10a7c680f7",
+    "size": 151968
+  },
+  {
+    "source": "/private/tmp/asm198x-source-context-node.log",
+    "retained": "node.log.gz",
+    "sha256": "71077876355a882ea59d642952b9d00e92553d7dc1f7bffae651afefd0421f5c",
+    "size": 9291
+  }
+]
