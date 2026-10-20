@@ -1,0 +1,218 @@
+{
+  "merge": {
+    "sha": "939da3f486d9c9a48a9e05d0c32518457fdf2a18",
+    "merged": true,
+    "message": "Pull Request successfully merged"
+  },
+  "cohorts": [
+    {
+      "head": "52a72ac0ba9cfa2ea92f4f610256e48ee43ee36e",
+      "checkout": "641d58b2b98c1bd74dc63877172a212df6e1cf3b",
+      "run_id": "39400559308",
+      "cargo_lock_sha256": "0ee4b612d610b2d581a5b32e1666f431bdfcf55b99cfaed65841aa48e369958a",
+      "reports": [
+        {
+          "target": "x86_64-unknown-linux-gnu",
+          "run_attempt": "1",
+          "report_sha256": "a9d194c911ca7e80b7f5632ad91312c381ef9da74e10e80273e8d9e5def6d7f2",
+          "archive_sha256": "f61fc9d5562567c95142361d3e873e28cdb1721cf381cd843945bd2b40a3e022",
+          "executable_sha256": "70efc89c55707d643ecceff61fca34c8cbc80af088bf0dc515d186afffa7c423",
+          "cases": 89,
+          "cohort": "ca65_string_bytes",
+          "cohort_cases": 287,
+          "cohort_runs": 1109,
+          "negative_controls": 2
+        },
+        {
+          "target": "x86_64-apple-darwin",
+          "run_attempt": "1",
+          "report_sha256": "c77d6e6a69a54d7ad23727d80d96ec47db07493ef8b8064f34d3525a6f8c5cee",
+          "archive_sha256": "298434faa0189df1cc413b5ad08da78219d06901825bcd7635f564ca53a4152e",
+          "executable_sha256": "6f4405fab969ee57b3021c2f58534c802e49f16f83d4c89709f1b54dfcc40e3c",
+          "cases": 89,
+          "cohort": "ca65_string_bytes",
+          "cohort_cases": 287,
+          "cohort_runs": 1109,
+          "negative_controls": 2
+        },
+        {
+          "target": "aarch64-apple-darwin",
+          "run_attempt": "1",
+          "report_sha256": "76ff9b0116bc42d365d9ceff5cde2f6a44bc11aead74e0811eb1ca411eae61bd",
+          "archive_sha256": "9d6c33d869108dec195ef69eba6aa1b413c327844ebbbf505d59749f07f8184c",
+          "executable_sha256": "c47a14b7886f8d6913c7dac9bb8dc49c01a341d5ff3f1e1f9beeda1c85d9b527",
+          "cases": 89,
+          "cohort": "ca65_string_bytes",
+          "cohort_cases": 287,
+          "cohort_runs": 1109,
+          "negative_controls": 2
+        },
+        {
+          "target": "aarch64-unknown-linux-gnu",
+          "run_attempt": "1",
+          "report_sha256": "e87afe91700ce0d5d3f7e13eab1cb2edd5eb10528553af2eb1f37cd509334172",
+          "archive_sha256": "bccd5ce157662a671d810a15e21f72d2e2cef2690268a71a8ca16fff31dabb72",
+          "executable_sha256": "e46f07efe97e49a68ce15a6e11b2658870342fd4e0c42a7f0a0333f3d300ed9b",
+          "cases": 89,
+          "cohort": "ca65_string_bytes",
+          "cohort_cases": 287,
+          "cohort_runs": 1109,
+          "negative_controls": 2
+        },
+        {
+          "target": "x86_64-pc-windows-msvc",
+          "run_attempt": "1",
+          "report_sha256": "fe5f0dc16a61c43612e5c1cbed72bae1f59a684f9430161a3cff38d1b9292e84",
+          "archive_sha256": "52fc0e58e0cb88d0fdc7ff18632f72fa7dd27d351bac830ee3e6da1cf6bb8db6",
+          "executable_sha256": "02b951d3c30e2df1ef88af4fda543523653efd48c712b3325731d3d9c067c089",
+          "cases": 89,
+          "cohort": "ca65_string_bytes",
+          "cohort_cases": 287,
+          "cohort_runs": 1109,
+          "negative_controls": 2
+        }
+      ]
+    },
+    {
+      "head": "52a72ac0ba9cfa2ea92f4f610256e48ee43ee36e",
+      "checkout": "641d58b2b98c1bd74dc63877172a212df6e1cf3b",
+      "run_id": "39400559308",
+      "cargo_lock_sha256": "0ee4b612d610b2d581a5b32e1666f431bdfcf55b99cfaed65841aa48e369958a",
+      "reports": [
+        {
+          "target": "x86_64-unknown-linux-gnu",
+          "run_attempt": "1",
+          "report_sha256": "a9d194c911ca7e80b7f5632ad91312c381ef9da74e10e80273e8d9e5def6d7f2",
+          "archive_sha256": "f61fc9d5562567c95142361d3e873e28cdb1721cf381cd843945bd2b40a3e022",
+          "executable_sha256": "70efc89c55707d643ecceff61fca34c8cbc80af088bf0dc515d186afffa7c423",
+          "cases": 89,
+          "cohort": "ca65_string_consumers",
+          "cohort_cases": 132,
+          "cohort_runs": 444,
+          "negative_controls": 2
+        },
+        {
+          "target": "x86_64-apple-darwin",
+          "run_attempt": "1",
+          "report_sha256": "c77d6e6a69a54d7ad23727d80d96ec47db07493ef8b8064f34d3525a6f8c5cee",
+          "archive_sha256": "298434faa0189df1cc413b5ad08da78219d06901825bcd7635f564ca53a4152e",
+          "executable_sha256": "6f4405fab969ee57b3021c2f58534c802e49f16f83d4c89709f1b54dfcc40e3c",
+          "cases": 89,
+          "cohort": "ca65_string_consumers",
+          "cohort_cases": 132,
+          "cohort_runs": 444,
+          "negative_controls": 2
+        },
+        {
+          "target": "aarch64-apple-darwin",
+          "run_attempt": "1",
+          "report_sha256": "76ff9b0116bc42d365d9ceff5cde2f6a44bc11aead74e0811eb1ca411eae61bd",
+          "archive_sha256": "9d6c33d869108dec195ef69eba6aa1b413c327844ebbbf505d59749f07f8184c",
+          "executable_sha256": "c47a14b7886f8d6913c7dac9bb8dc49c01a341d5ff3f1e1f9beeda1c85d9b527",
+          "cases": 89,
+          "cohort": "ca65_string_consumers",
+          "cohort_cases": 132,
+          "cohort_runs": 444,
+          "negative_controls": 2
+        },
+        {
+          "target": "aarch64-unknown-linux-gnu",
+          "run_attempt": "1",
+          "report_sha256": "e87afe91700ce0d5d3f7e13eab1cb2edd5eb10528553af2eb1f37cd509334172",
+          "archive_sha256": "bccd5ce157662a671d810a15e21f72d2e2cef2690268a71a8ca16fff31dabb72",
+          "executable_sha256": "e46f07efe97e49a68ce15a6e11b2658870342fd4e0c42a7f0a0333f3d300ed9b",
+          "cases": 89,
+          "cohort": "ca65_string_consumers",
+          "cohort_cases": 132,
+          "cohort_runs": 444,
+          "negative_controls": 2
+        },
+        {
+          "target": "x86_64-pc-windows-msvc",
+          "run_attempt": "1",
+          "report_sha256": "fe5f0dc16a61c43612e5c1cbed72bae1f59a684f9430161a3cff38d1b9292e84",
+          "archive_sha256": "52fc0e58e0cb88d0fdc7ff18632f72fa7dd27d351bac830ee3e6da1cf6bb8db6",
+          "executable_sha256": "02b951d3c30e2df1ef88af4fda543523653efd48c712b3325731d3d9c067c089",
+          "cases": 89,
+          "cohort": "ca65_string_consumers",
+          "cohort_cases": 132,
+          "cohort_runs": 444,
+          "negative_controls": 2
+        }
+      ]
+    },
+    {
+      "head": "52a72ac0ba9cfa2ea92f4f610256e48ee43ee36e",
+      "checkout": "641d58b2b98c1bd74dc63877172a212df6e1cf3b",
+      "run_id": "39400559308",
+      "cargo_lock_sha256": "0ee4b612d610b2d581a5b32e1666f431bdfcf55b99cfaed65841aa48e369958a",
+      "reports": [
+        {
+          "target": "x86_64-unknown-linux-gnu",
+          "run_attempt": "1",
+          "report_sha256": "a9d194c911ca7e80b7f5632ad91312c381ef9da74e10e80273e8d9e5def6d7f2",
+          "archive_sha256": "f61fc9d5562567c95142361d3e873e28cdb1721cf381cd843945bd2b40a3e022",
+          "executable_sha256": "70efc89c55707d643ecceff61fca34c8cbc80af088bf0dc515d186afffa7c423",
+          "cases": 89,
+          "cohort": "ca65_flat_string_bytes",
+          "cohort_cases": 574,
+          "cohort_runs": 2218,
+          "negative_controls": 2
+        },
+        {
+          "target": "x86_64-apple-darwin",
+          "run_attempt": "1",
+          "report_sha256": "c77d6e6a69a54d7ad23727d80d96ec47db07493ef8b8064f34d3525a6f8c5cee",
+          "archive_sha256": "298434faa0189df1cc413b5ad08da78219d06901825bcd7635f564ca53a4152e",
+          "executable_sha256": "6f4405fab969ee57b3021c2f58534c802e49f16f83d4c89709f1b54dfcc40e3c",
+          "cases": 89,
+          "cohort": "ca65_flat_string_bytes",
+          "cohort_cases": 574,
+          "cohort_runs": 2218,
+          "negative_controls": 2
+        },
+        {
+          "target": "aarch64-apple-darwin",
+          "run_attempt": "1",
+          "report_sha256": "76ff9b0116bc42d365d9ceff5cde2f6a44bc11aead74e0811eb1ca411eae61bd",
+          "archive_sha256": "9d6c33d869108dec195ef69eba6aa1b413c327844ebbbf505d59749f07f8184c",
+          "executable_sha256": "c47a14b7886f8d6913c7dac9bb8dc49c01a341d5ff3f1e1f9beeda1c85d9b527",
+          "cases": 89,
+          "cohort": "ca65_flat_string_bytes",
+          "cohort_cases": 574,
+          "cohort_runs": 2218,
+          "negative_controls": 2
+        },
+        {
+          "target": "aarch64-unknown-linux-gnu",
+          "run_attempt": "1",
+          "report_sha256": "e87afe91700ce0d5d3f7e13eab1cb2edd5eb10528553af2eb1f37cd509334172",
+          "archive_sha256": "bccd5ce157662a671d810a15e21f72d2e2cef2690268a71a8ca16fff31dabb72",
+          "executable_sha256": "e46f07efe97e49a68ce15a6e11b2658870342fd4e0c42a7f0a0333f3d300ed9b",
+          "cases": 89,
+          "cohort": "ca65_flat_string_bytes",
+          "cohort_cases": 574,
+          "cohort_runs": 2218,
+          "negative_controls": 2
+        },
+        {
+          "target": "x86_64-pc-windows-msvc",
+          "run_attempt": "1",
+          "report_sha256": "fe5f0dc16a61c43612e5c1cbed72bae1f59a684f9430161a3cff38d1b9292e84",
+          "archive_sha256": "52fc0e58e0cb88d0fdc7ff18632f72fa7dd27d351bac830ee3e6da1cf6bb8db6",
+          "executable_sha256": "02b951d3c30e2df1ef88af4fda543523653efd48c712b3325731d3d9c067c089",
+          "cases": 89,
+          "cohort": "ca65_flat_string_bytes",
+          "cohort_cases": 574,
+          "cohort_runs": 2218,
+          "negative_controls": 2
+        }
+      ]
+    }
+  ],
+  "resolution": [
+    "https://github.com/asm198x/asm198x/issues/886#issuecomment-6288030262",
+    "https://github.com/asm198x/asm198x/issues/889#issuecomment-6288030943",
+    "https://github.com/asm198x/asm198x/issues/890#issuecomment-6288031574"
+  ]
+}

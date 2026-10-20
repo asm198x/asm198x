@@ -3788,13 +3788,7 @@ fn parse_directive(
             }
             Ok(Kind::Bytes(out))
         }
-        "asciiz" => Ok(Kind::Bytes(parse_asciiz(
-            anons,
-            anchor,
-            &consts.0.strings,
-            rest,
-            line,
-        )?)),
+        "asciiz" => Ok(Kind::Bytes(parse_asciiz(&consts.0.strings, rest, line)?)),
         // The processor words. `.setcpu` takes a quoted name; the `.pNN`
         // shorthands are the name themselves.
         "cpu" => {
@@ -4066,18 +4060,17 @@ fn parse_data_list(
     Ok(out)
 }
 
-/// `.asciiz` list: like `.byte` with strings, but a single terminating `$00` is
-/// appended after the last item (ca65 emits one NUL for the whole directive).
+/// String operands followed by one terminating NUL for the whole directive.
 fn parse_asciiz(
-    anons: &AnonCtx,
-    anchor: &str,
     strings: &string_tokens::StringTokens,
     rest: &str,
     line: usize,
 ) -> Result<Vec<Expr>, AsmError> {
-    let mut out = parse_data_list(anons, anchor, strings, rest, line)?;
-    out.push(Expr::Num(0));
-    Ok(out)
+    Ok(strings
+        .asciiz(split_data_items(rest), line)?
+        .into_iter()
+        .map(|b| Expr::Num(i64::from(b)))
+        .collect())
 }
 
 fn parse_value_list(

@@ -97,13 +97,40 @@ fn verify_native_cases(fixture: &str, count: usize, accepted: usize, audits: &[(
         }
     }
     for case in excluded {
-        assert_eq!(case["audit"], "lifetime");
-        assert_eq!(case["issue"], 891);
+        match case["issue"].as_u64() {
+            Some(835 | 895) => {
+                assert!(matches!(
+                    case["audit"].as_str(),
+                    Some("literal" | "flat_literal")
+                ));
+                let name = case["name"].as_str().expect("excluded name");
+                if case["issue"] == 895 {
+                    assert_eq!(case["audit"], "flat_literal");
+                    assert!(
+                        ["_selected_", "_inactive_", "_zero_repeat_"]
+                            .iter()
+                            .any(|context| name.contains(context))
+                    );
+                } else {
+                    assert!(
+                        ["inactive_", "unused_macro_", "zero_repeat_"]
+                            .iter()
+                            .any(|context| name.contains(context))
+                    );
+                }
+            }
+            _ => {
+                assert_eq!(case["audit"], "lifetime");
+                assert_eq!(case["issue"], 891);
+            }
+        }
     }
     assert_eq!(
         excluded.len(),
         if audits.iter().any(|(name, _)| *name == "lifetime") {
             9
+        } else if audits.iter().any(|(name, _)| *name == "literal") {
+            294
         } else {
             0
         }
@@ -207,6 +234,15 @@ fn verify_native_cases(fixture: &str, count: usize, accepted: usize, audits: &[(
                 "{name}: handle in {output}"
             );
         }
+        if case["formatter_gap"].is_number() {
+            assert_eq!(case["formatter_gap"], 821);
+            assert_eq!(dialect, "huc6280");
+            assert!(
+                name.starts_with("huc6280_macro_body_")
+                    || name.starts_with("huc6280_unused_macro_")
+            );
+            continue;
+        }
         let formatted = run(&root, &["fmt", "--dialect", dialect, "input.s"]);
         assert!(formatted.status.success(), "{name}: {formatted:?}");
         assert!(
@@ -297,5 +333,28 @@ fn flat_ca65_readers_keep_native_byte_values_through_parsing() {
                 "../../../docs/plans/2026-10-20-ca65-string-token-provenance/flat-native.json"
             ),
         )],
+    );
+}
+
+#[test]
+fn literal_boundaries_and_asciiz_operand_types_match_native() {
+    verify_native_cases(
+        include_str!("fixtures/ca65-literal-boundaries.json"),
+        768,
+        477,
+        &[
+            (
+                "literal",
+                include_str!(
+                    "../../../docs/plans/2026-10-20-ca65-literal-boundaries/literal-boundary-native.json"
+                ),
+            ),
+            (
+                "flat_literal",
+                include_str!(
+                    "../../../docs/plans/2026-10-20-ca65-literal-boundaries/flat-native.json"
+                ),
+            ),
+        ],
     );
 }

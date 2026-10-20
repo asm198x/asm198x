@@ -382,7 +382,13 @@ impl FlatWalk for Walker {
                 },
             }));
         }
-        let op = if rest.is_empty() {
+        // String constructors stay authored syntax on the formatter path;
+        // their byte values and operand types are checked during assembly.
+        let syntax_asciiz = self.formatting
+            && split_first_word(rest.trim())
+                .0
+                .eq_ignore_ascii_case(".asciiz");
+        let op = if rest.is_empty() || syntax_asciiz {
             None
         } else {
             parse_op(prim, ext, rest, (&self.env, &self.strings), line)
@@ -703,8 +709,11 @@ fn parse_directive(
             Ok(Some(Operation::Bytes(out)))
         }
         "asciiz" => {
-            let mut out = byte_list(rest, strings, line)?;
-            out.push(Expr::Num(0));
+            let out = strings
+                .asciiz(split_data_items(rest), line)?
+                .into_iter()
+                .map(|b| Expr::Num(i64::from(b)))
+                .collect();
             Ok(Some(Operation::Bytes(out)))
         }
         "res" => parse_res(rest, env, line),

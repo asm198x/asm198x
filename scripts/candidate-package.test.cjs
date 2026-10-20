@@ -450,7 +450,7 @@ test('native selector-bound types are mandatory package evidence', () => {
   assert.equal(qualifies(complete.filter(r => r.name !== 'ca65_token_bound_types')), false);
 });
 
-for (const name of ['ca65_string_bytes', 'ca65_string_consumers', 'ca65_flat_string_bytes']) {
+for (const name of ['ca65_string_bytes', 'ca65_string_consumers', 'ca65_flat_string_bytes', 'ca65_literal_boundaries']) {
   test(name + ' native byte evidence cannot be omitted', () => {
     const complete = requiredCases.map(name => ({ name, status: 'pass' }));
     assert(qualifies(complete)); assert(requiredCases.includes(name));

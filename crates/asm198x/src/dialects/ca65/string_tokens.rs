@@ -105,7 +105,8 @@ impl StringTokens {
         line: usize,
     ) -> Result<Vec<u8>, AsmError> {
         if let Some(source) = arg.literal_spelling() {
-            return Ok(source.as_bytes()[1..source.len() - 1].to_vec());
+            return Self::literal_bytes(source, line)?
+                .ok_or_else(|| AsmError::new(line, format!("`{name}` takes a string here")));
         }
         if let text::Arg::Bare(source) = arg
             && Self::is_handle(source.trim())
@@ -120,10 +121,44 @@ impl StringTokens {
         if Self::is_handle(source) {
             return self.resolve(source, line).map(Some);
         }
-        Ok(source
-            .strip_prefix('"')
-            .and_then(|s| s.strip_suffix('"'))
-            .map(|s| s.as_bytes().to_vec()))
+        Self::literal_bytes(source, line)
+    }
+
+    fn literal_bytes(source: &str, line: usize) -> Result<Option<Vec<u8>>, AsmError> {
+        let Some(rest) = source.strip_prefix('"') else {
+            return Ok(None);
+        };
+        let Some(end) = rest.find('"') else {
+            return Err(AsmError::new(line, "unterminated string literal"));
+        };
+        if end + 1 != rest.len() {
+            return Err(AsmError::new(
+                line,
+                "unexpected tokens after string literal",
+            ));
+        }
+        Ok(Some(rest.as_bytes()[..end].to_vec()))
+    }
+
+    pub(crate) fn asciiz<'a>(
+        &self,
+        items: impl IntoIterator<Item = &'a str>,
+        line: usize,
+    ) -> Result<Vec<u8>, AsmError> {
+        let mut out = Vec::new();
+        let mut has_item = false;
+        for item in items {
+            let bytes = self
+                .data(item, line)?
+                .ok_or_else(|| AsmError::new(line, "`.asciiz` requires string operands"))?;
+            has_item = true;
+            out.extend(bytes);
+        }
+        if !has_item {
+            return Err(AsmError::new(line, "`.asciiz` requires string operands"));
+        }
+        out.push(0);
+        Ok(out)
     }
 
     pub(crate) fn error(&self, mut error: AsmError) -> AsmError {

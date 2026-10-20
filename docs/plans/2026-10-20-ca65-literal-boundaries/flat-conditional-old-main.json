@@ -1,0 +1,8 @@
+{
+  "binary": "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+  "source": ".setcpu \"65816\"\n.byte 6\n.if 1\n.byte \"a\"\n.endif\n.byte 7\n",
+  "exit": 1,
+  "stdout": "",
+  "stderr": "asm198x: input.s:3: error: unsupported directive `.if`\n",
+  "native_hex": "066107"
+}
