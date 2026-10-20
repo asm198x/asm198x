@@ -52,6 +52,12 @@ def cases() -> dict[str, str]:
             "explicit_outer_alias": "LEFT: .byte 0\nRIGHT: .byte 0\nALIAS=RIGHT-LEFT\n.scope INNER\n.ifconst ::ALIAS\n.byte 7\n.else\n.byte 9\n.endif\n.endscope\n",
         }
     )
+    for start in ["CODE", "DATA"]:
+        for finish in ["CODE", "DATA"]:
+            bodies[f"pc_{start}_{finish}"] = (
+                f'.segment "{start}"\nALIAS=*\n.byte 0\n.segment "{finish}"\n'
+                "TARGET: .byte 0\n.ifconst TARGET-ALIAS\n.byte 7\n.else\n.byte 9\n.endif\n"
+            )
     out = {}
     for kind, body in bodies.items():
         for context in ["direct", "included", "macro", "scope"]:
@@ -73,7 +79,7 @@ def cases() -> dict[str, str]:
     fan = "LEFT: .byte 0\nRIGHT: .byte 0\nNAME_0=RIGHT-LEFT\n"
     fan += "".join(f"NAME_{i}=NAME_{i - 1}+NAME_{i - 1}\n" for i in range(1, 17))
     out["shared_graph"] = fan + ".ifconst NAME_16\n.byte 7\n.else\n.byte 9\n.endif\n"
-    assert len(out) == 298
+    assert len(out) == 314
     return out
 
 
