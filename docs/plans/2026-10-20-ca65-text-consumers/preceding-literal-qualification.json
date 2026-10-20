@@ -1,0 +1,79 @@
+{
+  "merge": {
+    "sha": "f24229f87a60efa915d4da0c98fd9745edf08568",
+    "merged": true,
+    "message": "Pull Request successfully merged"
+  },
+  "summary": {
+    "head": "111b89a989147b961a23528c0b9567fe5cda79c9",
+    "checkout": "7eb1d0c26fa3022adc78ab65e863b626ca9e6ed0",
+    "run_id": "39403512713",
+    "cargo_lock_sha256": "0ee4b612d610b2d581a5b32e1666f431bdfcf55b99cfaed65841aa48e369958a",
+    "reports": [
+      {
+        "target": "x86_64-unknown-linux-gnu",
+        "run_attempt": "1",
+        "report_sha256": "bcbe4a13ddf738218e8096aad9e865e97d60776e8773bbdcffda1338406508d0",
+        "archive_sha256": "c993e9b81c65b31d6abce822556cd19beb2f978fa1545def7caebf3878400e3b",
+        "executable_sha256": "2ee70befffba4b66b68e5e845c655ed98bd6ecc5044d9104e4d1bfeae65ab4e0",
+        "cases": 90,
+        "cohort": "ca65_literal_boundaries",
+        "cohort_cases": 768,
+        "cohort_runs": 2016,
+        "negative_controls": 2
+      },
+      {
+        "target": "x86_64-apple-darwin",
+        "run_attempt": "1",
+        "report_sha256": "f64b68ea5748c1298e4ba2b9f9b9223bc8b0c30203eaa3d15d9293b53f6b9aa8",
+        "archive_sha256": "64ba6d4e413a6aba10e0b31a71a8ae5b8b3a37574f04e314d638f270989811f4",
+        "executable_sha256": "90e6aa927f23f9fd4b43dcf62e0f9f2a702711f08f6bde67268ecb1db26689b2",
+        "cases": 90,
+        "cohort": "ca65_literal_boundaries",
+        "cohort_cases": 768,
+        "cohort_runs": 2016,
+        "negative_controls": 2
+      },
+      {
+        "target": "aarch64-apple-darwin",
+        "run_attempt": "1",
+        "report_sha256": "d9b48cc50f052692e2fb7b44d70653e754786dd78aef38215ce5f3e884319620",
+        "archive_sha256": "5a0ca03269b8c68056d15cf4f29ecc97080711da2a4f97de40ed2ca404cf3ff8",
+        "executable_sha256": "bbe606d941d8f08ae32bbded507ded9e2c18b3c55571631214d25286018f2865",
+        "cases": 90,
+        "cohort": "ca65_literal_boundaries",
+        "cohort_cases": 768,
+        "cohort_runs": 2016,
+        "negative_controls": 2
+      },
+      {
+        "target": "aarch64-unknown-linux-gnu",
+        "run_attempt": "1",
+        "report_sha256": "849362b0e61a2d794cd922c161580a03805eeaf2a5e26834d6468db604d066d1",
+        "archive_sha256": "99a22f1b3d0582401f8769d4cd0fcde9de3089066573276e18784cccfb3f80a8",
+        "executable_sha256": "404a69a865a157ff8508f5a9400ccd045ace1111fd73b4245403f0035caa18d7",
+        "cases": 90,
+        "cohort": "ca65_literal_boundaries",
+        "cohort_cases": 768,
+        "cohort_runs": 2016,
+        "negative_controls": 2
+      },
+      {
+        "target": "x86_64-pc-windows-msvc",
+        "run_attempt": "1",
+        "report_sha256": "dbe3bcae7d79136e9dcdfa5052d210c00e47ec9e63703e7faefbb81d8f1b93cd",
+        "archive_sha256": "c8c09fd1368c0f818a8c0f058b7ae482e64de5372986b8b24008a70f271adb01",
+        "executable_sha256": "51d7886319289f2bf709e6e743d841ffb7f850a187e480c10852561425e17acd",
+        "cases": 90,
+        "cohort": "ca65_literal_boundaries",
+        "cohort_cases": 768,
+        "cohort_runs": 2016,
+        "negative_controls": 2
+      }
+    ]
+  },
+  "resolution": [
+    "https://github.com/asm198x/asm198x/issues/887#issuecomment-6288502147",
+    "https://github.com/asm198x/asm198x/issues/893#issuecomment-6288502715"
+  ]
+}
