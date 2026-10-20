@@ -1847,7 +1847,7 @@ impl text::TextSyntax for Ca65Text<'_> {
             }
             ".left" | ".right" => {
                 arity(args, 2, name, line)?;
-                let count = scope.number(&args[0], name, line)?.max(0) as usize;
+                let count = selector_bound(&args[0], scope, name, line)?.max(0) as usize;
                 let list = token_list(&args[1], name, line)?;
                 let all = tokens(list, self.token_target.unwrap_or(self.target));
                 let (from, to) = if lower == ".left" {
@@ -1886,8 +1886,8 @@ impl text::TextSyntax for Ca65Text<'_> {
             }
             ".mid" => {
                 arity(args, 3, name, line)?;
-                let start = scope.number(&args[0], name, line)?.max(0) as usize;
-                let count = scope.number(&args[1], name, line)?.max(0) as usize;
+                let start = selector_bound(&args[0], scope, name, line)?.max(0) as usize;
+                let count = selector_bound(&args[1], scope, name, line)?.max(0) as usize;
                 let list = token_list(&args[2], name, line)?;
                 let all = tokens(list, self.token_target.unwrap_or(self.target));
                 Folded::Bare(
@@ -2101,6 +2101,22 @@ fn token_value(token: &Token) -> String {
         TokenKind::Ident => token.text.to_string(),
         _ => String::new(),
     }
+}
+
+/// Selector positions need numeric expressions, not decoded string contents.
+fn selector_bound(
+    arg: &text::Arg,
+    scope: &text::Scope<'_>,
+    name: &str,
+    line: usize,
+) -> Result<i64, AsmError> {
+    if matches!(arg, text::Arg::Text(_)) {
+        return Err(AsmError::new(
+            line,
+            format!("`{name}` needs a numeric bound, not a string"),
+        ));
+    }
+    scope.number(arg, name, line)
 }
 
 /// The contents of a `{…}` token list, or a refusal naming what was wanted.
