@@ -1,0 +1,36 @@
+{
+  "commit": "6385342e512bf9696b9541e9e24e4d973a575daa",
+  "sha256": "721454a8f7825843413ff88525be1e6a02fa12898d65a0b33b304926156ce7cd",
+  "cases": [
+    {
+      "name": "65816",
+      "argv": [
+        "/private/tmp/asm198x-character-operands-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":1,\"line\":4,\"col\":0,\"expansion_frames\":[],\"path\":\"/private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-flat-macro-diagnostic-baseline-ajuizse9/broken.inc\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"value 256 does not fit in a byte\",\"fix\":null}]\n",
+      "stderr": ""
+    },
+    {
+      "name": "huc6280",
+      "argv": [
+        "/private/tmp/asm198x-character-operands-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":1,\"line\":4,\"col\":0,\"expansion_frames\":[],\"path\":\"/private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-flat-macro-diagnostic-baseline-ajuizse9/broken.inc\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"value 256 does not fit in a byte\",\"fix\":null}]\n",
+      "stderr": ""
+    }
+  ]
+}

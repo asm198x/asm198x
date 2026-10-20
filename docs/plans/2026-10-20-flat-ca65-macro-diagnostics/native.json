@@ -1,0 +1,77 @@
+{
+  "tools": {
+    "ca65": {
+      "path": "/opt/homebrew/bin/ca65",
+      "sha256": "1a57997819fd98814e4601b5160df589e7a1a24e1888a80fee51ae450d8fd0ea",
+      "version": {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "--version"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hbh3_vlg",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "ca65 V2.18 - N/A\n"
+      }
+    },
+    "ld65": {
+      "path": "/opt/homebrew/bin/ld65",
+      "sha256": "36bb196207a6b2c90a4aa991b419d6113885303951b14b60b455f51c777b3339",
+      "version": {
+        "argv": [
+          "/opt/homebrew/bin/ld65",
+          "--version"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hbh3_vlg",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "ld65 V2.18 - N/A\n"
+      }
+    }
+  },
+  "files": {
+    "broken.inc": ".macro emit operand\n.byte operand\n.endmacro\nemit 256\n"
+  },
+  "cases": [
+    {
+      "name": "65816",
+      "source": ".setcpu \"65816\"\n.org $1000\n.include \"broken.inc\"\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hbh3_vlg",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "broken.inc(4): Error: Range error (256 not in [0..255])\nbroken.inc(2): Note: Macro was defined here\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "huc6280",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.include \"broken.inc\"\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-hbh3_vlg",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "broken.inc(4): Error: Range error (256 not in [0..255])\nbroken.inc(2): Note: Macro was defined here\n"
+        }
+      ],
+      "native_hex": null
+    }
+  ]
+}
