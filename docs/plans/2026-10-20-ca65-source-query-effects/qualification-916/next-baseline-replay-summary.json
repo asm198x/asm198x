@@ -1,0 +1,211 @@
+[
+  {
+    "label": "query-original",
+    "facts": "docs/plans/2026-10-20-ca65-source-query-effects/native.json",
+    "baseline": "/private/tmp/asm198x-query-admission-producer/query-original-after.json",
+    "cases": 56,
+    "before_matches": 35,
+    "after_matches": 35,
+    "lost_matches": []
+  },
+  {
+    "label": "query-extended",
+    "facts": "docs/plans/2026-10-20-ca65-source-query-effects/extended-native.json",
+    "baseline": "/private/tmp/asm198x-query-admission-producer/query-extended-after.json",
+    "cases": 128,
+    "before_matches": 62,
+    "after_matches": 62,
+    "lost_matches": []
+  },
+  {
+    "label": "alias",
+    "facts": "docs/plans/2026-10-20-ca65-source-query-effects/alias-native.json",
+    "baseline": "/private/tmp/asm198x-query-admission-producer/alias-after.json",
+    "cases": 9,
+    "before_matches": 9,
+    "after_matches": 9,
+    "lost_matches": []
+  },
+  {
+    "label": "source-constancy",
+    "facts": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-native.json",
+    "baseline": "/private/tmp/asm198x-query-admission-producer/source-constancy-after.json",
+    "cases": 314,
+    "before_matches": 314,
+    "after_matches": 314,
+    "lost_matches": []
+  },
+  {
+    "label": "scope-native-phase-probes",
+    "facts": "docs/plans/2026-10-19-ca65-scope-binding/native-phase-probes.json",
+    "baseline": "/private/tmp/asm198x-query-admission-producer/scope-native-phase-probes-after.json",
+    "cases": 106,
+    "before_matches": 98,
+    "after_matches": 98,
+    "lost_matches": []
+  },
+  {
+    "label": "scope-native-completed-phase-probes",
+    "facts": "docs/plans/2026-10-19-ca65-scope-binding/native-completed-phase-probes.json",
+    "baseline": "/private/tmp/asm198x-query-admission-producer/scope-native-completed-phase-probes-after.json",
+    "cases": 105,
+    "before_matches": 97,
+    "after_matches": 97,
+    "lost_matches": []
+  },
+  {
+    "label": "scope-native-width-probes",
+    "facts": "docs/plans/2026-10-19-ca65-scope-binding/native-width-probes.json",
+    "baseline": "/private/tmp/asm198x-query-admission-producer/scope-native-width-probes-after.json",
+    "cases": 144,
+    "before_matches": 144,
+    "after_matches": 144,
+    "lost_matches": []
+  },
+  {
+    "label": "scope-deferred-followups-native",
+    "facts": "docs/plans/2026-10-19-ca65-scope-binding/deferred-followups-native.json",
+    "baseline": "/private/tmp/asm198x-query-admission-producer/scope-deferred-followups-native-after.json",
+    "cases": 22,
+    "before_matches": 12,
+    "after_matches": 12,
+    "lost_matches": []
+  },
+  {
+    "label": "scope-native-query-probes",
+    "facts": "docs/plans/2026-10-19-ca65-scope-binding/native-query-probes.json",
+    "baseline": "/private/tmp/asm198x-query-admission-producer/scope-native-query-probes-after.json",
+    "cases": 35,
+    "before_matches": 33,
+    "after_matches": 33,
+    "lost_matches": []
+  },
+  {
+    "label": "scope-native-stream-probes",
+    "facts": "docs/plans/2026-10-19-ca65-scope-binding/native-stream-probes.json",
+    "baseline": "/private/tmp/asm198x-query-admission-producer/scope-native-stream-probes-after.json",
+    "cases": 6,
+    "before_matches": 6,
+    "after_matches": 6,
+    "lost_matches": []
+  },
+  {
+    "label": "scope-native-negative-memory-probes",
+    "facts": "docs/plans/2026-10-19-ca65-scope-binding/native-negative-memory-probes.json",
+    "baseline": "/private/tmp/asm198x-query-admission-producer/scope-native-negative-memory-probes-after.json",
+    "cases": 28,
+    "before_matches": 28,
+    "after_matches": 28,
+    "lost_matches": []
+  },
+  {
+    "label": "strings-consumer-native",
+    "facts": "docs/plans/2026-10-20-ca65-string-token-provenance/consumer-native.json",
+    "baseline": "/private/tmp/asm198x-query-admission-producer/strings-consumer-native-after.json",
+    "cases": 69,
+    "before_matches": 69,
+    "after_matches": 69,
+    "lost_matches": []
+  },
+  {
+    "label": "strings-guard-native",
+    "facts": "docs/plans/2026-10-20-ca65-string-token-provenance/guard-native.json",
+    "baseline": "/private/tmp/asm198x-query-admission-producer/strings-guard-native-after.json",
+    "cases": 6,
+    "before_matches": 4,
+    "after_matches": 4,
+    "lost_matches": []
+  },
+  {
+    "label": "strings-lifetime-native",
+    "facts": "docs/plans/2026-10-20-ca65-string-token-provenance/lifetime-native.json",
+    "baseline": "/private/tmp/asm198x-query-admission-producer/strings-lifetime-native-after.json",
+    "cases": 36,
+    "before_matches": 27,
+    "after_matches": 27,
+    "lost_matches": []
+  },
+  {
+    "label": "strings-numeric-string-arity-native",
+    "facts": "docs/plans/2026-10-20-ca65-string-token-provenance/numeric-string-arity-native.json",
+    "baseline": "/private/tmp/asm198x-query-admission-producer/strings-numeric-string-arity-native-after.json",
+    "cases": 26,
+    "before_matches": 26,
+    "after_matches": 26,
+    "lost_matches": []
+  },
+  {
+    "label": "strings-index-scope-native",
+    "facts": "docs/plans/2026-10-20-ca65-string-token-provenance/index-scope-native.json",
+    "baseline": "/private/tmp/asm198x-query-admission-producer/strings-index-scope-native-after.json",
+    "cases": 4,
+    "before_matches": 2,
+    "after_matches": 2,
+    "lost_matches": []
+  },
+  {
+    "label": "strings-text-consumer-native",
+    "facts": "docs/plans/2026-10-20-ca65-string-token-provenance/text-consumer-native.json",
+    "baseline": "/private/tmp/asm198x-query-admission-producer/strings-text-consumer-native-after.json",
+    "cases": 6,
+    "before_matches": 6,
+    "after_matches": 6,
+    "lost_matches": []
+  },
+  {
+    "label": "strings-flat-native",
+    "facts": "docs/plans/2026-10-20-ca65-string-token-provenance/flat-native.json",
+    "baseline": "/private/tmp/asm198x-query-admission-producer/strings-flat-native-after.json",
+    "cases": 574,
+    "before_matches": 574,
+    "after_matches": 574,
+    "lost_matches": []
+  },
+  {
+    "label": "text-native",
+    "facts": "docs/plans/2026-10-20-ca65-text-consumers/native.json",
+    "baseline": "/private/tmp/asm198x-query-admission-producer/text-native-after.json",
+    "cases": 396,
+    "before_matches": 396,
+    "after_matches": 396,
+    "lost_matches": []
+  },
+  {
+    "label": "text-assertion-native",
+    "facts": "docs/plans/2026-10-20-ca65-text-consumers/assertion-native.json",
+    "baseline": "/private/tmp/asm198x-query-admission-producer/text-assertion-native-after.json",
+    "cases": 124,
+    "before_matches": 124,
+    "after_matches": 124,
+    "lost_matches": []
+  },
+  {
+    "label": "query-admission",
+    "facts": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-native.json",
+    "baseline": "/private/tmp/asm198x-query-admission-producer/new-after.json",
+    "cases": 54,
+    "before_matches": 51,
+    "after_matches": 51,
+    "lost_matches": []
+  },
+  {
+    "label": "query-short-circuit",
+    "facts": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-prior-short-circuit-native.json",
+    "baseline": "/private/tmp/asm198x-query-admission-producer/short-circuit-after.json",
+    "cases": 18,
+    "before_matches": 18,
+    "after_matches": 18,
+    "lost_matches": [],
+    "original_facts": "/private/tmp/asm198x-query-admission-producer/short-circuit-native.json",
+    "facts_sha256": "0c67ea54a1cca643fab2765faf367606201ac1d54f7dc314b368ea65b72a5d00"
+  },
+  {
+    "label": "conditional-context",
+    "facts": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-native.json",
+    "baseline": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-before.json",
+    "cases": 200,
+    "before_matches": 125,
+    "after_matches": 197,
+    "lost_matches": []
+  }
+]
