@@ -1779,10 +1779,13 @@ impl text::TextSyntax for Ca65Text<'_> {
                 one(args)?;
                 let token = match &args[0] {
                     text::Arg::Bare(b) => b.trim(),
-                    text::Arg::Text(t) => {
+                    text::Arg::Text { .. } => {
+                        let spelling = args[0].literal_spelling().expect("matched quoted argument");
                         return Err(AsmError::new(
                             line,
-                            format!("`{name}` takes a name or a number, and `\"{t}\"` is a string"),
+                            format!(
+                                "`{name}` takes a name or a number, and `{spelling}` is a string"
+                            ),
                         ));
                     }
                 };
@@ -2110,7 +2113,7 @@ fn selector_bound(
     name: &str,
     line: usize,
 ) -> Result<i64, AsmError> {
-    if matches!(arg, text::Arg::Text(_)) {
+    if matches!(arg, text::Arg::Text { .. }) {
         return Err(AsmError::new(
             line,
             format!("`{name}` needs a numeric bound, not a string"),
@@ -2288,14 +2291,14 @@ fn format_one(
     // types': no flag pads on the right, and `-` pads on the left.
     if matches!(kind, 's' | 'c') {
         let body = match (kind, arg) {
-            ('s', text::Arg::Text(t)) => match spec.precision {
+            ('s', text::Arg::Text { cooked: t, .. }) => match spec.precision {
                 Some(n) => t.chars().take(n).collect(),
                 None => t.clone(),
             },
             ('s', text::Arg::Bare(b)) => {
                 return Err(refuse(&format!("`{b}` as `%s`: it is not a string")));
             }
-            (_, text::Arg::Text(t)) => {
+            (_, text::Arg::Text { cooked: t, .. }) => {
                 return Err(refuse(&format!("the string \"{t}\" as `%c`")));
             }
             _ => {
@@ -2319,7 +2322,7 @@ fn format_one(
         });
     }
 
-    if let text::Arg::Text(t) = arg {
+    if let text::Arg::Text { cooked: t, .. } = arg {
         return Err(refuse(&format!("the string \"{t}\" as `%{kind}`")));
     }
     let value = scope.number(arg, ".sprintf", line)?;

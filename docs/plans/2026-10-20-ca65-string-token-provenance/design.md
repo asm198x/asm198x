@@ -1,6 +1,6 @@
 # Preserve ca65 byte strings as source tokens
 
-Status: proposed; architecture agreement required before production changes.
+Status: approved by the user on 2026-10-20; private ca65 byte-token design.
 Scope: #886 and #887, then the quoted-string portion of #872.
 
 ## Evidence and old failure modes
