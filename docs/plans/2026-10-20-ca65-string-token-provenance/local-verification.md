@@ -1,63 +1,52 @@
 # Byte-string source qualification
 
-The clean branch starts at current main 47fc51643eb98ecdd5ef2f64cfc5035bee52997e.
-It preserves the independent npm workflow change already merged there.
+The branch starts at main 47fc51643eb98ecdd5ef2f64cfc5035bee52997e and preserves
+its independently merged npm workflow. The qualified producer is commit
+f825ab1dc45fbcb52bbb3c11f0eee93078328a9c, tree
+c49461c72978bc9cd4f6a4cbb659524a4bf13b51, CLI SHA-256
+0e54714f31de462a92115f0d3f19f9bc8d9bddcb2f4dc04d8be7b78c073ed14d.
+The version, lock hash and exact dialect source hashes are in clean-producer.json.
 
 The full workspace with Lua passes 1,619 tests, with 38 ignored. All 104 Node
 checks pass. Clippy over every workspace target with Lua, rustfmt, Ruff and
-generated documentation checks pass. The new three native fixture tests cover
-963 cases: 912 acceptances and 51 refusals. Their native byte comparisons,
-canonical/idempotent formatting, official Debug198x parsing, symbol/section
-round trips and preservation of four previous outputs on refusal all pass.
-Quoted authored markers remain literal bytes; injected bare markers are refused.
+generated documentation checks pass. The three required native fixtures contain
+993 cases: 991 match native and two preserve explicit #795 refusals. There are
+926 acceptances, 65 native refusals and two guarded legacy refusals. The cohorts
+execute 1,109/444/2,218 commands. Accepted cases check native bytes, canonical and
+idempotent formatting, official Debug198x parsing and symbol/section round trips;
+refusals preserve four previous outputs. Quoted authored markers remain literal
+bytes and injected bare markers are refused.
 
-The private store retains byte values through the source pre-pass. Byte output,
-string construction, format width/precision and numeric string inspection use
-native bytes. Text argument spelling is retained beside cooked text; other
-dialects keep their accessors. The linked reader owns one store; flat expansions
-transfer their private store to the walker before parsing. Shared expansion and
-numeric Expr remain unchanged. Numeric string-function calls captured inside
-braces remain tokens, as four new native controls require.
+The private store retains immutable byte values through source folding. Byte
+output, string construction, format width/precision and numeric string inspection
+use native bytes. Raw spelling remains beside cooked text. The linked reader
+owns its store; flat expansions transfer their private store to the walker.
+Shared expansion and numeric Expr stay unchanged. Captured numeric string calls
+remain tokens. Named indices stay refused under #795; literal arithmetic works.
+All 26 numeric-call arity controls match the preceding native behavior.
 
-The retained audits explicitly account for existing gaps: #887 has three raw
-malformed literal acceptances, #795 has the scoped numeric query, #872 retains
-255 quoted token-list admission differences, #891 retains nine unbraced macro
-argument refusals, and #892 retains five computed-quote textual-consumer gaps.
-The latter audit also compares diagnostic payloads, avoiding an exit/image-only
-false green. No new native mismatch is introduced by the byte-emission slice.
+The final local archive passes all 89 required cohorts. The retained preceding
+main executable fails exactly the three new cohorts. Wrong-byte controls fail
+exactly reference_bytes/determinism/structured_success, and corrupt archives fail
+SHA-256 validation. Complete final reports are retained as clean-package-*.json.gz.
+Archive creation used xz preset 0 after the default compression exceeded its
+60-second bound under local build load; qualification and controls are unchanged.
 
-Local archive controls, clean producer identity, fresh 4510 replay and actual
-five-host qualification remain required before merge. Exact source snapshots
-and logs in this directory distinguish earlier prototypes from that producer.
+The final fresh 4510 replay matches all 564 native/upstream bytes, retains all
+seven processes and fourteen streams, and rejects a changed-byte control. Its
+source pin is e11fb5c39371046ebe25485f984f644c5a0d65d3. The disposable work
+directory was removed and its absence verified. Complete report and streams are
+in clean-4510; its verifier checked the exact producer above.
 
-The clean producer f920ac1adb4c11572908107cbde53a83b17b428a has tree
-297bb22a53d0fcd2a4490d0c9b5344da4be5d9e0 and CLI SHA-256
-31dd8c0220a4d6efef8e1b3114da99ac3baf9be7b44fc09b00f908551e45dda2.
-The version result and exact source hashes are retained in clean-producer.json.
-All complete native audits reproduce the counts above with this executable.
+Complete native audits retain the remaining gaps: #887 has three raw malformed
+literal acceptances in the argument cohort, #795 retains scoped numeric queries,
+#872 has 255 quoted token-list admission differences, #891 has nine unbraced
+macro argument refusals, and #892 has five computed-quote textual-consumer gaps.
+Diagnostic payloads are compared as well as exit/image results. Every preceding
+native match remains a match; every newly admitted case matches native.
 
-Its local archive passes all 89 required cohorts. The three new cohorts execute
-1,109, 372 and 2,218 commands. Packaging the retained main executable fails
-exactly those three new cohorts. The wrong-byte control fails exactly
-reference_bytes/determinism/structured_success; corrupted archives fail SHA-256
-validation. Their complete reports are retained.
-
-The fresh 4510 replay matches all 564 native/upstream bytes, retains all seven
-processes and fourteen streams, and rejects a changed-byte control. The driver
-removed its disposable work directory; that removal was verified. Source pin
-and build identity remain in the retained complete replay report. Exact-head CI
-and all five actual packages with ten controls remain required before merge.
-
-The f920ac1a checkpoint is superseded: the additional named-index controls
-show it emits wrong images for two #795 query cases. Its prior archive reports
-cover the earlier fixture and cannot qualify the final source. The guard keeps
-those previously unsupported indices refused and admits only literal arithmetic.
-Final producer/package/replay evidence must be regenerated for the narrowed
-source. The unsafe checkpoint is retained in trial-named-index-producer.json.
-
-The narrowed source passes the full workspace/Lua suite again: 1,619 passed,
-38 ignored. All 104 Node checks and Clippy over every workspace target pass.
-The final required fixtures contain 993 cases: 991 match native and two keep
-explicit #795 refusals. There are 926 accepted cases, 65 native refusals and
-two guarded legacy refusals. The new cohorts run 1,109/444/2,218 commands.
-The 26 numeric-call arity controls preserve the preceding native behavior.
+The f920ac1a checkpoint is unsafe for two named-index cases and empty numeric
+calls. Its identity remains in trial-named-index-producer.json and its failing
+consumer package control is retained. It does not qualify this source. The
+final clean-* evidence above supersedes that checkpoint. Actual five-host
+package artifacts and exact-head CI remain required before merge.
