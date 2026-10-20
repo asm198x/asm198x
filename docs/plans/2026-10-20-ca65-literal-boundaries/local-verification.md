@@ -24,3 +24,14 @@ Both original byte-string worktrees have been removed. All unique audit commits
 remain on the verified remote audit branch; every duplicated prototype file was
 checked against retained shipping history before deletion. The cleanup manifest
 and #894 merge/package summaries are retained here.
+
+The clean producer is a670d830361bb32c02f65137cdfd1646f4877872, CLI SHA-256
+9733815d758de5aaacd86f318573ec0d154e04d26efd452b9fd3da4ae4cd7a46.
+Its complete native replays reproduce the trial outcomes. All 90 local archive
+cohorts pass; wrong-byte controls fail exactly reference_bytes/determinism/
+structured_success and corrupted archives fail SHA-256 validation. The fresh
+4510 replay matches all 564 bytes and fourteen streams, rejects a changed byte,
+and removes its disposable work directory. Final producer identity and all
+native/package/replay evidence are retained as clean-* files. Source/test/script
+content is unchanged by this evidence update. Actual five-host qualification and
+all exact-head CI remain required before merge.
