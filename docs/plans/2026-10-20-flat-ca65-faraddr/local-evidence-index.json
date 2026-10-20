@@ -1,0 +1,170 @@
+[
+  {
+    "source": "/private/tmp/asm198x-flat-data-producer/identity.json",
+    "retained": "clean-identity.json.gz",
+    "size": 295,
+    "sha256": "57a04581da09347e163b91d92317d7846f31ba982b1400864401b8bfd69eac01"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-data-producer/build.log",
+    "retained": "clean-build.log.gz",
+    "size": 185,
+    "sha256": "b04985ab0bb0daa98dbb4cdc4ff344f327727573e74ae31d5d7a503a89501a33"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-data-producer/context.json",
+    "retained": "clean-context.json.gz",
+    "size": 101231,
+    "sha256": "aa709b8b09c2ff036e2053ee94981167b2a585b33847dcfd72fa0288f8c9b032"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-data-producer/faraddr.json",
+    "retained": "clean-faraddr.json.gz",
+    "size": 63015,
+    "sha256": "5a3bbc057e5d7a408dbc02f14315ebf83c5fbe2f334585066998cf73c96136b5"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-data-local-package/report.json",
+    "retained": "archive.json.gz",
+    "size": 22349162,
+    "sha256": "fc2725def09f8da488a585ca1cf5ceefc18b3a108e75164b6907454cd9f5ca1f"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-data-local-package/wrong-bytes.json",
+    "retained": "wrong-bytes.json.gz",
+    "size": 22349957,
+    "sha256": "59da30e59c0f6b6734cd62e84a67599f789b610e3b11de73b579ec0e4c1044c8"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-data-local-package/corrupt-archive.json",
+    "retained": "corrupt-archive.json.gz",
+    "size": 172,
+    "sha256": "d293f944fdd29a56aeb5c4e9e44a8acd99fbbb3d9552a90cc9eb8aad1dc1d6d1"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-data-predecessor-package.json",
+    "retained": "predecessor-archive.json.gz",
+    "size": 21948721,
+    "sha256": "fce23ebcf05afcdcc57debd8e2a6b9c6bd10a10c83b128659949e27d71294de9"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-data-all-node.log",
+    "retained": "node.log.gz",
+    "size": 7974,
+    "sha256": "e13b1c75403c192780b873c53d0ba615e22f3d0d51ae8891b0d57d7f4c2ccc81"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-data-setup-node.log",
+    "retained": "setup-node.log.gz",
+    "size": 1247,
+    "sha256": "a196cf798f8c07870a0247da42fed368af161a169d9a9c7009277f530612123f"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-data-docs.log",
+    "retained": "docs.log.gz",
+    "size": 184,
+    "sha256": "d0fd4495f284c7701062ede417bfccd6c18a17d8f39d7a8e434e6e4affd14417"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-data-tests.log",
+    "retained": "tests-launch-failed.log.gz",
+    "size": 75928,
+    "sha256": "308fd5e9d522cfcfc0bb3d67e0d0fa083c2a705fe7df2ada491cd7751a922676"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-data-clean-4510/report.json",
+    "retained": "clean-4510/report.json.gz",
+    "size": 12596,
+    "sha256": "2eda113fd4487dd48f6610b74c193ff60d3114fde7e301750180a60ff4e62c5d"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-data-clean-4510/verification.json",
+    "retained": "clean-4510/verification.json.gz",
+    "size": 209,
+    "sha256": "5795b7b4440c835bd820a1acdeb4e0339900e7613497740ae80d7009541e25e1"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-data-clean-4510/logs/cc65-4510-opcodes--opcode-space-version-ld65.stdout",
+    "retained": "clean-4510/logs/cc65-4510-opcodes--opcode-space-version-ld65.stdout.gz",
+    "size": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-data-clean-4510/logs/build-assembler.stdout",
+    "retained": "clean-4510/logs/build-assembler.stdout.gz",
+    "size": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-data-clean-4510/logs/assembler-version.stderr",
+    "retained": "clean-4510/logs/assembler-version.stderr.gz",
+    "size": 16,
+    "sha256": "cd9267fb50974330b2596f8f7d386346ec0227b2e2b702cb761d363dfa13a8c2"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-data-clean-4510/logs/cc65-4510-opcodes--opcode-space-version-ca65.stderr",
+    "retained": "clean-4510/logs/cc65-4510-opcodes--opcode-space-version-ca65.stderr.gz",
+    "size": 17,
+    "sha256": "5c22de95322cb1d858e9690b5e3c6e83984c27c5120ff12c49f8dc9679ed2dbc"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-data-clean-4510/logs/cc65-4510-opcodes--opcode-space-reference-0.stdout",
+    "retained": "clean-4510/logs/cc65-4510-opcodes--opcode-space-reference-0.stdout.gz",
+    "size": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-data-clean-4510/logs/cc65-4510-opcodes--opcode-space-reference-0.stderr",
+    "retained": "clean-4510/logs/cc65-4510-opcodes--opcode-space-reference-0.stderr.gz",
+    "size": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-data-clean-4510/logs/cc65-4510-opcodes--opcode-space-version-ca65.stdout",
+    "retained": "clean-4510/logs/cc65-4510-opcodes--opcode-space-version-ca65.stdout.gz",
+    "size": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-data-clean-4510/logs/assembler-version.stdout",
+    "retained": "clean-4510/logs/assembler-version.stdout.gz",
+    "size": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-data-clean-4510/logs/cc65-4510-opcodes--opcode-space-version-ld65.stderr",
+    "retained": "clean-4510/logs/cc65-4510-opcodes--opcode-space-version-ld65.stderr.gz",
+    "size": 17,
+    "sha256": "acf0ea5dbac2ff34c3733f092c38a357dd02d80c0d1edf0e05e8a36b92b62445"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-data-clean-4510/logs/build-assembler.stderr",
+    "retained": "clean-4510/logs/build-assembler.stderr.gz",
+    "size": 1320,
+    "sha256": "72a086b7f7eae05eba4f07e3cea77b9a96bfb88baae3d620c10dac2859bc0d35"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-data-clean-4510/logs/cc65-4510-opcodes--opcode-space-assembler-0.stdout",
+    "retained": "clean-4510/logs/cc65-4510-opcodes--opcode-space-assembler-0.stdout.gz",
+    "size": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-data-clean-4510/logs/cc65-4510-opcodes--opcode-space-reference-1.stdout",
+    "retained": "clean-4510/logs/cc65-4510-opcodes--opcode-space-reference-1.stdout.gz",
+    "size": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-data-clean-4510/logs/cc65-4510-opcodes--opcode-space-reference-1.stderr",
+    "retained": "clean-4510/logs/cc65-4510-opcodes--opcode-space-reference-1.stderr.gz",
+    "size": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-data-clean-4510/logs/cc65-4510-opcodes--opcode-space-assembler-0.stderr",
+    "retained": "clean-4510/logs/cc65-4510-opcodes--opcode-space-assembler-0.stderr.gz",
+    "size": 51,
+    "sha256": "d0f2bb0a758878171f47aca2c415910cd2bb55a06fb1b89e28d6e8ced2d21477"
+  }
+]
