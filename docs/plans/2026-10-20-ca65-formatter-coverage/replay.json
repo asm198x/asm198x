@@ -1,0 +1,851 @@
+{
+  "producer": "3606d654387e72b3287cc039e7d3b55eca5fd756",
+  "cases": [
+    {
+      "fixture": "ca65-numeric-admission.json",
+      "name": "order_macro_end_called",
+      "closed_issue": "833",
+      "matches_native_roundtrip": true,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "ca65",
+            "input.s"
+          ],
+          "exit": 0,
+          "stdout": "        .macro stop\n        .end\n        .endmacro\n        stop\n        .byte <$100000000\n",
+          "stderr": "formatted input.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "ca65",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "        .macro stop\n        .end\n        .endmacro\n        stop\n        .byte <$100000000\n",
+          "stderr": "formatted formatted.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 0 byte(s) -> out.bin\n"
+        }
+      ]
+    },
+    {
+      "fixture": "ca65-numeric-admission.json",
+      "name": "order_macro_end_after",
+      "closed_issue": "833",
+      "matches_native_roundtrip": true,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "ca65",
+            "input.s"
+          ],
+          "exit": 0,
+          "stdout": "        .macro stop\n        .end\n        .endmacro\n        .end\n        .byte <$100000000\n",
+          "stderr": "formatted input.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "ca65",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "        .macro stop\n        .end\n        .endmacro\n        .end\n        .byte <$100000000\n",
+          "stderr": "formatted formatted.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 0 byte(s) -> out.bin\n"
+        }
+      ]
+    },
+    {
+      "fixture": "ca65-numeric-admission.json",
+      "name": "extra_lazy_include_argument",
+      "closed_issue": "834",
+      "matches_native_roundtrip": true,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "ca65",
+            "input.s"
+          ],
+          "exit": 0,
+          "stdout": "        .if 0\n        .include 3\n        .endif\n        .byte 7\n",
+          "stderr": "formatted input.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "ca65",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "        .if 0\n        .include 3\n        .endif\n        .byte 7\n",
+          "stderr": "formatted formatted.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 1 byte(s) -> out.bin\n"
+        }
+      ]
+    },
+    {
+      "fixture": "ca65-numeric-admission.json",
+      "name": "extra_lazy_computed_include",
+      "closed_issue": "834",
+      "matches_native_roundtrip": true,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "ca65",
+            "input.s"
+          ],
+          "exit": 0,
+          "stdout": "        .if 0\n        .include .sprintf(\"absent-%u.inc\",4294967299)\n        .endif\n        .byte 7\n",
+          "stderr": "formatted input.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "ca65",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "        .if 0\n        .include .sprintf(\"absent-%u.inc\",4294967299)\n        .endif\n        .byte 7\n",
+          "stderr": "formatted formatted.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 1 byte(s) -> out.bin\n"
+        }
+      ]
+    },
+    {
+      "fixture": "ca65-numeric-admission.json",
+      "name": "extra_unused_macro_end_format",
+      "closed_issue": "833",
+      "matches_native_roundtrip": true,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "ca65",
+            "input.s"
+          ],
+          "exit": 0,
+          "stdout": "        .macro finish\n        .end .sprintf(\"%bad\",0)\n        .endmacro\n        finish\n        .byte 8\n",
+          "stderr": "formatted input.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "ca65",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "        .macro finish\n        .end .sprintf(\"%bad\",0)\n        .endmacro\n        finish\n        .byte 8\n",
+          "stderr": "formatted formatted.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 0 byte(s) -> out.bin\n"
+        }
+      ]
+    },
+    {
+      "fixture": "ca65-repeat-end.json",
+      "name": "count_0",
+      "closed_issue": "833",
+      "matches_native_roundtrip": true,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "ca65",
+            "input.s"
+          ],
+          "exit": 0,
+          "stdout": "        .repeat 0\n        .end\n        .endrepeat\n        .byte 8\n",
+          "stderr": "formatted input.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "ca65",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "        .repeat 0\n        .end\n        .endrepeat\n        .byte 8\n",
+          "stderr": "formatted formatted.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 1 byte(s) -> out.bin\n"
+        }
+      ]
+    },
+    {
+      "fixture": "ca65-repeat-end.json",
+      "name": "count_1",
+      "closed_issue": "833",
+      "matches_native_roundtrip": true,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "ca65",
+            "input.s"
+          ],
+          "exit": 0,
+          "stdout": "        .repeat 1\n        .end\n        .endrepeat\n        .byte 8\n",
+          "stderr": "formatted input.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "ca65",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "        .repeat 1\n        .end\n        .endrepeat\n        .byte 8\n",
+          "stderr": "formatted formatted.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 0 byte(s) -> out.bin\n"
+        }
+      ]
+    },
+    {
+      "fixture": "ca65-repeat-end.json",
+      "name": "count_2",
+      "closed_issue": "833",
+      "matches_native_roundtrip": true,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "ca65",
+            "input.s"
+          ],
+          "exit": 0,
+          "stdout": "        .repeat 2\n        .end\n        .endrepeat\n        .byte 8\n",
+          "stderr": "formatted input.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "ca65",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "        .repeat 2\n        .end\n        .endrepeat\n        .byte 8\n",
+          "stderr": "formatted formatted.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 0 byte(s) -> out.bin\n"
+        }
+      ]
+    },
+    {
+      "fixture": "ca65-repeat-end.json",
+      "name": "count_1000000",
+      "closed_issue": "833",
+      "matches_native_roundtrip": true,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "ca65",
+            "input.s"
+          ],
+          "exit": 0,
+          "stdout": "        .repeat 1000000\n        .end\n        .endrepeat\n        .byte 8\n",
+          "stderr": "formatted input.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "ca65",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "        .repeat 1000000\n        .end\n        .endrepeat\n        .byte 8\n",
+          "stderr": "formatted formatted.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 0 byte(s) -> out.bin\n"
+        }
+      ]
+    },
+    {
+      "fixture": "ca65-repeat-end.json",
+      "name": "count_4294967295",
+      "closed_issue": "833",
+      "matches_native_roundtrip": true,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "ca65",
+            "input.s"
+          ],
+          "exit": 0,
+          "stdout": "        .repeat 4294967295\n        .end\n        .endrepeat\n        .byte 8\n",
+          "stderr": "formatted input.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "ca65",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "        .repeat 4294967295\n        .end\n        .endrepeat\n        .byte 8\n",
+          "stderr": "formatted formatted.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 0 byte(s) -> out.bin\n"
+        }
+      ]
+    },
+    {
+      "fixture": "ca65-repeat-end.json",
+      "name": "emitted_before_end",
+      "closed_issue": "833",
+      "matches_native_roundtrip": true,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "ca65",
+            "input.s"
+          ],
+          "exit": 0,
+          "stdout": "        .repeat 2\n        .byte 7\n        .end\n        .endrepeat\n        .byte 8\n",
+          "stderr": "formatted input.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "ca65",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "        .repeat 2\n        .byte 7\n        .end\n        .endrepeat\n        .byte 8\n",
+          "stderr": "formatted formatted.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 1 byte(s) -> out.bin\n"
+        }
+      ]
+    },
+    {
+      "fixture": "ca65-repeat-end.json",
+      "name": "nested_repeat",
+      "closed_issue": "833",
+      "matches_native_roundtrip": true,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "ca65",
+            "input.s"
+          ],
+          "exit": 0,
+          "stdout": "        .repeat 2\n        .repeat 3\n        .byte 7\n        .end\n        .endrepeat\n        .endrepeat\n        .byte 8\n",
+          "stderr": "formatted input.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "ca65",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "        .repeat 2\n        .repeat 3\n        .byte 7\n        .end\n        .endrepeat\n        .endrepeat\n        .byte 8\n",
+          "stderr": "formatted formatted.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 1 byte(s) -> out.bin\n"
+        }
+      ]
+    },
+    {
+      "fixture": "ca65-repeat-end.json",
+      "name": "macro_repeat",
+      "closed_issue": "833",
+      "matches_native_roundtrip": true,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "ca65",
+            "input.s"
+          ],
+          "exit": 0,
+          "stdout": "        .macro stop\n        .repeat 2\n        .byte 7\n        .end\n        .endrepeat\n        .endmacro\n        stop\n        .byte 8\n",
+          "stderr": "formatted input.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "ca65",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "        .macro stop\n        .repeat 2\n        .byte 7\n        .end\n        .endrepeat\n        .endmacro\n        stop\n        .byte 8\n",
+          "stderr": "formatted formatted.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 1 byte(s) -> out.bin\n"
+        }
+      ]
+    },
+    {
+      "fixture": "ca65-repeat-end.json",
+      "name": "deferred_oversized_include",
+      "closed_issue": "833",
+      "matches_native_roundtrip": true,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "ca65",
+            "input.s"
+          ],
+          "exit": 0,
+          "stdout": "        .repeat 2\n        .include \"oversized.inc\"\n        .end\n        .endrepeat\n        .byte 8\n",
+          "stderr": "formatted input.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "ca65",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "        .repeat 2\n        .include \"oversized.inc\"\n        .end\n        .endrepeat\n        .byte 8\n",
+          "stderr": "formatted formatted.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 0 byte(s) -> out.bin\n"
+        }
+      ]
+    },
+    {
+      "fixture": "ca65-repeat-end.json",
+      "name": "missing_include_after_end",
+      "closed_issue": "833",
+      "matches_native_roundtrip": true,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "ca65",
+            "input.s"
+          ],
+          "exit": 0,
+          "stdout": "        .repeat 2\n        .end\n        .include \"missing.inc\"\n        .endrepeat\n        .byte 8\n",
+          "stderr": "formatted input.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "ca65",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "        .repeat 2\n        .end\n        .include \"missing.inc\"\n        .endrepeat\n        .byte 8\n",
+          "stderr": "formatted formatted.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 0 byte(s) -> out.bin\n"
+        }
+      ]
+    },
+    {
+      "fixture": "ca65-repeat-end.json",
+      "name": "zero_repeat_missing_include",
+      "closed_issue": "833",
+      "matches_native_roundtrip": true,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "ca65",
+            "input.s"
+          ],
+          "exit": 0,
+          "stdout": "        .repeat 0\n        .include \"missing.inc\"\n        .end\n        .endrepeat\n        .byte 8\n",
+          "stderr": "formatted input.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "ca65",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "        .repeat 0\n        .include \"missing.inc\"\n        .end\n        .endrepeat\n        .byte 8\n",
+          "stderr": "formatted formatted.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 1 byte(s) -> out.bin\n"
+        }
+      ]
+    },
+    {
+      "fixture": "ca65-repeat-end.json",
+      "name": "conditional_false_end",
+      "closed_issue": "833",
+      "matches_native_roundtrip": true,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "ca65",
+            "input.s"
+          ],
+          "exit": 0,
+          "stdout": "        .repeat 2\n        .if 0\n        .end\n        .else\n        .byte 7\n        .endif\n        .endrepeat\n        .byte 8\n",
+          "stderr": "formatted input.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "ca65",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "        .repeat 2\n        .if 0\n        .end\n        .else\n        .byte 7\n        .endif\n        .endrepeat\n        .byte 8\n",
+          "stderr": "formatted formatted.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 3 byte(s) -> out.bin\n"
+        }
+      ]
+    },
+    {
+      "fixture": "ca65-repeat-end.json",
+      "name": "macro_end_inside_repeat",
+      "closed_issue": "833",
+      "matches_native_roundtrip": true,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "ca65",
+            "input.s"
+          ],
+          "exit": 0,
+          "stdout": "        .macro stop\n        .end\n        .endmacro\n        .repeat 2\n        .byte 7\n        stop\n        .endrepeat\n        .byte 8\n",
+          "stderr": "formatted input.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "ca65",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "        .macro stop\n        .end\n        .endmacro\n        .repeat 2\n        .byte 7\n        stop\n        .endrepeat\n        .byte 8\n",
+          "stderr": "formatted formatted.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 1 byte(s) -> out.bin\n"
+        }
+      ]
+    }
+  ]
+}
