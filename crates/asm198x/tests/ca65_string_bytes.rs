@@ -98,26 +98,14 @@ fn verify_native_cases(fixture: &str, count: usize, accepted: usize, audits: &[(
     }
     for case in excluded {
         match case["issue"].as_u64() {
-            Some(835 | 895) => {
-                assert!(matches!(
-                    case["audit"].as_str(),
-                    Some("literal" | "flat_literal")
-                ));
+            Some(895) => {
+                assert_eq!(case["audit"], "flat_literal");
                 let name = case["name"].as_str().expect("excluded name");
-                if case["issue"] == 895 {
-                    assert_eq!(case["audit"], "flat_literal");
-                    assert!(
-                        ["_selected_", "_inactive_", "_zero_repeat_"]
-                            .iter()
-                            .any(|context| name.contains(context))
-                    );
-                } else {
-                    assert!(
-                        ["inactive_", "unused_macro_", "zero_repeat_"]
-                            .iter()
-                            .any(|context| name.contains(context))
-                    );
-                }
+                assert!(
+                    ["_selected_", "_inactive_", "_zero_repeat_"]
+                        .iter()
+                        .any(|context| name.contains(context))
+                );
             }
             _ => {
                 assert_eq!(case["audit"], "lifetime");
@@ -130,7 +118,7 @@ fn verify_native_cases(fixture: &str, count: usize, accepted: usize, audits: &[(
         if audits.iter().any(|(name, _)| *name == "lifetime") {
             9
         } else if audits.iter().any(|(name, _)| *name == "literal") {
-            294
+            264
         } else {
             0
         }
@@ -340,7 +328,7 @@ fn flat_ca65_readers_keep_native_byte_values_through_parsing() {
 fn literal_boundaries_and_asciiz_operand_types_match_native() {
     verify_native_cases(
         include_str!("fixtures/ca65-literal-boundaries.json"),
-        768,
+        798,
         477,
         &[
             (

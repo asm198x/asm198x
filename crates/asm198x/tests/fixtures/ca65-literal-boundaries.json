@@ -23635,99 +23635,669 @@
       "native_hex": "065c07",
       "audit": "flat_literal",
       "dialect": "huc6280"
+    },
+    {
+      "name": "inactive_byte_escaped_quote",
+      "source": ".byte 6\n.if 0\n.byte \"a\\\"b\"\n.endif\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-et0ja2zt",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Newline in string constant\n"
+        }
+      ],
+      "native_hex": null,
+      "audit": "literal",
+      "dialect": "ca65"
+    },
+    {
+      "name": "unused_macro_byte_escaped_quote",
+      "source": ".byte 6\n.macro emit\n.byte \"a\\\"b\"\n.endmacro\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-et0ja2zt",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Newline in string constant\n"
+        }
+      ],
+      "native_hex": null,
+      "audit": "literal",
+      "dialect": "ca65"
+    },
+    {
+      "name": "zero_repeat_byte_escaped_quote",
+      "source": ".byte 6\n.repeat 0\n.byte \"a\\\"b\"\n.endrepeat\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-et0ja2zt",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Newline in string constant\n"
+        }
+      ],
+      "native_hex": null,
+      "audit": "literal",
+      "dialect": "ca65"
+    },
+    {
+      "name": "inactive_asciiz_escaped_quote",
+      "source": ".byte 6\n.if 0\n.asciiz \"a\\\"b\"\n.endif\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-et0ja2zt",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Newline in string constant\n"
+        }
+      ],
+      "native_hex": null,
+      "audit": "literal",
+      "dialect": "ca65"
+    },
+    {
+      "name": "unused_macro_asciiz_escaped_quote",
+      "source": ".byte 6\n.macro emit\n.asciiz \"a\\\"b\"\n.endmacro\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-et0ja2zt",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Newline in string constant\n"
+        }
+      ],
+      "native_hex": null,
+      "audit": "literal",
+      "dialect": "ca65"
+    },
+    {
+      "name": "zero_repeat_asciiz_escaped_quote",
+      "source": ".byte 6\n.repeat 0\n.asciiz \"a\\\"b\"\n.endrepeat\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-et0ja2zt",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Newline in string constant\n"
+        }
+      ],
+      "native_hex": null,
+      "audit": "literal",
+      "dialect": "ca65"
+    },
+    {
+      "name": "inactive_byte_double_slash_quote",
+      "source": ".byte 6\n.if 0\n.byte \"a\\\\\"b\"\n.endif\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-et0ja2zt",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Newline in string constant\n"
+        }
+      ],
+      "native_hex": null,
+      "audit": "literal",
+      "dialect": "ca65"
+    },
+    {
+      "name": "unused_macro_byte_double_slash_quote",
+      "source": ".byte 6\n.macro emit\n.byte \"a\\\\\"b\"\n.endmacro\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-et0ja2zt",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Newline in string constant\n"
+        }
+      ],
+      "native_hex": null,
+      "audit": "literal",
+      "dialect": "ca65"
+    },
+    {
+      "name": "zero_repeat_byte_double_slash_quote",
+      "source": ".byte 6\n.repeat 0\n.byte \"a\\\\\"b\"\n.endrepeat\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-et0ja2zt",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Newline in string constant\n"
+        }
+      ],
+      "native_hex": null,
+      "audit": "literal",
+      "dialect": "ca65"
+    },
+    {
+      "name": "inactive_asciiz_double_slash_quote",
+      "source": ".byte 6\n.if 0\n.asciiz \"a\\\\\"b\"\n.endif\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-et0ja2zt",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Newline in string constant\n"
+        }
+      ],
+      "native_hex": null,
+      "audit": "literal",
+      "dialect": "ca65"
+    },
+    {
+      "name": "unused_macro_asciiz_double_slash_quote",
+      "source": ".byte 6\n.macro emit\n.asciiz \"a\\\\\"b\"\n.endmacro\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-et0ja2zt",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Newline in string constant\n"
+        }
+      ],
+      "native_hex": null,
+      "audit": "literal",
+      "dialect": "ca65"
+    },
+    {
+      "name": "zero_repeat_asciiz_double_slash_quote",
+      "source": ".byte 6\n.repeat 0\n.asciiz \"a\\\\\"b\"\n.endrepeat\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-et0ja2zt",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Newline in string constant\n"
+        }
+      ],
+      "native_hex": null,
+      "audit": "literal",
+      "dialect": "ca65"
+    },
+    {
+      "name": "inactive_byte_unterminated",
+      "source": ".byte 6\n.if 0\n.byte \"a\n.endif\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-et0ja2zt",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Newline in string constant\n"
+        }
+      ],
+      "native_hex": null,
+      "audit": "literal",
+      "dialect": "ca65"
+    },
+    {
+      "name": "unused_macro_byte_unterminated",
+      "source": ".byte 6\n.macro emit\n.byte \"a\n.endmacro\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-et0ja2zt",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Newline in string constant\n"
+        }
+      ],
+      "native_hex": null,
+      "audit": "literal",
+      "dialect": "ca65"
+    },
+    {
+      "name": "zero_repeat_byte_unterminated",
+      "source": ".byte 6\n.repeat 0\n.byte \"a\n.endrepeat\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-et0ja2zt",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Newline in string constant\n"
+        }
+      ],
+      "native_hex": null,
+      "audit": "literal",
+      "dialect": "ca65"
+    },
+    {
+      "name": "inactive_asciiz_unterminated",
+      "source": ".byte 6\n.if 0\n.asciiz \"a\n.endif\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-et0ja2zt",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Newline in string constant\n"
+        }
+      ],
+      "native_hex": null,
+      "audit": "literal",
+      "dialect": "ca65"
+    },
+    {
+      "name": "unused_macro_asciiz_unterminated",
+      "source": ".byte 6\n.macro emit\n.asciiz \"a\n.endmacro\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-et0ja2zt",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Newline in string constant\n"
+        }
+      ],
+      "native_hex": null,
+      "audit": "literal",
+      "dialect": "ca65"
+    },
+    {
+      "name": "zero_repeat_asciiz_unterminated",
+      "source": ".byte 6\n.repeat 0\n.asciiz \"a\n.endrepeat\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-et0ja2zt",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Newline in string constant\n"
+        }
+      ],
+      "native_hex": null,
+      "audit": "literal",
+      "dialect": "ca65"
+    },
+    {
+      "name": "65816_unused_macro_byte_escaped_quote",
+      "source": ".setcpu \"65816\"\n.byte 6\n.macro emit\n.byte \"a\\\"b\"\n.endmacro\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-y12eacf1",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(4): Error: Newline in string constant\n"
+        }
+      ],
+      "native_hex": null,
+      "audit": "flat_literal",
+      "dialect": "65816"
+    },
+    {
+      "name": "65816_unused_macro_asciiz_escaped_quote",
+      "source": ".setcpu \"65816\"\n.byte 6\n.macro emit\n.asciiz \"a\\\"b\"\n.endmacro\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-y12eacf1",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(4): Error: Newline in string constant\n"
+        }
+      ],
+      "native_hex": null,
+      "audit": "flat_literal",
+      "dialect": "65816"
+    },
+    {
+      "name": "65816_unused_macro_byte_double_slash_quote",
+      "source": ".setcpu \"65816\"\n.byte 6\n.macro emit\n.byte \"a\\\\\"b\"\n.endmacro\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-y12eacf1",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(4): Error: Newline in string constant\n"
+        }
+      ],
+      "native_hex": null,
+      "audit": "flat_literal",
+      "dialect": "65816"
+    },
+    {
+      "name": "65816_unused_macro_asciiz_double_slash_quote",
+      "source": ".setcpu \"65816\"\n.byte 6\n.macro emit\n.asciiz \"a\\\\\"b\"\n.endmacro\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-y12eacf1",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(4): Error: Newline in string constant\n"
+        }
+      ],
+      "native_hex": null,
+      "audit": "flat_literal",
+      "dialect": "65816"
+    },
+    {
+      "name": "65816_unused_macro_byte_unterminated",
+      "source": ".setcpu \"65816\"\n.byte 6\n.macro emit\n.byte \"a\n.endmacro\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-y12eacf1",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(4): Error: Newline in string constant\n"
+        }
+      ],
+      "native_hex": null,
+      "audit": "flat_literal",
+      "dialect": "65816"
+    },
+    {
+      "name": "65816_unused_macro_asciiz_unterminated",
+      "source": ".setcpu \"65816\"\n.byte 6\n.macro emit\n.asciiz \"a\n.endmacro\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-y12eacf1",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(4): Error: Newline in string constant\n"
+        }
+      ],
+      "native_hex": null,
+      "audit": "flat_literal",
+      "dialect": "65816"
+    },
+    {
+      "name": "huc6280_unused_macro_byte_escaped_quote",
+      "source": ".setcpu \"huc6280\"\n.byte 6\n.macro emit\n.byte \"a\\\"b\"\n.endmacro\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-y12eacf1",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(4): Error: Newline in string constant\n"
+        }
+      ],
+      "native_hex": null,
+      "audit": "flat_literal",
+      "dialect": "huc6280"
+    },
+    {
+      "name": "huc6280_unused_macro_asciiz_escaped_quote",
+      "source": ".setcpu \"huc6280\"\n.byte 6\n.macro emit\n.asciiz \"a\\\"b\"\n.endmacro\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-y12eacf1",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(4): Error: Newline in string constant\n"
+        }
+      ],
+      "native_hex": null,
+      "audit": "flat_literal",
+      "dialect": "huc6280"
+    },
+    {
+      "name": "huc6280_unused_macro_byte_double_slash_quote",
+      "source": ".setcpu \"huc6280\"\n.byte 6\n.macro emit\n.byte \"a\\\\\"b\"\n.endmacro\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-y12eacf1",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(4): Error: Newline in string constant\n"
+        }
+      ],
+      "native_hex": null,
+      "audit": "flat_literal",
+      "dialect": "huc6280"
+    },
+    {
+      "name": "huc6280_unused_macro_asciiz_double_slash_quote",
+      "source": ".setcpu \"huc6280\"\n.byte 6\n.macro emit\n.asciiz \"a\\\\\"b\"\n.endmacro\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-y12eacf1",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(4): Error: Newline in string constant\n"
+        }
+      ],
+      "native_hex": null,
+      "audit": "flat_literal",
+      "dialect": "huc6280"
+    },
+    {
+      "name": "huc6280_unused_macro_byte_unterminated",
+      "source": ".setcpu \"huc6280\"\n.byte 6\n.macro emit\n.byte \"a\n.endmacro\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-y12eacf1",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(4): Error: Newline in string constant\n"
+        }
+      ],
+      "native_hex": null,
+      "audit": "flat_literal",
+      "dialect": "huc6280"
+    },
+    {
+      "name": "huc6280_unused_macro_asciiz_unterminated",
+      "source": ".setcpu \"huc6280\"\n.byte 6\n.macro emit\n.asciiz \"a\n.endmacro\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-y12eacf1",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(4): Error: Newline in string constant\n"
+        }
+      ],
+      "native_hex": null,
+      "audit": "flat_literal",
+      "dialect": "huc6280"
     }
   ],
   "excluded_cases": [
-    {
-      "audit": "literal",
-      "name": "inactive_byte_escaped_quote",
-      "issue": 835
-    },
-    {
-      "audit": "literal",
-      "name": "unused_macro_byte_escaped_quote",
-      "issue": 835
-    },
-    {
-      "audit": "literal",
-      "name": "zero_repeat_byte_escaped_quote",
-      "issue": 835
-    },
-    {
-      "audit": "literal",
-      "name": "inactive_asciiz_escaped_quote",
-      "issue": 835
-    },
-    {
-      "audit": "literal",
-      "name": "unused_macro_asciiz_escaped_quote",
-      "issue": 835
-    },
-    {
-      "audit": "literal",
-      "name": "zero_repeat_asciiz_escaped_quote",
-      "issue": 835
-    },
-    {
-      "audit": "literal",
-      "name": "inactive_byte_double_slash_quote",
-      "issue": 835
-    },
-    {
-      "audit": "literal",
-      "name": "unused_macro_byte_double_slash_quote",
-      "issue": 835
-    },
-    {
-      "audit": "literal",
-      "name": "zero_repeat_byte_double_slash_quote",
-      "issue": 835
-    },
-    {
-      "audit": "literal",
-      "name": "inactive_asciiz_double_slash_quote",
-      "issue": 835
-    },
-    {
-      "audit": "literal",
-      "name": "unused_macro_asciiz_double_slash_quote",
-      "issue": 835
-    },
-    {
-      "audit": "literal",
-      "name": "zero_repeat_asciiz_double_slash_quote",
-      "issue": 835
-    },
-    {
-      "audit": "literal",
-      "name": "inactive_byte_unterminated",
-      "issue": 835
-    },
-    {
-      "audit": "literal",
-      "name": "unused_macro_byte_unterminated",
-      "issue": 835
-    },
-    {
-      "audit": "literal",
-      "name": "zero_repeat_byte_unterminated",
-      "issue": 835
-    },
-    {
-      "audit": "literal",
-      "name": "inactive_asciiz_unterminated",
-      "issue": 835
-    },
-    {
-      "audit": "literal",
-      "name": "unused_macro_asciiz_unterminated",
-      "issue": 835
-    },
-    {
-      "audit": "literal",
-      "name": "zero_repeat_asciiz_unterminated",
-      "issue": 835
-    },
     {
       "audit": "flat_literal",
       "name": "65816_selected_byte_plain",
@@ -24010,11 +24580,6 @@
     },
     {
       "audit": "flat_literal",
-      "name": "65816_unused_macro_byte_escaped_quote",
-      "issue": 835
-    },
-    {
-      "audit": "flat_literal",
       "name": "65816_zero_repeat_byte_escaped_quote",
       "issue": 895
     },
@@ -24027,11 +24592,6 @@
       "audit": "flat_literal",
       "name": "65816_inactive_asciiz_escaped_quote",
       "issue": 895
-    },
-    {
-      "audit": "flat_literal",
-      "name": "65816_unused_macro_asciiz_escaped_quote",
-      "issue": 835
     },
     {
       "audit": "flat_literal",
@@ -24050,11 +24610,6 @@
     },
     {
       "audit": "flat_literal",
-      "name": "65816_unused_macro_byte_double_slash_quote",
-      "issue": 835
-    },
-    {
-      "audit": "flat_literal",
       "name": "65816_zero_repeat_byte_double_slash_quote",
       "issue": 895
     },
@@ -24067,11 +24622,6 @@
       "audit": "flat_literal",
       "name": "65816_inactive_asciiz_double_slash_quote",
       "issue": 895
-    },
-    {
-      "audit": "flat_literal",
-      "name": "65816_unused_macro_asciiz_double_slash_quote",
-      "issue": 835
     },
     {
       "audit": "flat_literal",
@@ -24390,11 +24940,6 @@
     },
     {
       "audit": "flat_literal",
-      "name": "65816_unused_macro_byte_unterminated",
-      "issue": 835
-    },
-    {
-      "audit": "flat_literal",
       "name": "65816_zero_repeat_byte_unterminated",
       "issue": 895
     },
@@ -24407,11 +24952,6 @@
       "audit": "flat_literal",
       "name": "65816_inactive_asciiz_unterminated",
       "issue": 895
-    },
-    {
-      "audit": "flat_literal",
-      "name": "65816_unused_macro_asciiz_unterminated",
-      "issue": 835
     },
     {
       "audit": "flat_literal",
@@ -24700,11 +25240,6 @@
     },
     {
       "audit": "flat_literal",
-      "name": "huc6280_unused_macro_byte_escaped_quote",
-      "issue": 835
-    },
-    {
-      "audit": "flat_literal",
       "name": "huc6280_zero_repeat_byte_escaped_quote",
       "issue": 895
     },
@@ -24717,11 +25252,6 @@
       "audit": "flat_literal",
       "name": "huc6280_inactive_asciiz_escaped_quote",
       "issue": 895
-    },
-    {
-      "audit": "flat_literal",
-      "name": "huc6280_unused_macro_asciiz_escaped_quote",
-      "issue": 835
     },
     {
       "audit": "flat_literal",
@@ -24740,11 +25270,6 @@
     },
     {
       "audit": "flat_literal",
-      "name": "huc6280_unused_macro_byte_double_slash_quote",
-      "issue": 835
-    },
-    {
-      "audit": "flat_literal",
       "name": "huc6280_zero_repeat_byte_double_slash_quote",
       "issue": 895
     },
@@ -24757,11 +25282,6 @@
       "audit": "flat_literal",
       "name": "huc6280_inactive_asciiz_double_slash_quote",
       "issue": 895
-    },
-    {
-      "audit": "flat_literal",
-      "name": "huc6280_unused_macro_asciiz_double_slash_quote",
-      "issue": 835
     },
     {
       "audit": "flat_literal",
@@ -25080,11 +25600,6 @@
     },
     {
       "audit": "flat_literal",
-      "name": "huc6280_unused_macro_byte_unterminated",
-      "issue": 835
-    },
-    {
-      "audit": "flat_literal",
       "name": "huc6280_zero_repeat_byte_unterminated",
       "issue": 895
     },
@@ -25097,11 +25612,6 @@
       "audit": "flat_literal",
       "name": "huc6280_inactive_asciiz_unterminated",
       "issue": 895
-    },
-    {
-      "audit": "flat_literal",
-      "name": "huc6280_unused_macro_asciiz_unterminated",
-      "issue": 835
     },
     {
       "audit": "flat_literal",

@@ -187,7 +187,7 @@ impl Sweep<'_> {
             let end = starts.get(index + 1).copied().unwrap_or(source.len());
             let mut span = at.clone();
             span.line = line;
-            ca65_flat::validate_numeric_tokens(&source[start..end], &span)?;
+            ca65_flat::validate_lexical_tokens(&source[start..end], &span)?;
         }
         Ok(())
     }
@@ -616,7 +616,7 @@ fn sweep_line(
         }
     };
     if st.token_depth == 0 && node.span.expansion_frames.is_empty() {
-        ca65_flat::validate_numeric_tokens(&source, &node.span)?;
+        ca65_flat::validate_lexical_tokens(&source, &node.span)?;
     }
     let Some(processed) = sw
         .reader

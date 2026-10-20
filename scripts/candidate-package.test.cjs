@@ -464,3 +464,10 @@ test('native text-consumer payload evidence cannot be omitted', () => {
   assert(qualifies(complete)); assert(requiredCases.includes('ca65_text_consumers'));
   assert.equal(qualifies(complete.filter(row => row.name !== 'ca65_text_consumers')), false);
 });
+
+
+test('native quoted-token admission evidence cannot be omitted', () => {
+  const complete = requiredCases.map(name => ({ name, status: 'pass' }));
+  assert(qualifies(complete)); assert(requiredCases.includes('ca65_quoted_admission'));
+  assert.equal(qualifies(complete.filter(row => row.name !== 'ca65_quoted_admission')), false);
+});
