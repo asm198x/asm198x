@@ -30,3 +30,29 @@ admission. Retain the 71/287/623-case native audits as independent evidence.
 Update the binding string-layer decision with the approved byte-token boundary
 when its implementation lands. No Expr, public API/schema, dependency, inactive
 lexical scope, source-order numeric lookup or general identifier-capture change.
+
+## Package qualification slice
+
+The source implementation and fixtures are one byte-preservation slice for
+#886/#889/#890. The 9 existing unbraced macro-argument refusals are retained in
+full native/predecessor audits and explicitly excluded under #891. #887's three
+raw literal refusals and #795's scoped query remain separate; quoted token-list
+admission still has exactly 255 known differences under #872.
+
+Verified additional files: `tests/ca65_string_bytes.rs` and native fixtures
+`tests/fixtures/ca65-{string-bytes,string-consumers,flat-string-bytes}.json` below
+`crates/asm198x/`; `scripts/test-candidate-package.cjs` and
+`scripts/candidate-package.test.cjs`. Require three new package cohorts with
+287/102/574 cases, 274/90/548 native acceptances and 1,109/372/2,218 CLI commands.
+The full package cohort count becomes 89. Assert full native audit accounting,
+sidecar preservation on refusal, canonical/idempotent formatting, native images,
+stable section/symbol shapes and absence of private handles in all text outputs.
+
+Six native marker-admission controls are included in the consumer cohort:
+quoted/unquoted marker-looking source under 6502, 65816 and HuC6280. A preceding
+constructor allocates the same apparent ID, proving literal bytes stay literal
+and authored bare handles cannot resolve it. Text-output marker assertions apply
+to cases without an authored marker; those six instead compare the exact native
+image/refusal and complete output/formatting invariants. Metadata must agree
+with the actual authored source. The qualified total is 963 cases, 912 accepted
+and 51 refused, with 3,699 CLI commands across the three cohorts.
