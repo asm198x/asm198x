@@ -170,6 +170,46 @@ pub(crate) fn validate_lexical_tokens(source: &str, at: &Span) -> Result<(), Asm
     Ok(())
 }
 
+/// Split native fields while protecting quoted tokens and nested expressions.
+/// Assertions split only their two header separators; data lists split all.
+pub(crate) fn split_fields(rest: &str, max_splits: usize) -> Vec<&str> {
+    let bytes = rest.as_bytes();
+    let mut fields = Vec::new();
+    let mut depth = 0usize;
+    let mut start = 0;
+    let mut i = 0;
+    while i < bytes.len() {
+        match bytes[i] {
+            b'"' => {
+                i += 1;
+                while i < bytes.len() && bytes[i] != b'"' {
+                    i += 1;
+                }
+                i += usize::from(bytes.get(i) == Some(&b'"'));
+                continue;
+            }
+            b'\'' => {
+                i = (i + 2).min(bytes.len());
+                i += usize::from(bytes.get(i) == Some(&b'\''));
+                continue;
+            }
+            b'(' => depth += 1,
+            b')' => depth = depth.saturating_sub(1),
+            b',' if depth == 0 => {
+                fields.push(rest[start..i].trim());
+                start = i + 1;
+                if fields.len() == max_splits {
+                    break;
+                }
+            }
+            _ => {}
+        }
+        i += 1;
+    }
+    fields.push(rest[start..].trim());
+    fields
+}
+
 /// A walk-handled `.include`/`.incbin` line found by a dialect's per-line
 /// parse, handed back for the driver to decide: the single-source parse keeps
 /// it as an unresolved verbatim item (KTD1 — `--fmt` never opens the target);

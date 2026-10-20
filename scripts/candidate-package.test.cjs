@@ -471,3 +471,10 @@ test('native quoted-token admission evidence cannot be omitted', () => {
   assert(qualifies(complete)); assert(requiredCases.includes('ca65_quoted_admission'));
   assert.equal(qualifies(complete.filter(row => row.name !== 'ca65_quoted_admission')), false);
 });
+
+
+test('native character-operand evidence cannot be omitted', () => {
+  const complete = requiredCases.map(name => ({ name, status: 'pass' }));
+  assert(qualifies(complete)); assert(requiredCases.includes('ca65_character_operands'));
+  assert.equal(qualifies(complete.filter(row => row.name !== 'ca65_character_operands')), false);
+});

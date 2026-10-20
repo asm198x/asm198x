@@ -94,19 +94,16 @@ fn native_quoted_admission_checks_tokens_and_error_order() {
             std::fs::write(root.join(output), b"previous image").expect("seed output");
         }
         let result = assemble("input.s");
-        let comma_gap = fact["assembly_gaps"] == serde_json::json!([900]);
-        if comma_gap {
-            assert_eq!(name, "ascii_44_direct");
-        } else {
-            assert!(fact["assembly_gaps"].is_null(), "{name}: untracked gap");
-        }
-        let accepted = !comma_gap
-            && fact["native"]
-                .as_array()
-                .expect("native stages")
-                .last()
-                .expect("native result")["exit"]
-                == 0;
+        assert!(
+            fact["assembly_gaps"].is_null(),
+            "{name}: no remaining admission gaps"
+        );
+        let accepted = fact["native"]
+            .as_array()
+            .expect("native stages")
+            .last()
+            .expect("native result")["exit"]
+            == 0;
         assert_eq!(result.status.success(), accepted, "{name}: {result:?}");
         if !accepted {
             assert_eq!(result.status.code(), Some(1), "{name}: {result:?}");
@@ -120,12 +117,10 @@ fn native_quoted_admission_checks_tokens_and_error_order() {
             let diagnostics: serde_json::Value =
                 serde_json::from_slice(&result.stdout).expect("JSON diagnostics");
             assert_eq!(diagnostics[0]["span"]["path"], "input.s", "{name}");
-            if !comma_gap {
-                assert_eq!(
-                    diagnostics[0]["span"]["line"], fact["native_error_line"],
-                    "{name}"
-                );
-            }
+            assert_eq!(
+                diagnostics[0]["span"]["line"], fact["native_error_line"],
+                "{name}"
+            );
             continue;
         }
         let bytes = std::fs::read(root.join("out.bin")).expect("image");

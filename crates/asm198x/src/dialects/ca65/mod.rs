@@ -30,8 +30,8 @@ use super::ca65_flat::{self, DirectiveLine, FlatWalk, WalkDirective, parse_numbe
 use super::ca65_layout;
 use super::macros::{self, MacroSyntax};
 use super::mos6502::{
-    self, BytePrec, assignment_split, fold_const, is_ident, split_data_items, split_first_word,
-    split_top_level, string_literal,
+    self, BytePrec, assignment_split, fold_const, is_ident, split_first_word, split_top_level,
+    string_literal,
 };
 use crate::directives::{Category, Directive, Pattern, lookup};
 use crate::engine::{AsmError, DiagSeverity, Expr, Operation, Warning, WarningKind};
@@ -3999,41 +3999,7 @@ fn leading_string(
 /// Native character tokens contain one byte and an optional closing apostrophe;
 /// punctuation inside either kind of quoted token is not a header delimiter.
 fn assertion_fields(rest: &str) -> Vec<&str> {
-    let bytes = rest.as_bytes();
-    let mut fields = Vec::new();
-    let mut depth = 0usize;
-    let mut start = 0;
-    let mut i = 0;
-    while i < bytes.len() {
-        match bytes[i] {
-            b'"' => {
-                i += 1;
-                while i < bytes.len() && bytes[i] != b'"' {
-                    i += 1;
-                }
-                i += usize::from(bytes.get(i) == Some(&b'"'));
-                continue;
-            }
-            b'\'' => {
-                i = (i + 2).min(bytes.len());
-                i += usize::from(bytes.get(i) == Some(&b'\''));
-                continue;
-            }
-            b'(' => depth += 1,
-            b')' => depth = depth.saturating_sub(1),
-            b',' if depth == 0 => {
-                fields.push(rest[start..i].trim());
-                start = i + 1;
-                if fields.len() == 2 {
-                    break;
-                }
-            }
-            _ => {}
-        }
-        i += 1;
-    }
-    fields.push(rest[start..].trim());
-    fields
+    ca65_flat::split_fields(rest, 2)
 }
 
 /// `.assert cond, action[, "message"]`. The action decides whether a failure
@@ -4116,7 +4082,7 @@ fn parse_data_list(
         return Err(AsmError::new(line, "`.byte` needs a value"));
     }
     let mut out = Vec::new();
-    for piece in split_data_items(rest) {
+    for piece in ca65_flat::split_fields(rest, usize::MAX) {
         if let Some(bytes) = strings.data(piece, line)? {
             out.extend(bytes.into_iter().map(|b| Expr::Num(i64::from(b))));
         } else {
@@ -4133,7 +4099,7 @@ fn parse_asciiz(
     line: usize,
 ) -> Result<Vec<Expr>, AsmError> {
     Ok(strings
-        .asciiz(split_data_items(rest), line)?
+        .asciiz(ca65_flat::split_fields(rest, usize::MAX), line)?
         .into_iter()
         .map(|b| Expr::Num(i64::from(b)))
         .collect())
@@ -4149,7 +4115,7 @@ fn parse_value_list(
     if rest.is_empty() {
         return Err(AsmError::new(line, "directive needs a value"));
     }
-    split_top_level(rest, ',')
+    ca65_flat::split_fields(rest, usize::MAX)
         .iter()
         .map(|p| parse_value(anons, anchor, p, line))
         .collect()

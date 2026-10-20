@@ -1,0 +1,3366 @@
+{
+  "predecessor_sha256": "7468d49a7e9adf0aa69b3a1611765ab3ecf618c71f36a7b1ae83cccd2d93457b",
+  "trial_sha256": "1718b3d8cb4a19063879f11cc6ce635481cf43840bb82398813306c1f2077ce1",
+  "cases": [
+    {
+      "name": "huc6280_byte_44_lone_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_byte_44_pair_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_byte_44_arithmetic_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_byte_44_call_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_byte_34_lone_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_byte_34_pair_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_byte_34_arithmetic_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_byte_34_call_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_byte_39_lone_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_byte_39_pair_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_byte_39_arithmetic_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_byte_39_call_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_byte_92_lone_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_byte_92_pair_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_byte_92_arithmetic_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_byte_92_call_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_byte_59_lone_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_byte_59_pair_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_byte_59_arithmetic_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_byte_59_call_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_byte_40_lone_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_byte_40_pair_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_byte_40_arithmetic_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_byte_40_call_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_byte_41_lone_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_byte_41_pair_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_byte_41_arithmetic_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_byte_41_call_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_word_44_lone_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_word_44_pair_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_word_44_arithmetic_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_word_44_call_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_word_34_lone_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_word_34_pair_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_word_34_arithmetic_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_word_34_call_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_word_39_lone_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_word_39_pair_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_word_39_arithmetic_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_word_39_call_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_word_92_lone_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_word_92_pair_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_word_92_arithmetic_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_word_92_call_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_word_59_lone_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_word_59_pair_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_word_59_arithmetic_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_word_59_call_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_word_40_lone_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_word_40_pair_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_word_40_arithmetic_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_word_40_call_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_word_41_lone_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_word_41_pair_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_word_41_arithmetic_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_word_41_call_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dbyt_44_lone_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dbyt_44_pair_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dbyt_44_arithmetic_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dbyt_44_call_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dbyt_34_lone_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dbyt_34_pair_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dbyt_34_arithmetic_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dbyt_34_call_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dbyt_39_lone_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dbyt_39_pair_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dbyt_39_arithmetic_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dbyt_39_call_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dbyt_92_lone_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dbyt_92_pair_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dbyt_92_arithmetic_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dbyt_92_call_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dbyt_59_lone_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dbyt_59_pair_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dbyt_59_arithmetic_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dbyt_59_call_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dbyt_40_lone_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dbyt_40_pair_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dbyt_40_arithmetic_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dbyt_40_call_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dbyt_41_lone_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dbyt_41_pair_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dbyt_41_arithmetic_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dbyt_41_call_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dword_44_lone_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dword_44_pair_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dword_44_arithmetic_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dword_44_call_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dword_34_lone_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dword_34_pair_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dword_34_arithmetic_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dword_34_call_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dword_39_lone_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dword_39_pair_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dword_39_arithmetic_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dword_39_call_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dword_92_lone_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dword_92_pair_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dword_92_arithmetic_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dword_92_call_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dword_59_lone_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dword_59_pair_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dword_59_arithmetic_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dword_59_call_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dword_40_lone_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dword_40_pair_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dword_40_arithmetic_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dword_40_call_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dword_41_lone_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dword_41_pair_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dword_41_arithmetic_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_dword_41_call_macro",
+      "issue": 821,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-quoted-admission-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 3: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    }
+  ]
+}

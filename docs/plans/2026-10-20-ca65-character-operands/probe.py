@@ -25,7 +25,27 @@ def cases() -> dict[str, str]:
                     }.items():
                         name = f"{cpu}_{directive}_{byte}_{form}_{context}"
                         out[name] = f'.setcpu "{cpu}"\n.byte 6\n' + source + ".byte 7\n"
-    assert len(out) == 672
+    for cpu in ["6502", "65816", "huc6280"]:
+        for directive in ["byte", "word", "dbyt", "dword"]:
+            for name, operand in {
+                "empty": "1,,7",
+                "trailing_comma": "1,",
+                "leading_comma": ",1",
+                "unmatched_open": "(1,7",
+                "unmatched_close": "1),7",
+                "bad_character": "'ab'",
+                "open_string": '"open',
+                "character_tail": "','x",
+            }.items():
+                line = "." + directive + " " + operand + "\n"
+                for context, source in {
+                    "direct": line,
+                    "macro": ".macro emit\n" + line + ".endmacro\nemit\n",
+                }.items():
+                    out[f"{cpu}_{directive}_invalid_{name}_{context}"] = (
+                        f'.setcpu "{cpu}"\n.byte 6\n' + source + ".byte 7\n"
+                    )
+    assert len(out) == 864
     return out
 
 
