@@ -37,6 +37,5 @@ are also retained as compressed primary evidence.
 Fresh 4510 replay matches all 564 bytes and fourteen raw process streams and
 rejects a changed-byte control. That replay builds clean 2f094aa5; the retained
 source-equivalence record proves the later checker-only change leaves Rust,
-xtask and CLI bytes identical. The disposable build work is removed after
-retention. All exact-head CI and five actual native archives remain required
+xtask and CLI bytes identical. The audit runner removed its disposable build work; its absence is verified. All exact-head CI and five actual native archives remain required
 before merge; those reports will be retained after inspection.
