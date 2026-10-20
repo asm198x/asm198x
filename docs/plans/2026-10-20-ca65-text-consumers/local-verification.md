@@ -34,3 +34,12 @@ The preceding archive passes all 90 old cohorts and fails exactly the new text
 cohort. Source/test/native evidence and complete negative package outcomes are
 retained here. Clean producer, local archive controls, fresh 4510 replay and all
 five actual package reports remain required before merge.
+
+The final producer is 41368af1c96dfd36685ed27af4086877a97f53a3, CLI SHA-256
+b65334d7dcf9756d52a19fc0b27bf730ae48f4210cf84a40904f97534173acd0.
+Its complete native replays match the trial outcomes. All 91 local cohorts pass;
+wrong-byte controls fail exactly reference_bytes/determinism/structured_success,
+and corrupt archives fail SHA-256 validation. Fresh 4510 replay matches all
+564 bytes and fourteen streams, rejects a changed-byte control, and removes its
+disposable work directory. Clean identity, native/package reports and streams
+are retained here. All exact-head CI and actual five-host packages remain required.
