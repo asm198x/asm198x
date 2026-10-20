@@ -30,3 +30,20 @@ process outcomes. File the generated-string byte corruption and malformed raw
 data admission separately, then write a concrete representation design before
 changing a source/pre-pass boundary. The source AST formatter and shared Expr
 remain unchanged; new architecture needs agreement under the supplied AGENTS.
+
+## Full byte and UTF-8 precision sweep
+
+The additional 287 cases accept 274 natively and refuse 13. The preceding
+producer differs in 145. All values 1..255 are tested through %c; zero remains
+refused by both. Values 128..255 are emitted as two UTF-8 bytes here instead of
+one native byte. Quote/backslash values gain an escape byte. Native %.1s cuts
+UTF-8 input at a byte boundary (é becomes c3); the current implementation keeps
+the complete Unicode character (c3 a9). Nested concat/%s and asciiz retain these
+differences. Native and current code both refuse string values in .word/.dword
+and immediate operands; preserve those controls.
+
+This is a byte-string representation problem, not a reason to loosen numeric
+format typing or globally unescape data. A proposed private ca65 string-token
+layer must retain raw argument spelling, owned byte values and token identity
+through the shared text/macro mechanisms, materialize data directly, and never
+expose internal handles in source/diagnostic/debug/listing contracts.
