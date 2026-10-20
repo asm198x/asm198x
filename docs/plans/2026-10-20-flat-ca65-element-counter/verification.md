@@ -20,3 +20,20 @@ and all four existing output files survive. The new required archive cohort
 uses 1,216 commands and cannot be omitted. All 114 Node checks, all-target Clippy,
 rustfmt and generated docs/version checks pass. Full workspace and frozen
 artifact/native/five-host CI evidence remain required before merge.
+
+The complete Rust/Lua workspace passes 1,636 tests (38 ignored), with all-target
+Clippy and rustfmt green. All 114 Node checks pass after the coverage guard.
+The frozen CLI from 0a67ffa43e7eadd15103c84ec0795b7ba8a60739 has SHA-256
+9dd103083dba8a4ecd5148ad619d317b8ff3f965a371be9c4db6370aff10e8bc.
+The subsequent c474b640d293fe911de12a22403b90a89800854f change touches only
+integration-test/package-verifier coverage guards; a checked build has identical
+binary bytes. Both identities and the exact two changed paths are retained.
+
+All 99 archive cohorts pass, including the new 1,216-command cohort. The
+preceding archive fails only the counter cohort. Wrong bytes fail exactly three
+controls; corrupt archives fail SHA-256. Clean native replays match all 80 macro,
+132 far-address, 148 address, 304 counter and 254 broad cases. The 108 wide-data
+replay retains only its four explicit #895 inactive-source refusals.
+Fresh release-mode 4510 replay from c474b640 matches all 564 bytes and fourteen
+streams, rejects changed bytes and removes disposable work. Exact-head CI and
+five actual native archive reports remain required before merge.
