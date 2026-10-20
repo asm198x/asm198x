@@ -151,12 +151,10 @@ fn native_character_operands_keep_boundaries_and_error_locations() {
             "{name}: JSON bytes"
         );
         let debug = shape(&root);
-        // Both clean predecessor and trial reproduce these #821 refusals.
-        if fact["formatter_gap"].is_string() {
-            assert_eq!(fact["formatter_gap"], "821");
-            assert!(name.starts_with("huc6280_") && name.ends_with("_macro"));
-            continue;
-        }
+        assert!(
+            fact["formatter_gap"].is_null(),
+            "{name}: all formatter cases are required"
+        );
         let formatted = run(&root, &["fmt", "--dialect", dialect, "input.s"]);
         assert!(formatted.status.success(), "{name}: {formatted:?}");
         std::fs::write(root.join("formatted.s"), &formatted.stdout).expect("formatted source");
