@@ -1,0 +1,1355 @@
+{
+  "binary": "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+  "sha256": "303e98c5e4a9886a3eb7f20010e96a0744c67038155bea394e12c675b7af1dcb",
+  "results": [
+    {
+      "name": "format_%d_0",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "063207",
+      "matches_native": true
+    },
+    {
+      "name": "format_%d_1",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `.sprintf` cannot format the string \"2\" as `%d`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "format_%d_2",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "063207",
+      "matches_native": true
+    },
+    {
+      "name": "format_%d_3",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `.sprintf` cannot format the string \"VALUE\" as `%d`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "format_%d_4",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `.sprintf` cannot format the string \"2\" as `%d`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "format_%d_5",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06353007",
+      "matches_native": true
+    },
+    {
+      "name": "format_%d_6",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `.sprintf` needs a number it can work out where it stands, and `(\"2\")` is not one: this pass runs before the layout, so a label's address cannot be reached from here\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "format_%d_7",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `.sprintf` needs a number it can work out where it stands, and `+\"2\"` is not one: this pass runs before the layout, so a label's address cannot be reached from here\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "format_%u_0",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "063207",
+      "matches_native": true
+    },
+    {
+      "name": "format_%u_1",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `.sprintf` cannot format the string \"2\" as `%u`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "format_%u_2",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "063207",
+      "matches_native": true
+    },
+    {
+      "name": "format_%u_3",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `.sprintf` cannot format the string \"VALUE\" as `%u`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "format_%u_4",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `.sprintf` cannot format the string \"2\" as `%u`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "format_%u_5",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06353007",
+      "matches_native": true
+    },
+    {
+      "name": "format_%u_6",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `.sprintf` needs a number it can work out where it stands, and `(\"2\")` is not one: this pass runs before the layout, so a label's address cannot be reached from here\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "format_%u_7",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `.sprintf` needs a number it can work out where it stands, and `+\"2\"` is not one: this pass runs before the layout, so a label's address cannot be reached from here\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "format_%x_0",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "063207",
+      "matches_native": true
+    },
+    {
+      "name": "format_%x_1",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `.sprintf` cannot format the string \"2\" as `%x`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "format_%x_2",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "063207",
+      "matches_native": true
+    },
+    {
+      "name": "format_%x_3",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `.sprintf` cannot format the string \"VALUE\" as `%x`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "format_%x_4",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `.sprintf` cannot format the string \"2\" as `%x`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "format_%x_5",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06333207",
+      "matches_native": true
+    },
+    {
+      "name": "format_%x_6",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `.sprintf` needs a number it can work out where it stands, and `(\"2\")` is not one: this pass runs before the layout, so a label's address cannot be reached from here\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "format_%x_7",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `.sprintf` needs a number it can work out where it stands, and `+\"2\"` is not one: this pass runs before the layout, so a label's address cannot be reached from here\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "format_%X_0",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "063207",
+      "matches_native": true
+    },
+    {
+      "name": "format_%X_1",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `.sprintf` cannot format the string \"2\" as `%X`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "format_%X_2",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "063207",
+      "matches_native": true
+    },
+    {
+      "name": "format_%X_3",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `.sprintf` cannot format the string \"VALUE\" as `%X`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "format_%X_4",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `.sprintf` cannot format the string \"2\" as `%X`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "format_%X_5",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06333207",
+      "matches_native": true
+    },
+    {
+      "name": "format_%X_6",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `.sprintf` needs a number it can work out where it stands, and `(\"2\")` is not one: this pass runs before the layout, so a label's address cannot be reached from here\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "format_%X_7",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `.sprintf` needs a number it can work out where it stands, and `+\"2\"` is not one: this pass runs before the layout, so a label's address cannot be reached from here\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "format_%c_0",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "060207",
+      "matches_native": true
+    },
+    {
+      "name": "format_%c_1",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `.sprintf` cannot format the string \"2\" as `%c`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "format_%c_2",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "060207",
+      "matches_native": true
+    },
+    {
+      "name": "format_%c_3",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `.sprintf` cannot format the string \"VALUE\" as `%c`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "format_%c_4",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `.sprintf` cannot format the string \"2\" as `%c`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "format_%c_5",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "063207",
+      "matches_native": true
+    },
+    {
+      "name": "format_%c_6",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `.sprintf` needs a number it can work out where it stands, and `(\"2\")` is not one: this pass runs before the layout, so a label's address cannot be reached from here\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "format_%c_7",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `.sprintf` needs a number it can work out where it stands, and `+\"2\"` is not one: this pass runs before the layout, so a label's address cannot be reached from here\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "format_%s_0",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `.sprintf` cannot format `2` as `%s`: it is not a string\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "format_%s_1",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "063207",
+      "matches_native": true
+    },
+    {
+      "name": "format_%s_2",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `.sprintf` cannot format `VALUE` as `%s`: it is not a string\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "format_%s_3",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0656414c554507",
+      "matches_native": true
+    },
+    {
+      "name": "format_%s_4",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "063207",
+      "matches_native": true
+    },
+    {
+      "name": "format_%s_5",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `.sprintf` cannot format `'2'` as `%s`: it is not a string\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "format_%s_6",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `.sprintf` cannot format `(\"2\")` as `%s`: it is not a string\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "format_%s_7",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `.sprintf` cannot format `+\"2\"` as `%s`: it is not a string\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "mixed_first_string_number",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `.sprintf` cannot format the string \"2\" as `%d`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "mixed_last_string_number",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `.sprintf` cannot format the string \"2\" as `%d`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "mixed_valid",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0632787907",
+      "matches_native": true
+    },
+    {
+      "name": "defined_string_number",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: `.sprintf` cannot format the string \"2\" as `%d`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "defined_number",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "32",
+      "matches_native": true
+    },
+    {
+      "name": "captured_string_number",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:7: error: `.sprintf` cannot format the string \"2\" as `%d`\nin expansion of macro `emit` defined at input.s:2, invoked at input.s:7\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "argument_string_number",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: `.sprintf` cannot format the string \"2\" as `%d`\nin expansion of macro `emit` defined at input.s:1, invoked at input.s:4\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "argument_number",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "32",
+      "matches_native": true
+    },
+    {
+      "name": "included",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8zyvhtkc/format.inc:1: error: `.sprintf` cannot format the string \"2\" as `%d`\nincluded from input.s:1\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "inactive",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "unused",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "zero_repeat",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "selected_repeat",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: `.sprintf` cannot format the string \"2\" as `%d`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "scoped_number",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `.sprintf` needs a number it can work out where it stands, and `VALUE` is not one: this pass runs before the layout, so a label's address cannot be reached from here\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "constructed_quote",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "065c2207",
+      "matches_native": false
+    },
+    {
+      "name": "constructed_backslash",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "065c5c07",
+      "matches_native": false
+    },
+    {
+      "name": "concat_backslash",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c5c626307",
+      "matches_native": false
+    },
+    {
+      "name": "concat_two_backslashes",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c5c626307",
+      "matches_native": true
+    },
+    {
+      "name": "sprintf_string_backslash",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c5c6207",
+      "matches_native": false
+    },
+    {
+      "name": "sprintf_string_two_backslashes",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c5c6207",
+      "matches_native": true
+    },
+    {
+      "name": "raw_quote_escape",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c226207",
+      "matches_native": false
+    },
+    {
+      "name": "raw_adjacent_strings",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "066122226207",
+      "matches_native": false
+    },
+    {
+      "name": "raw_string_addition",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0661222b226207",
+      "matches_native": false
+    }
+  ]
+}
