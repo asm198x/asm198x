@@ -29,10 +29,10 @@ must name their platform surface; do not claim that POSIX-accepted filenames exi
 on Windows. Message JSON payloads remain portable. The existing UTF-8-only text
 contract remains a separate boundary from arbitrary byte strings.
 
-Before code, extend the physical assertion controls with native link-phase
-results for `lderror`/`ldwarning` and native acceptance boundaries for absent,
-nonstring and trailing message operands. The existing four physical records only
-measure native ca65's source phase for those two linker actions. Then implement
+The physical-assert-phases.json replay now retains both native source and link
+phases for all four actions; every native message retains the comma, while the
+preceding Asm198x message is empty. Before code, probe native acceptance boundaries
+for absent, nonstring and trailing message operands. Then implement
 through the private store and current readers, qualify exact payloads plus output
 preservation and formatter/debug round trips, run all existing byte/string audits,
 and retain clean producer/package/4510 evidence and five-host controls.
