@@ -995,6 +995,58 @@ pub(crate) fn stamp_file(mut e: AsmError, file: FileId) -> AsmError {
     e
 }
 
+// These two flat ca65 readers expand each physical file independently. Their
+// expansion's FileId(0) is local to that file, rather than the root input.
+fn local_macro_span(span: &mut Span, file: FileId) {
+    if span.file.is_root() && span.file != file {
+        span.file = file;
+        span.path = None;
+    }
+    local_macro_frames(span, file);
+}
+
+fn local_macro_frames(span: &mut Span, file: FileId) {
+    for frame in &mut span.expansion_frames {
+        if let Some(definition) = &mut frame.defined_at {
+            local_macro_span(definition, file);
+        }
+        local_macro_span(&mut frame.invoked_at, file);
+    }
+}
+
+pub(crate) fn resolve_local_macro_error(mut error: AsmError) -> AsmError {
+    if let Some(span) = &mut error.span {
+        local_macro_frames(span, span.file);
+    }
+    error
+}
+
+pub(crate) fn resolve_local_macro_files(nodes: &mut [Node]) {
+    for node in nodes {
+        let file = node.span.file;
+        local_macro_frames(&mut node.span, file);
+        if let Some(span) = &mut node.operand_span {
+            local_macro_frames(span, span.file);
+        }
+        match node.item.as_mut() {
+            Some(crate::ast::Item::Repeat { body, .. } | crate::ast::Item::Loop { body, .. }) => {
+                resolve_local_macro_files(body);
+            }
+            Some(crate::ast::Item::Conditional {
+                then_body,
+                else_body,
+                ..
+            }) => {
+                resolve_local_macro_files(then_body);
+                if let Some(body) = else_body {
+                    resolve_local_macro_files(body);
+                }
+            }
+            _ => {}
+        }
+    }
+}
+
 /// Apply the dialect's include extension default before resolving: an
 /// extensionless request tries the defaulted spelling (`request.inc`) first
 /// and the exact spelling second — asl's probe-pinned order (with both

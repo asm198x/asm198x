@@ -159,7 +159,9 @@ pub(crate) fn parse_program_multi(
         loader,
         &mut stack,
         &ca65_flat::CA65_SEMANTICS,
-    )?;
+    )
+    .map_err(ca65_flat::resolve_local_macro_error)?;
+    ca65_flat::resolve_local_macro_files(&mut w.nodes);
     Ok(Program { nodes: w.nodes })
 }
 

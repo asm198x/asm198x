@@ -1216,11 +1216,21 @@ pub(crate) struct Statement {
 }
 
 impl Statement {
+    fn line_span(&self, line: usize) -> Span {
+        let mut span = Span::in_file(self.file, line as u32, 0);
+        if line == self.line
+            && let Some(operand) = &self.operand_span
+        {
+            span.expansion_frames.clone_from(&operand.expansion_frames);
+        }
+        span
+    }
+
     /// A line-granular error at this statement, carrying its `(file, line)`
     /// as a real span — so a failure inside an included file renders with
     /// that file's name, not a bare line number.
     pub(crate) fn err(&self, message: impl Into<String>) -> AsmError {
-        AsmError::at(Span::in_file(self.file, self.line as u32, 0), message)
+        AsmError::at(self.line_span(self.line), message)
     }
 
     /// Stamp this statement's file onto an error raised by a line-only helper
@@ -1229,7 +1239,7 @@ impl Statement {
     /// carries a span (an operand-accurate one) is left alone.
     pub(crate) fn stamp(&self, mut e: AsmError) -> AsmError {
         if e.span.is_none() && e.line != 0 {
-            e.span = Some(Span::in_file(self.file, e.line as u32, 0));
+            e.span = Some(self.line_span(e.line));
         }
         e
     }
