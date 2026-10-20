@@ -1,46 +1,45 @@
 # Source-query implementation checkpoint
 
-The full #795 source-aware context design is approved. The checked text numeric
-callback is implemented and verified: 1,637 Rust/Lua tests pass (38 ignored),
-114 Node checks pass, and all-target Clippy/rustfmt/Ruff pass. The live reader
-and parser integration is unfinished; #795 remains open. The main 128-case
-native matrix and nine alias controls are retained with predecessor results.
-
-The preceding #910 fix is merged as #913 after all 29 checks and all five
-native archive qualifications passed. Its actual five-host reports and merge
-identity are retained in the counter plan's qualification-913 folder.
+The approved #795 design is partly implemented. #914 merged the checked text
+numeric callback and native source alias classification after all 29 exact-head
+checks and five native archive qualifications passed. All 1,638 Rust/Lua tests
+pass (38 ignored), along with 115 Node checks and Clippy/fmt/Ruff/docs checks.
+The 314-case classifier audit fixes 161 wrong-byte results; 313 supported cases
+are permanent. One existing undefined-query wrong acceptance remains explicit.
+The new 54-case query-admission audit pins fifteen wrong acceptances for the
+next context slice. Live .const and numeric text argument ordering remain open.
 
 ## Retained task workspaces
 
 - `/Users/stevehill/Projects/198x/Asm198x/asm198x-ca65-text-consumers` is the sole
-  task worktree. It remains for #795 implementation, regression verification
-  and checked merge. Remove it with git worktree remove once that work is
-  merged and all tracked, untracked and ignored content is inspected.
+  task worktree. It remains for #795 implementation and checked merge. Remove
+  it with git worktree remove when #795 is merged, after inspecting all tracked,
+  untracked and ignored content and verifying retained commits/evidence.
 - `/private/tmp/asm198x-text-consumers-build` is the active shared build cache.
-  Reuse it for #795, then remove it after all task-owned build/test processes
-  exit. It contains no durable unfinished source or unique evidence.
-- `/private/tmp/asm198x-flat-counter-producer` retains the frozen #795 audit
-  predecessor (source 0a67ffa43e7eadd15103c84ec0795b7ba8a60739, SHA-256
-  9dd103083dba8a4ecd5148ad619d317b8ff3f965a371be9c4db6370aff10e8bc).
-  Retain until the source-aware replacement is qualified and its before/after
-  replay is durable, then verify retained evidence before removing it.
-- `/private/tmp/asm198x-flat-counter-local-package` retains the 99-cohort
-  predecessor archive for the next package omission control. Remove it after
-  #795's new required cohort proves the old archive fails and that report is
-  retained. Its existing qualification and controls are already durable.
+  Reuse it for #795, then remove it after all task-owned build/test processes exit.
+- `/private/tmp/asm198x-source-constancy-final-producer` is the next frozen audit
+  baseline: source 499a58a29015f79a0b3897572db1e1ba9dc816c8, CLI SHA-256
+  1d5c767f35ac32e5acdb3543db9a06cc320802d194bf99b83c72f70a333afc2a.
+  Native results and identity are durable in source-constancy-local-qualification-914.
+  Remove after the next corrected context producer is qualified and retained.
+- `/private/tmp/asm198x-source-constancy-final-local-package` is the 100-cohort
+  predecessor archive for the next required-cohort control. Remove after the
+  next cohort proves that archive fails and its retained hashes/reports are verified.
 
-The original asm198x checkout remains on its original local main commit. No
-additional worktrees were created. Completed native report downloads and the
-older producer/package/audit directories were removed after positive retention
-checks; their indexes are in completed-slice-cleanup and the qualification
-folders. No task-owned background build, test or CI monitor remains running.
+Superseded producers, packages, native report downloads and completed clean
+4510 workspaces were removed after positive retention checks. Their indexes
+are in the qualification and cleanup folders. No task-owned build, test or CI
+monitor remains running. The original asm198x checkout stays at its original
+local main; no additional worktrees were created.
 
-## Remaining implementation
+## Next implementation
 
-Connect an opt-in live reader/parser context through SourceConstants and the
-existing scope environment. Consume ordinary reads, name-only queries and
-numeric text arguments in native order. Use Deferred source classifications
-for aliases without consulting final addresses. Preserve syntax-only formatting
-and lazy inactive/unused source. Require the retained native matrices, preceding
-source/text controls, permanent CLI/archive coverage, full verification and all
-five actual host archives before closing #795.
+Connect opt-in source hooks to the existing expression parser and live Reader /
+SourceConstants environment. Reuse Deferred source classifications and original
+bound lookup keys; do not duplicate namespaces or consult final layout addresses.
+Read ordinary names, query-only arguments and numeric text arguments in native
+order. Preserve unresolved query dependencies and spans until existing final
+binding can validate them, including references discarded by constant folding.
+Keep inactive/unused source lazy and formatting syntax-only. The approved design,
+128-case order matrix, 54-case admission matrix and prior text/source controls
+remain the acceptance evidence before #795 can close.
