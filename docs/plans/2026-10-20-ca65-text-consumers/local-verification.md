@@ -11,7 +11,8 @@ The portable required cohort has 472 cases (264 accepted, 208 refused), with
 1,264 CLI commands. It checks exact user payloads, native bytes, four previous
 outputs on refusal, canonical/idempotent formatting, official Debug198x parsing
 and symbol/section round trips. All 88 native filename requests are also tested
-through MemoryLoader on every OS; 48 filesystem-specific cases have additional
+through MemoryLoader on every OS, with 44 additional direct requests on the flat
+65816/HuC6280 readers; 48 filesystem-specific cases have additional
 Unix CLI round trips. The actual five-host packages execute the 472 portable
 cases, including 40 real-file cases with ten portable names. POSIX-only names
 are explicitly accounted for rather than assumed to exist on Windows.
