@@ -22,6 +22,16 @@ checks, all-target Clippy, rustfmt, Ruff and generated docs pass. The first buil
 reported a missing BTreeSet import; that failed log is retained. A checked build
 completed before the final native replay; the stale-binary trial is not used.
 
-Clean producer/native replays, local archives and corruption controls, fresh
-4510 replay, exact-head CI and all five native package reports remain required
-before merge. #904 is the next diagnostic-context slice.
+Clean producer 164dbc71e92b517afec5141a09e57e1da76ce845 has CLI SHA-256
+033b1269f942f071e93a6f1defd0ca50c6222ad3786e19c7afcf61cd1a633bb3.
+Its replay matches all 32 programs, 864 operands, 549 quoted-admission cases,
+396 text values and 124 assertion boundaries. Earlier native matches are all
+retained, without unexplained new admission.
+
+All 94 local archive cohorts pass, including 130 new macro/error commands.
+The predecessor fails exactly the four affected formatter cohorts. Wrong bytes
+fail the three expected byte/determinism/structured-success controls; a corrupt
+archive fails SHA-256. Fresh 4510 replay matches all 564 bytes and fourteen
+streams, rejects changed bytes and leaves no disposable work. Complete clean
+identities/replays, archive controls and streams are retained here. All exact-head
+CI and five actual native archives remain required before merge. #904 is next.
