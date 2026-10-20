@@ -234,9 +234,23 @@ fn flat_addresses_match_native_cpu_specific_extraction_and_roundtrips() {
 
 #[test]
 fn flat_data_elements_match_native_current_counters_and_roundtrips() {
-    verify(
+    let facts: serde_json::Value =
         serde_json::from_str(include_str!("fixtures/ca65-flat-element-counter.json"))
-            .expect("facts"),
-        304,
-    );
+            .expect("facts");
+    let rejected: Vec<_> = facts["cases"]
+        .as_array()
+        .expect("cases")
+        .iter()
+        .filter(|fact| {
+            fact["native"]
+                .as_array()
+                .expect("native")
+                .last()
+                .expect("result")["exit"]
+                != 0
+        })
+        .collect();
+    assert_eq!(rejected.len(), 33);
+    assert!(rejected.iter().all(|fact| fact["format_error"] == true));
+    verify(facts, 304);
 }
