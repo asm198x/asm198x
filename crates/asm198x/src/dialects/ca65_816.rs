@@ -780,27 +780,19 @@ fn parse_directive(
         "org" => Ok(Some(Operation::Org(value(rest, line)?))),
         "bytes" => Ok(Some(Operation::Bytes(byte_list(rest, strings, line)?))),
         "words" => Ok(Some(Operation::Words(value_list(rest, line)?))),
-        // `.dword` — 32-bit little-endian. Emitted as width-4 computed pieces so
-        // symbolic values resolve in pass two (the 65816 is little-endian).
-        "dword" => Ok(Some(Operation::Encoded(
-            value_list(rest, line)?
-                .into_iter()
-                .map(|expr| Piece::Val {
-                    expr,
-                    bytes: 4,
-                    rel: false,
-                    signed: false,
-                })
-                .collect(),
-        ))),
-        // `.dbyt` — 16-bit big-endian (high byte first), independent of the CPU's
-        // little-endianness, so lay each value down as `[Hi, Lo]` bytes.
-        "dbyt" => Ok(Some(Operation::Bytes(
-            value_list(rest, line)?
-                .into_iter()
-                .flat_map(|e| [Expr::Hi(Box::new(e.clone())), Expr::Lo(Box::new(e))])
-                .collect(),
-        ))),
+        // Data directives validate the complete unsigned value after layout.
+        "dword" => Ok(Some(Operation::Sized {
+            width: 4,
+            big_endian: false,
+            range: crate::engine::DataRange::Unsigned,
+            values: value_list(rest, line)?,
+        })),
+        "dbyt" => Ok(Some(Operation::Sized {
+            width: 2,
+            big_endian: true,
+            range: crate::engine::DataRange::Unsigned,
+            values: value_list(rest, line)?,
+        })),
         "faraddr" => Ok(Some(Operation::Sized {
             width: 3,
             big_endian: false,

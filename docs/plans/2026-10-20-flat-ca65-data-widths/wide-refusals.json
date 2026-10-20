@@ -1,0 +1,153 @@
+{
+  "issue": 895,
+  "cases": [
+    {
+      "name": "65816_dbyt_inactive",
+      "predecessor": {
+        "name": "65816_dbyt_inactive",
+        "argv": [
+          "/private/tmp/asm198x-flat-data-producer/asm198x",
+          "--dialect",
+          "65816",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:3: error: unsupported directive `.if`\n",
+        "hex": "70726576696f757320696d616765",
+        "matches_native": false
+      },
+      "trial": {
+        "name": "65816_dbyt_inactive",
+        "argv": [
+          "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+          "--dialect",
+          "65816",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:3: error: unsupported directive `.if`\n",
+        "hex": "70726576696f757320696d616765",
+        "matches_native": false
+      }
+    },
+    {
+      "name": "65816_dword_inactive",
+      "predecessor": {
+        "name": "65816_dword_inactive",
+        "argv": [
+          "/private/tmp/asm198x-flat-data-producer/asm198x",
+          "--dialect",
+          "65816",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:3: error: unsupported directive `.if`\n",
+        "hex": "70726576696f757320696d616765",
+        "matches_native": false
+      },
+      "trial": {
+        "name": "65816_dword_inactive",
+        "argv": [
+          "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+          "--dialect",
+          "65816",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:3: error: unsupported directive `.if`\n",
+        "hex": "70726576696f757320696d616765",
+        "matches_native": false
+      }
+    },
+    {
+      "name": "huc6280_dbyt_inactive",
+      "predecessor": {
+        "name": "huc6280_dbyt_inactive",
+        "argv": [
+          "/private/tmp/asm198x-flat-data-producer/asm198x",
+          "--dialect",
+          "huc6280",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:3: error: unsupported directive `.if`\n",
+        "hex": "70726576696f757320696d616765",
+        "matches_native": false
+      },
+      "trial": {
+        "name": "huc6280_dbyt_inactive",
+        "argv": [
+          "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+          "--dialect",
+          "huc6280",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:3: error: unsupported directive `.if`\n",
+        "hex": "70726576696f757320696d616765",
+        "matches_native": false
+      }
+    },
+    {
+      "name": "huc6280_dword_inactive",
+      "predecessor": {
+        "name": "huc6280_dword_inactive",
+        "argv": [
+          "/private/tmp/asm198x-flat-data-producer/asm198x",
+          "--dialect",
+          "huc6280",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:3: error: unsupported directive `.if`\n",
+        "hex": "70726576696f757320696d616765",
+        "matches_native": false
+      },
+      "trial": {
+        "name": "huc6280_dword_inactive",
+        "argv": [
+          "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+          "--dialect",
+          "huc6280",
+          "input.s",
+          "-o",
+          "out.bin",
+          "--debug=out.debug198x"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.s:3: error: unsupported directive `.if`\n",
+        "hex": "70726576696f757320696d616765",
+        "matches_native": false
+      }
+    }
+  ]
+}
