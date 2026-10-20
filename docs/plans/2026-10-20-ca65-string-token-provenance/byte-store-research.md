@@ -3,7 +3,8 @@
 The second frozen prototype executable has SHA-256
 `d4d6871adb0c5a48c5ff8cc8578bfeb188aaaaa95c300819e65c578979ee8eec`.
 Its source-file hashes are retained in `trial-byte-store-identity.json.gz`.
-Production work remains uncommitted while full qualification is prepared.
+At this trial checkpoint production work was uncommitted. The clean-producer
+identity and qualification below supersede this prototype.
 
 The retained native comparison gives:
 

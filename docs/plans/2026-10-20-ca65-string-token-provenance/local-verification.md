@@ -29,3 +29,21 @@ false green. No new native mismatch is introduced by the byte-emission slice.
 Local archive controls, clean producer identity, fresh 4510 replay and actual
 five-host qualification remain required before merge. Exact source snapshots
 and logs in this directory distinguish earlier prototypes from that producer.
+
+The clean producer f920ac1adb4c11572908107cbde53a83b17b428a has tree
+297bb22a53d0fcd2a4490d0c9b5344da4be5d9e0 and CLI SHA-256
+31dd8c0220a4d6efef8e1b3114da99ac3baf9be7b44fc09b00f908551e45dda2.
+The version result and exact source hashes are retained in clean-producer.json.
+All complete native audits reproduce the counts above with this executable.
+
+Its local archive passes all 89 required cohorts. The three new cohorts execute
+1,109, 372 and 2,218 commands. Packaging the retained main executable fails
+exactly those three new cohorts. The wrong-byte control fails exactly
+reference_bytes/determinism/structured_success; corrupted archives fail SHA-256
+validation. Their complete reports are retained.
+
+The fresh 4510 replay matches all 564 native/upstream bytes, retains all seven
+processes and fourteen streams, and rejects a changed-byte control. The driver
+removed its disposable work directory; that removal was verified. Source pin
+and build identity remain in the retained complete replay report. Exact-head CI
+and all five actual packages with ten controls remain required before merge.

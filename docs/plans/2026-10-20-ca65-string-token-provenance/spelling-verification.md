@@ -23,6 +23,6 @@ byte-count/index semantics in `.strlen`/`.strat`, byte retention through token
 selectors and nested construction, valid text paths/names/messages, and numeric
 string refusal. Its native identities, sources and process streams are retained.
 
-This foundation does not fix #886/#887/#872 yet. No production token store or
-emission behavior is included in this commit. The separate uncommitted store
-prototype must be integrated and independently qualified before shipping.
+The raw-spelling foundation at a28b735f did not fix #886/#887/#872 by itself.
+Its later store integration and qualification are recorded separately in this
+directory. The retained logs describe the foundation checkpoint.
