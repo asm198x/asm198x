@@ -1,0 +1,94 @@
+[
+  {
+    "action": "error",
+    "source": ".byte 6\n.assert 0,error,\",\"\n.byte 7\n",
+    "native": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "input.s(2): Error: ,\n"
+    },
+    "actual": [
+      {
+        "binary": "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "exit": 1,
+        "stdout": "[{\"span\":{\"file\":0,\"line\":2,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"\",\"fix\":null}]\n",
+        "stderr": ""
+      },
+      {
+        "binary": "/private/tmp/asm198x-literal-boundaries-producer/asm198x",
+        "exit": 1,
+        "stdout": "[{\"span\":{\"file\":0,\"line\":2,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"\",\"fix\":null}]\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "action": "warning",
+    "source": ".byte 6\n.assert 0,warning,\",\"\n.byte 7\n",
+    "native": {
+      "exit": 0,
+      "stdout": "",
+      "stderr": "input.s(2): Warning: ,\n"
+    },
+    "actual": [
+      {
+        "binary": "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[6,7],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[{\"line\":2,\"message\":\"\"}],\"debug\":{\"symbols\":[],\"lines\":[]},\"section_debug\":[{\"section\":{\"id\":0,\"name\":\"CODE\",\"base\":4096},\"file_offset\":0,\"debug\":{\"symbols\":[],\"lines\":[{\"line\":1,\"offset\":0,\"length\":1},{\"line\":3,\"offset\":1,\"length\":1}],\"cycle_coverage\":\"full\"}}],\"areas\":[{\"name\":\"MAIN\",\"start\":4096,\"size\":28672,\"used\":2,\"free\":28670,\"largest_free\":28670,\"segments\":[{\"name\":\"CODE\",\"base\":4096,\"length\":2}]}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      {
+        "binary": "/private/tmp/asm198x-literal-boundaries-producer/asm198x",
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[6,7],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[{\"line\":2,\"message\":\"\"}],\"debug\":{\"symbols\":[],\"lines\":[]},\"section_debug\":[{\"section\":{\"id\":0,\"name\":\"CODE\",\"base\":4096},\"file_offset\":0,\"debug\":{\"symbols\":[],\"lines\":[{\"line\":1,\"offset\":0,\"length\":1},{\"line\":3,\"offset\":1,\"length\":1}],\"cycle_coverage\":\"full\"}}],\"areas\":[{\"name\":\"MAIN\",\"start\":4096,\"size\":28672,\"used\":2,\"free\":28670,\"largest_free\":28670,\"segments\":[{\"name\":\"CODE\",\"base\":4096,\"length\":2}]}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "action": "lderror",
+    "source": ".byte 6\n.assert 0,lderror,\",\"\n.byte 7\n",
+    "native": {
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "actual": [
+      {
+        "binary": "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "exit": 1,
+        "stdout": "[{\"span\":{\"file\":0,\"line\":2,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"\",\"fix\":null}]\n",
+        "stderr": ""
+      },
+      {
+        "binary": "/private/tmp/asm198x-literal-boundaries-producer/asm198x",
+        "exit": 1,
+        "stdout": "[{\"span\":{\"file\":0,\"line\":2,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"\",\"fix\":null}]\n",
+        "stderr": ""
+      }
+    ]
+  },
+  {
+    "action": "ldwarning",
+    "source": ".byte 6\n.assert 0,ldwarning,\",\"\n.byte 7\n",
+    "native": {
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "actual": [
+      {
+        "binary": "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[6,7],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[{\"line\":2,\"message\":\"\"}],\"debug\":{\"symbols\":[],\"lines\":[]},\"section_debug\":[{\"section\":{\"id\":0,\"name\":\"CODE\",\"base\":4096},\"file_offset\":0,\"debug\":{\"symbols\":[],\"lines\":[{\"line\":1,\"offset\":0,\"length\":1},{\"line\":3,\"offset\":1,\"length\":1}],\"cycle_coverage\":\"full\"}}],\"areas\":[{\"name\":\"MAIN\",\"start\":4096,\"size\":28672,\"used\":2,\"free\":28670,\"largest_free\":28670,\"segments\":[{\"name\":\"CODE\",\"base\":4096,\"length\":2}]}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      {
+        "binary": "/private/tmp/asm198x-literal-boundaries-producer/asm198x",
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[6,7],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[{\"line\":2,\"message\":\"\"}],\"debug\":{\"symbols\":[],\"lines\":[]},\"section_debug\":[{\"section\":{\"id\":0,\"name\":\"CODE\",\"base\":4096},\"file_offset\":0,\"debug\":{\"symbols\":[],\"lines\":[{\"line\":1,\"offset\":0,\"length\":1},{\"line\":3,\"offset\":1,\"length\":1}],\"cycle_coverage\":\"full\"}}],\"areas\":[{\"name\":\"MAIN\",\"start\":4096,\"size\":28672,\"used\":2,\"free\":28670,\"largest_free\":28670,\"segments\":[{\"name\":\"CODE\",\"base\":4096,\"length\":2}]}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      }
+    ]
+  }
+]
