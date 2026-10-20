@@ -91,8 +91,8 @@ pub(crate) fn parse_number(token: &str, line: usize) -> Result<i64, AsmError> {
     Ok(value)
 }
 
-/// Check native numeric tokens without interpreting skipped source.
-pub(crate) fn validate_numeric_tokens(source: &str, at: &Span) -> Result<(), AsmError> {
+/// Check native numeric and quoted tokens without interpreting source meaning.
+pub(crate) fn validate_lexical_tokens(source: &str, at: &Span) -> Result<(), AsmError> {
     StringTokens::reject_authored(source, at.line as usize)
         .map_err(|error| AsmError::at(at.clone(), error.message))?;
     let bytes = source.as_bytes();
@@ -103,19 +103,28 @@ pub(crate) fn validate_numeric_tokens(source: &str, at: &Span) -> Result<(), Asm
             b';' => break,
             b'"' => {
                 i += 1;
-                while i < bytes.len() && bytes[i] != b'"' {
+                while i < bytes.len() && !matches!(bytes[i], b'"' | b'\n') {
                     i += 1;
                 }
-                i += usize::from(i < bytes.len());
+                if bytes.get(i) != Some(&b'"') {
+                    let mut span = at.clone();
+                    span.col = start as u32 + 1;
+                    return Err(AsmError::at(span, "unterminated string literal"));
+                }
+                i += 1;
                 continue;
             }
             b'\'' => {
-                // Default ca65 characters consume one byte. Three consecutive
-                // apostrophes represent the apostrophe character itself.
-                i = (i + 2).min(bytes.len());
-                if bytes.get(i) == Some(&b'\'') {
-                    i += 1;
+                // Native characters contain exactly one printable ASCII byte, including
+                // a raw backslash or apostrophe, followed by the closing quote.
+                if !matches!(bytes.get(i + 1), Some(b' '..=b'~'))
+                    || bytes.get(i + 2) != Some(&b'\'')
+                {
+                    let mut span = at.clone();
+                    span.col = start as u32 + 1;
+                    return Err(AsmError::at(span, "malformed character literal"));
                 }
+                i += 3;
                 continue;
             }
             b'$' | b'%' => {
@@ -1329,7 +1338,7 @@ pub(crate) struct Ca65Macros;
 
 impl macros::MacroSyntax for Ca65Macros {
     fn admit_line(&self, source: &str, at: &Span) -> Result<(), AsmError> {
-        validate_numeric_tokens(source, at)
+        validate_lexical_tokens(source, at)
     }
 
     fn is_symbol_char(&self, c: u8) -> bool {
