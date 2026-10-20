@@ -1,0 +1,177 @@
+{
+  "binary": "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+  "sha256": "aa59d2c5e5011b426f70fc11b1211214b580ce7af27020be6720d02d30166257",
+  "results": [
+    {
+      "name": "byte_0",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00",
+      "matches_native": true
+    },
+    {
+      "name": "byte_1",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "byte_9",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "byte_11",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0b",
+      "matches_native": true
+    },
+    {
+      "name": "byte_12",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0c",
+      "matches_native": true
+    },
+    {
+      "name": "byte_13",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0d",
+      "matches_native": true
+    },
+    {
+      "name": "byte_27",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "1b",
+      "matches_native": true
+    },
+    {
+      "name": "byte_31",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "1f",
+      "matches_native": true
+    },
+    {
+      "name": "byte_127",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "7f",
+      "matches_native": true
+    }
+  ]
+}
