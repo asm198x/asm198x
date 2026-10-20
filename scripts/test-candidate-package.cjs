@@ -1539,6 +1539,11 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
     ]) test(cohort, () => {
       const facts = require('../crates/asm198x/tests/fixtures/' + fixture);
       assert.equal(facts.cases.length, count);
+      if (cohort === 'ca65_flat_element_counter') {
+        const rejected = facts.cases.filter(fact => fact.native.at(-1).exit !== 0);
+        assert.equal(rejected.length, 33);
+        assert(rejected.every(fact => fact.format_error === true), 'counter error formatting coverage is required');
+      }
       for (const [name, source] of Object.entries(facts.files)) write(name, source);
       for (const fact of facts.cases) {
         write('input.s', fact.source);
