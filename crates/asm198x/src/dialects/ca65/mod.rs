@@ -42,6 +42,7 @@ mod deferred;
 mod format;
 mod link;
 mod project;
+pub(super) mod string_tokens;
 pub(crate) use link::VisRule;
 use link::{Emit, Resolved, area_usage, emit, link, resolve};
 use project::{Sweep, collect_syms, map_expr_syms, map_kind_syms, parsed_from_program};
@@ -1211,6 +1212,7 @@ pub(crate) fn parse_program_multi(
 /// pending comment trivia — lives here, so in the multi-file walk it threads
 /// *through* include boundaries in both directions (KTD1, probe-pinned).
 struct Walker {
+    strings: string_tokens::StringTokens,
     set: &'static isa::InstructionSet,
     extension: Option<&'static isa::InstructionSet>,
     cpu_stack: Vec<Option<&'static isa::InstructionSet>>,
@@ -1341,6 +1343,7 @@ impl Walker {
     fn new(set: &'static isa::InstructionSet, expand_text_defines: bool) -> Self {
         Self {
             set,
+            strings: string_tokens::StringTokens::default(),
             extension: None,
             cpu_stack: Vec::new(),
             repeat_registers: None,
@@ -2421,6 +2424,22 @@ impl FlatWalk for Walker {
             });
             return Ok(None);
         }
+        let string_source;
+        let raw = if self.expand_text_defines {
+            let code = split_comment(raw).0.trim();
+            let operation = split_label_head(code).map_or(code, |(_, rest)| rest);
+            let word = split_first_word(operation).0.to_ascii_lowercase();
+            let byte_data = lookup(DIRECTIVES, &word)
+                .is_some_and(|entry| matches!(entry.id, "bytes" | "asciiz"));
+            if byte_data {
+                raw
+            } else {
+                string_source = self.strings.text_source(raw, line)?;
+                &string_source
+            }
+        } else {
+            raw
+        };
         // Deferred anonymous-reference records need the current file; the
         // parse helpers below only know their line.
         self.anons.file.set(file);
@@ -2440,7 +2459,7 @@ impl FlatWalk for Walker {
                 operand_span: None,
                 label: None,
                 item: Some(crate::ast::Item::Verbatim),
-                source: raw.trim_end().to_string(),
+                source: self.strings.display(raw.trim_end()),
                 span: Span::in_file(file, line as u32, 1),
                 trivia: Trivia {
                     leading,
@@ -2714,7 +2733,9 @@ impl FlatWalk for Walker {
                     // parse failure as a fatal statement until projection chooses
                     // the live branch: reached source still reports the original
                     // diagnostic, while dead source is never required to parse.
-                    Err(error) => Kind::Message(DiagSeverity::Error, error.message),
+                    Err(error) => {
+                        Kind::Message(DiagSeverity::Error, self.strings.error(error).message)
+                    }
                 },
             }
         };
@@ -2768,7 +2789,7 @@ impl FlatWalk for Walker {
                 operand_span: None,
                 label: symbol,
                 item: Some(Item::Native(Box::new(kind))),
-                source: rest.trim().to_string(),
+                source: self.strings.display(rest.trim()),
                 span,
                 trivia,
             }),
@@ -3734,7 +3755,13 @@ fn parse_directive(
         ));
     }
     match entry.id {
-        "bytes" => Ok(Kind::Bytes(parse_data_list(anons, anchor, rest, line)?)),
+        "bytes" => Ok(Kind::Bytes(parse_data_list(
+            anons,
+            anchor,
+            &consts.0.strings,
+            rest,
+            line,
+        )?)),
         "words" => Ok(Kind::Words(parse_value_list(anons, anchor, rest, line)?)),
         "dbyt" => Ok(Kind::DBytes(parse_value_list(anons, anchor, rest, line)?)),
         "dword" => Ok(Kind::DWords(parse_value_list(anons, anchor, rest, line)?)),
@@ -3761,7 +3788,13 @@ fn parse_directive(
             }
             Ok(Kind::Bytes(out))
         }
-        "asciiz" => Ok(Kind::Bytes(parse_asciiz(anons, anchor, rest, line)?)),
+        "asciiz" => Ok(Kind::Bytes(parse_asciiz(
+            anons,
+            anchor,
+            &consts.0.strings,
+            rest,
+            line,
+        )?)),
         // The processor words. `.setcpu` takes a quoted name; the `.pNN`
         // shorthands are the name themselves.
         "cpu" => {
@@ -4014,6 +4047,7 @@ fn parse_align(
 fn parse_data_list(
     anons: &AnonCtx,
     anchor: &str,
+    strings: &string_tokens::StringTokens,
     rest: &str,
     line: usize,
 ) -> Result<Vec<Expr>, AsmError> {
@@ -4023,8 +4057,8 @@ fn parse_data_list(
     }
     let mut out = Vec::new();
     for piece in split_data_items(rest) {
-        if let Some(text) = string_literal(piece) {
-            out.extend(text.bytes().map(|b| Expr::Num(i64::from(b))));
+        if let Some(bytes) = strings.data(piece, line)? {
+            out.extend(bytes.into_iter().map(|b| Expr::Num(i64::from(b))));
         } else {
             out.push(parse_value(anons, anchor, piece, line)?);
         }
@@ -4037,10 +4071,11 @@ fn parse_data_list(
 fn parse_asciiz(
     anons: &AnonCtx,
     anchor: &str,
+    strings: &string_tokens::StringTokens,
     rest: &str,
     line: usize,
 ) -> Result<Vec<Expr>, AsmError> {
-    let mut out = parse_data_list(anons, anchor, rest, line)?;
+    let mut out = parse_data_list(anons, anchor, strings, rest, line)?;
     out.push(Expr::Num(0));
     Ok(out)
 }

@@ -319,7 +319,7 @@ fn live_text(
         source,
         target,
         &st.consts,
-        &reader.text_names,
+        (&reader.text_names, &reader.strings),
         reader.repeat_registers.map(|selected| {
             if selected {
                 ca65_flat::Target::Csg4510

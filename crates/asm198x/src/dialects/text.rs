@@ -25,8 +25,8 @@ use crate::engine::AsmError;
 /// One argument to a string function, after the pass has folded it.
 #[derive(Debug, Clone)]
 pub(crate) enum Arg {
-    /// A string literal's contents, without its quotes.
-    Text(String),
+    /// Both the decoded contents and the original quoted spelling.
+    Text { cooked: String, spelling: String },
     /// Anything else, verbatim — a number, a symbol, an expression.
     Bare(String),
 }
@@ -35,7 +35,7 @@ impl Arg {
     /// The text of a string argument, or a refusal naming what was wanted.
     pub(crate) fn text(&self, name: &str, line: usize) -> Result<&str, AsmError> {
         match self {
-            Arg::Text(t) => Ok(t),
+            Arg::Text { cooked, .. } => Ok(cooked),
             Arg::Bare(b) => Err(AsmError::new(
                 line,
                 format!("`{name}` takes a string here, and `{b}` is not one"),
@@ -43,11 +43,19 @@ impl Arg {
         }
     }
 
+    /// Authored quoted spelling, including its quotes, before escape decoding.
+    pub(crate) fn literal_spelling(&self) -> Option<&str> {
+        match self {
+            Arg::Text { spelling, .. } => Some(spelling),
+            Arg::Bare(_) => None,
+        }
+    }
+
     /// The argument's text, whichever kind it is — what a number is read from.
     fn raw(&self) -> &str {
         match self {
             Arg::Bare(b) => b.trim(),
-            Arg::Text(t) => t,
+            Arg::Text { cooked, .. } => cooked,
         }
     }
 }
@@ -160,6 +168,12 @@ pub(crate) trait TextSyntax {
     /// Whether spaces or tabs may separate a function name from its arguments.
     fn permits_function_space(&self) -> bool {
         false
+    }
+
+    /// Whether this function folds while captured inside a brace token list.
+    /// ca65 evaluates string constructors there but retains numeric calls.
+    fn folds_in_braces(&self, _name: &str) -> bool {
+        true
     }
 
     /// The delimiters around an interpolated string-symbol name. rgbasm uses
@@ -423,6 +437,7 @@ fn fold_once<S: TextSyntax>(
     let word = |c: u8| c.is_ascii_alphanumeric() || c == b'_' || c == b'.';
     let mut quote: Option<u8> = None;
     let mut i = 0;
+    let mut braces = 0usize;
     while i < bytes.len() {
         let c = bytes[i];
         if let Some(q) = quote {
@@ -438,19 +453,28 @@ fn fold_once<S: TextSyntax>(
                 i += 1;
             }
             b';' => break,
+            b'{' => {
+                braces += 1;
+                i += 1;
+            }
+            b'}' => {
+                braces = braces.saturating_sub(1);
+                i += 1;
+            }
             _ if word(c) && (i == 0 || !word(bytes[i - 1])) => {
                 let mut j = i;
                 while j < bytes.len() && word(bytes[j]) {
                     j += 1;
                 }
                 let name = &line[i..j];
-                if let Some(open) = call_open(syntax, line, j)
+                if (braces == 0 || syntax.folds_in_braces(name))
+                    && let Some(open) = call_open(syntax, line, j)
                     && let Some(close) = matching_paren(line, open)
                 {
                     let inner = &line[open + 1..close];
                     // Innermost first: a call inside the arguments is folded
                     // before this one, so every argument is already a literal.
-                    if has_call(syntax, scope, inner) {
+                    if has_call(syntax, scope, inner, braces) {
                         i = open + 1;
                         continue;
                     }
@@ -474,7 +498,7 @@ fn fold_once<S: TextSyntax>(
 
 /// Whether the text holds a call this dialect would fold — used to find the
 /// innermost one rather than folding an outer call over unfolded arguments.
-fn has_call<S: TextSyntax>(syntax: &S, scope: &Scope, text: &str) -> bool {
+fn has_call<S: TextSyntax>(syntax: &S, scope: &Scope, text: &str, mut braces: usize) -> bool {
     let bytes = text.as_bytes();
     let word = |c: u8| c.is_ascii_alphanumeric() || c == b'_' || c == b'.';
     let mut quote: Option<u8> = None;
@@ -493,12 +517,19 @@ fn has_call<S: TextSyntax>(syntax: &S, scope: &Scope, text: &str) -> bool {
             i += 1;
             continue;
         }
+        if c == b'{' {
+            braces += 1;
+        }
+        if c == b'}' {
+            braces = braces.saturating_sub(1);
+        }
         if word(c) && (i == 0 || !word(bytes[i - 1])) {
             let mut j = i;
             while j < bytes.len() && word(bytes[j]) {
                 j += 1;
             }
-            let open = call_open(syntax, text, j);
+            let permitted = braces == 0 || syntax.folds_in_braces(&text[i..j]);
+            let open = permitted.then(|| call_open(syntax, text, j)).flatten();
             if open.is_some()
                 && syntax
                     .function(&text[i..j], &[], scope, 0)
@@ -595,7 +626,44 @@ fn split_args(text: &str) -> Vec<Arg> {
 fn one_arg(text: &str) -> Arg {
     let trimmed = text.trim();
     match trimmed.strip_prefix('"').and_then(|t| t.strip_suffix('"')) {
-        Some(inner) => Arg::Text(unescape(inner)),
+        Some(inner) => Arg::Text {
+            cooked: unescape(inner),
+            spelling: trimmed.to_owned(),
+        },
         _ => Arg::Bare(trimmed.to_string()),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn quoted_arguments_keep_spelling_and_existing_cooked_values() {
+        for (source, cooked) in [
+            (r#""a\b""#, r#"a\b"#),
+            (r#""a\\b""#, r#"a\b"#),
+            (r#""a\"b""#, "a\"b"),
+            ("\"é\"", "é"),
+            ("\"\"", ""),
+        ] {
+            let arg = one_arg(&format!("  {source}  "));
+            assert_eq!(arg.literal_spelling(), Some(source));
+            assert_eq!(arg.text("test", 1).expect("quoted argument"), cooked);
+            assert_eq!(arg.raw(), cooked);
+        }
+        let bare = one_arg("  VALUE + 1  ");
+        assert_eq!(bare.literal_spelling(), None);
+        assert_eq!(bare.raw(), "VALUE + 1");
+        assert!(bare.text("test", 1).is_err());
+    }
+
+    #[test]
+    fn argument_splitting_preserves_quoted_commas_and_nested_source() {
+        let args = split_args(r#""a,b", .concat("c", "d"), {x,y}"#);
+        assert_eq!(args.len(), 3);
+        assert_eq!(args[0].literal_spelling(), Some(r#""a,b""#));
+        assert_eq!(args[1].raw(), r#".concat("c", "d")"#);
+        assert_eq!(args[2].raw(), "{x,y}");
     }
 }
