@@ -1,0 +1,212 @@
+[
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/query-original-after.json",
+    "retained": "query-original-after.json.gz",
+    "length": 28863,
+    "sha256": "72e523633486a1af2b21e1f7535db9b4333ef8c669c78df41f9c749f0b56d790"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/strings-consumer-native-after.json",
+    "retained": "strings-consumer-native-after.json.gz",
+    "length": 34010,
+    "sha256": "1d4181340faf25917ca512c3ee7a53e6531b376c927e807043af34e11846b500"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/strings-numeric-string-arity-native-after.json",
+    "retained": "strings-numeric-string-arity-native-after.json.gz",
+    "length": 13013,
+    "sha256": "a64bd17ff3265206d1812736d8c8aad1fb16308de28379d2222d3ba3adec1936"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/scope-deferred-followups-native-after.json",
+    "retained": "scope-deferred-followups-native-after.json.gz",
+    "length": 11357,
+    "sha256": "225c69650423a6fbf6860849fd065b394609fd8dec5ad8f79ac44f203041069d"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/strings-index-scope-native-after.json",
+    "retained": "strings-index-scope-native-after.json.gz",
+    "length": 2187,
+    "sha256": "254878aaa53183383a8b5f4d0a42d56cac1cbb3fc2a7bf3bdf5adfc969f171f0"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/query-short-circuit-after.json",
+    "retained": "query-short-circuit-after.json.gz",
+    "length": 9768,
+    "sha256": "385866cf03797de1f52750d30b8ea2ab9e1ca0aef50dc29be168e89098864be5"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/strings-lifetime-native-after.json",
+    "retained": "strings-lifetime-native-after.json.gz",
+    "length": 17830,
+    "sha256": "c79bb3acea6684a02ac08b213c6c40de8b226dfc9e97c45ae4d241b096d70b86"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/text-assertion-native-after.json",
+    "retained": "text-assertion-native-after.json.gz",
+    "length": 61773,
+    "sha256": "730c762baabe5ba6fa0fd32004715bbf648ecc4e82d8583991226f0d928d761e"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/replay-summary.json",
+    "retained": "replay-summary.json.gz",
+    "length": 7134,
+    "sha256": "5f80980426ab8e4b79bec28d0abfa78ddc79b875245e8520755c7ad0f5ef0c4c"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/query-admission-after.json",
+    "retained": "query-admission-after.json.gz",
+    "length": 28009,
+    "sha256": "1f9d0dd20dc9dd4e3eec850884bae178c83ce9b7e4ece1c999f3912eab028c39"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/text-native-after.json",
+    "retained": "text-native-after.json.gz",
+    "length": 201182,
+    "sha256": "2376499967f8eea1d4797273771512c25e4746bc089acfc7c4f5f696b8e1524a"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/scope-native-width-probes-after.json",
+    "retained": "scope-native-width-probes-after.json.gz",
+    "length": 73081,
+    "sha256": "445aa83af2f9eb94a2acfab4bf18a0d8e92b95c44954c802dd4f1dcae18d07ac"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/scope-native-negative-memory-probes-after.json",
+    "retained": "scope-native-negative-memory-probes-after.json.gz",
+    "length": 14469,
+    "sha256": "6522cb89164925a977127c10294b980c5df8caee28d8e574483a150c61cec7e4"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/scope-native-query-probes-after.json",
+    "retained": "scope-native-query-probes-after.json.gz",
+    "length": 17442,
+    "sha256": "fe565983db9d5c2ed9d0ca878bc6c6821229ea2458cfff12e6100769bfa695ee"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/source-constancy-after.json",
+    "retained": "source-constancy-after.json.gz",
+    "length": 158803,
+    "sha256": "56726bc97bec02847ed627f54694edd353879d5d7b1a0aa55db1a43195fd8b0a"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/conditional-after.json",
+    "retained": "conditional-after.json.gz",
+    "length": 100525,
+    "sha256": "f4098560188527af612831b861c745b2d1712844b4f6e127bee1d23f59e7bd1e"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/query-extended-after.json",
+    "retained": "query-extended-after.json.gz",
+    "length": 71367,
+    "sha256": "e673f79a24c9919428425299c7b006189a1d38ef1ac5257300bd89c31aaea7e2"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/scope-native-phase-probes-after.json",
+    "retained": "scope-native-phase-probes-after.json.gz",
+    "length": 55408,
+    "sha256": "b06f9597780ae9a16ff57115206ca63d37e500e781c88a7035a27c32538138e8"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/strings-text-consumer-native-after.json",
+    "retained": "strings-text-consumer-native-after.json.gz",
+    "length": 3120,
+    "sha256": "a59d1e2c2aedb89acc2cbbab65738a8bf3ad904f4df124fdfeb7fdce910e150f"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/scope-native-stream-probes-after.json",
+    "retained": "scope-native-stream-probes-after.json.gz",
+    "length": 3274,
+    "sha256": "9d927216d0b57cf85807e41e7abb1ca9fb07d71dbd55f02359127ca43c127272"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/strings-flat-native-after.json",
+    "retained": "strings-flat-native-after.json.gz",
+    "length": 265443,
+    "sha256": "e718b73ba94bd79e3aadd3d0dfd7936d2806d3c2af9936bc54c71733228b7a34"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/strings-guard-native-after.json",
+    "retained": "strings-guard-native-after.json.gz",
+    "length": 3388,
+    "sha256": "6a81b3f6c913376bf9c275faa4ee2f07034ad8a30e318f735acc02b21781202a"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/alias-after.json",
+    "retained": "alias-after.json.gz",
+    "length": 4536,
+    "sha256": "94aa1c8afaffd8acc65bc3e32ce8b88bd3ae97e948cfd3da807b7edfa9329b0f"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/scope-native-completed-phase-probes-after.json",
+    "retained": "scope-native-completed-phase-probes-after.json.gz",
+    "length": 54891,
+    "sha256": "c274d386d4a84c0e8152ac65ad066ffac8f7b4433286f6b2fe77ade7b4b06dda"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/format.log",
+    "retained": "format.log.gz",
+    "length": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/docs.log",
+    "retained": "docs.log.gz",
+    "length": 118,
+    "sha256": "850fb02c80b3af4d7c04ac1360de437f687bcf6b9a2f733160e4bd10ce98a165"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/ruff-format.log",
+    "retained": "ruff-format.log.gz",
+    "length": 25,
+    "sha256": "fd2299c9f1c6dc869070883e281051bfe93aacf66c1a3b0069f45b4aa410ca50"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/ruff.log",
+    "retained": "ruff.log.gz",
+    "length": 19,
+    "sha256": "82b3e6a6c090a57601d22943bd23fca9218d1031dbe5a7b754092f9a156b4f18"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/versions.log",
+    "retained": "versions.log.gz",
+    "length": 66,
+    "sha256": "86573d0aa21805a5bc8f1f7d113a12d243521d1907836723f37df91a52d66bd6"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-final-producer/binary-sha256",
+    "retained": "binary-sha256.gz",
+    "length": 65,
+    "sha256": "56ca01c465c2fb07896480aff0942c567eba07018a0455907b6a68d4da03bca1"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-checked-focused.log",
+    "retained": "asm198x-conditional-context-checked-focused.log.gz",
+    "length": 1169,
+    "sha256": "b530944bfef0263eb8ff82a69501147bfcba9ee1960f8c8b5b45cc42d8dcf6cd"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-qualified-clippy.log",
+    "retained": "asm198x-conditional-context-qualified-clippy.log.gz",
+    "length": 288,
+    "sha256": "ad669498fd0b8430819053d9e6719a8aa61701383ca9707a4a62a90a45b90177"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-checked-node.log",
+    "retained": "asm198x-conditional-context-checked-node.log.gz",
+    "length": 9384,
+    "sha256": "d1c2847c71001b69f6c4d7f61f26af8605716558b0f58b5a6f7e536fe6ab044c"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-span-green.log",
+    "retained": "asm198x-conditional-context-span-green.log.gz",
+    "length": 513,
+    "sha256": "c92af26b0cc6603012173904ee360f974da7b44b57dae6826a662c2d4c1a4cb1"
+  },
+  {
+    "source": "/private/tmp/asm198x-conditional-context-qualified-replay.log",
+    "retained": "asm198x-conditional-context-qualified-replay.log.gz",
+    "length": 608,
+    "sha256": "d3d70e87743f7c86daea2ddcec6f75bd8384410588e65607ce1d8d941f738a3e"
+  }
+]

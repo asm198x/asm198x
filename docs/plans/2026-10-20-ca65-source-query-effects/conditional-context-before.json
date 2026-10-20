@@ -1,0 +1,3806 @@
+{
+  "binary": "/private/tmp/asm198x-query-admission-producer/asm198x",
+  "sha256": "a60a02b8c30809de561906713bbf4c08f7cb1eb7d8a977f0289ca1331d23a83d",
+  "results": [
+    {
+      "name": "first_query_direct",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0700",
+      "matches_native": false
+    },
+    {
+      "name": "first_query_included",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0700",
+      "matches_native": false
+    },
+    {
+      "name": "first_query_macro",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0700",
+      "matches_native": false
+    },
+    {
+      "name": "first_query_inactive",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "first_query_unused",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "last_query_direct",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0900",
+      "matches_native": false
+    },
+    {
+      "name": "last_query_included",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0900",
+      "matches_native": false
+    },
+    {
+      "name": "last_query_macro",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0900",
+      "matches_native": false
+    },
+    {
+      "name": "last_query_inactive",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "last_query_unused",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ordinary_first_direct",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0701",
+      "matches_native": true
+    },
+    {
+      "name": "ordinary_first_included",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0701",
+      "matches_native": true
+    },
+    {
+      "name": "ordinary_first_macro",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0701",
+      "matches_native": true
+    },
+    {
+      "name": "ordinary_first_inactive",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ordinary_first_unused",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ordinary_last_direct",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0701",
+      "matches_native": true
+    },
+    {
+      "name": "ordinary_last_included",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0701",
+      "matches_native": true
+    },
+    {
+      "name": "ordinary_last_macro",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0701",
+      "matches_native": true
+    },
+    {
+      "name": "ordinary_last_inactive",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ordinary_last_unused",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "short_read_direct",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0901",
+      "matches_native": true
+    },
+    {
+      "name": "short_read_included",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0901",
+      "matches_native": true
+    },
+    {
+      "name": "short_read_macro",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0901",
+      "matches_native": true
+    },
+    {
+      "name": "short_read_inactive",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "short_read_unused",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "nested_const_direct",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0700",
+      "matches_native": false
+    },
+    {
+      "name": "nested_const_included",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0700",
+      "matches_native": false
+    },
+    {
+      "name": "nested_const_macro",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0700",
+      "matches_native": false
+    },
+    {
+      "name": "nested_const_inactive",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "nested_const_unused",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "same_segment_direct",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "same_segment_included",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "same_segment_macro",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "same_segment_inactive",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "same_segment_unused",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "alias_segment_direct",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "alias_segment_included",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "alias_segment_macro",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "alias_segment_inactive",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "alias_segment_unused",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "forward_difference_direct",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000900",
+      "matches_native": true
+    },
+    {
+      "name": "forward_difference_included",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000900",
+      "matches_native": true
+    },
+    {
+      "name": "forward_difference_macro",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000900",
+      "matches_native": true
+    },
+    {
+      "name": "forward_difference_inactive",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "forward_difference_unused",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "forward_value_direct",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0900",
+      "matches_native": false
+    },
+    {
+      "name": "forward_value_included",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0900",
+      "matches_native": false
+    },
+    {
+      "name": "forward_value_macro",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0900",
+      "matches_native": false
+    },
+    {
+      "name": "forward_value_inactive",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "forward_value_unused",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "missing_direct",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: `MISSING` is not defined anywhere in this source\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "missing_included",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-f7n74fu8/missing_included.inc:1: error: `MISSING` is not defined anywhere in this source\nincluded from input.s:1\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "missing_macro",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:8: error: `MISSING` is not defined anywhere in this source\nin expansion of macro `run` defined at input.s:1, invoked at input.s:8\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "missing_inactive",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "missing_unused",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "missing_zero_direct",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: `MISSING` is not defined anywhere in this source\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "missing_zero_included",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-f7n74fu8/missing_zero_included.inc:1: error: `MISSING` is not defined anywhere in this source\nincluded from input.s:1\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "missing_zero_macro",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:8: error: `MISSING` is not defined anywhere in this source\nin expansion of macro `run` defined at input.s:1, invoked at input.s:8\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "missing_zero_inactive",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "missing_zero_unused",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "missing_logical_direct",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": false
+    },
+    {
+      "name": "missing_logical_included",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": false
+    },
+    {
+      "name": "missing_logical_macro",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": false
+    },
+    {
+      "name": "missing_logical_inactive",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "missing_logical_unused",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "query_only_ref_direct",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: `\u0001ref\u0001MISSING` is not defined anywhere in this source\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "query_only_ref_included",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-f7n74fu8/query_only_ref_included.inc:1: error: `\u0001ref\u0001MISSING` is not defined anywhere in this source\nincluded from input.s:1\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "query_only_ref_macro",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:9: error: `\u0001ref\u0001MISSING` is not defined anywhere in this source\nin expansion of macro `run` defined at input.s:1, invoked at input.s:9\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "query_only_ref_inactive",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "query_only_ref_unused",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "query_only_defined_direct",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: `\u0001defined\u0001MISSING` is not defined anywhere in this source\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "query_only_defined_included",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-f7n74fu8/query_only_defined_included.inc:1: error: `\u0001defined\u0001MISSING` is not defined anywhere in this source\nincluded from input.s:1\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "query_only_defined_macro",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:9: error: `\u0001defined\u0001MISSING` is not defined anywhere in this source\nin expansion of macro `run` defined at input.s:1, invoked at input.s:9\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "query_only_defined_inactive",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "query_only_defined_unused",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "sprintf_read_direct",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0700",
+      "matches_native": false
+    },
+    {
+      "name": "sprintf_read_included",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0700",
+      "matches_native": false
+    },
+    {
+      "name": "sprintf_read_macro",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0700",
+      "matches_native": false
+    },
+    {
+      "name": "sprintf_read_inactive",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "sprintf_read_unused",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "sprintf_prefix_direct",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0700",
+      "matches_native": false
+    },
+    {
+      "name": "sprintf_prefix_included",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0700",
+      "matches_native": false
+    },
+    {
+      "name": "sprintf_prefix_macro",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0700",
+      "matches_native": false
+    },
+    {
+      "name": "sprintf_prefix_inactive",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "sprintf_prefix_unused",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "sprintf_numeric_order_direct",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: `.sprintf` needs a number it can work out where it stands, and `.ref(VALUE)` is not one: this pass runs before the layout, so a label's address cannot be reached from here\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "sprintf_numeric_order_included",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-f7n74fu8/sprintf_numeric_order_included.inc:2: error: `.sprintf` needs a number it can work out where it stands, and `.ref(VALUE)` is not one: this pass runs before the layout, so a label's address cannot be reached from here\nincluded from input.s:1\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "sprintf_numeric_order_macro",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:10: error: `.sprintf` needs a number it can work out where it stands, and `.ref(VALUE)` is not one: this pass runs before the layout, so a label's address cannot be reached from here\nin expansion of macro `run` defined at input.s:1, invoked at input.s:10\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "sprintf_numeric_order_inactive",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "sprintf_numeric_order_unused",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "nested_numeric_order_direct",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: `.sprintf` needs a number it can work out where it stands, and `.ref(VALUE)+1` is not one: this pass runs before the layout, so a label's address cannot be reached from here\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "nested_numeric_order_included",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-f7n74fu8/nested_numeric_order_included.inc:2: error: `.sprintf` needs a number it can work out where it stands, and `.ref(VALUE)+1` is not one: this pass runs before the layout, so a label's address cannot be reached from here\nincluded from input.s:1\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "nested_numeric_order_macro",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:10: error: `.sprintf` needs a number it can work out where it stands, and `.ref(VALUE)+1` is not one: this pass runs before the layout, so a label's address cannot be reached from here\nin expansion of macro `run` defined at input.s:1, invoked at input.s:10\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "nested_numeric_order_inactive",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "nested_numeric_order_unused",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "nested_string_order_direct",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0700",
+      "matches_native": false
+    },
+    {
+      "name": "nested_string_order_included",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0700",
+      "matches_native": false
+    },
+    {
+      "name": "nested_string_order_macro",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0700",
+      "matches_native": false
+    },
+    {
+      "name": "nested_string_order_inactive",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "nested_string_order_unused",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "outer_fallback_direct",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `.const` cannot answer for `VALUE`: this pass keeps no scope stack, so a constant inside a `.proc` or `.scope` is invisible to it\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "outer_fallback_included",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-f7n74fu8/outer_fallback_included.inc:3: error: `.const` cannot answer for `VALUE`: this pass keeps no scope stack, so a constant inside a `.proc` or `.scope` is invisible to it\nincluded from input.s:1\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "outer_fallback_macro",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:12: error: `.const` cannot answer for `VALUE`: this pass keeps no scope stack, so a constant inside a `.proc` or `.scope` is invisible to it\nin expansion of macro `run` defined at input.s:1, invoked at input.s:12\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "outer_fallback_inactive",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "outer_fallback_unused",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "inner_value_direct",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `.const` cannot answer for `VALUE`: this pass keeps no scope stack, so a constant inside a `.proc` or `.scope` is invisible to it\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "inner_value_included",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-f7n74fu8/inner_value_included.inc:3: error: `.const` cannot answer for `VALUE`: this pass keeps no scope stack, so a constant inside a `.proc` or `.scope` is invisible to it\nincluded from input.s:1\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "inner_value_macro",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:12: error: `.const` cannot answer for `VALUE`: this pass keeps no scope stack, so a constant inside a `.proc` or `.scope` is invisible to it\nin expansion of macro `run` defined at input.s:1, invoked at input.s:12\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "inner_value_inactive",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "inner_value_unused",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "explicit_root_direct",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: `.const` cannot answer for `::VALUE`: this pass keeps no scope stack, so a constant inside a `.proc` or `.scope` is invisible to it\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "explicit_root_included",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-f7n74fu8/explicit_root_included.inc:4: error: `.const` cannot answer for `::VALUE`: this pass keeps no scope stack, so a constant inside a `.proc` or `.scope` is invisible to it\nincluded from input.s:1\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "explicit_root_macro",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:13: error: `.const` cannot answer for `::VALUE`: this pass keeps no scope stack, so a constant inside a `.proc` or `.scope` is invisible to it\nin expansion of macro `run` defined at input.s:1, invoked at input.s:13\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "explicit_root_inactive",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "explicit_root_unused",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "explicit_missing_direct",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `.const` cannot answer for `::VALUE`: this pass keeps no scope stack, so a constant inside a `.proc` or `.scope` is invisible to it\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "explicit_missing_included",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-f7n74fu8/explicit_missing_included.inc:3: error: `.const` cannot answer for `::VALUE`: this pass keeps no scope stack, so a constant inside a `.proc` or `.scope` is invisible to it\nincluded from input.s:1\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "explicit_missing_macro",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:11: error: `.const` cannot answer for `::VALUE`: this pass keeps no scope stack, so a constant inside a `.proc` or `.scope` is invisible to it\nin expansion of macro `run` defined at input.s:1, invoked at input.s:11\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "explicit_missing_inactive",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "explicit_missing_unused",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "future_shadow_direct",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `.const` cannot answer for `VALUE`: this pass keeps no scope stack, so a constant inside a `.proc` or `.scope` is invisible to it\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "future_shadow_included",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-f7n74fu8/future_shadow_included.inc:3: error: `.const` cannot answer for `VALUE`: this pass keeps no scope stack, so a constant inside a `.proc` or `.scope` is invisible to it\nincluded from input.s:1\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "future_shadow_macro",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:13: error: `.const` cannot answer for `VALUE`: this pass keeps no scope stack, so a constant inside a `.proc` or `.scope` is invisible to it\nin expansion of macro `run` defined at input.s:1, invoked at input.s:13\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "future_shadow_inactive",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "future_shadow_unused",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "generated_defined_direct",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0700",
+      "matches_native": true
+    },
+    {
+      "name": "generated_defined_included",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0700",
+      "matches_native": true
+    },
+    {
+      "name": "generated_defined_macro",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0700",
+      "matches_native": true
+    },
+    {
+      "name": "generated_defined_inactive",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "generated_defined_unused",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "generated_ref_direct",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0900",
+      "matches_native": true
+    },
+    {
+      "name": "generated_ref_included",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0900",
+      "matches_native": true
+    },
+    {
+      "name": "generated_ref_macro",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0900",
+      "matches_native": true
+    },
+    {
+      "name": "generated_ref_inactive",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "generated_ref_unused",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "generated_ref_after_direct",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0900",
+      "matches_native": false
+    },
+    {
+      "name": "generated_ref_after_included",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0900",
+      "matches_native": false
+    },
+    {
+      "name": "generated_ref_after_macro",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0900",
+      "matches_native": false
+    },
+    {
+      "name": "generated_ref_after_inactive",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "generated_ref_after_unused",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "generated_label_size_direct",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: `.sizeof(Point)=1` must be a constant here \u2014 ca65 folds a condition against the                          `=` constants above it, and refuses a label or a forward reference\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "generated_label_size_included",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-f7n74fu8/generated_label_size_included.inc:2: error: `.sizeof(Point)=1` must be a constant here \u2014 ca65 folds a condition against the                          `=` constants above it, and refuses a label or a forward reference\nincluded from input.s:1\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "generated_label_size_macro",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:10: error: `.sizeof(Point)=1` must be a constant here \u2014 ca65 folds a condition against the                          `=` constants above it, and refuses a label or a forward reference\nin expansion of macro `run` defined at input.s:1, invoked at input.s:10\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "generated_label_size_inactive",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "generated_label_size_unused",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "generated_size_direct",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "generated_size_included",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "generated_size_macro",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "generated_size_inactive",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "generated_size_unused",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "token_count_direct",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0700",
+      "matches_native": false
+    },
+    {
+      "name": "token_count_included",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0700",
+      "matches_native": false
+    },
+    {
+      "name": "token_count_macro",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0700",
+      "matches_native": false
+    },
+    {
+      "name": "token_count_inactive",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "token_count_unused",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "token_match_direct",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0700",
+      "matches_native": true
+    },
+    {
+      "name": "token_match_included",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0700",
+      "matches_native": true
+    },
+    {
+      "name": "token_match_macro",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0700",
+      "matches_native": true
+    },
+    {
+      "name": "token_match_inactive",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "token_match_unused",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "character_parenthesis_direct",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: `.const('(')` must be a constant here \u2014 ca65 folds a condition against the                          `=` constants above it, and refuses a label or a forward reference\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "character_parenthesis_included",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-f7n74fu8/character_parenthesis_included.inc:2: error: `.const('(')` must be a constant here \u2014 ca65 folds a condition against the                          `=` constants above it, and refuses a label or a forward reference\nincluded from input.s:1\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "character_parenthesis_macro",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:10: error: `.const('(')` must be a constant here \u2014 ca65 folds a condition against the                          `=` constants above it, and refuses a label or a forward reference\nin expansion of macro `run` defined at input.s:1, invoked at input.s:10\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "character_parenthesis_inactive",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "character_parenthesis_unused",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "index_const_direct",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0700",
+      "matches_native": false
+    },
+    {
+      "name": "index_const_included",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0700",
+      "matches_native": false
+    },
+    {
+      "name": "index_const_macro",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0700",
+      "matches_native": false
+    },
+    {
+      "name": "index_const_inactive",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "index_const_unused",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "index_query_direct",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: `.strat` index must be a literal constant expression\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "index_query_included",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-f7n74fu8/index_query_included.inc:2: error: `.strat` index must be a literal constant expression\nincluded from input.s:1\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "index_query_macro",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:10: error: `.strat` index must be a literal constant expression\nin expansion of macro `run` defined at input.s:1, invoked at input.s:10\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "index_query_inactive",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "index_query_unused",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "index_symbol_direct",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: `.strat` index must be a literal constant expression\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "index_symbol_included",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-f7n74fu8/index_symbol_included.inc:2: error: `.strat` index must be a literal constant expression\nincluded from input.s:1\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "index_symbol_macro",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:10: error: `.strat` index must be a literal constant expression\nin expansion of macro `run` defined at input.s:1, invoked at input.s:10\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "index_symbol_inactive",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "index_symbol_unused",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "future_size_direct",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: `FUTURE\u0001:size` is not defined anywhere in this source\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "future_size_included",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-f7n74fu8/future_size_included.inc:1: error: `FUTURE\u0001:size` is not defined anywhere in this source\nincluded from input.s:1\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "future_size_macro",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:11: error: `FUTURE\u0001:size` is not defined anywhere in this source\nin expansion of macro `run` defined at input.s:1, invoked at input.s:11\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "future_size_inactive",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "future_size_unused",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "missing_size_direct",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1: error: `MISSING\u0001:size` is not defined anywhere in this source\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "missing_size_included",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-f7n74fu8/missing_size_included.inc:1: error: `MISSING\u0001:size` is not defined anywhere in this source\nincluded from input.s:1\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "missing_size_macro",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:8: error: `MISSING\u0001:size` is not defined anywhere in this source\nin expansion of macro `run` defined at input.s:1, invoked at input.s:8\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "missing_size_inactive",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "missing_size_unused",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "known_size_direct",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "known_size_included",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "known_size_macro",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "known_size_inactive",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "known_size_unused",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "elseif_order_direct",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0700",
+      "matches_native": false
+    },
+    {
+      "name": "elseif_order_included",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0700",
+      "matches_native": false
+    },
+    {
+      "name": "elseif_order_macro",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0700",
+      "matches_native": false
+    },
+    {
+      "name": "elseif_order_inactive",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "elseif_order_unused",
+      "argv": [
+        "/private/tmp/asm198x-query-admission-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    }
+  ]
+}

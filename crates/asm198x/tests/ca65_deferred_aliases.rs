@@ -77,6 +77,11 @@ fn selected_query_names_require_final_native_binding() {
     verify_fixture(fixture, 51);
 }
 
+#[test]
+fn conditional_source_queries_follow_native_read_order() {
+    verify_fixture(include_str!("fixtures/ca65-conditional-context.json"), 197);
+}
+
 fn verify_fixture(fixture: &str, count: usize) {
     let facts: serde_json::Value = serde_json::from_str(fixture).expect("native captures");
     let cases = facts["cases"].as_array().expect("cases");

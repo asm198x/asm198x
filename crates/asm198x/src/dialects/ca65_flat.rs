@@ -1566,7 +1566,7 @@ fn local_declaration(line: &str) -> Option<Vec<String>> {
 /// `.definedmacro` is not here — it is answered a layer earlier, during macro
 /// expansion — but it needs the same stand-in for the same reason, so the
 /// caller adds it.
-fn is_text_function(lower: &str) -> bool {
+pub(crate) fn is_text_function(lower: &str) -> bool {
     matches!(
         lower,
         ".concat"
@@ -1651,6 +1651,47 @@ pub(crate) fn expand_ca65_macros(
     })
 }
 
+/// Borrowed source-time numeric semantics for linked ca65 text consumers.
+pub(crate) trait LiveNumbers {
+    fn literal(&self, text: &str, line: usize) -> Result<Option<i64>, AsmError>;
+    fn number(&self, text: &str, line: usize) -> Result<Option<i64>, AsmError>;
+    fn constancy(&self, text: &str, line: usize) -> Result<i64, AsmError>;
+}
+
+pub(crate) struct LiveText<'a> {
+    pub target: Target,
+    pub token_target: Option<Target>,
+    pub numbers: &'a BTreeMap<String, i64>,
+    pub strings: &'a StringTokens,
+    pub defined: &'a std::collections::BTreeSet<String>,
+    pub context: &'a dyn LiveNumbers,
+}
+
+pub(crate) fn expand_ca65_live(
+    source: &str,
+    line: usize,
+    live: LiveText<'_>,
+) -> Result<String, AsmError> {
+    let syntax = Ca65Text {
+        source_line: Some(line),
+        target: live.target,
+        token_target: live.token_target,
+        depth: std::cell::Cell::new(0),
+        numbers: Cow::Borrowed(live.numbers),
+        defined: Cow::Borrowed(live.defined),
+        strings: Cow::Borrowed(live.strings),
+        live: Some(live.context),
+    };
+    text::expand(&syntax, source)
+        .map(|text| text.trim_end_matches('\n').to_string())
+        .map_err(|mut error| {
+            if error.span.is_none() {
+                error.line = line;
+            }
+            live.strings.error(error)
+        })
+}
+
 pub(crate) fn expand_ca65_line(
     source: &str,
     target: Target,
@@ -1661,6 +1702,7 @@ pub(crate) fn expand_ca65_line(
     line: usize,
 ) -> Result<String, AsmError> {
     let syntax = Ca65Text {
+        live: None,
         source_line: Some(line),
         target,
         token_target,
@@ -1728,6 +1770,7 @@ impl Target {
 /// **token** rather than its value: with `N = 7`, `.string(N)` is `"N"`.
 #[derive(Default)]
 struct Ca65Text<'a> {
+    live: Option<&'a dyn LiveNumbers>,
     source_line: Option<usize>,
     strings: Cow<'a, StringTokens>,
     /// How many `.proc`/`.scope` blocks are open around the line being read.
@@ -1810,6 +1853,19 @@ pub(crate) fn defined_names(source: &str) -> std::collections::BTreeSet<String> 
 }
 
 impl Ca65Text<'_> {
+    fn bytes(&self, arg: &text::Arg, name: &str, line: usize) -> Result<Vec<u8>, AsmError> {
+        if self.live.is_some()
+            && let text::Arg::Bare(raw) = arg
+            && !StringTokens::is_handle(raw.trim())
+        {
+            let expanded = text::expand(self, raw)?;
+            return self
+                .strings
+                .bytes(&text::Arg::Bare(expanded.trim().to_string()), name, line);
+        }
+        self.strings.bytes(arg, name, line)
+    }
+
     /// Answer `.const`: 1 if the expression folds here, 0 if every name in it
     /// is defined somewhere but not to a value this pass can reach.
     ///
@@ -1838,6 +1894,9 @@ impl Ca65Text<'_> {
                 line,
                 format!("`{name}` takes an expression, not a string"),
             ));
+        }
+        if let Some(live) = self.live {
+            return live.constancy(raw, line);
         }
         if self.depth.get() > 0 || raw.contains("::") {
             return Err(AsmError::new(
@@ -1872,8 +1931,16 @@ impl Ca65Text<'_> {
 }
 
 impl text::TextSyntax for Ca65Text<'_> {
+    fn reads_arguments(&self, name: &str) -> bool {
+        self.live.is_some()
+            && matches!(
+                name.to_ascii_lowercase().as_str(),
+                ".const" | ".sprintf" | ".concat" | ".strlen" | ".strat" | ".ident"
+            )
+    }
+
     fn folds_in_braces(&self, name: &str) -> bool {
-        !matches!(name.to_ascii_lowercase().as_str(), ".strlen" | ".strat")
+        self.live.is_none() && !matches!(name.to_ascii_lowercase().as_str(), ".strlen" | ".strat")
     }
 
     fn permits_function_space(&self) -> bool {
@@ -1926,6 +1993,18 @@ impl text::TextSyntax for Ca65Text<'_> {
     /// A ca65 expression over the constants above the line. A label's address
     /// is unreachable here, and ca65 refuses that case itself — `.sprintf("%d",
     /// L)` on a label is "Constant expression expected" there too.
+    fn evaluate_checked(
+        &self,
+        text: &str,
+        numbers: &BTreeMap<String, i64>,
+        line: usize,
+    ) -> Result<Option<i64>, AsmError> {
+        match self.live {
+            Some(live) => live.number(text, line),
+            None => Ok(self.evaluate(text, numbers, line)),
+        }
+    }
+
     fn evaluate(
         &self,
         text: &str,
@@ -1989,7 +2068,7 @@ impl text::TextSyntax for Ca65Text<'_> {
             ".concat" => {
                 let mut out = Vec::new();
                 for a in args {
-                    out.extend(self.strings.bytes(a, name, line)?);
+                    out.extend(self.bytes(a, name, line)?);
                 }
                 string(out)?
             }
@@ -2021,43 +2100,61 @@ impl text::TextSyntax for Ca65Text<'_> {
                 string(token.as_bytes().to_vec())?
             }
             ".sprintf" => string(sprintf(
-                &self.strings.bytes(&args[0], name, line)?,
+                &self.bytes(&args[0], name, line)?,
                 &args[1..],
-                &self.strings,
+                &|arg, name, line| self.bytes(arg, name, line),
                 scope,
                 line,
             )?)?,
             ".strlen" => {
                 one(args)?;
                 Folded::Number(
-                    self.strings
-                        .bytes(&args[0], name, line)
-                        .map_err(|_| {
-                            AsmError::new(line, format!("`{name}` takes a string, not a value"))
+                    self.bytes(&args[0], name, line)
+                        .map_err(|error| {
+                            if self.live.is_some() && error.span.is_some() {
+                                error
+                            } else {
+                                AsmError::new(line, format!("`{name}` takes a string, not a value"))
+                            }
                         })?
                         .len() as i64,
                 )
             }
             ".strat" => {
                 arity(args, 2, name, line)?;
-                let bytes = self.strings.bytes(&args[0], name, line)?;
-                if let text::Arg::Bare(source) = &args[1]
-                    && !StringTokens::is_string(&args[1])
-                {
-                    let expression = super::ca65::constant_value(source, line)?;
-                    let mut named = false;
-                    let _ = crate::ast::map_sym_expr(expression, &mut |symbol| {
-                        named = true;
-                        crate::engine::Expr::Sym(symbol)
-                    });
-                    if named {
+                let bytes = self.bytes(&args[0], name, line)?;
+                let index = if let Some(live) = self.live {
+                    if StringTokens::is_string(&args[1]) {
                         return Err(AsmError::new(
                             line,
-                            "`.strat` index must be a literal constant expression",
+                            "`.strat` needs a numeric bound, not a string",
                         ));
                     }
-                }
-                let index = selector_bound(&args[1], scope, name, line)?;
+                    let text::Arg::Bare(source) = &args[1] else {
+                        unreachable!("quoted arguments rejected")
+                    };
+                    live.literal(source, line)?.ok_or_else(|| {
+                        AsmError::new(line, "`.strat` index must be a literal constant expression")
+                    })?
+                } else {
+                    if let text::Arg::Bare(source) = &args[1]
+                        && !StringTokens::is_string(&args[1])
+                    {
+                        let expression = super::ca65::constant_value(source, line)?;
+                        let mut named = false;
+                        let _ = crate::ast::map_sym_expr(expression, &mut |symbol| {
+                            named = true;
+                            crate::engine::Expr::Sym(symbol)
+                        });
+                        if named {
+                            return Err(AsmError::new(
+                                line,
+                                "`.strat` index must be a literal constant expression",
+                            ));
+                        }
+                    }
+                    selector_bound(&args[1], scope, name, line)?
+                };
                 let byte = usize::try_from(index)
                     .ok()
                     .and_then(|i| bytes.get(i))
@@ -2174,7 +2271,7 @@ impl text::TextSyntax for Ca65Text<'_> {
             // resolve — forward references included, as in ca65.
             ".ident" => {
                 one(args)?;
-                let bytes = self.strings.bytes(&args[0], name, line)?;
+                let bytes = self.bytes(&args[0], name, line)?;
                 let value = std::str::from_utf8(&bytes).map_err(|_| {
                     AsmError::new(line, "`.ident` argument is not a valid identifier")
                 })?;
@@ -2496,10 +2593,12 @@ fn format_spec(fmt: &[u8], mut i: usize) -> Option<(FormatSpec, usize)> {
 }
 
 /// Fold one `.sprintf` call.
+type StringBytes<'a> = dyn Fn(&text::Arg, &str, usize) -> Result<Vec<u8>, AsmError> + 'a;
+
 fn sprintf(
     bytes: &[u8],
     args: &[text::Arg],
-    strings: &StringTokens,
+    string_bytes: &StringBytes<'_>,
     scope: &text::Scope,
     line: usize,
 ) -> Result<Vec<u8>, AsmError> {
@@ -2540,7 +2639,7 @@ fn sprintf(
                 ),
             )
         })?;
-        out.extend(format_one(&spec, arg, strings, scope, line)?);
+        out.extend(format_one(&spec, arg, string_bytes, scope, line)?);
         used += 1;
         i = next;
     }
@@ -2561,7 +2660,7 @@ fn sprintf(
 fn format_one(
     spec: &FormatSpec,
     arg: &text::Arg,
-    strings: &StringTokens,
+    string_bytes: &StringBytes<'_>,
     scope: &text::Scope,
     line: usize,
 ) -> Result<Vec<u8>, AsmError> {
@@ -2572,7 +2671,7 @@ fn format_one(
     // types': no flag pads on the right, and `-` pads on the left.
     if matches!(kind, 's' | 'c') {
         let mut body = if kind == 's' {
-            let mut bytes = strings.bytes(arg, ".sprintf", line)?;
+            let mut bytes = string_bytes(arg, ".sprintf", line)?;
             if let Some(n) = spec.precision {
                 bytes.truncate(n);
             }
@@ -2752,6 +2851,61 @@ fn take<const N: usize>(
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn nested_live_string_queries_preserve_definition_diagnostics() {
+        use crate::span::{ExpansionFrame, FileId, Span};
+        struct Reject(Span);
+        impl super::LiveNumbers for Reject {
+            fn literal(
+                &self,
+                _text: &str,
+                _line: usize,
+            ) -> Result<Option<i64>, crate::engine::AsmError> {
+                unreachable!("sprintf numeric argument")
+            }
+            fn number(
+                &self,
+                _text: &str,
+                _line: usize,
+            ) -> Result<Option<i64>, crate::engine::AsmError> {
+                let mut error = crate::engine::AsmError::unsupported(
+                    self.0.line as usize,
+                    "definition cannot be evaluated",
+                );
+                error.span = Some(self.0.clone());
+                Err(error)
+            }
+            fn constancy(&self, _text: &str, _line: usize) -> Result<i64, crate::engine::AsmError> {
+                unreachable!("numeric sprintf argument")
+            }
+        }
+        let mut span = Span::in_file(FileId(3), 7, 4);
+        span.expansion_frames.push(ExpansionFrame {
+            macro_name: "definition".to_string(),
+            defined_at: Some(Box::new(Span::in_file(FileId(3), 2, 1))),
+            invoked_at: Box::new(Span::in_file(FileId(0), 11, 1)),
+        });
+        let strings = super::StringTokens::default();
+        let numbers = std::collections::BTreeMap::new();
+        let defined = std::collections::BTreeSet::new();
+        let error = super::expand_ca65_live(
+            ".strlen(.sprintf(\"%d\",VALUE))",
+            17,
+            super::LiveText {
+                target: super::Target::Mos6502,
+                token_target: None,
+                numbers: &numbers,
+                strings: &strings,
+                defined: &defined,
+                context: &Reject(span.clone()),
+            },
+        )
+        .expect_err("nested read must refuse");
+        assert_eq!(error.span, Some(span));
+        assert_eq!(error.code, crate::contract::Code::UnsupportedFeature);
+        assert_eq!(error.message, "definition cannot be evaluated");
+    }
+
     use super::*;
 
     #[test]

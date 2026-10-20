@@ -4161,11 +4161,21 @@ fn plain_references(value: &Expr) -> Expr {
 }
 
 fn parse_value(anons: &AnonCtx, anchor: &str, raw: &str, line: usize) -> Result<Expr, AsmError> {
+    parse_value_source(anons, anchor, raw, line, None)
+}
+
+fn parse_value_source(
+    anons: &AnonCtx,
+    anchor: &str,
+    raw: &str,
+    line: usize,
+    source: Option<&dyn mos6502::ExprSource>,
+) -> Result<Expr, AsmError> {
     let t = raw.trim();
     if let Some((sign, level)) = anon_ref(t) {
         return Ok(Expr::Sym(anons.refer(sign, level, line)?));
     }
-    let expr = mos6502::parse_expr(
+    let expr = mos6502::parse_expr_source(
         t,
         line,
         parse_number,
@@ -4190,6 +4200,7 @@ fn parse_value(anons: &AnonCtx, anchor: &str, raw: &str, line: usize) -> Result<
             caret: mos6502::Caret::BankOrXor,
             at_is_pc: false,
         },
+        source,
     )?;
     // Bare names, arithmetic and name-query markers all share the same
     // cheap namespace. Binding only a bare operand loses that context.

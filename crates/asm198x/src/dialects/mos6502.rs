@@ -562,17 +562,35 @@ fn implicit_number(token: &str) -> Option<i64> {
 
 /// Parse a value expression. `parse_number` lexes the dialect's numeric literal
 /// forms; `opts` selects the dialect's operator syntax.
+/// Optional source-time reading; syntax-only consumers use the pure entry.
+pub(crate) trait ExprSource {
+    fn recognizes(&self, name: &str) -> bool;
+    fn symbol(&self, name: &str, line: usize) -> Result<Expr, AsmError>;
+    fn function(&self, name: &str, args: &str, line: usize) -> Result<Expr, AsmError>;
+}
+
 pub(crate) fn parse_expr(
     raw: &str,
     line: usize,
     parse_number: fn(&str, usize) -> Result<i64, AsmError>,
     opts: ExprOpts,
 ) -> Result<Expr, AsmError> {
-    let tokens = tokenize(raw, line, parse_number, opts)?;
+    parse_expr_source(raw, line, parse_number, opts, None)
+}
+
+pub(crate) fn parse_expr_source(
+    raw: &str,
+    line: usize,
+    parse_number: fn(&str, usize) -> Result<i64, AsmError>,
+    opts: ExprOpts,
+    source: Option<&dyn ExprSource>,
+) -> Result<Expr, AsmError> {
+    let tokens = tokenize(raw, line, parse_number, opts, source)?;
     if tokens.is_empty() {
         return Err(AsmError::new(line, "expected a value"));
     }
     let mut parser = ExprParser {
+        source,
         tokens,
         pos: 0,
         line,
@@ -597,6 +615,10 @@ pub(crate) fn parse_expr(
 enum Tok {
     Num(i64),
     Sym(String),
+    SourceCall {
+        name: String,
+        args: String,
+    },
     Star,
     Pc,
     Plus,
@@ -667,6 +689,7 @@ fn tokenize(
     line: usize,
     parse_number: fn(&str, usize) -> Result<i64, AsmError>,
     opts: ExprOpts,
+    source: Option<&dyn ExprSource>,
 ) -> Result<Vec<Tok>, AsmError> {
     let chars: Vec<char> = raw.chars().collect();
     let mut tokens = Vec::new();
@@ -677,7 +700,14 @@ fn tokenize(
         // one did. That is the whole of how `<` tells its two meanings apart.
         let after_value = matches!(
             tokens.last(),
-            Some(Tok::Num(_) | Tok::Sym(_) | Tok::Pc | Tok::RParen | Tok::Str(_))
+            Some(
+                Tok::Num(_)
+                    | Tok::Sym(_)
+                    | Tok::SourceCall { .. }
+                    | Tok::Pc
+                    | Tok::RParen
+                    | Tok::Str(_)
+            )
         );
         let c = chars[i];
         match c {
@@ -953,6 +983,51 @@ fn tokenize(
                     i += if chars[i] == ':' { 2 } else { 1 };
                 }
                 let word: String = chars[start..i].iter().collect();
+                if source.is_some_and(|source| source.recognizes(&word)) {
+                    let mut open = i;
+                    while chars.get(open).is_some_and(|c| c.is_whitespace()) {
+                        open += 1;
+                    }
+                    if chars.get(open) == Some(&'(') {
+                        let mut depth = 1usize;
+                        let mut quote = None;
+                        let mut close = open + 1;
+                        while close < chars.len() {
+                            let c = chars[close];
+                            if let Some(q) = quote {
+                                if c == q {
+                                    quote = None;
+                                }
+                            } else {
+                                match c {
+                                    '\'' | '"' => quote = Some(c),
+                                    '(' => depth += 1,
+                                    ')' => {
+                                        depth -= 1;
+                                        if depth == 0 {
+                                            break;
+                                        }
+                                    }
+                                    _ => {}
+                                }
+                            }
+                            close += 1;
+                        }
+                        if depth != 0 {
+                            return Err(AsmError::new(
+                                line,
+                                format!("expected `)` in `{word}(...)`"),
+                            ));
+                        }
+                        tokens.push(Tok::SourceCall {
+                            name: word,
+                            args: chars[open + 1..close].iter().collect(),
+                        });
+                        i = close + 1;
+                        continue;
+                    }
+                }
+
                 if let Some(value) = implicit_number(&word) {
                     tokens.push(Tok::Num(value));
                     continue;
@@ -985,7 +1060,8 @@ fn tokenize(
     Ok(tokens)
 }
 
-struct ExprParser {
+struct ExprParser<'a> {
+    source: Option<&'a dyn ExprSource>,
     tokens: Vec<Tok>,
     pos: usize,
     line: usize,
@@ -998,7 +1074,7 @@ struct ExprParser {
     logical_not_tight: bool,
 }
 
-impl ExprParser {
+impl ExprParser<'_> {
     fn expr(&mut self) -> Result<Expr, AsmError> {
         self.logical_not()
     }
@@ -1328,6 +1404,10 @@ impl ExprParser {
             .ok_or_else(|| AsmError::new(self.line, "expected a value"))?;
         self.pos += 1;
         match tok {
+            Tok::SourceCall { name, args } => self
+                .source
+                .expect("source call has a context")
+                .function(&name, &args, self.line),
             Tok::Num(n) => Ok(Expr::Num(n)),
             Tok::Sym(s) => {
                 // `name(` is a call where the dialect has functions; anywhere
@@ -1355,7 +1435,10 @@ impl ExprParser {
                         self.pos += 1;
                         build(&s, args, self.line)
                     }
-                    _ => Ok(Expr::Sym(s)),
+                    _ => match self.source {
+                        Some(source) => source.symbol(&s, self.line),
+                        None => Ok(Expr::Sym(s)),
+                    },
                 }
             }
             Tok::Pc => Ok(Expr::Pc),
