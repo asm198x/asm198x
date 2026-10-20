@@ -1,45 +1,57 @@
 # Source-query implementation checkpoint
 
-The approved #795 design is partly implemented. #914 merged the checked text
-numeric callback and native source alias classification after all 29 exact-head
-checks and five native archive qualifications passed. All 1,638 Rust/Lua tests
-pass (38 ignored), along with 115 Node checks and Clippy/fmt/Ruff/docs checks.
-The 314-case classifier audit fixes 161 wrong-byte results; 313 supported cases
-are permanent. One existing undefined-query wrong acceptance remains explicit.
-The new 54-case query-admission audit pins fifteen wrong acceptances for the
-next context slice. Live .const and numeric text argument ordering remain open.
+The approved #795 design remains partly implemented. #915 merged conditional
+required-name admission at 301e1fe2fc4ad65ac00debaf88d4d2d7da2f9cc3, with
+qualified source 0e963625f5dd814e2dc0f135512c34819823b709. The merged tree is
+identical to the qualified tree. All 1,639 Rust/Lua tests pass (38 ignored),
+along with 115 Node checks, Clippy/fmt and docs/version checks. All 29 required
+CI checks and five native archives pass; each archive ran 101 required cohorts,
+156 query-admission commands and 1,229 classifier commands, plus both negative
+controls. The initial macOS Lua job acquired no runner; the exact capacity
+annotations and successful same-commit retry are retained in qualification-915.
+
+The 54-case admission audit now matches 51 cases, fixing twelve wrong
+acceptances. Three logical .const controls remain explicitly excluded under
+#795. Eighteen supplementary native short-circuit/.ifnconst controls all match,
+fixing nine additional wrong acceptances. All 2,194 earlier replay cases retain
+every prior match. The classifier fixture now includes all 314 cases, with its
+last undefined-name wrong acceptance fixed and no exclusions.
 
 ## Retained task workspaces
 
 - `/Users/stevehill/Projects/198x/Asm198x/asm198x-ca65-text-consumers` is the sole
-  task worktree. It remains for #795 implementation and checked merge. Remove
-  it with git worktree remove when #795 is merged, after inspecting all tracked,
-  untracked and ignored content and verifying retained commits/evidence.
-- `/private/tmp/asm198x-text-consumers-build` is the active shared build cache.
-  Reuse it for #795, then remove it after all task-owned build/test processes exit.
-- `/private/tmp/asm198x-source-constancy-final-producer` is the next frozen audit
-  baseline: source 499a58a29015f79a0b3897572db1e1ba9dc816c8, CLI SHA-256
-  1d5c767f35ac32e5acdb3543db9a06cc320802d194bf99b83c72f70a333afc2a.
-  Native results and identity are durable in source-constancy-local-qualification-914.
-  Remove after the next corrected context producer is qualified and retained.
-- `/private/tmp/asm198x-source-constancy-final-local-package` is the 100-cohort
+  task worktree. Reuse it for #795; remove with git worktree remove after the
+  issue is complete, after inspecting all tracked, untracked and ignored files
+  and positively verifying retained commits and evidence.
+- `/private/tmp/asm198x-text-consumers-build` is the reusable task build cache.
+  Remove after #795 work finishes and task-owned build/test processes exit.
+- `/private/tmp/asm198x-query-admission-producer` is the next frozen baseline:
+  source 0e963625f5dd814e2dc0f135512c34819823b709. identity.json records both
+  executable hashes and the source tree/lock. asm198x is the replay producer;
+  asm198x-lua is the release-feature archive producer. Complete records are
+  retained in query-admission-local-qualification-915 and qualification-915.
+  Remove after the next corrected producer is qualified and retained.
+- `/private/tmp/asm198x-query-admission-local-package` is the 101-cohort
   predecessor archive for the next required-cohort control. Remove after the
-  next cohort proves that archive fails and its retained hashes/reports are verified.
+  next cohort rejects it and the archive hashes/reports are retained.
 
-Superseded producers, packages, native report downloads and completed clean
-4510 workspaces were removed after positive retention checks. Their indexes
-are in the qualification and cleanup folders. No task-owned build, test or CI
-monitor remains running. The original asm198x checkout stays at its original
-local main; no additional worktrees were created.
+The old classifier producer/package, new clean 4510 workspace, five downloaded
+native reports and task-only helpers/logs were removed after exact retention
+checks. query-admission-cleanup-915/index.json records every verified file,
+source retention, removed directory and df readings. No task-owned build, test,
+archive qualification or CI monitor remains running. The original checkout
+stays at local main 47fc51643eb98ecdd5ef2f64cfc5035bee52997e; no additional
+worktrees were created.
 
 ## Next implementation
 
-Connect opt-in source hooks to the existing expression parser and live Reader /
-SourceConstants environment. Reuse Deferred source classifications and original
-bound lookup keys; do not duplicate namespaces or consult final layout addresses.
-Read ordinary names, query-only arguments and numeric text arguments in native
-order. Preserve unresolved query dependencies and spans until existing final
-binding can validate them, including references discarded by constant folding.
-Keep inactive/unused source lazy and formatting syntax-only. The approved design,
-128-case order matrix, 54-case admission matrix and prior text/source controls
-remain the acceptance evidence before #795 can close.
+Connect the approved opt-in source parser hooks and live Reader/Projection
+context. Consume ordinary names, .const and numeric string arguments at their
+native expression positions. Reuse Deferred source classification, the existing
+shared scope environment and original bound lookup keys. The conditional
+source_reads metadata now demonstrates final admission; extend that seam to
+live .const/numeric arguments before short-circuit folding discards names.
+Query-only arguments stay non-reading; inactive/unused source stays lazy and
+formatting stays syntax-only. The retained 128-case ordering matrix, 54-case
+admission matrix, supplementary eighteen controls and earlier source/text
+matrices remain the acceptance evidence before #795 can close.
