@@ -1,0 +1,177 @@
+{
+  "binary": "/private/tmp/asm198x-flat-counter-producer/asm198x",
+  "sha256": "9dd103083dba8a4ecd5148ad619d317b8ff3f965a371be9c4db6370aff10e8bc",
+  "results": [
+    {
+      "name": "difference",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "chain",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "unary",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "multiply",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "cancel",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "missing_cancel",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: undefined symbol `MISSING`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "forward_difference",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "090000",
+      "matches_native": true
+    },
+    {
+      "name": "alias_to_label",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "constant",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    }
+  ]
+}
