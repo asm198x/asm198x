@@ -67,14 +67,28 @@ canonical syntax-only reader and preserves the existing after-`.end` contract.
    local package/corruption controls, actual five-host archives and exact-head CI.
    Rebase-merge and remove the owned workspace/caches after retaining evidence.
 
-## Expanded pre-implementation controls
+## Expanded controls and delivery boundary
 
-The 157-case audit retains the original 139 cases and adds macro/repeat `.end`,
-`.exitmacro`, malformed `.end` tails, inactive missing includes, unknown names
-and comment/semicolon controls. Native accepts 77 and refuses 80. The clean
-predecessor has 44 wrong acceptances and two first-error position mismatches:
-malformed tokens before a missing include currently report the later include
-instead. `compare.py` checks native first-error lines and all four existing
-outputs on refusal, alongside acceptance and emitted bytes. Complete facts and
-predecessor process streams are retained in `native-expanded.json` and
-`predecessor-expanded.json`.
+The final 549-case audit retains the original 139 cases and adds macro/repeat
+`.end`, `.exitmacro`, malformed `.end` tails, inactive missing includes, unknown
+names, comments, semicolons, CRLF and EOF controls. It also covers every ASCII
+byte in selected source, an inactive branch and an unused macro. Native accepts
+367 cases and refuses 182. The clean predecessor has 143 wrong acceptances,
+two first-error location mismatches and one existing safe refusal. `compare.py`
+checks native first-error lines and all four previous outputs on refusal,
+alongside acceptance and emitted bytes. Complete facts and predecessor process
+streams are retained in `native-expanded.json` and `predecessor-expanded.json`.
+
+Character bodies must be printable ASCII bytes (space through tilde). Balanced
+control-byte literals are invalid. Double-quoted strings accept carriage return
+as a byte; physical LF ends an unclosed string. Complete EOF tokens stay valid.
+Nine additional raw-string controls accept NUL, SOH, tab, vertical tab, form
+feed, carriage return, escape, unit separator and DEL as string bytes. Their
+`native-string-controls.json` and paired trial have zero differences. These
+bytes stay valid strings even though they are invalid character bodies.
+
+The valid selected comma character `.byte ','` is the existing safe refusal
+(#900). The lexical gate accepts its shape, but the later data-item splitter
+divides the character at the comma. Retain it explicitly as a safe refusal in
+this admission slice and fix its operand boundary next; do not claim all 549
+cases match native. Inactive and unused-macro comma controls remain accepted.
