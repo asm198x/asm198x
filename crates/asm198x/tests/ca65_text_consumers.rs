@@ -211,6 +211,36 @@ fn native_filename_values_reach_the_memory_loader_on_every_os() {
         assert_eq!(again_debug.symbols, debug.symbols, "{name}: symbols");
     }
     assert_eq!(checked, 88);
+    let mut flat_checked = 0;
+    for case in original["cases"].as_array().expect("cases") {
+        if !case["name"].as_str().expect("name").starts_with("direct_")
+            || !matches!(case["consumer"].as_str(), Some("include" | "incbin"))
+        {
+            continue;
+        }
+        let source = case["source"].as_str().expect("source");
+        for (dialect, result) in [
+            (
+                "65816",
+                asm198x::assemble_ca65_816_files(source, "input.s", &loader),
+            ),
+            (
+                "huc6280",
+                asm198x::assemble_ca65_huc6280_files(source, "input.s", &loader),
+            ),
+        ] {
+            flat_checked += 1;
+            let result = result.unwrap_or_else(|e| panic!("{dialect}/{}: {e:?}", case["name"]));
+            let hex: String = result.bytes.iter().map(|b| format!("{b:02x}")).collect();
+            assert_eq!(
+                hex,
+                case["native_hex"].as_str().expect("native image"),
+                "{dialect}/{}",
+                case["name"]
+            );
+        }
+    }
+    assert_eq!(flat_checked, 44);
 }
 
 fn verify_cli<'a>(
