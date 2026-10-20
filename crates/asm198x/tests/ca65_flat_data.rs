@@ -159,6 +159,42 @@ fn verify(facts: serde_json::Value, count: usize) {
                     );
                 }
             }
+            if fact["format_error"] == true {
+                let formatted = run(&root, &["fmt", "--dialect", dialect, "input.s"]);
+                assert!(formatted.status.success(), "{name}: {formatted:?}");
+                std::fs::write(root.join("formatted.s"), &formatted.stdout)
+                    .expect("formatted source");
+                let again = run(&root, &["fmt", "--dialect", dialect, "formatted.s"]);
+                assert!(again.status.success(), "{name}: {again:?}");
+                assert_eq!(
+                    again.stdout, formatted.stdout,
+                    "{name}: error-source idempotence"
+                );
+                let after = assemble("formatted.s");
+                assert_eq!(after.status.code(), Some(1), "{name}: {after:?}");
+                let diagnostics: serde_json::Value =
+                    serde_json::from_slice(&after.stdout).expect("JSON error");
+                let expected = &fact["native_error"];
+                let original = expected["path"].as_str().expect("native path");
+                let filename = if original == "input.s" {
+                    "formatted.s"
+                } else {
+                    original
+                };
+                assert!(
+                    Path::new(diagnostics[0]["span"]["path"].as_str().expect("path"))
+                        .ends_with(filename),
+                    "{name}"
+                );
+                assert_eq!(diagnostics[0]["span"]["line"], expected["line"], "{name}");
+                for output in outputs {
+                    assert_eq!(
+                        std::fs::read(root.join(output)).expect("output"),
+                        b"previous output",
+                        "{name}: {output}"
+                    );
+                }
+            }
         }
     }
 }
@@ -193,5 +229,14 @@ fn flat_addresses_match_native_cpu_specific_extraction_and_roundtrips() {
     verify(
         serde_json::from_str(include_str!("fixtures/ca65-flat-addresses.json")).expect("facts"),
         148,
+    );
+}
+
+#[test]
+fn flat_data_elements_match_native_current_counters_and_roundtrips() {
+    verify(
+        serde_json::from_str(include_str!("fixtures/ca65-flat-element-counter.json"))
+            .expect("facts"),
+        304,
     );
 }
