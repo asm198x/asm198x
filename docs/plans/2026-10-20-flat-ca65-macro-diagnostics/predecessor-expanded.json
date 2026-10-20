@@ -1,0 +1,2216 @@
+{
+  "binary": "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+  "sha256": "033b1269f942f071e93a6f1defd0ca50c6222ad3786e19c7afcf61cd1a633bb3",
+  "results": [
+    {
+      "name": "65816_byte_range_root",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":0,\"line\":6,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"value 256 does not fit in a byte\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": false,
+      "expected": {
+        "path": "input.s",
+        "line": 6,
+        "frames": [
+          "inner"
+        ],
+        "definition_lines": {
+          "inner": 3
+        }
+      }
+    },
+    {
+      "name": "65816_byte_range_included",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":1,\"line\":4,\"col\":0,\"expansion_frames\":[],\"path\":\"/private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-flat-macro-context-y8ho9mgd/65816_byte_range_included.inc\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"value 256 does not fit in a byte\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": false,
+      "expected": {
+        "path": "65816_byte_range_included.inc",
+        "line": 4,
+        "frames": [
+          "inner"
+        ],
+        "definition_lines": {
+          "inner": 1
+        }
+      }
+    },
+    {
+      "name": "65816_byte_range_nested_root",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":0,\"line\":9,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"value 256 does not fit in a byte\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": false,
+      "expected": {
+        "path": "input.s",
+        "line": 9,
+        "frames": [
+          "inner",
+          "outer"
+        ],
+        "definition_lines": {
+          "inner": 3,
+          "outer": 6
+        }
+      }
+    },
+    {
+      "name": "65816_byte_range_nested_included",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":1,\"line\":7,\"col\":0,\"expansion_frames\":[],\"path\":\"/private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-flat-macro-context-y8ho9mgd/65816_byte_range_nested_included.inc\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"value 256 does not fit in a byte\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": false,
+      "expected": {
+        "path": "65816_byte_range_nested_included.inc",
+        "line": 7,
+        "frames": [
+          "inner",
+          "outer"
+        ],
+        "definition_lines": {
+          "inner": 1,
+          "outer": 4
+        }
+      }
+    },
+    {
+      "name": "65816_byte_range_plain",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":0,\"line\":3,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"value 256 does not fit in a byte\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": true,
+      "expected": {
+        "path": "input.s",
+        "line": 3,
+        "frames": [],
+        "definition_lines": {}
+      }
+    },
+    {
+      "name": "65816_byte_range_unused",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 0,
+      "stdout": "{\"version\":1,\"bytes\":[7],\"origin\":4096,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":6,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":1,\"free\":65535,\"largest_free\":61439}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+      "stderr": "",
+      "native_accepted": true,
+      "matches_native_outcome": true,
+      "matches_context": true,
+      "expected": null
+    },
+    {
+      "name": "65816_word_range_root",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":0,\"line\":6,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"value 65536 does not fit in a word\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": false,
+      "expected": {
+        "path": "input.s",
+        "line": 6,
+        "frames": [
+          "inner"
+        ],
+        "definition_lines": {
+          "inner": 3
+        }
+      }
+    },
+    {
+      "name": "65816_word_range_included",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":1,\"line\":4,\"col\":0,\"expansion_frames\":[],\"path\":\"/private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-flat-macro-context-y8ho9mgd/65816_word_range_included.inc\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"value 65536 does not fit in a word\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": false,
+      "expected": {
+        "path": "65816_word_range_included.inc",
+        "line": 4,
+        "frames": [
+          "inner"
+        ],
+        "definition_lines": {
+          "inner": 1
+        }
+      }
+    },
+    {
+      "name": "65816_word_range_nested_root",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":0,\"line\":9,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"value 65536 does not fit in a word\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": false,
+      "expected": {
+        "path": "input.s",
+        "line": 9,
+        "frames": [
+          "inner",
+          "outer"
+        ],
+        "definition_lines": {
+          "inner": 3,
+          "outer": 6
+        }
+      }
+    },
+    {
+      "name": "65816_word_range_nested_included",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":1,\"line\":7,\"col\":0,\"expansion_frames\":[],\"path\":\"/private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-flat-macro-context-y8ho9mgd/65816_word_range_nested_included.inc\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"value 65536 does not fit in a word\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": false,
+      "expected": {
+        "path": "65816_word_range_nested_included.inc",
+        "line": 7,
+        "frames": [
+          "inner",
+          "outer"
+        ],
+        "definition_lines": {
+          "inner": 1,
+          "outer": 4
+        }
+      }
+    },
+    {
+      "name": "65816_word_range_plain",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":0,\"line\":3,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"value 65536 does not fit in a word\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": true,
+      "expected": {
+        "path": "input.s",
+        "line": 3,
+        "frames": [],
+        "definition_lines": {}
+      }
+    },
+    {
+      "name": "65816_word_range_unused",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 0,
+      "stdout": "{\"version\":1,\"bytes\":[7],\"origin\":4096,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":6,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":1,\"free\":65535,\"largest_free\":61439}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+      "stderr": "",
+      "native_accepted": true,
+      "matches_native_outcome": true,
+      "matches_context": true,
+      "expected": null
+    },
+    {
+      "name": "65816_faraddr_range_root",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 0,
+      "stdout": "{\"version\":1,\"bytes\":[0,0,0],\"origin\":4096,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":6,\"offset\":0,\"length\":3}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":3,\"free\":65533,\"largest_free\":61437}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": false,
+      "matches_context": false,
+      "expected": null
+    },
+    {
+      "name": "65816_faraddr_range_included",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 0,
+      "stdout": "{\"version\":1,\"bytes\":[0,0,0],\"origin\":4096,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":4,\"offset\":0,\"length\":3,\"file\":1}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":3,\"free\":65533,\"largest_free\":61437}],\"diagnostics\":[],\"files\":[\"input.s\",\"/private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-flat-macro-context-y8ho9mgd/65816_faraddr_range_included.inc\"]}\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": false,
+      "matches_context": false,
+      "expected": null
+    },
+    {
+      "name": "65816_faraddr_range_nested_root",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 0,
+      "stdout": "{\"version\":1,\"bytes\":[0,0,0],\"origin\":4096,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":9,\"offset\":0,\"length\":3}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":3,\"free\":65533,\"largest_free\":61437}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": false,
+      "matches_context": false,
+      "expected": null
+    },
+    {
+      "name": "65816_faraddr_range_nested_included",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 0,
+      "stdout": "{\"version\":1,\"bytes\":[0,0,0],\"origin\":4096,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":7,\"offset\":0,\"length\":3,\"file\":1}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":3,\"free\":65533,\"largest_free\":61437}],\"diagnostics\":[],\"files\":[\"input.s\",\"/private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-flat-macro-context-y8ho9mgd/65816_faraddr_range_nested_included.inc\"]}\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": false,
+      "matches_context": false,
+      "expected": null
+    },
+    {
+      "name": "65816_faraddr_range_plain",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 0,
+      "stdout": "{\"version\":1,\"bytes\":[0,0,0],\"origin\":4096,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":3,\"offset\":0,\"length\":3}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":3,\"free\":65533,\"largest_free\":61437}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": false,
+      "matches_context": false,
+      "expected": null
+    },
+    {
+      "name": "65816_faraddr_range_unused",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 0,
+      "stdout": "{\"version\":1,\"bytes\":[7],\"origin\":4096,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":6,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":1,\"free\":65535,\"largest_free\":61439}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+      "stderr": "",
+      "native_accepted": true,
+      "matches_native_outcome": true,
+      "matches_context": true,
+      "expected": null
+    },
+    {
+      "name": "65816_undefined_root",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":0,\"line\":6,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"undefined symbol `MISSING`\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": false,
+      "expected": {
+        "path": "input.s",
+        "line": 6,
+        "frames": [
+          "inner"
+        ],
+        "definition_lines": {
+          "inner": 3
+        }
+      }
+    },
+    {
+      "name": "65816_undefined_included",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":1,\"line\":4,\"col\":0,\"expansion_frames\":[],\"path\":\"/private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-flat-macro-context-y8ho9mgd/65816_undefined_included.inc\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"undefined symbol `MISSING`\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": false,
+      "expected": {
+        "path": "65816_undefined_included.inc",
+        "line": 4,
+        "frames": [
+          "inner"
+        ],
+        "definition_lines": {
+          "inner": 1
+        }
+      }
+    },
+    {
+      "name": "65816_undefined_nested_root",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":0,\"line\":9,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"undefined symbol `MISSING`\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": false,
+      "expected": {
+        "path": "input.s",
+        "line": 9,
+        "frames": [
+          "inner",
+          "outer"
+        ],
+        "definition_lines": {
+          "inner": 3,
+          "outer": 6
+        }
+      }
+    },
+    {
+      "name": "65816_undefined_nested_included",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":1,\"line\":7,\"col\":0,\"expansion_frames\":[],\"path\":\"/private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-flat-macro-context-y8ho9mgd/65816_undefined_nested_included.inc\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"undefined symbol `MISSING`\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": false,
+      "expected": {
+        "path": "65816_undefined_nested_included.inc",
+        "line": 7,
+        "frames": [
+          "inner",
+          "outer"
+        ],
+        "definition_lines": {
+          "inner": 1,
+          "outer": 4
+        }
+      }
+    },
+    {
+      "name": "65816_undefined_plain",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":0,\"line\":3,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"undefined symbol `MISSING`\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": true,
+      "expected": {
+        "path": "input.s",
+        "line": 3,
+        "frames": [],
+        "definition_lines": {}
+      }
+    },
+    {
+      "name": "65816_undefined_unused",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 0,
+      "stdout": "{\"version\":1,\"bytes\":[7],\"origin\":4096,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":6,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":1,\"free\":65535,\"largest_free\":61439}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+      "stderr": "",
+      "native_accepted": true,
+      "matches_native_outcome": true,
+      "matches_context": true,
+      "expected": null
+    },
+    {
+      "name": "65816_syntax_root",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":0,\"line\":6,\"col\":0,\"expansion_frames\":[{\"macro_name\":\"inner\",\"defined_at\":{\"file\":0,\"line\":3,\"col\":1,\"expansion_frames\":[],\"path\":\"input.s\"},\"invoked_at\":{\"file\":0,\"line\":6,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"}}],\"path\":\"input.s\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"expected a value\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": true,
+      "expected": {
+        "path": "input.s",
+        "line": 6,
+        "frames": [
+          "inner"
+        ],
+        "definition_lines": {
+          "inner": 3
+        }
+      }
+    },
+    {
+      "name": "65816_syntax_included",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":1,\"line\":4,\"col\":0,\"expansion_frames\":[{\"macro_name\":\"inner\",\"defined_at\":{\"file\":0,\"line\":1,\"col\":1,\"expansion_frames\":[],\"path\":\"input.s\"},\"invoked_at\":{\"file\":0,\"line\":4,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"}}],\"path\":\"/private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-flat-macro-context-y8ho9mgd/65816_syntax_included.inc\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"expected a value\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": false,
+      "expected": {
+        "path": "65816_syntax_included.inc",
+        "line": 4,
+        "frames": [
+          "inner"
+        ],
+        "definition_lines": {
+          "inner": 1
+        }
+      }
+    },
+    {
+      "name": "65816_syntax_nested_root",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":0,\"line\":9,\"col\":0,\"expansion_frames\":[{\"macro_name\":\"inner\",\"defined_at\":{\"file\":0,\"line\":3,\"col\":1,\"expansion_frames\":[],\"path\":\"input.s\"},\"invoked_at\":{\"file\":0,\"line\":9,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"}},{\"macro_name\":\"outer\",\"defined_at\":{\"file\":0,\"line\":6,\"col\":1,\"expansion_frames\":[],\"path\":\"input.s\"},\"invoked_at\":{\"file\":0,\"line\":9,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"}}],\"path\":\"input.s\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"expected a value\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": true,
+      "expected": {
+        "path": "input.s",
+        "line": 9,
+        "frames": [
+          "inner",
+          "outer"
+        ],
+        "definition_lines": {
+          "inner": 3,
+          "outer": 6
+        }
+      }
+    },
+    {
+      "name": "65816_syntax_nested_included",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":1,\"line\":7,\"col\":0,\"expansion_frames\":[{\"macro_name\":\"inner\",\"defined_at\":{\"file\":0,\"line\":1,\"col\":1,\"expansion_frames\":[],\"path\":\"input.s\"},\"invoked_at\":{\"file\":0,\"line\":7,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"}},{\"macro_name\":\"outer\",\"defined_at\":{\"file\":0,\"line\":4,\"col\":1,\"expansion_frames\":[],\"path\":\"input.s\"},\"invoked_at\":{\"file\":0,\"line\":7,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"}}],\"path\":\"/private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-flat-macro-context-y8ho9mgd/65816_syntax_nested_included.inc\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"expected a value\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": false,
+      "expected": {
+        "path": "65816_syntax_nested_included.inc",
+        "line": 7,
+        "frames": [
+          "inner",
+          "outer"
+        ],
+        "definition_lines": {
+          "inner": 1,
+          "outer": 4
+        }
+      }
+    },
+    {
+      "name": "65816_syntax_plain",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":0,\"line\":3,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"expected a value\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": true,
+      "expected": {
+        "path": "input.s",
+        "line": 3,
+        "frames": [],
+        "definition_lines": {}
+      }
+    },
+    {
+      "name": "65816_syntax_unused",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 0,
+      "stdout": "{\"version\":1,\"bytes\":[7],\"origin\":4096,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":6,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":1,\"free\":65535,\"largest_free\":61439}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+      "stderr": "",
+      "native_accepted": true,
+      "matches_native_outcome": true,
+      "matches_context": true,
+      "expected": null
+    },
+    {
+      "name": "65816_negative_reserve_root",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":0,\"line\":6,\"col\":0,\"expansion_frames\":[{\"macro_name\":\"inner\",\"defined_at\":{\"file\":0,\"line\":3,\"col\":1,\"expansion_frames\":[],\"path\":\"input.s\"},\"invoked_at\":{\"file\":0,\"line\":6,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"}}],\"path\":\"input.s\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"`.res` count must be a non-negative constant\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": true,
+      "expected": {
+        "path": "input.s",
+        "line": 6,
+        "frames": [
+          "inner"
+        ],
+        "definition_lines": {
+          "inner": 3
+        }
+      }
+    },
+    {
+      "name": "65816_negative_reserve_included",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":1,\"line\":4,\"col\":0,\"expansion_frames\":[{\"macro_name\":\"inner\",\"defined_at\":{\"file\":0,\"line\":1,\"col\":1,\"expansion_frames\":[],\"path\":\"input.s\"},\"invoked_at\":{\"file\":0,\"line\":4,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"}}],\"path\":\"/private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-flat-macro-context-y8ho9mgd/65816_negative_reserve_included.inc\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"`.res` count must be a non-negative constant\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": false,
+      "expected": {
+        "path": "65816_negative_reserve_included.inc",
+        "line": 4,
+        "frames": [
+          "inner"
+        ],
+        "definition_lines": {
+          "inner": 1
+        }
+      }
+    },
+    {
+      "name": "65816_negative_reserve_nested_root",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":0,\"line\":9,\"col\":0,\"expansion_frames\":[{\"macro_name\":\"inner\",\"defined_at\":{\"file\":0,\"line\":3,\"col\":1,\"expansion_frames\":[],\"path\":\"input.s\"},\"invoked_at\":{\"file\":0,\"line\":9,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"}},{\"macro_name\":\"outer\",\"defined_at\":{\"file\":0,\"line\":6,\"col\":1,\"expansion_frames\":[],\"path\":\"input.s\"},\"invoked_at\":{\"file\":0,\"line\":9,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"}}],\"path\":\"input.s\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"`.res` count must be a non-negative constant\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": true,
+      "expected": {
+        "path": "input.s",
+        "line": 9,
+        "frames": [
+          "inner",
+          "outer"
+        ],
+        "definition_lines": {
+          "inner": 3,
+          "outer": 6
+        }
+      }
+    },
+    {
+      "name": "65816_negative_reserve_nested_included",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":1,\"line\":7,\"col\":0,\"expansion_frames\":[{\"macro_name\":\"inner\",\"defined_at\":{\"file\":0,\"line\":1,\"col\":1,\"expansion_frames\":[],\"path\":\"input.s\"},\"invoked_at\":{\"file\":0,\"line\":7,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"}},{\"macro_name\":\"outer\",\"defined_at\":{\"file\":0,\"line\":4,\"col\":1,\"expansion_frames\":[],\"path\":\"input.s\"},\"invoked_at\":{\"file\":0,\"line\":7,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"}}],\"path\":\"/private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-flat-macro-context-y8ho9mgd/65816_negative_reserve_nested_included.inc\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"`.res` count must be a non-negative constant\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": false,
+      "expected": {
+        "path": "65816_negative_reserve_nested_included.inc",
+        "line": 7,
+        "frames": [
+          "inner",
+          "outer"
+        ],
+        "definition_lines": {
+          "inner": 1,
+          "outer": 4
+        }
+      }
+    },
+    {
+      "name": "65816_negative_reserve_plain",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":0,\"line\":3,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"`.res` count must be a non-negative constant\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": true,
+      "expected": {
+        "path": "input.s",
+        "line": 3,
+        "frames": [],
+        "definition_lines": {}
+      }
+    },
+    {
+      "name": "65816_negative_reserve_unused",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 0,
+      "stdout": "{\"version\":1,\"bytes\":[7],\"origin\":4096,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":6,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":1,\"free\":65535,\"largest_free\":61439}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+      "stderr": "",
+      "native_accepted": true,
+      "matches_native_outcome": true,
+      "matches_context": true,
+      "expected": null
+    },
+    {
+      "name": "65816_valid_root",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 0,
+      "stdout": "{\"version\":1,\"bytes\":[7],\"origin\":4096,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":6,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":1,\"free\":65535,\"largest_free\":61439}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+      "stderr": "",
+      "native_accepted": true,
+      "matches_native_outcome": true,
+      "matches_context": true,
+      "expected": null
+    },
+    {
+      "name": "65816_valid_included",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 0,
+      "stdout": "{\"version\":1,\"bytes\":[7],\"origin\":4096,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":4,\"offset\":0,\"length\":1,\"file\":1}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":1,\"free\":65535,\"largest_free\":61439}],\"diagnostics\":[],\"files\":[\"input.s\",\"/private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-flat-macro-context-y8ho9mgd/65816_valid_included.inc\"]}\n",
+      "stderr": "",
+      "native_accepted": true,
+      "matches_native_outcome": true,
+      "matches_context": true,
+      "expected": null
+    },
+    {
+      "name": "65816_valid_nested_root",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 0,
+      "stdout": "{\"version\":1,\"bytes\":[7],\"origin\":4096,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":9,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":1,\"free\":65535,\"largest_free\":61439}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+      "stderr": "",
+      "native_accepted": true,
+      "matches_native_outcome": true,
+      "matches_context": true,
+      "expected": null
+    },
+    {
+      "name": "65816_valid_nested_included",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 0,
+      "stdout": "{\"version\":1,\"bytes\":[7],\"origin\":4096,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":7,\"offset\":0,\"length\":1,\"file\":1}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":1,\"free\":65535,\"largest_free\":61439}],\"diagnostics\":[],\"files\":[\"input.s\",\"/private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-flat-macro-context-y8ho9mgd/65816_valid_nested_included.inc\"]}\n",
+      "stderr": "",
+      "native_accepted": true,
+      "matches_native_outcome": true,
+      "matches_context": true,
+      "expected": null
+    },
+    {
+      "name": "huc6280_byte_range_root",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":0,\"line\":6,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"value 256 does not fit in a byte\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": false,
+      "expected": {
+        "path": "input.s",
+        "line": 6,
+        "frames": [
+          "inner"
+        ],
+        "definition_lines": {
+          "inner": 3
+        }
+      }
+    },
+    {
+      "name": "huc6280_byte_range_included",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":1,\"line\":4,\"col\":0,\"expansion_frames\":[],\"path\":\"/private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-flat-macro-context-y8ho9mgd/huc6280_byte_range_included.inc\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"value 256 does not fit in a byte\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": false,
+      "expected": {
+        "path": "huc6280_byte_range_included.inc",
+        "line": 4,
+        "frames": [
+          "inner"
+        ],
+        "definition_lines": {
+          "inner": 1
+        }
+      }
+    },
+    {
+      "name": "huc6280_byte_range_nested_root",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":0,\"line\":9,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"value 256 does not fit in a byte\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": false,
+      "expected": {
+        "path": "input.s",
+        "line": 9,
+        "frames": [
+          "inner",
+          "outer"
+        ],
+        "definition_lines": {
+          "inner": 3,
+          "outer": 6
+        }
+      }
+    },
+    {
+      "name": "huc6280_byte_range_nested_included",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":1,\"line\":7,\"col\":0,\"expansion_frames\":[],\"path\":\"/private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-flat-macro-context-y8ho9mgd/huc6280_byte_range_nested_included.inc\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"value 256 does not fit in a byte\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": false,
+      "expected": {
+        "path": "huc6280_byte_range_nested_included.inc",
+        "line": 7,
+        "frames": [
+          "inner",
+          "outer"
+        ],
+        "definition_lines": {
+          "inner": 1,
+          "outer": 4
+        }
+      }
+    },
+    {
+      "name": "huc6280_byte_range_plain",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":0,\"line\":3,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"value 256 does not fit in a byte\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": true,
+      "expected": {
+        "path": "input.s",
+        "line": 3,
+        "frames": [],
+        "definition_lines": {}
+      }
+    },
+    {
+      "name": "huc6280_byte_range_unused",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 0,
+      "stdout": "{\"version\":1,\"bytes\":[7],\"origin\":4096,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":6,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":1,\"free\":65535,\"largest_free\":61439}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+      "stderr": "",
+      "native_accepted": true,
+      "matches_native_outcome": true,
+      "matches_context": true,
+      "expected": null
+    },
+    {
+      "name": "huc6280_word_range_root",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":0,\"line\":6,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"value 65536 does not fit in a word\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": false,
+      "expected": {
+        "path": "input.s",
+        "line": 6,
+        "frames": [
+          "inner"
+        ],
+        "definition_lines": {
+          "inner": 3
+        }
+      }
+    },
+    {
+      "name": "huc6280_word_range_included",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":1,\"line\":4,\"col\":0,\"expansion_frames\":[],\"path\":\"/private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-flat-macro-context-y8ho9mgd/huc6280_word_range_included.inc\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"value 65536 does not fit in a word\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": false,
+      "expected": {
+        "path": "huc6280_word_range_included.inc",
+        "line": 4,
+        "frames": [
+          "inner"
+        ],
+        "definition_lines": {
+          "inner": 1
+        }
+      }
+    },
+    {
+      "name": "huc6280_word_range_nested_root",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":0,\"line\":9,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"value 65536 does not fit in a word\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": false,
+      "expected": {
+        "path": "input.s",
+        "line": 9,
+        "frames": [
+          "inner",
+          "outer"
+        ],
+        "definition_lines": {
+          "inner": 3,
+          "outer": 6
+        }
+      }
+    },
+    {
+      "name": "huc6280_word_range_nested_included",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":1,\"line\":7,\"col\":0,\"expansion_frames\":[],\"path\":\"/private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-flat-macro-context-y8ho9mgd/huc6280_word_range_nested_included.inc\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"value 65536 does not fit in a word\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": false,
+      "expected": {
+        "path": "huc6280_word_range_nested_included.inc",
+        "line": 7,
+        "frames": [
+          "inner",
+          "outer"
+        ],
+        "definition_lines": {
+          "inner": 1,
+          "outer": 4
+        }
+      }
+    },
+    {
+      "name": "huc6280_word_range_plain",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":0,\"line\":3,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"value 65536 does not fit in a word\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": true,
+      "expected": {
+        "path": "input.s",
+        "line": 3,
+        "frames": [],
+        "definition_lines": {}
+      }
+    },
+    {
+      "name": "huc6280_word_range_unused",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 0,
+      "stdout": "{\"version\":1,\"bytes\":[7],\"origin\":4096,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":6,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":1,\"free\":65535,\"largest_free\":61439}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+      "stderr": "",
+      "native_accepted": true,
+      "matches_native_outcome": true,
+      "matches_context": true,
+      "expected": null
+    },
+    {
+      "name": "huc6280_faraddr_range_root",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 0,
+      "stdout": "{\"version\":1,\"bytes\":[0,0,0],\"origin\":4096,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":6,\"offset\":0,\"length\":3}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":3,\"free\":65533,\"largest_free\":61437}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": false,
+      "matches_context": false,
+      "expected": null
+    },
+    {
+      "name": "huc6280_faraddr_range_included",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 0,
+      "stdout": "{\"version\":1,\"bytes\":[0,0,0],\"origin\":4096,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":4,\"offset\":0,\"length\":3,\"file\":1}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":3,\"free\":65533,\"largest_free\":61437}],\"diagnostics\":[],\"files\":[\"input.s\",\"/private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-flat-macro-context-y8ho9mgd/huc6280_faraddr_range_included.inc\"]}\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": false,
+      "matches_context": false,
+      "expected": null
+    },
+    {
+      "name": "huc6280_faraddr_range_nested_root",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 0,
+      "stdout": "{\"version\":1,\"bytes\":[0,0,0],\"origin\":4096,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":9,\"offset\":0,\"length\":3}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":3,\"free\":65533,\"largest_free\":61437}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": false,
+      "matches_context": false,
+      "expected": null
+    },
+    {
+      "name": "huc6280_faraddr_range_nested_included",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 0,
+      "stdout": "{\"version\":1,\"bytes\":[0,0,0],\"origin\":4096,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":7,\"offset\":0,\"length\":3,\"file\":1}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":3,\"free\":65533,\"largest_free\":61437}],\"diagnostics\":[],\"files\":[\"input.s\",\"/private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-flat-macro-context-y8ho9mgd/huc6280_faraddr_range_nested_included.inc\"]}\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": false,
+      "matches_context": false,
+      "expected": null
+    },
+    {
+      "name": "huc6280_faraddr_range_plain",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 0,
+      "stdout": "{\"version\":1,\"bytes\":[0,0,0],\"origin\":4096,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":3,\"offset\":0,\"length\":3}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":3,\"free\":65533,\"largest_free\":61437}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": false,
+      "matches_context": false,
+      "expected": null
+    },
+    {
+      "name": "huc6280_faraddr_range_unused",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 0,
+      "stdout": "{\"version\":1,\"bytes\":[7],\"origin\":4096,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":6,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":1,\"free\":65535,\"largest_free\":61439}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+      "stderr": "",
+      "native_accepted": true,
+      "matches_native_outcome": true,
+      "matches_context": true,
+      "expected": null
+    },
+    {
+      "name": "huc6280_undefined_root",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":0,\"line\":6,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"undefined symbol `MISSING`\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": false,
+      "expected": {
+        "path": "input.s",
+        "line": 6,
+        "frames": [
+          "inner"
+        ],
+        "definition_lines": {
+          "inner": 3
+        }
+      }
+    },
+    {
+      "name": "huc6280_undefined_included",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":1,\"line\":4,\"col\":0,\"expansion_frames\":[],\"path\":\"/private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-flat-macro-context-y8ho9mgd/huc6280_undefined_included.inc\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"undefined symbol `MISSING`\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": false,
+      "expected": {
+        "path": "huc6280_undefined_included.inc",
+        "line": 4,
+        "frames": [
+          "inner"
+        ],
+        "definition_lines": {
+          "inner": 1
+        }
+      }
+    },
+    {
+      "name": "huc6280_undefined_nested_root",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":0,\"line\":9,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"undefined symbol `MISSING`\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": false,
+      "expected": {
+        "path": "input.s",
+        "line": 9,
+        "frames": [
+          "inner",
+          "outer"
+        ],
+        "definition_lines": {
+          "inner": 3,
+          "outer": 6
+        }
+      }
+    },
+    {
+      "name": "huc6280_undefined_nested_included",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":1,\"line\":7,\"col\":0,\"expansion_frames\":[],\"path\":\"/private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-flat-macro-context-y8ho9mgd/huc6280_undefined_nested_included.inc\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"undefined symbol `MISSING`\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": false,
+      "expected": {
+        "path": "huc6280_undefined_nested_included.inc",
+        "line": 7,
+        "frames": [
+          "inner",
+          "outer"
+        ],
+        "definition_lines": {
+          "inner": 1,
+          "outer": 4
+        }
+      }
+    },
+    {
+      "name": "huc6280_undefined_plain",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":0,\"line\":3,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"undefined symbol `MISSING`\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": true,
+      "expected": {
+        "path": "input.s",
+        "line": 3,
+        "frames": [],
+        "definition_lines": {}
+      }
+    },
+    {
+      "name": "huc6280_undefined_unused",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 0,
+      "stdout": "{\"version\":1,\"bytes\":[7],\"origin\":4096,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":6,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":1,\"free\":65535,\"largest_free\":61439}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+      "stderr": "",
+      "native_accepted": true,
+      "matches_native_outcome": true,
+      "matches_context": true,
+      "expected": null
+    },
+    {
+      "name": "huc6280_syntax_root",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":0,\"line\":6,\"col\":0,\"expansion_frames\":[{\"macro_name\":\"inner\",\"defined_at\":{\"file\":0,\"line\":3,\"col\":1,\"expansion_frames\":[],\"path\":\"input.s\"},\"invoked_at\":{\"file\":0,\"line\":6,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"}}],\"path\":\"input.s\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"expected a value\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": true,
+      "expected": {
+        "path": "input.s",
+        "line": 6,
+        "frames": [
+          "inner"
+        ],
+        "definition_lines": {
+          "inner": 3
+        }
+      }
+    },
+    {
+      "name": "huc6280_syntax_included",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":1,\"line\":4,\"col\":0,\"expansion_frames\":[{\"macro_name\":\"inner\",\"defined_at\":{\"file\":0,\"line\":1,\"col\":1,\"expansion_frames\":[],\"path\":\"input.s\"},\"invoked_at\":{\"file\":0,\"line\":4,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"}}],\"path\":\"/private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-flat-macro-context-y8ho9mgd/huc6280_syntax_included.inc\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"expected a value\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": false,
+      "expected": {
+        "path": "huc6280_syntax_included.inc",
+        "line": 4,
+        "frames": [
+          "inner"
+        ],
+        "definition_lines": {
+          "inner": 1
+        }
+      }
+    },
+    {
+      "name": "huc6280_syntax_nested_root",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":0,\"line\":9,\"col\":0,\"expansion_frames\":[{\"macro_name\":\"inner\",\"defined_at\":{\"file\":0,\"line\":3,\"col\":1,\"expansion_frames\":[],\"path\":\"input.s\"},\"invoked_at\":{\"file\":0,\"line\":9,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"}},{\"macro_name\":\"outer\",\"defined_at\":{\"file\":0,\"line\":6,\"col\":1,\"expansion_frames\":[],\"path\":\"input.s\"},\"invoked_at\":{\"file\":0,\"line\":9,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"}}],\"path\":\"input.s\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"expected a value\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": true,
+      "expected": {
+        "path": "input.s",
+        "line": 9,
+        "frames": [
+          "inner",
+          "outer"
+        ],
+        "definition_lines": {
+          "inner": 3,
+          "outer": 6
+        }
+      }
+    },
+    {
+      "name": "huc6280_syntax_nested_included",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":1,\"line\":7,\"col\":0,\"expansion_frames\":[{\"macro_name\":\"inner\",\"defined_at\":{\"file\":0,\"line\":1,\"col\":1,\"expansion_frames\":[],\"path\":\"input.s\"},\"invoked_at\":{\"file\":0,\"line\":7,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"}},{\"macro_name\":\"outer\",\"defined_at\":{\"file\":0,\"line\":4,\"col\":1,\"expansion_frames\":[],\"path\":\"input.s\"},\"invoked_at\":{\"file\":0,\"line\":7,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"}}],\"path\":\"/private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-flat-macro-context-y8ho9mgd/huc6280_syntax_nested_included.inc\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"expected a value\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": false,
+      "expected": {
+        "path": "huc6280_syntax_nested_included.inc",
+        "line": 7,
+        "frames": [
+          "inner",
+          "outer"
+        ],
+        "definition_lines": {
+          "inner": 1,
+          "outer": 4
+        }
+      }
+    },
+    {
+      "name": "huc6280_syntax_plain",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":0,\"line\":3,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"expected a value\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": true,
+      "expected": {
+        "path": "input.s",
+        "line": 3,
+        "frames": [],
+        "definition_lines": {}
+      }
+    },
+    {
+      "name": "huc6280_syntax_unused",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 0,
+      "stdout": "{\"version\":1,\"bytes\":[7],\"origin\":4096,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":6,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":1,\"free\":65535,\"largest_free\":61439}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+      "stderr": "",
+      "native_accepted": true,
+      "matches_native_outcome": true,
+      "matches_context": true,
+      "expected": null
+    },
+    {
+      "name": "huc6280_negative_reserve_root",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":0,\"line\":6,\"col\":0,\"expansion_frames\":[{\"macro_name\":\"inner\",\"defined_at\":{\"file\":0,\"line\":3,\"col\":1,\"expansion_frames\":[],\"path\":\"input.s\"},\"invoked_at\":{\"file\":0,\"line\":6,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"}}],\"path\":\"input.s\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"`.res` count must be a non-negative constant\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": true,
+      "expected": {
+        "path": "input.s",
+        "line": 6,
+        "frames": [
+          "inner"
+        ],
+        "definition_lines": {
+          "inner": 3
+        }
+      }
+    },
+    {
+      "name": "huc6280_negative_reserve_included",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":1,\"line\":4,\"col\":0,\"expansion_frames\":[{\"macro_name\":\"inner\",\"defined_at\":{\"file\":0,\"line\":1,\"col\":1,\"expansion_frames\":[],\"path\":\"input.s\"},\"invoked_at\":{\"file\":0,\"line\":4,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"}}],\"path\":\"/private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-flat-macro-context-y8ho9mgd/huc6280_negative_reserve_included.inc\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"`.res` count must be a non-negative constant\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": false,
+      "expected": {
+        "path": "huc6280_negative_reserve_included.inc",
+        "line": 4,
+        "frames": [
+          "inner"
+        ],
+        "definition_lines": {
+          "inner": 1
+        }
+      }
+    },
+    {
+      "name": "huc6280_negative_reserve_nested_root",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":0,\"line\":9,\"col\":0,\"expansion_frames\":[{\"macro_name\":\"inner\",\"defined_at\":{\"file\":0,\"line\":3,\"col\":1,\"expansion_frames\":[],\"path\":\"input.s\"},\"invoked_at\":{\"file\":0,\"line\":9,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"}},{\"macro_name\":\"outer\",\"defined_at\":{\"file\":0,\"line\":6,\"col\":1,\"expansion_frames\":[],\"path\":\"input.s\"},\"invoked_at\":{\"file\":0,\"line\":9,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"}}],\"path\":\"input.s\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"`.res` count must be a non-negative constant\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": true,
+      "expected": {
+        "path": "input.s",
+        "line": 9,
+        "frames": [
+          "inner",
+          "outer"
+        ],
+        "definition_lines": {
+          "inner": 3,
+          "outer": 6
+        }
+      }
+    },
+    {
+      "name": "huc6280_negative_reserve_nested_included",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":1,\"line\":7,\"col\":0,\"expansion_frames\":[{\"macro_name\":\"inner\",\"defined_at\":{\"file\":0,\"line\":1,\"col\":1,\"expansion_frames\":[],\"path\":\"input.s\"},\"invoked_at\":{\"file\":0,\"line\":7,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"}},{\"macro_name\":\"outer\",\"defined_at\":{\"file\":0,\"line\":4,\"col\":1,\"expansion_frames\":[],\"path\":\"input.s\"},\"invoked_at\":{\"file\":0,\"line\":7,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"}}],\"path\":\"/private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-flat-macro-context-y8ho9mgd/huc6280_negative_reserve_nested_included.inc\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"`.res` count must be a non-negative constant\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": false,
+      "expected": {
+        "path": "huc6280_negative_reserve_nested_included.inc",
+        "line": 7,
+        "frames": [
+          "inner",
+          "outer"
+        ],
+        "definition_lines": {
+          "inner": 1,
+          "outer": 4
+        }
+      }
+    },
+    {
+      "name": "huc6280_negative_reserve_plain",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":0,\"line\":3,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"`.res` count must be a non-negative constant\",\"fix\":null}]\n",
+      "stderr": "",
+      "native_accepted": false,
+      "matches_native_outcome": true,
+      "matches_context": true,
+      "expected": {
+        "path": "input.s",
+        "line": 3,
+        "frames": [],
+        "definition_lines": {}
+      }
+    },
+    {
+      "name": "huc6280_negative_reserve_unused",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 0,
+      "stdout": "{\"version\":1,\"bytes\":[7],\"origin\":4096,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":6,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":1,\"free\":65535,\"largest_free\":61439}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+      "stderr": "",
+      "native_accepted": true,
+      "matches_native_outcome": true,
+      "matches_context": true,
+      "expected": null
+    },
+    {
+      "name": "huc6280_valid_root",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 0,
+      "stdout": "{\"version\":1,\"bytes\":[7],\"origin\":4096,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":6,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":1,\"free\":65535,\"largest_free\":61439}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+      "stderr": "",
+      "native_accepted": true,
+      "matches_native_outcome": true,
+      "matches_context": true,
+      "expected": null
+    },
+    {
+      "name": "huc6280_valid_included",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 0,
+      "stdout": "{\"version\":1,\"bytes\":[7],\"origin\":4096,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":4,\"offset\":0,\"length\":1,\"file\":1}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":1,\"free\":65535,\"largest_free\":61439}],\"diagnostics\":[],\"files\":[\"input.s\",\"/private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-flat-macro-context-y8ho9mgd/huc6280_valid_included.inc\"]}\n",
+      "stderr": "",
+      "native_accepted": true,
+      "matches_native_outcome": true,
+      "matches_context": true,
+      "expected": null
+    },
+    {
+      "name": "huc6280_valid_nested_root",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 0,
+      "stdout": "{\"version\":1,\"bytes\":[7],\"origin\":4096,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":9,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":1,\"free\":65535,\"largest_free\":61439}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+      "stderr": "",
+      "native_accepted": true,
+      "matches_native_outcome": true,
+      "matches_context": true,
+      "expected": null
+    },
+    {
+      "name": "huc6280_valid_nested_included",
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x",
+        "--sym=out.sym",
+        "--listing-json=out.lst.json",
+        "--message-format=json"
+      ],
+      "exit": 0,
+      "stdout": "{\"version\":1,\"bytes\":[7],\"origin\":4096,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":7,\"offset\":0,\"length\":1,\"file\":1}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":1,\"free\":65535,\"largest_free\":61439}],\"diagnostics\":[],\"files\":[\"input.s\",\"/private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-flat-macro-context-y8ho9mgd/huc6280_valid_nested_included.inc\"]}\n",
+      "stderr": "",
+      "native_accepted": true,
+      "matches_native_outcome": true,
+      "matches_context": true,
+      "expected": null
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "source_commit": "164dbc71e92b517afec5141a09e57e1da76ce845",
+  "cases": [
+    {
+      "name": "65816",
+      "source": ".include \"broken.inc\"\n",
+      "files": {
+        "broken.inc": ".macro emit operand\n.byte operand\n.endmacro\nemit )\n"
+      },
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":1,\"line\":4,\"col\":0,\"expansion_frames\":[{\"macro_name\":\"emit\",\"defined_at\":{\"file\":0,\"line\":1,\"col\":1,\"expansion_frames\":[],\"path\":\"input.s\"},\"invoked_at\":{\"file\":0,\"line\":4,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"}}],\"path\":\"/private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-flat-parser-frames-f83xbcdd/broken.inc\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"expected a value\",\"fix\":null}]\n",
+      "stderr": ""
+    },
+    {
+      "name": "huc6280",
+      "source": ".include \"broken.inc\"\n",
+      "files": {
+        "broken.inc": ".macro emit operand\n.byte operand\n.endmacro\nemit )\n"
+      },
+      "argv": [
+        "/private/tmp/asm198x-huc-macro-format-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":1,\"line\":4,\"col\":0,\"expansion_frames\":[{\"macro_name\":\"emit\",\"defined_at\":{\"file\":0,\"line\":1,\"col\":1,\"expansion_frames\":[],\"path\":\"input.s\"},\"invoked_at\":{\"file\":0,\"line\":4,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"}}],\"path\":\"/private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-flat-parser-frames-f83xbcdd/broken.inc\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"expected a value\",\"fix\":null}]\n",
+      "stderr": ""
+    }
+  ]
+}
