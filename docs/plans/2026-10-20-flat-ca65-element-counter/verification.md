@@ -37,3 +37,12 @@ replay retains only its four explicit #895 inactive-source refusals.
 Fresh release-mode 4510 replay from c474b640 matches all 564 bytes and fourteen
 streams, rejects changed bytes and removes disposable work. Exact-head CI and
 five actual native archive reports remain required before merge.
+
+PR #913 passed all 29 exact-head checks and all five workflows. Independently
+inspected native archives on ARM/Intel macOS, ARM/Intel Linux and Windows all
+pass 99 cohorts, including all 304 counter cases and 1,216 commands. Every
+archive also rejects wrong bytes and checksum corruption. All hosts passed on
+attempt one. The rebase merge b059280c2a31004ebd6eb25df854be296481ec2f has
+the exact qualified head tree and is an ancestor of origin/main. #910 is closed.
+Complete reports, producer-lock identities and merge evidence are retained in
+qualification-913.
