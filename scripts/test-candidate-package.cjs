@@ -70,7 +70,7 @@ requiredCases.push('ca65_token_bound_types');
 requiredCases.push('ca65_string_bytes', 'ca65_string_consumers', 'ca65_flat_string_bytes', 'ca65_literal_boundaries');
 requiredCases.push('ca65_text_consumers', 'ca65_quoted_admission', 'ca65_character_operands');
 requiredCases.push('ca65_huc_macro_format');
-requiredCases.push('ca65_flat_macro_diagnostics', 'ca65_flat_faraddr', 'ca65_flat_wide_data');
+requiredCases.push('ca65_flat_macro_diagnostics', 'ca65_flat_faraddr', 'ca65_flat_wide_data', 'ca65_flat_addresses');
 const sourceFiles = {
   'LICENSE': '62cd567bc9270c722abcaa6ad88b6a1fe861698d63890f787cc557d2395be203',
   'helloworld.asm': '9e57c82435c0cf35e56089d56d6b83991c61624c2b3448ab6c66fb13a884a0a5',
@@ -1534,6 +1534,7 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
       ['ca65_flat_macro_diagnostics', 'ca65-flat-macro-diagnostics.json', 80],
       ['ca65_flat_faraddr', 'ca65-flat-faraddr.json', 132],
       ['ca65_flat_wide_data', 'ca65-flat-wide-data.json', 104],
+      ['ca65_flat_addresses', 'ca65-flat-addresses.json', 148],
     ]) test(cohort, () => {
       const facts = require('../crates/asm198x/tests/fixtures/' + fixture);
       assert.equal(facts.cases.length, count);

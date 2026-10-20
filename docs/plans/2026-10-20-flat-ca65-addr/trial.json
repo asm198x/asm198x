@@ -1,0 +1,2522 @@
+{
+  "binary": "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+  "sha256": "5c66d5d4c607135b9e6e809e317e43ffecc504032b58beca7e2dc94b2a307fa5",
+  "results": [
+    {
+      "name": "65816_0_direct",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff",
+      "matches_native": true
+    },
+    {
+      "name": "65816_0_macro",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff",
+      "matches_native": true
+    },
+    {
+      "name": "65816_0_included",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff",
+      "matches_native": true
+    },
+    {
+      "name": "65816_0_unused",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_1_direct",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_1_macro",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_1_included",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_1_unused",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_2_direct",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ff7f",
+      "matches_native": true
+    },
+    {
+      "name": "65816_2_macro",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ff7f",
+      "matches_native": true
+    },
+    {
+      "name": "65816_2_included",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ff7f",
+      "matches_native": true
+    },
+    {
+      "name": "65816_2_unused",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_3_direct",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0080",
+      "matches_native": true
+    },
+    {
+      "name": "65816_3_macro",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0080",
+      "matches_native": true
+    },
+    {
+      "name": "65816_3_included",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0080",
+      "matches_native": true
+    },
+    {
+      "name": "65816_3_unused",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_4_direct",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff",
+      "matches_native": true
+    },
+    {
+      "name": "65816_4_macro",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff",
+      "matches_native": true
+    },
+    {
+      "name": "65816_4_included",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff",
+      "matches_native": true
+    },
+    {
+      "name": "65816_4_unused",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_5_direct",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_5_macro",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_5_included",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_5_unused",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_6_direct",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0100",
+      "matches_native": true
+    },
+    {
+      "name": "65816_6_macro",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0100",
+      "matches_native": true
+    },
+    {
+      "name": "65816_6_included",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0100",
+      "matches_native": true
+    },
+    {
+      "name": "65816_6_unused",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_7_direct",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ff7f",
+      "matches_native": true
+    },
+    {
+      "name": "65816_7_macro",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ff7f",
+      "matches_native": true
+    },
+    {
+      "name": "65816_7_included",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ff7f",
+      "matches_native": true
+    },
+    {
+      "name": "65816_7_unused",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_8_direct",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff",
+      "matches_native": true
+    },
+    {
+      "name": "65816_8_macro",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff",
+      "matches_native": true
+    },
+    {
+      "name": "65816_8_included",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff",
+      "matches_native": true
+    },
+    {
+      "name": "65816_8_unused",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_9_direct",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_9_macro",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_9_included",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_9_unused",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_10_direct",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff",
+      "matches_native": true
+    },
+    {
+      "name": "65816_10_macro",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff",
+      "matches_native": true
+    },
+    {
+      "name": "65816_10_included",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff",
+      "matches_native": true
+    },
+    {
+      "name": "65816_10_unused",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_11_direct",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_11_macro",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_11_included",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_11_unused",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_12_direct",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff",
+      "matches_native": true
+    },
+    {
+      "name": "65816_12_macro",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff",
+      "matches_native": true
+    },
+    {
+      "name": "65816_12_included",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff",
+      "matches_native": true
+    },
+    {
+      "name": "65816_12_unused",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_13_direct",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_13_macro",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_13_included",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_13_unused",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_14_direct",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_14_macro",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_14_included",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_14_unused",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_15_direct",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_15_macro",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_15_included",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_15_unused",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_16_direct",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ff00",
+      "matches_native": true
+    },
+    {
+      "name": "65816_16_macro",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ff00",
+      "matches_native": true
+    },
+    {
+      "name": "65816_16_included",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ff00",
+      "matches_native": true
+    },
+    {
+      "name": "65816_16_unused",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_forward_bank",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 3 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "021007",
+      "matches_native": true
+    },
+    {
+      "name": "65816_forward_negative",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 3 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "02f007",
+      "matches_native": true
+    },
+    {
+      "name": "65816_two_values",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0100ffff",
+      "matches_native": true
+    },
+    {
+      "name": "65816_word_control",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value 65536 does not fit in a word\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "65816_uppercase",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff",
+      "matches_native": true
+    },
+    {
+      "name": "65816_missing",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: undefined symbol `MISSING`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_0_direct",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value -65537 does not fit in a word\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_0_macro",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value -65537 does not fit in a word\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_0_included",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-55h_1o30/huc6280_0_included.inc:1: error: value -65537 does not fit in a word\nincluded from input.s:3\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_0_unused",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_1_direct",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value -65536 does not fit in a word\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_1_macro",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value -65536 does not fit in a word\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_1_included",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-55h_1o30/huc6280_1_included.inc:1: error: value -65536 does not fit in a word\nincluded from input.s:3\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_1_unused",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_2_direct",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value -32769 does not fit in a word\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_2_macro",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value -32769 does not fit in a word\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_2_included",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-55h_1o30/huc6280_2_included.inc:1: error: value -32769 does not fit in a word\nincluded from input.s:3\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_2_unused",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_3_direct",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value -32768 does not fit in a word\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_3_macro",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value -32768 does not fit in a word\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_3_included",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-55h_1o30/huc6280_3_included.inc:1: error: value -32768 does not fit in a word\nincluded from input.s:3\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_3_unused",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_4_direct",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value -1 does not fit in a word\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_4_macro",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value -1 does not fit in a word\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_4_included",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-55h_1o30/huc6280_4_included.inc:1: error: value -1 does not fit in a word\nincluded from input.s:3\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_4_unused",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_5_direct",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_5_macro",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_5_included",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_5_unused",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_6_direct",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0100",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_6_macro",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0100",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_6_included",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0100",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_6_unused",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_7_direct",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ff7f",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_7_macro",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ff7f",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_7_included",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ff7f",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_7_unused",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_8_direct",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_8_macro",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_8_included",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_8_unused",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_9_direct",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value 65536 does not fit in a word\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_9_macro",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value 65536 does not fit in a word\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_9_included",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-55h_1o30/huc6280_9_included.inc:1: error: value 65536 does not fit in a word\nincluded from input.s:3\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_9_unused",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_10_direct",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value 16777215 does not fit in a word\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_10_macro",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value 16777215 does not fit in a word\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_10_included",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-55h_1o30/huc6280_10_included.inc:1: error: value 16777215 does not fit in a word\nincluded from input.s:3\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_10_unused",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_11_direct",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value 16777216 does not fit in a word\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_11_macro",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value 16777216 does not fit in a word\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_11_included",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-55h_1o30/huc6280_11_included.inc:1: error: value 16777216 does not fit in a word\nincluded from input.s:3\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_11_unused",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_12_direct",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value 4294967295 does not fit in a word\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_12_macro",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value 4294967295 does not fit in a word\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_12_included",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-55h_1o30/huc6280_12_included.inc:1: error: value 4294967295 does not fit in a word\nincluded from input.s:3\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_12_unused",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_13_direct",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value 4294967296 does not fit in a word\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_13_macro",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value 4294967296 does not fit in a word\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_13_included",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-55h_1o30/huc6280_13_included.inc:1: error: value 4294967296 does not fit in a word\nincluded from input.s:3\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_13_unused",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_14_direct",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value -4294967296 does not fit in a word\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_14_macro",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value -4294967296 does not fit in a word\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_14_included",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-55h_1o30/huc6280_14_included.inc:1: error: value -4294967296 does not fit in a word\nincluded from input.s:3\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_14_unused",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_15_direct",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_15_macro",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_15_included",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_15_unused",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_16_direct",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ff00",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_16_macro",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ff00",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_16_included",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ff00",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_16_unused",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_forward_bank",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value 69634 does not fit in a word\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_forward_negative",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value -4094 does not fit in a word\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_two_values",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value 131071 does not fit in a word\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_word_control",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value 65536 does not fit in a word\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_uppercase",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value 131071 does not fit in a word\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_missing",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: undefined symbol `MISSING`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    }
+  ]
+}
