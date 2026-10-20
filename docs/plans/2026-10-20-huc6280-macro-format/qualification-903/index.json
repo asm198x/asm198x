@@ -1,0 +1,147 @@
+[
+  {
+    "file": "candidate-qualification-x86_64-unknown-linux-gnu-1/wrong-bytes.json.gz",
+    "original_bytes": 18919841,
+    "original_sha256": "b9e69c5a9c7b767b373d9e3fe4dd4162d28e8ba7e0eaa4f2f991e370de2ee851"
+  },
+  {
+    "file": "candidate-qualification-x86_64-unknown-linux-gnu-1/corrupt-archive.json.gz",
+    "original_bytes": 180,
+    "original_sha256": "0b4d2d082c9b8af180fc479d18fb2de3e8d2e64a19155e533d87f86ef97ccf07"
+  },
+  {
+    "file": "candidate-qualification-x86_64-unknown-linux-gnu-1/plan.json.gz",
+    "original_bytes": 13973,
+    "original_sha256": "998be1811c772cee8ae18022d1a04b7f97288d243a80ccf40687856f72e44638"
+  },
+  {
+    "file": "candidate-qualification-x86_64-unknown-linux-gnu-1/report.json.gz",
+    "original_bytes": 18919046,
+    "original_sha256": "b630c5109221dab9d5cb704f93b056ff3fe19517fac4ac1012547cbf8ec3c8c2"
+  },
+  {
+    "file": "candidate-qualification-x86_64-unknown-linux-gnu-1/acquisition.json.gz",
+    "original_bytes": 126,
+    "original_sha256": "70a40b4add6fd0805f94fdf57fbfc666185f3dfa20c35cf19fcadb337963f9ae"
+  },
+  {
+    "file": "candidate-qualification-x86_64-apple-darwin-1/wrong-bytes.json.gz",
+    "original_bytes": 21392003,
+    "original_sha256": "f9105a5c1917730678386867f0514fa08e80dccbab5874aaab59eb49d1cc14be"
+  },
+  {
+    "file": "candidate-qualification-x86_64-apple-darwin-1/corrupt-archive.json.gz",
+    "original_bytes": 170,
+    "original_sha256": "2e5a8c2e13cf7c92b79606177bf5c326bf1dadd6f43bf7f4f7023897c4a8101c"
+  },
+  {
+    "file": "candidate-qualification-x86_64-apple-darwin-1/plan.json.gz",
+    "original_bytes": 13916,
+    "original_sha256": "5e1969ffe55f895ec0babd29f44c06805f02fbd3666f68f904bbe8ee30876b3b"
+  },
+  {
+    "file": "candidate-qualification-x86_64-apple-darwin-1/report.json.gz",
+    "original_bytes": 21391208,
+    "original_sha256": "a9e2d4e7c826aec6d75e7dbe60dfeb199d6957439a5c2d01e5adfe925154caec"
+  },
+  {
+    "file": "candidate-qualification-x86_64-apple-darwin-1/acquisition.json.gz",
+    "original_bytes": 126,
+    "original_sha256": "70a40b4add6fd0805f94fdf57fbfc666185f3dfa20c35cf19fcadb337963f9ae"
+  },
+  {
+    "file": "candidate-qualification-aarch64-apple-darwin-1/wrong-bytes.json.gz",
+    "original_bytes": 21392010,
+    "original_sha256": "06e2f657c416da9690193bb909e90508931af16246c4c7f7344b7ca3ece67cd7"
+  },
+  {
+    "file": "candidate-qualification-aarch64-apple-darwin-1/corrupt-archive.json.gz",
+    "original_bytes": 172,
+    "original_sha256": "d293f944fdd29a56aeb5c4e9e44a8acd99fbbb3d9552a90cc9eb8aad1dc1d6d1"
+  },
+  {
+    "file": "candidate-qualification-aarch64-apple-darwin-1/plan.json.gz",
+    "original_bytes": 13916,
+    "original_sha256": "aae56a69259430e0a5aa83bc036e953570dd25a286fad39cd2da6e485591ef3a"
+  },
+  {
+    "file": "candidate-qualification-aarch64-apple-darwin-1/report.json.gz",
+    "original_bytes": 21391215,
+    "original_sha256": "db7914d04916fbfa5b56fbf3824461c4367479ec8215a3f493644d7caca16dac"
+  },
+  {
+    "file": "candidate-qualification-aarch64-apple-darwin-1/acquisition.json.gz",
+    "original_bytes": 126,
+    "original_sha256": "70a40b4add6fd0805f94fdf57fbfc666185f3dfa20c35cf19fcadb337963f9ae"
+  },
+  {
+    "file": "candidate-qualification-aarch64-unknown-linux-gnu-1/wrong-bytes.json.gz",
+    "original_bytes": 18919848,
+    "original_sha256": "903003be7007e1b67e1459ab60abf2382e5fb056eecc7d5a7793bd029f6ea075"
+  },
+  {
+    "file": "candidate-qualification-aarch64-unknown-linux-gnu-1/corrupt-archive.json.gz",
+    "original_bytes": 182,
+    "original_sha256": "82cc3298ec0de54957a653ff1ad769a06adc7ecf95a36894ea9d1bf3b618952d"
+  },
+  {
+    "file": "candidate-qualification-aarch64-unknown-linux-gnu-1/plan.json.gz",
+    "original_bytes": 13973,
+    "original_sha256": "998be1811c772cee8ae18022d1a04b7f97288d243a80ccf40687856f72e44638"
+  },
+  {
+    "file": "candidate-qualification-aarch64-unknown-linux-gnu-1/report.json.gz",
+    "original_bytes": 18919053,
+    "original_sha256": "009e79de5e5778cf86096b134d42e063cbb544411b2a59489d51aa86174b19f9"
+  },
+  {
+    "file": "candidate-qualification-aarch64-unknown-linux-gnu-1/acquisition.json.gz",
+    "original_bytes": 126,
+    "original_sha256": "70a40b4add6fd0805f94fdf57fbfc666185f3dfa20c35cf19fcadb337963f9ae"
+  },
+  {
+    "file": "candidate-qualification-x86_64-pc-windows-msvc-1/wrong-bytes.json.gz",
+    "original_bytes": 21197089,
+    "original_sha256": "07fc676a9d80db85b7f84edd962154bfdbcb4961183a1f8e86c9d4e3ec4e6aff"
+  },
+  {
+    "file": "candidate-qualification-x86_64-pc-windows-msvc-1/corrupt-archive.json.gz",
+    "original_bytes": 173,
+    "original_sha256": "14917b0dd5c0d132a39a1b8a988625000b26d8c9f83f57c358445d524d227fbf"
+  },
+  {
+    "file": "candidate-qualification-x86_64-pc-windows-msvc-1/plan.json.gz",
+    "original_bytes": 13854,
+    "original_sha256": "23fd648373e15b7d33d34c7ddf4efa736eb59b92e47d6c41d27119174c0acda8"
+  },
+  {
+    "file": "candidate-qualification-x86_64-pc-windows-msvc-1/report.json.gz",
+    "original_bytes": 21196294,
+    "original_sha256": "0a0dea6645217e6c81d970f0849a5472805cb132d0c6ca0f435e39c6a9be43f0"
+  },
+  {
+    "file": "candidate-qualification-x86_64-pc-windows-msvc-1/acquisition.json.gz",
+    "original_bytes": 126,
+    "original_sha256": "70a40b4add6fd0805f94fdf57fbfc666185f3dfa20c35cf19fcadb337963f9ae"
+  },
+  {
+    "file": "ci.json.gz",
+    "original_bytes": 237533,
+    "original_sha256": "9e1105b85f2f833daf27a4bf3b81f4f5fd491c0207d3c44f36e6bef4426e9ddc"
+  },
+  {
+    "file": "summary.json.gz",
+    "original_bytes": 2772,
+    "original_sha256": "a01963044239b2e16d259c3099c308e4aa80fdd72793ff16b5e96b1d2f1b466b"
+  },
+  {
+    "file": "merge.json.gz",
+    "original_bytes": 123,
+    "original_sha256": "56d344aad4ad343f136b5c52b5924d91acab2ef9b57992bd16789148842c1d83"
+  },
+  {
+    "file": "resolution.json.gz",
+    "original_bytes": 2586,
+    "original_sha256": "96f4c7793a32f756cbd4ff299d324d6e0715c5cb24b0a1b5347a4828fcc78367"
+  }
+]
