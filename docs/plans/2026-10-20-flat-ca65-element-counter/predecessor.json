@@ -1,0 +1,5174 @@
+{
+  "binary": "/private/tmp/asm198x-flat-addr-producer/asm198x",
+  "sha256": "7d234fe1abc3766cad625f20ec56e3d0d908d753a0e93dfaba41ceb509b4683e",
+  "results": [
+    {
+      "name": "65816_byte_two_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": false
+    },
+    {
+      "name": "65816_byte_two_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": false
+    },
+    {
+      "name": "65816_byte_two_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": false
+    },
+    {
+      "name": "65816_byte_two_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_byte_sum_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": false
+    },
+    {
+      "name": "65816_byte_sum_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": false
+    },
+    {
+      "name": "65816_byte_sum_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": false
+    },
+    {
+      "name": "65816_byte_sum_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_byte_difference_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_byte_difference_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_byte_difference_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_byte_difference_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_byte_ascii_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 5 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "4142004300",
+      "matches_native": false
+    },
+    {
+      "name": "65816_byte_ascii_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 5 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "4142004300",
+      "matches_native": false
+    },
+    {
+      "name": "65816_byte_ascii_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 5 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "4142004300",
+      "matches_native": false
+    },
+    {
+      "name": "65816_byte_ascii_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_byte_utf8_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 3 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "c3a900",
+      "matches_native": false
+    },
+    {
+      "name": "65816_byte_utf8_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 3 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "c3a900",
+      "matches_native": false
+    },
+    {
+      "name": "65816_byte_utf8_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 3 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "c3a900",
+      "matches_native": false
+    },
+    {
+      "name": "65816_byte_utf8_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_byte_computed_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ff00",
+      "matches_native": false
+    },
+    {
+      "name": "65816_byte_computed_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ff00",
+      "matches_native": false
+    },
+    {
+      "name": "65816_byte_computed_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ff00",
+      "matches_native": false
+    },
+    {
+      "name": "65816_byte_computed_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_byte_partial_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "c300",
+      "matches_native": false
+    },
+    {
+      "name": "65816_byte_partial_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "c300",
+      "matches_native": false
+    },
+    {
+      "name": "65816_byte_partial_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "c300",
+      "matches_native": false
+    },
+    {
+      "name": "65816_byte_partial_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_words_two_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00100010",
+      "matches_native": false
+    },
+    {
+      "name": "65816_words_two_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00100010",
+      "matches_native": false
+    },
+    {
+      "name": "65816_words_two_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00100010",
+      "matches_native": false
+    },
+    {
+      "name": "65816_words_two_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_words_sum_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00200020",
+      "matches_native": false
+    },
+    {
+      "name": "65816_words_sum_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00200020",
+      "matches_native": false
+    },
+    {
+      "name": "65816_words_sum_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00200020",
+      "matches_native": false
+    },
+    {
+      "name": "65816_words_sum_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_words_difference_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00000000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_words_difference_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00000000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_words_difference_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00000000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_words_difference_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_words_forward_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 5 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0400040007",
+      "matches_native": false
+    },
+    {
+      "name": "65816_words_forward_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 5 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0400040007",
+      "matches_native": false
+    },
+    {
+      "name": "65816_words_forward_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 5 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0400040007",
+      "matches_native": false
+    },
+    {
+      "name": "65816_words_forward_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_dbyt_two_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "10001000",
+      "matches_native": false
+    },
+    {
+      "name": "65816_dbyt_two_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "10001000",
+      "matches_native": false
+    },
+    {
+      "name": "65816_dbyt_two_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "10001000",
+      "matches_native": false
+    },
+    {
+      "name": "65816_dbyt_two_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_dbyt_difference_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00000000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_dbyt_difference_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00000000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_dbyt_difference_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00000000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_dbyt_difference_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_dword_two_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 8 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0010000000100000",
+      "matches_native": false
+    },
+    {
+      "name": "65816_dword_two_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 8 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0010000000100000",
+      "matches_native": false
+    },
+    {
+      "name": "65816_dword_two_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 8 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0010000000100000",
+      "matches_native": false
+    },
+    {
+      "name": "65816_dword_two_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_dword_sum_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 8 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0020000000200000",
+      "matches_native": false
+    },
+    {
+      "name": "65816_dword_sum_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 8 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0020000000200000",
+      "matches_native": false
+    },
+    {
+      "name": "65816_dword_sum_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 8 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0020000000200000",
+      "matches_native": false
+    },
+    {
+      "name": "65816_dword_sum_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_faraddr_two_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 6 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "001000001000",
+      "matches_native": false
+    },
+    {
+      "name": "65816_faraddr_two_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 6 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "001000001000",
+      "matches_native": false
+    },
+    {
+      "name": "65816_faraddr_two_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 6 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "001000001000",
+      "matches_native": false
+    },
+    {
+      "name": "65816_faraddr_two_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_faraddr_difference_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 6 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000000000000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_faraddr_difference_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 6 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000000000000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_faraddr_difference_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 6 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000000000000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_faraddr_difference_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_addr_two_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00100010",
+      "matches_native": false
+    },
+    {
+      "name": "65816_addr_two_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00100010",
+      "matches_native": false
+    },
+    {
+      "name": "65816_addr_two_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00100010",
+      "matches_native": false
+    },
+    {
+      "name": "65816_addr_two_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_addr_sum_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00200020",
+      "matches_native": false
+    },
+    {
+      "name": "65816_addr_sum_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00200020",
+      "matches_native": false
+    },
+    {
+      "name": "65816_addr_sum_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00200020",
+      "matches_native": false
+    },
+    {
+      "name": "65816_addr_sum_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_lobytes_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": false
+    },
+    {
+      "name": "65816_lobytes_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": false
+    },
+    {
+      "name": "65816_lobytes_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": false
+    },
+    {
+      "name": "65816_lobytes_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_hibytes_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "1010",
+      "matches_native": false
+    },
+    {
+      "name": "65816_hibytes_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "1010",
+      "matches_native": false
+    },
+    {
+      "name": "65816_hibytes_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "1010",
+      "matches_native": false
+    },
+    {
+      "name": "65816_hibytes_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_bankbytes_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": false
+    },
+    {
+      "name": "65816_bankbytes_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": false
+    },
+    {
+      "name": "65816_bankbytes_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": false
+    },
+    {
+      "name": "65816_bankbytes_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_high_nested_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "1010",
+      "matches_native": false
+    },
+    {
+      "name": "65816_high_nested_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "1010",
+      "matches_native": false
+    },
+    {
+      "name": "65816_high_nested_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "1010",
+      "matches_native": false
+    },
+    {
+      "name": "65816_high_nested_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_bank_nested_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": false
+    },
+    {
+      "name": "65816_bank_nested_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": false
+    },
+    {
+      "name": "65816_bank_nested_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": false
+    },
+    {
+      "name": "65816_bank_nested_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_byte_overflow_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff",
+      "matches_native": false
+    },
+    {
+      "name": "65816_byte_overflow_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff",
+      "matches_native": false
+    },
+    {
+      "name": "65816_byte_overflow_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff",
+      "matches_native": false
+    },
+    {
+      "name": "65816_byte_overflow_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_word_overflow_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffffffff",
+      "matches_native": false
+    },
+    {
+      "name": "65816_word_overflow_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffffffff",
+      "matches_native": false
+    },
+    {
+      "name": "65816_word_overflow_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffffffff",
+      "matches_native": false
+    },
+    {
+      "name": "65816_word_overflow_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_dbyt_overflow_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffffffff",
+      "matches_native": false
+    },
+    {
+      "name": "65816_dbyt_overflow_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffffffff",
+      "matches_native": false
+    },
+    {
+      "name": "65816_dbyt_overflow_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffffffff",
+      "matches_native": false
+    },
+    {
+      "name": "65816_dbyt_overflow_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_dword_overflow_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 8 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffffffffffffffff",
+      "matches_native": false
+    },
+    {
+      "name": "65816_dword_overflow_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 8 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffffffffffffffff",
+      "matches_native": false
+    },
+    {
+      "name": "65816_dword_overflow_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 8 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffffffffffffffff",
+      "matches_native": false
+    },
+    {
+      "name": "65816_dword_overflow_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_faraddr_overflow_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 6 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "fdfffffdffff",
+      "matches_native": false
+    },
+    {
+      "name": "65816_faraddr_overflow_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 6 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "fdfffffdffff",
+      "matches_native": false
+    },
+    {
+      "name": "65816_faraddr_overflow_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 6 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "fdfffffdffff",
+      "matches_native": false
+    },
+    {
+      "name": "65816_faraddr_overflow_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_addr_wrap_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffffffff",
+      "matches_native": false
+    },
+    {
+      "name": "65816_addr_wrap_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffffffff",
+      "matches_native": false
+    },
+    {
+      "name": "65816_addr_wrap_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffffffff",
+      "matches_native": false
+    },
+    {
+      "name": "65816_addr_wrap_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_separate_lines_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00100210",
+      "matches_native": true
+    },
+    {
+      "name": "65816_separate_lines_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00100210",
+      "matches_native": true
+    },
+    {
+      "name": "65816_separate_lines_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00100210",
+      "matches_native": true
+    },
+    {
+      "name": "65816_separate_lines_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_literal_asterisk_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 5 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "2a002a2a00",
+      "matches_native": false
+    },
+    {
+      "name": "65816_literal_asterisk_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 5 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "2a002a2a00",
+      "matches_native": false
+    },
+    {
+      "name": "65816_literal_asterisk_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 5 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "2a002a2a00",
+      "matches_native": false
+    },
+    {
+      "name": "65816_literal_asterisk_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_multiplication_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00200020",
+      "matches_native": false
+    },
+    {
+      "name": "65816_multiplication_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00200020",
+      "matches_native": false
+    },
+    {
+      "name": "65816_multiplication_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00200020",
+      "matches_native": false
+    },
+    {
+      "name": "65816_multiplication_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_negation_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00100010",
+      "matches_native": false
+    },
+    {
+      "name": "65816_negation_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00100010",
+      "matches_native": false
+    },
+    {
+      "name": "65816_negation_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00100010",
+      "matches_native": false
+    },
+    {
+      "name": "65816_negation_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_complement_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffefffef",
+      "matches_native": false
+    },
+    {
+      "name": "65816_complement_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffefffef",
+      "matches_native": false
+    },
+    {
+      "name": "65816_complement_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffefffef",
+      "matches_native": false
+    },
+    {
+      "name": "65816_complement_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_logical_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0101",
+      "matches_native": false
+    },
+    {
+      "name": "65816_logical_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0101",
+      "matches_native": false
+    },
+    {
+      "name": "65816_logical_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0101",
+      "matches_native": false
+    },
+    {
+      "name": "65816_logical_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_named_constant_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "02100210",
+      "matches_native": false
+    },
+    {
+      "name": "65816_named_constant_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "02100210",
+      "matches_native": false
+    },
+    {
+      "name": "65816_named_constant_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "02100210",
+      "matches_native": false
+    },
+    {
+      "name": "65816_named_constant_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_mixed_width_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 11 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0001100110051000051000",
+      "matches_native": false
+    },
+    {
+      "name": "65816_mixed_width_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 11 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0001100110051000051000",
+      "matches_native": false
+    },
+    {
+      "name": "65816_mixed_width_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 11 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0001100110051000051000",
+      "matches_native": false
+    },
+    {
+      "name": "65816_mixed_width_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_byte_two_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_byte_two_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_byte_two_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_byte_two_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_byte_sum_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_byte_sum_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_byte_sum_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_byte_sum_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_byte_difference_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_byte_difference_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_byte_difference_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_byte_difference_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_byte_ascii_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 5 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "4142004300",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_byte_ascii_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 5 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "4142004300",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_byte_ascii_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 5 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "4142004300",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_byte_ascii_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_byte_utf8_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 3 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "c3a900",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_byte_utf8_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 3 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "c3a900",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_byte_utf8_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 3 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "c3a900",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_byte_utf8_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_byte_computed_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ff00",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_byte_computed_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ff00",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_byte_computed_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ff00",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_byte_computed_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_byte_partial_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "c300",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_byte_partial_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "c300",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_byte_partial_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "c300",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_byte_partial_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_words_two_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00100010",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_words_two_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00100010",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_words_two_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00100010",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_words_two_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_words_sum_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00200020",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_words_sum_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00200020",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_words_sum_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00200020",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_words_sum_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_words_difference_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00000000",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_words_difference_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00000000",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_words_difference_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00000000",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_words_difference_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_words_forward_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 5 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0400040007",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_words_forward_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 5 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0400040007",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_words_forward_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 5 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0400040007",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_words_forward_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_dbyt_two_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "10001000",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_dbyt_two_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "10001000",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_dbyt_two_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "10001000",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_dbyt_two_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_dbyt_difference_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00000000",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_dbyt_difference_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00000000",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_dbyt_difference_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00000000",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_dbyt_difference_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_dword_two_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 8 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0010000000100000",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_dword_two_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 8 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0010000000100000",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_dword_two_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 8 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0010000000100000",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_dword_two_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_dword_sum_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 8 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0020000000200000",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_dword_sum_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 8 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0020000000200000",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_dword_sum_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 8 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0020000000200000",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_dword_sum_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_faraddr_two_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 6 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "001000001000",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_faraddr_two_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 6 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "001000001000",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_faraddr_two_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 6 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "001000001000",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_faraddr_two_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_faraddr_difference_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 6 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000000000000",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_faraddr_difference_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 6 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000000000000",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_faraddr_difference_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 6 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000000000000",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_faraddr_difference_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_addr_two_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00100010",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_addr_two_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00100010",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_addr_two_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00100010",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_addr_two_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_addr_sum_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00200020",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_addr_sum_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00200020",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_addr_sum_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00200020",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_addr_sum_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_lobytes_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_lobytes_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_lobytes_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_lobytes_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_hibytes_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "1010",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_hibytes_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "1010",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_hibytes_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "1010",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_hibytes_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_bankbytes_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_bankbytes_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_bankbytes_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_bankbytes_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_high_nested_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "1010",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_high_nested_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "1010",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_high_nested_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "1010",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_high_nested_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_bank_nested_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_bank_nested_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_bank_nested_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_bank_nested_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_byte_overflow_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_byte_overflow_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_byte_overflow_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_byte_overflow_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_word_overflow_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffffffff",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_word_overflow_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffffffff",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_word_overflow_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffffffff",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_word_overflow_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_dbyt_overflow_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffffffff",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_dbyt_overflow_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffffffff",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_dbyt_overflow_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffffffff",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_dbyt_overflow_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_dword_overflow_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 8 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffffffffffffffff",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_dword_overflow_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 8 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffffffffffffffff",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_dword_overflow_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 8 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffffffffffffffff",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_dword_overflow_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_faraddr_overflow_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 6 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "fdfffffdffff",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_faraddr_overflow_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 6 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "fdfffffdffff",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_faraddr_overflow_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 6 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "fdfffffdffff",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_faraddr_overflow_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_addr_wrap_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffffffff",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_addr_wrap_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffffffff",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_addr_wrap_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffffffff",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_addr_wrap_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_separate_lines_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00100210",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_separate_lines_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00100210",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_separate_lines_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00100210",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_separate_lines_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_literal_asterisk_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 5 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "2a002a2a00",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_literal_asterisk_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 5 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "2a002a2a00",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_literal_asterisk_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 5 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "2a002a2a00",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_literal_asterisk_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_multiplication_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00200020",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_multiplication_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00200020",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_multiplication_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00200020",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_multiplication_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_negation_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00100010",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_negation_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00100010",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_negation_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00100010",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_negation_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_complement_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffefffef",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_complement_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffefffef",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_complement_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffefffef",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_complement_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_logical_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0101",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_logical_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0101",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_logical_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0101",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_logical_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_named_constant_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "02100210",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_named_constant_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "02100210",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_named_constant_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "02100210",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_named_constant_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_mixed_width_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 11 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0001100110051000051000",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_mixed_width_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 11 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0001100110051000051000",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_mixed_width_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 11 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0001100110051000051000",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_mixed_width_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-addr-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    }
+  ]
+}

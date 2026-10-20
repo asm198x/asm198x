@@ -699,29 +699,29 @@ fn parse_directive(
     match entry.id {
         "org" => Ok(Some(Operation::Org(value(rest, line)?))),
         "bytes" => Ok(Some(Operation::Bytes(byte_list(rest, strings, line)?))),
-        "words" => Ok(Some(Operation::Words(value_list(rest, line)?))),
+        "words" => Ok(Some(Operation::Words(value_list(rest, line, 2)?))),
         // Data directives validate the complete unsigned value after layout.
         "dword" => Ok(Some(Operation::Sized {
             width: 4,
             big_endian: false,
             range: crate::engine::DataRange::Unsigned,
-            values: value_list(rest, line)?,
+            values: value_list(rest, line, 4)?,
         })),
         "dbyt" => Ok(Some(Operation::Sized {
             width: 2,
             big_endian: true,
             range: crate::engine::DataRange::Unsigned,
-            values: value_list(rest, line)?,
+            values: value_list(rest, line, 2)?,
         })),
         "faraddr" => Ok(Some(Operation::Sized {
             width: 3,
             big_endian: false,
             range: crate::engine::DataRange::Unsigned,
-            values: value_list(rest, line)?,
+            values: value_list(rest, line, 3)?,
         })),
         // Explicit extraction truncates each value to the selected byte.
         "lobytes" | "hibytes" | "bankbytes" => Ok(Some(Operation::Bytes(
-            value_list(rest, line)?
+            value_list(rest, line, 1)?
                 .into_iter()
                 .map(|value| match entry.id {
                     "lobytes" => Expr::Lo(Box::new(value)),
@@ -783,19 +783,25 @@ fn byte_list(
         if let Some(bytes) = strings.data(piece, line)? {
             out.extend(bytes.into_iter().map(|b| Expr::Num(i64::from(b))));
         } else {
-            out.push(value(piece, line)?);
+            out.push(ca65_flat::data_element(
+                value(piece, line)?,
+                out.len(),
+                1,
+                line,
+            )?);
         }
     }
     Ok(out)
 }
 
-fn value_list(rest: &str, line: usize) -> Result<Vec<Expr>, AsmError> {
+fn value_list(rest: &str, line: usize, width: usize) -> Result<Vec<Expr>, AsmError> {
     if rest.trim().is_empty() {
         return Err(AsmError::new(line, "`.word` needs a value"));
     }
     ca65_flat::split_fields(rest, usize::MAX)
         .iter()
-        .map(|p| value(p, line))
+        .enumerate()
+        .map(|(index, piece)| ca65_flat::data_element(value(piece, line)?, index, width, line))
         .collect()
 }
 
