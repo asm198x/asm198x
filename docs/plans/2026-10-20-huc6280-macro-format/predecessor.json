@@ -1,0 +1,1430 @@
+{
+  "binary": "/private/tmp/asm198x-character-operands-producer/asm198x",
+  "sha256": "721454a8f7825843413ff88525be1e6a02fa12898d65a0b33b304926156ce7cd",
+  "results": [
+    {
+      "name": "65816_no_arguments",
+      "matches_native": true,
+      "formatter_roundtrip": true,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "65816",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $1000 -> out.bin\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "65816",
+            "input.s"
+          ],
+          "exit": 0,
+          "stdout": "        .setcpu \"65816\"\n        .org $1000\n        .byte 6\n        .macro emit\n        .byte 7\n        .endmacro\n        emit\n        .byte 8\n",
+          "stderr": "formatted input.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "65816",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "        .setcpu \"65816\"\n        .org $1000\n        .byte 6\n        .macro emit\n        .byte 7\n        .endmacro\n        emit\n        .byte 8\n",
+          "stderr": "formatted formatted.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "65816",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $1000 -> out.bin\n"
+        }
+      ]
+    },
+    {
+      "name": "65816_parameter",
+      "matches_native": true,
+      "formatter_roundtrip": true,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "65816",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $1000 -> out.bin\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "65816",
+            "input.s"
+          ],
+          "exit": 0,
+          "stdout": "        .setcpu \"65816\"\n        .org $1000\n        .byte 6\n        .macro emit operand\n        .byte operand\n        .endmacro\n        emit $FF\n        .byte 8\n",
+          "stderr": "formatted input.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "65816",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "        .setcpu \"65816\"\n        .org $1000\n        .byte 6\n        .macro emit operand\n        .byte operand\n        .endmacro\n        emit $FF\n        .byte 8\n",
+          "stderr": "formatted formatted.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "65816",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $1000 -> out.bin\n"
+        }
+      ]
+    },
+    {
+      "name": "65816_two_parameters",
+      "matches_native": true,
+      "formatter_roundtrip": true,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "65816",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 4 byte(s) at $1000 -> out.bin\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "65816",
+            "input.s"
+          ],
+          "exit": 0,
+          "stdout": "        .setcpu \"65816\"\n        .org $1000\n        .byte 6\n        .macro emit first, second\n        .byte first,second\n        .endmacro\n        emit 1,2\n        .byte 8\n",
+          "stderr": "formatted input.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "65816",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "        .setcpu \"65816\"\n        .org $1000\n        .byte 6\n        .macro emit first, second\n        .byte first,second\n        .endmacro\n        emit 1,2\n        .byte 8\n",
+          "stderr": "formatted formatted.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "65816",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 4 byte(s) at $1000 -> out.bin\n"
+        }
+      ]
+    },
+    {
+      "name": "65816_quoted_parameter",
+      "matches_native": true,
+      "formatter_roundtrip": true,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "65816",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 5 byte(s) at $1000 -> out.bin\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "65816",
+            "input.s"
+          ],
+          "exit": 0,
+          "stdout": "        .setcpu \"65816\"\n        .org $1000\n        .byte 6\n        .macro emit operand\n        .byte operand\n        .endmacro\n        emit \"a,b\"\n        .byte 8\n",
+          "stderr": "formatted input.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "65816",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "        .setcpu \"65816\"\n        .org $1000\n        .byte 6\n        .macro emit operand\n        .byte operand\n        .endmacro\n        emit \"a,b\"\n        .byte 8\n",
+          "stderr": "formatted formatted.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "65816",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 5 byte(s) at $1000 -> out.bin\n"
+        }
+      ]
+    },
+    {
+      "name": "65816_character_parameter",
+      "matches_native": true,
+      "formatter_roundtrip": true,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "65816",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $1000 -> out.bin\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "65816",
+            "input.s"
+          ],
+          "exit": 0,
+          "stdout": "        .setcpu \"65816\"\n        .org $1000\n        .byte 6\n        .macro emit operand\n        .byte operand\n        .endmacro\n        emit ','\n        .byte 8\n",
+          "stderr": "formatted input.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "65816",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "        .setcpu \"65816\"\n        .org $1000\n        .byte 6\n        .macro emit operand\n        .byte operand\n        .endmacro\n        emit ','\n        .byte 8\n",
+          "stderr": "formatted formatted.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "65816",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $1000 -> out.bin\n"
+        }
+      ]
+    },
+    {
+      "name": "65816_arithmetic",
+      "matches_native": true,
+      "formatter_roundtrip": true,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "65816",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $1000 -> out.bin\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "65816",
+            "input.s"
+          ],
+          "exit": 0,
+          "stdout": "        .setcpu \"65816\"\n        .org $1000\n        .byte 6\n        .macro emit operand\n        .byte operand+1\n        .endmacro\n        emit 6\n        .byte 8\n",
+          "stderr": "formatted input.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "65816",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "        .setcpu \"65816\"\n        .org $1000\n        .byte 6\n        .macro emit operand\n        .byte operand+1\n        .endmacro\n        emit 6\n        .byte 8\n",
+          "stderr": "formatted formatted.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "65816",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $1000 -> out.bin\n"
+        }
+      ]
+    },
+    {
+      "name": "65816_locals",
+      "matches_native": true,
+      "formatter_roundtrip": true,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "65816",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 8 byte(s) at $1000 -> out.bin\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "65816",
+            "input.s"
+          ],
+          "exit": 0,
+          "stdout": "        .setcpu \"65816\"\n        .org $1000\n        .byte 6\n        .macro emit\n        .local here\n        here: .byte 7\n        .word here\n        .endmacro\n        emit\n        emit\n        .byte 8\n",
+          "stderr": "formatted input.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "65816",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "        .setcpu \"65816\"\n        .org $1000\n        .byte 6\n        .macro emit\n        .local here\n        here: .byte 7\n        .word here\n        .endmacro\n        emit\n        emit\n        .byte 8\n",
+          "stderr": "formatted formatted.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "65816",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 8 byte(s) at $1000 -> out.bin\n"
+        }
+      ]
+    },
+    {
+      "name": "65816_nested_calls",
+      "matches_native": true,
+      "formatter_roundtrip": true,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "65816",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $1000 -> out.bin\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "65816",
+            "input.s"
+          ],
+          "exit": 0,
+          "stdout": "        .setcpu \"65816\"\n        .org $1000\n        .byte 6\n        .macro outer\n        inner\n        .endmacro\n        .macro inner\n        .byte 7\n        .endmacro\n        outer\n        .byte 8\n",
+          "stderr": "formatted input.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "65816",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "        .setcpu \"65816\"\n        .org $1000\n        .byte 6\n        .macro outer\n        inner\n        .endmacro\n        .macro inner\n        .byte 7\n        .endmacro\n        outer\n        .byte 8\n",
+          "stderr": "formatted formatted.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "65816",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $1000 -> out.bin\n"
+        }
+      ]
+    },
+    {
+      "name": "65816_labelled_call",
+      "matches_native": true,
+      "formatter_roundtrip": true,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "65816",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 5 byte(s) at $1000 -> out.bin\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "65816",
+            "input.s"
+          ],
+          "exit": 0,
+          "stdout": "        .setcpu \"65816\"\n        .org $1000\n        .byte 6\n        .macro emit operand\n        .byte operand\n        .endmacro\nhere:\n        emit 7\n        .word here\n        .byte 8\n",
+          "stderr": "formatted input.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "65816",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "        .setcpu \"65816\"\n        .org $1000\n        .byte 6\n        .macro emit operand\n        .byte operand\n        .endmacro\nhere:\n        emit 7\n        .word here\n        .byte 8\n",
+          "stderr": "formatted formatted.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "65816",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 5 byte(s) at $1000 -> out.bin\n"
+        }
+      ]
+    },
+    {
+      "name": "65816_short_form",
+      "matches_native": true,
+      "formatter_roundtrip": true,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "65816",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $1000 -> out.bin\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "65816",
+            "input.s"
+          ],
+          "exit": 0,
+          "stdout": "        .setcpu \"65816\"\n        .org $1000\n        .byte 6\n        .mac emit operand\n        .byte operand\n        .endmac\n        emit 7\n        .byte 8\n",
+          "stderr": "formatted input.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "65816",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "        .setcpu \"65816\"\n        .org $1000\n        .byte 6\n        .mac emit operand\n        .byte operand\n        .endmac\n        emit 7\n        .byte 8\n",
+          "stderr": "formatted formatted.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "65816",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $1000 -> out.bin\n"
+        }
+      ]
+    },
+    {
+      "name": "65816_keyword_case",
+      "matches_native": true,
+      "formatter_roundtrip": true,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "65816",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $1000 -> out.bin\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "65816",
+            "input.s"
+          ],
+          "exit": 0,
+          "stdout": "        .setcpu \"65816\"\n        .org $1000\n        .byte 6\n        .MACRO Emit operand\n        .byte operand\n        .ENDMACRO\n        Emit 7\n        .byte 8\n",
+          "stderr": "formatted input.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "65816",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "        .setcpu \"65816\"\n        .org $1000\n        .byte 6\n        .MACRO Emit operand\n        .byte operand\n        .ENDMACRO\n        Emit 7\n        .byte 8\n",
+          "stderr": "formatted formatted.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "65816",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $1000 -> out.bin\n"
+        }
+      ]
+    },
+    {
+      "name": "65816_unused_values",
+      "matches_native": true,
+      "formatter_roundtrip": true,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "65816",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $1000 -> out.bin\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "65816",
+            "input.s"
+          ],
+          "exit": 0,
+          "stdout": "        .setcpu \"65816\"\n        .org $1000\n        .byte 6\n        .macro unused operand\n        .local here\n        here: .byte operand\n        .res MISSING\n        .endmacro\n        .byte 7\n        .byte 8\n",
+          "stderr": "formatted input.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "65816",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "        .setcpu \"65816\"\n        .org $1000\n        .byte 6\n        .macro unused operand\n        .local here\n        here: .byte operand\n        .res MISSING\n        .endmacro\n        .byte 7\n        .byte 8\n",
+          "stderr": "formatted formatted.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "65816",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $1000 -> out.bin\n"
+        }
+      ]
+    },
+    {
+      "name": "65816_comments",
+      "matches_native": true,
+      "formatter_roundtrip": true,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "65816",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 5 byte(s) at $1000 -> out.bin\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "65816",
+            "input.s"
+          ],
+          "exit": 0,
+          "stdout": "        .setcpu \"65816\"\n        .org $1000\n        .byte 6\n; before\n        .macro emit operand   ; header\n; body\n        .byte operand   ; value\n        .endmacro   ; close\n        emit \"a;b\"   ; call\n        .byte 8\n",
+          "stderr": "formatted input.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "65816",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "        .setcpu \"65816\"\n        .org $1000\n        .byte 6\n; before\n        .macro emit operand   ; header\n; body\n        .byte operand   ; value\n        .endmacro   ; close\n        emit \"a;b\"   ; call\n        .byte 8\n",
+          "stderr": "formatted formatted.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "65816",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 5 byte(s) at $1000 -> out.bin\n"
+        }
+      ]
+    },
+    {
+      "name": "65816_unused_repeat",
+      "matches_native": true,
+      "formatter_roundtrip": true,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "65816",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $1000 -> out.bin\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "65816",
+            "input.s"
+          ],
+          "exit": 0,
+          "stdout": "        .setcpu \"65816\"\n        .org $1000\n        .byte 6\n        .macro unused count\n        .repeat count,I\n        .byte I\n        .endrepeat\n        .endmacro\n        .byte 7\n        .byte 8\n",
+          "stderr": "formatted input.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "65816",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "        .setcpu \"65816\"\n        .org $1000\n        .byte 6\n        .macro unused count\n        .repeat count,I\n        .byte I\n        .endrepeat\n        .endmacro\n        .byte 7\n        .byte 8\n",
+          "stderr": "formatted formatted.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "65816",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $1000 -> out.bin\n"
+        }
+      ]
+    },
+    {
+      "name": "65816_unused_include",
+      "matches_native": true,
+      "formatter_roundtrip": true,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "65816",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $1000 -> out.bin\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "65816",
+            "input.s"
+          ],
+          "exit": 0,
+          "stdout": "        .setcpu \"65816\"\n        .org $1000\n        .byte 6\n        .macro unused\n        .include \"missing.inc\"\n        .endmacro\n        .byte 7\n        .byte 8\n",
+          "stderr": "formatted input.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "65816",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "        .setcpu \"65816\"\n        .org $1000\n        .byte 6\n        .macro unused\n        .include \"missing.inc\"\n        .endmacro\n        .byte 7\n        .byte 8\n",
+          "stderr": "formatted formatted.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "65816",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $1000 -> out.bin\n"
+        }
+      ]
+    },
+    {
+      "name": "65816_multiple_calls",
+      "matches_native": true,
+      "formatter_roundtrip": true,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "65816",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 4 byte(s) at $1000 -> out.bin\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "65816",
+            "input.s"
+          ],
+          "exit": 0,
+          "stdout": "        .setcpu \"65816\"\n        .org $1000\n        .byte 6\n        .macro emit operand\n        .byte operand\n        .endmacro\n        emit 7\n        emit 8\n        .byte 8\n",
+          "stderr": "formatted input.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "65816",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "        .setcpu \"65816\"\n        .org $1000\n        .byte 6\n        .macro emit operand\n        .byte operand\n        .endmacro\n        emit 7\n        emit 8\n        .byte 8\n",
+          "stderr": "formatted formatted.s -> stdout\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "65816",
+            "formatted.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 4 byte(s) at $1000 -> out.bin\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_no_arguments",
+      "matches_native": true,
+      "formatter_roundtrip": false,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "huc6280",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $1000 -> out.bin\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 4: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_parameter",
+      "matches_native": true,
+      "formatter_roundtrip": false,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "huc6280",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $1000 -> out.bin\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 4: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_two_parameters",
+      "matches_native": true,
+      "formatter_roundtrip": false,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "huc6280",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 4 byte(s) at $1000 -> out.bin\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 4: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_quoted_parameter",
+      "matches_native": true,
+      "formatter_roundtrip": false,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "huc6280",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 5 byte(s) at $1000 -> out.bin\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 4: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_character_parameter",
+      "matches_native": true,
+      "formatter_roundtrip": false,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "huc6280",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $1000 -> out.bin\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 4: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_arithmetic",
+      "matches_native": true,
+      "formatter_roundtrip": false,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "huc6280",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $1000 -> out.bin\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 4: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_locals",
+      "matches_native": true,
+      "formatter_roundtrip": false,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "huc6280",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 8 byte(s) at $1000 -> out.bin\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 4: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_nested_calls",
+      "matches_native": true,
+      "formatter_roundtrip": false,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "huc6280",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $1000 -> out.bin\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 4: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_labelled_call",
+      "matches_native": true,
+      "formatter_roundtrip": false,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "huc6280",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 5 byte(s) at $1000 -> out.bin\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 4: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_short_form",
+      "matches_native": true,
+      "formatter_roundtrip": false,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "huc6280",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $1000 -> out.bin\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 4: `.mac` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_keyword_case",
+      "matches_native": true,
+      "formatter_roundtrip": false,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "huc6280",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $1000 -> out.bin\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 4: `.MACRO` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_unused_values",
+      "matches_native": true,
+      "formatter_roundtrip": false,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "huc6280",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $1000 -> out.bin\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 4: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_comments",
+      "matches_native": true,
+      "formatter_roundtrip": false,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "huc6280",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 5 byte(s) at $1000 -> out.bin\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 5: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_unused_repeat",
+      "matches_native": true,
+      "formatter_roundtrip": false,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "huc6280",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $1000 -> out.bin\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 4: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_unused_include",
+      "matches_native": true,
+      "formatter_roundtrip": false,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "huc6280",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $1000 -> out.bin\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 4: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    },
+    {
+      "name": "huc6280_multiple_calls",
+      "matches_native": true,
+      "formatter_roundtrip": false,
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "--dialect",
+            "huc6280",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 4 byte(s) at $1000 -> out.bin\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-character-operands-producer/asm198x",
+            "fmt",
+            "--dialect",
+            "huc6280",
+            "input.s"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.s: line 4: `.macro` is declared (`macro`) but not dispatched here\n"
+        }
+      ]
+    }
+  ]
+}
