@@ -72,7 +72,8 @@ pub(crate) struct Scope<'a> {
 
 /// Reading a number in a dialect's own expression grammar, against the
 /// constants above the line.
-type Evaluate<'a> = dyn Fn(&str, &BTreeMap<String, i64>, usize) -> Option<i64> + 'a;
+type Evaluate<'a> =
+    dyn Fn(&str, &BTreeMap<String, i64>, usize) -> Result<Option<i64>, AsmError> + 'a;
 
 impl Scope<'_> {
     /// A whole-number argument, which the pass works out where it stands: an
@@ -85,7 +86,7 @@ impl Scope<'_> {
     /// which is not assigned until long after this pass has run.
     pub(crate) fn number(&self, arg: &Arg, name: &str, line: usize) -> Result<i64, AsmError> {
         let text = arg.raw();
-        (self.evaluate)(text, self.numbers, line).ok_or_else(|| {
+        (self.evaluate)(text, self.numbers, line)?.ok_or_else(|| {
             AsmError::new(
                 line,
                 format!(
@@ -153,6 +154,18 @@ pub(crate) trait TextSyntax {
     fn evaluate(&self, text: &str, numbers: &BTreeMap<String, i64>, line: usize) -> Option<i64> {
         let _ = (numbers, line);
         parse_int(text)
+    }
+
+    /// A live source reader may reject lookup with its original source span.
+    /// Pure dialects keep their existing fold and the ordinary nonconstant
+    /// diagnostic; a checked reader's error must not become that fallback.
+    fn evaluate_checked(
+        &self,
+        text: &str,
+        numbers: &BTreeMap<String, i64>,
+        line: usize,
+    ) -> Result<Option<i64>, AsmError> {
+        Ok(self.evaluate(text, numbers, line))
     }
 
     /// Fold one call. `None` means the name is not a string function here, and
@@ -232,7 +245,7 @@ pub(crate) fn expand<S: TextSyntax>(syntax: &S, source: &str) -> Result<String, 
     let mut symbols: BTreeMap<String, String> = BTreeMap::new();
     let mut numbers: BTreeMap<String, i64> = BTreeMap::new();
     let mut out = String::with_capacity(source.len());
-    let evaluate = |t: &str, n: &BTreeMap<String, i64>, l: usize| syntax.evaluate(t, n, l);
+    let evaluate = |t: &str, n: &BTreeMap<String, i64>, l: usize| syntax.evaluate_checked(t, n, l);
     for (index, raw) in source.lines().enumerate() {
         let line = index + 1;
         if let Some(name) = syntax.undefinition(raw) {
@@ -637,6 +650,81 @@ fn one_arg(text: &str) -> Arg {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    struct Numeric;
+
+    impl TextSyntax for Numeric {
+        fn definition(&self, _: &str) -> Option<(String, String)> {
+            None
+        }
+
+        fn function(
+            &self,
+            name: &str,
+            args: &[Arg],
+            scope: &Scope,
+            line: usize,
+        ) -> Result<Option<Folded>, AsmError> {
+            if name != "number" || args.len() != 1 {
+                return Ok(None);
+            }
+            scope
+                .number(&args[0], name, line)
+                .map(Folded::Number)
+                .map(Some)
+        }
+    }
+
+    #[test]
+    fn checked_numeric_reads_preserve_lookup_errors_and_pure_defaults() {
+        use crate::span::{ExpansionFrame, FileId, Span};
+
+        struct Checked(Span);
+
+        impl TextSyntax for Checked {
+            fn definition(&self, line: &str) -> Option<(String, String)> {
+                Numeric.definition(line)
+            }
+
+            fn evaluate_checked(
+                &self,
+                _: &str,
+                _: &BTreeMap<String, i64>,
+                _: usize,
+            ) -> Result<Option<i64>, AsmError> {
+                Err(AsmError::at(self.0.clone(), "no such scope `missing`"))
+            }
+
+            fn function(
+                &self,
+                name: &str,
+                args: &[Arg],
+                scope: &Scope,
+                line: usize,
+            ) -> Result<Option<Folded>, AsmError> {
+                Numeric.function(name, args, scope, line)
+            }
+        }
+
+        let mut span = Span::in_file(FileId(3), 7, 4);
+        span.expansion_frames.push(ExpansionFrame {
+            macro_name: "read_number".to_string(),
+            defined_at: Some(Box::new(Span::in_file(FileId(3), 2, 1))),
+            invoked_at: Box::new(Span::in_file(FileId(0), 11, 1)),
+        });
+        let error = expand(&Checked(span.clone()), "number(missing::VALUE)")
+            .expect_err("checked lookup must refuse");
+        assert_eq!(error.span, Some(span));
+        assert_eq!(error.message, "no such scope `missing`");
+
+        assert_eq!(expand(&Numeric, "number($2a)").expect("pure fold"), "42\n");
+        assert!(
+            expand(&Numeric, "number(MISSING)")
+                .expect_err("unknown pure value")
+                .message
+                .contains("needs a number it can work out where it stands")
+        );
+    }
 
     #[test]
     fn quoted_arguments_keep_spelling_and_existing_cooked_values() {
