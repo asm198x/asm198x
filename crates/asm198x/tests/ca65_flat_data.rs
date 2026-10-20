@@ -187,3 +187,11 @@ fn flat_wide_data_matches_native_unsigned_limits_and_roundtrips() {
         104,
     );
 }
+
+#[test]
+fn flat_addresses_match_native_cpu_specific_extraction_and_roundtrips() {
+    verify(
+        serde_json::from_str(include_str!("fixtures/ca65-flat-addresses.json")).expect("facts"),
+        148,
+    );
+}

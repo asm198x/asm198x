@@ -642,7 +642,16 @@ pub const DIRECTIVES: &[Directive] = &[
         id: "words",
         pattern: Pattern::Sigilled {
             sigil: '.',
-            names: &["word", "addr"],
+            names: &["word"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "addresses",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["addr"],
             required: true,
         },
         category: Category::Operation,
@@ -780,6 +789,14 @@ fn parse_directive(
         "org" => Ok(Some(Operation::Org(value(rest, line)?))),
         "bytes" => Ok(Some(Operation::Bytes(byte_list(rest, strings, line)?))),
         "words" => Ok(Some(Operation::Words(value_list(rest, line)?))),
+        // Native 65816 `.addr` extracts the low word before emission; `.word`
+        // and HuC6280 `.addr` validate the complete value instead.
+        "addresses" => Ok(Some(Operation::Bytes(
+            value_list(rest, line)?
+                .into_iter()
+                .flat_map(|e| [Expr::Lo(Box::new(e.clone())), Expr::Hi(Box::new(e))])
+                .collect(),
+        ))),
         // Data directives validate the complete unsigned value after layout.
         "dword" => Ok(Some(Operation::Sized {
             width: 4,
