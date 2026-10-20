@@ -68,6 +68,7 @@ requiredCases.push('ca65_generated_name_constancy');
 requiredCases.push('ca65_generated_macros');
 requiredCases.push('ca65_token_bound_types');
 requiredCases.push('ca65_string_bytes', 'ca65_string_consumers', 'ca65_flat_string_bytes', 'ca65_literal_boundaries');
+requiredCases.push('ca65_text_consumers');
 const sourceFiles = {
   'LICENSE': '62cd567bc9270c722abcaa6ad88b6a1fe861698d63890f787cc557d2395be203',
   'helloworld.asm': '9e57c82435c0cf35e56089d56d6b83991c61624c2b3448ab6c66fb13a884a0a5',
@@ -1455,6 +1456,11 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
       assert.equal(facts.cases.length, count);
       assert.equal(facts.excluded_cases.length, excludedCount);
       for (const fact of facts.excluded_cases) {
+        if (excludedIssue === 'text') {
+          assert.equal(fact.audit, 'text'); assert.equal(fact.surface, 'memory_and_posix');
+          assert.equal(facts.posix_cases.filter(row => row.name === fact.name).length, 1);
+          continue;
+        }
         assert(excludedIssue === 'literal' ? [835, 895].includes(fact.issue) : fact.issue === excludedIssue);
         if (excludedIssue === 'literal') {
           assert(['literal', 'flat_literal'].includes(fact.audit));
@@ -1474,7 +1480,27 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
         const args = input => ['--dialect', fact.dialect, ...(fact.dialect === 'ca65' ? ['-C', 'cpu.cfg'] : []), input, '-o', 'cpu.bin', '--debug=scope.debug198x', '--listing-json=scope.lst.json', '--sym=scope.sym', '--message-format=json'];
         const authoredMarker = fact.authored_marker ?? false;
         assert.equal(authoredMarker, fact.source.includes('ca65-string:'));
+        const verifyPayload = result => {
+          if (excludedIssue !== 'text') return;
+          const payload = JSON.parse(result.stdout);
+          const entries = Array.isArray(payload) ? payload : payload.warnings;
+          assert(Array.isArray(entries), name + ': structured payload');
+          if (fact.expected_messages === null) {
+            assert.equal(fact.audit, 'assertion'); assert.notEqual(fact.native.at(-1).exit, 0);
+          } else {
+            assert(Array.isArray(fact.expected_messages));
+            assert.deepEqual(entries.map(row => row.message), fact.expected_messages, name + ': exact message payload');
+          }
+          if (Array.isArray(payload)) {
+            assert(entries.length > 0);
+            for (const diagnostic of entries) {
+              assert.equal(diagnostic.span.path, 'cpu.s', name + ': source path');
+              if (fact.name.startsWith('macro_body_')) assert(diagnostic.span.expansion_frames.length > 0, name + ': macro frames');
+            }
+          }
+        };
         const p = run(args('cpu.s'));
+        verifyPayload(p);
         if (!authoredMarker) for (const stream of [p.stdout, p.stderr]) assert(!stream.includes('ca65-string:'), name + ': handle in diagnostic');
         if (fact.native.at(-1).exit !== 0 || fact.assembly_gaps) {
           if (fact.assembly_gaps) { assert.equal(fact.audit, 'index_scope'); assert.deepEqual(fact.assembly_gaps, [795]); assert(['scoped_shadow', 'named_reference'].includes(fact.name)); }
@@ -1502,11 +1528,13 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
         assert.equal(again.stdout, formatted.stdout, name + ': idempotence');
         const roundtrip = run(args('scope-formatted.s'));
         assert.equal(roundtrip.status, 0, name + ': ' + roundtrip.stderr);
+        verifyPayload(roundtrip);
         assert.deepEqual(read('cpu.bin'), Buffer.from(fact.native_hex, 'hex'), name + ': formatted bytes');
         assert.deepEqual(shape(), before, name + ': formatted symbols and sections');
       }
       assert.equal(accepted, acceptedCount);
     };
+    test('ca65_text_consumers', () => qualifyCa65ByteStrings('ca65-text-consumers.json', 472, 264, 48, 'text'));
     test('ca65_literal_boundaries', () => qualifyCa65ByteStrings('ca65-literal-boundaries.json', 768, 477, 294, 'literal'));
     test('ca65_string_bytes', () => qualifyCa65ByteStrings('ca65-string-bytes.json', 287, 274, 0));
     test('ca65_string_consumers', () => qualifyCa65ByteStrings('ca65-string-consumers.json', 132, 104, 9));

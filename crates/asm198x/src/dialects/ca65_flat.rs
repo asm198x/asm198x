@@ -1115,7 +1115,16 @@ pub(crate) fn include_request(
     line: usize,
     directive: &str,
 ) -> Result<String, AsmError> {
-    let (name, rest) = quoted_name(args, line, directive)?;
+    include_value_request(args, line, directive, &StringTokens::default())
+}
+
+pub(crate) fn include_value_request(
+    args: &str,
+    line: usize,
+    directive: &str,
+    strings: &StringTokens,
+) -> Result<String, AsmError> {
+    let (name, rest) = quoted_name(args, line, directive, strings)?;
     if !rest.trim().is_empty() {
         return Err(AsmError::new(
             line,
@@ -1143,7 +1152,7 @@ pub(crate) fn formatter_file_item(rest: &str, line: usize) -> Option<crate::ast:
     } else if word.eq_ignore_ascii_case(".incbin") {
         // The window is source text, not a formatter-time constant query.
         Some(
-            quoted_name(args, line, word)
+            quoted_name(args, line, word, &StringTokens::default())
                 .map(|(request, _)| Item::Incbin { request })
                 .unwrap_or(Item::Verbatim),
         )
@@ -1164,7 +1173,17 @@ pub(crate) fn incbin_args(
     directive: &str,
     fold: &dyn Fn(&str) -> Result<i64, AsmError>,
 ) -> Result<(String, Option<i64>, Option<i64>), AsmError> {
-    let (name, rest) = quoted_name(args, line, directive)?;
+    incbin_value_args(args, line, directive, fold, &StringTokens::default())
+}
+
+pub(crate) fn incbin_value_args(
+    args: &str,
+    line: usize,
+    directive: &str,
+    fold: &dyn Fn(&str) -> Result<i64, AsmError>,
+    strings: &StringTokens,
+) -> Result<(String, Option<i64>, Option<i64>), AsmError> {
+    let (name, rest) = quoted_name(args, line, directive, strings)?;
     let rest = rest.trim();
     if rest.is_empty() {
         return Ok((name, None, None));
@@ -1204,8 +1223,19 @@ fn quoted_name<'a>(
     args: &'a str,
     line: usize,
     directive: &str,
+    strings: &StringTokens,
 ) -> Result<(String, &'a str), AsmError> {
     let t = args.trim();
+    if StringTokens::is_handle(t) {
+        let (name, tail) = strings.text_prefix(t, line)?;
+        if name.is_empty() {
+            return Err(AsmError::new(
+                line,
+                format!("`{directive}` needs a file name"),
+            ));
+        }
+        return Ok((name, tail));
+    }
     let Some(inner) = t.strip_prefix('"') else {
         return Err(AsmError::new(
             line,

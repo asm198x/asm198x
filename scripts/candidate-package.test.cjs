@@ -457,3 +457,10 @@ for (const name of ['ca65_string_bytes', 'ca65_string_consumers', 'ca65_flat_str
     assert.equal(qualifies(complete.filter(row => row.name !== name)), false);
   });
 }
+
+
+test('native text-consumer payload evidence cannot be omitted', () => {
+  const complete = requiredCases.map(name => ({ name, status: 'pass' }));
+  assert(qualifies(complete)); assert(requiredCases.includes('ca65_text_consumers'));
+  assert.equal(qualifies(complete.filter(row => row.name !== 'ca65_text_consumers')), false);
+});

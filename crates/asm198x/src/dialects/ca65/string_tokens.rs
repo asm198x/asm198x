@@ -166,6 +166,44 @@ impl StringTokens {
         error
     }
 
+    fn text_value(&self, handle: &str, line: usize) -> Result<String, AsmError> {
+        let key = Self::key(handle, line)?;
+        let values = self.values.borrow();
+        let value = values
+            .get(&key)
+            .ok_or_else(|| AsmError::new(line, "unknown internal string token"))?;
+        std::str::from_utf8(&value.bytes)
+            .map(str::to_owned)
+            .map_err(|_| {
+                AsmError::new(
+                    value.line,
+                    "binary string cannot be used as UTF-8 text here",
+                )
+            })
+    }
+
+    /// Read one native text value without turning computed bytes into source.
+    /// Each consumer decides whether the remaining source is allowed.
+    pub(crate) fn text_prefix<'a>(
+        &self,
+        source: &'a str,
+        line: usize,
+    ) -> Result<(String, &'a str), AsmError> {
+        let source = source.trim_start();
+        if Self::is_handle(source) {
+            let end = Self::handle_len(source)
+                .ok_or_else(|| AsmError::new(line, "invalid internal string token"))?;
+            return Ok((self.text_value(&source[..end], line)?, &source[end..]));
+        }
+        let body = source
+            .strip_prefix('"')
+            .ok_or_else(|| AsmError::new(line, "string constant expected"))?;
+        let end = body
+            .find('"')
+            .ok_or_else(|| AsmError::new(line, "unterminated string"))?;
+        Ok((body[..end].to_string(), &body[end + 1..]))
+    }
+
     /// Text-only grammar positions retain their UTF-8 contract. Byte directives
     /// instead resolve values directly, without serializing the byte payload.
     pub(crate) fn text_source<'a>(
@@ -177,17 +215,7 @@ impl StringTokens {
             return Ok(Cow::Borrowed(source));
         }
         self.rewrite(source, |handle| {
-            let key = Self::key(handle, line)?;
-            let values = self.values.borrow();
-            let value = values
-                .get(&key)
-                .ok_or_else(|| AsmError::new(line, "unknown internal string token"))?;
-            let text = std::str::from_utf8(&value.bytes).map_err(|_| {
-                AsmError::new(
-                    value.line,
-                    "binary string cannot be used as UTF-8 text here",
-                )
-            })?;
+            let text = self.text_value(handle, line)?;
             Ok(format!("\"{text}\""))
         })
         .map(Cow::Owned)
@@ -290,6 +318,10 @@ mod tests {
         assert_ne!(a, b);
         assert!(first.resolve(&b, 1).is_err());
         assert!(second.resolve(&a, 1).is_err());
+        assert!(first.text_prefix(&b, 1).is_err());
+        assert!(second.text_prefix(&a, 1).is_err());
+        assert!(first.text_prefix(PREFIX, 1).is_err());
+        assert!(first.text_prefix(&format!("{PREFIX}x{END}"), 1).is_err());
         for source in [
             PREFIX.to_string(),
             format!("{PREFIX}x{END}"),
@@ -327,5 +359,19 @@ mod tests {
             token.as_bytes()
         );
         assert_eq!(store.display(&quoted), quoted);
+        let (text, tail) = store.text_prefix(&quoted, 1).expect("literal text");
+        assert_eq!(text.as_bytes(), token.as_bytes());
+        assert!(tail.is_empty());
+    }
+
+    #[test]
+    fn binary_values_remain_data_but_fail_the_utf8_text_contract() {
+        let store = StringTokens::default();
+        let token = store
+            .intern(vec![255], "constructor".into(), 7)
+            .expect("token");
+        assert_eq!(store.data(&token, 1).expect("binary data"), Some(vec![255]));
+        assert!(store.text_prefix(&token, 1).is_err());
+        assert!(store.text_source(&token, 1).is_err());
     }
 }

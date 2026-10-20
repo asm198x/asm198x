@@ -36,3 +36,8 @@ for absent, nonstring and trailing message operands. Then implement
 through the private store and current readers, qualify exact payloads plus output
 preservation and formatter/debug round trips, run all existing byte/string audits,
 and retain clean producer/package/4510 evidence and five-host controls.
+
+Native can print the same assertion warning during both assembly and linking.
+The existing fused driver emits one logical diagnostic. Payload evidence is
+checked against every populated native phase, rather than adding duplicate
+process prints to the expected JSON warning list.
