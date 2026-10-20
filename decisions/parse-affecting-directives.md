@@ -182,3 +182,24 @@ existing macro capture seam apply the numeric-only check. The 317 native
 admission controls, source identities and retained outcomes are in
 `docs/plans/2026-10-19-ca65-numeric-admission/`. Character-literal errors remain
 a separate lexical scope (#835); this exception does not authorize them.
+
+
+## Native quoted-token lexical errors (2026-10-20, #835/#899)
+
+Approved on 2026-10-20, this extends the numeric-only exception above to native
+character and double-quoted string tokens. It supersedes the preceding exclusion
+of character checks and the blanket prohibition on tokenising untaken source,
+only for these physical lexical checks.
+
+At the existing selected-source and macro/repeat capture admission seams, reject
+invalid native one-byte character forms and unterminated double-quoted tokens.
+Backslashes remain raw source bytes. Adjacent complete string tokens are
+lexically valid; selected operand grammar is a separate check. Do not reinterpret
+computed byte-string values as physical quoted source.
+
+Directives, expressions, names, text expansion and include I/O remain selected
+and lazy. Preserve source positions, macro provenance, native read/capture order
+and the established first-error contract. Source after an active `.end` remains
+unread; `.end` in an untaken branch does not stop admission. The formatter
+remains a canonical syntax-only reader. The approved design and native evidence
+are in `docs/plans/2026-10-20-ca65-quoted-admission/`.
