@@ -1,0 +1,102 @@
+[
+  {
+    "path": "crates/asm198x/src/dialects/ca65/mod.rs",
+    "sha256": "eb534240a54fc3d22c26b1fad235d1f9e433369ed2d8615629d793a567738938",
+    "retained": [
+      "f920ac1adb4c11572908107cbde53a83b17b428a",
+      "f825ab1dc45fbcb52bbb3c11f0eee93078328a9c"
+    ]
+  },
+  {
+    "path": "crates/asm198x/src/dialects/ca65/project.rs",
+    "sha256": "15e5863c80cd3baef780b1dc3187888cbade36818def0caee6ca7db813aee369",
+    "retained": [
+      "f920ac1adb4c11572908107cbde53a83b17b428a",
+      "f825ab1dc45fbcb52bbb3c11f0eee93078328a9c"
+    ]
+  },
+  {
+    "path": "crates/asm198x/src/dialects/ca65_816.rs",
+    "sha256": "c86c6f2b1b98b8ca512372083c9744c36b73c31e2c3aa3a5781cb8dcf5567781",
+    "retained": [
+      "f920ac1adb4c11572908107cbde53a83b17b428a",
+      "f825ab1dc45fbcb52bbb3c11f0eee93078328a9c"
+    ]
+  },
+  {
+    "path": "crates/asm198x/src/dialects/ca65_flat.rs",
+    "sha256": "6f9857a1154e3414de0fd886d650ff66e1ee034178d51ff25cb2f3a219296129",
+    "retained": [
+      "f920ac1adb4c11572908107cbde53a83b17b428a"
+    ]
+  },
+  {
+    "path": "crates/asm198x/src/dialects/ca65_huc6280.rs",
+    "sha256": "dc798e04b56db6d59149a3b17f0c40db14d937de67783cdddfd7d1040da8f4eb",
+    "retained": [
+      "f920ac1adb4c11572908107cbde53a83b17b428a",
+      "f825ab1dc45fbcb52bbb3c11f0eee93078328a9c"
+    ]
+  },
+  {
+    "path": "crates/asm198x/src/dialects/text.rs",
+    "sha256": "8e289c0476ba0938bdcfddd186b1824bbe659a9bd14effbbac98e3c6b7fb9dab",
+    "retained": [
+      "f920ac1adb4c11572908107cbde53a83b17b428a",
+      "f825ab1dc45fbcb52bbb3c11f0eee93078328a9c"
+    ]
+  },
+  {
+    "path": "scripts/candidate-package.test.cjs",
+    "sha256": "3ed0c426a6419e7f1831372ec3c5550839367aff0b5a4368b0497eaeab260d98",
+    "retained": [
+      "f920ac1adb4c11572908107cbde53a83b17b428a",
+      "f825ab1dc45fbcb52bbb3c11f0eee93078328a9c"
+    ]
+  },
+  {
+    "path": "scripts/test-candidate-package.cjs",
+    "sha256": "7e8639391f0d73767b233bbb5e9f1de4a535966ff6563cb7417c707b2251ab66",
+    "retained": [
+      "f920ac1adb4c11572908107cbde53a83b17b428a"
+    ]
+  },
+  {
+    "path": "crates/asm198x/src/dialects/ca65/string_tokens.rs",
+    "sha256": "111e0eb966ffb45cfb68dc7f93216c4fc915da5f41093d707a07079e303d3e33",
+    "retained": [
+      "f920ac1adb4c11572908107cbde53a83b17b428a",
+      "f825ab1dc45fbcb52bbb3c11f0eee93078328a9c"
+    ]
+  },
+  {
+    "path": "crates/asm198x/tests/ca65_string_bytes.rs",
+    "sha256": "b7fd402736ab79f6bc56ee9e2a7c0021c5b264f1a1531ee5fe4dd5a730bc7291",
+    "retained": [
+      "f920ac1adb4c11572908107cbde53a83b17b428a"
+    ]
+  },
+  {
+    "path": "crates/asm198x/tests/fixtures/ca65-flat-string-bytes.json",
+    "sha256": "c1005affeb4ce76d13624a05da0ced16d4a9609828ee5639de99c6929004c814",
+    "retained": [
+      "f920ac1adb4c11572908107cbde53a83b17b428a",
+      "f825ab1dc45fbcb52bbb3c11f0eee93078328a9c"
+    ]
+  },
+  {
+    "path": "crates/asm198x/tests/fixtures/ca65-string-bytes.json",
+    "sha256": "c11abf1072e8b16aa3c894e5774a26750d8823d2efbc6491dc225b768a25b9bd",
+    "retained": [
+      "f920ac1adb4c11572908107cbde53a83b17b428a",
+      "f825ab1dc45fbcb52bbb3c11f0eee93078328a9c"
+    ]
+  },
+  {
+    "path": "crates/asm198x/tests/fixtures/ca65-string-consumers.json",
+    "sha256": "212482fec7e22fe8a147e7a4521e8e61078167d68a03e63307e9725d2f32caf3",
+    "retained": [
+      "f920ac1adb4c11572908107cbde53a83b17b428a"
+    ]
+  }
+]

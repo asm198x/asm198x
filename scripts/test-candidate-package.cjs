@@ -67,7 +67,7 @@ requiredCases.push('ca65_cheap_root');
 requiredCases.push('ca65_generated_name_constancy');
 requiredCases.push('ca65_generated_macros');
 requiredCases.push('ca65_token_bound_types');
-requiredCases.push('ca65_string_bytes', 'ca65_string_consumers', 'ca65_flat_string_bytes');
+requiredCases.push('ca65_string_bytes', 'ca65_string_consumers', 'ca65_flat_string_bytes', 'ca65_literal_boundaries');
 const sourceFiles = {
   'LICENSE': '62cd567bc9270c722abcaa6ad88b6a1fe861698d63890f787cc557d2395be203',
   'helloworld.asm': '9e57c82435c0cf35e56089d56d6b83991c61624c2b3448ab6c66fb13a884a0a5',
@@ -1450,11 +1450,18 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
         }
       }
     });
-    const qualifyCa65ByteStrings = (file, count, acceptedCount, excludedCount) => {
+    const qualifyCa65ByteStrings = (file, count, acceptedCount, excludedCount, excludedIssue = 891) => {
       const facts = require('../crates/asm198x/tests/fixtures/' + file);
       assert.equal(facts.cases.length, count);
       assert.equal(facts.excluded_cases.length, excludedCount);
-      for (const fact of facts.excluded_cases) assert.equal(fact.issue, 891);
+      for (const fact of facts.excluded_cases) {
+        assert(excludedIssue === 'literal' ? [835, 895].includes(fact.issue) : fact.issue === excludedIssue);
+        if (excludedIssue === 'literal') {
+          assert(['literal', 'flat_literal'].includes(fact.audit));
+          assert((fact.issue === 895 ? ['_selected_', '_inactive_', '_zero_repeat_'] : ['inactive_', 'unused_macro_', 'zero_repeat_']).some(context => fact.name.includes(context)));
+          if (fact.issue === 895) assert.equal(fact.audit, 'flat_literal');
+        }
+      }
       for (const [name, text] of Object.entries(facts.files)) {
         fs.mkdirSync(path.dirname(path.join(root, name)), { recursive: true }); write(name, text);
       }
@@ -1481,6 +1488,11 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
         if (!authoredMarker) for (const output of outputs.slice(1)) assert(!read(output).toString().includes('ca65-string:'), name + ': handle in ' + output);
         const shape = () => read('scope.debug198x').toString().trim().split('\n').map(line => JSON.parse(line)).filter(row => row.t === 'symbol' || row.t === 'section');
         const before = shape();
+        if (fact.formatter_gap) {
+          assert.equal(fact.formatter_gap, 821); assert.equal(fact.dialect, 'huc6280');
+          assert(['huc6280_macro_body_', 'huc6280_unused_macro_'].some(prefix => fact.name.startsWith(prefix)));
+          continue;
+        }
         const formatted = run(['fmt', '--dialect', fact.dialect, 'cpu.s']);
         assert.equal(formatted.status, 0, name + ': ' + formatted.stderr);
         assert(authoredMarker || !formatted.stdout.includes('ca65-string:'), name + ': handle in formatted source');
@@ -1495,6 +1507,7 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
       }
       assert.equal(accepted, acceptedCount);
     };
+    test('ca65_literal_boundaries', () => qualifyCa65ByteStrings('ca65-literal-boundaries.json', 768, 477, 294, 'literal'));
     test('ca65_string_bytes', () => qualifyCa65ByteStrings('ca65-string-bytes.json', 287, 274, 0));
     test('ca65_string_consumers', () => qualifyCa65ByteStrings('ca65-string-consumers.json', 132, 104, 9));
     test('ca65_flat_string_bytes', () => qualifyCa65ByteStrings('ca65-flat-string-bytes.json', 574, 548, 0));

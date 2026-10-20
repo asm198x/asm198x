@@ -440,7 +440,10 @@ impl FlatWalk for Walker {
         // copied rather than read: `nop2` is a call, and the encoder has no
         // form for it because there is no such instruction.
         let invoked = mos6502::split_first_word(rest.trim()).0;
-        let op = if rest.is_empty() || self.macro_names.contains(invoked) {
+        // The formatter retains string construction syntax without evaluating
+        // it. Assembly alone resolves `.asciiz` operands to byte values.
+        let syntax_asciiz = self.formatting && invoked.eq_ignore_ascii_case(".asciiz");
+        let op = if rest.is_empty() || self.macro_names.contains(invoked) || syntax_asciiz {
             None
         } else {
             parse_op(
@@ -796,7 +799,6 @@ fn parse_directive(
                 .flat_map(|e| [Expr::Hi(Box::new(e.clone())), Expr::Lo(Box::new(e))])
                 .collect(),
         ))),
-        // `.asciiz` — a `.byte` string list with one terminating $00.
         // Byte 0, 1 and 2 of each value, and all three for `.faraddr`. Byte 2
         // is `Expr::Bank`, the engine's 65816 `^` node. Wrapping the expression
         // rather than folding it keeps a forward label resolving in pass two.
@@ -818,8 +820,11 @@ fn parse_directive(
             Ok(Some(Operation::Bytes(out)))
         }
         "asciiz" => {
-            let mut out = byte_list(rest, strings, line)?;
-            out.push(Expr::Num(0));
+            let out = strings
+                .asciiz(split_data_items(rest), line)?
+                .into_iter()
+                .map(|b| Expr::Num(i64::from(b)))
+                .collect();
             Ok(Some(Operation::Bytes(out)))
         }
         "res" => parse_res(rest, env, line),
