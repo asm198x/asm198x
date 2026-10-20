@@ -47,3 +47,17 @@ processes and fourteen streams, and rejects a changed-byte control. The driver
 removed its disposable work directory; that removal was verified. Source pin
 and build identity remain in the retained complete replay report. Exact-head CI
 and all five actual packages with ten controls remain required before merge.
+
+The f920ac1a checkpoint is superseded: the additional named-index controls
+show it emits wrong images for two #795 query cases. Its prior archive reports
+cover the earlier fixture and cannot qualify the final source. The guard keeps
+those previously unsupported indices refused and admits only literal arithmetic.
+Final producer/package/replay evidence must be regenerated for the narrowed
+source. The unsafe checkpoint is retained in trial-named-index-producer.json.
+
+The narrowed source passes the full workspace/Lua suite again: 1,619 passed,
+38 ignored. All 104 Node checks and Clippy over every workspace target pass.
+The final required fixtures contain 993 cases: 991 match native and two keep
+explicit #795 refusals. There are 926 accepted cases, 65 native refusals and
+two guarded legacy refusals. The new cohorts run 1,109/444/2,218 commands.
+The 26 numeric-call arity controls preserve the preceding native behavior.

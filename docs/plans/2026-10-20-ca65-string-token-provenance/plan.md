@@ -58,3 +58,26 @@ with the actual authored source. The qualified total is 963 cases, 912 accepted
 and 51 refused, with 3,699 CLI commands across the three cohorts.
 
 The remaining computed quote payload/path cases are tracked in #892.
+
+## Named-index safety boundary
+
+Four additional native controls reproduce two newly admitted wrong images in
+the first producer: a shadowed scoped index and a missing reference event.
+Keep named indices refused under #795; allow literal arithmetic for #890.
+`ca65_flat.rs` checks the parsed index for symbol references before evaluating
+it. `index_scope_probe.py` and its native/predecessor/prototype records retain
+all four controls. The consumer fixture now has 106 cases, including both
+explicit #795 refusal controls and two native-matching arithmetic cases.
+The three cohorts cover 967 cases: 965 match native, and two preserve declared
+legacy refusals. Accepted counts are 274/92/548; command counts 1,109/382/2,218.
+Re-run full qualification and require the pre-guard producer archive to fail
+exactly the consumer cohort. The first producer is negative evidence for this
+boundary and cannot qualify the final shipping source.
+
+The 26-case numeric-function arity audit preserves native empty-call refusals,
+argument types, inactive captures and empty calls retained as token lists.
+Recognition probes use line zero; real empty numeric calls enforce arity.
+The consumer cohort is now 132 cases, with 104 accepted, 444 CLI commands,
+and the same two explicit #795 controls. Combined: 993 cases, 926 accepted,
+65 native refusals plus two retained #795 refusals, and 3,771 CLI commands.
+Re-run all checks after this final compatibility guard.

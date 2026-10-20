@@ -1784,9 +1784,16 @@ impl text::TextSyntax for Ca65Text<'_> {
         if !is_text_function(&lower) {
             return Ok(None);
         }
-        // An empty argument list is how the pass asks "is this a call?", so it
-        // is answered without complaint.
+        // Recognition probes use line zero. A real numeric string query must
+        // keep its native arity, even when the argument list is empty.
         if args.is_empty() {
+            if line != 0 {
+                match lower.as_str() {
+                    ".strlen" => arity(args, 1, name, line)?,
+                    ".strat" => arity(args, 2, name, line)?,
+                    _ => {}
+                }
+            }
             return Ok(Some(Folded::Text(String::new())));
         }
         let source = format!(
@@ -1862,6 +1869,22 @@ impl text::TextSyntax for Ca65Text<'_> {
             ".strat" => {
                 arity(args, 2, name, line)?;
                 let bytes = self.strings.bytes(&args[0], name, line)?;
+                if let text::Arg::Bare(source) = &args[1]
+                    && !StringTokens::is_string(&args[1])
+                {
+                    let expression = super::ca65::constant_value(source, line)?;
+                    let mut named = false;
+                    let _ = crate::ast::map_sym_expr(expression, &mut |symbol| {
+                        named = true;
+                        crate::engine::Expr::Sym(symbol)
+                    });
+                    if named {
+                        return Err(AsmError::new(
+                            line,
+                            "`.strat` index must be a literal constant expression",
+                        ));
+                    }
+                }
                 let index = selector_bound(&args[1], scope, name, line)?;
                 let byte = usize::try_from(index)
                     .ok()
