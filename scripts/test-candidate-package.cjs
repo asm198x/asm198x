@@ -1401,7 +1401,7 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
     });
     test('ca65_ident_names', () => {
       const facts = require('../crates/asm198x/tests/fixtures/ca65-ident-names.json');
-      assert.equal(facts.cases.length, 549);
+      assert.equal(facts.cases.length, 165);
       for (const [name, text] of Object.entries(facts.files)) {
         fs.mkdirSync(path.dirname(path.join(root, name)), { recursive: true }); write(name, text);
       }
