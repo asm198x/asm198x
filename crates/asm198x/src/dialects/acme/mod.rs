@@ -2297,6 +2297,7 @@ fn parse_directive(
             Ok(Operation::Sized {
                 width,
                 big_endian,
+                range: crate::engine::DataRange::SignedOrUnsigned,
                 values: parse_list(anons, zone, rest, line)?,
             })
         }

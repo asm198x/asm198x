@@ -177,10 +177,12 @@ pub(super) fn substitute_anon_refs(
         Operation::Sized {
             width,
             big_endian,
+            range,
             values,
         } => Operation::Sized {
             width,
             big_endian,
+            range,
             values: values.into_iter().map(subst).collect::<Result<_, _>>()?,
         },
         Operation::InitMem(v) => Operation::InitMem(v),

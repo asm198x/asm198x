@@ -1,6 +1,6 @@
 # Unsigned far-address data validation (#906)
 
-Status: proposal awaiting design agreement. No implementation change is made.
+Status: approved by Steve on 2026-10-20: extend the existing Sized operation.
 The 132-case native audit accepts 64 and refuses 68. Native `.faraddr` accepts
 0 through 16777215 and rejects negative values, including -1. The existing
 `Operation::Sized` three-byte emission accepts signed negatives as well as
@@ -33,5 +33,5 @@ proposed.
 
 The proposed change extends a shared engine/AST convention. The user-provided
 AGENTS.md requires agreement for significant departures from conventions and
-new architectural patterns; obtain that agreement before implementation. #904
+new architectural patterns; That agreement is recorded above. #904
 can continue independently using the same native diagnostic evidence.

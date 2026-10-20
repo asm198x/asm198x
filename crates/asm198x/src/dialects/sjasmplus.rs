@@ -1590,6 +1590,7 @@ fn wide(values: Vec<Expr>, width: u8) -> Operation {
     Operation::Sized {
         width,
         big_endian: false,
+        range: crate::engine::DataRange::SignedOrUnsigned,
         values,
     }
 }
