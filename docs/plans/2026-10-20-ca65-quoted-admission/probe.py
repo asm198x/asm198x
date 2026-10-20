@@ -69,6 +69,26 @@ def cases() -> dict[str, str]:
         "character_semicolon": ".byte ';'\n",
     }.items():
         out[name] = ".byte 6\n" + body + ".byte 7\n"
+    out.update(
+        {
+            "crlf_character": ".byte 'A'\r\n",
+            "crlf_string": '.byte "a"\r\n',
+            "cr_inside_string": '.byte "a\rb"\n',
+            "cr_inside_character": ".byte '\r'\n",
+            "eof_character": ".byte 'A'",
+            "eof_string": '.byte "a"',
+            "eof_bad_character": ".byte 'A",
+            "eof_bad_string": '.byte "a',
+        }
+    )
+    for byte in range(128):
+        line = ".byte '" + chr(byte) + "'\n"
+        for context, body in {
+            "direct": line,
+            "inactive": ".if 0\n" + line + ".endif\n",
+            "unused_macro": ".macro unused\n" + line + ".endmacro\n",
+        }.items():
+            out[f"ascii_{byte}_{context}"] = ".byte 6\n" + body + ".byte 7\n"
     return out
 
 

@@ -85,7 +85,7 @@ def main() -> None:
                     "matches_native": matches,
                 }
             )
-    assert len(rows) == len(facts["cases"]) == 157
+    assert len(rows) == len(facts["cases"]) == 549
     args.output.write_text(
         json.dumps(
             {
