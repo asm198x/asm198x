@@ -1,0 +1,9 @@
+{
+  "commit": "0e963625f5dd814e2dc0f135512c34819823b709",
+  "tree": "9a8a00e82a9de82f9da7fefd327a31b3828cfc3c",
+  "binaries": {
+    "asm198x": "a60a02b8c30809de561906713bbf4c08f7cb1eb7d8a977f0289ca1331d23a83d",
+    "asm198x-lua": "fdba1c756750fc11149302c6e1e65aea5e8a8bf3b01772698d56c39f66446abb"
+  },
+  "cargo_lock_sha256": "0ee4b612d610b2d581a5b32e1666f431bdfcf55b99cfaed65841aa48e369958a"
+}

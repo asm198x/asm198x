@@ -33,3 +33,20 @@ Remaining #795 work is the approved source-aware parser/text context: consume
 ordinary names, `.const` and numeric string arguments in expression order,
 including names discarded by short-circuiting. Reuse these final admission
 requirements at that live seam; do not mark a whole operand tail in advance.
+
+## Checked result
+
+#915 merged with all 29 required checks, 1,639 Rust/Lua passes (38 ignored),
+115 Node checks and five actual native archives, each passing 101 cohorts and
+both negative controls. The merged tree matches qualified source
+0e963625f5dd814e2dc0f135512c34819823b709. The first macOS Lua job ran no steps
+because GitHub could not acquire a runner; its annotations and successful
+same-commit retry are retained. No check was bypassed.
+
+Eighteen supplementary direct/include/macro controls challenge .ifnconst and
+short-circuited .if reads, with missing and forward names. All eighteen match;
+the predecessor had nine wrong acceptances. Their exact native streams and
+before/after results are in query-admission-local-qualification-915. They are
+supplementary audit coverage; the required archive query fixture remains the
+explicit 51-case fixture above. The fresh 4510 run matches all 564 reference
+bytes, verifies seven processes/fourteen streams and rejects a changed byte.

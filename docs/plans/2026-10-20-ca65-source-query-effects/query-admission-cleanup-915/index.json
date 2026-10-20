@@ -1,0 +1,839 @@
+{
+  "retention_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743",
+  "removed_directories": [
+    "/private/tmp/asm198x-source-constancy-final-producer",
+    "/private/tmp/asm198x-source-constancy-final-local-package",
+    "/private/tmp/asm198x-query-admission-clean-4510",
+    "/private/tmp/asm198x-query-admission-candidates"
+  ],
+  "verified_files": [
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-producer/before-strings-lifetime-native.json",
+      "sha256": "9b02f26fe850f2d02c9da9636fb9eed75765d3324867741f6deb63717466ab02",
+      "length": 17349,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-producer--before-strings-lifetime-native.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-producer/after-scope-native-query-probes.json",
+      "sha256": "e85c0d4271456fc837d6b48c1e1928eb1e669fc3f45e15a8fed3d1652e905897",
+      "length": 17334,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-producer--after-scope-native-query-probes.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-producer/before-scope-native-width-probes.json",
+      "sha256": "3241e19c37cb7369fffb089572e446b6ccdb69b921ea9b5abb8e00d7e003981c",
+      "length": 71196,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-producer--before-scope-native-width-probes.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-producer/before-strings-flat-native.json",
+      "sha256": "336357eca7ddec5dc5c9c60fe3d5e2da271f3876781499ea6b7048a0a68637e1",
+      "length": 257968,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-producer--before-strings-flat-native.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-producer/after-scope-deferred-followups-native.json",
+      "sha256": "e51cda0b79f2f4db538238c7513ac4030c9ebb9d9ffc3d9d95c35226e1614621",
+      "length": 11288,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-producer--after-scope-deferred-followups-native.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-producer/replay-summary.json",
+      "sha256": "f802f5e8d2ee70e9e038348dae17e67e68a20c1734c32097120dd5b03acf904a",
+      "length": 10111,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-producer--replay-summary.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-producer/before-text-native.json",
+      "sha256": "16a3221bdeb5ac05c04a81a17fe4598749e74a576e687a08cd57132e3e967519",
+      "length": 196021,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-producer--before-text-native.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-producer/before-query-original.json",
+      "sha256": "bf6c4bfd81f572482003ff162be0d8956179a8b07908d1f548e55fefb7f17961",
+      "length": 28125,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-producer--before-query-original.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-producer/before-source-constancy.json",
+      "sha256": "3467681b5b490f05536f032d7078ddefe14c881cd61d0570dc4747fddc06cd17",
+      "length": 154871,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-producer--before-source-constancy.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-producer/before-scope-native-completed-phase-probes.json",
+      "sha256": "3101cdf70a362686072d3e8e4ff3bd7ac4c3f18f04dc07d55cee530747252175",
+      "length": 53513,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-producer--before-scope-native-completed-phase-probes.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-producer/after-strings-flat-native.json",
+      "sha256": "a8563931260b67bc3bb20bbb554814668d5cdfec444c67c7d0222c77fe9f2143",
+      "length": 263718,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-producer--after-strings-flat-native.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-producer/before-scope-native-phase-probes.json",
+      "sha256": "2250139d0a5042994e4b4dee3fa84efd844f4bf796d873e11dcb9fe8977a151f",
+      "length": 54017,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-producer--before-scope-native-phase-probes.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-producer/before-scope-deferred-followups-native.json",
+      "sha256": "bf8c8ad7bcfb7836f41feb9efcf1c9f7d612cade8c66a9eba8e9cd2234041c24",
+      "length": 11057,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-producer--before-scope-deferred-followups-native.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-producer/after-strings-consumer-native.json",
+      "sha256": "abac64d0bb418b375b4d9a60792555295b765f4567e9845976c6009f54749187",
+      "length": 33800,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-producer--after-strings-consumer-native.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-producer/after-scope-native-completed-phase-probes.json",
+      "sha256": "104bb66a031f8e2400c307a87a1b7282e4d5a7a2fbffcf84c26d5204a119fd61",
+      "length": 54573,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-producer--after-scope-native-completed-phase-probes.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-producer/before-query-extended.json",
+      "sha256": "66301b7618078584dbc9f0217de16810d7a1f2b94e52e4a61ea8cd3599143ccb",
+      "length": 69693,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-producer--before-query-extended.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-producer/before-text-assertion-native.json",
+      "sha256": "00bbd311391623f7957a8eea623f56dd673fde43197aa4f9790ad7301f860e02",
+      "length": 60148,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-producer--before-text-assertion-native.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-producer/after-strings-index-scope-native.json",
+      "sha256": "dceaf32872a9a970093c0369c440e67aed6dbc55bf2906c76429e4925aec05c9",
+      "length": 2172,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-producer--after-strings-index-scope-native.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-producer/after-source-constancy.json",
+      "sha256": "09d789f5436b0bf4fcb9294b490256840301ae207f2c1282a497031cd9eaf8eb",
+      "length": 157860,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-producer--after-source-constancy.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-producer/after-scope-native-width-probes.json",
+      "sha256": "fe726e7d2f2c618fbed97cc97cbf67ce64f9f9b4523dd5ecc950c276a42ab840",
+      "length": 72646,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-producer--after-scope-native-width-probes.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-producer/before-scope-native-negative-memory-probes.json",
+      "sha256": "6bb698da57d54e9e510589f5ee99ee68693c89e934dd795f40a2e152862daa3f",
+      "length": 14092,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-producer--before-scope-native-negative-memory-probes.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-producer/before-strings-text-consumer-native.json",
+      "sha256": "853f5dd1e41db03a5aea3a77b7d4d2077ec7a1b856141ae98fb53b1e04eff418",
+      "length": 3029,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-producer--before-strings-text-consumer-native.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-producer/identity.json",
+      "sha256": "c857d7b5de3d1c1531aac096b59967381f2127bf6c2e74376142c0e32ef36ae7",
+      "length": 295,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-producer--identity.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-producer/before-scope-native-query-probes.json",
+      "sha256": "cde81916c1fe63c297762c77e5322ac5c154566447e3e2e97f915d995ca23d2a",
+      "length": 16974,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-producer--before-scope-native-query-probes.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-producer/after-scope-native-negative-memory-probes.json",
+      "sha256": "380edfc890b12d3e33a7519a60a190f881af106711b7ea207682147add8dcddc",
+      "length": 14382,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-producer--after-scope-native-negative-memory-probes.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-producer/after-query-original.json",
+      "sha256": "ae52188ac4219b20690e3696705a257fd4712cc5d88456cbf30e9c11dc901e4c",
+      "length": 28692,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-producer--after-query-original.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-producer/after-scope-native-stream-probes.json",
+      "sha256": "a12415f0864189459b6ccbb1f406decc8fed99af248c394377a726e9ba3480c8",
+      "length": 3253,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-producer--after-scope-native-stream-probes.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-producer/after-strings-guard-native.json",
+      "sha256": "27b754e2db2ae3b948fa3c9426ccbd11157b4ede4b859dff382b6eeeb876bcda",
+      "length": 3367,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-producer--after-strings-guard-native.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-producer/after-strings-lifetime-native.json",
+      "sha256": "5d22fdb62e54b3d5b4af6d24ae923c8cd4e5e925d7d063895ce98a0ef26a5c98",
+      "length": 17719,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-producer--after-strings-lifetime-native.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-producer/after-query-extended.json",
+      "sha256": "52fe8aae440bda57b433f188e879486c7b5e861f7bb18fb403490193b164da5f",
+      "length": 70980,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-producer--after-query-extended.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-producer/before-strings-index-scope-native.json",
+      "sha256": "df971233fd21709be010fa5b71463df8bdbf3e4154025f8169c3318787f9531d",
+      "length": 2122,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-producer--before-strings-index-scope-native.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-producer/after-alias.json",
+      "sha256": "d65da9a5c0e44b95ae7e5ff201ffbf52e061993977cf696aea9d3ab1ce2704b9",
+      "length": 4506,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-producer--after-alias.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-producer/before-alias.json",
+      "sha256": "8e1a1e74ce62666ca17bc59fd447d3f8750a06f08a12bda7b33e75753b4d3b6b",
+      "length": 4411,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-producer--before-alias.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-producer/after-text-assertion-native.json",
+      "sha256": "c5252c6b24eca13d277b80833834d790990139543f4120d2e30283eeccdb699f",
+      "length": 61398,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-producer--after-text-assertion-native.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-producer/before-strings-consumer-native.json",
+      "sha256": "a30a0462e6e8b560388659ac7cd935de379d4032f3b9defd93ecd1bb4ee12d60",
+      "length": 33100,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-producer--before-strings-consumer-native.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-producer/before-strings-numeric-string-arity-native.json",
+      "sha256": "7a1dc383f5d116580636b74330462f616dee4f91d40302b85b71740380370745",
+      "length": 12662,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-producer--before-strings-numeric-string-arity-native.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-producer/after-text-native.json",
+      "sha256": "08afeb969a0f1cf3890cb29181d316725a1a9687de71da205b9ba30970863763",
+      "length": 199991,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-producer--after-text-native.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-producer/before-scope-native-stream-probes.json",
+      "sha256": "b7851fcb51953bab7b956e382c15ee284e1ce2603005bcd54970a9f4164fca94",
+      "length": 3183,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-producer--before-scope-native-stream-probes.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-producer/after-strings-numeric-string-arity-native.json",
+      "sha256": "5d52507610f3693a29412454f8b52c03bf95f781dcc14ebedf8cf68cb2a2ba7e",
+      "length": 12932,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-producer--after-strings-numeric-string-arity-native.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-producer/asm198x",
+      "sha256": "1d5c767f35ac32e5acdb3543db9a06cc320802d194bf99b83c72f70a333afc2a",
+      "length": 20184808,
+      "retained_source": "499a58a29015f79a0b3897572db1e1ba9dc816c8",
+      "refs": [
+        "refs/heads/audit/ca65-source-constancy-914",
+        "refs/heads/fix/ca65-source-query-context",
+        "refs/remotes/origin/audit/ca65-source-constancy-914",
+        "refs/remotes/origin/fix/ca65-source-query-context"
+      ],
+      "identity": "/Users/stevehill/Projects/198x/Asm198x/asm198x-ca65-text-consumers/docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-producer/after-strings-text-consumer-native.json",
+      "sha256": "33d63b69ceed4a7ca96361b05d39be79d0fca4fa3e5b3184595e3ce0fe576df4",
+      "length": 3099,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-producer--after-strings-text-consumer-native.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-producer/before-strings-guard-native.json",
+      "sha256": "3955b6441a9d2910009fdcc9652cdd54917eb4c3cd9804d06fb0433e996a660c",
+      "length": 3297,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-producer--before-strings-guard-native.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-producer/build.log",
+      "sha256": "9a30d54c8b16d7e49510b182028079bca120aeebb7d662e88f8566e6196a49f6",
+      "length": 72,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-producer--build.log.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-producer/after-scope-native-phase-probes.json",
+      "sha256": "5ae12dcb5123cb64d5e8a3bd76fcaf4889c522c73bfa43f36a9982a1a385e4b4",
+      "length": 55087,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-producer--after-scope-native-phase-probes.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-local-package/wrong-bytes.log",
+      "sha256": "87605dbd66ffc1e358388a268c8be494a1f623f56e088be8fa85f139f044e53a",
+      "length": 130,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-local-package--wrong-bytes.log.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-local-package/wrong-bytes.json",
+      "sha256": "b6df9830afd61562e72a56d08912f5fbadb942c2c90caf626e65e76eb9ff9a53",
+      "length": 25184488,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-local-package--wrong-bytes.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-local-package/corrupt-archive.json",
+      "sha256": "d293f944fdd29a56aeb5c4e9e44a8acd99fbbb3d9552a90cc9eb8aad1dc1d6d1",
+      "length": 172,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-local-package--corrupt-archive.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-local-package/predecessor.json",
+      "sha256": "f37e125315cfbaaa1fd30c7b80d99f4ee49414ec603143717995fcd99594a4d8",
+      "length": 23929080,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-local-package--predecessor.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-local-package/report.log",
+      "sha256": "900e7dd637ca14c2ef4f6874219f9dc8c67987d4e9ed2832eceb24f29378a5aa",
+      "length": 77,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-local-package--report.log.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-local-package/report.json",
+      "sha256": "76b3e5f82854b725f3a2ff25df4875656e086e26d1a81c9d2e18a3e0a7deb83c",
+      "length": 25183693,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-local-package--report.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-local-package/corrupt-archive.log",
+      "sha256": "3550aa9d511637203739d8851e07f919cc59970f4cabfb370654246285ff1680",
+      "length": 973,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-local-package--corrupt-archive.log.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-local-package/asm198x-aarch64-apple-darwin.tar.xz.sha256",
+      "sha256": "ef8f1f5e0ddc3f8efabc22273d5ebe9bc4eae790d784957b2a48b98e4e0df30a",
+      "length": 102,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-local-package--asm198x-aarch64-apple-darwin.tar.xz.sha256.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-local-package/asm198x-aarch64-apple-darwin.tar.xz",
+      "sha256": "3b3f67457d85242e2be3300f12367208ed657fc36ace380a5035f9452d29ac52",
+      "length": 2722428,
+      "retained_checksum": "/Users/stevehill/Projects/198x/Asm198x/asm198x-ca65-text-consumers/docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-local-package--asm198x-aarch64-apple-darwin.tar.xz.sha256.gz",
+      "archive_sha256": "3b3f67457d85242e2be3300f12367208ed657fc36ace380a5035f9452d29ac52"
+    },
+    {
+      "path": "/private/tmp/asm198x-source-constancy-final-local-package/predecessor.log",
+      "sha256": "fad025c270dbe0f2c2d4f5940c995cfa86dc9f5800319844feb9d56bf93117d7",
+      "length": 101,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/source-constancy-local-qualification-914/asm198x-source-constancy-final-local-package--predecessor.log.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-clean-4510/report.json",
+      "sha256": "6d891d8d72b16761e96c343276c2f839f690031fab38ec1afef818cf26ac77c4",
+      "length": 12656,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/4510--report.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-clean-4510/logs/cc65-4510-opcodes--opcode-space-version-ld65.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "length": 0,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/4510--logs--cc65-4510-opcodes--opcode-space-version-ld65.stdout.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-clean-4510/logs/build-assembler.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "length": 0,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/4510--logs--build-assembler.stdout.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-clean-4510/logs/assembler-version.stderr",
+      "sha256": "cd9267fb50974330b2596f8f7d386346ec0227b2e2b702cb761d363dfa13a8c2",
+      "length": 16,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/4510--logs--assembler-version.stderr.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-clean-4510/logs/cc65-4510-opcodes--opcode-space-version-ca65.stderr",
+      "sha256": "5c22de95322cb1d858e9690b5e3c6e83984c27c5120ff12c49f8dc9679ed2dbc",
+      "length": 17,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/4510--logs--cc65-4510-opcodes--opcode-space-version-ca65.stderr.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-clean-4510/logs/cc65-4510-opcodes--opcode-space-reference-0.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "length": 0,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/4510--logs--cc65-4510-opcodes--opcode-space-reference-0.stdout.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-clean-4510/logs/cc65-4510-opcodes--opcode-space-reference-0.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "length": 0,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/4510--logs--cc65-4510-opcodes--opcode-space-reference-0.stderr.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-clean-4510/logs/cc65-4510-opcodes--opcode-space-version-ca65.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "length": 0,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/4510--logs--cc65-4510-opcodes--opcode-space-version-ca65.stdout.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-clean-4510/logs/assembler-version.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "length": 0,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/4510--logs--assembler-version.stdout.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-clean-4510/logs/cc65-4510-opcodes--opcode-space-version-ld65.stderr",
+      "sha256": "acf0ea5dbac2ff34c3733f092c38a357dd02d80c0d1edf0e05e8a36b92b62445",
+      "length": 17,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/4510--logs--cc65-4510-opcodes--opcode-space-version-ld65.stderr.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-clean-4510/logs/build-assembler.stderr",
+      "sha256": "45cef72a0be54022074c036696558ba6e4f8808bc83dde473be1ff741c0e6537",
+      "length": 1320,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/4510--logs--build-assembler.stderr.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-clean-4510/logs/cc65-4510-opcodes--opcode-space-assembler-0.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "length": 0,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/4510--logs--cc65-4510-opcodes--opcode-space-assembler-0.stdout.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-clean-4510/logs/cc65-4510-opcodes--opcode-space-reference-1.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "length": 0,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/4510--logs--cc65-4510-opcodes--opcode-space-reference-1.stdout.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-clean-4510/logs/cc65-4510-opcodes--opcode-space-reference-1.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "length": 0,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/4510--logs--cc65-4510-opcodes--opcode-space-reference-1.stderr.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-clean-4510/logs/cc65-4510-opcodes--opcode-space-assembler-0.stderr",
+      "sha256": "d0f2bb0a758878171f47aca2c415910cd2bb55a06fb1b89e28d6e8ced2d21477",
+      "length": 51,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/4510--logs--cc65-4510-opcodes--opcode-space-assembler-0.stderr.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-candidates/artifacts.json",
+      "sha256": "f4b3cbdf6bb5ae4cd1c1dd2fc2c07aaa10d5a3364a1545e0438e94762f3bd965",
+      "length": 4519,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/candidates--artifacts.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-x86_64-unknown-linux-gnu-1/wrong-bytes.json",
+      "sha256": "18c5891fb8d2a3363ce59d01761c3856a5bc59344d17a65ca278c072de3d0d54",
+      "length": 22430835,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/candidates--candidate-qualification-x86_64-unknown-linux-gnu-1--wrong-bytes.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-x86_64-unknown-linux-gnu-1/corrupt-archive.json",
+      "sha256": "0b4d2d082c9b8af180fc479d18fb2de3e8d2e64a19155e533d87f86ef97ccf07",
+      "length": 180,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/candidates--candidate-qualification-x86_64-unknown-linux-gnu-1--corrupt-archive.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-x86_64-unknown-linux-gnu-1/plan.json",
+      "sha256": "998be1811c772cee8ae18022d1a04b7f97288d243a80ccf40687856f72e44638",
+      "length": 13973,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/candidates--candidate-qualification-x86_64-unknown-linux-gnu-1--plan.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-x86_64-unknown-linux-gnu-1/report.json",
+      "sha256": "6e9d2573207754c4786338d642162aef69e32e1a0c734299aece1ddaf7c622bd",
+      "length": 22430040,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/candidates--candidate-qualification-x86_64-unknown-linux-gnu-1--report.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-x86_64-unknown-linux-gnu-1/acquisition.json",
+      "sha256": "b7e32b8b1e900e98a2866f90e46fa9f6fdafb9965b5a9aa835742f209331d21e",
+      "length": 126,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/candidates--candidate-qualification-x86_64-unknown-linux-gnu-1--acquisition.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-x86_64-apple-darwin-1/wrong-bytes.json",
+      "sha256": "e9fa6be6719d8d218620d3bfe61b0ed5d40e99c89317dd1c719930d4df62dd77",
+      "length": 25330709,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/candidates--candidate-qualification-x86_64-apple-darwin-1--wrong-bytes.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-x86_64-apple-darwin-1/corrupt-archive.json",
+      "sha256": "2e5a8c2e13cf7c92b79606177bf5c326bf1dadd6f43bf7f4f7023897c4a8101c",
+      "length": 170,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/candidates--candidate-qualification-x86_64-apple-darwin-1--corrupt-archive.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-x86_64-apple-darwin-1/plan.json",
+      "sha256": "5e1969ffe55f895ec0babd29f44c06805f02fbd3666f68f904bbe8ee30876b3b",
+      "length": 13916,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/candidates--candidate-qualification-x86_64-apple-darwin-1--plan.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-x86_64-apple-darwin-1/report.json",
+      "sha256": "fdc71f500deb8cb6bee27ee2d3f036c18c5813ff6291c4ec83a93d1eba40a99e",
+      "length": 25329914,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/candidates--candidate-qualification-x86_64-apple-darwin-1--report.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-x86_64-apple-darwin-1/acquisition.json",
+      "sha256": "b7e32b8b1e900e98a2866f90e46fa9f6fdafb9965b5a9aa835742f209331d21e",
+      "length": 126,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/candidates--candidate-qualification-x86_64-apple-darwin-1--acquisition.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-aarch64-apple-darwin-1/wrong-bytes.json",
+      "sha256": "3dbf2952056c67f5afeef463b491f8f95ae77087432cb82fe7c85bb596691946",
+      "length": 25330716,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/candidates--candidate-qualification-aarch64-apple-darwin-1--wrong-bytes.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-aarch64-apple-darwin-1/corrupt-archive.json",
+      "sha256": "d293f944fdd29a56aeb5c4e9e44a8acd99fbbb3d9552a90cc9eb8aad1dc1d6d1",
+      "length": 172,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/candidates--candidate-qualification-aarch64-apple-darwin-1--corrupt-archive.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-aarch64-apple-darwin-1/plan.json",
+      "sha256": "aae56a69259430e0a5aa83bc036e953570dd25a286fad39cd2da6e485591ef3a",
+      "length": 13916,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/candidates--candidate-qualification-aarch64-apple-darwin-1--plan.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-aarch64-apple-darwin-1/report.json",
+      "sha256": "b0a2f76b570a3bbdd0ddf1ff0896b875c60e7b7a5c2c16b0dfc429a84b3c2953",
+      "length": 25329921,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/candidates--candidate-qualification-aarch64-apple-darwin-1--report.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-aarch64-apple-darwin-1/acquisition.json",
+      "sha256": "b7e32b8b1e900e98a2866f90e46fa9f6fdafb9965b5a9aa835742f209331d21e",
+      "length": 126,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/candidates--candidate-qualification-aarch64-apple-darwin-1--acquisition.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-aarch64-unknown-linux-gnu-1/wrong-bytes.json",
+      "sha256": "137c649189d6edc348ba79e8cb29e1dd34ed52a6b7e77d5f00e0745bdfe4e5f5",
+      "length": 22430842,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/candidates--candidate-qualification-aarch64-unknown-linux-gnu-1--wrong-bytes.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-aarch64-unknown-linux-gnu-1/corrupt-archive.json",
+      "sha256": "82cc3298ec0de54957a653ff1ad769a06adc7ecf95a36894ea9d1bf3b618952d",
+      "length": 182,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/candidates--candidate-qualification-aarch64-unknown-linux-gnu-1--corrupt-archive.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-aarch64-unknown-linux-gnu-1/plan.json",
+      "sha256": "998be1811c772cee8ae18022d1a04b7f97288d243a80ccf40687856f72e44638",
+      "length": 13973,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/candidates--candidate-qualification-aarch64-unknown-linux-gnu-1--plan.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-aarch64-unknown-linux-gnu-1/report.json",
+      "sha256": "d07b4f320999467af5e0f8a5ca7ec04eb6f6f884cc61fea67abd92fe50cbd249",
+      "length": 22430047,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/candidates--candidate-qualification-aarch64-unknown-linux-gnu-1--report.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-aarch64-unknown-linux-gnu-1/acquisition.json",
+      "sha256": "b7e32b8b1e900e98a2866f90e46fa9f6fdafb9965b5a9aa835742f209331d21e",
+      "length": 126,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/candidates--candidate-qualification-aarch64-unknown-linux-gnu-1--acquisition.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-x86_64-pc-windows-msvc-1/wrong-bytes.json",
+      "sha256": "0cf36b666e8da83c019432b5d8255c1026488121d69eab87eab5eafff1261ed8",
+      "length": 25113482,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/candidates--candidate-qualification-x86_64-pc-windows-msvc-1--wrong-bytes.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-x86_64-pc-windows-msvc-1/corrupt-archive.json",
+      "sha256": "14917b0dd5c0d132a39a1b8a988625000b26d8c9f83f57c358445d524d227fbf",
+      "length": 173,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/candidates--candidate-qualification-x86_64-pc-windows-msvc-1--corrupt-archive.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-x86_64-pc-windows-msvc-1/plan.json",
+      "sha256": "23fd648373e15b7d33d34c7ddf4efa736eb59b92e47d6c41d27119174c0acda8",
+      "length": 13854,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/candidates--candidate-qualification-x86_64-pc-windows-msvc-1--plan.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-x86_64-pc-windows-msvc-1/report.json",
+      "sha256": "8d6822060abb05f3467d0a8552e0d426a5b6422105d2fd22e7b55ae32c0a6a53",
+      "length": 25112687,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/candidates--candidate-qualification-x86_64-pc-windows-msvc-1--report.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-x86_64-pc-windows-msvc-1/acquisition.json",
+      "sha256": "b7e32b8b1e900e98a2866f90e46fa9f6fdafb9965b5a9aa835742f209331d21e",
+      "length": 126,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/candidates--candidate-qualification-x86_64-pc-windows-msvc-1--acquisition.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-clippy.log",
+      "sha256": "5b1387dc8f20c00db7dfea2579fd913704cc62a3e2409e2c53b73a800c611655",
+      "length": 288,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/asm198x-query-admission-clippy.log.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-node.log",
+      "sha256": "29e034b3359029c06d35d9cc0427654e4d84265653259414c55708417d66adc0",
+      "length": 9371,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/asm198x-query-admission-node.log.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-ci-attempt2-jobs.json",
+      "sha256": "c20ff6a95d845d00df88135ab9342e5173430e5cb153552d0bf02327a8c7d395",
+      "length": 52632,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/asm198x-query-admission-ci-attempt2-jobs.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-merge-verification.json",
+      "sha256": "f877de63279a424cb798c1bf98c6ba70ba4b5829a1c4fbea627dc6d355119b92",
+      "length": 283,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/asm198x-query-admission-merge-verification.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-classifier-summary.json",
+      "sha256": "4f5448a8e74ff96f6cd521de9c9e531b80b5a0d7bd0c092c77774206d12f5cb0",
+      "length": 2767,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/asm198x-query-admission-classifier-summary.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-ci-jobs-failure.json",
+      "sha256": "a29e2caa355863064c448fe742ebde524a517e352d4d35cd590d941ccf50a25b",
+      "length": 49964,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/asm198x-query-admission-ci-jobs-failure.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-ci.json",
+      "sha256": "1a9237fcc3fcc20e402857f8255ae4054cca7ff3921a152ee51ea08320c87312",
+      "length": 237829,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/asm198x-query-admission-ci.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-ci-cancellation.json",
+      "sha256": "9abce1ff5340d814e5989ac4b7e80a89c9bc66002a0adf98747575eebb55431f",
+      "length": 6542,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/asm198x-query-admission-ci-cancellation.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-query-summary.json",
+      "sha256": "504f36552d4c8a656f2c98e73a366f3fab8ec3a53f6ac235ef6b49a1bce96914",
+      "length": 2752,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/asm198x-query-admission-query-summary.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-full.log",
+      "sha256": "0e1780ae2b348f925284205c7310923ff279399046fe30393d70c9d107856540",
+      "length": 152098,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/asm198x-query-admission-full.log.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-head",
+      "sha256": "2f15b736d38862268f891f51c670c049537c74251c6cc7c8c1bc26cd63b7541d",
+      "length": 41,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/asm198x-query-admission-head.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-merge.json",
+      "sha256": "464dd4f47247520f5155b587eae1ebc2a1c991a1c188d594f5fbe1ffcbaf82a6",
+      "length": 123,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/asm198x-query-admission-merge.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-ci.log",
+      "sha256": "c129c1c5a8a4f8fa74d15917bbe78cce73f74d88bcb50f0296e5e1fc4d9d2d93",
+      "length": 523,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/asm198x-query-admission-ci.log.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-summary.json",
+      "sha256": "504f36552d4c8a656f2c98e73a366f3fab8ec3a53f6ac235ef6b49a1bce96914",
+      "length": 2752,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/asm198x-query-admission-summary.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-4510.log",
+      "sha256": "1c1ce04484a7e9b16a2a6407590c8b20213f5284ea8f1d1ffd12ec9500e391c3",
+      "length": 157,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/asm198x-query-admission-4510.log.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-build.log",
+      "sha256": "def78c42f9fba15be58c86b67d79aed1186d056a2e2f078577c7f7883bf23572",
+      "length": 769,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/asm198x-query-admission-build.log.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-ci-failed.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "length": 0,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/asm198x-query-admission-ci-failed.log.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-ci-attempt1.json",
+      "sha256": "f27d971b4079a9ccc1f07561554f06696ca8134a61545940957fb35faf341b6e",
+      "length": 237672,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/asm198x-query-admission-ci-attempt1.json.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-pr.md",
+      "sha256": "5558c5c54c3b6a0a5b38edcb99b5edc9a3eb4a43003424897f24d16f309d18fb",
+      "length": 1266,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/asm198x-query-admission-pr.md.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-focused.log",
+      "sha256": "816a73d19217e117b54e006e263cd146a98a02ea0697ea1ef5d16b59bb9cd133",
+      "length": 711,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/asm198x-query-admission-focused.log.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-ci-attempt1.log",
+      "sha256": "45f24cf762c160a7017d7fd584ad9256b060c3d68b0dee4b44f83846549be874",
+      "length": 8747,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-915/asm198x-query-admission-ci-attempt1.log.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    },
+    {
+      "path": "/private/tmp/asm198x-audit-query-admission-candidates.py",
+      "sha256": "7e1ba35ce9adbf4b1c6b1b2360dc372e6eb4d05777c830461954de37e1f9dda4",
+      "length": 14720,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/asm198x-audit-query-admission-candidates.py.gz",
+      "retained_commit": "ed565cac0832f0b5e521ccc0011416f82aeec743"
+    }
+  ],
+  "active_owned_processes": [],
+  "df_before": "Filesystem   1024-blocks      Used Available Capacity  iused     ifree %iused  Mounted on\n/dev/disk3s5   971350180 912079444  14701176    99% 10675598 147011760    7%   /System/Volumes/Data\n",
+  "df_after": "Filesystem   1024-blocks      Used Available Capacity  iused     ifree %iused  Mounted on\n/dev/disk3s5   971350180 911746736  15033884    99% 10675488 150338840    7%   /System/Volumes/Data\n"
+}
