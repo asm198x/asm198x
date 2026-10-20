@@ -17,6 +17,9 @@ pub(super) struct Definition {
 #[derive(Default)]
 pub(super) struct Deferred {
     pub definitions: BTreeMap<String, Definition>,
+    /// Ordinary dependencies of selected predicates survive numeric folding.
+    /// Keep the bound lookup key: normal scoped fallback differs from `::X`.
+    pub source_reads: Vec<(String, Span)>,
     waiting: BTreeMap<String, BTreeSet<String>>,
     remaining: BTreeMap<String, BTreeSet<String>>,
     size_cache: std::cell::RefCell<BTreeMap<String, SizeHint>>,
@@ -26,6 +29,13 @@ fn symbols(value: &Expr) -> BTreeSet<String> {
     let mut names = BTreeSet::new();
     collect_syms(&Kind::Bytes(vec![value.clone()]), &mut names);
     names
+}
+
+impl Deferred {
+    pub fn require_source_names(&mut self, value: &Expr, span: &Span) {
+        self.source_reads
+            .extend(symbols(value).into_iter().map(|name| (name, span.clone())));
+    }
 }
 
 #[derive(Clone, Copy)]

@@ -395,17 +395,17 @@ fn project_nodes(
                 else_body,
                 ..
             }) => {
-                let line = node.span.line as usize;
                 let head = read_block_head(node, head, st, sw)?;
-                let selected =
-                    fold_condition(&head, st, &sw.reader, line).map_err(|error| match error {
+                let selected = fold_condition(&head, st, &sw.reader, &node.span).map_err(
+                    |error| match error {
                         ConditionError::Use(error) => super::statement_error(
                             error,
                             node.span.file,
                             &node.span.expansion_frames,
                         ),
                         ConditionError::Definition(error) => error,
-                    })?;
+                    },
+                )?;
                 let then_end = then_body.last().map_or(node.span.line, end_line);
                 if selected {
                     project_nodes(then_body, st, sw)?;
@@ -1029,10 +1029,11 @@ impl From<AsmError> for ConditionError {
 
 fn fold_condition(
     head: &str,
-    st: &Projection,
+    st: &mut Projection,
     reader: &Walker,
-    line: usize,
+    span: &crate::span::Span,
 ) -> Result<bool, ConditionError> {
+    let line = span.line as usize;
     let (word, args) = split_first_word(head.trim());
     let word = word.to_ascii_lowercase();
     let args = args.trim();
@@ -1100,6 +1101,7 @@ fn fold_condition(
             }
             let expr = reader.source_value(args, line)?;
             let expr = map_expr_syms(&expr, &resolve_defined(&st.consts, &st.label_seg));
+            st.deferred.require_source_names(&expr, span);
             st.deferred
                 .study_source(
                     &expr,
@@ -1121,6 +1123,7 @@ fn fold_condition(
             // `.if .defined(X)` — answered against what stands above this line,
             // which is what makes `.defined` positional in the first place.
             let expr = map_expr_syms(&expr, &resolve_defined(&st.consts, &st.label_seg));
+            st.deferred.require_source_names(&expr, span);
             // ca65: `Constant expression expected` — a condition may not reach
             // forward, and a ca65 label is never constant.
             let value = fold_const(&expr, env, line).map_err(|_| {
