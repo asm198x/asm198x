@@ -14,9 +14,11 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("binary", type=Path)
     parser.add_argument("output", type=Path)
+    parser.add_argument("--facts", type=Path, default=ROOT / "consumer-native.json")
+    parser.add_argument("--flat", action="store_true")
     args = parser.parse_args()
     binary = args.binary.resolve(strict=True)
-    facts = json.loads((ROOT / "consumer-native.json").read_text())
+    facts = json.loads(args.facts.read_text())
     rows = []
     with tempfile.TemporaryDirectory(prefix="asm198x-end-token-") as td:
         root = Path(td)
@@ -29,9 +31,8 @@ def main() -> None:
             argv = [
                 str(binary),
                 "--dialect",
-                "ca65",
-                "-C",
-                "input.cfg",
+                case["name"].split("_", 1)[0] if args.flat else "ca65",
+                *([] if args.flat else ["-C", "input.cfg"]),
                 "input.s",
                 "-o",
                 "out.bin",

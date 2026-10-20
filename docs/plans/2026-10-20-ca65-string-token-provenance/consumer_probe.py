@@ -39,6 +39,13 @@ def cases() -> dict[str, str]:
         "numeric_selector": '.byte .left(.concat("1","2"),{1})\n',
     }.items():
         out[label] = expr
+    for label, expr in {
+        "length": '.strlen("ab")',
+        "index": '.strat("ab",0)',
+        "nested_length": '.strlen(.concat("a","b"))',
+        "nested_index": '.strat(.concat("a","b"),0)',
+    }.items():
+        out[f"braced_{label}"] = f".byte .tcount({{{expr}}})\n"
     return out
 
 
