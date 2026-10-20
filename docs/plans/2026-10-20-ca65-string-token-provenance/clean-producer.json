@@ -1,16 +1,21 @@
 {
-  "commit": "f920ac1adb4c11572908107cbde53a83b17b428a",
-  "tree": "297bb22a53d0fcd2a4490d0c9b5344da4be5d9e0",
-  "binary": "/private/tmp/asm198x-byte-strings-clean-producer/asm198x",
-  "sha256": "31dd8c0220a4d6efef8e1b3114da99ac3baf9be7b44fc09b00f908551e45dda2",
+  "commit": "f825ab1dc45fbcb52bbb3c11f0eee93078328a9c",
+  "tree": "c49461c72978bc9cd4f6a4cbb659524a4bf13b51",
+  "binary": "/private/tmp/asm198x-byte-strings-final-producer/asm198x",
+  "sha256": "0e54714f31de462a92115f0d3f19f9bc8d9bddcb2f4dc04d8be7b78c073ed14d",
   "cargo_lock_sha256": "0ee4b612d610b2d581a5b32e1666f431bdfcf55b99cfaed65841aa48e369958a",
+  "version_result": {
+    "exit": 0,
+    "stdout": "",
+    "stderr": "asm198x v0.0.71\n"
+  },
   "version": "asm198x v0.0.71",
   "source_sha256": {
     "crates/asm198x/src/dialects/i8080.rs": "edf3a9a9133e7b5b25170b63a644a6602df3814a18159e8d9aba55b21ba41906",
     "crates/asm198x/src/dialects/z8000.rs": "2f63840e63f3ccebfd443d2eef644b1c9a7c4e45171057bc189144db7fc61dd1",
     "crates/asm198x/src/dialects/cp1610.rs": "0a8c5f7312b45f678e42ef4e7290f9a7dd0bdd45e0124c303a4f289c31985670",
     "crates/asm198x/src/dialects/pasmo.rs": "c83e84cc0eba635f5fcd3f6e787d16c11de3e1fa851d446e57ab44040822f619",
-    "crates/asm198x/src/dialects/ca65_flat.rs": "6f9857a1154e3414de0fd886d650ff66e1ee034178d51ff25cb2f3a219296129",
+    "crates/asm198x/src/dialects/ca65_flat.rs": "39d64db98c4217d11278fc126411542ce4d6aac54c6f1b0bc85d18469fc413b2",
     "crates/asm198x/src/dialects/s2650.rs": "49b35441675efef238870edcbb604bd4bcad781110aaa7bbe99339c649745577",
     "crates/asm198x/src/dialects/i8048.rs": "9ceee2a6ea09c18ac5e7ad3061e2a8d5afe2fb3cb378bc4c3f643a30d33681b5",
     "crates/asm198x/src/dialects/ca65_layout.rs": "fa03c671e85b7872fda8d5d0d23953941ece7492b25c360642a67395bfae4051",
@@ -50,14 +55,5 @@
     "crates/asm198x/src/dialects/rgbasm/layout.rs": "aea8ee0d6e24cf50f55b2c63346138998a744b045dd361027596a21baf136baf",
     "crates/asm198x/src/dialects/rgbasm/mod.rs": "e126439a2f10eb882f84d746b9af373cd8356fb19cdb97564b7d40f27c0423c7",
     "crates/asm198x/src/dialects/rgbasm/project.rs": "471d2824d9af0680481b185205a3c615e7aec744ad9a6a55665f88c81b7d7b1a"
-  },
-  "version_result": {
-    "argv": [
-      "/private/tmp/asm198x-byte-strings-clean-producer/asm198x",
-      "--version"
-    ],
-    "exit": 0,
-    "stdout": "",
-    "stderr": "asm198x v0.0.71\n"
   }
 }
