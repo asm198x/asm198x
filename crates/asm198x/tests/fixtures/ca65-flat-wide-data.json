@@ -1,0 +1,3170 @@
+{
+  "tools": {
+    "ca65": {
+      "path": "/opt/homebrew/bin/ca65",
+      "sha256": "1a57997819fd98814e4601b5160df589e7a1a24e1888a80fee51ae450d8fd0ea",
+      "version": {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "--version"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "ca65 V2.18 - N/A\n"
+      }
+    },
+    "ld65": {
+      "path": "/opt/homebrew/bin/ld65",
+      "sha256": "36bb196207a6b2c90a4aa991b419d6113885303951b14b60b455f51c777b3339",
+      "version": {
+        "argv": [
+          "/opt/homebrew/bin/ld65",
+          "--version"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "ld65 V2.18 - N/A\n"
+      }
+    }
+  },
+  "files": {
+    "65816_dbyt_included_negative.inc": ".dbyt -1\n",
+    "65816_dbyt_included_max.inc": ".dbyt 65535\n",
+    "65816_dword_included_negative.inc": ".dword -1\n",
+    "65816_dword_included_max.inc": ".dword 4294967295\n",
+    "huc6280_dbyt_included_negative.inc": ".dbyt -1\n",
+    "huc6280_dbyt_included_max.inc": ".dbyt 65535\n",
+    "huc6280_dword_included_negative.inc": ".dword -1\n",
+    "huc6280_dword_included_max.inc": ".dword 4294967295\n"
+  },
+  "cases": [
+    {
+      "name": "65816_dbyt_0_direct",
+      "source": ".setcpu \"65816\"\n.org $1000\n.dbyt -32769\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Range error (18446744073709551487 not in [0..65535])\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "65816",
+      "native_error": {
+        "path": "input.s",
+        "line": 3
+      }
+    },
+    {
+      "name": "65816_dbyt_0_macro",
+      "source": ".setcpu \"65816\"\n.org $1000\n.macro emit\n.dbyt -32769\n.endmacro\nemit\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(6): Error: Range error (18446744073709551487 not in [0..65535])\ninput.s(4): Note: Macro was defined here\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "65816",
+      "native_error": {
+        "path": "input.s",
+        "line": 6
+      }
+    },
+    {
+      "name": "65816_dbyt_1_direct",
+      "source": ".setcpu \"65816\"\n.org $1000\n.dbyt -32768\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Range error (18446744073709486208 not in [0..65535])\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "65816",
+      "native_error": {
+        "path": "input.s",
+        "line": 3
+      }
+    },
+    {
+      "name": "65816_dbyt_1_macro",
+      "source": ".setcpu \"65816\"\n.org $1000\n.macro emit\n.dbyt -32768\n.endmacro\nemit\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(6): Error: Range error (18446744073709486208 not in [0..65535])\ninput.s(4): Note: Macro was defined here\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "65816",
+      "native_error": {
+        "path": "input.s",
+        "line": 6
+      }
+    },
+    {
+      "name": "65816_dbyt_2_direct",
+      "source": ".setcpu \"65816\"\n.org $1000\n.dbyt -1\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Range error (18446744073709551615 not in [0..65535])\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "65816",
+      "native_error": {
+        "path": "input.s",
+        "line": 3
+      }
+    },
+    {
+      "name": "65816_dbyt_2_macro",
+      "source": ".setcpu \"65816\"\n.org $1000\n.macro emit\n.dbyt -1\n.endmacro\nemit\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(6): Error: Range error (18446744073709551615 not in [0..65535])\ninput.s(4): Note: Macro was defined here\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "65816",
+      "native_error": {
+        "path": "input.s",
+        "line": 6
+      }
+    },
+    {
+      "name": "65816_dbyt_3_direct",
+      "source": ".setcpu \"65816\"\n.org $1000\n.dbyt 0\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0000",
+      "dialect": "65816"
+    },
+    {
+      "name": "65816_dbyt_3_macro",
+      "source": ".setcpu \"65816\"\n.org $1000\n.macro emit\n.dbyt 0\n.endmacro\nemit\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0000",
+      "dialect": "65816"
+    },
+    {
+      "name": "65816_dbyt_4_direct",
+      "source": ".setcpu \"65816\"\n.org $1000\n.dbyt 1\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0001",
+      "dialect": "65816"
+    },
+    {
+      "name": "65816_dbyt_4_macro",
+      "source": ".setcpu \"65816\"\n.org $1000\n.macro emit\n.dbyt 1\n.endmacro\nemit\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0001",
+      "dialect": "65816"
+    },
+    {
+      "name": "65816_dbyt_5_direct",
+      "source": ".setcpu \"65816\"\n.org $1000\n.dbyt 32767\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "7fff",
+      "dialect": "65816"
+    },
+    {
+      "name": "65816_dbyt_5_macro",
+      "source": ".setcpu \"65816\"\n.org $1000\n.macro emit\n.dbyt 32767\n.endmacro\nemit\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "7fff",
+      "dialect": "65816"
+    },
+    {
+      "name": "65816_dbyt_6_direct",
+      "source": ".setcpu \"65816\"\n.org $1000\n.dbyt 65535\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "ffff",
+      "dialect": "65816"
+    },
+    {
+      "name": "65816_dbyt_6_macro",
+      "source": ".setcpu \"65816\"\n.org $1000\n.macro emit\n.dbyt 65535\n.endmacro\nemit\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "ffff",
+      "dialect": "65816"
+    },
+    {
+      "name": "65816_dbyt_7_direct",
+      "source": ".setcpu \"65816\"\n.org $1000\n.dbyt 65536\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Range error (65536 not in [0..65535])\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "65816",
+      "native_error": {
+        "path": "input.s",
+        "line": 3
+      }
+    },
+    {
+      "name": "65816_dbyt_7_macro",
+      "source": ".setcpu \"65816\"\n.org $1000\n.macro emit\n.dbyt 65536\n.endmacro\nemit\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(6): Error: Range error (65536 not in [0..65535])\ninput.s(4): Note: Macro was defined here\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "65816",
+      "native_error": {
+        "path": "input.s",
+        "line": 6
+      }
+    },
+    {
+      "name": "65816_dbyt_8_direct",
+      "source": ".setcpu \"65816\"\n.org $1000\n.dbyt $FFFFFFFF\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Range error (4294967295 not in [0..65535])\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "65816",
+      "native_error": {
+        "path": "input.s",
+        "line": 3
+      }
+    },
+    {
+      "name": "65816_dbyt_8_macro",
+      "source": ".setcpu \"65816\"\n.org $1000\n.macro emit\n.dbyt $FFFFFFFF\n.endmacro\nemit\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(6): Error: Range error (4294967295 not in [0..65535])\ninput.s(4): Note: Macro was defined here\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "65816",
+      "native_error": {
+        "path": "input.s",
+        "line": 6
+      }
+    },
+    {
+      "name": "65816_dbyt_forward",
+      "source": ".setcpu \"65816\"\n.org $1000\n.dbyt target\ntarget: .byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "100207",
+      "dialect": "65816"
+    },
+    {
+      "name": "65816_dbyt_unused",
+      "source": ".setcpu \"65816\"\n.org $1000\n.macro unused\n.dbyt MISSING\n.endmacro\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07",
+      "dialect": "65816"
+    },
+    {
+      "name": "65816_dword_0_direct",
+      "source": ".setcpu \"65816\"\n.org $1000\n.dword -2147483649\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Range error (18446744071562067967 not in [0..4294967295])\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "65816",
+      "native_error": {
+        "path": "input.s",
+        "line": 3
+      }
+    },
+    {
+      "name": "65816_dword_0_macro",
+      "source": ".setcpu \"65816\"\n.org $1000\n.macro emit\n.dword -2147483649\n.endmacro\nemit\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(6): Error: Range error (18446744071562067967 not in [0..4294967295])\ninput.s(4): Note: Macro was defined here\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "65816",
+      "native_error": {
+        "path": "input.s",
+        "line": 6
+      }
+    },
+    {
+      "name": "65816_dword_1_direct",
+      "source": ".setcpu \"65816\"\n.org $1000\n.dword -2147483648\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Range error (18446744071562067968 not in [0..4294967295])\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "65816",
+      "native_error": {
+        "path": "input.s",
+        "line": 3
+      }
+    },
+    {
+      "name": "65816_dword_1_macro",
+      "source": ".setcpu \"65816\"\n.org $1000\n.macro emit\n.dword -2147483648\n.endmacro\nemit\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(6): Error: Range error (18446744071562067968 not in [0..4294967295])\ninput.s(4): Note: Macro was defined here\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "65816",
+      "native_error": {
+        "path": "input.s",
+        "line": 6
+      }
+    },
+    {
+      "name": "65816_dword_2_direct",
+      "source": ".setcpu \"65816\"\n.org $1000\n.dword -1\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Range error (18446744073709551615 not in [0..4294967295])\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "65816",
+      "native_error": {
+        "path": "input.s",
+        "line": 3
+      }
+    },
+    {
+      "name": "65816_dword_2_macro",
+      "source": ".setcpu \"65816\"\n.org $1000\n.macro emit\n.dword -1\n.endmacro\nemit\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(6): Error: Range error (18446744073709551615 not in [0..4294967295])\ninput.s(4): Note: Macro was defined here\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "65816",
+      "native_error": {
+        "path": "input.s",
+        "line": 6
+      }
+    },
+    {
+      "name": "65816_dword_3_direct",
+      "source": ".setcpu \"65816\"\n.org $1000\n.dword 0\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "00000000",
+      "dialect": "65816"
+    },
+    {
+      "name": "65816_dword_3_macro",
+      "source": ".setcpu \"65816\"\n.org $1000\n.macro emit\n.dword 0\n.endmacro\nemit\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "00000000",
+      "dialect": "65816"
+    },
+    {
+      "name": "65816_dword_4_direct",
+      "source": ".setcpu \"65816\"\n.org $1000\n.dword 1\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "01000000",
+      "dialect": "65816"
+    },
+    {
+      "name": "65816_dword_4_macro",
+      "source": ".setcpu \"65816\"\n.org $1000\n.macro emit\n.dword 1\n.endmacro\nemit\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "01000000",
+      "dialect": "65816"
+    },
+    {
+      "name": "65816_dword_5_direct",
+      "source": ".setcpu \"65816\"\n.org $1000\n.dword 2147483647\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "ffffff7f",
+      "dialect": "65816"
+    },
+    {
+      "name": "65816_dword_5_macro",
+      "source": ".setcpu \"65816\"\n.org $1000\n.macro emit\n.dword 2147483647\n.endmacro\nemit\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "ffffff7f",
+      "dialect": "65816"
+    },
+    {
+      "name": "65816_dword_6_direct",
+      "source": ".setcpu \"65816\"\n.org $1000\n.dword 4294967295\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "ffffffff",
+      "dialect": "65816"
+    },
+    {
+      "name": "65816_dword_6_macro",
+      "source": ".setcpu \"65816\"\n.org $1000\n.macro emit\n.dword 4294967295\n.endmacro\nemit\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "ffffffff",
+      "dialect": "65816"
+    },
+    {
+      "name": "65816_dword_7_direct",
+      "source": ".setcpu \"65816\"\n.org $1000\n.dword 4294967296\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Range error (4294967296 not in [0..4294967295])\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "65816",
+      "native_error": {
+        "path": "input.s",
+        "line": 3
+      }
+    },
+    {
+      "name": "65816_dword_7_macro",
+      "source": ".setcpu \"65816\"\n.org $1000\n.macro emit\n.dword 4294967296\n.endmacro\nemit\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(6): Error: Range error (4294967296 not in [0..4294967295])\ninput.s(4): Note: Macro was defined here\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "65816",
+      "native_error": {
+        "path": "input.s",
+        "line": 6
+      }
+    },
+    {
+      "name": "65816_dword_8_direct",
+      "source": ".setcpu \"65816\"\n.org $1000\n.dword $FFFFFFFF\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "ffffffff",
+      "dialect": "65816"
+    },
+    {
+      "name": "65816_dword_8_macro",
+      "source": ".setcpu \"65816\"\n.org $1000\n.macro emit\n.dword $FFFFFFFF\n.endmacro\nemit\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "ffffffff",
+      "dialect": "65816"
+    },
+    {
+      "name": "65816_dword_forward",
+      "source": ".setcpu \"65816\"\n.org $1000\n.dword target\ntarget: .byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0410000007",
+      "dialect": "65816"
+    },
+    {
+      "name": "65816_dword_unused",
+      "source": ".setcpu \"65816\"\n.org $1000\n.macro unused\n.dword MISSING\n.endmacro\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07",
+      "dialect": "65816"
+    },
+    {
+      "name": "huc6280_dbyt_0_direct",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.dbyt -32769\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Range error (18446744073709551487 not in [0..65535])\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "huc6280",
+      "native_error": {
+        "path": "input.s",
+        "line": 3
+      }
+    },
+    {
+      "name": "huc6280_dbyt_0_macro",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.macro emit\n.dbyt -32769\n.endmacro\nemit\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(6): Error: Range error (18446744073709551487 not in [0..65535])\ninput.s(4): Note: Macro was defined here\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "huc6280",
+      "native_error": {
+        "path": "input.s",
+        "line": 6
+      }
+    },
+    {
+      "name": "huc6280_dbyt_1_direct",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.dbyt -32768\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Range error (18446744073709486208 not in [0..65535])\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "huc6280",
+      "native_error": {
+        "path": "input.s",
+        "line": 3
+      }
+    },
+    {
+      "name": "huc6280_dbyt_1_macro",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.macro emit\n.dbyt -32768\n.endmacro\nemit\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(6): Error: Range error (18446744073709486208 not in [0..65535])\ninput.s(4): Note: Macro was defined here\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "huc6280",
+      "native_error": {
+        "path": "input.s",
+        "line": 6
+      }
+    },
+    {
+      "name": "huc6280_dbyt_2_direct",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.dbyt -1\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Range error (18446744073709551615 not in [0..65535])\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "huc6280",
+      "native_error": {
+        "path": "input.s",
+        "line": 3
+      }
+    },
+    {
+      "name": "huc6280_dbyt_2_macro",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.macro emit\n.dbyt -1\n.endmacro\nemit\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(6): Error: Range error (18446744073709551615 not in [0..65535])\ninput.s(4): Note: Macro was defined here\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "huc6280",
+      "native_error": {
+        "path": "input.s",
+        "line": 6
+      }
+    },
+    {
+      "name": "huc6280_dbyt_3_direct",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.dbyt 0\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0000",
+      "dialect": "huc6280"
+    },
+    {
+      "name": "huc6280_dbyt_3_macro",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.macro emit\n.dbyt 0\n.endmacro\nemit\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0000",
+      "dialect": "huc6280"
+    },
+    {
+      "name": "huc6280_dbyt_4_direct",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.dbyt 1\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0001",
+      "dialect": "huc6280"
+    },
+    {
+      "name": "huc6280_dbyt_4_macro",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.macro emit\n.dbyt 1\n.endmacro\nemit\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0001",
+      "dialect": "huc6280"
+    },
+    {
+      "name": "huc6280_dbyt_5_direct",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.dbyt 32767\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "7fff",
+      "dialect": "huc6280"
+    },
+    {
+      "name": "huc6280_dbyt_5_macro",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.macro emit\n.dbyt 32767\n.endmacro\nemit\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "7fff",
+      "dialect": "huc6280"
+    },
+    {
+      "name": "huc6280_dbyt_6_direct",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.dbyt 65535\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "ffff",
+      "dialect": "huc6280"
+    },
+    {
+      "name": "huc6280_dbyt_6_macro",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.macro emit\n.dbyt 65535\n.endmacro\nemit\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "ffff",
+      "dialect": "huc6280"
+    },
+    {
+      "name": "huc6280_dbyt_7_direct",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.dbyt 65536\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Range error (65536 not in [0..65535])\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "huc6280",
+      "native_error": {
+        "path": "input.s",
+        "line": 3
+      }
+    },
+    {
+      "name": "huc6280_dbyt_7_macro",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.macro emit\n.dbyt 65536\n.endmacro\nemit\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(6): Error: Range error (65536 not in [0..65535])\ninput.s(4): Note: Macro was defined here\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "huc6280",
+      "native_error": {
+        "path": "input.s",
+        "line": 6
+      }
+    },
+    {
+      "name": "huc6280_dbyt_8_direct",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.dbyt $FFFFFFFF\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Range error (4294967295 not in [0..65535])\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "huc6280",
+      "native_error": {
+        "path": "input.s",
+        "line": 3
+      }
+    },
+    {
+      "name": "huc6280_dbyt_8_macro",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.macro emit\n.dbyt $FFFFFFFF\n.endmacro\nemit\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(6): Error: Range error (4294967295 not in [0..65535])\ninput.s(4): Note: Macro was defined here\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "huc6280",
+      "native_error": {
+        "path": "input.s",
+        "line": 6
+      }
+    },
+    {
+      "name": "huc6280_dbyt_forward",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.dbyt target\ntarget: .byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "100207",
+      "dialect": "huc6280"
+    },
+    {
+      "name": "huc6280_dbyt_unused",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.macro unused\n.dbyt MISSING\n.endmacro\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07",
+      "dialect": "huc6280"
+    },
+    {
+      "name": "huc6280_dword_0_direct",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.dword -2147483649\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Range error (18446744071562067967 not in [0..4294967295])\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "huc6280",
+      "native_error": {
+        "path": "input.s",
+        "line": 3
+      }
+    },
+    {
+      "name": "huc6280_dword_0_macro",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.macro emit\n.dword -2147483649\n.endmacro\nemit\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(6): Error: Range error (18446744071562067967 not in [0..4294967295])\ninput.s(4): Note: Macro was defined here\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "huc6280",
+      "native_error": {
+        "path": "input.s",
+        "line": 6
+      }
+    },
+    {
+      "name": "huc6280_dword_1_direct",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.dword -2147483648\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Range error (18446744071562067968 not in [0..4294967295])\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "huc6280",
+      "native_error": {
+        "path": "input.s",
+        "line": 3
+      }
+    },
+    {
+      "name": "huc6280_dword_1_macro",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.macro emit\n.dword -2147483648\n.endmacro\nemit\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(6): Error: Range error (18446744071562067968 not in [0..4294967295])\ninput.s(4): Note: Macro was defined here\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "huc6280",
+      "native_error": {
+        "path": "input.s",
+        "line": 6
+      }
+    },
+    {
+      "name": "huc6280_dword_2_direct",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.dword -1\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Range error (18446744073709551615 not in [0..4294967295])\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "huc6280",
+      "native_error": {
+        "path": "input.s",
+        "line": 3
+      }
+    },
+    {
+      "name": "huc6280_dword_2_macro",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.macro emit\n.dword -1\n.endmacro\nemit\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(6): Error: Range error (18446744073709551615 not in [0..4294967295])\ninput.s(4): Note: Macro was defined here\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "huc6280",
+      "native_error": {
+        "path": "input.s",
+        "line": 6
+      }
+    },
+    {
+      "name": "huc6280_dword_3_direct",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.dword 0\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "00000000",
+      "dialect": "huc6280"
+    },
+    {
+      "name": "huc6280_dword_3_macro",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.macro emit\n.dword 0\n.endmacro\nemit\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "00000000",
+      "dialect": "huc6280"
+    },
+    {
+      "name": "huc6280_dword_4_direct",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.dword 1\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "01000000",
+      "dialect": "huc6280"
+    },
+    {
+      "name": "huc6280_dword_4_macro",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.macro emit\n.dword 1\n.endmacro\nemit\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "01000000",
+      "dialect": "huc6280"
+    },
+    {
+      "name": "huc6280_dword_5_direct",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.dword 2147483647\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "ffffff7f",
+      "dialect": "huc6280"
+    },
+    {
+      "name": "huc6280_dword_5_macro",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.macro emit\n.dword 2147483647\n.endmacro\nemit\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "ffffff7f",
+      "dialect": "huc6280"
+    },
+    {
+      "name": "huc6280_dword_6_direct",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.dword 4294967295\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "ffffffff",
+      "dialect": "huc6280"
+    },
+    {
+      "name": "huc6280_dword_6_macro",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.macro emit\n.dword 4294967295\n.endmacro\nemit\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "ffffffff",
+      "dialect": "huc6280"
+    },
+    {
+      "name": "huc6280_dword_7_direct",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.dword 4294967296\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Range error (4294967296 not in [0..4294967295])\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "huc6280",
+      "native_error": {
+        "path": "input.s",
+        "line": 3
+      }
+    },
+    {
+      "name": "huc6280_dword_7_macro",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.macro emit\n.dword 4294967296\n.endmacro\nemit\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(6): Error: Range error (4294967296 not in [0..4294967295])\ninput.s(4): Note: Macro was defined here\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "huc6280",
+      "native_error": {
+        "path": "input.s",
+        "line": 6
+      }
+    },
+    {
+      "name": "huc6280_dword_8_direct",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.dword $FFFFFFFF\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "ffffffff",
+      "dialect": "huc6280"
+    },
+    {
+      "name": "huc6280_dword_8_macro",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.macro emit\n.dword $FFFFFFFF\n.endmacro\nemit\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "ffffffff",
+      "dialect": "huc6280"
+    },
+    {
+      "name": "huc6280_dword_forward",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.dword target\ntarget: .byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0410000007",
+      "dialect": "huc6280"
+    },
+    {
+      "name": "huc6280_dword_unused",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.macro unused\n.dword MISSING\n.endmacro\n.byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "07",
+      "dialect": "huc6280"
+    },
+    {
+      "name": "65816_dbyt_included_negative",
+      "source": ".setcpu \"65816\"\n.org $1000\n.include \"65816_dbyt_included_negative.inc\"\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "65816_dbyt_included_negative.inc(1): Error: Range error (18446744073709551615 not in [0..65535])\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "65816",
+      "native_error": {
+        "path": "65816_dbyt_included_negative.inc",
+        "line": 1
+      }
+    },
+    {
+      "name": "65816_dbyt_included_max",
+      "source": ".setcpu \"65816\"\n.org $1000\n.include \"65816_dbyt_included_max.inc\"\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "ffff",
+      "dialect": "65816"
+    },
+    {
+      "name": "65816_dbyt_forward_high",
+      "source": ".setcpu \"65816\"\n.org $1000\n.dbyt target+65535\ntarget: .byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Range error (65808 not in [0..65535])\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "65816",
+      "native_error": {
+        "path": "input.s",
+        "line": 3
+      }
+    },
+    {
+      "name": "65816_dbyt_forward_negative",
+      "source": ".setcpu \"65816\"\n.org $1000\n.dbyt target-8192\ntarget: .byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Range error (18446744073709486832 not in [0..65535])\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "65816",
+      "native_error": {
+        "path": "input.s",
+        "line": 3
+      }
+    },
+    {
+      "name": "65816_dbyt_arithmetic_high",
+      "source": ".setcpu \"65816\"\n.org $1000\n.dbyt 65535+1\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Range error (65536 not in [0..65535])\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "65816",
+      "native_error": {
+        "path": "input.s",
+        "line": 3
+      }
+    },
+    {
+      "name": "65816_dbyt_two_values",
+      "source": ".setcpu \"65816\"\n.org $1000\n.dbyt 1,65535\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0001ffff",
+      "dialect": "65816"
+    },
+    {
+      "name": "65816_dword_included_negative",
+      "source": ".setcpu \"65816\"\n.org $1000\n.include \"65816_dword_included_negative.inc\"\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "65816_dword_included_negative.inc(1): Error: Range error (18446744073709551615 not in [0..4294967295])\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "65816",
+      "native_error": {
+        "path": "65816_dword_included_negative.inc",
+        "line": 1
+      }
+    },
+    {
+      "name": "65816_dword_included_max",
+      "source": ".setcpu \"65816\"\n.org $1000\n.include \"65816_dword_included_max.inc\"\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "ffffffff",
+      "dialect": "65816"
+    },
+    {
+      "name": "65816_dword_forward_high",
+      "source": ".setcpu \"65816\"\n.org $1000\n.dword target+4294967295\ntarget: .byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Range error (4294971395 not in [0..4294967295])\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "65816",
+      "native_error": {
+        "path": "input.s",
+        "line": 3
+      }
+    },
+    {
+      "name": "65816_dword_forward_negative",
+      "source": ".setcpu \"65816\"\n.org $1000\n.dword target-8192\ntarget: .byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Range error (18446744073709547524 not in [0..4294967295])\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "65816",
+      "native_error": {
+        "path": "input.s",
+        "line": 3
+      }
+    },
+    {
+      "name": "65816_dword_arithmetic_high",
+      "source": ".setcpu \"65816\"\n.org $1000\n.dword 4294967295+1\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Range error (4294967296 not in [0..4294967295])\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "65816",
+      "native_error": {
+        "path": "input.s",
+        "line": 3
+      }
+    },
+    {
+      "name": "65816_dword_two_values",
+      "source": ".setcpu \"65816\"\n.org $1000\n.dword 1,4294967295\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "01000000ffffffff",
+      "dialect": "65816"
+    },
+    {
+      "name": "huc6280_dbyt_included_negative",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.include \"huc6280_dbyt_included_negative.inc\"\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "huc6280_dbyt_included_negative.inc(1): Error: Range error (18446744073709551615 not in [0..65535])\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "huc6280",
+      "native_error": {
+        "path": "huc6280_dbyt_included_negative.inc",
+        "line": 1
+      }
+    },
+    {
+      "name": "huc6280_dbyt_included_max",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.include \"huc6280_dbyt_included_max.inc\"\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "ffff",
+      "dialect": "huc6280"
+    },
+    {
+      "name": "huc6280_dbyt_forward_high",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.dbyt target+65535\ntarget: .byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Range error (65808 not in [0..65535])\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "huc6280",
+      "native_error": {
+        "path": "input.s",
+        "line": 3
+      }
+    },
+    {
+      "name": "huc6280_dbyt_forward_negative",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.dbyt target-8192\ntarget: .byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Range error (18446744073709486832 not in [0..65535])\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "huc6280",
+      "native_error": {
+        "path": "input.s",
+        "line": 3
+      }
+    },
+    {
+      "name": "huc6280_dbyt_arithmetic_high",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.dbyt 65535+1\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Range error (65536 not in [0..65535])\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "huc6280",
+      "native_error": {
+        "path": "input.s",
+        "line": 3
+      }
+    },
+    {
+      "name": "huc6280_dbyt_two_values",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.dbyt 1,65535\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "0001ffff",
+      "dialect": "huc6280"
+    },
+    {
+      "name": "huc6280_dword_included_negative",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.include \"huc6280_dword_included_negative.inc\"\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "huc6280_dword_included_negative.inc(1): Error: Range error (18446744073709551615 not in [0..4294967295])\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "huc6280",
+      "native_error": {
+        "path": "huc6280_dword_included_negative.inc",
+        "line": 1
+      }
+    },
+    {
+      "name": "huc6280_dword_included_max",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.include \"huc6280_dword_included_max.inc\"\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "ffffffff",
+      "dialect": "huc6280"
+    },
+    {
+      "name": "huc6280_dword_forward_high",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.dword target+4294967295\ntarget: .byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Range error (4294971395 not in [0..4294967295])\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "huc6280",
+      "native_error": {
+        "path": "input.s",
+        "line": 3
+      }
+    },
+    {
+      "name": "huc6280_dword_forward_negative",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.dword target-8192\ntarget: .byte 7\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Range error (18446744073709547524 not in [0..4294967295])\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "huc6280",
+      "native_error": {
+        "path": "input.s",
+        "line": 3
+      }
+    },
+    {
+      "name": "huc6280_dword_arithmetic_high",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.dword 4294967295+1\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(3): Error: Range error (4294967296 not in [0..4294967295])\n"
+        }
+      ],
+      "native_hex": null,
+      "dialect": "huc6280",
+      "native_error": {
+        "path": "input.s",
+        "line": 3
+      }
+    },
+    {
+      "name": "huc6280_dword_two_values",
+      "source": ".setcpu \"huc6280\"\n.org $1000\n.dword 1,4294967295\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-7s189vt2",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "01000000ffffffff",
+      "dialect": "huc6280"
+    }
+  ],
+  "excluded_audit_cases": {
+    "65816_dbyt_inactive": 895,
+    "65816_dword_inactive": 895,
+    "huc6280_dbyt_inactive": 895,
+    "huc6280_dword_inactive": 895
+  }
+}
