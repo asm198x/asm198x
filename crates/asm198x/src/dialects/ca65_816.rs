@@ -256,9 +256,9 @@ impl FlatWalk for Walker {
         let raw = if !self.formatting {
             let (_, operation) = split_label(split_comment(raw).0);
             let word = split_first_word(operation).0.to_ascii_lowercase();
-            let byte_data = lookup(DIRECTIVES, &word)
-                .is_some_and(|entry| matches!(entry.id, "bytes" | "asciiz"));
-            if byte_data {
+            let native_strings = lookup(DIRECTIVES, &word)
+                .is_some_and(|entry| matches!(entry.id, "bytes" | "asciiz" | "include" | "incbin"));
+            if native_strings {
                 raw
             } else {
                 string_source = self.strings.text_source(raw, line)?;
@@ -495,11 +495,12 @@ impl Walker {
         let (word, args) = split_first_word(rest);
         match word.to_ascii_lowercase().as_str() {
             ".include" => Ok(Some(WalkDirective::Include {
-                request: ca65_flat::include_request(args, line, ".include")?,
+                request: ca65_flat::include_value_request(args, line, ".include", &self.strings)?,
             })),
             ".incbin" => {
                 let fold = |piece: &str| fold_const(&value(piece.trim(), line)?, &self.env, line);
-                let (request, offset, size) = ca65_flat::incbin_args(args, line, ".incbin", &fold)?;
+                let (request, offset, size) =
+                    ca65_flat::incbin_value_args(args, line, ".incbin", &fold, &self.strings)?;
                 Ok(Some(WalkDirective::Incbin {
                     request,
                     offset,

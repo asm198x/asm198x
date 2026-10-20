@@ -2233,7 +2233,7 @@ impl Walker {
         let (word, args) = split_first_word(rest);
         match word.to_ascii_lowercase().as_str() {
             ".include" => Ok(Some(WalkDirective::Include {
-                request: ca65_flat::include_request(args, line, ".include")?,
+                request: ca65_flat::include_value_request(args, line, ".include", &self.strings)?,
             })),
             ".incbin" => {
                 let fold = |piece: &str| {
@@ -2242,7 +2242,8 @@ impl Walker {
                         line,
                     )
                 };
-                let (request, offset, size) = ca65_flat::incbin_args(args, line, ".incbin", &fold)?;
+                let (request, offset, size) =
+                    ca65_flat::incbin_value_args(args, line, ".incbin", &fold, &self.strings)?;
                 Ok(Some(WalkDirective::Incbin {
                     request,
                     offset,
@@ -2429,9 +2430,13 @@ impl FlatWalk for Walker {
             let code = split_comment(raw).0.trim();
             let operation = split_label_head(code).map_or(code, |(_, rest)| rest);
             let word = split_first_word(operation).0.to_ascii_lowercase();
-            let byte_data = lookup(DIRECTIVES, &word)
-                .is_some_and(|entry| matches!(entry.id, "bytes" | "asciiz"));
-            if byte_data {
+            let native_strings = lookup(DIRECTIVES, &word).is_some_and(|entry| {
+                matches!(
+                    entry.id,
+                    "bytes" | "asciiz" | "include" | "incbin" | "out" | "message" | "assert"
+                )
+            });
+            if native_strings {
                 raw
             } else {
                 string_source = self.strings.text_source(raw, line)?;
@@ -3852,11 +3857,17 @@ fn parse_directive(
         // string and ignore whatever follows it on the line — probed, not
         // assumed, because the two shapes read alike in the manual.
         "out" => {
-            let text = rest.trim();
-            match text.strip_prefix('"').and_then(|t| t.strip_suffix('"')) {
-                Some(lit) => Ok(Kind::Message(DiagSeverity::Note, lit.to_string())),
-                None => Err(AsmError::new(line, "`.out` takes one string")),
+            let source = rest.trim();
+            if !string_tokens::StringTokens::is_handle(source)
+                && (!source.starts_with('"') || !source[1..].contains('"'))
+            {
+                return Err(AsmError::new(line, "`.out` takes one string"));
             }
+            let (text, tail) = consts.0.strings.text_prefix(source, line)?;
+            if !tail.trim().is_empty() {
+                return Err(AsmError::new(line, "`.out` takes one string"));
+            }
+            Ok(Kind::Message(DiagSeverity::Note, text))
         }
         "message" => {
             let severity = if name.eq_ignore_ascii_case("warning") {
@@ -3864,9 +3875,12 @@ fn parse_directive(
             } else {
                 DiagSeverity::Error
             };
-            Ok(Kind::Message(severity, leading_string(rest, line)?))
+            Ok(Kind::Message(
+                severity,
+                leading_string(rest, &consts.0.strings, line)?,
+            ))
         }
-        "assert" => parse_assert(anons, anchor, rest, line),
+        "assert" => parse_assert(anons, anchor, &consts.0.strings, rest, line),
         "export" | "import" | "global" => parse_visible(
             match entry.id {
                 "export" => VisRule::MustBeDefined,
@@ -3973,23 +3987,67 @@ fn parse_visible(
 /// The leading string of a `.warning`/`.error`/`.fatal` operand. ca65 reads
 /// one string constant and skips the rest of the line: `.warning "a", 5` and
 /// `.warning "a" "b"` both say `a` and nothing more.
-fn leading_string(rest: &str, line: usize) -> Result<String, AsmError> {
-    let rest = rest.trim_start();
-    let body = rest
-        .strip_prefix('"')
-        .ok_or_else(|| AsmError::new(line, "string constant expected"))?;
-    let end = body
-        .find('"')
-        .ok_or_else(|| AsmError::new(line, "unterminated string"))?;
-    Ok(body[..end].to_string())
+fn leading_string(
+    rest: &str,
+    strings: &string_tokens::StringTokens,
+    line: usize,
+) -> Result<String, AsmError> {
+    strings.text_prefix(rest, line).map(|(text, _)| text)
+}
+
+/// Read the condition/action separators, leaving the message as one value.
+/// Native character tokens contain one byte and an optional closing apostrophe;
+/// punctuation inside either kind of quoted token is not a header delimiter.
+fn assertion_fields(rest: &str) -> Vec<&str> {
+    let bytes = rest.as_bytes();
+    let mut fields = Vec::new();
+    let mut depth = 0usize;
+    let mut start = 0;
+    let mut i = 0;
+    while i < bytes.len() {
+        match bytes[i] {
+            b'"' => {
+                i += 1;
+                while i < bytes.len() && bytes[i] != b'"' {
+                    i += 1;
+                }
+                i += usize::from(bytes.get(i) == Some(&b'"'));
+                continue;
+            }
+            b'\'' => {
+                i = (i + 2).min(bytes.len());
+                i += usize::from(bytes.get(i) == Some(&b'\''));
+                continue;
+            }
+            b'(' => depth += 1,
+            b')' => depth = depth.saturating_sub(1),
+            b',' if depth == 0 => {
+                fields.push(rest[start..i].trim());
+                start = i + 1;
+                if fields.len() == 2 {
+                    break;
+                }
+            }
+            _ => {}
+        }
+        i += 1;
+    }
+    fields.push(rest[start..].trim());
+    fields
 }
 
 /// `.assert cond, action[, "message"]`. The action decides whether a failure
 /// stops the assembly: `error` and `lderror` do, `warning` and `ldwarning`
 /// note it and carry on. With assembly and linking fused there is no moment
 /// between the two `ld` forms and the others.
-fn parse_assert(anons: &AnonCtx, anchor: &str, rest: &str, line: usize) -> Result<Kind, AsmError> {
-    let parts = split_top_level(rest, ',');
+fn parse_assert(
+    anons: &AnonCtx,
+    anchor: &str,
+    strings: &string_tokens::StringTokens,
+    rest: &str,
+    line: usize,
+) -> Result<Kind, AsmError> {
+    let parts = assertion_fields(rest);
     let cond = parse_value(anons, anchor, parts.first().copied().unwrap_or(""), line)?;
     let action = parts.get(1).map(|a| a.trim().to_ascii_lowercase());
     let fatal = match action.as_deref() {
@@ -4002,10 +4060,18 @@ fn parse_assert(anons: &AnonCtx, anchor: &str, rest: &str, line: usize) -> Resul
             ));
         }
     };
-    let message = parts
-        .get(2)
-        .map(|m| m.trim().trim_matches('"').to_string())
-        .unwrap_or_else(|| "Assertion failed".to_string());
+    let message = if let Some(source) = parts.get(2) {
+        let (text, tail) = strings.text_prefix(source, line)?;
+        if !tail.trim().is_empty() {
+            return Err(AsmError::new(
+                line,
+                "unexpected tokens after assertion message",
+            ));
+        }
+        text
+    } else {
+        "Assertion failed".to_string()
+    };
     Ok(Kind::Assert(cond, fatal, message))
 }
 
