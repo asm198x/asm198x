@@ -1,0 +1,150 @@
+[
+  {
+    "source": "/private/tmp/asm198x-flat-addr-producer/identity.json",
+    "sha256": "159725c2c51c3922b3eff739b952dcaccf8eb4013eb3685fc6ea7ce0ca7e0dad",
+    "size": 295,
+    "retained": "docs/plans/2026-10-20-flat-ca65-addr/clean-identity.json.gz"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-addr-producer/asm198x",
+    "sha256": "7d234fe1abc3766cad625f20ec56e3d0d908d753a0e93dfaba41ceb509b4683e",
+    "size": 20058376,
+    "producer_commit": "ebb4477f08489b01025d351cb4a1f31d130b773f",
+    "verified_remote_refs": [
+      "  origin/audit/flat-ca65-element-counter",
+      "  origin/audit/flat-data-qualification-907"
+    ]
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-addr-producer/build.log",
+    "sha256": "4f294e01525018e856e2b2bc487db97a4acfa1c26e5875d87888a292bf6ee242",
+    "size": 185,
+    "retained": "docs/plans/2026-10-20-flat-ca65-addr/clean-build.log.gz"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-addr-local-package/wrong-bytes.json",
+    "sha256": "6117d5aaad82454381558a5267fc4cd09bc3e5033bb9fc37ca7d672e6df531f3",
+    "size": 22932386,
+    "retained": "docs/plans/2026-10-20-flat-ca65-addr/package-wrong-bytes.json.gz"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-addr-local-package/corrupt-archive.json",
+    "sha256": "d293f944fdd29a56aeb5c4e9e44a8acd99fbbb3d9552a90cc9eb8aad1dc1d6d1",
+    "size": 172,
+    "retained": "docs/plans/2026-10-19-ca65-reserved-labels/current-package-corrupt-archive.json.gz"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-addr-local-package/report.json",
+    "sha256": "5dc64e7356e3cde7b3a6eac2f421a5dda351d44fc72357b1acd5a5099d7580fd",
+    "size": 22931591,
+    "retained": "docs/plans/2026-10-20-flat-ca65-addr/package-report.json.gz"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-addr-local-package/asm198x-aarch64-apple-darwin.tar.xz.sha256",
+    "sha256": "495760223c38dc6d2fd3e60e5778abbb7a3242c175839e34668d0da5dcde7f01",
+    "size": 102,
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/completed-slice-cleanup/asm198x-flat-addr-local-package--asm198x-aarch64-apple-darwin.tar.xz.sha256.gz"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-addr-local-package/asm198x-aarch64-apple-darwin.tar.xz",
+    "sha256": "b4912035caee491c5f63168922cf61e11b66607561e6d48971ed09c19b086563",
+    "size": 2707124,
+    "qualified_report": "/private/tmp/asm198x-flat-addr-local-package/report.json"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-addr-clean-4510/report.json",
+    "sha256": "8e24a101abde663a16ec45a8b32230fc25b5155a39ddb0e3d134c7d049b26c3a",
+    "size": 12597,
+    "retained": "docs/plans/2026-10-20-flat-ca65-addr/clean-4510/report.json.gz"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-addr-clean-4510/verification.json",
+    "sha256": "095e69c12a097dedf0b3d6892610dbae978001a26008244f4d8c352e467d9a0e",
+    "size": 209,
+    "retained": "docs/plans/2026-10-20-flat-ca65-addr/clean-4510/verification.json.gz"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-addr-clean-4510/logs/cc65-4510-opcodes--opcode-space-version-ld65.stdout",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "retained": "docs/plans/2026-10-20-ca65-literal-boundaries/fmt.log.gz"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-addr-clean-4510/logs/build-assembler.stdout",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "retained": "docs/plans/2026-10-20-ca65-literal-boundaries/fmt.log.gz"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-addr-clean-4510/logs/assembler-version.stderr",
+    "sha256": "cd9267fb50974330b2596f8f7d386346ec0227b2e2b702cb761d363dfa13a8c2",
+    "size": 16,
+    "retained": "docs/plans/2026-10-20-flat-ca65-faraddr/clean-4510/logs/assembler-version.stderr.gz"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-addr-clean-4510/logs/cc65-4510-opcodes--opcode-space-version-ca65.stderr",
+    "sha256": "5c22de95322cb1d858e9690b5e3c6e83984c27c5120ff12c49f8dc9679ed2dbc",
+    "size": 17,
+    "retained": "docs/plans/2026-10-20-flat-ca65-faraddr/clean-4510/logs/cc65-4510-opcodes--opcode-space-version-ca65.stderr.gz"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-addr-clean-4510/logs/cc65-4510-opcodes--opcode-space-reference-0.stdout",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "retained": "docs/plans/2026-10-20-ca65-literal-boundaries/fmt.log.gz"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-addr-clean-4510/logs/cc65-4510-opcodes--opcode-space-reference-0.stderr",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "retained": "docs/plans/2026-10-20-ca65-literal-boundaries/fmt.log.gz"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-addr-clean-4510/logs/cc65-4510-opcodes--opcode-space-version-ca65.stdout",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "retained": "docs/plans/2026-10-20-ca65-literal-boundaries/fmt.log.gz"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-addr-clean-4510/logs/assembler-version.stdout",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "retained": "docs/plans/2026-10-20-ca65-literal-boundaries/fmt.log.gz"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-addr-clean-4510/logs/cc65-4510-opcodes--opcode-space-version-ld65.stderr",
+    "sha256": "acf0ea5dbac2ff34c3733f092c38a357dd02d80c0d1edf0e05e8a36b92b62445",
+    "size": 17,
+    "retained": "docs/plans/2026-10-20-flat-ca65-faraddr/clean-4510/logs/cc65-4510-opcodes--opcode-space-version-ld65.stderr.gz"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-addr-clean-4510/logs/build-assembler.stderr",
+    "sha256": "d97b498d31aed0589d4b28684de9034c4549bf39eba86e25a003eb2924c77373",
+    "size": 1320,
+    "retained": "docs/plans/2026-10-20-flat-ca65-addr/clean-4510/logs/build-assembler.stderr.gz"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-addr-clean-4510/logs/cc65-4510-opcodes--opcode-space-assembler-0.stdout",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "retained": "docs/plans/2026-10-20-ca65-literal-boundaries/fmt.log.gz"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-addr-clean-4510/logs/cc65-4510-opcodes--opcode-space-reference-1.stdout",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "retained": "docs/plans/2026-10-20-ca65-literal-boundaries/fmt.log.gz"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-addr-clean-4510/logs/cc65-4510-opcodes--opcode-space-reference-1.stderr",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "size": 0,
+    "retained": "docs/plans/2026-10-20-ca65-literal-boundaries/fmt.log.gz"
+  },
+  {
+    "source": "/private/tmp/asm198x-flat-addr-clean-4510/logs/cc65-4510-opcodes--opcode-space-assembler-0.stderr",
+    "sha256": "d0f2bb0a758878171f47aca2c415910cd2bb55a06fb1b89e28d6e8ced2d21477",
+    "size": 51,
+    "retained": "docs/plans/2026-10-20-flat-ca65-faraddr/clean-4510/logs/cc65-4510-opcodes--opcode-space-assembler-0.stderr.gz"
+  }
+]
