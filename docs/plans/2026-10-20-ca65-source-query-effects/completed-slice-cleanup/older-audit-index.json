@@ -1,0 +1,134 @@
+[
+  {
+    "source": "/private/tmp/asm198x-text-consumers-baseline/identity.json",
+    "sha256": "2c9127b150bebcea198ee741972a37db385ee1d1098fa864407b23030d050c3e",
+    "size": 207,
+    "retained": "docs/plans/2026-10-20-ca65-text-consumers/baseline-identity.json.gz"
+  },
+  {
+    "source": "/private/tmp/asm198x-text-consumers-baseline/assertion.json",
+    "sha256": "6213d6ed6d7c1180b571255d8ca353fb305104cb6d53f362c97a2ac33395e5a3",
+    "size": 60390,
+    "retained": "docs/plans/2026-10-20-ca65-text-consumers/baseline-assertion.json.gz"
+  },
+  {
+    "source": "/private/tmp/asm198x-text-consumers-baseline/asm198x",
+    "sha256": "e31af2587bb8a9f04082ef0919492be983256054497b669843e2a8ea8225d892",
+    "size": 20081704,
+    "producer_commit": "d967f99a068f9386de9cc4c472a32457bb566862",
+    "verified_remote_refs": [
+      "  origin/audit/ca65-quoted-admission",
+      "  origin/fix/ca65-text-consumers"
+    ]
+  },
+  {
+    "source": "/private/tmp/asm198x-text-consumers-baseline/text.json",
+    "sha256": "e5c65fa1a5cd092dcbed35d55157dbfcdec01f5b738df3292c9b545e60917a20",
+    "size": 812131,
+    "retained": "docs/plans/2026-10-20-ca65-text-consumers/baseline-text.json.gz"
+  },
+  {
+    "source": "/private/tmp/asm198x-text-consumers-trial/index-scope.json",
+    "sha256": "e272da1cdeb294e05a47febd7c8803adcb8d037b39edf3d422098e5eff89f985",
+    "size": 2117,
+    "retained": "docs/plans/2026-10-20-ca65-text-consumers/trial-index-scope.json.gz"
+  },
+  {
+    "source": "/private/tmp/asm198x-text-consumers-trial/consumers.json",
+    "sha256": "2500334c88700a0456931ab050d9f2024db95bce72841c38106b216b576d937b",
+    "size": 33030,
+    "retained": "docs/plans/2026-10-20-ca65-text-consumers/trial-consumers.json.gz"
+  },
+  {
+    "source": "/private/tmp/asm198x-text-consumers-trial/arguments.json",
+    "sha256": "11a5727bdb3c8719968e297b23cb062f4e483ac3abef81ac58de9137a2babb5e",
+    "size": 35927,
+    "retained": "docs/plans/2026-10-20-ca65-text-consumers/trial-arguments.json.gz"
+  },
+  {
+    "source": "/private/tmp/asm198x-text-consumers-trial/text-consumers.json",
+    "sha256": "172819bbd36442f5a57614db5489d00c1befa7b4dd2432cd04669a6471a76626",
+    "size": 5892,
+    "retained": "docs/plans/2026-10-20-ca65-text-consumers/trial-text-consumers.json.gz"
+  },
+  {
+    "source": "/private/tmp/asm198x-text-consumers-trial/assertion.json",
+    "sha256": "95d4e8a4a17a3fa3b3cee0b835b5a37ab9dc09fae51e63c8ed41fdda7adc4b75",
+    "size": 60023,
+    "retained": "docs/plans/2026-10-20-ca65-text-consumers/trial-assertion.json.gz"
+  },
+  {
+    "source": "/private/tmp/asm198x-text-consumers-trial/flat-bytes.json",
+    "sha256": "243f11ae819c3535b73c4966566e8f32d2b7edb2d0d03c7a5c0b3515b86859fb",
+    "size": 257393,
+    "retained": "docs/plans/2026-10-20-ca65-text-consumers/trial-flat-bytes.json.gz"
+  },
+  {
+    "source": "/private/tmp/asm198x-text-consumers-trial/quoted.json",
+    "sha256": "b93832fb358a51aeb3f8edd45a5e2ce294bc5590837b642276fa63a4a8347a4d",
+    "size": 314166,
+    "retained": "docs/plans/2026-10-20-ca65-text-consumers/trial-quoted.json.gz"
+  },
+  {
+    "source": "/private/tmp/asm198x-text-consumers-trial/bytes.json",
+    "sha256": "82b902e413832641dcc9f02da14ab2ddcd551244b991155203997e6d75b8e920",
+    "size": 136242,
+    "retained": "docs/plans/2026-10-20-ca65-text-consumers/trial-bytes.json.gz"
+  },
+  {
+    "source": "/private/tmp/asm198x-text-consumers-trial/numeric-arity.json",
+    "sha256": "eecf26760cc60ee920067557ac90cf19b5bbae77e6b58284e922efc1571907a3",
+    "size": 12635,
+    "retained": "docs/plans/2026-10-20-ca65-text-consumers/trial-numeric-arity.json.gz"
+  },
+  {
+    "source": "/private/tmp/asm198x-text-consumers-trial/lifetime.json",
+    "sha256": "6558c3afc24d7e088c16e01b499c8e05b9719c36db4a3a62ef595f0c34722e74",
+    "size": 17312,
+    "retained": "docs/plans/2026-10-20-ca65-text-consumers/trial-lifetime.json.gz"
+  },
+  {
+    "source": "/private/tmp/asm198x-text-consumers-trial/asm198x",
+    "sha256": "07792dd2dab50bfdf540d30f6a8a76dd418b7008e2e08a73f3f9157215f15b51",
+    "size": 20083112,
+    "superseded_trial": true,
+    "retained_reports": [
+      "/private/tmp/asm198x-text-consumers-trial/index-scope.json",
+      "/private/tmp/asm198x-text-consumers-trial/consumers.json",
+      "/private/tmp/asm198x-text-consumers-trial/arguments.json",
+      "/private/tmp/asm198x-text-consumers-trial/text-consumers.json",
+      "/private/tmp/asm198x-text-consumers-trial/assertion.json",
+      "/private/tmp/asm198x-text-consumers-trial/flat-bytes.json",
+      "/private/tmp/asm198x-text-consumers-trial/quoted.json",
+      "/private/tmp/asm198x-text-consumers-trial/bytes.json",
+      "/private/tmp/asm198x-text-consumers-trial/numeric-arity.json",
+      "/private/tmp/asm198x-text-consumers-trial/lifetime.json",
+      "/private/tmp/asm198x-text-consumers-trial/text.json"
+    ],
+    "superseding_verified_main_commit": "2442480fbc8b50c18c08577ef34c8b17518b36a4"
+  },
+  {
+    "source": "/private/tmp/asm198x-text-consumers-trial/text.json",
+    "sha256": "400e545e8f3d3baa133603975503f46a5d1382c06e016a7d30af226857dd300f",
+    "size": 828124,
+    "retained": "docs/plans/2026-10-20-ca65-text-consumers/trial-text.json.gz"
+  },
+  {
+    "source": "/private/tmp/asm198x-ca65-quoted-admission-audit/predecessor.json",
+    "sha256": "228c6a519d82ad12b8ab2a1c4171d3a5dca5ce7871921bbaaec86abe5f5dcf63",
+    "size": 68067,
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/completed-slice-cleanup/asm198x-ca65-quoted-admission-audit--predecessor.json.gz"
+  },
+  {
+    "source": "/private/tmp/asm198x-ca65-quoted-admission-audit/native.json",
+    "sha256": "1ae59d4b5ae458cad592bd8bc32d0fa34d97b1d8e910b47db9a144186479a123",
+    "size": 118852,
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/completed-slice-cleanup/asm198x-ca65-quoted-admission-audit--native.json.gz"
+  },
+  {
+    "source": "/private/tmp/asm198x-ca65-quoted-admission-audit/probe.py",
+    "sha256": "ee1642a1b0d53e37d5700e96523f8e535f60df2c8f207c6b4ee6875d6b237077",
+    "size": 2240,
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/completed-slice-cleanup/asm198x-ca65-quoted-admission-audit--probe.py.gz"
+  }
+]
