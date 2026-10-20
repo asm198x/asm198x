@@ -4,8 +4,8 @@ The 54 native controls accept 35 programs and refuse 19. The corrected source
 classifier producer 499a58a29015f79a0b3897572db1e1ba9dc816c8 still accepts
 15 programs native ca65 rejects. They cover missing names in .ifconst,
 cancellation, zero products, logical .const arguments and explicit root lookup,
-each directly, in includes and in macros. All retain previous output on native
-failure; the comparison records current CLI acceptance and actual bytes.
+each directly, in includes and in macros. Each comparison seeds an existing output and records whether refusal preserves
+it, alongside current CLI acceptance and actual bytes.
 
 Query-only .ref/.defined arguments, forward definitions, scoped outward fallback,
 shadowing, logical source reads and lazy bodies are controls. They must keep
