@@ -31,7 +31,6 @@ become negative only after layout. Encoding a sentinel into expressions would
 hide the original value and invent an expression workaround, so it is not
 proposed.
 
-The proposed change extends a shared engine/AST convention. The user-provided
-AGENTS.md requires agreement for significant departures from conventions and
-new architectural patterns; That agreement is recorded above. #904
-can continue independently using the same native diagnostic evidence.
+This private engine/AST extension was approved under the user-provided
+AGENTS.md requirement for agreement on significant convention changes. #904
+uses the same native diagnostic evidence.
