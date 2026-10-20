@@ -701,6 +701,13 @@ pub(crate) fn eval_binop(op: BinOp, a: i64, b: i64, line: usize) -> Result<i64, 
 // The generic statement stream a dialect produces
 // ---------------------------------------------------------------------------
 
+/// Accepted values for a sized data directive, independent of instruction operands.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum DataRange {
+    SignedOrUnsigned,
+    Unsigned,
+}
+
 /// The bounded native SAVENEX command stream, evaluated in the emit pass.
 #[derive(Clone)]
 pub(crate) enum NexCommand {
@@ -812,6 +819,7 @@ pub(crate) enum Operation {
     Sized {
         width: u8,
         big_endian: bool,
+        range: DataRange,
         values: Vec<Expr>,
     },
     /// The source naming its own output file — ACME's `!to`. Emits nothing
@@ -2255,13 +2263,18 @@ fn assemble_statements(
             Some(Operation::Sized {
                 width,
                 big_endian,
+                range,
                 values,
             }) => {
                 for e in values {
                     let v = e.eval(&symbols, pc, s.line).map_err(|err| s.stamp(err))?;
                     let width = *width;
                     let max = (1i64 << (u32::from(width) * 8)) - 1;
-                    if !(floor(u32::from(width))..=max).contains(&v) {
+                    let min = match range {
+                        DataRange::SignedOrUnsigned => floor(u32::from(width)),
+                        DataRange::Unsigned => 0,
+                    };
+                    if !(min..=max).contains(&v) {
                         match byte_policy {
                             Oversize::Error => {
                                 return Err(s.operand_err(format!(

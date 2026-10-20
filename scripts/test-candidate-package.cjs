@@ -70,6 +70,7 @@ requiredCases.push('ca65_token_bound_types');
 requiredCases.push('ca65_string_bytes', 'ca65_string_consumers', 'ca65_flat_string_bytes', 'ca65_literal_boundaries');
 requiredCases.push('ca65_text_consumers', 'ca65_quoted_admission', 'ca65_character_operands');
 requiredCases.push('ca65_huc_macro_format');
+requiredCases.push('ca65_flat_macro_diagnostics', 'ca65_flat_faraddr');
 const sourceFiles = {
   'LICENSE': '62cd567bc9270c722abcaa6ad88b6a1fe861698d63890f787cc557d2395be203',
   'helloworld.asm': '9e57c82435c0cf35e56089d56d6b83991c61624c2b3448ab6c66fb13a884a0a5',
@@ -1526,6 +1527,56 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
         } else {
           assert.equal(p.status, 1, fact.name + ': ' + p.stderr);
           assert.equal(read('cpu.bin').toString(), 'previous image', fact.name);
+        }
+      }
+    });
+    for (const [cohort, fixture, count] of [
+      ['ca65_flat_macro_diagnostics', 'ca65-flat-macro-diagnostics.json', 80],
+      ['ca65_flat_faraddr', 'ca65-flat-faraddr.json', 132],
+    ]) test(cohort, () => {
+      const facts = require('../crates/asm198x/tests/fixtures/' + fixture);
+      assert.equal(facts.cases.length, count);
+      for (const [name, source] of Object.entries(facts.files)) write(name, source);
+      for (const fact of facts.cases) {
+        write('input.s', fact.source);
+        const outputs = ['cpu.bin', 'scope.debug198x', 'scope.sym', 'scope.lst.json'];
+        for (const output of outputs) write(output, 'previous output');
+        const assemble = input => run(['--dialect', fact.dialect, input, '-o', 'cpu.bin',
+          '--debug=scope.debug198x', '--sym=scope.sym', '--listing-json=scope.lst.json', '--message-format=json']);
+        const accepted = fact.native.at(-1).exit === 0;
+        const result = assemble('input.s');
+        assert.equal(result.status, accepted ? 0 : 1, fact.name + ': ' + result.stderr);
+        const payload = JSON.parse(result.stdout);
+        if (accepted) {
+          const bytes = Buffer.from(fact.native_hex, 'hex');
+          assert.deepEqual(read('cpu.bin'), bytes, fact.name);
+          assert.deepEqual(payload.bytes, Array.from(bytes), fact.name);
+          const shape = () => read('scope.debug198x').toString().trim().split('\n')
+            .map(line => JSON.parse(line)).filter(row => row.t === 'symbol' || row.t === 'section');
+          const before = shape();
+          const formatted = run(['fmt', '--dialect', fact.dialect, 'input.s']);
+          assert.equal(formatted.status, 0, fact.name + ': ' + formatted.stderr);
+          write('scope-formatted.s', formatted.stdout);
+          const again = run(['fmt', '--dialect', fact.dialect, 'scope-formatted.s']);
+          assert.equal(again.status, 0, fact.name + ': ' + again.stderr);
+          assert.equal(again.stdout, formatted.stdout, fact.name + ': idempotence');
+          const after = assemble('scope-formatted.s');
+          assert.equal(after.status, 0, fact.name + ': ' + after.stderr);
+          assert.deepEqual(read('cpu.bin'), bytes, fact.name + ': formatted bytes');
+          assert.deepEqual(shape(), before, fact.name + ': symbols and sections');
+        } else {
+          for (const output of outputs) assert.equal(read(output).toString(), 'previous output', fact.name + ': ' + output);
+          assert(Array.isArray(payload) && payload.length > 0, fact.name);
+          if (fact.expected_context) {
+            const expected = fact.expected_context; const span = payload[0].span;
+            assert.equal(path.basename(span.path), expected.path, fact.name);
+            assert.equal(span.line, expected.line, fact.name);
+            assert.deepEqual(span.expansion_frames.map(frame => frame.macro_name), expected.frames, fact.name);
+            for (const frame of span.expansion_frames) {
+              for (const key of ['defined_at', 'invoked_at']) assert.equal(path.basename(frame[key].path), expected.path, fact.name + ': ' + key);
+              assert.equal(frame.defined_at.line, expected.definition_lines[frame.macro_name], fact.name);
+            }
+          }
         }
       }
     });

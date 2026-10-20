@@ -485,3 +485,11 @@ test('native macro formatter evidence cannot be omitted', () => {
   assert(qualifies(complete)); assert(requiredCases.includes('ca65_huc_macro_format'));
   assert.equal(qualifies(complete.filter(row => row.name !== 'ca65_huc_macro_format')), false);
 });
+
+for (const cohort of ['ca65_flat_macro_diagnostics', 'ca65_flat_faraddr']) {
+  test(cohort + ' evidence cannot be omitted', () => {
+    const complete = requiredCases.map(name => ({ name, status: 'pass' }));
+    assert(qualifies(complete)); assert(requiredCases.includes(cohort));
+    assert.equal(qualifies(complete.filter(row => row.name !== cohort)), false);
+  });
+}

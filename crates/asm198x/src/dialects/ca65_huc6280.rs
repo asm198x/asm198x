@@ -721,26 +721,23 @@ fn parse_directive(
                 .flat_map(|e| [Expr::Hi(Box::new(e.clone())), Expr::Lo(Box::new(e))])
                 .collect(),
         ))),
-        // Byte 0, 1 and 2 of each value, and all three for `.faraddr`. Byte 2
-        // is `Expr::Bank`, the engine's 65816 `^` node. Wrapping the expression
-        // rather than folding it keeps a forward label resolving in pass two.
-        "lobytes" | "hibytes" | "bankbytes" | "faraddr" => {
-            let bank = |e: Expr| Expr::Bank(Box::new(e));
-            let mut out = Vec::new();
-            for value in value_list(rest, line)? {
-                match entry.id {
-                    "lobytes" => out.push(Expr::Lo(Box::new(value))),
-                    "hibytes" => out.push(Expr::Hi(Box::new(value))),
-                    "bankbytes" => out.push(bank(value)),
-                    _ => {
-                        out.push(Expr::Lo(Box::new(value.clone())));
-                        out.push(Expr::Hi(Box::new(value.clone())));
-                        out.push(bank(value));
-                    }
-                }
-            }
-            Ok(Some(Operation::Bytes(out)))
-        }
+        "faraddr" => Ok(Some(Operation::Sized {
+            width: 3,
+            big_endian: false,
+            range: crate::engine::DataRange::Unsigned,
+            values: value_list(rest, line)?,
+        })),
+        // Explicit extraction truncates each value to the selected byte.
+        "lobytes" | "hibytes" | "bankbytes" => Ok(Some(Operation::Bytes(
+            value_list(rest, line)?
+                .into_iter()
+                .map(|value| match entry.id {
+                    "lobytes" => Expr::Lo(Box::new(value)),
+                    "hibytes" => Expr::Hi(Box::new(value)),
+                    _ => Expr::Bank(Box::new(value)),
+                })
+                .collect(),
+        ))),
         "asciiz" => {
             let out = strings
                 .asciiz(ca65_flat::split_fields(rest, usize::MAX), line)?

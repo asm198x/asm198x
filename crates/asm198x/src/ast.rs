@@ -25,7 +25,7 @@
 //! carries a scoped `allow(dead_code)`, so the rest of the module keeps normal
 //! dead-code detection (CI is `-D warnings`).
 
-use crate::engine::{AsmError, Expr, Operation, Piece, Statement};
+use crate::engine::{AsmError, DataRange, Expr, Operation, Piece, Statement};
 
 // ---------------------------------------------------------------------------
 // Provenance (R3)
@@ -252,6 +252,7 @@ pub(crate) enum Item {
     Sized {
         width: u8,
         big_endian: bool,
+        range: DataRange,
         values: Vec<Operand>,
     },
     /// ACME's `!initmem` — the assembly-wide fill byte. Carries no operand
@@ -953,10 +954,12 @@ pub(crate) fn lower_item_ref(item: &Item) -> Result<Operation, AsmError> {
         Item::Sized {
             width,
             big_endian,
+            range,
             values,
         } => Operation::Sized {
             width: *width,
             big_endian: *big_endian,
+            range: *range,
             values: values
                 .iter()
                 .cloned()
@@ -1109,10 +1112,12 @@ fn lower_item(item: Item) -> Result<Operation, AsmError> {
         Item::Sized {
             width,
             big_endian,
+            range,
             values,
         } => Operation::Sized {
             width,
             big_endian,
+            range,
             values: values
                 .into_iter()
                 .map(Operand::into_value)
@@ -1353,10 +1358,12 @@ pub(crate) fn map_syms(op: Operation, f: &mut impl FnMut(String) -> Expr) -> Ope
         Operation::Sized {
             width,
             big_endian,
+            range,
             values,
         } => Operation::Sized {
             width,
             big_endian,
+            range,
             values: values.into_iter().map(|e| map_sym_expr(e, f)).collect(),
         },
         // No expressions to rewrite: the fill byte is folded at parse time.
@@ -1523,10 +1530,12 @@ pub(crate) fn item_from_operation(op: Operation) -> Item {
         Operation::Sized {
             width,
             big_endian,
+            range,
             values,
         } => Item::Sized {
             width,
             big_endian,
+            range,
             values: values.into_iter().map(Operand::expr).collect(),
         },
         Operation::InitMem(v) => Item::InitMem(v),

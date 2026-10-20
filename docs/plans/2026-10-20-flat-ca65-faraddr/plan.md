@@ -8,10 +8,10 @@ width-checked `Operation::Sized` for two-, three- and four-byte data.
 1. Retain native signed/unsigned boundaries, arithmetic, forward labels,
    macro/include/unused contexts and byte-extraction controls. Replay the clean
    preceding binary and explain every status/byte difference.
-2. If native boundaries match the existing checked three-byte operation, route
-   only `.faraddr` through it in `ca65_816.rs` and `ca65_huc6280.rs`. Keep explicit
-   low/high/bank extraction behavior and numeric/source-order rules unchanged.
-   Stop for design agreement if a new expression or engine operation is needed.
+2. Apply the approved explicit unsigned range policy to private Sized data in
+   the engine and AST. Existing ACME/SjASMPlus consumers retain signed-or-unsigned
+   behavior. Route only flat ca65 `.faraddr` through unsigned three-byte data;
+   keep low/high/bank extraction and instruction-piece ranges unchanged.
 3. Test native byte/refusal behavior, outputs, diagnostics and canonical/debug
    round trips, including actual CLI and required archive evidence.
 4. Run complete slice verification and five-host package controls before merge;
