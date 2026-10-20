@@ -1,0 +1,327 @@
+{
+  "tools": {
+    "ca65": {
+      "path": "/opt/homebrew/bin/ca65",
+      "sha256": "1a57997819fd98814e4601b5160df589e7a1a24e1888a80fee51ae450d8fd0ea",
+      "version": {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "--version"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-36lwwo7a",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "ca65 V2.18 - N/A\n"
+      }
+    },
+    "ld65": {
+      "path": "/opt/homebrew/bin/ld65",
+      "sha256": "36bb196207a6b2c90a4aa991b419d6113885303951b14b60b455f51c777b3339",
+      "version": {
+        "argv": [
+          "/opt/homebrew/bin/ld65",
+          "--version"
+        ],
+        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-36lwwo7a",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "ld65 V2.18 - N/A\n"
+      }
+    }
+  },
+  "files": {},
+  "cases": [
+    {
+      "name": "difference",
+      "source": "LEFT: .byte 0\nRIGHT: .byte 0\nFIRST=RIGHT-LEFT\nALIAS=RIGHT-LEFT\n.ifconst ALIAS\n.byte 7\n.else\n.byte 9\n.endif\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-36lwwo7a",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-36lwwo7a",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "000007"
+    },
+    {
+      "name": "chain",
+      "source": "LEFT: .byte 0\nRIGHT: .byte 0\nFIRST=RIGHT-LEFT\nALIAS=FIRST+1\n.ifconst ALIAS\n.byte 7\n.else\n.byte 9\n.endif\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-36lwwo7a",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-36lwwo7a",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "000007"
+    },
+    {
+      "name": "unary",
+      "source": "LEFT: .byte 0\nRIGHT: .byte 0\nFIRST=RIGHT-LEFT\nALIAS=-LEFT+RIGHT\n.ifconst ALIAS\n.byte 7\n.else\n.byte 9\n.endif\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-36lwwo7a",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-36lwwo7a",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "000007"
+    },
+    {
+      "name": "multiply",
+      "source": "LEFT: .byte 0\nRIGHT: .byte 0\nFIRST=RIGHT-LEFT\nALIAS=LEFT*0\n.ifconst ALIAS\n.byte 7\n.else\n.byte 9\n.endif\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-36lwwo7a",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-36lwwo7a",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "000007"
+    },
+    {
+      "name": "cancel",
+      "source": "LEFT: .byte 0\nRIGHT: .byte 0\nFIRST=RIGHT-LEFT\nALIAS=LEFT-LEFT\n.ifconst ALIAS\n.byte 7\n.else\n.byte 9\n.endif\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-36lwwo7a",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-36lwwo7a",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "000007"
+    },
+    {
+      "name": "missing_cancel",
+      "source": "LEFT: .byte 0\nRIGHT: .byte 0\nFIRST=RIGHT-LEFT\nALIAS=MISSING-MISSING\n.ifconst ALIAS\n.byte 7\n.else\n.byte 9\n.endif\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-36lwwo7a",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(4): Error: Symbol 'MISSING' is undefined\ninput.s(4): Note: Expanded from here\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "forward_difference",
+      "source": "ALIAS=RIGHT-LEFT\n.ifconst ALIAS\n.byte 7\n.else\n.byte 9\n.endif\nLEFT: .byte 0\nRIGHT: .byte 0\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-36lwwo7a",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-36lwwo7a",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "090000"
+    },
+    {
+      "name": "alias_to_label",
+      "source": "LEFT: .byte 0\nRIGHT: .byte 0\nFIRST=RIGHT-LEFT\nALIAS=LEFT\n.ifconst ALIAS\n.byte 7\n.else\n.byte 9\n.endif\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-36lwwo7a",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-36lwwo7a",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "000009"
+    },
+    {
+      "name": "constant",
+      "source": "LEFT: .byte 0\nRIGHT: .byte 0\nFIRST=RIGHT-LEFT\nALIAS=2\n.ifconst ALIAS\n.byte 7\n.else\n.byte 9\n.endif\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-36lwwo7a",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-36lwwo7a",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "000007"
+    }
+  ]
+}
