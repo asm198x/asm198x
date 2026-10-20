@@ -835,12 +835,23 @@ pub(crate) fn lower(program: Program) -> Result<Vec<Statement>, AsmError> {
                     ),
                 ));
             }
+            let operand_span = node.operand_span.or_else(|| {
+                if node.span.expansion_frames.is_empty() {
+                    None
+                } else {
+                    // Data may have no precise operand position. Retain its
+                    // macro context as an explicitly line-granular fallback.
+                    let mut span = node.span.clone();
+                    span.col = 0;
+                    Some(span)
+                }
+            });
             Ok(Statement {
                 line: node.span.line as usize,
                 file: node.span.file,
                 label: node.label.map(|s| s.qualified),
                 op: node.item.map(lower_item).transpose()?,
-                operand_span: node.operand_span,
+                operand_span,
                 xor_mask: 0,
                 instruction_set: None,
                 extension_set: None,

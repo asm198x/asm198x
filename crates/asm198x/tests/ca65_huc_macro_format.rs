@@ -232,7 +232,18 @@ fn included_macro_errors_keep_outputs_and_locations_after_formatting() {
                 .expect("include path");
             assert!(Path::new(path).ends_with("broken.inc"), "{path}");
             assert_eq!(diagnostics[0]["span"]["line"], 4);
-            // The existing missing definition frames are tracked separately in #904.
+            let frames = diagnostics[0]["span"]["expansion_frames"]
+                .as_array()
+                .expect("macro frames");
+            assert_eq!(frames.len(), 1);
+            assert_eq!(frames[0]["macro_name"], "emit");
+            assert_eq!(frames[0]["defined_at"]["line"], 1);
+            for key in ["defined_at", "invoked_at"] {
+                assert!(
+                    Path::new(frames[0][key]["path"].as_str().expect("frame path"))
+                        .ends_with("broken.inc")
+                );
+            }
             for output in outputs {
                 assert_eq!(
                     std::fs::read(root.join(output)).expect("preserved output"),
