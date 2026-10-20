@@ -1,0 +1,82 @@
+{
+  "binary": "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+  "sha256": "7e05a6b30a3336469d72732c7ff1675567c4ab67b0ad585bab45f1e6da80e06b",
+  "results": [
+    {
+      "name": "scoped_shadow",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: `.strat` index must be a literal constant expression\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "named_reference",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: `.strat` index must be a literal constant expression\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "literal_arithmetic",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "41",
+      "matches_native": true
+    },
+    {
+      "name": "nested_literal_index",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "42",
+      "matches_native": true
+    }
+  ]
+}

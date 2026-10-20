@@ -1469,7 +1469,8 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
         assert.equal(authoredMarker, fact.source.includes('ca65-string:'));
         const p = run(args('cpu.s'));
         if (!authoredMarker) for (const stream of [p.stdout, p.stderr]) assert(!stream.includes('ca65-string:'), name + ': handle in diagnostic');
-        if (fact.native.at(-1).exit !== 0) {
+        if (fact.native.at(-1).exit !== 0 || fact.assembly_gaps) {
+          if (fact.assembly_gaps) { assert.equal(fact.audit, 'index_scope'); assert.deepEqual(fact.assembly_gaps, [795]); assert(['scoped_shadow', 'named_reference'].includes(fact.name)); }
           assert.equal(p.status, 1, name + ': ' + p.stderr);
           for (const output of outputs) assert.equal(read(output).toString(), 'previous output', name + ': preserved ' + output);
           continue;
@@ -1495,7 +1496,7 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
       assert.equal(accepted, acceptedCount);
     };
     test('ca65_string_bytes', () => qualifyCa65ByteStrings('ca65-string-bytes.json', 287, 274, 0));
-    test('ca65_string_consumers', () => qualifyCa65ByteStrings('ca65-string-consumers.json', 102, 90, 9));
+    test('ca65_string_consumers', () => qualifyCa65ByteStrings('ca65-string-consumers.json', 132, 104, 9));
     test('ca65_flat_string_bytes', () => qualifyCa65ByteStrings('ca65-flat-string-bytes.json', 574, 548, 0));
     test('ca65_token_bound_types', () => {
       const facts = require('../crates/asm198x/tests/fixtures/ca65-token-bound-types.json');

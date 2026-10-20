@@ -1,0 +1,82 @@
+{
+  "binary": "/private/tmp/asm198x-byte-strings-clean-producer/asm198x",
+  "sha256": "31dd8c0220a4d6efef8e1b3114da99ac3baf9be7b44fc09b00f908551e45dda2",
+  "results": [
+    {
+      "name": "scoped_shadow",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "41",
+      "matches_native": false
+    },
+    {
+      "name": "named_reference",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "4100",
+      "matches_native": false
+    },
+    {
+      "name": "literal_arithmetic",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "41",
+      "matches_native": true
+    },
+    {
+      "name": "nested_literal_index",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "42",
+      "matches_native": true
+    }
+  ]
+}

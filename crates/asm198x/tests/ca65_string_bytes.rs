@@ -84,6 +84,14 @@ fn verify_native_cases(fixture: &str, count: usize, accepted: usize, audits: &[(
             .iter()
             .find(|row| row["name"] == case["name"])
             .expect("original case");
+        if case["assembly_gaps"].is_array() {
+            assert_eq!(case["audit"], "index_scope");
+            assert_eq!(case["assembly_gaps"], serde_json::json!([795]));
+            assert!(matches!(
+                case["name"].as_str(),
+                Some("scoped_shadow" | "named_reference")
+            ));
+        }
         for field in ["source", "config", "native", "native_hex"] {
             assert_eq!(case[field], original[field], "{}: {field}", case["name"]);
         }
@@ -152,7 +160,8 @@ fn verify_native_cases(fixture: &str, count: usize, accepted: usize, audits: &[(
             .expect("native stages")
             .last()
             .expect("stage")["exit"]
-            == 0;
+            == 0
+            && !case["assembly_gaps"].is_array();
         assert_eq!(
             result.status.code(),
             Some(if native_accepted { 0 } else { 1 }),
@@ -239,8 +248,8 @@ fn all_native_character_bytes_and_precision_boundaries_survive() {
 fn native_string_consumers_and_selected_capture_lifetimes_survive() {
     verify_native_cases(
         include_str!("fixtures/ca65-string-consumers.json"),
-        102,
-        90,
+        132,
+        104,
         &[
             (
                 "consumers",
@@ -258,6 +267,18 @@ fn native_string_consumers_and_selected_capture_lifetimes_survive() {
                 "guards",
                 include_str!(
                     "../../../docs/plans/2026-10-20-ca65-string-token-provenance/guard-native.json"
+                ),
+            ),
+            (
+                "index_scope",
+                include_str!(
+                    "../../../docs/plans/2026-10-20-ca65-string-token-provenance/index-scope-native.json"
+                ),
+            ),
+            (
+                "numeric_arity",
+                include_str!(
+                    "../../../docs/plans/2026-10-20-ca65-string-token-provenance/numeric-string-arity-native.json"
                 ),
             ),
         ],
