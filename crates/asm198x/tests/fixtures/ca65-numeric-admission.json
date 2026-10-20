@@ -5769,8 +5769,7 @@
         }
       ],
       "native_hex": "",
-      "dialect": "ca65",
-      "formatter_gap": "833"
+      "dialect": "ca65"
     },
     {
       "name": "order_macro_end_after",
@@ -5805,8 +5804,7 @@
         }
       ],
       "native_hex": "",
-      "dialect": "ca65",
-      "formatter_gap": "833"
+      "dialect": "ca65"
     },
     {
       "name": "order_conditional_closer",
@@ -6093,8 +6091,7 @@
         }
       ],
       "native_hex": "07",
-      "dialect": "ca65",
-      "formatter_gap": "834"
+      "dialect": "ca65"
     },
     {
       "name": "extra_lazy_computed_include",
@@ -6129,8 +6126,7 @@
         }
       ],
       "native_hex": "07",
-      "dialect": "ca65",
-      "formatter_gap": "834"
+      "dialect": "ca65"
     },
     {
       "name": "extra_lazy_cpu",
@@ -6445,8 +6441,7 @@
         }
       ],
       "native_hex": "",
-      "dialect": "ca65",
-      "formatter_gap": "833"
+      "dialect": "ca65"
     },
     {
       "name": "extra_included_overflow",
