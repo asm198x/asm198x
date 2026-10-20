@@ -16229,8 +16229,7 @@
       ],
       "native_hex": "062c07",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_byte_44_pair_direct",
@@ -16302,8 +16301,7 @@
       ],
       "native_hex": "062c0707",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_byte_44_arithmetic_direct",
@@ -16375,8 +16373,7 @@
       ],
       "native_hex": "062d0707",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_byte_44_call_direct",
@@ -16448,8 +16445,7 @@
       ],
       "native_hex": "062c0707",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_byte_34_lone_direct",
@@ -16521,8 +16517,7 @@
       ],
       "native_hex": "062207",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_byte_34_pair_direct",
@@ -16594,8 +16589,7 @@
       ],
       "native_hex": "06220707",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_byte_34_arithmetic_direct",
@@ -16667,8 +16661,7 @@
       ],
       "native_hex": "06230707",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_byte_34_call_direct",
@@ -16740,8 +16733,7 @@
       ],
       "native_hex": "06220707",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_byte_39_lone_direct",
@@ -16813,8 +16805,7 @@
       ],
       "native_hex": "062707",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_byte_39_pair_direct",
@@ -16886,8 +16877,7 @@
       ],
       "native_hex": "06270707",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_byte_39_arithmetic_direct",
@@ -16959,8 +16949,7 @@
       ],
       "native_hex": "06280707",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_byte_39_call_direct",
@@ -17032,8 +17021,7 @@
       ],
       "native_hex": "06270707",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_byte_92_lone_direct",
@@ -17105,8 +17093,7 @@
       ],
       "native_hex": "065c07",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_byte_92_pair_direct",
@@ -17178,8 +17165,7 @@
       ],
       "native_hex": "065c0707",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_byte_92_arithmetic_direct",
@@ -17251,8 +17237,7 @@
       ],
       "native_hex": "065d0707",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_byte_92_call_direct",
@@ -17324,8 +17309,7 @@
       ],
       "native_hex": "065c0707",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_byte_59_lone_direct",
@@ -17397,8 +17381,7 @@
       ],
       "native_hex": "063b07",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_byte_59_pair_direct",
@@ -17470,8 +17453,7 @@
       ],
       "native_hex": "063b0707",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_byte_59_arithmetic_direct",
@@ -17543,8 +17525,7 @@
       ],
       "native_hex": "063c0707",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_byte_59_call_direct",
@@ -17616,8 +17597,7 @@
       ],
       "native_hex": "063b0707",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_byte_40_lone_direct",
@@ -17689,8 +17669,7 @@
       ],
       "native_hex": "062807",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_byte_40_pair_direct",
@@ -17762,8 +17741,7 @@
       ],
       "native_hex": "06280707",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_byte_40_arithmetic_direct",
@@ -17835,8 +17813,7 @@
       ],
       "native_hex": "06290707",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_byte_40_call_direct",
@@ -17908,8 +17885,7 @@
       ],
       "native_hex": "06280707",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_byte_41_lone_direct",
@@ -17981,8 +17957,7 @@
       ],
       "native_hex": "062907",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_byte_41_pair_direct",
@@ -18054,8 +18029,7 @@
       ],
       "native_hex": "06290707",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_byte_41_arithmetic_direct",
@@ -18127,8 +18101,7 @@
       ],
       "native_hex": "062a0707",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_byte_41_call_direct",
@@ -18200,8 +18173,7 @@
       ],
       "native_hex": "06290707",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_word_44_lone_direct",
@@ -18273,8 +18245,7 @@
       ],
       "native_hex": "062c0007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_word_44_pair_direct",
@@ -18346,8 +18317,7 @@
       ],
       "native_hex": "062c00070007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_word_44_arithmetic_direct",
@@ -18419,8 +18389,7 @@
       ],
       "native_hex": "062d00070007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_word_44_call_direct",
@@ -18492,8 +18461,7 @@
       ],
       "native_hex": "062c00070007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_word_34_lone_direct",
@@ -18565,8 +18533,7 @@
       ],
       "native_hex": "06220007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_word_34_pair_direct",
@@ -18638,8 +18605,7 @@
       ],
       "native_hex": "062200070007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_word_34_arithmetic_direct",
@@ -18711,8 +18677,7 @@
       ],
       "native_hex": "062300070007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_word_34_call_direct",
@@ -18784,8 +18749,7 @@
       ],
       "native_hex": "062200070007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_word_39_lone_direct",
@@ -18857,8 +18821,7 @@
       ],
       "native_hex": "06270007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_word_39_pair_direct",
@@ -18930,8 +18893,7 @@
       ],
       "native_hex": "062700070007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_word_39_arithmetic_direct",
@@ -19003,8 +18965,7 @@
       ],
       "native_hex": "062800070007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_word_39_call_direct",
@@ -19076,8 +19037,7 @@
       ],
       "native_hex": "062700070007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_word_92_lone_direct",
@@ -19149,8 +19109,7 @@
       ],
       "native_hex": "065c0007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_word_92_pair_direct",
@@ -19222,8 +19181,7 @@
       ],
       "native_hex": "065c00070007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_word_92_arithmetic_direct",
@@ -19295,8 +19253,7 @@
       ],
       "native_hex": "065d00070007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_word_92_call_direct",
@@ -19368,8 +19325,7 @@
       ],
       "native_hex": "065c00070007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_word_59_lone_direct",
@@ -19441,8 +19397,7 @@
       ],
       "native_hex": "063b0007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_word_59_pair_direct",
@@ -19514,8 +19469,7 @@
       ],
       "native_hex": "063b00070007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_word_59_arithmetic_direct",
@@ -19587,8 +19541,7 @@
       ],
       "native_hex": "063c00070007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_word_59_call_direct",
@@ -19660,8 +19613,7 @@
       ],
       "native_hex": "063b00070007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_word_40_lone_direct",
@@ -19733,8 +19685,7 @@
       ],
       "native_hex": "06280007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_word_40_pair_direct",
@@ -19806,8 +19757,7 @@
       ],
       "native_hex": "062800070007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_word_40_arithmetic_direct",
@@ -19879,8 +19829,7 @@
       ],
       "native_hex": "062900070007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_word_40_call_direct",
@@ -19952,8 +19901,7 @@
       ],
       "native_hex": "062800070007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_word_41_lone_direct",
@@ -20025,8 +19973,7 @@
       ],
       "native_hex": "06290007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_word_41_pair_direct",
@@ -20098,8 +20045,7 @@
       ],
       "native_hex": "062900070007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_word_41_arithmetic_direct",
@@ -20171,8 +20117,7 @@
       ],
       "native_hex": "062a00070007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_word_41_call_direct",
@@ -20244,8 +20189,7 @@
       ],
       "native_hex": "062900070007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dbyt_44_lone_direct",
@@ -20317,8 +20261,7 @@
       ],
       "native_hex": "06002c07",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dbyt_44_pair_direct",
@@ -20390,8 +20333,7 @@
       ],
       "native_hex": "06002c000707",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dbyt_44_arithmetic_direct",
@@ -20463,8 +20405,7 @@
       ],
       "native_hex": "06002d000707",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dbyt_44_call_direct",
@@ -20536,8 +20477,7 @@
       ],
       "native_hex": "06002c000707",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dbyt_34_lone_direct",
@@ -20609,8 +20549,7 @@
       ],
       "native_hex": "06002207",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dbyt_34_pair_direct",
@@ -20682,8 +20621,7 @@
       ],
       "native_hex": "060022000707",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dbyt_34_arithmetic_direct",
@@ -20755,8 +20693,7 @@
       ],
       "native_hex": "060023000707",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dbyt_34_call_direct",
@@ -20828,8 +20765,7 @@
       ],
       "native_hex": "060022000707",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dbyt_39_lone_direct",
@@ -20901,8 +20837,7 @@
       ],
       "native_hex": "06002707",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dbyt_39_pair_direct",
@@ -20974,8 +20909,7 @@
       ],
       "native_hex": "060027000707",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dbyt_39_arithmetic_direct",
@@ -21047,8 +20981,7 @@
       ],
       "native_hex": "060028000707",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dbyt_39_call_direct",
@@ -21120,8 +21053,7 @@
       ],
       "native_hex": "060027000707",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dbyt_92_lone_direct",
@@ -21193,8 +21125,7 @@
       ],
       "native_hex": "06005c07",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dbyt_92_pair_direct",
@@ -21266,8 +21197,7 @@
       ],
       "native_hex": "06005c000707",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dbyt_92_arithmetic_direct",
@@ -21339,8 +21269,7 @@
       ],
       "native_hex": "06005d000707",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dbyt_92_call_direct",
@@ -21412,8 +21341,7 @@
       ],
       "native_hex": "06005c000707",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dbyt_59_lone_direct",
@@ -21485,8 +21413,7 @@
       ],
       "native_hex": "06003b07",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dbyt_59_pair_direct",
@@ -21558,8 +21485,7 @@
       ],
       "native_hex": "06003b000707",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dbyt_59_arithmetic_direct",
@@ -21631,8 +21557,7 @@
       ],
       "native_hex": "06003c000707",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dbyt_59_call_direct",
@@ -21704,8 +21629,7 @@
       ],
       "native_hex": "06003b000707",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dbyt_40_lone_direct",
@@ -21777,8 +21701,7 @@
       ],
       "native_hex": "06002807",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dbyt_40_pair_direct",
@@ -21850,8 +21773,7 @@
       ],
       "native_hex": "060028000707",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dbyt_40_arithmetic_direct",
@@ -21923,8 +21845,7 @@
       ],
       "native_hex": "060029000707",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dbyt_40_call_direct",
@@ -21996,8 +21917,7 @@
       ],
       "native_hex": "060028000707",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dbyt_41_lone_direct",
@@ -22069,8 +21989,7 @@
       ],
       "native_hex": "06002907",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dbyt_41_pair_direct",
@@ -22142,8 +22061,7 @@
       ],
       "native_hex": "060029000707",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dbyt_41_arithmetic_direct",
@@ -22215,8 +22133,7 @@
       ],
       "native_hex": "06002a000707",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dbyt_41_call_direct",
@@ -22288,8 +22205,7 @@
       ],
       "native_hex": "060029000707",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dword_44_lone_direct",
@@ -22361,8 +22277,7 @@
       ],
       "native_hex": "062c00000007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dword_44_pair_direct",
@@ -22434,8 +22349,7 @@
       ],
       "native_hex": "062c0000000700000007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dword_44_arithmetic_direct",
@@ -22507,8 +22421,7 @@
       ],
       "native_hex": "062d0000000700000007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dword_44_call_direct",
@@ -22580,8 +22493,7 @@
       ],
       "native_hex": "062c0000000700000007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dword_34_lone_direct",
@@ -22653,8 +22565,7 @@
       ],
       "native_hex": "062200000007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dword_34_pair_direct",
@@ -22726,8 +22637,7 @@
       ],
       "native_hex": "06220000000700000007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dword_34_arithmetic_direct",
@@ -22799,8 +22709,7 @@
       ],
       "native_hex": "06230000000700000007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dword_34_call_direct",
@@ -22872,8 +22781,7 @@
       ],
       "native_hex": "06220000000700000007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dword_39_lone_direct",
@@ -22945,8 +22853,7 @@
       ],
       "native_hex": "062700000007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dword_39_pair_direct",
@@ -23018,8 +22925,7 @@
       ],
       "native_hex": "06270000000700000007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dword_39_arithmetic_direct",
@@ -23091,8 +22997,7 @@
       ],
       "native_hex": "06280000000700000007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dword_39_call_direct",
@@ -23164,8 +23069,7 @@
       ],
       "native_hex": "06270000000700000007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dword_92_lone_direct",
@@ -23237,8 +23141,7 @@
       ],
       "native_hex": "065c00000007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dword_92_pair_direct",
@@ -23310,8 +23213,7 @@
       ],
       "native_hex": "065c0000000700000007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dword_92_arithmetic_direct",
@@ -23383,8 +23285,7 @@
       ],
       "native_hex": "065d0000000700000007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dword_92_call_direct",
@@ -23456,8 +23357,7 @@
       ],
       "native_hex": "065c0000000700000007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dword_59_lone_direct",
@@ -23529,8 +23429,7 @@
       ],
       "native_hex": "063b00000007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dword_59_pair_direct",
@@ -23602,8 +23501,7 @@
       ],
       "native_hex": "063b0000000700000007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dword_59_arithmetic_direct",
@@ -23675,8 +23573,7 @@
       ],
       "native_hex": "063c0000000700000007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dword_59_call_direct",
@@ -23748,8 +23645,7 @@
       ],
       "native_hex": "063b0000000700000007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dword_40_lone_direct",
@@ -23821,8 +23717,7 @@
       ],
       "native_hex": "062800000007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dword_40_pair_direct",
@@ -23894,8 +23789,7 @@
       ],
       "native_hex": "06280000000700000007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dword_40_arithmetic_direct",
@@ -23967,8 +23861,7 @@
       ],
       "native_hex": "06290000000700000007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dword_40_call_direct",
@@ -24040,8 +23933,7 @@
       ],
       "native_hex": "06280000000700000007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dword_41_lone_direct",
@@ -24113,8 +24005,7 @@
       ],
       "native_hex": "062900000007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dword_41_pair_direct",
@@ -24186,8 +24077,7 @@
       ],
       "native_hex": "06290000000700000007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dword_41_arithmetic_direct",
@@ -24259,8 +24149,7 @@
       ],
       "native_hex": "062a0000000700000007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "huc6280_dword_41_call_direct",
@@ -24332,8 +24221,7 @@
       ],
       "native_hex": "06290000000700000007",
       "dialect": "huc6280",
-      "native_error_line": null,
-      "formatter_gap": "821"
+      "native_error_line": null
     },
     {
       "name": "6502_byte_invalid_empty_direct",

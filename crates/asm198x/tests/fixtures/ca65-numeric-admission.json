@@ -7953,8 +7953,7 @@
         }
       ],
       "native_hex": "07",
-      "dialect": "huc6280",
-      "formatter_gap": "821"
+      "dialect": "huc6280"
     },
     {
       "name": "extra_huc6280_called_macro_0",
@@ -7989,8 +7988,7 @@
         }
       ],
       "native_hex": "03",
-      "dialect": "huc6280",
-      "formatter_gap": "821"
+      "dialect": "huc6280"
     },
     {
       "name": "extra_huc6280_unused_argument_0",
@@ -8025,8 +8023,7 @@
         }
       ],
       "native_hex": "07",
-      "dialect": "huc6280",
-      "formatter_gap": "821"
+      "dialect": "huc6280"
     },
     {
       "name": "extra_huc6280_quoted_0",
@@ -8320,8 +8317,7 @@
         }
       ],
       "native_hex": "07",
-      "dialect": "huc6280",
-      "formatter_gap": "821"
+      "dialect": "huc6280"
     },
     {
       "name": "extra_huc6280_called_macro_2",
@@ -8356,8 +8352,7 @@
         }
       ],
       "native_hex": "ff",
-      "dialect": "huc6280",
-      "formatter_gap": "821"
+      "dialect": "huc6280"
     },
     {
       "name": "extra_huc6280_unused_argument_2",
@@ -8392,8 +8387,7 @@
         }
       ],
       "native_hex": "07",
-      "dialect": "huc6280",
-      "formatter_gap": "821"
+      "dialect": "huc6280"
     },
     {
       "name": "extra_huc6280_quoted_2",
@@ -8687,8 +8681,7 @@
         }
       ],
       "native_hex": "07",
-      "dialect": "huc6280",
-      "formatter_gap": "821"
+      "dialect": "huc6280"
     },
     {
       "name": "extra_huc6280_called_macro_4",
@@ -8723,8 +8716,7 @@
         }
       ],
       "native_hex": "ff",
-      "dialect": "huc6280",
-      "formatter_gap": "821"
+      "dialect": "huc6280"
     },
     {
       "name": "extra_huc6280_unused_argument_4",
@@ -8759,8 +8751,7 @@
         }
       ],
       "native_hex": "07",
-      "dialect": "huc6280",
-      "formatter_gap": "821"
+      "dialect": "huc6280"
     },
     {
       "name": "extra_huc6280_quoted_4",
@@ -9054,8 +9045,7 @@
         }
       ],
       "native_hex": "07",
-      "dialect": "huc6280",
-      "formatter_gap": "821"
+      "dialect": "huc6280"
     },
     {
       "name": "extra_huc6280_called_macro_6",
@@ -9090,8 +9080,7 @@
         }
       ],
       "native_hex": "ff",
-      "dialect": "huc6280",
-      "formatter_gap": "821"
+      "dialect": "huc6280"
     },
     {
       "name": "extra_huc6280_unused_argument_6",
@@ -9126,8 +9115,7 @@
         }
       ],
       "native_hex": "07",
-      "dialect": "huc6280",
-      "formatter_gap": "821"
+      "dialect": "huc6280"
     },
     {
       "name": "extra_huc6280_quoted_6",

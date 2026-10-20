@@ -222,15 +222,10 @@ fn verify_native_cases(fixture: &str, count: usize, accepted: usize, audits: &[(
                 "{name}: handle in {output}"
             );
         }
-        if case["formatter_gap"].is_number() {
-            assert_eq!(case["formatter_gap"], 821);
-            assert_eq!(dialect, "huc6280");
-            assert!(
-                name.starts_with("huc6280_macro_body_")
-                    || name.starts_with("huc6280_unused_macro_")
-            );
-            continue;
-        }
+        assert!(
+            case["formatter_gap"].is_null(),
+            "{name}: all formatter cases are required"
+        );
         let formatted = run(&root, &["fmt", "--dialect", dialect, "input.s"]);
         assert!(formatted.status.success(), "{name}: {formatted:?}");
         assert!(

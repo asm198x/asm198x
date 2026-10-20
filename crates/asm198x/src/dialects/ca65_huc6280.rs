@@ -25,7 +25,7 @@
 //! flow back out to drive the includer's later zp/abs selection, exactly as
 //! `ca65 --cpu huc6280` does (probe-pinned).
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 use super::ca65_flat::{self, DirectiveLine, FlatWalk, WalkDirective, parse_number};
 use super::mos6502::{
@@ -173,6 +173,9 @@ struct Walker {
     strings: super::ca65::string_tokens::StringTokens,
     /// Only unexpanded formatting keeps file operands without evaluation.
     formatting: bool,
+    /// Formatter-only state for opaque macro templates and their calls.
+    in_macro: bool,
+    macro_names: BTreeSet<String>,
     /// Constants bound with `name = expr`, consulted for zp/abs sizing and
     /// `.res`/`.incbin` argument folding at parse time.
     env: BTreeMap<String, i64>,
@@ -188,6 +191,8 @@ impl Walker {
         Self {
             strings: super::ca65::string_tokens::StringTokens::default(),
             formatting: false,
+            in_macro: false,
+            macro_names: BTreeSet::new(),
             env: BTreeMap::new(),
             pending_leading: Vec::new(),
             nodes: Vec::new(),
@@ -307,6 +312,32 @@ impl FlatWalk for Walker {
             span: Span::in_file(file, line as u32, (code.len() + 1) as u32),
         });
 
+        // Like the 65816 formatter, retain authored macro templates without
+        // parsing their parameters, local declarations or unevaluated values.
+        if self.formatting {
+            use crate::dialects::macros::MacroSyntax as _;
+            let text = code.trim();
+            let opened = ca65_flat::Ca65Macros.header(text);
+            if self.in_macro || opened.is_some() {
+                if let Some((name, _)) = opened {
+                    self.macro_names.insert(name);
+                }
+                self.in_macro = !ca65_flat::Ca65Macros.is_end(text);
+                self.nodes.push(Node {
+                    operand_span: None,
+                    label: None,
+                    item: None,
+                    source: text.to_string(),
+                    span: Span::in_file(file, line as u32, 1),
+                    trivia: Trivia {
+                        leading: std::mem::take(&mut self.pending_leading),
+                        trailing,
+                    },
+                });
+                return Ok(None);
+            }
+        }
+
         // `name = expr` binds a named constant (a lone `=`, not a comparison).
         if let Some(eq) = mos6502::assignment_split(code.trim()) {
             let trimmed = code.trim();
@@ -385,11 +416,10 @@ impl FlatWalk for Walker {
         }
         // String constructors stay authored syntax on the formatter path;
         // their byte values and operand types are checked during assembly.
-        let syntax_asciiz = self.formatting
-            && split_first_word(rest.trim())
-                .0
-                .eq_ignore_ascii_case(".asciiz");
-        let op = if rest.is_empty() || syntax_asciiz {
+        let invoked = split_first_word(rest.trim()).0;
+        let syntax_asciiz = self.formatting && invoked.eq_ignore_ascii_case(".asciiz");
+        let macro_call = self.formatting && self.macro_names.contains(invoked);
+        let op = if rest.is_empty() || macro_call || syntax_asciiz {
             None
         } else {
             parse_op(prim, ext, rest, (&self.env, &self.strings), line)

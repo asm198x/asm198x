@@ -69,6 +69,7 @@ requiredCases.push('ca65_generated_macros');
 requiredCases.push('ca65_token_bound_types');
 requiredCases.push('ca65_string_bytes', 'ca65_string_consumers', 'ca65_flat_string_bytes', 'ca65_literal_boundaries');
 requiredCases.push('ca65_text_consumers', 'ca65_quoted_admission', 'ca65_character_operands');
+requiredCases.push('ca65_huc_macro_format');
 const sourceFiles = {
   'LICENSE': '62cd567bc9270c722abcaa6ad88b6a1fe861698d63890f787cc557d2395be203',
   'helloworld.asm': '9e57c82435c0cf35e56089d56d6b83991c61624c2b3448ab6c66fb13a884a0a5',
@@ -1131,7 +1132,7 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
         if (fact.native.at(-1).exit === 0) {
           assert.equal(p.status, 0, fact.name + ': ' + p.stderr);
           assert.deepEqual(read('cpu.bin'), Buffer.from(fact.native_hex, 'hex'), fact.name);
-          if (fact.formatter_gap) continue;
+          assert.equal(fact.formatter_gap, undefined, fact.name + ': all formatter cases are required');
           const before = shape();
           const formatted = run(['fmt', '--dialect', fact.dialect, 'cpu.s']);
           assert.equal(formatted.status, 0, fact.name + ': ' + formatted.stderr);
@@ -1205,11 +1206,7 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
           assert.deepEqual(read('cpu.bin'), Buffer.from(fact.native_hex, 'hex'), fact.name);
           assert.deepEqual(JSON.parse(p.stdout).bytes, Array.from(Buffer.from(fact.native_hex, 'hex')), fact.name + ': JSON bytes');
           const before = shape();
-          if (fact.formatter_gap) {
-            assert.equal(fact.formatter_gap, '821');
-            assert(fact.name.startsWith('huc6280_') && fact.name.endsWith('_macro'));
-            continue;
-          }
+          assert.equal(fact.formatter_gap, undefined, fact.name + ': all formatter cases are required');
           const formatted = run(['fmt', '--dialect', fact.dialect, 'cpu.s']);
           assert.equal(formatted.status, 0, fact.name + ': ' + formatted.stderr);
           write('scope-formatted.s', formatted.stdout);
@@ -1244,7 +1241,7 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
         if (fact.native.at(-1).exit === 0) {
           assert.equal(p.status, 0, fact.name + ': ' + p.stderr);
           assert.deepEqual(read('cpu.bin'), Buffer.from(fact.native_hex, 'hex'), fact.name);
-          if (fact.formatter_gap) continue;
+          assert.equal(fact.formatter_gap, undefined, fact.name + ': all formatter cases are required');
           const before = shape();
           const formatted = run(['fmt', '--dialect', fact.dialect, 'cpu.s']);
           assert.equal(formatted.status, 0, fact.name + ': ' + formatted.stderr);
@@ -1532,6 +1529,54 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
         }
       }
     });
+    test('ca65_huc_macro_format', () => {
+      const facts = require('../crates/asm198x/tests/fixtures/ca65-huc-macro-format.json');
+      assert.equal(facts.cases.length, 32); assert.equal(facts.error_cases.length, 2);
+      for (const [name, source] of Object.entries(facts.files)) write(name, source);
+      const definitions = source => source.split('\n').map(line => line.trim().split(/\s+/))
+        .filter(words => /^\.(?:macro|mac)$/i.test(words[0])).map(words => words[1]);
+      const calls = (source, names) => source.split('\n').filter(line => {
+        const words = line.trim().split(/\s+/); if (words[0].endsWith(':')) words.shift();
+        return names.includes(words[0]);
+      }).length;
+      for (const fact of facts.cases) {
+        write('cpu.s', fact.source); assert.equal(fact.native.at(-1).exit, 0);
+        const assemble = input => run(['--dialect', fact.dialect, input, '-o', 'cpu.bin',
+          '--debug=scope.debug198x', '--sym=scope.sym', '--listing-json=scope.lst.json', '--message-format=json']);
+        const shape = () => read('scope.debug198x').toString().trim().split('\n')
+          .map(line => JSON.parse(line)).filter(row => row.t === 'symbol' || row.t === 'section');
+        const first = assemble('cpu.s'); assert.equal(first.status, 0, fact.name + ': ' + first.stderr);
+        assert.deepEqual(read('cpu.bin'), Buffer.from(fact.native_hex, 'hex'), fact.name);
+        assert.deepEqual(JSON.parse(first.stdout).bytes, Array.from(Buffer.from(fact.native_hex, 'hex')), fact.name);
+        const before = shape();
+        const formatted = run(['fmt', '--dialect', fact.dialect, 'cpu.s']);
+        assert.equal(formatted.status, 0, fact.name + ': ' + formatted.stderr);
+        const names = definitions(fact.source); assert(names.length > 0);
+        assert.deepEqual(definitions(formatted.stdout), names, fact.name + ': definitions survive');
+        assert.equal(calls(formatted.stdout, names), calls(fact.source, names), fact.name + ': calls survive');
+        for (const marker of ['MISSING', '.repeat', '.endrepeat', 'missing.inc']) {
+          if (fact.source.includes(marker)) assert(formatted.stdout.includes(marker), fact.name + ': template lost ' + marker);
+        }
+        write('scope-formatted.s', formatted.stdout);
+        const again = run(['fmt', '--dialect', fact.dialect, 'scope-formatted.s']);
+        assert.equal(again.status, 0, fact.name + ': ' + again.stderr);
+        assert.equal(again.stdout, formatted.stdout, fact.name + ': idempotence');
+        const after = assemble('scope-formatted.s'); assert.equal(after.status, 0, fact.name + ': ' + after.stderr);
+        assert.deepEqual(read('cpu.bin'), Buffer.from(fact.native_hex, 'hex'), fact.name + ': formatted bytes');
+        assert.deepEqual(shape(), before, fact.name + ': symbols and addresses');
+      }
+      for (const fact of facts.error_cases) {
+        write('cpu.s', fact.source); assert.equal(fact.native.at(-1).exit, 1);
+        const outputs = ['cpu.bin', 'scope.debug198x', 'scope.sym', 'scope.lst.json'];
+        for (const output of outputs) write(output, 'previous output');
+        const result = run(['--dialect', fact.name, 'cpu.s', '-o', 'cpu.bin',
+          '--debug=scope.debug198x', '--sym=scope.sym', '--listing-json=scope.lst.json', '--message-format=json']);
+        assert.equal(result.status, 1, fact.name + ': ' + result.stderr);
+        const diagnostic = JSON.parse(result.stdout)[0];
+        assert.equal(path.basename(diagnostic.span.path), 'broken.inc'); assert.equal(diagnostic.span.line, 4);
+        for (const output of outputs) assert.equal(read(output).toString(), 'previous output', fact.name + ': ' + output);
+      }
+    });
     const qualifyCa65ByteStrings = (file, count, acceptedCount, excludedCount, excludedIssue = 891) => {
       const facts = require('../crates/asm198x/tests/fixtures/' + file);
       assert.equal(facts.cases.length, count);
@@ -1594,11 +1639,7 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
         if (!authoredMarker) for (const output of outputs.slice(1)) assert(!read(output).toString().includes('ca65-string:'), name + ': handle in ' + output);
         const shape = () => read('scope.debug198x').toString().trim().split('\n').map(line => JSON.parse(line)).filter(row => row.t === 'symbol' || row.t === 'section');
         const before = shape();
-        if (fact.formatter_gap) {
-          assert.equal(fact.formatter_gap, 821); assert.equal(fact.dialect, 'huc6280');
-          assert(['huc6280_macro_body_', 'huc6280_unused_macro_'].some(prefix => fact.name.startsWith(prefix)));
-          continue;
-        }
+        assert.equal(fact.formatter_gap, undefined, name + ': all formatter cases are required');
         const formatted = run(['fmt', '--dialect', fact.dialect, 'cpu.s']);
         assert.equal(formatted.status, 0, name + ': ' + formatted.stderr);
         assert(authoredMarker || !formatted.stdout.includes('ca65-string:'), name + ': handle in formatted source');

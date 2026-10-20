@@ -106,10 +106,10 @@ fn native_repeat_end_stops_even_billion_count_streams() {
             fact["native_hex"].as_str().expect("native bytes"),
             "{name}"
         );
-        // Independently reproduced formatter gaps are tracked by issue.
-        if fact["formatter_gap"].is_string() {
-            continue;
-        }
+        assert!(
+            fact["formatter_gap"].is_null(),
+            "{name}: all formatter cases are required"
+        );
         let debug = shape(&root);
         let formatted = run(&root, &["fmt", "--dialect", dialect, "input.s"]);
         assert!(formatted.status.success(), "{name}: {formatted:?}");
