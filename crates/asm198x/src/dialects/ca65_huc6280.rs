@@ -30,7 +30,7 @@ use std::collections::BTreeMap;
 use super::ca65_flat::{self, DirectiveLine, FlatWalk, WalkDirective, parse_number};
 use super::mos6502::{
     self, BytePrec, Index, OperandSyntax, fold_const, is_ident, split_data_items, split_first_word,
-    split_top_level, string_literal, top_level_rfind,
+    split_top_level, top_level_rfind,
 };
 use crate::ast::{Comment, Node, Program, Scope, Span, Symbol, Trivia};
 use crate::dialect::Dialect;
@@ -112,10 +112,14 @@ pub(crate) fn parse_program(source: &str, mode: macros::Expand) -> Result<Progra
     // Macros expand before parsing (#93), but only for assembly: the formatter
     // asks with `Expand::No`, because laying source out must not replace a
     // definition with its expansions.
-    let expanded = ca65_flat::expand_ca65(source, mode, ca65_flat::Target::HuC6280)?;
+    let ca65_flat::Ca65Expansion {
+        expansion: expanded,
+        strings,
+    } = ca65_flat::expand_ca65(source, mode, ca65_flat::Target::HuC6280)?;
     let text = macros::expanded_text(&expanded, source);
     let origins = macros::line_origins(&expanded);
     let mut w = Walker::new();
+    w.strings.retain(strings);
     w.formatting = mode == macros::Expand::No;
     for (i, raw) in text.lines().enumerate() {
         if let Some(d) = w
@@ -166,6 +170,7 @@ pub(crate) fn parse_program_multi(
 /// multi-file walk it threads *through* include boundaries in both directions
 /// (KTD1, probe-pinned).
 struct Walker {
+    strings: super::ca65::string_tokens::StringTokens,
     /// Only unexpanded formatting keeps file operands without evaluation.
     formatting: bool,
     /// Constants bound with `name = expr`, consulted for zp/abs sizing and
@@ -181,6 +186,7 @@ struct Walker {
 impl Walker {
     fn new() -> Self {
         Self {
+            strings: super::ca65::string_tokens::StringTokens::default(),
             formatting: false,
             env: BTreeMap::new(),
             pending_leading: Vec::new(),
@@ -238,7 +244,10 @@ impl FlatWalk for Walker {
     /// The multi-file walk expands too, or macros would work when a file is
     /// assembled alone and vanish the moment it is included from another.
     fn expand_source(&self, source: &str) -> Result<macros::Expansion, AsmError> {
-        ca65_flat::expand_ca65(source, macros::Expand::Yes, ca65_flat::Target::HuC6280)
+        let expanded =
+            ca65_flat::expand_ca65(source, macros::Expand::Yes, ca65_flat::Target::HuC6280)?;
+        self.strings.retain(expanded.strings);
+        Ok(expanded.expansion)
     }
 
     fn walk_line(
@@ -249,6 +258,21 @@ impl FlatWalk for Walker {
     ) -> Result<Option<DirectiveLine>, AsmError> {
         let prim = &isa::mos6502::SET;
         let ext = &isa::huc6280::SET;
+        let string_source;
+        let raw = if !self.formatting {
+            let (_, operation) = split_label(split_comment(raw).0);
+            let word = split_first_word(operation).0.to_ascii_lowercase();
+            let byte_data = lookup(DIRECTIVES, &word)
+                .is_some_and(|entry| matches!(entry.id, "bytes" | "asciiz"));
+            if byte_data {
+                raw
+            } else {
+                string_source = self.strings.text_source(raw, line)?;
+                &string_source
+            }
+        } else {
+            raw
+        };
         let (code, comment) = split_comment(raw);
         // A `{…}` token list is unevaluated source with no expression to
         // render it from, so the formatter hands the line back as written.
@@ -259,7 +283,7 @@ impl FlatWalk for Walker {
                 operand_span: None,
                 label: None,
                 item: Some(crate::ast::Item::Verbatim),
-                source: raw.trim_end().to_string(),
+                source: self.strings.display(raw.trim_end()),
                 span: Span::in_file(file, line as u32, 1),
                 trivia: Trivia {
                     leading,
@@ -349,7 +373,7 @@ impl FlatWalk for Walker {
                     scope: Scope::Global,
                     name,
                 }),
-                source: rest.trim().to_string(),
+                source: self.strings.display(rest.trim()),
                 span: Span::in_file(file, line as u32, 1),
                 operand_span: ca65_flat::directive_operand_span(raw, rest, line, file),
                 trivia: Trivia {
@@ -361,7 +385,8 @@ impl FlatWalk for Walker {
         let op = if rest.is_empty() {
             None
         } else {
-            parse_op(prim, ext, rest, &self.env, line)?
+            parse_op(prim, ext, rest, (&self.env, &self.strings), line)
+                .map_err(|e| self.strings.error(e))?
         };
         // Keep source-bearing no-op directives (`.segment`/`setcpu`/…) as
         // source-only nodes so the formatter reproduces them; skip only a truly
@@ -377,7 +402,7 @@ impl FlatWalk for Walker {
                 name,
             }),
             item: op.map(crate::ast::item_from_operation),
-            source: rest.trim().to_string(),
+            source: self.strings.display(rest.trim()),
             span: Span::in_file(file, line as u32, 1),
             trivia: Trivia {
                 leading: std::mem::take(&mut self.pending_leading),
@@ -441,11 +466,15 @@ fn parse_op(
     prim: &'static isa::InstructionSet,
     ext: &'static isa::InstructionSet,
     rest: &str,
-    env: &BTreeMap<String, i64>,
+    context: (
+        &BTreeMap<String, i64>,
+        &super::ca65::string_tokens::StringTokens,
+    ),
     line: usize,
 ) -> Result<Option<Operation>, AsmError> {
+    let (env, strings) = context;
     if let Some(dir) = rest.strip_prefix('.') {
-        return parse_directive(dir, env, line);
+        return parse_directive(dir, env, strings, line);
     }
     let (mnemonic, operand) = split_first_word(rest);
     let mn = mnemonic.to_ascii_uppercase();
@@ -610,6 +639,7 @@ pub const DIRECTIVES: &[Directive] = &[
 fn parse_directive(
     dir: &str,
     env: &BTreeMap<String, i64>,
+    strings: &super::ca65::string_tokens::StringTokens,
     line: usize,
 ) -> Result<Option<Operation>, AsmError> {
     let (name, rest) = split_first_word(dir);
@@ -629,7 +659,7 @@ fn parse_directive(
     }
     match entry.id {
         "org" => Ok(Some(Operation::Org(value(rest, line)?))),
-        "bytes" => Ok(Some(Operation::Bytes(byte_list(rest, line)?))),
+        "bytes" => Ok(Some(Operation::Bytes(byte_list(rest, strings, line)?))),
         "words" => Ok(Some(Operation::Words(value_list(rest, line)?))),
         // `.dword` — 32-bit little-endian, as computed pieces so symbols resolve
         // in pass two.
@@ -673,7 +703,7 @@ fn parse_directive(
             Ok(Some(Operation::Bytes(out)))
         }
         "asciiz" => {
-            let mut out = byte_list(rest, line)?;
+            let mut out = byte_list(rest, strings, line)?;
             out.push(Expr::Num(0));
             Ok(Some(Operation::Bytes(out)))
         }
@@ -709,14 +739,18 @@ fn parse_res(
     ])))
 }
 
-fn byte_list(rest: &str, line: usize) -> Result<Vec<Expr>, AsmError> {
+fn byte_list(
+    rest: &str,
+    strings: &super::ca65::string_tokens::StringTokens,
+    line: usize,
+) -> Result<Vec<Expr>, AsmError> {
     if rest.trim().is_empty() {
         return Err(AsmError::new(line, "`.byte` needs a value"));
     }
     let mut out = Vec::new();
     for piece in split_data_items(rest) {
-        if let Some(text) = string_literal(piece) {
-            out.extend(text.bytes().map(|b| Expr::Num(i64::from(b))));
+        if let Some(bytes) = strings.data(piece, line)? {
+            out.extend(bytes.into_iter().map(|b| Expr::Num(i64::from(b))));
         } else {
             out.push(value(piece, line)?);
         }

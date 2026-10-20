@@ -43,6 +43,7 @@
 use std::borrow::Cow;
 use std::collections::BTreeMap;
 
+use super::ca65::string_tokens::StringTokens;
 use crate::ast::{Node, Span, Symbol, Trivia};
 use crate::dialects::macros;
 use crate::dialects::text;
@@ -92,6 +93,8 @@ pub(crate) fn parse_number(token: &str, line: usize) -> Result<i64, AsmError> {
 
 /// Check native numeric tokens without interpreting skipped source.
 pub(crate) fn validate_numeric_tokens(source: &str, at: &Span) -> Result<(), AsmError> {
+    StringTokens::reject_authored(source, at.line as usize)
+        .map_err(|error| AsmError::at(at.clone(), error.message))?;
     let bytes = source.as_bytes();
     let mut i = 0;
     while i < bytes.len() {
@@ -1385,13 +1388,6 @@ fn local_declaration(line: &str) -> Option<Vec<String>> {
         .filter(|names| !names.is_empty())
 }
 
-/// Whether the argument is an unfolded text-layer call — which happens only on
-/// the formatter's path, where a function over a string sees the stand-in
-/// rather than the text it would have folded to.
-fn unfolded_text(arg: &super::mos6502::ExprArg) -> bool {
-    matches!(arg, super::mos6502::ExprArg::Value(crate::engine::Expr::Sym(s)) if s.starts_with(TEXT_MARK))
-}
-
 /// The text layer's function names, lower-cased. One list, read by the pass
 /// that folds them and by the stand-in the formatter parses.
 ///
@@ -1402,6 +1398,8 @@ fn is_text_function(lower: &str) -> bool {
     matches!(
         lower,
         ".concat"
+            | ".strlen"
+            | ".strat"
             | ".string"
             | ".ident"
             | ".sprintf"
@@ -1439,21 +1437,34 @@ fn name_list(text: &str) -> Vec<String> {
 /// written for macro bodies, so most of what they fold only exists once the
 /// macro has been placed — and it emits one line per line, so the origins the
 /// expansion recorded still line up.
+pub(crate) struct Ca65Expansion {
+    pub(crate) expansion: macros::Expansion,
+    pub(crate) strings: StringTokens,
+}
+
 pub(crate) fn expand_ca65(
     source: &str,
     mode: macros::Expand,
     target: Target,
-) -> Result<macros::Expansion, AsmError> {
-    macros::expansion(mode, source, |s| {
+) -> Result<Ca65Expansion, AsmError> {
+    let strings = StringTokens::default();
+    if mode == macros::Expand::Yes {
+        for (line, source) in source.lines().enumerate() {
+            StringTokens::reject_authored(source, line + 1)?;
+        }
+    }
+    let expansion = macros::expansion(mode, source, |s| {
         let expanded = macros::expand(&Ca65Macros, s)?;
         let text = Ca65Text {
             target,
             defined: Cow::Owned(defined_names(&expanded.text)),
+            strings: Cow::Borrowed(&strings),
             ..Ca65Text::default()
         };
-        let resolved = text::expand(&text, &expanded.text)?;
+        let resolved = text::expand(&text, &expanded.text).map_err(|e| strings.error(e))?;
         Ok(Some((resolved, expanded.origins)))
-    })
+    })?;
+    Ok(Ca65Expansion { expansion, strings })
 }
 
 /// The linked ca65 reader resolves text under its live CPU in the sweep.
@@ -1472,21 +1483,23 @@ pub(crate) fn expand_ca65_line(
     source: &str,
     target: Target,
     numbers: &BTreeMap<String, i64>,
-    defined: &std::collections::BTreeSet<String>,
+    text_state: (&std::collections::BTreeSet<String>, &StringTokens),
     token_target: Option<Target>,
     depth: usize,
     line: usize,
 ) -> Result<String, AsmError> {
     let syntax = Ca65Text {
+        source_line: Some(line),
         target,
         token_target,
         depth: std::cell::Cell::new(depth),
         numbers: Cow::Borrowed(numbers),
-        defined: Cow::Borrowed(defined),
+        defined: Cow::Borrowed(text_state.0),
+        strings: Cow::Borrowed(text_state.1),
     };
     text::expand(&syntax, source)
         .map(|text| text.trim_end_matches('\n').to_string())
-        .map_err(|error| AsmError::new(line, error.message))
+        .map_err(|error| text_state.1.error(AsmError::new(line, error.message)))
 }
 
 /// Which CPU a ca65 parse is for.
@@ -1543,6 +1556,8 @@ impl Target {
 /// **token** rather than its value: with `N = 7`, `.string(N)` is `"N"`.
 #[derive(Default)]
 struct Ca65Text<'a> {
+    source_line: Option<usize>,
+    strings: Cow<'a, StringTokens>,
     /// How many `.proc`/`.scope` blocks are open around the line being read.
     ///
     /// The pass has no scope stack, so a constant defined inside one is not
@@ -1646,6 +1661,12 @@ impl Ca65Text<'_> {
             ));
         };
         let raw = raw.trim();
+        if StringTokens::is_handle(raw) {
+            return Err(AsmError::new(
+                line,
+                format!("`{name}` takes an expression, not a string"),
+            ));
+        }
         if self.depth.get() > 0 || raw.contains("::") {
             return Err(AsmError::new(
                 line,
@@ -1679,6 +1700,10 @@ impl Ca65Text<'_> {
 }
 
 impl text::TextSyntax for Ca65Text<'_> {
+    fn folds_in_braces(&self, name: &str) -> bool {
+        !matches!(name.to_ascii_lowercase().as_str(), ".strlen" | ".strat")
+    }
+
     fn permits_function_space(&self) -> bool {
         true
     }
@@ -1764,14 +1789,30 @@ impl text::TextSyntax for Ca65Text<'_> {
         if args.is_empty() {
             return Ok(Some(Folded::Text(String::new())));
         }
+        let source = format!(
+            "{name}({})",
+            args.iter()
+                .map(|arg| match arg {
+                    text::Arg::Text { spelling, .. } => spelling.as_str(),
+                    text::Arg::Bare(source) => source.as_str(),
+                })
+                .collect::<Vec<_>>()
+                .join(",")
+        );
+        let source = self.strings.display(&source);
+        let string = |bytes| {
+            self.strings
+                .intern(bytes, source.clone(), self.source_line.unwrap_or(line))
+                .map(Folded::Bare)
+        };
         let one = |args: &[text::Arg]| arity(args, 1, name, line);
         Ok(Some(match lower.as_str() {
             ".concat" => {
-                let mut out = String::new();
+                let mut out = Vec::new();
                 for a in args {
-                    out.push_str(a.text(name, line)?);
+                    out.extend(self.strings.bytes(a, name, line)?);
                 }
-                Folded::Text(out)
+                string(out)?
             }
             // The *token*, not its value: ca65 takes one identifier or one
             // number here and refuses an expression or a string.
@@ -1779,10 +1820,13 @@ impl text::TextSyntax for Ca65Text<'_> {
                 one(args)?;
                 let token = match &args[0] {
                     text::Arg::Bare(b) => b.trim(),
-                    text::Arg::Text(t) => {
+                    text::Arg::Text { .. } => {
+                        let spelling = args[0].literal_spelling().expect("matched quoted argument");
                         return Err(AsmError::new(
                             line,
-                            format!("`{name}` takes a name or a number, and `\"{t}\"` is a string"),
+                            format!(
+                                "`{name}` takes a name or a number, and `{spelling}` is a string"
+                            ),
                         ));
                     }
                 };
@@ -1795,10 +1839,37 @@ impl text::TextSyntax for Ca65Text<'_> {
                         ),
                     ));
                 }
-                Folded::Text(token.to_string())
+                string(token.as_bytes().to_vec())?
             }
-            ".sprintf" => {
-                Folded::Text(sprintf(args[0].text(name, line)?, &args[1..], scope, line)?)
+            ".sprintf" => string(sprintf(
+                &self.strings.bytes(&args[0], name, line)?,
+                &args[1..],
+                &self.strings,
+                scope,
+                line,
+            )?)?,
+            ".strlen" => {
+                one(args)?;
+                Folded::Number(
+                    self.strings
+                        .bytes(&args[0], name, line)
+                        .map_err(|_| {
+                            AsmError::new(line, format!("`{name}` takes a string, not a value"))
+                        })?
+                        .len() as i64,
+                )
+            }
+            ".strat" => {
+                arity(args, 2, name, line)?;
+                let bytes = self.strings.bytes(&args[0], name, line)?;
+                let index = selector_bound(&args[1], scope, name, line)?;
+                let byte = usize::try_from(index)
+                    .ok()
+                    .and_then(|i| bytes.get(i))
+                    .ok_or_else(|| {
+                        AsmError::new(line, format!("`.strat` index {index} is past the string"))
+                    })?;
+                Folded::Number(i64::from(*byte))
             }
             // The token-list half. A token list is unevaluated source, so these
             // answer over what is *written* rather than what it is worth — and
@@ -1839,10 +1910,20 @@ impl text::TextSyntax for Ca65Text<'_> {
                     tokens(a, self.token_target.unwrap_or(self.target)),
                     tokens(b, self.token_target.unwrap_or(self.target)),
                 );
-                let same = a.len() == b.len()
-                    && a.iter().zip(&b).all(|(x, y)| {
-                        x.kind == y.kind && (!exact || token_value(x) == token_value(y))
-                    });
+                let mut same = a.len() == b.len();
+                for (x, y) in a.iter().zip(&b) {
+                    let value = |token: &Token| -> Result<Vec<u8>, AsmError> {
+                        if StringTokens::is_handle(token.text) {
+                            self.strings.resolve(token.text, line)
+                        } else {
+                            Ok(token_value(token).into_bytes())
+                        }
+                    };
+                    if x.kind != y.kind || (exact && value(x)? != value(y)?) {
+                        same = false;
+                        break;
+                    }
+                }
                 Folded::Number(i64::from(same))
             }
             ".left" | ".right" => {
@@ -1898,7 +1979,10 @@ impl text::TextSyntax for Ca65Text<'_> {
             // resolve — forward references included, as in ca65.
             ".ident" => {
                 one(args)?;
-                let value = args[0].text(name, line)?;
+                let bytes = self.strings.bytes(&args[0], name, line)?;
+                let value = std::str::from_utf8(&bytes).map_err(|_| {
+                    AsmError::new(line, "`.ident` argument is not a valid identifier")
+                })?;
                 let mut bytes = value.strip_prefix('@').unwrap_or(value).bytes();
                 if !bytes
                     .next()
@@ -2002,6 +2086,10 @@ fn tokens(text: &str, target: Target) -> Vec<Token<'_>> {
         }
         let start = i;
         let kind = match c {
+            1 if StringTokens::is_handle(&text[i..]) => {
+                i += StringTokens::handle_len(&text[i..]).unwrap_or(text.len() - i);
+                TokenKind::Str
+            }
             b'"' => {
                 i += 1;
                 while i < bytes.len() && bytes[i] != b'"' {
@@ -2110,7 +2198,7 @@ fn selector_bound(
     name: &str,
     line: usize,
 ) -> Result<i64, AsmError> {
-    if matches!(arg, text::Arg::Text(_)) {
+    if StringTokens::is_string(arg) {
         return Err(AsmError::new(
             line,
             format!("`{name}` needs a numeric bound, not a string"),
@@ -2214,13 +2302,13 @@ fn format_spec(fmt: &[u8], mut i: usize) -> Option<(FormatSpec, usize)> {
 
 /// Fold one `.sprintf` call.
 fn sprintf(
-    fmt: &str,
+    bytes: &[u8],
     args: &[text::Arg],
+    strings: &StringTokens,
     scope: &text::Scope,
     line: usize,
-) -> Result<String, AsmError> {
-    let bytes = fmt.as_bytes();
-    let mut out = String::with_capacity(fmt.len());
+) -> Result<Vec<u8>, AsmError> {
+    let mut out = Vec::with_capacity(bytes.len());
     let mut used = 0usize;
     let mut i = 0usize;
     while i < bytes.len() {
@@ -2229,11 +2317,11 @@ fn sprintf(
             while i < bytes.len() && bytes[i] != b'%' {
                 i += 1;
             }
-            out.push_str(&fmt[start..i]);
+            out.extend_from_slice(&bytes[start..i]);
             continue;
         }
         if bytes.get(i + 1) == Some(&b'%') {
-            out.push('%');
+            out.push(b'%');
             i += 2;
             continue;
         }
@@ -2257,7 +2345,7 @@ fn sprintf(
                 ),
             )
         })?;
-        out.push_str(&format_one(&spec, arg, scope, line)?);
+        out.extend(format_one(&spec, arg, strings, scope, line)?);
         used += 1;
         i = next;
     }
@@ -2278,49 +2366,48 @@ fn sprintf(
 fn format_one(
     spec: &FormatSpec,
     arg: &text::Arg,
+    strings: &StringTokens,
     scope: &text::Scope,
     line: usize,
-) -> Result<String, AsmError> {
+) -> Result<Vec<u8>, AsmError> {
     let kind = spec.kind;
     let refuse = |what: &str| AsmError::new(line, format!("`.sprintf` cannot format {what}"));
 
     // `%s` and `%c` share a padding rule that is the reverse of the numeric
     // types': no flag pads on the right, and `-` pads on the left.
     if matches!(kind, 's' | 'c') {
-        let body = match (kind, arg) {
-            ('s', text::Arg::Text(t)) => match spec.precision {
-                Some(n) => t.chars().take(n).collect(),
-                None => t.clone(),
-            },
-            ('s', text::Arg::Bare(b)) => {
-                return Err(refuse(&format!("`{b}` as `%s`: it is not a string")));
+        let mut body = if kind == 's' {
+            let mut bytes = strings.bytes(arg, ".sprintf", line)?;
+            if let Some(n) = spec.precision {
+                bytes.truncate(n);
             }
-            (_, text::Arg::Text(t)) => {
-                return Err(refuse(&format!("the string \"{t}\" as `%c`")));
-            }
-            _ => {
-                // ca65 answers 0 and anything past a byte with "Char argument
-                // out of range", so `%c` takes 1..=255 and nothing else.
-                let value = scope.number(arg, ".sprintf", line)?;
-                let byte = u8::try_from(value)
-                    .ok()
-                    .filter(|b| *b != 0)
-                    .ok_or_else(|| {
-                        refuse(&format!("{value} as `%c`: a character runs from 1 to 255"))
-                    })?;
-                (byte as char).to_string()
-            }
-        };
-        let pad = spec.width.saturating_sub(body.chars().count());
-        return Ok(if spec.left {
-            format!("{:pad$}{body}", "", pad = pad)
+            bytes
         } else {
-            format!("{body}{:pad$}", "", pad = pad)
-        });
+            if StringTokens::is_string(arg) {
+                return Err(refuse("a string as `%c`"));
+            }
+            let value = scope.number(arg, ".sprintf", line)?;
+            let byte = u8::try_from(value)
+                .ok()
+                .filter(|b| *b != 0)
+                .ok_or_else(|| {
+                    refuse(&format!("{value} as `%c`: a character runs from 1 to 255"))
+                })?;
+            vec![byte]
+        };
+        let pad = spec.width.saturating_sub(body.len());
+        if spec.left {
+            let mut padded = vec![b' '; pad];
+            padded.extend(body);
+            body = padded;
+        } else {
+            body.resize(body.len() + pad, b' ');
+        }
+        return Ok(body);
     }
 
-    if let text::Arg::Text(t) = arg {
-        return Err(refuse(&format!("the string \"{t}\" as `%{kind}`")));
+    if StringTokens::is_string(arg) {
+        return Err(refuse(&format!("a string as `%{kind}`")));
     }
     let value = scope.number(arg, ".sprintf", line)?;
     // `%d`, `%i` and `%x` read the value signed; `%u`, `%X` and `%o` read the
@@ -2358,7 +2445,7 @@ fn format_one(
     };
     let width = sign.len() + prefix.len() + digits.chars().count();
     let pad = spec.width.saturating_sub(width);
-    Ok(match () {
+    Ok((match () {
         _ if spec.left => format!("{sign}{prefix}{digits}{:pad$}", "", pad = pad),
         // A precision has already said how many digits there are, so the zero
         // flag has nothing left to say.
@@ -2367,6 +2454,7 @@ fn format_one(
         }
         _ => format!("{:pad$}{sign}{prefix}{digits}", "", pad = pad),
     })
+    .into_bytes())
 }
 
 /// Whether the text is one identifier or one number literal — what `.string`
@@ -2402,36 +2490,6 @@ pub(crate) fn expr_function(
     // not happen fails as an unresolved symbol rather than answering a number.
     if is_text_function(&lower) || lower == ".definedmacro" {
         return Ok(Expr::Sym(format!("{TEXT_MARK}{lower}")));
-    }
-
-    // The string functions. A string is consumed here and yields a number, so
-    // an expression still evaluates to an `i64` — see `ExprArg`.
-    match lower.as_str() {
-        ".strlen" => {
-            let [t]: [_; 1] = take(name, args, 1, line)?;
-            if unfolded_text(&t) {
-                return Ok(Expr::Sym(format!("{TEXT_MARK}{lower}")));
-            }
-            return Ok(Expr::Num(t.text(name, line)?.chars().count() as i64));
-        }
-        ".strat" => {
-            let [t, i]: [_; 2] = take(name, args, 2, line)?;
-            if unfolded_text(&t) {
-                return Ok(Expr::Sym(format!("{TEXT_MARK}{lower}")));
-            }
-            let text = t.text(name, line)?;
-            let Expr::Num(idx) = i.value(name, line)? else {
-                return Err(AsmError::new(line, "`.strat` index must be a constant"));
-            };
-            let ch = usize::try_from(idx)
-                .ok()
-                .and_then(|n| text.chars().nth(n))
-                .ok_or_else(|| {
-                    AsmError::new(line, format!("`.strat` index {idx} is past the string"))
-                })?;
-            return Ok(Expr::Num(ch as i64));
-        }
-        _ => {}
     }
 
     // The two-argument value functions, before the one-argument ones claim `args`.

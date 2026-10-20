@@ -67,6 +67,7 @@ requiredCases.push('ca65_cheap_root');
 requiredCases.push('ca65_generated_name_constancy');
 requiredCases.push('ca65_generated_macros');
 requiredCases.push('ca65_token_bound_types');
+requiredCases.push('ca65_string_bytes', 'ca65_string_consumers', 'ca65_flat_string_bytes');
 const sourceFiles = {
   'LICENSE': '62cd567bc9270c722abcaa6ad88b6a1fe861698d63890f787cc557d2395be203',
   'helloworld.asm': '9e57c82435c0cf35e56089d56d6b83991c61624c2b3448ab6c66fb13a884a0a5',
@@ -1449,6 +1450,53 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
         }
       }
     });
+    const qualifyCa65ByteStrings = (file, count, acceptedCount, excludedCount) => {
+      const facts = require('../crates/asm198x/tests/fixtures/' + file);
+      assert.equal(facts.cases.length, count);
+      assert.equal(facts.excluded_cases.length, excludedCount);
+      for (const fact of facts.excluded_cases) assert.equal(fact.issue, 891);
+      for (const [name, text] of Object.entries(facts.files)) {
+        fs.mkdirSync(path.dirname(path.join(root, name)), { recursive: true }); write(name, text);
+      }
+      let accepted = 0;
+      for (const fact of facts.cases) {
+        const name = fact.audit + '/' + fact.name;
+        write('cpu.cfg', fact.config); write('cpu.s', fact.source);
+        const outputs = ['cpu.bin', 'scope.debug198x', 'scope.lst.json', 'scope.sym'];
+        for (const output of outputs) write(output, 'previous output');
+        const args = input => ['--dialect', fact.dialect, ...(fact.dialect === 'ca65' ? ['-C', 'cpu.cfg'] : []), input, '-o', 'cpu.bin', '--debug=scope.debug198x', '--listing-json=scope.lst.json', '--sym=scope.sym', '--message-format=json'];
+        const authoredMarker = fact.authored_marker ?? false;
+        assert.equal(authoredMarker, fact.source.includes('ca65-string:'));
+        const p = run(args('cpu.s'));
+        if (!authoredMarker) for (const stream of [p.stdout, p.stderr]) assert(!stream.includes('ca65-string:'), name + ': handle in diagnostic');
+        if (fact.native.at(-1).exit !== 0) {
+          assert.equal(p.status, 1, name + ': ' + p.stderr);
+          for (const output of outputs) assert.equal(read(output).toString(), 'previous output', name + ': preserved ' + output);
+          continue;
+        }
+        accepted++;
+        assert.equal(p.status, 0, name + ': ' + p.stderr);
+        assert.deepEqual(read('cpu.bin'), Buffer.from(fact.native_hex, 'hex'), name);
+        if (!authoredMarker) for (const output of outputs.slice(1)) assert(!read(output).toString().includes('ca65-string:'), name + ': handle in ' + output);
+        const shape = () => read('scope.debug198x').toString().trim().split('\n').map(line => JSON.parse(line)).filter(row => row.t === 'symbol' || row.t === 'section');
+        const before = shape();
+        const formatted = run(['fmt', '--dialect', fact.dialect, 'cpu.s']);
+        assert.equal(formatted.status, 0, name + ': ' + formatted.stderr);
+        assert(authoredMarker || !formatted.stdout.includes('ca65-string:'), name + ': handle in formatted source');
+        write('scope-formatted.s', formatted.stdout);
+        const again = run(['fmt', '--dialect', fact.dialect, 'scope-formatted.s']);
+        assert.equal(again.status, 0, name + ': ' + again.stderr);
+        assert.equal(again.stdout, formatted.stdout, name + ': idempotence');
+        const roundtrip = run(args('scope-formatted.s'));
+        assert.equal(roundtrip.status, 0, name + ': ' + roundtrip.stderr);
+        assert.deepEqual(read('cpu.bin'), Buffer.from(fact.native_hex, 'hex'), name + ': formatted bytes');
+        assert.deepEqual(shape(), before, name + ': formatted symbols and sections');
+      }
+      assert.equal(accepted, acceptedCount);
+    };
+    test('ca65_string_bytes', () => qualifyCa65ByteStrings('ca65-string-bytes.json', 287, 274, 0));
+    test('ca65_string_consumers', () => qualifyCa65ByteStrings('ca65-string-consumers.json', 102, 90, 9));
+    test('ca65_flat_string_bytes', () => qualifyCa65ByteStrings('ca65-flat-string-bytes.json', 574, 548, 0));
     test('ca65_token_bound_types', () => {
       const facts = require('../crates/asm198x/tests/fixtures/ca65-token-bound-types.json');
       assert.equal(facts.cases.length, 99);

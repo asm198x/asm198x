@@ -1,0 +1,152 @@
+{
+  "binary": "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+  "sha256": "303e98c5e4a9886a3eb7f20010e96a0744c67038155bea394e12c675b7af1dcb",
+  "results": [
+    {
+      "name": "quoted_include",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":0,\"line\":1,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"`.include` needs a quoted file name\",\"fix\":null}]\n",
+      "stderr": "",
+      "hex": "70726576696f757320696d616765",
+      "native_messages": [],
+      "actual_messages": [
+        "`.include` needs a quoted file name"
+      ],
+      "matches_native": false
+    },
+    {
+      "name": "quoted_incbin",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":0,\"line\":1,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"`.incbin` needs a quoted file name\",\"fix\":null}]\n",
+      "stderr": "",
+      "hex": "70726576696f757320696d616765",
+      "native_messages": [],
+      "actual_messages": [
+        "`.incbin` needs a quoted file name"
+      ],
+      "matches_native": false
+    },
+    {
+      "name": "quoted_warning",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--message-format=json"
+      ],
+      "exit": 0,
+      "stdout": "{\"version\":1,\"bytes\":[7],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[{\"line\":1,\"message\":\"\\\\\"}],\"debug\":{\"symbols\":[],\"lines\":[]},\"section_debug\":[{\"section\":{\"id\":0,\"name\":\"CODE\",\"base\":4096},\"file_offset\":0,\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"}}],\"areas\":[{\"name\":\"MAIN\",\"start\":4096,\"size\":28672,\"used\":1,\"free\":28671,\"largest_free\":28671,\"segments\":[{\"name\":\"CODE\",\"base\":4096,\"length\":1}]}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+      "stderr": "",
+      "hex": "07",
+      "native_messages": [
+        "\""
+      ],
+      "actual_messages": [
+        "\\"
+      ],
+      "matches_native": false
+    },
+    {
+      "name": "quoted_error",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":0,\"line\":1,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"\\\\\",\"fix\":null}]\n",
+      "stderr": "",
+      "hex": "70726576696f757320696d616765",
+      "native_messages": [
+        "\""
+      ],
+      "actual_messages": [
+        "\\"
+      ],
+      "matches_native": false
+    },
+    {
+      "name": "quoted_assert",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--message-format=json"
+      ],
+      "exit": 1,
+      "stdout": "[{\"span\":{\"file\":0,\"line\":1,\"col\":0,\"expansion_frames\":[],\"path\":\"input.s\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"\\\\\",\"fix\":null}]\n",
+      "stderr": "",
+      "hex": "70726576696f757320696d616765",
+      "native_messages": [
+        "\""
+      ],
+      "actual_messages": [
+        "\\"
+      ],
+      "matches_native": false
+    },
+    {
+      "name": "slash_warning",
+      "argv": [
+        "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--message-format=json"
+      ],
+      "exit": 0,
+      "stdout": "{\"version\":1,\"bytes\":[7],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[{\"line\":1,\"message\":\"\\\\\\\\\"}],\"debug\":{\"symbols\":[],\"lines\":[]},\"section_debug\":[{\"section\":{\"id\":0,\"name\":\"CODE\",\"base\":4096},\"file_offset\":0,\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"}}],\"areas\":[{\"name\":\"MAIN\",\"start\":4096,\"size\":28672,\"used\":1,\"free\":28671,\"largest_free\":28671,\"segments\":[{\"name\":\"CODE\",\"base\":4096,\"length\":1}]}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+      "stderr": "",
+      "hex": "07",
+      "native_messages": [
+        "\\"
+      ],
+      "actual_messages": [
+        "\\\\"
+      ],
+      "matches_native": false
+    }
+  ]
+}

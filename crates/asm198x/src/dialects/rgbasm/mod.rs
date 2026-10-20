@@ -2292,12 +2292,12 @@ fn format_one(
         if spec.zero {
             return Err(refuse("a string with the padding flag `0`"));
         }
-        let text::Arg::Text(text) = arg else {
+        let text::Arg::Text { cooked: text, .. } = arg else {
             return Err(refuse("a number as `%s`"));
         };
         (String::new(), String::new(), text.clone())
     } else {
-        if let text::Arg::Text(text) = arg {
+        if let text::Arg::Text { cooked: text, .. } = arg {
             return Err(refuse(&format!("the string \"{text}\" as `%{kind}`")));
         }
         // rgbasm's values are 32-bit, and every type but `%d` and `%f` reads

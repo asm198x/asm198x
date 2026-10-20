@@ -1,0 +1,521 @@
+{
+  "binaries": {
+    "predecessor": {
+      "path": "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+      "sha256": "303e98c5e4a9886a3eb7f20010e96a0744c67038155bea394e12c675b7af1dcb"
+    },
+    "byte_store": {
+      "path": "/private/tmp/asm198x-byte-string-producer/asm198x",
+      "sha256": "4daf2d88f3156f90441bbcf5ab713a75719b5a2cff90b4fbc899d47e131a88b7"
+    }
+  },
+  "cases": [
+    {
+      "name": "repeat",
+      "source": ".repeat 10000\n.byte .sprintf(\"%c\",65)\n.endrepeat\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 0,
+          "elapsed_seconds": 0.06361470790579915,
+          "stdout": "",
+          "stderr": "",
+          "max_rss_bytes": 4407296,
+          "user_seconds": 0.03668,
+          "system_seconds": 0.004097
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "elapsed_seconds": 0.01385770901106298,
+          "stdout": "",
+          "stderr": "",
+          "max_rss_bytes": 2785280,
+          "user_seconds": 0.004914,
+          "system_seconds": 0.002505
+        }
+      ],
+      "native_length": 10000,
+      "native_sha256": "85757d9ef5868bb53472a6be8d81d1e3c398546b69b107141ad336053c40cb54",
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "elapsed_seconds": 0.2546651251614094,
+          "stdout": "",
+          "stderr": "assembled + linked 10000 byte(s) -> out.bin\n",
+          "max_rss_bytes": 14368768,
+          "user_seconds": 0.22456299999999998,
+          "system_seconds": 0.010027,
+          "binary": "predecessor",
+          "repeat": 0
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-byte-string-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "elapsed_seconds": 0.28264487511478364,
+          "stdout": "",
+          "stderr": "assembled + linked 10000 byte(s) -> out.bin\n",
+          "max_rss_bytes": 17629184,
+          "user_seconds": 0.26864299999999997,
+          "system_seconds": 0.0076,
+          "binary": "byte_store",
+          "repeat": 0
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "elapsed_seconds": 0.2792682920116931,
+          "stdout": "",
+          "stderr": "assembled + linked 10000 byte(s) -> out.bin\n",
+          "max_rss_bytes": 15613952,
+          "user_seconds": 0.23227699999999998,
+          "system_seconds": 0.005291,
+          "binary": "predecessor",
+          "repeat": 1
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-byte-string-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "elapsed_seconds": 0.9492414169944823,
+          "stdout": "",
+          "stderr": "assembled + linked 10000 byte(s) -> out.bin\n",
+          "max_rss_bytes": 17956864,
+          "user_seconds": 0.356111,
+          "system_seconds": 0.012606,
+          "binary": "byte_store",
+          "repeat": 1
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "elapsed_seconds": 0.3374559578951448,
+          "stdout": "",
+          "stderr": "assembled + linked 10000 byte(s) -> out.bin\n",
+          "max_rss_bytes": 14434304,
+          "user_seconds": 0.255254,
+          "system_seconds": 0.008857,
+          "binary": "predecessor",
+          "repeat": 2
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-byte-string-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "elapsed_seconds": 0.2955185838509351,
+          "stdout": "",
+          "stderr": "assembled + linked 10000 byte(s) -> out.bin\n",
+          "max_rss_bytes": 15908864,
+          "user_seconds": 0.277729,
+          "system_seconds": 0.005660999999999999,
+          "binary": "byte_store",
+          "repeat": 2
+        }
+      ]
+    },
+    {
+      "name": "macro_repeat",
+      "source": ".macro emit\n.byte .sprintf(\"%c\",65)\n.endmacro\n.repeat 10000\nemit\n.endrepeat\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 0,
+          "elapsed_seconds": 0.13299541710875928,
+          "stdout": "",
+          "stderr": "",
+          "max_rss_bytes": 5095424,
+          "user_seconds": 0.10777199999999999,
+          "system_seconds": 0.004129
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "elapsed_seconds": 0.014945334056392312,
+          "stdout": "",
+          "stderr": "",
+          "max_rss_bytes": 2949120,
+          "user_seconds": 0.00469,
+          "system_seconds": 0.0029119999999999997
+        }
+      ],
+      "native_length": 10000,
+      "native_sha256": "85757d9ef5868bb53472a6be8d81d1e3c398546b69b107141ad336053c40cb54",
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "elapsed_seconds": 0.39430849999189377,
+          "stdout": "",
+          "stderr": "assembled + linked 10000 byte(s) -> out.bin\n",
+          "max_rss_bytes": 16515072,
+          "user_seconds": 0.36049,
+          "system_seconds": 0.00643,
+          "binary": "predecessor",
+          "repeat": 0
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-byte-string-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "elapsed_seconds": 0.6839378750883043,
+          "stdout": "",
+          "stderr": "assembled + linked 10000 byte(s) -> out.bin\n",
+          "max_rss_bytes": 19775488,
+          "user_seconds": 0.44717799999999996,
+          "system_seconds": 0.010780999999999999,
+          "binary": "byte_store",
+          "repeat": 0
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "elapsed_seconds": 0.8033381248824298,
+          "stdout": "",
+          "stderr": "assembled + linked 10000 byte(s) -> out.bin\n",
+          "max_rss_bytes": 16400384,
+          "user_seconds": 0.449426,
+          "system_seconds": 0.015215999999999999,
+          "binary": "predecessor",
+          "repeat": 1
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-byte-string-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "elapsed_seconds": 0.8543365830555558,
+          "stdout": "",
+          "stderr": "assembled + linked 10000 byte(s) -> out.bin\n",
+          "max_rss_bytes": 19808256,
+          "user_seconds": 0.514156,
+          "system_seconds": 0.01405,
+          "binary": "byte_store",
+          "repeat": 1
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "elapsed_seconds": 0.6756192077882588,
+          "stdout": "",
+          "stderr": "assembled + linked 10000 byte(s) -> out.bin\n",
+          "max_rss_bytes": 17514496,
+          "user_seconds": 0.416352,
+          "system_seconds": 0.012395,
+          "binary": "predecessor",
+          "repeat": 2
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-byte-string-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "elapsed_seconds": 0.6879690838977695,
+          "stdout": "",
+          "stderr": "assembled + linked 10000 byte(s) -> out.bin\n",
+          "max_rss_bytes": 18644992,
+          "user_seconds": 0.458225,
+          "system_seconds": 0.010791,
+          "binary": "byte_store",
+          "repeat": 2
+        }
+      ]
+    },
+    {
+      "name": "ordinary_repeat",
+      "source": ".repeat 10000\nnop\n.endrepeat\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "exit": 0,
+          "elapsed_seconds": 0.03951254207640886,
+          "stdout": "",
+          "stderr": "",
+          "max_rss_bytes": 4014080,
+          "user_seconds": 0.026768999999999998,
+          "system_seconds": 0.0039429999999999995
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "elapsed_seconds": 0.014756165910512209,
+          "stdout": "",
+          "stderr": "",
+          "max_rss_bytes": 2736128,
+          "user_seconds": 0.004566,
+          "system_seconds": 0.003405
+        }
+      ],
+      "native_length": 10000,
+      "native_sha256": "df19a8f7fe5f5b75e6559def6f7c62052fed04be334a4868b659339ef1cdc622",
+      "runs": [
+        {
+          "argv": [
+            "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "elapsed_seconds": 0.16424970794469118,
+          "stdout": "",
+          "stderr": "assembled + linked 10000 byte(s) -> out.bin\n",
+          "max_rss_bytes": 16613376,
+          "user_seconds": 0.142763,
+          "system_seconds": 0.005108,
+          "binary": "predecessor",
+          "repeat": 0
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-byte-string-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "elapsed_seconds": 0.20890795905143023,
+          "stdout": "",
+          "stderr": "assembled + linked 10000 byte(s) -> out.bin\n",
+          "max_rss_bytes": 15826944,
+          "user_seconds": 0.17074,
+          "system_seconds": 0.006919,
+          "binary": "byte_store",
+          "repeat": 0
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "elapsed_seconds": 0.1811499590985477,
+          "stdout": "",
+          "stderr": "assembled + linked 10000 byte(s) -> out.bin\n",
+          "max_rss_bytes": 14827520,
+          "user_seconds": 0.154026,
+          "system_seconds": 0.005307,
+          "binary": "predecessor",
+          "repeat": 1
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-byte-string-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "elapsed_seconds": 0.23560491716489196,
+          "stdout": "",
+          "stderr": "assembled + linked 10000 byte(s) -> out.bin\n",
+          "max_rss_bytes": 15515648,
+          "user_seconds": 0.183231,
+          "system_seconds": 0.007743,
+          "binary": "byte_store",
+          "repeat": 1
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-token-bound-clean-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "elapsed_seconds": 0.20333304209634662,
+          "stdout": "",
+          "stderr": "assembled + linked 10000 byte(s) -> out.bin\n",
+          "max_rss_bytes": 16220160,
+          "user_seconds": 0.16661499999999999,
+          "system_seconds": 0.006859,
+          "binary": "predecessor",
+          "repeat": 2
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-byte-string-producer/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "input.s",
+            "-o",
+            "out.bin"
+          ],
+          "exit": 0,
+          "elapsed_seconds": 0.2071781251579523,
+          "stdout": "",
+          "stderr": "assembled + linked 10000 byte(s) -> out.bin\n",
+          "max_rss_bytes": 16302080,
+          "user_seconds": 0.169934,
+          "system_seconds": 0.005652,
+          "binary": "byte_store",
+          "repeat": 2
+        }
+      ]
+    }
+  ]
+}

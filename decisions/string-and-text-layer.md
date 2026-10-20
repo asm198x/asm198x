@@ -34,6 +34,28 @@ The second row is why the pass answers both halves: once text is resolved
 before parsing, a numeric predicate's argument is an ordinary literal by the
 time the expression parser sees it.
 
+## Native byte-string tokens (2026-10-20, #886/#887/#872)
+
+The approved ca65 design retains authored quoted spelling separately from the
+shared text layer's cooked text. Native ca65 string values are bytes: `%c` can
+produce `$ff`, and `%s` precision can cut a UTF-8 sequence between its bytes.
+Serializing these through Rust `String` and C-style escapes changes the value.
+
+A private ca65 store may therefore retain immutable byte-string tokens through
+the source pre-pass. Compiler-owned handles travel through the existing shared
+text/macro mechanics and resolve at ca65 consumers before layout. Numeric data
+operations receive the bytes; text-only consumers keep their existing text
+contracts. Unknown or authored handles fail closed, quoted marker-looking data
+remains data, and internal handles never enter user-facing output.
+
+This clarifies “folded to text” above: source tokens may retain native byte
+values instead of being serialized as escaped UTF-8 source. It does not add
+strings to `Expr`, move functions into layout, duplicate shared expansion,
+expand inactive lexical validation or change source-order numeric lookup.
+The formatter continues to read syntax without expansion and emits canonical
+AST output. The approved design and delivery boundaries are in
+`docs/plans/2026-10-20-ca65-string-token-provenance/`.
+
 ## Why not a string type in `Expr`
 
 It would be closer to how rgbasm models this internally, and it was rejected
