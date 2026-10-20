@@ -493,3 +493,10 @@ for (const cohort of ['ca65_flat_macro_diagnostics', 'ca65_flat_faraddr', 'ca65_
     assert.equal(qualifies(complete.filter(row => row.name !== cohort)), false);
   });
 }
+
+
+test('native source constancy evidence cannot be omitted', () => {
+  const complete = requiredCases.map(name => ({ name, status: 'pass' }));
+  assert(qualifies(complete)); assert(requiredCases.includes('ca65_source_constancy'));
+  assert.equal(qualifies(complete.filter(row => row.name !== 'ca65_source_constancy')), false);
+});

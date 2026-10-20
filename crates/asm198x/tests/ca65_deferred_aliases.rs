@@ -39,9 +39,9 @@ fn run(root: &Path, args: &[&str]) -> Output {
 }
 
 fn shape(root: &Path) -> Vec<serde_json::Value> {
-    std::fs::read_to_string(root.join("out.debug198x"))
-        .expect("debug output")
-        .lines()
+    let text = std::fs::read_to_string(root.join("out.debug198x")).expect("debug output");
+    debug198x::DebugInfo::read(&text).expect("official debug reader");
+    text.lines()
         .map(|line| serde_json::from_str::<serde_json::Value>(line).expect("debug record"))
         .filter(|row| row["t"] == "symbol" || row["t"] == "section")
         .collect()
@@ -49,12 +49,26 @@ fn shape(root: &Path) -> Vec<serde_json::Value> {
 
 #[test]
 fn native_deferred_aliases_resolve_without_changing_source_time_forms() {
-    let facts: serde_json::Value =
-        serde_json::from_str(include_str!("fixtures/ca65-deferred-aliases.json"))
-            .expect("native captures");
+    verify_fixture(include_str!("fixtures/ca65-deferred-aliases.json"), 63);
+}
+
+#[test]
+fn source_constancy_follows_native_alias_classification() {
+    let fixture = include_str!("fixtures/ca65-source-constancy.json");
+    let facts: serde_json::Value = serde_json::from_str(fixture).expect("native captures");
+    assert_eq!(facts["audit_case_count"], 298);
+    assert_eq!(
+        facts["excluded_audit_cases"],
+        serde_json::json!({"explicit_outer_alias_scope": [795]})
+    );
+    verify_fixture(fixture, 297);
+}
+
+fn verify_fixture(fixture: &str, count: usize) {
+    let facts: serde_json::Value = serde_json::from_str(fixture).expect("native captures");
     let cases = facts["cases"].as_array().expect("cases");
-    assert_eq!(cases.len(), 63);
-    let root = scratch::dir("ca65-deferred-aliases");
+    assert_eq!(cases.len(), count);
+    let root = scratch::dir(&format!("ca65-deferred-aliases-{count}"));
     for (name, text) in facts["files"].as_object().expect("includes") {
         std::fs::create_dir_all(root.join(name).parent().expect("include parent"))
             .expect("include directories");
@@ -82,10 +96,21 @@ fn native_deferred_aliases_resolve_without_changing_source_time_forms() {
             if dialect == "ca65" {
                 args.extend(["-C", "input.cfg"]);
             }
-            args.extend([input, "-o", "out.bin", "--debug=out.debug198x"]);
+            args.extend([
+                input,
+                "-o",
+                "out.bin",
+                "--debug=out.debug198x",
+                "--sym=out.sym",
+                "--listing-json=out.lst.json",
+                "--message-format=json",
+            ]);
             run(&root, &args)
         };
-        std::fs::write(root.join("out.bin"), b"previous image").expect("seed image");
+        let outputs = ["out.bin", "out.debug198x", "out.sym", "out.lst.json"];
+        for output in outputs {
+            std::fs::write(root.join(output), b"previous image").expect("seed output");
+        }
         let result = assemble("input.s");
         let accepted = fact["native"]
             .as_array()
@@ -95,11 +120,16 @@ fn native_deferred_aliases_resolve_without_changing_source_time_forms() {
             == 0;
         assert_eq!(result.status.success(), accepted, "{name}: {result:?}");
         if !accepted {
-            assert_eq!(
-                std::fs::read(root.join("out.bin")).expect("preserved image"),
-                b"previous image",
-                "{name}"
-            );
+            let errors: serde_json::Value =
+                serde_json::from_slice(&result.stdout).expect("diagnostics");
+            assert!(!errors.as_array().expect("error list").is_empty(), "{name}");
+            for output in outputs {
+                assert_eq!(
+                    std::fs::read(root.join(output)).expect("preserved output"),
+                    b"previous image",
+                    "{name}: {output}"
+                );
+            }
             continue;
         }
         let bytes = std::fs::read(root.join("out.bin")).expect("image");
@@ -108,6 +138,13 @@ fn native_deferred_aliases_resolve_without_changing_source_time_forms() {
             hex,
             fact["native_hex"].as_str().expect("native bytes"),
             "{name}"
+        );
+        let payload: serde_json::Value =
+            serde_json::from_slice(&result.stdout).expect("JSON output");
+        assert_eq!(
+            payload["bytes"],
+            serde_json::json!(&bytes),
+            "{name}: JSON bytes"
         );
         let debug = shape(&root);
         let formatted = run(&root, &["fmt", "--dialect", dialect, "input.s"]);
@@ -122,6 +159,13 @@ fn native_deferred_aliases_resolve_without_changing_source_time_forms() {
             std::fs::read(root.join("out.bin")).expect("formatted image"),
             bytes,
             "{name}: formatted bytes"
+        );
+        let payload: serde_json::Value =
+            serde_json::from_slice(&result.stdout).expect("formatted JSON output");
+        assert_eq!(
+            payload["bytes"],
+            serde_json::json!(&bytes),
+            "{name}: formatted JSON bytes"
         );
         assert_eq!(shape(&root), debug, "{name}: addresses and symbols");
     }

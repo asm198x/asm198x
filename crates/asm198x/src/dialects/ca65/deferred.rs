@@ -165,6 +165,46 @@ fn expression_hint(
 }
 
 impl Deferred {
+    /// Source expressions in dependency order, without expanding shared alias
+    /// subtrees or reaching outward through an unresolved source reference.
+    /// Cycle diagnostics remain the responsibility of `study_source`.
+    pub fn source_definitions(&self, value: &Expr) -> Vec<(&str, &Expr)> {
+        let mut stack: Vec<_> = symbols(value)
+            .into_iter()
+            .map(|key| {
+                let key = split_scope_ref(&key).map_or_else(
+                    || key.clone(),
+                    |(path, name)| {
+                        if path.is_empty() {
+                            name.to_string()
+                        } else {
+                            format!("{path}::{name}")
+                        }
+                    },
+                );
+                (key, false)
+            })
+            .collect();
+        let mut visited = BTreeSet::new();
+        let mut ordered = Vec::new();
+        while let Some((key, after)) = stack.pop() {
+            let Some((name, definition)) = self.definitions.get_key_value(&key) else {
+                continue;
+            };
+            if after {
+                ordered.push((name.as_str(), &definition.source_value));
+            } else if visited.insert(key.clone()) {
+                stack.push((key, true));
+                stack.extend(
+                    symbols(&definition.source_value)
+                        .into_iter()
+                        .map(|key| (key, false)),
+                );
+            }
+        }
+        ordered
+    }
+
     pub fn insert(
         &mut self,
         name: String,
