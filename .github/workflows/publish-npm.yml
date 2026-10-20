@@ -6,21 +6,26 @@
 # or forget. Provenance is attested automatically as a side effect: the tarball
 # on the registry can be traced to this workflow and this commit.
 #
-# Reconciling rather than event-driven. It runs on every push to main and asks
-# the registry what is missing, so a publish that failed, or a version bump
-# that landed while the runner was down, is picked up by the next push instead
-# of needing someone to notice. Publishing an already-published version is a
-# normal no-op, not a failure.
+# Only a release publishes (umbrella
+# decisions/browser-bundles-ship-as-npm-packages.md): this runs after the
+# Release workflow succeeds for an asm198x-vX.Y.Z tag, and builds from that
+# tag, so a site only ever pins a build that passed release qualification. A
+# manual dispatch names a tag, for the first publish of a new package or to
+# reconcile one that failed. Every package carries the crate's
+# [package.metadata.npm] version, and publishing a version npm already has is
+# a no-op, so a release that doesn't bump it republishes nothing.
 name: Publish to npm
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "crates/asm198x-web/**"
-      - "crates/asm198x/**"
-      - ".github/workflows/publish-npm.yml"
+  workflow_run:
+    workflows: [Release]
+    types: [completed]
   workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to publish from, such as asm198x-v0.0.72"
+        required: true
+        type: string
 
 # One at a time. Two runs racing on the same version would have one of them
 # publish and the other fail on a name it cannot reuse.
@@ -28,9 +33,47 @@ concurrency:
   group: publish-npm
   cancel-in-progress: false
 
+permissions:
+  contents: read
+
 jobs:
+  release:
+    name: Find the release to publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      tag: ${{ steps.find.outputs.tag }}
+    steps:
+      - name: Decide whether this run publishes
+        id: find
+        env:
+          EVENT: ${{ github.event_name }}
+          RUN_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          RUN_EVENT: ${{ github.event.workflow_run.event }}
+          RUN_REF: ${{ github.event.workflow_run.head_branch }}
+          INPUT_TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          # Release also plans pull requests; only a successful run for a
+          # version tag has released anything.
+          if [ "$EVENT" = workflow_dispatch ]; then
+            tag="$INPUT_TAG"
+          elif [ "$RUN_CONCLUSION" = success ] && [ "$RUN_EVENT" = push ]; then
+            tag="$RUN_REF"
+          else
+            tag=""
+          fi
+          if [[ "$tag" =~ ^asm198x-v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "tag=$tag" >> "$GITHUB_OUTPUT"
+            echo "Publishing from $tag."
+          else
+            echo "Not a successful release run for an asm198x-vX.Y.Z tag; nothing to publish."
+          fi
+
   publish:
     name: ${{ matrix.package }}
+    needs: release
+    if: needs.release.outputs.tag != ''
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -47,12 +90,15 @@ jobs:
         # package, on npmjs.com. Adding an architecture here before doing that
         # gets a run that fails on a name it is not trusted to publish.
         #
-        # The rest of the split — mos6502, m68k, m6809, sm83, i8080 and the
-        # eleven others, plus `all` for the full build — is a line each once
-        # someone wants them.
-        package: [z80]
+        # z80 and mos6502 serve the Code198x website's assemblers; `all` is
+        # @asm198x/web, every architecture, for the documentation playground.
+        # The other architectures are a line each once someone wants them.
+        package: [z80, mos6502, all]
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.release.outputs.tag }}
+          persist-credentials: false
 
       - name: Read the toolchain the repository pins
         id: toolchain
