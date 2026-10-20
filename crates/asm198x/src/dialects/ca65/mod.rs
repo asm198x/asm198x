@@ -457,6 +457,13 @@ fn assemble_program(
         for definition in parsed.deferred.definitions.values() {
             collect_syms(&Kind::Bytes(vec![definition.value.clone()]), &mut refs);
         }
+        refs.extend(
+            parsed
+                .deferred
+                .source_reads
+                .iter()
+                .map(|(name, _)| name.clone()),
+        );
         let known: BTreeSet<&String> = parsed
             .label_seg
             .keys()
@@ -469,6 +476,15 @@ fn assemble_program(
             .cloned()
             .collect();
         let targets = scope_targets(&scoped, &|name| known.contains(&name.to_string()));
+        for (name, span) in &parsed.deferred.source_reads {
+            let target = targets.get(name).unwrap_or(name);
+            if !known.contains(target) {
+                return Err(AsmError::at(
+                    span.clone(),
+                    format!("undefined symbol `{}`", display_label(target)),
+                ));
+            }
+        }
         for definition in parsed.deferred.definitions.values_mut() {
             definition.value = map_expr_syms(&definition.value, &|name| {
                 targets.get(name).map(|target| Expr::Sym(target.clone()))

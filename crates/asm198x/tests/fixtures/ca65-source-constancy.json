@@ -10029,6 +10029,26 @@
       "native_hex": "000007"
     },
     {
+      "name": "explicit_outer_alias_scope",
+      "source": ".scope WRAPPER\nLEFT: .byte 0\nRIGHT: .byte 0\nALIAS=RIGHT-LEFT\n.scope INNER\n.ifconst ::ALIAS\n.byte 7\n.else\n.byte 9\n.endif\n.endscope\n.endscope\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; DATA:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "input.o"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-i5qsq_5n",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "input.s(6): Error: Symbol 'ALIAS' is undefined\n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
       "name": "pc_CODE_CODE_direct",
       "source": ".segment \"CODE\"\nALIAS=*\n.byte 0\n.segment \"CODE\"\nTARGET: .byte 0\n.ifconst TARGET-ALIAS\n.byte 7\n.else\n.byte 9\n.endif\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; DATA:load=MAIN,type=ro; }\n",
@@ -10642,9 +10662,5 @@
     }
   ],
   "audit_case_count": 314,
-  "excluded_audit_cases": {
-    "explicit_outer_alias_scope": [
-      795
-    ]
-  }
+  "excluded_audit_cases": {}
 }

@@ -57,11 +57,24 @@ fn source_constancy_follows_native_alias_classification() {
     let fixture = include_str!("fixtures/ca65-source-constancy.json");
     let facts: serde_json::Value = serde_json::from_str(fixture).expect("native captures");
     assert_eq!(facts["audit_case_count"], 314);
+    assert_eq!(facts["excluded_audit_cases"], serde_json::json!({}));
+    verify_fixture(fixture, 314);
+}
+
+#[test]
+fn selected_query_names_require_final_native_binding() {
+    let fixture = include_str!("fixtures/ca65-query-admission.json");
+    let facts: serde_json::Value = serde_json::from_str(fixture).expect("native captures");
+    assert_eq!(facts["audit_case_count"], 54);
     assert_eq!(
         facts["excluded_audit_cases"],
-        serde_json::json!({"explicit_outer_alias_scope": [795]})
+        serde_json::json!({
+            "missing_logical_const_direct": [795],
+            "missing_logical_const_included": [795],
+            "missing_logical_const_macro": [795],
+        })
     );
-    verify_fixture(fixture, 313);
+    verify_fixture(fixture, 51);
 }
 
 fn verify_fixture(fixture: &str, count: usize) {
@@ -123,6 +136,23 @@ fn verify_fixture(fixture: &str, count: usize) {
             let errors: serde_json::Value =
                 serde_json::from_slice(&result.stdout).expect("diagnostics");
             assert!(!errors.as_array().expect("error list").is_empty(), "{name}");
+            if let Some(expected) = fact.get("query_error") {
+                let span = &errors[0]["span"];
+                let path = span["path"].as_str().expect("source path");
+                assert_eq!(
+                    Path::new(path).file_name().expect("file name").to_str(),
+                    expected["path"].as_str(),
+                    "{name}"
+                );
+                assert_eq!(span["line"], expected["line"], "{name}");
+                let frames: Vec<_> = span["expansion_frames"]
+                    .as_array()
+                    .expect("frames")
+                    .iter()
+                    .map(|f| f["macro_name"].clone())
+                    .collect();
+                assert_eq!(serde_json::json!(frames), expected["frames"], "{name}");
+            }
             for output in outputs {
                 assert_eq!(
                     std::fs::read(root.join(output)).expect("preserved output"),
