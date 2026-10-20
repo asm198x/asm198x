@@ -1141,28 +1141,30 @@ fn fold_condition(
     }
 }
 
-/// How much of each segment an expression carries — ca65's constancy rule,
-/// which is the linker's.
-///
-/// `Some(weights)` for an expression that is *linear* in the labels: every
-/// label above this line counts +1 in its own segment, `*` counts +1 in the
-/// active one, and addition and subtraction combine them. All-zero weights
-/// mean the expression is a constant. `None` means it is not linear at all — a
-/// label multiplied, shifted, masked or fed to a byte extractor — which ca65
-/// answers as not constant too, so the caller need not tell the two apart.
-///
-/// A name this line has not seen yet counts as a label of *no* segment, which
-/// cannot cancel against a real one: `.const(LB - LA)` with `LB` below the line
-/// is `0` in ca65, and a name defined nowhere is `0` here where ca65
-/// additionally reports the undefined symbol.
+/// Constancy uses the retained source graph, before any final addresses or
+/// outward scope fallback exist. Cache each alias once so shared subexpressions
+/// and long chains do not become recursively expanded expression trees.
 fn segment_weights(expr: &Expr, st: &Projection) -> Option<BTreeMap<String, i64>> {
+    let mut aliases = BTreeMap::new();
+    for (name, value) in st.deferred.source_definitions(expr) {
+        let weights = expression_weights(value, st, &aliases);
+        aliases.insert(name.to_string(), weights);
+    }
+    expression_weights(expr, st, &aliases)
+}
+
+fn expression_weights(
+    expr: &Expr,
+    st: &Projection,
+    aliases: &BTreeMap<String, Option<BTreeMap<String, i64>>>,
+) -> Option<BTreeMap<String, i64>> {
     let mut weights = BTreeMap::new();
-    walk_weights(expr, 1, st, &mut weights)?;
+    walk_weights(expr, 1, st, aliases, &mut weights)?;
     Some(weights)
 }
 
-/// Whether an expression stands for a value on its own — all weights present
-/// and cancelling.
+/// Whether every known segment contribution cancels. An unresolved source
+/// name has no classification, even when final binding could find an outer name.
 fn weighs_nothing(expr: &Expr, st: &Projection) -> bool {
     segment_weights(expr, st).is_some_and(|w| w.values().all(|&n| n == 0))
 }
@@ -1171,43 +1173,93 @@ fn walk_weights(
     expr: &Expr,
     sign: i64,
     st: &Projection,
+    aliases: &BTreeMap<String, Option<BTreeMap<String, i64>>>,
     weights: &mut BTreeMap<String, i64>,
 ) -> Option<()> {
     use crate::engine::BinOp as Op;
-    let mut carry = |seg: String| *weights.entry(seg).or_insert(0) += sign;
+    let mut carry = |seg: String, amount: i64| {
+        let weight = weights.entry(seg).or_insert(0i64);
+        *weight = weight.checked_add(amount)?;
+        Some(())
+    };
+    let constant = |value: &Expr| {
+        expression_weights(value, st, aliases).is_some_and(|w| w.values().all(|&n| n == 0))
+    };
+    let number = |value: &Expr| {
+        value
+            .eval_with(
+                &|name| {
+                    let key = super::split_scope_ref(name).map(|(path, name)| {
+                        if path.is_empty() {
+                            name.to_string()
+                        } else {
+                            format!("{path}::{name}")
+                        }
+                    });
+                    st.consts.get(key.as_deref().unwrap_or(name)).copied()
+                },
+                None,
+                0,
+            )
+            .ok()
+    };
     match expr {
         Expr::Num(_) => Some(()),
-        Expr::Pc => {
-            carry(st.seg.clone());
-            Some(())
-        }
+        Expr::Pc => carry(st.seg.clone(), sign),
         Expr::Sym(name) => {
-            if st.consts.contains_key(name) {
+            let key = super::split_scope_ref(name).map_or_else(
+                || name.clone(),
+                |(path, name)| {
+                    if path.is_empty() {
+                        name.to_string()
+                    } else {
+                        format!("{path}::{name}")
+                    }
+                },
+            );
+            if st.consts.contains_key(&key) {
                 return Some(());
             }
-            carry(st.label_seg.get(name).cloned().unwrap_or_default());
-            Some(())
+            if let Some(alias) = aliases.get(&key) {
+                for (seg, weight) in alias.as_ref()? {
+                    carry(seg.clone(), weight.checked_mul(sign)?)?;
+                }
+                return Some(());
+            }
+            carry(st.label_seg.get(&key)?.clone(), sign)
         }
         Expr::Bin(Op::Add, a, b) => {
-            walk_weights(a, sign, st, weights)?;
-            walk_weights(b, sign, st, weights)
+            walk_weights(a, sign, st, aliases, weights)?;
+            walk_weights(b, sign, st, aliases, weights)
         }
         Expr::Bin(Op::Sub, a, b) => {
-            walk_weights(a, sign, st, weights)?;
-            walk_weights(b, -sign, st, weights)
+            walk_weights(a, sign, st, aliases, weights)?;
+            walk_weights(b, sign.checked_neg()?, st, aliases, weights)
         }
-        // Every other operator is linear only over operands that already stand
-        // for values, so each side is weighed on its own and a label anywhere
-        // inside ends it.
-        Expr::Bin(_, a, b) => (weighs_nothing(a, st) && weighs_nothing(b, st)).then_some(()),
+        Expr::Neg(value) => walk_weights(value, sign.checked_neg()?, st, aliases, weights),
+        Expr::Bin(Op::Mul, a, b) => {
+            let left = number(a);
+            let right = number(b);
+            if left == Some(0) || right == Some(0) {
+                Some(())
+            } else if let Some(factor) = right {
+                walk_weights(a, sign.checked_mul(factor)?, st, aliases, weights)
+            } else if let Some(factor) = left {
+                walk_weights(b, sign.checked_mul(factor)?, st, aliases, weights)
+            } else {
+                (constant(a) && constant(b)).then_some(())
+            }
+        }
+        // Nonlinear operations still require constant operands. In particular,
+        // native division by one does not permit segment cancellation.
+        Expr::Bin(_, a, b) => (constant(a) && constant(b)).then_some(()),
         Expr::Lo(e)
         | Expr::Hi(e)
         | Expr::Bank(e)
-        | Expr::Neg(e)
         | Expr::BitNot(e)
         | Expr::LogNot(e)
         | Expr::FixRound(e)
-        | Expr::TrailingZeros(e) => weighs_nothing(e, st).then_some(()),
+        | Expr::TrailingZeros(e) => constant(e).then_some(()),
     }
 }
 

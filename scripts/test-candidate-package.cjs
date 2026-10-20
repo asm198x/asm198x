@@ -36,7 +36,7 @@ requiredCases.push('ca65_reserved_constants');
 requiredCases.push('ca65_label_delimiters');
 requiredCases.push('ca65_macro_definition_labels');
 requiredCases.push('ca65_record_allocators');
-requiredCases.push('ca65_deferred_aliases');
+requiredCases.push('ca65_deferred_aliases', 'ca65_source_constancy');
 requiredCases.push('ca65_scope_binding');
 requiredCases.push('ca65_unused_cycles');
 requiredCases.push('ca65_enum_expressions');
@@ -863,6 +863,43 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
           assert.deepEqual(shape(), before, fact.name + ': formatted symbols and addresses');
         } else {
           reject(p); assert.equal(read('cpu.bin').toString(), 'previous image', fact.name);
+        }
+      }
+    });
+    test('ca65_source_constancy', () => {
+      const facts = require('../crates/asm198x/tests/fixtures/ca65-source-constancy.json');
+      assert.equal(facts.cases.length, 297);
+      assert.equal(facts.audit_case_count, 298);
+      assert.deepEqual(facts.excluded_audit_cases, { explicit_outer_alias_scope: [795] });
+      for (const [name, text] of Object.entries(facts.files)) {
+        fs.mkdirSync(path.dirname(path.join(root, name)), { recursive: true }); write(name, text);
+      }
+      for (const fact of facts.cases) {
+        write('cpu.cfg', fact.config); write('cpu.s', fact.source);
+        const outputs = ['cpu.bin', 'scope.debug198x', 'scope.sym', 'scope.lst.json'];
+        for (const output of outputs) write(output, 'previous image');
+        const assemble = input => run(['--dialect', 'ca65', '-C', 'cpu.cfg', input, '-o', 'cpu.bin', '--debug=scope.debug198x', '--sym=scope.sym', '--listing-json=scope.lst.json', '--message-format=json']);
+        const shape = () => read('scope.debug198x').toString().trim().split('\n').map(s => JSON.parse(s)).filter(r => r.t === 'symbol' || r.t === 'section');
+        const p = assemble('cpu.s');
+        if (fact.native.at(-1).exit === 0) {
+          assert.equal(p.status, 0, fact.name + ': ' + p.stderr);
+          assert.deepEqual(read('cpu.bin'), Buffer.from(fact.native_hex, 'hex'), fact.name);
+          assert.deepEqual(JSON.parse(p.stdout).bytes, Array.from(Buffer.from(fact.native_hex, 'hex')), fact.name + ': JSON bytes');
+          const before = shape();
+          const formatted = run(['fmt', '--dialect', 'ca65', 'cpu.s']);
+          assert.equal(formatted.status, 0, fact.name + ': ' + formatted.stderr);
+          write('scope-formatted.s', formatted.stdout);
+          const again = run(['fmt', '--dialect', 'ca65', 'scope-formatted.s']);
+          assert.equal(again.status, 0, fact.name + ': ' + again.stderr);
+          assert.equal(again.stdout, formatted.stdout, fact.name + ': idempotence');
+          const roundtrip = assemble('scope-formatted.s');
+          assert.equal(roundtrip.status, 0, fact.name + ': ' + roundtrip.stderr);
+          assert.deepEqual(read('cpu.bin'), Buffer.from(fact.native_hex, 'hex'), fact.name + ': formatted bytes');
+          assert.deepEqual(JSON.parse(roundtrip.stdout).bytes, Array.from(Buffer.from(fact.native_hex, 'hex')), fact.name + ': formatted JSON bytes');
+          assert.deepEqual(shape(), before, fact.name + ': formatted symbols and addresses');
+        } else {
+          reject(p); assert(Array.isArray(JSON.parse(p.stdout)) && JSON.parse(p.stdout).length > 0, fact.name);
+          for (const output of outputs) assert.equal(read(output).toString(), 'previous image', fact.name + ': ' + output);
         }
       }
     });

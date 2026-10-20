@@ -1,0 +1,5668 @@
+{
+  "binary": "/private/tmp/asm198x-flat-counter-producer/asm198x",
+  "sha256": "9dd103083dba8a4ecd5148ad619d317b8ff3f965a371be9c4db6370aff10e8bc",
+  "results": [
+    {
+      "name": "difference_False_ifconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "difference_False_ifconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "difference_False_ifconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "difference_False_ifconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "difference_False_ifnconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "difference_False_ifnconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "difference_False_ifnconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "difference_False_ifnconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "difference_True_ifconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "difference_True_ifconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "difference_True_ifconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "difference_True_ifconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "difference_True_ifnconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "difference_True_ifnconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "difference_True_ifnconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "difference_True_ifnconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "unary_False_ifconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "unary_False_ifconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "unary_False_ifconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "unary_False_ifconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "unary_False_ifnconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "unary_False_ifnconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "unary_False_ifnconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "unary_False_ifnconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "unary_True_ifconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "unary_True_ifconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "unary_True_ifconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "unary_True_ifconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "unary_True_ifnconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "unary_True_ifnconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "unary_True_ifnconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "unary_True_ifnconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "zero_left_False_ifconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "zero_left_False_ifconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "zero_left_False_ifconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "zero_left_False_ifconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "zero_left_False_ifnconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "zero_left_False_ifnconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "zero_left_False_ifnconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "zero_left_False_ifnconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "zero_left_True_ifconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "zero_left_True_ifconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "zero_left_True_ifconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "zero_left_True_ifconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "zero_left_True_ifnconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "zero_left_True_ifnconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "zero_left_True_ifnconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "zero_left_True_ifnconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "zero_right_False_ifconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "zero_right_False_ifconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "zero_right_False_ifconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "zero_right_False_ifconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "zero_right_False_ifnconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "zero_right_False_ifnconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "zero_right_False_ifnconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "zero_right_False_ifnconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "zero_right_True_ifconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "zero_right_True_ifconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "zero_right_True_ifconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "zero_right_True_ifconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "zero_right_True_ifnconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "zero_right_True_ifnconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "zero_right_True_ifnconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "zero_right_True_ifnconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "cancel_False_ifconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "cancel_False_ifconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "cancel_False_ifconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "cancel_False_ifconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "cancel_False_ifnconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "cancel_False_ifnconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "cancel_False_ifnconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "cancel_False_ifnconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "cancel_True_ifconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "cancel_True_ifconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "cancel_True_ifconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "cancel_True_ifconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "cancel_True_ifnconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "cancel_True_ifnconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "cancel_True_ifnconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "cancel_True_ifnconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "double_False_ifconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "double_False_ifconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "double_False_ifconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "double_False_ifconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "double_False_ifnconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "double_False_ifnconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "double_False_ifnconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "double_False_ifnconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "double_True_ifconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "double_True_ifconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "double_True_ifconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "double_True_ifconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "double_True_ifnconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "double_True_ifnconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "double_True_ifnconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "double_True_ifnconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "sum_False_ifconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "sum_False_ifconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "sum_False_ifconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "sum_False_ifconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "sum_False_ifnconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "sum_False_ifnconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "sum_False_ifnconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "sum_False_ifnconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "sum_True_ifconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "sum_True_ifconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "sum_True_ifconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "sum_True_ifconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "sum_True_ifnconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "sum_True_ifnconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "sum_True_ifnconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "sum_True_ifnconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "extract_label_False_ifconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "extract_label_False_ifconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "extract_label_False_ifconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "extract_label_False_ifconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "extract_label_False_ifnconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "extract_label_False_ifnconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "extract_label_False_ifnconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "extract_label_False_ifnconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "extract_label_True_ifconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "extract_label_True_ifconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "extract_label_True_ifconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "extract_label_True_ifconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "extract_label_True_ifnconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "extract_label_True_ifnconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "extract_label_True_ifnconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "extract_label_True_ifnconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "scaled_difference_False_ifconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "scaled_difference_False_ifconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "scaled_difference_False_ifconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "scaled_difference_False_ifconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "scaled_difference_False_ifnconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "scaled_difference_False_ifnconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "scaled_difference_False_ifnconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "scaled_difference_False_ifnconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "scaled_difference_True_ifconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "scaled_difference_True_ifconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "scaled_difference_True_ifconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "scaled_difference_True_ifconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "scaled_difference_True_ifnconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "scaled_difference_True_ifnconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "scaled_difference_True_ifnconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "scaled_difference_True_ifnconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "extract_difference_False_ifconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "extract_difference_False_ifconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "extract_difference_False_ifconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "extract_difference_False_ifconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "extract_difference_False_ifnconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "extract_difference_False_ifnconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "extract_difference_False_ifnconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "extract_difference_False_ifnconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "extract_difference_True_ifconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "extract_difference_True_ifconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "extract_difference_True_ifconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "extract_difference_True_ifconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "extract_difference_True_ifnconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "extract_difference_True_ifnconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "extract_difference_True_ifnconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "extract_difference_True_ifnconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "subtraction_False_ifconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "subtraction_False_ifconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "subtraction_False_ifconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "subtraction_False_ifconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "subtraction_False_ifnconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "subtraction_False_ifnconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "subtraction_False_ifnconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "subtraction_False_ifnconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "subtraction_True_ifconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "subtraction_True_ifconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "subtraction_True_ifconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "subtraction_True_ifconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "subtraction_True_ifnconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "subtraction_True_ifnconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "subtraction_True_ifnconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "subtraction_True_ifnconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "divide_cancel_False_ifconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "divide_cancel_False_ifconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "divide_cancel_False_ifconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "divide_cancel_False_ifconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "divide_cancel_False_ifnconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "divide_cancel_False_ifnconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "divide_cancel_False_ifnconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "divide_cancel_False_ifnconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "divide_cancel_True_ifconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "divide_cancel_True_ifconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "divide_cancel_True_ifconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "divide_cancel_True_ifconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "divide_cancel_True_ifnconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "divide_cancel_True_ifnconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "divide_cancel_True_ifnconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "divide_cancel_True_ifnconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "unit_product_left_False_ifconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "unit_product_left_False_ifconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "unit_product_left_False_ifconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "unit_product_left_False_ifconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "unit_product_left_False_ifnconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "unit_product_left_False_ifnconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "unit_product_left_False_ifnconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "unit_product_left_False_ifnconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "unit_product_left_True_ifconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "unit_product_left_True_ifconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "unit_product_left_True_ifconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "unit_product_left_True_ifconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "unit_product_left_True_ifnconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "unit_product_left_True_ifnconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "unit_product_left_True_ifnconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "unit_product_left_True_ifnconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "unit_product_right_False_ifconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "unit_product_right_False_ifconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "unit_product_right_False_ifconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "unit_product_right_False_ifconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "unit_product_right_False_ifnconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "unit_product_right_False_ifnconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "unit_product_right_False_ifnconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "unit_product_right_False_ifnconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "unit_product_right_True_ifconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "unit_product_right_True_ifconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "unit_product_right_True_ifconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "unit_product_right_True_ifconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "unit_product_right_True_ifnconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "unit_product_right_True_ifnconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "unit_product_right_True_ifnconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "unit_product_right_True_ifnconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "scaled_cancel_False_ifconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "scaled_cancel_False_ifconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "scaled_cancel_False_ifconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "scaled_cancel_False_ifconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "scaled_cancel_False_ifnconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "scaled_cancel_False_ifnconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "scaled_cancel_False_ifnconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "scaled_cancel_False_ifnconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "scaled_cancel_True_ifconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "scaled_cancel_True_ifconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "scaled_cancel_True_ifconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "scaled_cancel_True_ifconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "scaled_cancel_True_ifnconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "scaled_cancel_True_ifnconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "scaled_cancel_True_ifnconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "scaled_cancel_True_ifnconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": false
+    },
+    {
+      "name": "bitnot_cancel_False_ifconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "bitnot_cancel_False_ifconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "bitnot_cancel_False_ifconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "bitnot_cancel_False_ifconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "bitnot_cancel_False_ifnconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "bitnot_cancel_False_ifnconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "bitnot_cancel_False_ifnconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "bitnot_cancel_False_ifnconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "bitnot_cancel_True_ifconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "bitnot_cancel_True_ifconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "bitnot_cancel_True_ifconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "bitnot_cancel_True_ifconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "bitnot_cancel_True_ifnconst_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "bitnot_cancel_True_ifnconst_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "bitnot_cancel_True_ifnconst_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "bitnot_cancel_True_ifnconst_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000007",
+      "matches_native": true
+    },
+    {
+      "name": "coefficient_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "coefficient_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "coefficient_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "coefficient_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "chain_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "chain_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "chain_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "chain_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "forward_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "090000",
+      "matches_native": true
+    },
+    {
+      "name": "forward_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "090000",
+      "matches_native": true
+    },
+    {
+      "name": "forward_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "090000",
+      "matches_native": true
+    },
+    {
+      "name": "forward_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "090000",
+      "matches_native": true
+    },
+    {
+      "name": "forward_cancel_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0900",
+      "matches_native": true
+    },
+    {
+      "name": "forward_cancel_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0900",
+      "matches_native": true
+    },
+    {
+      "name": "forward_cancel_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0900",
+      "matches_native": true
+    },
+    {
+      "name": "forward_cancel_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0900",
+      "matches_native": true
+    },
+    {
+      "name": "forward_then_known_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09000009",
+      "matches_native": false
+    },
+    {
+      "name": "forward_then_known_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09000009",
+      "matches_native": false
+    },
+    {
+      "name": "forward_then_known_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09000009",
+      "matches_native": false
+    },
+    {
+      "name": "forward_then_known_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09000009",
+      "matches_native": false
+    },
+    {
+      "name": "missing_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1:1: error: undefined symbol `MISSING`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "missing_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-2wmgkv66/missing_included.inc:1:1: error: undefined symbol `MISSING`\nincluded from input.s:1\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "missing_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:9:1: error: undefined symbol `MISSING`\nin expansion of macro `run` defined at input.s:1, invoked at input.s:9\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "missing_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: undefined symbol `MISSING`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "cycle_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1:1: error: circular definition of symbol `FIRST`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "cycle_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-2wmgkv66/cycle_included.inc:1:1: error: circular definition of symbol `FIRST`\nincluded from input.s:1\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "cycle_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:10:1: error: circular definition of symbol `FIRST`\nin expansion of macro `run` defined at input.s:1, invoked at input.s:10\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "cycle_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: circular definition of symbol `WRAPPER::FIRST`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "cross_segment_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000900",
+      "matches_native": true
+    },
+    {
+      "name": "cross_segment_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000900",
+      "matches_native": true
+    },
+    {
+      "name": "cross_segment_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000900",
+      "matches_native": true
+    },
+    {
+      "name": "cross_segment_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000900",
+      "matches_native": true
+    },
+    {
+      "name": "outer_alias_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "outer_alias_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "outer_alias_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "outer_alias_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": true
+    },
+    {
+      "name": "explicit_outer_alias_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "explicit_outer_alias_included",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "explicit_outer_alias_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "explicit_outer_alias_scope",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "long_chain",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    },
+    {
+      "name": "shared_graph",
+      "argv": [
+        "/private/tmp/asm198x-flat-counter-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000009",
+      "matches_native": false
+    }
+  ]
+}
