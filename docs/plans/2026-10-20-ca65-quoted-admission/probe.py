@@ -47,6 +47,28 @@ def cases() -> dict[str, str]:
         out[f"missing_include_before_{name}"] = '.include "missing.inc"\n' + line
         out[f"bad_{name}_before_missing_include"] = line + '.include "missing.inc"\n'
         out[f"inactive_end_before_{name}"] = ".if 0\n.end\n.endif\n" + line
+    for name, value in {"character": "'AB'", "string": '"open'}.items():
+        line = f".byte {value}\n"
+        for context, body in {
+            "macro_end": ".macro emit\n.end\n" + line + ".endmacro\n",
+            "repeat_end": ".repeat 0\n.end\n" + line + ".endrepeat\n",
+            "macro_exit": ".macro emit\n.exitmacro\n" + line + ".endmacro\n",
+            "active_end_tail": ".end " + value + "\n",
+            "inactive_end_tail": ".if 0\n.end " + value + "\n.endif\n",
+            "inactive_missing_include": '.if 0\n.include "missing.inc"\n'
+            + line
+            + ".endif\n",
+        }.items():
+            out[f"{context}_{name}"] = ".byte 6\n" + body + ".byte 7\n"
+    for name, body in {
+        "inactive_unknown_name": ".if 0\n.byte UNKNOWN\n.endif\n",
+        "inactive_missing_include": '.if 0\n.include "missing.inc"\n.endif\n',
+        "inactive_text": '.if 0\n.define VALUE "open\n.endif\n',
+        "quoted_comment": "; \"open 'AB'\n",
+        "string_semicolon": '.byte "a;b"\n',
+        "character_semicolon": ".byte ';'\n",
+    }.items():
+        out[name] = ".byte 6\n" + body + ".byte 7\n"
     return out
 
 

@@ -66,3 +66,15 @@ canonical syntax-only reader and preserves the existing after-`.end` contract.
 5. Run full Rust/Lua and Node suites, Clippy/fmt/Ruff/docs; freeze a clean producer,
    local package/corruption controls, actual five-host archives and exact-head CI.
    Rebase-merge and remove the owned workspace/caches after retaining evidence.
+
+## Expanded pre-implementation controls
+
+The 157-case audit retains the original 139 cases and adds macro/repeat `.end`,
+`.exitmacro`, malformed `.end` tails, inactive missing includes, unknown names
+and comment/semicolon controls. Native accepts 77 and refuses 80. The clean
+predecessor has 44 wrong acceptances and two first-error position mismatches:
+malformed tokens before a missing include currently report the later include
+instead. `compare.py` checks native first-error lines and all four existing
+outputs on refusal, alongside acceptance and emitted bytes. Complete facts and
+predecessor process streams are retained in `native-expanded.json` and
+`predecessor-expanded.json`.
