@@ -1,0 +1,332 @@
+[
+  {
+    "source": "/private/tmp/asm198x-query-admission-producer/query-original-after.json",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--query-original-after.json.gz",
+    "length": 28293,
+    "sha256": "3bc2b556a42de2b8da6d1901cc8632b3f10e86e15734c71a3a9e7ad162ea596d"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-producer/short-circuit-before.json",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--short-circuit-before.json.gz",
+    "length": 9061,
+    "sha256": "664c1202a84b689a10777358d2e2ae3cdc134b3ca7d08f26695b0eb92ee0d7ba"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-producer/strings-consumer-native-after.json",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--strings-consumer-native-after.json.gz",
+    "length": 33310,
+    "sha256": "2e4c3b2cfd8d9939702030c90cecd7973568543a35ec9a467c12528a61d6cd07"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-producer/strings-numeric-string-arity-native-after.json",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--strings-numeric-string-arity-native-after.json.gz",
+    "length": 12743,
+    "sha256": "31d868d0fd88725a562de8d319a7aeab28f899c5c4c6327e51a77588fafa18e2"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-producer/scope-deferred-followups-native-after.json",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--scope-deferred-followups-native-after.json.gz",
+    "length": 11127,
+    "sha256": "1ee7bab40ea8db376db1e950a64ee3d106ac4c441c0cf1cbf2b7acb90889179d"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-producer/strings-index-scope-native-after.json",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--strings-index-scope-native-after.json.gz",
+    "length": 2137,
+    "sha256": "e51228abb62109463d948cdc9bcf68315b87e92b5bb2dc5722c83c8dad26b73b"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-producer/strings-lifetime-native-after.json",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--strings-lifetime-native-after.json.gz",
+    "length": 17460,
+    "sha256": "b904b8b0c443c0459f21768350b62b4c18dec6a1bf0c15075eadc0edc0bd3501"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-producer/text-assertion-native-after.json",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--text-assertion-native-after.json.gz",
+    "length": 60523,
+    "sha256": "6b6ca0ba8d96c43dbcf5d3bf1e2e1ce9e390f9db951285f509f4bcf820160b0d"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-producer/replay-summary.json",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--replay-summary.json.gz",
+    "length": 6656,
+    "sha256": "fd196dff3d5277b5b44811b3bd3f1250ad434992eddef55b6d5e8ad1028be00a"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-producer/new-before.json",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--new-before.json.gz",
+    "length": 25504,
+    "sha256": "aac47a47d2e7c1acb702d03ec0c673e510292acf38bd4296bf1d9670c64c2bf7"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-producer/text-native-after.json",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--text-native-after.json.gz",
+    "length": 197212,
+    "sha256": "0da493afe238926713ff2c77f52065876fa7552c541a88ad26b4f0c2ccbccfb3"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-producer/scope-native-width-probes-after.json",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--scope-native-width-probes-after.json.gz",
+    "length": 71631,
+    "sha256": "d1592813aa760fccf9e8cbf9a35d89df87264847c9b740ee158a7f46f04d994d"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-producer/scope-native-negative-memory-probes-after.json",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--scope-native-negative-memory-probes-after.json.gz",
+    "length": 14179,
+    "sha256": "31e34dca5d4e381415331ccc4c04751566351feda48c581605e6a6892ff64a3e"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-producer/scope-native-query-probes-after.json",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--scope-native-query-probes-after.json.gz",
+    "length": 17082,
+    "sha256": "276d178ee13ca2b870388713447ef04d26a91dfe7695dfed03571bce2e783ea8"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-producer/source-constancy-after.json",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--source-constancy-after.json.gz",
+    "length": 155653,
+    "sha256": "68042ce15ec0d9d83aa8687db6f08470113fa65722f4467928db2a581025f2be"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-producer/short-circuit-native.json",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--short-circuit-native.json.gz",
+    "length": 16849,
+    "sha256": "0c67ea54a1cca643fab2765faf367606201ac1d54f7dc314b368ea65b72a5d00"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-producer/query-extended-after.json",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--query-extended-after.json.gz",
+    "length": 70077,
+    "sha256": "97d65c89e1295890750572ed494a1493e94faa4b2063d3f3cba5bad0f61f912e"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-producer/scope-native-phase-probes-after.json",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--scope-native-phase-probes-after.json.gz",
+    "length": 54338,
+    "sha256": "6598ddd9489e852b0830bf0cce0f0487dc8fac0b9129122e548d1eabb7138df8"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-producer/new-after.json",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--new-after.json.gz",
+    "length": 27459,
+    "sha256": "0d9fc0a71929b71bc55cc88be8380461d66968e924e31e68725b3a8237623366"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-producer/strings-text-consumer-native-after.json",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--strings-text-consumer-native-after.json.gz",
+    "length": 3050,
+    "sha256": "df1f424d757cc18cdbcc01c568877ead7e16323287a4cce408dd2efbc482cb03"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-producer/full-summary.json",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--full-summary.json.gz",
+    "length": 369,
+    "sha256": "40cdf92a5b9708645f4b692156c7b3e48ed739e97a91d69014e968a25acd142f"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-producer/short-circuit-after.json",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--short-circuit-after.json.gz",
+    "length": 9654,
+    "sha256": "95295bb47fda4ad90b21a7c22a0644969e1d34efa3f63610925d4ae0e80f9770"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-producer/scope-native-stream-probes-after.json",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--scope-native-stream-probes-after.json.gz",
+    "length": 3204,
+    "sha256": "3764224d74fe6e875f920eb5623f913f0b48b2e39452dbf3dcd6d21140f13735"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-producer/strings-flat-native-after.json",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--strings-flat-native-after.json.gz",
+    "length": 259693,
+    "sha256": "daa0960d4344433979814d18fe7bf2c922f7ad080266d1d032d13eb6461a1342"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-producer/binary-identities.json",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--binary-identities.json.gz",
+    "length": 169,
+    "sha256": "9e9c5353eddf439ae0e7f002255dfef325fd078ec5e39d70b5d9780d3555564f"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-producer/strings-guard-native-after.json",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--strings-guard-native-after.json.gz",
+    "length": 3318,
+    "sha256": "55bc07e296be77f9cfc1050ee250c96fae86d66716b99a924500e7a76453500f"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-producer/alias-after.json",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--alias-after.json.gz",
+    "length": 4436,
+    "sha256": "b3600ede6683c964224e3c0a786f1e8dc2f429f0dfa6943fc031758f3769d480"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-producer/scope-native-completed-phase-probes-after.json",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--scope-native-completed-phase-probes-after.json.gz",
+    "length": 53831,
+    "sha256": "4df97fa4848cf4697e1909494143c876c961ba764fd75ac697ca183c2985ebd7"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-local-package/wrong-bytes.log",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/package--wrong-bytes.log.gz",
+    "length": 130,
+    "sha256": "510d6e0cbebf8f8fb4024939bdabda214330b734100fab57025f8737a47fe073"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-local-package/wrong-bytes.json",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/package--wrong-bytes.json.gz",
+    "length": 25329615,
+    "sha256": "67904fe47a2e88660bdb140e161c0114f620ef2b781b44f404ba088bafa49100"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-local-package/corrupt-archive.json",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/package--corrupt-archive.json.gz",
+    "length": 172,
+    "sha256": "d293f944fdd29a56aeb5c4e9e44a8acd99fbbb3d9552a90cc9eb8aad1dc1d6d1"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-local-package/predecessor.json",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/package--predecessor.json.gz",
+    "length": 25095736,
+    "sha256": "d52dd4cabac7108a2019da6751961f6b1c1b8822e0cc9e30a130affc6a6e7a29"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-local-package/report.log",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/package--report.log.gz",
+    "length": 77,
+    "sha256": "df94e11e81421497a3d4c3902b9b14b2276e963c3baaa39a80a3035e01b8de46"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-local-package/report.json",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/package--report.json.gz",
+    "length": 25328820,
+    "sha256": "90bc23cffc8c79937483086ca94d705e2c61cc7e47f3d196ad75795c03053b9a"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-local-package/corrupt-archive.log",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/package--corrupt-archive.log.gz",
+    "length": 973,
+    "sha256": "78c1507e312700d7f275e0e361bdcba0b421ebf5bfd28dad08a926ca11b2c66f"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-local-package/asm198x-aarch64-apple-darwin.tar.xz.sha256",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/package--asm198x-aarch64-apple-darwin.tar.xz.sha256.gz",
+    "length": 102,
+    "sha256": "4edff4081da6ca33015530eed8dc1dadce1510a6c36e851720a75e741e2b8de6"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-local-package/predecessor.log",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/package--predecessor.log.gz",
+    "length": 124,
+    "sha256": "93a04484df79b6e40a929ce36c2703ae8548d36c1e8380e76e5c80929d029b21"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-clean-4510/report.json",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/4510--report.json.gz",
+    "length": 12656,
+    "sha256": "6d891d8d72b16761e96c343276c2f839f690031fab38ec1afef818cf26ac77c4"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-clean-4510/logs/cc65-4510-opcodes--opcode-space-version-ld65.stdout",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/4510--logs--cc65-4510-opcodes--opcode-space-version-ld65.stdout.gz",
+    "length": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-clean-4510/logs/build-assembler.stdout",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/4510--logs--build-assembler.stdout.gz",
+    "length": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-clean-4510/logs/assembler-version.stderr",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/4510--logs--assembler-version.stderr.gz",
+    "length": 16,
+    "sha256": "cd9267fb50974330b2596f8f7d386346ec0227b2e2b702cb761d363dfa13a8c2"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-clean-4510/logs/cc65-4510-opcodes--opcode-space-version-ca65.stderr",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/4510--logs--cc65-4510-opcodes--opcode-space-version-ca65.stderr.gz",
+    "length": 17,
+    "sha256": "5c22de95322cb1d858e9690b5e3c6e83984c27c5120ff12c49f8dc9679ed2dbc"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-clean-4510/logs/cc65-4510-opcodes--opcode-space-reference-0.stdout",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/4510--logs--cc65-4510-opcodes--opcode-space-reference-0.stdout.gz",
+    "length": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-clean-4510/logs/cc65-4510-opcodes--opcode-space-reference-0.stderr",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/4510--logs--cc65-4510-opcodes--opcode-space-reference-0.stderr.gz",
+    "length": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-clean-4510/logs/cc65-4510-opcodes--opcode-space-version-ca65.stdout",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/4510--logs--cc65-4510-opcodes--opcode-space-version-ca65.stdout.gz",
+    "length": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-clean-4510/logs/assembler-version.stdout",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/4510--logs--assembler-version.stdout.gz",
+    "length": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-clean-4510/logs/cc65-4510-opcodes--opcode-space-version-ld65.stderr",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/4510--logs--cc65-4510-opcodes--opcode-space-version-ld65.stderr.gz",
+    "length": 17,
+    "sha256": "acf0ea5dbac2ff34c3733f092c38a357dd02d80c0d1edf0e05e8a36b92b62445"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-clean-4510/logs/build-assembler.stderr",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/4510--logs--build-assembler.stderr.gz",
+    "length": 1320,
+    "sha256": "45cef72a0be54022074c036696558ba6e4f8808bc83dde473be1ff741c0e6537"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-clean-4510/logs/cc65-4510-opcodes--opcode-space-assembler-0.stdout",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/4510--logs--cc65-4510-opcodes--opcode-space-assembler-0.stdout.gz",
+    "length": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-clean-4510/logs/cc65-4510-opcodes--opcode-space-reference-1.stdout",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/4510--logs--cc65-4510-opcodes--opcode-space-reference-1.stdout.gz",
+    "length": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-clean-4510/logs/cc65-4510-opcodes--opcode-space-reference-1.stderr",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/4510--logs--cc65-4510-opcodes--opcode-space-reference-1.stderr.gz",
+    "length": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-clean-4510/logs/cc65-4510-opcodes--opcode-space-assembler-0.stderr",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/4510--logs--cc65-4510-opcodes--opcode-space-assembler-0.stderr.gz",
+    "length": 51,
+    "sha256": "d0f2bb0a758878171f47aca2c415910cd2bb55a06fb1b89e28d6e8ced2d21477"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-full.log",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/asm198x-query-admission-full.log.gz",
+    "length": 152098,
+    "sha256": "0e1780ae2b348f925284205c7310923ff279399046fe30393d70c9d107856540"
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-4510.log",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/asm198x-query-admission-4510.log.gz",
+    "length": 157,
+    "sha256": "1c1ce04484a7e9b16a2a6407590c8b20213f5284ea8f1d1ffd12ec9500e391c3"
+  },
+  {
+    "source": "/private/tmp/asm198x-audit-query-admission-candidates.py",
+    "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/asm198x-audit-query-admission-candidates.py.gz",
+    "length": 14720,
+    "sha256": "7e1ba35ce9adbf4b1c6b1b2360dc372e6eb4d05777c830461954de37e1f9dda4"
+  }
+]
