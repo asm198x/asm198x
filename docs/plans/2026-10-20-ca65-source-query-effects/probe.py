@@ -40,6 +40,45 @@ def cases() -> dict[str, str]:
                 source = f'.include "{filename}"\n'
             out[name] = source
     assert len(out) == 56
+    controls = {
+        "missing_const": ".byte .const(MISSING)\n",
+        "forward_const": ".byte .const(VALUE),.ref(VALUE)\nVALUE=2\n",
+        "missing_sprintf": '.byte .sprintf("%d",MISSING)\n',
+        "forward_sprintf": '.byte .sprintf("%d",VALUE)\nVALUE=2\n',
+        "explicit_outer": "VALUE=2\n.scope INNER\n.byte .ref(::VALUE),.const(::VALUE),.ref(::VALUE)\n.endscope\n",
+        "shadow_after": "VALUE=2\n.scope INNER\n.byte .defined(VALUE),.const(VALUE),.defined(VALUE),.ref(VALUE)\nVALUE=3\n.byte VALUE,.const(VALUE)\n.endscope\n",
+        "cheap_const": "ROOT: .byte 0\n@VALUE=2\n.byte .ref(@VALUE),.const(@VALUE),.ref(@VALUE)\n",
+        "query_only": "VALUE=2\n.byte .defined(VALUE),.ref(VALUE),.defined(VALUE),.ref(VALUE)\n",
+        "numeric_before_nested": 'VALUE=2\n.byte .sprintf("%d%d",VALUE,.ref(VALUE))\n',
+        "nested_before_numeric": 'VALUE=2\n.byte .sprintf("%d%d",.ref(VALUE),VALUE),.ref(VALUE)\n',
+        "numeric_inside_nested": 'VALUE=2\n.byte .sprintf("%s%d",.sprintf("%d",VALUE),.ref(VALUE))\n',
+        "constructor_query": 'VALUE=2\n.byte .concat(.sprintf("%d",VALUE),.sprintf("%d",.ref(VALUE)))\n',
+        "label_const": "TARGET: .byte 0\n.byte .ref(TARGET),.const(TARGET),.ref(TARGET)\n",
+        "forward_label_const": ".byte .ref(TARGET),.const(TARGET),.ref(TARGET)\nTARGET: .byte 0\n",
+        "difference_const": "LEFT: .byte 0\nRIGHT: .byte 0\n.byte .const(RIGHT-LEFT),.ref(LEFT),.ref(RIGHT)\n",
+        "alias_const": "LEFT: .byte 0\nRIGHT: .byte 0\nALIAS=RIGHT-LEFT\n.byte .ref(ALIAS),.const(ALIAS),.ref(ALIAS)\n",
+        "alias_chain_const": "LEFT: .byte 0\nRIGHT: .byte 0\nFIRST=RIGHT-LEFT\nSECOND=FIRST+1\n.byte .const(SECOND)\n",
+        "alias_label": "LEFT: .byte 0\nALIAS=LEFT\n.byte .const(ALIAS)\n",
+        "alias_forward_difference": "FIRST=RIGHT-LEFT\n.byte .const(FIRST)\nLEFT: .byte 0\nRIGHT: .byte 0\n",
+        "alias_cycle": "FIRST=SECOND\nSECOND=FIRST\n.byte .const(FIRST)\n",
+        "repeat_order": "VALUE=2\n.repeat 2\n.byte .ref(VALUE),.const(VALUE),.ref(VALUE)\n.endrepeat\n",
+        "repeat_scope": "VALUE=2\n.repeat 2\n.scope\n.byte .defined(VALUE),.const(VALUE),.defined(VALUE),.ref(VALUE)\n.endscope\n.endrepeat\n",
+        "zero_repeat": '.repeat 0\n.byte .sprintf("%d",MISSING),.const(MISSING)\n.endrepeat\n.byte 7\n',
+        "inactive_nested": '.if 0\n.byte .sprintf("%d",.const(MISSING))\n.endif\n.byte 7\n',
+    }
+    for kind, body in controls.items():
+        for context in ["direct", "included", "macro"]:
+            name = "control_" + kind + "_" + context
+            if context == "included":
+                filename = name + ".inc"
+                FILES[filename] = body
+                source = f'.include "{filename}"\n'
+            elif context == "macro":
+                source = ".macro run\n" + body + ".endmacro\nrun\n"
+            else:
+                source = body
+            out[name] = source
+    assert len(out) == 128
     return out
 
 
