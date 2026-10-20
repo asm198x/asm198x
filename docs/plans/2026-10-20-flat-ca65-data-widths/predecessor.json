@@ -1,0 +1,3916 @@
+{
+  "binary": "/private/tmp/asm198x-flat-data-producer/asm198x",
+  "sha256": "bb458d654a38dd17af6101f41a60120445a262e58fba709509713f6b833de536",
+  "results": [
+    {
+      "name": "65816_byte_0_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value -129 does not fit in a byte\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "65816_byte_0_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value -129 does not fit in a byte\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "65816_byte_1_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value -128 does not fit in a byte\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "65816_byte_1_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value -128 does not fit in a byte\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "65816_byte_2_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value -1 does not fit in a byte\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "65816_byte_2_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value -1 does not fit in a byte\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "65816_byte_3_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00",
+      "matches_native": true
+    },
+    {
+      "name": "65816_byte_3_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00",
+      "matches_native": true
+    },
+    {
+      "name": "65816_byte_4_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "65816_byte_4_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "65816_byte_5_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "7f",
+      "matches_native": true
+    },
+    {
+      "name": "65816_byte_5_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "7f",
+      "matches_native": true
+    },
+    {
+      "name": "65816_byte_6_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ff",
+      "matches_native": true
+    },
+    {
+      "name": "65816_byte_6_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ff",
+      "matches_native": true
+    },
+    {
+      "name": "65816_byte_7_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value 256 does not fit in a byte\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "65816_byte_7_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value 256 does not fit in a byte\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "65816_byte_8_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value 4294967295 does not fit in a byte\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "65816_byte_8_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value 4294967295 does not fit in a byte\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "65816_byte_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_word_0_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value -32769 does not fit in a word\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "65816_word_0_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value -32769 does not fit in a word\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "65816_word_1_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value -32768 does not fit in a word\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "65816_word_1_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value -32768 does not fit in a word\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "65816_word_2_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value -1 does not fit in a word\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "65816_word_2_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value -1 does not fit in a word\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "65816_word_3_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_word_3_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_word_4_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0100",
+      "matches_native": true
+    },
+    {
+      "name": "65816_word_4_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0100",
+      "matches_native": true
+    },
+    {
+      "name": "65816_word_5_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ff7f",
+      "matches_native": true
+    },
+    {
+      "name": "65816_word_5_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ff7f",
+      "matches_native": true
+    },
+    {
+      "name": "65816_word_6_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff",
+      "matches_native": true
+    },
+    {
+      "name": "65816_word_6_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff",
+      "matches_native": true
+    },
+    {
+      "name": "65816_word_7_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value 65536 does not fit in a word\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "65816_word_7_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value 65536 does not fit in a word\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "65816_word_8_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value 4294967295 does not fit in a word\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "65816_word_8_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value 4294967295 does not fit in a word\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "65816_word_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_addr_0_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value -32769 does not fit in a word\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_addr_0_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value -32769 does not fit in a word\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_addr_1_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value -32768 does not fit in a word\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_addr_1_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value -32768 does not fit in a word\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_addr_2_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value -1 does not fit in a word\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_addr_2_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value -1 does not fit in a word\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_addr_3_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_addr_3_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_addr_4_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0100",
+      "matches_native": true
+    },
+    {
+      "name": "65816_addr_4_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0100",
+      "matches_native": true
+    },
+    {
+      "name": "65816_addr_5_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ff7f",
+      "matches_native": true
+    },
+    {
+      "name": "65816_addr_5_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ff7f",
+      "matches_native": true
+    },
+    {
+      "name": "65816_addr_6_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff",
+      "matches_native": true
+    },
+    {
+      "name": "65816_addr_6_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff",
+      "matches_native": true
+    },
+    {
+      "name": "65816_addr_7_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value 65536 does not fit in a word\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_addr_7_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value 65536 does not fit in a word\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_addr_8_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value 4294967295 does not fit in a word\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_addr_8_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value 4294967295 does not fit in a word\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_addr_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_dbyt_0_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "7fff",
+      "matches_native": false
+    },
+    {
+      "name": "65816_dbyt_0_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "7fff",
+      "matches_native": false
+    },
+    {
+      "name": "65816_dbyt_1_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "8000",
+      "matches_native": false
+    },
+    {
+      "name": "65816_dbyt_1_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "8000",
+      "matches_native": false
+    },
+    {
+      "name": "65816_dbyt_2_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff",
+      "matches_native": false
+    },
+    {
+      "name": "65816_dbyt_2_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff",
+      "matches_native": false
+    },
+    {
+      "name": "65816_dbyt_3_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_dbyt_3_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_dbyt_4_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0001",
+      "matches_native": true
+    },
+    {
+      "name": "65816_dbyt_4_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0001",
+      "matches_native": true
+    },
+    {
+      "name": "65816_dbyt_5_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "7fff",
+      "matches_native": true
+    },
+    {
+      "name": "65816_dbyt_5_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "7fff",
+      "matches_native": true
+    },
+    {
+      "name": "65816_dbyt_6_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff",
+      "matches_native": true
+    },
+    {
+      "name": "65816_dbyt_6_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff",
+      "matches_native": true
+    },
+    {
+      "name": "65816_dbyt_7_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": false
+    },
+    {
+      "name": "65816_dbyt_7_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": false
+    },
+    {
+      "name": "65816_dbyt_8_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff",
+      "matches_native": false
+    },
+    {
+      "name": "65816_dbyt_8_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff",
+      "matches_native": false
+    },
+    {
+      "name": "65816_dbyt_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_dword_0_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value -2147483649 out of range for a 4-byte operand\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "65816_dword_0_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value -2147483649 out of range for a 4-byte operand\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "65816_dword_1_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00000080",
+      "matches_native": false
+    },
+    {
+      "name": "65816_dword_1_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00000080",
+      "matches_native": false
+    },
+    {
+      "name": "65816_dword_2_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffffffff",
+      "matches_native": false
+    },
+    {
+      "name": "65816_dword_2_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffffffff",
+      "matches_native": false
+    },
+    {
+      "name": "65816_dword_3_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00000000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_dword_3_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00000000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_dword_4_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "01000000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_dword_4_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "01000000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_dword_5_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffffff7f",
+      "matches_native": true
+    },
+    {
+      "name": "65816_dword_5_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffffff7f",
+      "matches_native": true
+    },
+    {
+      "name": "65816_dword_6_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffffffff",
+      "matches_native": true
+    },
+    {
+      "name": "65816_dword_6_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffffffff",
+      "matches_native": true
+    },
+    {
+      "name": "65816_dword_7_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value 4294967296 out of range for a 4-byte operand\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "65816_dword_7_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value 4294967296 out of range for a 4-byte operand\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "65816_dword_8_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffffffff",
+      "matches_native": true
+    },
+    {
+      "name": "65816_dword_8_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffffffff",
+      "matches_native": true
+    },
+    {
+      "name": "65816_dword_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_faraddr_0_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value -8388609 does not fit in 3 byte(s)\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "65816_faraddr_0_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value -8388609 does not fit in 3 byte(s)\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "65816_faraddr_1_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value -8388608 does not fit in 3 byte(s)\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "65816_faraddr_1_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value -8388608 does not fit in 3 byte(s)\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "65816_faraddr_2_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value -1 does not fit in 3 byte(s)\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "65816_faraddr_2_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value -1 does not fit in 3 byte(s)\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "65816_faraddr_3_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 3 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_faraddr_3_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 3 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_faraddr_4_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 3 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "010000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_faraddr_4_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 3 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "010000",
+      "matches_native": true
+    },
+    {
+      "name": "65816_faraddr_5_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 3 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff7f",
+      "matches_native": true
+    },
+    {
+      "name": "65816_faraddr_5_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 3 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff7f",
+      "matches_native": true
+    },
+    {
+      "name": "65816_faraddr_6_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 3 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffffff",
+      "matches_native": true
+    },
+    {
+      "name": "65816_faraddr_6_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 3 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffffff",
+      "matches_native": true
+    },
+    {
+      "name": "65816_faraddr_7_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value 16777216 does not fit in 3 byte(s)\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "65816_faraddr_7_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value 16777216 does not fit in 3 byte(s)\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "65816_faraddr_8_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value 4294967295 does not fit in 3 byte(s)\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "65816_faraddr_8_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value 4294967295 does not fit in 3 byte(s)\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "65816_faraddr_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "65816_extraction",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 3 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000000",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_byte_0_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value -129 does not fit in a byte\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_byte_0_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value -129 does not fit in a byte\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_byte_1_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value -128 does not fit in a byte\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_byte_1_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value -128 does not fit in a byte\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_byte_2_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value -1 does not fit in a byte\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_byte_2_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value -1 does not fit in a byte\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_byte_3_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_byte_3_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_byte_4_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_byte_4_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_byte_5_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "7f",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_byte_5_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "7f",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_byte_6_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ff",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_byte_6_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ff",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_byte_7_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value 256 does not fit in a byte\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_byte_7_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value 256 does not fit in a byte\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_byte_8_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value 4294967295 does not fit in a byte\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_byte_8_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value 4294967295 does not fit in a byte\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_byte_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_word_0_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value -32769 does not fit in a word\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_word_0_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value -32769 does not fit in a word\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_word_1_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value -32768 does not fit in a word\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_word_1_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value -32768 does not fit in a word\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_word_2_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value -1 does not fit in a word\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_word_2_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value -1 does not fit in a word\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_word_3_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_word_3_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_word_4_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0100",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_word_4_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0100",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_word_5_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ff7f",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_word_5_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ff7f",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_word_6_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_word_6_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_word_7_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value 65536 does not fit in a word\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_word_7_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value 65536 does not fit in a word\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_word_8_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value 4294967295 does not fit in a word\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_word_8_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value 4294967295 does not fit in a word\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_word_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_addr_0_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value -32769 does not fit in a word\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_addr_0_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value -32769 does not fit in a word\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_addr_1_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value -32768 does not fit in a word\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_addr_1_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value -32768 does not fit in a word\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_addr_2_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value -1 does not fit in a word\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_addr_2_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value -1 does not fit in a word\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_addr_3_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_addr_3_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_addr_4_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0100",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_addr_4_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0100",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_addr_5_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ff7f",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_addr_5_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ff7f",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_addr_6_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_addr_6_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_addr_7_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value 65536 does not fit in a word\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_addr_7_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value 65536 does not fit in a word\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_addr_8_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value 4294967295 does not fit in a word\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_addr_8_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value 4294967295 does not fit in a word\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_addr_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_dbyt_0_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "7fff",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_dbyt_0_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "7fff",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_dbyt_1_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "8000",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_dbyt_1_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "8000",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_dbyt_2_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_dbyt_2_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_dbyt_3_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_dbyt_3_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_dbyt_4_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0001",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_dbyt_4_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0001",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_dbyt_5_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "7fff",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_dbyt_5_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "7fff",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_dbyt_6_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_dbyt_6_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_dbyt_7_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_dbyt_7_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0000",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_dbyt_8_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_dbyt_8_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_dbyt_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_dword_0_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value -2147483649 out of range for a 4-byte operand\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_dword_0_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value -2147483649 out of range for a 4-byte operand\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_dword_1_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00000080",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_dword_1_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00000080",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_dword_2_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffffffff",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_dword_2_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffffffff",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_dword_3_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00000000",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_dword_3_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "00000000",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_dword_4_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "01000000",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_dword_4_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "01000000",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_dword_5_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffffff7f",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_dword_5_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffffff7f",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_dword_6_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffffffff",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_dword_6_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffffffff",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_dword_7_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value 4294967296 out of range for a 4-byte operand\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_dword_7_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value 4294967296 out of range for a 4-byte operand\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_dword_8_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffffffff",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_dword_8_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 4 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffffffff",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_dword_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_faraddr_0_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value -8388609 does not fit in 3 byte(s)\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_faraddr_0_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value -8388609 does not fit in 3 byte(s)\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_faraddr_1_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value -8388608 does not fit in 3 byte(s)\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_faraddr_1_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value -8388608 does not fit in 3 byte(s)\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_faraddr_2_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value -1 does not fit in 3 byte(s)\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_faraddr_2_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value -1 does not fit in 3 byte(s)\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_faraddr_3_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 3 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000000",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_faraddr_3_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 3 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000000",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_faraddr_4_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 3 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "010000",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_faraddr_4_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 3 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "010000",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_faraddr_5_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 3 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff7f",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_faraddr_5_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 3 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffff7f",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_faraddr_6_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 3 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffffff",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_faraddr_6_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 3 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "ffffff",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_faraddr_7_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value 16777216 does not fit in 3 byte(s)\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_faraddr_7_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value 16777216 does not fit in 3 byte(s)\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_faraddr_8_direct",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: value 4294967295 does not fit in 3 byte(s)\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_faraddr_8_macro",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: value 4294967295 does not fit in 3 byte(s)\nin expansion of macro `emit` defined at input.s:3, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_faraddr_unused",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_extraction",
+      "argv": [
+        "/private/tmp/asm198x-flat-data-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 3 byte(s) at $1000 -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000000",
+      "matches_native": true
+    }
+  ]
+}
