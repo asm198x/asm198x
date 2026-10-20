@@ -1,0 +1,6732 @@
+{
+  "binary": "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+  "sha256": "7e05a6b30a3336469d72732c7ff1675567c4ab67b0ad585bab45f1e6da80e06b",
+  "results": [
+    {
+      "name": "direct_byte_plain",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "066107",
+      "matches_native": true
+    },
+    {
+      "name": "labelled_byte_plain",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "066107",
+      "matches_native": true
+    },
+    {
+      "name": "selected_byte_plain",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "066107",
+      "matches_native": true
+    },
+    {
+      "name": "macro_body_byte_plain",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "066107",
+      "matches_native": true
+    },
+    {
+      "name": "inactive_byte_plain",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "unused_macro_byte_plain",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "zero_repeat_byte_plain",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "direct_asciiz_plain",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06610007",
+      "matches_native": true
+    },
+    {
+      "name": "labelled_asciiz_plain",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06610007",
+      "matches_native": true
+    },
+    {
+      "name": "selected_asciiz_plain",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06610007",
+      "matches_native": true
+    },
+    {
+      "name": "macro_body_asciiz_plain",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06610007",
+      "matches_native": true
+    },
+    {
+      "name": "inactive_asciiz_plain",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "unused_macro_asciiz_plain",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "zero_repeat_asciiz_plain",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "concat_plain",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615a07",
+      "matches_native": true
+    },
+    {
+      "name": "sprintf_plain",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "066107",
+      "matches_native": true
+    },
+    {
+      "name": "direct_byte_empty",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "labelled_byte_empty",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "selected_byte_empty",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "macro_body_byte_empty",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "inactive_byte_empty",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "unused_macro_byte_empty",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "zero_repeat_byte_empty",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "direct_asciiz_empty",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "060007",
+      "matches_native": true
+    },
+    {
+      "name": "labelled_asciiz_empty",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "060007",
+      "matches_native": true
+    },
+    {
+      "name": "selected_asciiz_empty",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "060007",
+      "matches_native": true
+    },
+    {
+      "name": "macro_body_asciiz_empty",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "060007",
+      "matches_native": true
+    },
+    {
+      "name": "inactive_asciiz_empty",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "unused_macro_asciiz_empty",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "zero_repeat_asciiz_empty",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "concat_empty",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "065a07",
+      "matches_native": true
+    },
+    {
+      "name": "sprintf_empty",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "direct_byte_slash",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c6207",
+      "matches_native": true
+    },
+    {
+      "name": "labelled_byte_slash",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c6207",
+      "matches_native": true
+    },
+    {
+      "name": "selected_byte_slash",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c6207",
+      "matches_native": true
+    },
+    {
+      "name": "macro_body_byte_slash",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c6207",
+      "matches_native": true
+    },
+    {
+      "name": "inactive_byte_slash",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "unused_macro_byte_slash",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "zero_repeat_byte_slash",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "direct_asciiz_slash",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c620007",
+      "matches_native": true
+    },
+    {
+      "name": "labelled_asciiz_slash",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c620007",
+      "matches_native": true
+    },
+    {
+      "name": "selected_asciiz_slash",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c620007",
+      "matches_native": true
+    },
+    {
+      "name": "macro_body_asciiz_slash",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c620007",
+      "matches_native": true
+    },
+    {
+      "name": "inactive_asciiz_slash",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "unused_macro_asciiz_slash",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "zero_repeat_asciiz_slash",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "concat_slash",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c625a07",
+      "matches_native": true
+    },
+    {
+      "name": "sprintf_slash",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c6207",
+      "matches_native": true
+    },
+    {
+      "name": "direct_byte_two_slashes",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c5c6207",
+      "matches_native": true
+    },
+    {
+      "name": "labelled_byte_two_slashes",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c5c6207",
+      "matches_native": true
+    },
+    {
+      "name": "selected_byte_two_slashes",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c5c6207",
+      "matches_native": true
+    },
+    {
+      "name": "macro_body_byte_two_slashes",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c5c6207",
+      "matches_native": true
+    },
+    {
+      "name": "inactive_byte_two_slashes",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "unused_macro_byte_two_slashes",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "zero_repeat_byte_two_slashes",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "direct_asciiz_two_slashes",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c5c620007",
+      "matches_native": true
+    },
+    {
+      "name": "labelled_asciiz_two_slashes",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c5c620007",
+      "matches_native": true
+    },
+    {
+      "name": "selected_asciiz_two_slashes",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c5c620007",
+      "matches_native": true
+    },
+    {
+      "name": "macro_body_asciiz_two_slashes",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c5c620007",
+      "matches_native": true
+    },
+    {
+      "name": "inactive_asciiz_two_slashes",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "unused_macro_asciiz_two_slashes",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "zero_repeat_asciiz_two_slashes",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "concat_two_slashes",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c5c625a07",
+      "matches_native": true
+    },
+    {
+      "name": "sprintf_two_slashes",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c5c6207",
+      "matches_native": true
+    },
+    {
+      "name": "direct_byte_trailing_slash",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c07",
+      "matches_native": true
+    },
+    {
+      "name": "labelled_byte_trailing_slash",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c07",
+      "matches_native": true
+    },
+    {
+      "name": "selected_byte_trailing_slash",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c07",
+      "matches_native": true
+    },
+    {
+      "name": "macro_body_byte_trailing_slash",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c07",
+      "matches_native": true
+    },
+    {
+      "name": "inactive_byte_trailing_slash",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "unused_macro_byte_trailing_slash",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "zero_repeat_byte_trailing_slash",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "direct_asciiz_trailing_slash",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c0007",
+      "matches_native": true
+    },
+    {
+      "name": "labelled_asciiz_trailing_slash",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c0007",
+      "matches_native": true
+    },
+    {
+      "name": "selected_asciiz_trailing_slash",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c0007",
+      "matches_native": true
+    },
+    {
+      "name": "macro_body_asciiz_trailing_slash",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c0007",
+      "matches_native": true
+    },
+    {
+      "name": "inactive_asciiz_trailing_slash",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "unused_macro_asciiz_trailing_slash",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "zero_repeat_asciiz_trailing_slash",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "concat_trailing_slash",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c5a07",
+      "matches_native": true
+    },
+    {
+      "name": "sprintf_trailing_slash",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c07",
+      "matches_native": true
+    },
+    {
+      "name": "direct_byte_trailing_two_slashes",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c5c07",
+      "matches_native": true
+    },
+    {
+      "name": "labelled_byte_trailing_two_slashes",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c5c07",
+      "matches_native": true
+    },
+    {
+      "name": "selected_byte_trailing_two_slashes",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c5c07",
+      "matches_native": true
+    },
+    {
+      "name": "macro_body_byte_trailing_two_slashes",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c5c07",
+      "matches_native": true
+    },
+    {
+      "name": "inactive_byte_trailing_two_slashes",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "unused_macro_byte_trailing_two_slashes",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "zero_repeat_byte_trailing_two_slashes",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "direct_asciiz_trailing_two_slashes",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c5c0007",
+      "matches_native": true
+    },
+    {
+      "name": "labelled_asciiz_trailing_two_slashes",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c5c0007",
+      "matches_native": true
+    },
+    {
+      "name": "selected_asciiz_trailing_two_slashes",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c5c0007",
+      "matches_native": true
+    },
+    {
+      "name": "macro_body_asciiz_trailing_two_slashes",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c5c0007",
+      "matches_native": true
+    },
+    {
+      "name": "inactive_asciiz_trailing_two_slashes",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "unused_macro_asciiz_trailing_two_slashes",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "zero_repeat_asciiz_trailing_two_slashes",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "concat_trailing_two_slashes",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c5c5a07",
+      "matches_native": true
+    },
+    {
+      "name": "sprintf_trailing_two_slashes",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c5c07",
+      "matches_native": true
+    },
+    {
+      "name": "direct_byte_adjacent",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "066122226207",
+      "matches_native": false
+    },
+    {
+      "name": "labelled_byte_adjacent",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "066122226207",
+      "matches_native": false
+    },
+    {
+      "name": "selected_byte_adjacent",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "066122226207",
+      "matches_native": false
+    },
+    {
+      "name": "macro_body_byte_adjacent",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "066122226207",
+      "matches_native": false
+    },
+    {
+      "name": "inactive_byte_adjacent",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "unused_macro_byte_adjacent",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "zero_repeat_byte_adjacent",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "direct_asciiz_adjacent",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06612222620007",
+      "matches_native": false
+    },
+    {
+      "name": "labelled_asciiz_adjacent",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06612222620007",
+      "matches_native": false
+    },
+    {
+      "name": "selected_asciiz_adjacent",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06612222620007",
+      "matches_native": false
+    },
+    {
+      "name": "macro_body_asciiz_adjacent",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06612222620007",
+      "matches_native": false
+    },
+    {
+      "name": "inactive_asciiz_adjacent",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "unused_macro_asciiz_adjacent",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "zero_repeat_asciiz_adjacent",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "concat_adjacent",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06612222625a07",
+      "matches_native": false
+    },
+    {
+      "name": "sprintf_adjacent",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "066122226207",
+      "matches_native": false
+    },
+    {
+      "name": "direct_byte_separated",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06612220226207",
+      "matches_native": false
+    },
+    {
+      "name": "labelled_byte_separated",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06612220226207",
+      "matches_native": false
+    },
+    {
+      "name": "selected_byte_separated",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06612220226207",
+      "matches_native": false
+    },
+    {
+      "name": "macro_body_byte_separated",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06612220226207",
+      "matches_native": false
+    },
+    {
+      "name": "inactive_byte_separated",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "unused_macro_byte_separated",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "zero_repeat_byte_separated",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "direct_asciiz_separated",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 8 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0661222022620007",
+      "matches_native": false
+    },
+    {
+      "name": "labelled_asciiz_separated",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 8 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0661222022620007",
+      "matches_native": false
+    },
+    {
+      "name": "selected_asciiz_separated",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 8 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0661222022620007",
+      "matches_native": false
+    },
+    {
+      "name": "macro_body_asciiz_separated",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 8 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0661222022620007",
+      "matches_native": false
+    },
+    {
+      "name": "inactive_asciiz_separated",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "unused_macro_asciiz_separated",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "zero_repeat_asciiz_separated",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "concat_separated",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 8 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0661222022625a07",
+      "matches_native": false
+    },
+    {
+      "name": "sprintf_separated",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06612220226207",
+      "matches_native": false
+    },
+    {
+      "name": "direct_byte_addition",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0661222b226207",
+      "matches_native": false
+    },
+    {
+      "name": "labelled_byte_addition",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0661222b226207",
+      "matches_native": false
+    },
+    {
+      "name": "selected_byte_addition",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0661222b226207",
+      "matches_native": false
+    },
+    {
+      "name": "macro_body_byte_addition",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0661222b226207",
+      "matches_native": false
+    },
+    {
+      "name": "inactive_byte_addition",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "unused_macro_byte_addition",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "zero_repeat_byte_addition",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "direct_asciiz_addition",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 8 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0661222b22620007",
+      "matches_native": false
+    },
+    {
+      "name": "labelled_asciiz_addition",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 8 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0661222b22620007",
+      "matches_native": false
+    },
+    {
+      "name": "selected_asciiz_addition",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 8 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0661222b22620007",
+      "matches_native": false
+    },
+    {
+      "name": "macro_body_asciiz_addition",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 8 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0661222b22620007",
+      "matches_native": false
+    },
+    {
+      "name": "inactive_asciiz_addition",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "unused_macro_asciiz_addition",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "zero_repeat_asciiz_addition",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "concat_addition",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 8 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0661222b22625a07",
+      "matches_native": false
+    },
+    {
+      "name": "sprintf_addition",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0661222b226207",
+      "matches_native": false
+    },
+    {
+      "name": "direct_byte_escaped_quote",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c226207",
+      "matches_native": false
+    },
+    {
+      "name": "labelled_byte_escaped_quote",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c226207",
+      "matches_native": false
+    },
+    {
+      "name": "selected_byte_escaped_quote",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c226207",
+      "matches_native": false
+    },
+    {
+      "name": "macro_body_byte_escaped_quote",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c226207",
+      "matches_native": false
+    },
+    {
+      "name": "inactive_byte_escaped_quote",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": false
+    },
+    {
+      "name": "unused_macro_byte_escaped_quote",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": false
+    },
+    {
+      "name": "zero_repeat_byte_escaped_quote",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": false
+    },
+    {
+      "name": "direct_asciiz_escaped_quote",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c22620007",
+      "matches_native": false
+    },
+    {
+      "name": "labelled_asciiz_escaped_quote",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c22620007",
+      "matches_native": false
+    },
+    {
+      "name": "selected_asciiz_escaped_quote",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c22620007",
+      "matches_native": false
+    },
+    {
+      "name": "macro_body_asciiz_escaped_quote",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c22620007",
+      "matches_native": false
+    },
+    {
+      "name": "inactive_asciiz_escaped_quote",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": false
+    },
+    {
+      "name": "unused_macro_asciiz_escaped_quote",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": false
+    },
+    {
+      "name": "zero_repeat_asciiz_escaped_quote",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": false
+    },
+    {
+      "name": "concat_escaped_quote",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unterminated string in expression\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "sprintf_escaped_quote",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unterminated string in expression\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "direct_byte_double_slash_quote",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c5c226207",
+      "matches_native": false
+    },
+    {
+      "name": "labelled_byte_double_slash_quote",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c5c226207",
+      "matches_native": false
+    },
+    {
+      "name": "selected_byte_double_slash_quote",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c5c226207",
+      "matches_native": false
+    },
+    {
+      "name": "macro_body_byte_double_slash_quote",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 7 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c5c226207",
+      "matches_native": false
+    },
+    {
+      "name": "inactive_byte_double_slash_quote",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": false
+    },
+    {
+      "name": "unused_macro_byte_double_slash_quote",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": false
+    },
+    {
+      "name": "zero_repeat_byte_double_slash_quote",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": false
+    },
+    {
+      "name": "direct_asciiz_double_slash_quote",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 8 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c5c22620007",
+      "matches_native": false
+    },
+    {
+      "name": "labelled_asciiz_double_slash_quote",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 8 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c5c22620007",
+      "matches_native": false
+    },
+    {
+      "name": "selected_asciiz_double_slash_quote",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 8 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c5c22620007",
+      "matches_native": false
+    },
+    {
+      "name": "macro_body_asciiz_double_slash_quote",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 8 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c5c22620007",
+      "matches_native": false
+    },
+    {
+      "name": "inactive_asciiz_double_slash_quote",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": false
+    },
+    {
+      "name": "unused_macro_asciiz_double_slash_quote",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": false
+    },
+    {
+      "name": "zero_repeat_asciiz_double_slash_quote",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": false
+    },
+    {
+      "name": "concat_double_slash_quote",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unterminated string in expression\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "sprintf_double_slash_quote",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unterminated string in expression\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "direct_byte_trailing_name",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: expected a value\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "labelled_byte_trailing_name",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: expected a value\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "selected_byte_trailing_name",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: expected a value\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "macro_body_byte_trailing_name",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: expected a value\nin expansion of macro `emit` defined at input.s:2, invoked at input.s:5\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "inactive_byte_trailing_name",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "unused_macro_byte_trailing_name",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "zero_repeat_byte_trailing_name",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "direct_asciiz_trailing_name",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: expected a value\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "labelled_asciiz_trailing_name",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: expected a value\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "selected_asciiz_trailing_name",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: expected a value\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "macro_body_asciiz_trailing_name",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: expected a value\nin expansion of macro `emit` defined at input.s:2, invoked at input.s:5\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "inactive_asciiz_trailing_name",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "unused_macro_asciiz_trailing_name",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "zero_repeat_asciiz_trailing_name",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "concat_trailing_name",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: `.concat` takes a string here\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "sprintf_trailing_name",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: `.sprintf` takes a string here\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "direct_byte_trailing_number",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: expected a value\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "labelled_byte_trailing_number",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: expected a value\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "selected_byte_trailing_number",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: expected a value\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "macro_body_byte_trailing_number",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: expected a value\nin expansion of macro `emit` defined at input.s:2, invoked at input.s:5\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "inactive_byte_trailing_number",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "unused_macro_byte_trailing_number",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "zero_repeat_byte_trailing_number",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "direct_asciiz_trailing_number",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: expected a value\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "labelled_asciiz_trailing_number",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: expected a value\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "selected_asciiz_trailing_number",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: expected a value\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "macro_body_asciiz_trailing_number",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: expected a value\nin expansion of macro `emit` defined at input.s:2, invoked at input.s:5\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "inactive_asciiz_trailing_number",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "unused_macro_asciiz_trailing_number",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "zero_repeat_asciiz_trailing_number",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "concat_trailing_number",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: `.concat` takes a string here\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "sprintf_trailing_number",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: `.sprintf` takes a string here\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "direct_byte_parenthesized",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: expected a value\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "labelled_byte_parenthesized",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: expected a value\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "selected_byte_parenthesized",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: expected a value\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "macro_body_byte_parenthesized",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: expected a value\nin expansion of macro `emit` defined at input.s:2, invoked at input.s:5\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "inactive_byte_parenthesized",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "unused_macro_byte_parenthesized",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "zero_repeat_byte_parenthesized",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "direct_asciiz_parenthesized",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: expected a value\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "labelled_asciiz_parenthesized",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: expected a value\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "selected_asciiz_parenthesized",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: expected a value\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "macro_body_asciiz_parenthesized",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: expected a value\nin expansion of macro `emit` defined at input.s:2, invoked at input.s:5\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "inactive_asciiz_parenthesized",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "unused_macro_asciiz_parenthesized",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "zero_repeat_asciiz_parenthesized",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "concat_parenthesized",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: `.concat` takes a string here\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "sprintf_parenthesized",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: `.sprintf` takes a string here\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "direct_byte_comma_number",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06610107",
+      "matches_native": true
+    },
+    {
+      "name": "labelled_byte_comma_number",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06610107",
+      "matches_native": true
+    },
+    {
+      "name": "selected_byte_comma_number",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06610107",
+      "matches_native": true
+    },
+    {
+      "name": "macro_body_byte_comma_number",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06610107",
+      "matches_native": true
+    },
+    {
+      "name": "inactive_byte_comma_number",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "unused_macro_byte_comma_number",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "zero_repeat_byte_comma_number",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "direct_asciiz_comma_number",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0661010007",
+      "matches_native": false
+    },
+    {
+      "name": "labelled_asciiz_comma_number",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0661010007",
+      "matches_native": false
+    },
+    {
+      "name": "selected_asciiz_comma_number",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0661010007",
+      "matches_native": false
+    },
+    {
+      "name": "macro_body_asciiz_comma_number",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0661010007",
+      "matches_native": false
+    },
+    {
+      "name": "inactive_asciiz_comma_number",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "unused_macro_asciiz_comma_number",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "zero_repeat_asciiz_comma_number",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "concat_comma_number",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: `.concat` takes a string here\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "sprintf_comma_number",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: `.sprintf` was given 2 argument(s) and has 1 format spec(s) to put them in\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "direct_byte_comma_string",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06616207",
+      "matches_native": true
+    },
+    {
+      "name": "labelled_byte_comma_string",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06616207",
+      "matches_native": true
+    },
+    {
+      "name": "selected_byte_comma_string",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06616207",
+      "matches_native": true
+    },
+    {
+      "name": "macro_body_byte_comma_string",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06616207",
+      "matches_native": true
+    },
+    {
+      "name": "inactive_byte_comma_string",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "unused_macro_byte_comma_string",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "zero_repeat_byte_comma_string",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "direct_asciiz_comma_string",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0661620007",
+      "matches_native": true
+    },
+    {
+      "name": "labelled_asciiz_comma_string",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0661620007",
+      "matches_native": true
+    },
+    {
+      "name": "selected_asciiz_comma_string",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0661620007",
+      "matches_native": true
+    },
+    {
+      "name": "macro_body_asciiz_comma_string",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0661620007",
+      "matches_native": true
+    },
+    {
+      "name": "inactive_asciiz_comma_string",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "unused_macro_asciiz_comma_string",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "zero_repeat_asciiz_comma_string",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "concat_comma_string",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0661625a07",
+      "matches_native": true
+    },
+    {
+      "name": "sprintf_comma_string",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: `.sprintf` was given 2 argument(s) and has 1 format spec(s) to put them in\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "direct_byte_comment",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "066107",
+      "matches_native": true
+    },
+    {
+      "name": "labelled_byte_comment",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "066107",
+      "matches_native": true
+    },
+    {
+      "name": "selected_byte_comment",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "066107",
+      "matches_native": true
+    },
+    {
+      "name": "macro_body_byte_comment",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "066107",
+      "matches_native": true
+    },
+    {
+      "name": "inactive_byte_comment",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "unused_macro_byte_comment",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "zero_repeat_byte_comment",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "direct_asciiz_comment",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06610007",
+      "matches_native": true
+    },
+    {
+      "name": "labelled_asciiz_comment",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06610007",
+      "matches_native": true
+    },
+    {
+      "name": "selected_asciiz_comment",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06610007",
+      "matches_native": true
+    },
+    {
+      "name": "macro_body_asciiz_comment",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06610007",
+      "matches_native": true
+    },
+    {
+      "name": "inactive_asciiz_comment",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "unused_macro_asciiz_comment",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "zero_repeat_asciiz_comment",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "concat_comment",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: `.concat` takes a string here\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "sprintf_comment",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: `.sprintf` takes a string here\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "direct_byte_slash_comment",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c07",
+      "matches_native": true
+    },
+    {
+      "name": "labelled_byte_slash_comment",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c07",
+      "matches_native": true
+    },
+    {
+      "name": "selected_byte_slash_comment",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c07",
+      "matches_native": true
+    },
+    {
+      "name": "macro_body_byte_slash_comment",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c07",
+      "matches_native": true
+    },
+    {
+      "name": "inactive_byte_slash_comment",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "unused_macro_byte_slash_comment",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "zero_repeat_byte_slash_comment",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "direct_asciiz_slash_comment",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c0007",
+      "matches_native": true
+    },
+    {
+      "name": "labelled_asciiz_slash_comment",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c0007",
+      "matches_native": true
+    },
+    {
+      "name": "selected_asciiz_slash_comment",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c0007",
+      "matches_native": true
+    },
+    {
+      "name": "macro_body_asciiz_slash_comment",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06615c0007",
+      "matches_native": true
+    },
+    {
+      "name": "inactive_asciiz_slash_comment",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "unused_macro_asciiz_slash_comment",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "zero_repeat_asciiz_slash_comment",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "concat_slash_comment",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: `.concat` takes a string here\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "sprintf_slash_comment",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: `.sprintf` takes a string here\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "direct_byte_utf8",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06c3a907",
+      "matches_native": true
+    },
+    {
+      "name": "labelled_byte_utf8",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06c3a907",
+      "matches_native": true
+    },
+    {
+      "name": "selected_byte_utf8",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06c3a907",
+      "matches_native": true
+    },
+    {
+      "name": "macro_body_byte_utf8",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06c3a907",
+      "matches_native": true
+    },
+    {
+      "name": "inactive_byte_utf8",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "unused_macro_byte_utf8",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "zero_repeat_byte_utf8",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "direct_asciiz_utf8",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06c3a90007",
+      "matches_native": true
+    },
+    {
+      "name": "labelled_asciiz_utf8",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06c3a90007",
+      "matches_native": true
+    },
+    {
+      "name": "selected_asciiz_utf8",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06c3a90007",
+      "matches_native": true
+    },
+    {
+      "name": "macro_body_asciiz_utf8",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06c3a90007",
+      "matches_native": true
+    },
+    {
+      "name": "inactive_asciiz_utf8",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "unused_macro_asciiz_utf8",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "zero_repeat_asciiz_utf8",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "concat_utf8",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06c3a95a07",
+      "matches_native": true
+    },
+    {
+      "name": "sprintf_utf8",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06c3a907",
+      "matches_native": true
+    },
+    {
+      "name": "direct_byte_punctuation",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 8 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06613b2c28296207",
+      "matches_native": true
+    },
+    {
+      "name": "labelled_byte_punctuation",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 8 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06613b2c28296207",
+      "matches_native": true
+    },
+    {
+      "name": "selected_byte_punctuation",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 8 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06613b2c28296207",
+      "matches_native": true
+    },
+    {
+      "name": "macro_body_byte_punctuation",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 8 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06613b2c28296207",
+      "matches_native": true
+    },
+    {
+      "name": "inactive_byte_punctuation",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "unused_macro_byte_punctuation",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "zero_repeat_byte_punctuation",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "direct_asciiz_punctuation",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 9 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06613b2c2829620007",
+      "matches_native": true
+    },
+    {
+      "name": "labelled_asciiz_punctuation",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 9 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06613b2c2829620007",
+      "matches_native": true
+    },
+    {
+      "name": "selected_asciiz_punctuation",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 9 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06613b2c2829620007",
+      "matches_native": true
+    },
+    {
+      "name": "macro_body_asciiz_punctuation",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 9 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06613b2c2829620007",
+      "matches_native": true
+    },
+    {
+      "name": "inactive_asciiz_punctuation",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "unused_macro_asciiz_punctuation",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "zero_repeat_asciiz_punctuation",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "concat_punctuation",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 9 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06613b2c2829625a07",
+      "matches_native": true
+    },
+    {
+      "name": "sprintf_punctuation",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 8 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06613b2c28296207",
+      "matches_native": true
+    },
+    {
+      "name": "direct_byte_empty_adjacent",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06222207",
+      "matches_native": false
+    },
+    {
+      "name": "labelled_byte_empty_adjacent",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06222207",
+      "matches_native": false
+    },
+    {
+      "name": "selected_byte_empty_adjacent",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06222207",
+      "matches_native": false
+    },
+    {
+      "name": "macro_body_byte_empty_adjacent",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06222207",
+      "matches_native": false
+    },
+    {
+      "name": "inactive_byte_empty_adjacent",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "unused_macro_byte_empty_adjacent",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "zero_repeat_byte_empty_adjacent",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "direct_asciiz_empty_adjacent",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0622220007",
+      "matches_native": false
+    },
+    {
+      "name": "labelled_asciiz_empty_adjacent",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0622220007",
+      "matches_native": false
+    },
+    {
+      "name": "selected_asciiz_empty_adjacent",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0622220007",
+      "matches_native": false
+    },
+    {
+      "name": "macro_body_asciiz_empty_adjacent",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0622220007",
+      "matches_native": false
+    },
+    {
+      "name": "inactive_asciiz_empty_adjacent",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "unused_macro_asciiz_empty_adjacent",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "zero_repeat_asciiz_empty_adjacent",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": true
+    },
+    {
+      "name": "concat_empty_adjacent",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0622225a07",
+      "matches_native": false
+    },
+    {
+      "name": "sprintf_empty_adjacent",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "06222207",
+      "matches_native": false
+    },
+    {
+      "name": "direct_byte_unterminated",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unterminated string in expression\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "labelled_byte_unterminated",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unterminated string in expression\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "selected_byte_unterminated",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: unterminated string in expression\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "macro_body_byte_unterminated",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: unterminated string in expression\nin expansion of macro `emit` defined at input.s:2, invoked at input.s:5\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "inactive_byte_unterminated",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": false
+    },
+    {
+      "name": "unused_macro_byte_unterminated",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": false
+    },
+    {
+      "name": "zero_repeat_byte_unterminated",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": false
+    },
+    {
+      "name": "direct_asciiz_unterminated",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unterminated string in expression\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "labelled_asciiz_unterminated",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unterminated string in expression\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "selected_asciiz_unterminated",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: unterminated string in expression\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "macro_body_asciiz_unterminated",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: unterminated string in expression\nin expansion of macro `emit` defined at input.s:2, invoked at input.s:5\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "inactive_asciiz_unterminated",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": false
+    },
+    {
+      "name": "unused_macro_asciiz_unterminated",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": false
+    },
+    {
+      "name": "zero_repeat_asciiz_unterminated",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "0607",
+      "matches_native": false
+    },
+    {
+      "name": "concat_unterminated",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unterminated string in expression\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "sprintf_unterminated",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unterminated string in expression\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "computed_quote",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "062207",
+      "matches_native": true
+    },
+    {
+      "name": "computed_slash",
+      "argv": [
+        "/private/tmp/asm198x-byte-strings-index-guard-trial/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "065c07",
+      "matches_native": true
+    }
+  ]
+}
