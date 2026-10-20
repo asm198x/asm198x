@@ -210,6 +210,47 @@ pub(crate) fn split_fields(rest: &str, max_splits: usize) -> Vec<&str> {
     fields
 }
 
+/// Bind `*` to this data element while the engine keeps statement-start PCs.
+/// The authored source stays on the AST node for canonical formatting.
+pub(crate) fn data_element(
+    mut value: crate::engine::Expr,
+    index: usize,
+    width: usize,
+    line: usize,
+) -> Result<crate::engine::Expr, AsmError> {
+    use crate::engine::{BinOp, Expr};
+
+    fn bind(value: &mut Expr, offset: i64) {
+        match value {
+            Expr::Pc => {
+                *value = Expr::Bin(BinOp::Add, Box::new(Expr::Pc), Box::new(Expr::Num(offset)));
+            }
+            Expr::Num(_) | Expr::Sym(_) => {}
+            Expr::Lo(inner)
+            | Expr::Hi(inner)
+            | Expr::Bank(inner)
+            | Expr::Neg(inner)
+            | Expr::BitNot(inner)
+            | Expr::FixRound(inner)
+            | Expr::TrailingZeros(inner)
+            | Expr::LogNot(inner) => bind(inner, offset),
+            Expr::Bin(_, left, right) => {
+                bind(left, offset);
+                bind(right, offset);
+            }
+        }
+    }
+
+    let offset = index
+        .checked_mul(width)
+        .and_then(|offset| i64::try_from(offset).ok())
+        .ok_or_else(|| AsmError::new(line, "data list is too large"))?;
+    if offset != 0 {
+        bind(&mut value, offset);
+    }
+    Ok(value)
+}
+
 /// A walk-handled `.include`/`.incbin` line found by a dialect's per-line
 /// parse, handed back for the driver to decide: the single-source parse keeps
 /// it as an unresolved verbatim item (KTD1 — `--fmt` never opens the target);
