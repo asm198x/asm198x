@@ -1,0 +1,284 @@
+[
+  {
+    "source": "/private/tmp/asm198x-query-admission-candidates/artifacts.json",
+    "retained": "candidates--artifacts.json.gz",
+    "sha256": "f4b3cbdf6bb5ae4cd1c1dd2fc2c07aaa10d5a3364a1545e0438e94762f3bd965",
+    "length": 4519
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-x86_64-unknown-linux-gnu-1/wrong-bytes.json",
+    "retained": "candidates--candidate-qualification-x86_64-unknown-linux-gnu-1--wrong-bytes.json.gz",
+    "sha256": "18c5891fb8d2a3363ce59d01761c3856a5bc59344d17a65ca278c072de3d0d54",
+    "length": 22430835
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-x86_64-unknown-linux-gnu-1/corrupt-archive.json",
+    "retained": "candidates--candidate-qualification-x86_64-unknown-linux-gnu-1--corrupt-archive.json.gz",
+    "sha256": "0b4d2d082c9b8af180fc479d18fb2de3e8d2e64a19155e533d87f86ef97ccf07",
+    "length": 180
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-x86_64-unknown-linux-gnu-1/plan.json",
+    "retained": "candidates--candidate-qualification-x86_64-unknown-linux-gnu-1--plan.json.gz",
+    "sha256": "998be1811c772cee8ae18022d1a04b7f97288d243a80ccf40687856f72e44638",
+    "length": 13973
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-x86_64-unknown-linux-gnu-1/report.json",
+    "retained": "candidates--candidate-qualification-x86_64-unknown-linux-gnu-1--report.json.gz",
+    "sha256": "6e9d2573207754c4786338d642162aef69e32e1a0c734299aece1ddaf7c622bd",
+    "length": 22430040
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-x86_64-unknown-linux-gnu-1/acquisition.json",
+    "retained": "candidates--candidate-qualification-x86_64-unknown-linux-gnu-1--acquisition.json.gz",
+    "sha256": "b7e32b8b1e900e98a2866f90e46fa9f6fdafb9965b5a9aa835742f209331d21e",
+    "length": 126
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-x86_64-apple-darwin-1/wrong-bytes.json",
+    "retained": "candidates--candidate-qualification-x86_64-apple-darwin-1--wrong-bytes.json.gz",
+    "sha256": "e9fa6be6719d8d218620d3bfe61b0ed5d40e99c89317dd1c719930d4df62dd77",
+    "length": 25330709
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-x86_64-apple-darwin-1/corrupt-archive.json",
+    "retained": "candidates--candidate-qualification-x86_64-apple-darwin-1--corrupt-archive.json.gz",
+    "sha256": "2e5a8c2e13cf7c92b79606177bf5c326bf1dadd6f43bf7f4f7023897c4a8101c",
+    "length": 170
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-x86_64-apple-darwin-1/plan.json",
+    "retained": "candidates--candidate-qualification-x86_64-apple-darwin-1--plan.json.gz",
+    "sha256": "5e1969ffe55f895ec0babd29f44c06805f02fbd3666f68f904bbe8ee30876b3b",
+    "length": 13916
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-x86_64-apple-darwin-1/report.json",
+    "retained": "candidates--candidate-qualification-x86_64-apple-darwin-1--report.json.gz",
+    "sha256": "fdc71f500deb8cb6bee27ee2d3f036c18c5813ff6291c4ec83a93d1eba40a99e",
+    "length": 25329914
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-x86_64-apple-darwin-1/acquisition.json",
+    "retained": "candidates--candidate-qualification-x86_64-apple-darwin-1--acquisition.json.gz",
+    "sha256": "b7e32b8b1e900e98a2866f90e46fa9f6fdafb9965b5a9aa835742f209331d21e",
+    "length": 126
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-aarch64-apple-darwin-1/wrong-bytes.json",
+    "retained": "candidates--candidate-qualification-aarch64-apple-darwin-1--wrong-bytes.json.gz",
+    "sha256": "3dbf2952056c67f5afeef463b491f8f95ae77087432cb82fe7c85bb596691946",
+    "length": 25330716
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-aarch64-apple-darwin-1/corrupt-archive.json",
+    "retained": "candidates--candidate-qualification-aarch64-apple-darwin-1--corrupt-archive.json.gz",
+    "sha256": "d293f944fdd29a56aeb5c4e9e44a8acd99fbbb3d9552a90cc9eb8aad1dc1d6d1",
+    "length": 172
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-aarch64-apple-darwin-1/plan.json",
+    "retained": "candidates--candidate-qualification-aarch64-apple-darwin-1--plan.json.gz",
+    "sha256": "aae56a69259430e0a5aa83bc036e953570dd25a286fad39cd2da6e485591ef3a",
+    "length": 13916
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-aarch64-apple-darwin-1/report.json",
+    "retained": "candidates--candidate-qualification-aarch64-apple-darwin-1--report.json.gz",
+    "sha256": "b0a2f76b570a3bbdd0ddf1ff0896b875c60e7b7a5c2c16b0dfc429a84b3c2953",
+    "length": 25329921
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-aarch64-apple-darwin-1/acquisition.json",
+    "retained": "candidates--candidate-qualification-aarch64-apple-darwin-1--acquisition.json.gz",
+    "sha256": "b7e32b8b1e900e98a2866f90e46fa9f6fdafb9965b5a9aa835742f209331d21e",
+    "length": 126
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-aarch64-unknown-linux-gnu-1/wrong-bytes.json",
+    "retained": "candidates--candidate-qualification-aarch64-unknown-linux-gnu-1--wrong-bytes.json.gz",
+    "sha256": "137c649189d6edc348ba79e8cb29e1dd34ed52a6b7e77d5f00e0745bdfe4e5f5",
+    "length": 22430842
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-aarch64-unknown-linux-gnu-1/corrupt-archive.json",
+    "retained": "candidates--candidate-qualification-aarch64-unknown-linux-gnu-1--corrupt-archive.json.gz",
+    "sha256": "82cc3298ec0de54957a653ff1ad769a06adc7ecf95a36894ea9d1bf3b618952d",
+    "length": 182
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-aarch64-unknown-linux-gnu-1/plan.json",
+    "retained": "candidates--candidate-qualification-aarch64-unknown-linux-gnu-1--plan.json.gz",
+    "sha256": "998be1811c772cee8ae18022d1a04b7f97288d243a80ccf40687856f72e44638",
+    "length": 13973
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-aarch64-unknown-linux-gnu-1/report.json",
+    "retained": "candidates--candidate-qualification-aarch64-unknown-linux-gnu-1--report.json.gz",
+    "sha256": "d07b4f320999467af5e0f8a5ca7ec04eb6f6f884cc61fea67abd92fe50cbd249",
+    "length": 22430047
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-aarch64-unknown-linux-gnu-1/acquisition.json",
+    "retained": "candidates--candidate-qualification-aarch64-unknown-linux-gnu-1--acquisition.json.gz",
+    "sha256": "b7e32b8b1e900e98a2866f90e46fa9f6fdafb9965b5a9aa835742f209331d21e",
+    "length": 126
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-x86_64-pc-windows-msvc-1/wrong-bytes.json",
+    "retained": "candidates--candidate-qualification-x86_64-pc-windows-msvc-1--wrong-bytes.json.gz",
+    "sha256": "0cf36b666e8da83c019432b5d8255c1026488121d69eab87eab5eafff1261ed8",
+    "length": 25113482
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-x86_64-pc-windows-msvc-1/corrupt-archive.json",
+    "retained": "candidates--candidate-qualification-x86_64-pc-windows-msvc-1--corrupt-archive.json.gz",
+    "sha256": "14917b0dd5c0d132a39a1b8a988625000b26d8c9f83f57c358445d524d227fbf",
+    "length": 173
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-x86_64-pc-windows-msvc-1/plan.json",
+    "retained": "candidates--candidate-qualification-x86_64-pc-windows-msvc-1--plan.json.gz",
+    "sha256": "23fd648373e15b7d33d34c7ddf4efa736eb59b92e47d6c41d27119174c0acda8",
+    "length": 13854
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-x86_64-pc-windows-msvc-1/report.json",
+    "retained": "candidates--candidate-qualification-x86_64-pc-windows-msvc-1--report.json.gz",
+    "sha256": "8d6822060abb05f3467d0a8552e0d426a5b6422105d2fd22e7b55ae32c0a6a53",
+    "length": 25112687
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-candidates/candidate-qualification-x86_64-pc-windows-msvc-1/acquisition.json",
+    "retained": "candidates--candidate-qualification-x86_64-pc-windows-msvc-1--acquisition.json.gz",
+    "sha256": "b7e32b8b1e900e98a2866f90e46fa9f6fdafb9965b5a9aa835742f209331d21e",
+    "length": 126
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-summary.json",
+    "retained": "asm198x-query-admission-summary.json.gz",
+    "sha256": "504f36552d4c8a656f2c98e73a366f3fab8ec3a53f6ac235ef6b49a1bce96914",
+    "length": 2752
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-query-summary.json",
+    "retained": "asm198x-query-admission-query-summary.json.gz",
+    "sha256": "504f36552d4c8a656f2c98e73a366f3fab8ec3a53f6ac235ef6b49a1bce96914",
+    "length": 2752
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-classifier-summary.json",
+    "retained": "asm198x-query-admission-classifier-summary.json.gz",
+    "sha256": "4f5448a8e74ff96f6cd521de9c9e531b80b5a0d7bd0c092c77774206d12f5cb0",
+    "length": 2767
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-ci-attempt1.json",
+    "retained": "asm198x-query-admission-ci-attempt1.json.gz",
+    "sha256": "f27d971b4079a9ccc1f07561554f06696ca8134a61545940957fb35faf341b6e",
+    "length": 237672
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-ci-attempt1.log",
+    "retained": "asm198x-query-admission-ci-attempt1.log.gz",
+    "sha256": "45f24cf762c160a7017d7fd584ad9256b060c3d68b0dee4b44f83846549be874",
+    "length": 8747
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-ci-cancellation.json",
+    "retained": "asm198x-query-admission-ci-cancellation.json.gz",
+    "sha256": "9abce1ff5340d814e5989ac4b7e80a89c9bc66002a0adf98747575eebb55431f",
+    "length": 6542
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-ci-jobs-failure.json",
+    "retained": "asm198x-query-admission-ci-jobs-failure.json.gz",
+    "sha256": "a29e2caa355863064c448fe742ebde524a517e352d4d35cd590d941ccf50a25b",
+    "length": 49964
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-ci-failed.log",
+    "retained": "asm198x-query-admission-ci-failed.log.gz",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "length": 0
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-clippy.log",
+    "retained": "asm198x-query-admission-clippy.log.gz",
+    "sha256": "5b1387dc8f20c00db7dfea2579fd913704cc62a3e2409e2c53b73a800c611655",
+    "length": 288
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-node.log",
+    "retained": "asm198x-query-admission-node.log.gz",
+    "sha256": "29e034b3359029c06d35d9cc0427654e4d84265653259414c55708417d66adc0",
+    "length": 9371
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-ci-attempt2-jobs.json",
+    "retained": "asm198x-query-admission-ci-attempt2-jobs.json.gz",
+    "sha256": "c20ff6a95d845d00df88135ab9342e5173430e5cb153552d0bf02327a8c7d395",
+    "length": 52632
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-merge-verification.json",
+    "retained": "asm198x-query-admission-merge-verification.json.gz",
+    "sha256": "f877de63279a424cb798c1bf98c6ba70ba4b5829a1c4fbea627dc6d355119b92",
+    "length": 283
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-ci.json",
+    "retained": "asm198x-query-admission-ci.json.gz",
+    "sha256": "1a9237fcc3fcc20e402857f8255ae4054cca7ff3921a152ee51ea08320c87312",
+    "length": 237829
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-full.log",
+    "retained": "asm198x-query-admission-full.log.gz",
+    "sha256": "0e1780ae2b348f925284205c7310923ff279399046fe30393d70c9d107856540",
+    "length": 152098
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-head",
+    "retained": "asm198x-query-admission-head.gz",
+    "sha256": "2f15b736d38862268f891f51c670c049537c74251c6cc7c8c1bc26cd63b7541d",
+    "length": 41
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-merge.json",
+    "retained": "asm198x-query-admission-merge.json.gz",
+    "sha256": "464dd4f47247520f5155b587eae1ebc2a1c991a1c188d594f5fbe1ffcbaf82a6",
+    "length": 123
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-ci.log",
+    "retained": "asm198x-query-admission-ci.log.gz",
+    "sha256": "c129c1c5a8a4f8fa74d15917bbe78cce73f74d88bcb50f0296e5e1fc4d9d2d93",
+    "length": 523
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-4510.log",
+    "retained": "asm198x-query-admission-4510.log.gz",
+    "sha256": "1c1ce04484a7e9b16a2a6407590c8b20213f5284ea8f1d1ffd12ec9500e391c3",
+    "length": 157
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-build.log",
+    "retained": "asm198x-query-admission-build.log.gz",
+    "sha256": "def78c42f9fba15be58c86b67d79aed1186d056a2e2f078577c7f7883bf23572",
+    "length": 769
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-pr.md",
+    "retained": "asm198x-query-admission-pr.md.gz",
+    "sha256": "5558c5c54c3b6a0a5b38edcb99b5edc9a3eb4a43003424897f24d16f309d18fb",
+    "length": 1266
+  },
+  {
+    "source": "/private/tmp/asm198x-query-admission-focused.log",
+    "retained": "asm198x-query-admission-focused.log.gz",
+    "sha256": "816a73d19217e117b54e006e263cd146a98a02ea0697ea1ef5d16b59bb9cd133",
+    "length": 711
+  }
+]
