@@ -21,7 +21,7 @@ entire file as a formatter fallback.
    tests in `crates/asm198x/tests/`, including missing-include formatting guards
    and included source/macro diagnostics. Promote all 185 measured #821 flags
    in the numeric-admission, literal-boundary and character-operand fixtures;
-   leave #833/#834 flags governed by their own issue outcomes.
+   remove the 18 stale closed #833/#834 flags under #902 after their verified replays.
 4. Add required package and omission evidence. Show the preceding archive fails
    the new/prompted formatter checks. Run full Rust/Lua, Node, Clippy/fmt/Ruff/docs,
    clean native replays, archive/corruption controls and fresh 4510 checks.
