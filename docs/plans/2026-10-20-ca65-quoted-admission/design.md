@@ -1,7 +1,7 @@
 # Proposal: native quoted-token lexical admission (#835, #899)
 
-Status: awaiting agreement. No implementation or binding decision change has
-been made. The 139-case native audit has 70 acceptances and 69 refusals. The
+Status: approved on 2026-10-20: extend lexical admission to characters and
+quoted strings (option 1). Implementation follows the steps below. The 139-case native audit has 70 acceptances and 69 refusals. The
 clean preceding producer has 33 wrong acceptances: 27 character cases and six
 quoted-string cases. Three character cases are selected-source UTF-8 characters;
 30 errors are in inactive branches, unused macros and zero-repeat captures.
@@ -11,10 +11,8 @@ quoted-string cases. Three character cases are selected-source UTF-8 characters;
 `decisions/parse-affecting-directives.md` authorizes only native numeric-token
 checks in skipped/captured source. It explicitly states: “Character-literal
 errors remain a separate lexical scope (#835); this exception does not authorize
-them.” The blanket lazy-reading rule therefore still prevents these checks.
-The user-provided AGENTS.md instructions make decisions binding and require
-agreement before this behavior change. The numeric-only record stays unchanged
-until that agreement is given.
+them.” The approved extension below supersedes that numeric-only limit. Directives,
+expressions, names and includes remain lazy.
 
 ## Options
 
