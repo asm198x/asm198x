@@ -501,4 +501,6 @@ test('native source constancy evidence cannot be omitted', () => {
   assert.equal(qualifies(complete.filter(row => row.name !== 'ca65_source_constancy')), false);
   assert(requiredCases.includes('ca65_query_admission'));
   assert.equal(qualifies(complete.filter(row => row.name !== 'ca65_query_admission')), false);
+  assert(requiredCases.includes('ca65_conditional_context'));
+  assert.equal(qualifies(complete.filter(row => row.name !== 'ca65_conditional_context')), false);
 });

@@ -168,6 +168,12 @@ pub(crate) trait TextSyntax {
         Ok(self.evaluate(text, numbers, line))
     }
 
+    /// Opt-in live functions consume their own arguments in source order.
+    /// Pure grammars retain innermost-first expansion.
+    fn reads_arguments(&self, _name: &str) -> bool {
+        false
+    }
+
     /// Fold one call. `None` means the name is not a string function here, and
     /// the call is left alone for the ordinary parse to deal with.
     fn function(
@@ -487,7 +493,7 @@ fn fold_once<S: TextSyntax>(
                     let inner = &line[open + 1..close];
                     // Innermost first: a call inside the arguments is folded
                     // before this one, so every argument is already a literal.
-                    if has_call(syntax, scope, inner, braces) {
+                    if !syntax.reads_arguments(name) && has_call(syntax, scope, inner, braces) {
                         i = open + 1;
                         continue;
                     }

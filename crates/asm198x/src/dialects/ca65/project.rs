@@ -539,8 +539,27 @@ fn read_block_head(
     )?
     .text;
     let generated_label = super::split_generated_label_head(processed.trim()).is_some();
-    let processed = live_text(&processed, st, &sw.reader, line)
-        .map_err(|e| super::statement_error(e, file, &node.span.expansion_frames))?;
+    let label = super::split_label_head(processed.trim())
+        .or_else(|| super::split_generated_label_head(processed.trim()));
+    let tail = label.map_or(processed.trim(), |(_, tail)| tail);
+    let numeric = matches!(
+        split_first_word(tail).0.to_ascii_lowercase().as_str(),
+        ".if" | ".elseif" | ".ifconst" | ".ifnconst"
+    );
+    let processed = if numeric {
+        match label {
+            Some((label, tail)) => {
+                let label = live_text(label, st, &sw.reader, line).map_err(|error| {
+                    super::statement_error(error, file, &node.span.expansion_frames)
+                })?;
+                format!("{label} {tail}")
+            }
+            None => processed,
+        }
+    } else {
+        live_text(&processed, st, &sw.reader, line)
+            .map_err(|e| super::statement_error(e, file, &node.span.expansion_frames))?
+    };
     if let Some((label, _)) = super::split_label_head(processed.trim()) {
         let name = label.trim_end_matches(':');
         if sw.reader.reserved_head_label(name, generated_label) {
@@ -1014,6 +1033,201 @@ fn consume_include(
     out
 }
 
+/// Borrows the existing reader and projection; it owns only read requirements.
+struct ConditionalSource<'a> {
+    reader: &'a Walker,
+    projection: &'a Projection,
+    span: &'a crate::span::Span,
+    required: std::cell::RefCell<Vec<Expr>>,
+}
+
+impl ConditionalSource<'_> {
+    fn read(&self, text: &str, line: usize) -> Result<Expr, AsmError> {
+        let result = (|| {
+            let value = super::parse_value_source(
+                &self.reader.anons,
+                self.reader.scope_env.anchor_str(),
+                text,
+                line,
+                Some(self),
+            )?;
+            let Kind::Bytes(mut values) =
+                self.reader.scope_syms(&Kind::Bytes(vec![value]), line)?
+            else {
+                unreachable!("source expression")
+            };
+            let value = values.pop().expect("one expression");
+            self.required.borrow_mut().push(value.clone());
+            Ok(value)
+        })();
+        result.map_err(|mut error: AsmError| {
+            error.span.get_or_insert_with(|| self.span.clone());
+            error
+        })
+    }
+
+    fn expand(&self, text: &str, line: usize) -> Result<String, AsmError> {
+        ca65_flat::expand_ca65_live(
+            text,
+            line,
+            ca65_flat::LiveText {
+                target: if self.reader.extension.is_some() {
+                    ca65_flat::Target::Csg4510
+                } else {
+                    ca65_flat::Target::Mos6502
+                },
+                token_target: self.reader.repeat_registers.map(|selected| {
+                    if selected {
+                        ca65_flat::Target::Csg4510
+                    } else {
+                        ca65_flat::Target::Mos6502
+                    }
+                }),
+                numbers: &self.projection.consts,
+                strings: &self.reader.strings,
+                defined: &self.reader.text_names,
+                context: self,
+            },
+        )
+    }
+
+    fn fold(&self, value: &Expr, line: usize) -> Result<i64, AsmError> {
+        value.eval_with(
+            &|name| {
+                let key = super::split_scope_ref(name).map(|(path, name)| {
+                    if path.is_empty() {
+                        name.to_string()
+                    } else {
+                        format!("{path}::{name}")
+                    }
+                });
+                self.projection
+                    .consts
+                    .get(key.as_deref().unwrap_or(name))
+                    .copied()
+            },
+            None,
+            line,
+        )
+    }
+}
+
+impl mos6502::ExprSource for ConditionalSource<'_> {
+    fn recognizes(&self, name: &str) -> bool {
+        matches!(
+            name.to_ascii_lowercase().as_str(),
+            ".ref" | ".referenced" | ".def" | ".defined" | ".sizeof"
+        ) || ca65_flat::is_text_function(&name.to_ascii_lowercase())
+    }
+
+    fn symbol(&self, name: &str, line: usize) -> Result<Expr, AsmError> {
+        self.reader.source_value(name, line)?;
+        Ok(Expr::Sym(name.to_string()))
+    }
+
+    fn function(&self, name: &str, args: &str, _line: usize) -> Result<Expr, AsmError> {
+        let line = self.span.line as usize;
+        let source = format!("{name}({args})");
+        match name.to_ascii_lowercase().as_str() {
+            ".const" => {
+                if ca65_flat::split_fields(args, usize::MAX).len() != 1 || args.trim().is_empty() {
+                    return Err(AsmError::new(line, "`.const` takes one expression"));
+                }
+                Ok(Expr::Num(ca65_flat::LiveNumbers::constancy(
+                    self, args, line,
+                )?))
+            }
+            ".ref" | ".referenced" | ".defined" | ".def" | ".sizeof" => {
+                // Constructor arguments are read as source, but the resulting
+                // identifier stays a name-only query rather than an ordinary read.
+                let argument = self.expand(args, line)?;
+                let source = format!("{name}({argument})");
+                if name.eq_ignore_ascii_case(".sizeof") {
+                    let value = self.reader.source_value(&source, line)?;
+                    self.fold(&value, line).map(Expr::Num).map_err(|_| {
+                        AsmError::new(line, format!("size of `{argument}` is unknown here"))
+                    })
+                } else {
+                    self.reader.source_value(&source, line)
+                }
+            }
+            _ => {
+                let expanded = self.expand(&source, line)?;
+                super::parse_value_source(
+                    &self.reader.anons,
+                    self.reader.scope_env.anchor_str(),
+                    &expanded,
+                    line,
+                    Some(self),
+                )
+            }
+        }
+    }
+}
+
+impl ca65_flat::LiveNumbers for ConditionalSource<'_> {
+    fn literal(&self, text: &str, _line: usize) -> Result<Option<i64>, AsmError> {
+        let line = self.span.line as usize;
+        let value = self.read(text, line)?;
+        let mut names = BTreeSet::new();
+        super::collect_syms(&Kind::Bytes(vec![value.clone()]), &mut names);
+        Ok(if names.is_empty() {
+            self.fold(&value, line).ok()
+        } else {
+            None
+        })
+    }
+
+    fn number(&self, text: &str, _line: usize) -> Result<Option<i64>, AsmError> {
+        let line = self.span.line as usize;
+        let value = self.read(text, line)?;
+        Ok(self.fold(&value, line).ok())
+    }
+
+    fn constancy(&self, text: &str, _line: usize) -> Result<i64, AsmError> {
+        let line = self.span.line as usize;
+        let value = self.read(text, line)?;
+        let st = self.projection;
+        st.deferred.study_source(
+            &value,
+            &st.consts,
+            &st.label_seg,
+            &st.zero_page_names,
+            st.seg == "ZEROPAGE",
+            line,
+        )?;
+        Ok(i64::from(
+            self.fold(&value, line).is_ok() || weighs_nothing(&value, st),
+        ))
+    }
+}
+
+fn read_conditional_source(
+    text: &str,
+    st: &mut Projection,
+    reader: &Walker,
+    span: &crate::span::Span,
+) -> Result<Expr, ConditionError> {
+    let source = ConditionalSource {
+        reader,
+        projection: st,
+        span,
+        required: std::cell::RefCell::new(Vec::new()),
+    };
+    let result = source.read(text, span.line as usize);
+    let required = source.required.into_inner();
+    for value in required {
+        st.deferred.require_source_names(&value, span);
+    }
+    result.map_err(|error| {
+        let mut error = reader.strings.error(error);
+        // A definition diagnostic already has its own provenance. Only enrich
+        // fresh use-site errors; do not stamp them over an earlier definition.
+        error.span.get_or_insert_with(|| span.clone());
+        ConditionError::Definition(error)
+    })
+}
+
 /// Fold a `.if` / `.ifdef` / `.ifndef` / `.elseif` head.
 /// Cycle diagnostics retain the definition's file and expansion frames.
 enum ConditionError {
@@ -1037,7 +1251,6 @@ fn fold_condition(
     let (word, args) = split_first_word(head.trim());
     let word = word.to_ascii_lowercase();
     let args = args.trim();
-    let env = &st.consts;
     match word.as_str() {
         ".ifdef" | ".ifndef" => {
             let name = args
@@ -1099,7 +1312,7 @@ fn fold_condition(
             if args.is_empty() {
                 return Err(AsmError::new(line, format!("`{word}` needs an expression")).into());
             }
-            let expr = reader.source_value(args, line)?;
+            let expr = read_conditional_source(args, st, reader, span)?;
             let expr = map_expr_syms(&expr, &resolve_defined(&st.consts, &st.label_seg));
             st.deferred.require_source_names(&expr, span);
             st.deferred
@@ -1112,21 +1325,21 @@ fn fold_condition(
                     line,
                 )
                 .map_err(ConditionError::Definition)?;
-            let constant = fold_const(&expr, env, line).is_ok() || weighs_nothing(&expr, st);
+            let constant = fold_const(&expr, &st.consts, line).is_ok() || weighs_nothing(&expr, st);
             Ok((word == ".ifconst") == constant)
         }
         ".if" | ".elseif" => {
             if args.is_empty() {
                 return Err(AsmError::new(line, format!("`{word}` needs a condition")).into());
             }
-            let expr = reader.source_value(args, line)?;
+            let expr = read_conditional_source(args, st, reader, span)?;
             // `.if .defined(X)` — answered against what stands above this line,
             // which is what makes `.defined` positional in the first place.
             let expr = map_expr_syms(&expr, &resolve_defined(&st.consts, &st.label_seg));
             st.deferred.require_source_names(&expr, span);
             // ca65: `Constant expression expected` — a condition may not reach
             // forward, and a ca65 label is never constant.
-            let value = fold_const(&expr, env, line).map_err(|_| {
+            let value = fold_const(&expr, &st.consts, line).map_err(|_| {
                 AsmError::new(
                     line,
                     format!(
