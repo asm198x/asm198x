@@ -1,0 +1,1266 @@
+{
+  "retention_commit": "2be51b69263333540922b647a843733a1f6653da",
+  "removed_directories": [
+    "/private/tmp/asm198x-query-admission-producer",
+    "/private/tmp/asm198x-query-admission-local-package",
+    "/private/tmp/asm198x-conditional-context-producer",
+    "/private/tmp/asm198x-conditional-context-size-trial-producer",
+    "/private/tmp/asm198x-conditional-context-final-clean-4510",
+    "/private/tmp/asm198x-conditional-context-final-candidates",
+    "/Users/stevehill/Projects/198x/Asm198x/asm198x-ca65-text-consumers/.ruff_cache"
+  ],
+  "verified_files": [
+    {
+      "path": "/private/tmp/asm198x-query-admission-producer/query-original-after.json",
+      "sha256": "3bc2b556a42de2b8da6d1901cc8632b3f10e86e15734c71a3a9e7ad162ea596d",
+      "length": 28293,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--query-original-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-producer/short-circuit-before.json",
+      "sha256": "664c1202a84b689a10777358d2e2ae3cdc134b3ca7d08f26695b0eb92ee0d7ba",
+      "length": 9061,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--short-circuit-before.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-producer/strings-consumer-native-after.json",
+      "sha256": "2e4c3b2cfd8d9939702030c90cecd7973568543a35ec9a467c12528a61d6cd07",
+      "length": 33310,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--strings-consumer-native-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-producer/strings-numeric-string-arity-native-after.json",
+      "sha256": "31d868d0fd88725a562de8d319a7aeab28f899c5c4c6327e51a77588fafa18e2",
+      "length": 12743,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--strings-numeric-string-arity-native-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-producer/scope-deferred-followups-native-after.json",
+      "sha256": "1ee7bab40ea8db376db1e950a64ee3d106ac4c441c0cf1cbf2b7acb90889179d",
+      "length": 11127,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--scope-deferred-followups-native-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-producer/strings-index-scope-native-after.json",
+      "sha256": "e51228abb62109463d948cdc9bcf68315b87e92b5bb2dc5722c83c8dad26b73b",
+      "length": 2137,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--strings-index-scope-native-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-producer/format.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "length": 0,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local/format.log.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-producer/strings-lifetime-native-after.json",
+      "sha256": "b904b8b0c443c0459f21768350b62b4c18dec6a1bf0c15075eadc0edc0bd3501",
+      "length": 17460,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--strings-lifetime-native-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-producer/text-assertion-native-after.json",
+      "sha256": "6b6ca0ba8d96c43dbcf5d3bf1e2e1ce9e390f9db951285f509f4bcf820160b0d",
+      "length": 60523,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--text-assertion-native-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-producer/replay-summary.json",
+      "sha256": "fd196dff3d5277b5b44811b3bd3f1250ad434992eddef55b6d5e8ad1028be00a",
+      "length": 6656,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--replay-summary.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-producer/new-before.json",
+      "sha256": "aac47a47d2e7c1acb702d03ec0c673e510292acf38bd4296bf1d9670c64c2bf7",
+      "length": 25504,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--new-before.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-producer/text-native-after.json",
+      "sha256": "0da493afe238926713ff2c77f52065876fa7552c541a88ad26b4f0c2ccbccfb3",
+      "length": 197212,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--text-native-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-producer/scope-native-width-probes-after.json",
+      "sha256": "d1592813aa760fccf9e8cbf9a35d89df87264847c9b740ee158a7f46f04d994d",
+      "length": 71631,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--scope-native-width-probes-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-producer/scope-native-negative-memory-probes-after.json",
+      "sha256": "31e34dca5d4e381415331ccc4c04751566351feda48c581605e6a6892ff64a3e",
+      "length": 14179,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--scope-native-negative-memory-probes-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-producer/scope-native-query-probes-after.json",
+      "sha256": "276d178ee13ca2b870388713447ef04d26a91dfe7695dfed03571bce2e783ea8",
+      "length": 17082,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--scope-native-query-probes-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-producer/source-constancy-after.json",
+      "sha256": "68042ce15ec0d9d83aa8687db6f08470113fa65722f4467928db2a581025f2be",
+      "length": 155653,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--source-constancy-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-producer/short-circuit-native.json",
+      "sha256": "0c67ea54a1cca643fab2765faf367606201ac1d54f7dc314b368ea65b72a5d00",
+      "length": 16849,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--short-circuit-native.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-producer/docs.log",
+      "sha256": "850fb02c80b3af4d7c04ac1360de437f687bcf6b9a2f733160e4bd10ce98a165",
+      "length": 118,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local/docs.log.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-producer/query-extended-after.json",
+      "sha256": "97d65c89e1295890750572ed494a1493e94faa4b2063d3f3cba5bad0f61f912e",
+      "length": 70077,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--query-extended-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-producer/scope-native-phase-probes-after.json",
+      "sha256": "6598ddd9489e852b0830bf0cce0f0487dc8fac0b9129122e548d1eabb7138df8",
+      "length": 54338,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--scope-native-phase-probes-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-producer/new-after.json",
+      "sha256": "0d9fc0a71929b71bc55cc88be8380461d66968e924e31e68725b3a8237623366",
+      "length": 27459,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--new-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-producer/strings-text-consumer-native-after.json",
+      "sha256": "df1f424d757cc18cdbcc01c568877ead7e16323287a4cce408dd2efbc482cb03",
+      "length": 3050,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--strings-text-consumer-native-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-producer/identity.json",
+      "sha256": "096d205c02e75af778d939b61361cc1044f39e3a6a370471b364de6bc8ae20e5",
+      "length": 394,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-cleanup-915/producer-identity.json",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-producer/full-summary.json",
+      "sha256": "40cdf92a5b9708645f4b692156c7b3e48ed739e97a91d69014e968a25acd142f",
+      "length": 369,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--full-summary.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-producer/short-circuit-after.json",
+      "sha256": "95295bb47fda4ad90b21a7c22a0644969e1d34efa3f63610925d4ae0e80f9770",
+      "length": 9654,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--short-circuit-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-producer/versions.log",
+      "sha256": "86573d0aa21805a5bc8f1f7d113a12d243521d1907836723f37df91a52d66bd6",
+      "length": 66,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local/versions.log.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-producer/scope-native-stream-probes-after.json",
+      "sha256": "3764224d74fe6e875f920eb5623f913f0b48b2e39452dbf3dcd6d21140f13735",
+      "length": 3204,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--scope-native-stream-probes-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-producer/strings-flat-native-after.json",
+      "sha256": "daa0960d4344433979814d18fe7bf2c922f7ad080266d1d032d13eb6461a1342",
+      "length": 259693,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--strings-flat-native-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-producer/binary-identities.json",
+      "sha256": "9e9c5353eddf439ae0e7f002255dfef325fd078ec5e39d70b5d9780d3555564f",
+      "length": 169,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--binary-identities.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-producer/strings-guard-native-after.json",
+      "sha256": "55bc07e296be77f9cfc1050ee250c96fae86d66716b99a924500e7a76453500f",
+      "length": 3318,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--strings-guard-native-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-producer/alias-after.json",
+      "sha256": "b3600ede6683c964224e3c0a786f1e8dc2f429f0dfa6943fc031758f3769d480",
+      "length": 4436,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--alias-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-producer/scope-native-completed-phase-probes-after.json",
+      "sha256": "4df97fa4848cf4697e1909494143c876c961ba764fd75ac697ca183c2985ebd7",
+      "length": 53831,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/producer--scope-native-completed-phase-probes-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-producer/asm198x",
+      "sha256": "a60a02b8c30809de561906713bbf4c08f7cb1eb7d8a977f0289ca1331d23a83d",
+      "length": 18469560,
+      "retained_source": "0e963625f5dd814e2dc0f135512c34819823b709",
+      "retained_refs": [
+        "refs/heads/audit/ca65-query-admission-915",
+        "refs/heads/fix/ca65-source-query-reading",
+        "refs/remotes/origin/audit/ca65-query-admission-915",
+        "refs/remotes/origin/fix/ca65-source-query-reading"
+      ],
+      "retained_identity": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-cleanup-915/producer-identity.json"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-producer/asm198x-lua",
+      "sha256": "fdba1c756750fc11149302c6e1e65aea5e8a8bf3b01772698d56c39f66446abb",
+      "length": 20205976,
+      "retained_source": "0e963625f5dd814e2dc0f135512c34819823b709",
+      "retained_refs": [
+        "refs/heads/audit/ca65-query-admission-915",
+        "refs/heads/fix/ca65-source-query-reading",
+        "refs/remotes/origin/audit/ca65-query-admission-915",
+        "refs/remotes/origin/fix/ca65-source-query-reading"
+      ],
+      "retained_identity": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-cleanup-915/producer-identity.json"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-local-package/wrong-bytes.log",
+      "sha256": "510d6e0cbebf8f8fb4024939bdabda214330b734100fab57025f8737a47fe073",
+      "length": 130,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/package--wrong-bytes.log.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-local-package/wrong-bytes.json",
+      "sha256": "67904fe47a2e88660bdb140e161c0114f620ef2b781b44f404ba088bafa49100",
+      "length": 25329615,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/package--wrong-bytes.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-local-package/corrupt-archive.json",
+      "sha256": "d293f944fdd29a56aeb5c4e9e44a8acd99fbbb3d9552a90cc9eb8aad1dc1d6d1",
+      "length": 172,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/package--corrupt-archive.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-local-package/predecessor.json",
+      "sha256": "d52dd4cabac7108a2019da6751961f6b1c1b8822e0cc9e30a130affc6a6e7a29",
+      "length": 25095736,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/package--predecessor.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-local-package/report.log",
+      "sha256": "df94e11e81421497a3d4c3902b9b14b2276e963c3baaa39a80a3035e01b8de46",
+      "length": 77,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/package--report.log.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-local-package/report.json",
+      "sha256": "90bc23cffc8c79937483086ca94d705e2c61cc7e47f3d196ad75795c03053b9a",
+      "length": 25328820,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/package--report.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-local-package/corrupt-archive.log",
+      "sha256": "78c1507e312700d7f275e0e361bdcba0b421ebf5bfd28dad08a926ca11b2c66f",
+      "length": 973,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/package--corrupt-archive.log.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-local-package/asm198x-aarch64-apple-darwin.tar.xz.sha256",
+      "sha256": "4edff4081da6ca33015530eed8dc1dadce1510a6c36e851720a75e741e2b8de6",
+      "length": 102,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/package--asm198x-aarch64-apple-darwin.tar.xz.sha256.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-local-package/asm198x-aarch64-apple-darwin.tar.xz",
+      "sha256": "d503272e034f11894d4397bf618a8c805e3ae4e51c69c56ef7fc110f038f0c5a",
+      "length": 2723320,
+      "retained_checksum": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/package--asm198x-aarch64-apple-darwin.tar.xz.sha256.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-query-admission-local-package/predecessor.log",
+      "sha256": "93a04484df79b6e40a929ce36c2703ae8548d36c1e8380e76e5c80929d029b21",
+      "length": 124,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/query-admission-local-qualification-915/package--predecessor.log.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-producer/query-original-after.json",
+      "sha256": "89eea88dcfc151a1d32e87a3e70495109c131bf8cc7db74b7e8762edb925ac0e",
+      "length": 28521,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-producer--query-original-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-producer/strings-consumer-native-after.json",
+      "sha256": "cd9b178b2702a988cac42d59ac1076beef37716d862483543a6b1a39771d5774",
+      "length": 33590,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-producer--strings-consumer-native-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-producer/strings-numeric-string-arity-native-after.json",
+      "sha256": "baacf9a516c60afb0168e069359c8a9a0d899eccdaf12507cfc1a0f789fcfbba",
+      "length": 12851,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-producer--strings-numeric-string-arity-native-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-producer/scope-deferred-followups-native-after.json",
+      "sha256": "3f272c6aa5e1c4d866f245441ff6056de8766ea896767157331b8dc578ce3a0a",
+      "length": 11219,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-producer--scope-deferred-followups-native-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-producer/strings-index-scope-native-after.json",
+      "sha256": "b2e13b7991027bcdf581287ce50150db74289845217fa869745511dec839ed42",
+      "length": 2157,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-producer--strings-index-scope-native-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-producer/query-short-circuit-after.json",
+      "sha256": "5712b41503ac1691bb9d68b36ae385425e777b666f8546a56934fb5c70921cb5",
+      "length": 9654,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-producer--query-short-circuit-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-producer/strings-lifetime-native-after.json",
+      "sha256": "1778288c686d71560ddc2f098d1363f44f4063271e764a2c31aa83fab59e54a6",
+      "length": 17608,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-producer--strings-lifetime-native-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-producer/text-assertion-native-after.json",
+      "sha256": "4216e2674612b5676b006e374c21e8b78d978acbdb21338f25d590e166d638be",
+      "length": 61023,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-producer--text-assertion-native-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-producer/replay-summary.json",
+      "sha256": "5f80980426ab8e4b79bec28d0abfa78ddc79b875245e8520755c7ad0f5ef0c4c",
+      "length": 7134,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-producer--replay-summary.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-producer/query-admission-after.json",
+      "sha256": "47fe096d5ee1c0563d2f1a246a876447a5e49be31799be6f55ef87ef795ba21a",
+      "length": 27679,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-producer--query-admission-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-producer/text-native-after.json",
+      "sha256": "15e16b7d7c023aabc46ae9f118ef626d9aa2eaf354c2b5dad53d9f0b12650eab",
+      "length": 198800,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-producer--text-native-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-producer/scope-native-width-probes-after.json",
+      "sha256": "fdc59c4ee9c58b7d86be45be3bb9d73070a84959ad41ba6e01dcfd34e38dc440",
+      "length": 72211,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-producer--scope-native-width-probes-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-producer/scope-native-negative-memory-probes-after.json",
+      "sha256": "23c578ea91ef6836fa73bfe08517176d387b79cb2c157b256cea335fce453011",
+      "length": 14295,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-producer--scope-native-negative-memory-probes-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-producer/scope-native-query-probes-after.json",
+      "sha256": "f4692644c1d578fe2fd162da1c3beed8774a004cd712e0f28721a2bc3b4e12e6",
+      "length": 17226,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-producer--scope-native-query-probes-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-producer/source-constancy-after.json",
+      "sha256": "5afc22c821ef4da119316ce98972f319af57e7e11a77ff599af66c03170aecec",
+      "length": 156913,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-producer--source-constancy-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-producer/query-extended-after.json",
+      "sha256": "60a7a031a60187eb409715663814d2c45cea006d0635f5f38df2a0f29dab613d",
+      "length": 70593,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-producer--query-extended-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-producer/scope-native-phase-probes-after.json",
+      "sha256": "9e80759680984d9a52263adc683f0854cb135a12238c174e88fe1f5d266387a4",
+      "length": 54766,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-producer--scope-native-phase-probes-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-producer/strings-text-consumer-native-after.json",
+      "sha256": "3be46397bfaea043a24c2238a9a7fd7d0174dddc5b671c2285f74f0463012825",
+      "length": 3078,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-producer--strings-text-consumer-native-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-producer/scope-native-stream-probes-after.json",
+      "sha256": "c247a66097572bafb0de84d1c7519a8b6f45680f371e1aa1db386f271d3be57b",
+      "length": 3232,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-producer--scope-native-stream-probes-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-producer/strings-flat-native-after.json",
+      "sha256": "75f15e042985e59f42fa457f0cb8546a8e1e3ce657cf292a569ad982c55a5212",
+      "length": 261993,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-producer--strings-flat-native-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-producer/binary-sha256",
+      "sha256": "da60320135e04dec9cf63fc295e6fd1d15af6a20ed40f2fdf0050319a48912dd",
+      "length": 65,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-producer--binary-sha256.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-producer/strings-guard-native-after.json",
+      "sha256": "d3ee3823afda7f09bf9fc72fb3b12c82253a1403079bed2dac8da5629a58dfd5",
+      "length": 3346,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-producer--strings-guard-native-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-producer/alias-after.json",
+      "sha256": "29251366d61b7cd7a27eb17c0ad769618fa8689c6f9aaade392a64ce077ac956",
+      "length": 4476,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-producer--alias-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-producer/scope-native-completed-phase-probes-after.json",
+      "sha256": "edf70c603d7d8bf8a736f0ddf86f2e199262e25c7eeb3e755a54a0fe9cf1e93c",
+      "length": 54255,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-producer--scope-native-completed-phase-probes-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-producer/asm198x",
+      "sha256": "e67c2d451f3f8ff93fe24302bdab2691ccc4f38aa41dd5b1232429769c010f93",
+      "length": 20253544,
+      "disposable_superseded_preflight_binary": true,
+      "retained_fingerprint": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-producer--binary-sha256.gz",
+      "status": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-trials/status.md"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-size-trial-producer/query-original-after.json",
+      "sha256": "25a61dea7ea766cb5fd57b07f925590d14086f8a496b12589d272f9558ab4375",
+      "length": 28863,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-size-trial-producer--query-original-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-size-trial-producer/strings-consumer-native-after.json",
+      "sha256": "a735f1f0e15499c2e0673d7f111ec962f1174d40282cbac1a26771e216a4ed55",
+      "length": 34010,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-size-trial-producer--strings-consumer-native-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-size-trial-producer/strings-numeric-string-arity-native-after.json",
+      "sha256": "f502a29b63bf060e53e28703c881993f567572e560cc926e0e3f64aec6bcbdb7",
+      "length": 13013,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-size-trial-producer--strings-numeric-string-arity-native-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-size-trial-producer/scope-deferred-followups-native-after.json",
+      "sha256": "58fd232590846cb3283d9660d1d827824cc81d8b0b8eb251c6d710367e74fd40",
+      "length": 11357,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-size-trial-producer--scope-deferred-followups-native-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-size-trial-producer/strings-index-scope-native-after.json",
+      "sha256": "e5d53c203368ae95b11c66f1c9f3fc01c6975480d79a8ad0d49c08e3844396ae",
+      "length": 2187,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-size-trial-producer--strings-index-scope-native-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-size-trial-producer/query-short-circuit-after.json",
+      "sha256": "aa7c8253edb7fb6bb833d25a4d9c370ed5882626b004c545863fc3634c63b110",
+      "length": 9768,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-size-trial-producer--query-short-circuit-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-size-trial-producer/strings-lifetime-native-after.json",
+      "sha256": "6d93a4253a1b87ce3884fa82973fee0ec117bb5110d4f362e5694fbec11d7874",
+      "length": 17830,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-size-trial-producer--strings-lifetime-native-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-size-trial-producer/text-assertion-native-after.json",
+      "sha256": "84bb00c5ff55616100a69c150eaa6641296bfb5689773ce799d46522698da012",
+      "length": 61773,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-size-trial-producer--text-assertion-native-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-size-trial-producer/replay-summary.json",
+      "sha256": "5f80980426ab8e4b79bec28d0abfa78ddc79b875245e8520755c7ad0f5ef0c4c",
+      "length": 7134,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-size-trial-producer--replay-summary.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-size-trial-producer/query-admission-after.json",
+      "sha256": "45b58eff6192d09420d561a38dca0fb9afd39d4cac7924c560de3405e456f080",
+      "length": 28009,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-size-trial-producer--query-admission-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-size-trial-producer/text-native-after.json",
+      "sha256": "19d2393cf9a12e3b3e58939f0bf8c6c531cb563266bbf9b0847e42e9854da606",
+      "length": 201182,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-size-trial-producer--text-native-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-size-trial-producer/scope-native-width-probes-after.json",
+      "sha256": "f50e17d84aa6f2f8598c69c3acd37b8e2d5f29c62d77ca480e067d0e8ec28db0",
+      "length": 73081,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-size-trial-producer--scope-native-width-probes-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-size-trial-producer/scope-native-negative-memory-probes-after.json",
+      "sha256": "28a1696735c3c1edfb9e117f0968118f1f832d193c0161abdcd046260f719c64",
+      "length": 14469,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-size-trial-producer--scope-native-negative-memory-probes-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-size-trial-producer/scope-native-query-probes-after.json",
+      "sha256": "9043f038be28c3b8cc05cd39ea7bea80272b11d49a882a0724b01c145e60a965",
+      "length": 17442,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-size-trial-producer--scope-native-query-probes-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-size-trial-producer/source-constancy-after.json",
+      "sha256": "c5da0e494fa37d4bb14fc5e97996f78ff0275a21cfd36886d668599fde3713d5",
+      "length": 158803,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-size-trial-producer--source-constancy-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-size-trial-producer/conditional-after.json",
+      "sha256": "e9ba8b24a13ff33181d7aa24091168161d67619a988e2719322c4eb8693cadd5",
+      "length": 93193,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-size-trial-producer--conditional-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-size-trial-producer/query-extended-after.json",
+      "sha256": "eea14d9e57ac980ec74e1374fa35e3ed0e5baebcf6ea55fb8c5aea86ed82730f",
+      "length": 71367,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-size-trial-producer--query-extended-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-size-trial-producer/scope-native-phase-probes-after.json",
+      "sha256": "7699774958062af9930ecb9d287f289dfa2683caa65917cabe5e352df29589fb",
+      "length": 55408,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-size-trial-producer--scope-native-phase-probes-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-size-trial-producer/strings-text-consumer-native-after.json",
+      "sha256": "b037971f49655108f341afb15831a8436f52302faaffe5dec2daee7ec548dc33",
+      "length": 3120,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-size-trial-producer--strings-text-consumer-native-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-size-trial-producer/scope-native-stream-probes-after.json",
+      "sha256": "e864deccb0341c55e13de374b038642813fa1d3216cbd4bed868f47761a2dbc7",
+      "length": 3274,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-size-trial-producer--scope-native-stream-probes-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-size-trial-producer/strings-flat-native-after.json",
+      "sha256": "e7940e0ae6957415fe554b7dd6eb368e65c5a4d8d5cab97176bfa34f4e72e7dd",
+      "length": 265443,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-size-trial-producer--strings-flat-native-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-size-trial-producer/binary-sha256",
+      "sha256": "98998d83ce5e01d228a6f287ea39cd80b7a277beba042aa65aec1ecbe03c6046",
+      "length": 65,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-size-trial-producer--binary-sha256.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-size-trial-producer/strings-guard-native-after.json",
+      "sha256": "fa889e10fc015e94b5999be51434a536601c7e78c296a94a2ce33b8dbdc77bc6",
+      "length": 3388,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-size-trial-producer--strings-guard-native-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-size-trial-producer/alias-after.json",
+      "sha256": "bcccfdcc382246223eecfd6283947b7b478ef9ce93781d8bd3a10a63d6968394",
+      "length": 4536,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-size-trial-producer--alias-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-size-trial-producer/scope-native-completed-phase-probes-after.json",
+      "sha256": "00ff0848a972748be9b8e5a9ef7151524a20b3ddf3ade6e5d5616166b1e19cfc",
+      "length": 54891,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-size-trial-producer--scope-native-completed-phase-probes-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-size-trial-producer/asm198x",
+      "sha256": "9920bb60e14c505a979b2da74fb6f872015ec35ec2ae4759a64c7f0453b2c395",
+      "length": 20256824,
+      "disposable_superseded_preflight_binary": true,
+      "retained_fingerprint": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-size-trial-producer--binary-sha256.gz",
+      "status": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-trials/status.md"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-clean-4510/report.json",
+      "sha256": "6bf8ba9e8c4fd5b4aac867899f4f9ac6eebaaaefaa986d2808444b6019f0dfd7",
+      "length": 12756,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-final-clean-4510--report.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-clean-4510/logs/cc65-4510-opcodes--opcode-space-version-ld65.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "length": 0,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-final-clean-4510--logs--cc65-4510-opcodes--opcode-space-version-ld65.stdout.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-clean-4510/logs/build-assembler.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "length": 0,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-final-clean-4510--logs--build-assembler.stdout.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-clean-4510/logs/assembler-version.stderr",
+      "sha256": "cd9267fb50974330b2596f8f7d386346ec0227b2e2b702cb761d363dfa13a8c2",
+      "length": 16,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-final-clean-4510--logs--assembler-version.stderr.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-clean-4510/logs/cc65-4510-opcodes--opcode-space-version-ca65.stderr",
+      "sha256": "5c22de95322cb1d858e9690b5e3c6e83984c27c5120ff12c49f8dc9679ed2dbc",
+      "length": 17,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-final-clean-4510--logs--cc65-4510-opcodes--opcode-space-version-ca65.stderr.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-clean-4510/logs/cc65-4510-opcodes--opcode-space-reference-0.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "length": 0,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-final-clean-4510--logs--cc65-4510-opcodes--opcode-space-reference-0.stdout.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-clean-4510/logs/cc65-4510-opcodes--opcode-space-reference-0.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "length": 0,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-final-clean-4510--logs--cc65-4510-opcodes--opcode-space-reference-0.stderr.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-clean-4510/logs/cc65-4510-opcodes--opcode-space-version-ca65.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "length": 0,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-final-clean-4510--logs--cc65-4510-opcodes--opcode-space-version-ca65.stdout.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-clean-4510/logs/assembler-version.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "length": 0,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-final-clean-4510--logs--assembler-version.stdout.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-clean-4510/logs/cc65-4510-opcodes--opcode-space-version-ld65.stderr",
+      "sha256": "acf0ea5dbac2ff34c3733f092c38a357dd02d80c0d1edf0e05e8a36b92b62445",
+      "length": 17,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-final-clean-4510--logs--cc65-4510-opcodes--opcode-space-version-ld65.stderr.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-clean-4510/logs/build-assembler.stderr",
+      "sha256": "40a8e21716457e3eb9ee0ca58526ad113776bb30f1926f1c5f3a684094952944",
+      "length": 1320,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-final-clean-4510--logs--build-assembler.stderr.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-clean-4510/logs/cc65-4510-opcodes--opcode-space-assembler-0.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "length": 0,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-final-clean-4510--logs--cc65-4510-opcodes--opcode-space-assembler-0.stdout.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-clean-4510/logs/cc65-4510-opcodes--opcode-space-reference-1.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "length": 0,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-final-clean-4510--logs--cc65-4510-opcodes--opcode-space-reference-1.stdout.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-clean-4510/logs/cc65-4510-opcodes--opcode-space-reference-1.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "length": 0,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-final-clean-4510--logs--cc65-4510-opcodes--opcode-space-reference-1.stderr.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-clean-4510/logs/cc65-4510-opcodes--opcode-space-assembler-0.stderr",
+      "sha256": "d0f2bb0a758878171f47aca2c415910cd2bb55a06fb1b89e28d6e8ced2d21477",
+      "length": 51,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-conditional-context-final-clean-4510--logs--cc65-4510-opcodes--opcode-space-assembler-0.stderr.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-candidates/artifacts.json",
+      "sha256": "2db295c53436ee933337fc543c27b8b9113f6d0bc3f4fb522e8e51b952e8cf0f",
+      "length": 3635,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/candidates--artifacts.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-x86_64-unknown-linux-gnu-1/wrong-bytes.json",
+      "sha256": "431821ff22daa033ba3edd4ae7ffae6f9267123be4c9bdd204605782d0291d9b",
+      "length": 23045250,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/candidates--candidate-qualification-x86_64-unknown-linux-gnu-1--wrong-bytes.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-x86_64-unknown-linux-gnu-1/corrupt-archive.json",
+      "sha256": "0b4d2d082c9b8af180fc479d18fb2de3e8d2e64a19155e533d87f86ef97ccf07",
+      "length": 180,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/candidates--candidate-qualification-x86_64-unknown-linux-gnu-1--corrupt-archive.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-x86_64-unknown-linux-gnu-1/plan.json",
+      "sha256": "998be1811c772cee8ae18022d1a04b7f97288d243a80ccf40687856f72e44638",
+      "length": 13973,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/candidates--candidate-qualification-x86_64-unknown-linux-gnu-1--plan.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-x86_64-unknown-linux-gnu-1/report.json",
+      "sha256": "5debfc875cc3f45b270fae458a5e67f5b86cefd0d0d61e9084b88b7632321647",
+      "length": 23044455,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/candidates--candidate-qualification-x86_64-unknown-linux-gnu-1--report.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-x86_64-unknown-linux-gnu-1/acquisition.json",
+      "sha256": "caae8b5ce416eff16321d0e0deee5bc6d577c211970e1cfb92e94eb822dd2d25",
+      "length": 126,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/candidates--candidate-qualification-x86_64-unknown-linux-gnu-1--acquisition.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-x86_64-apple-darwin-1/wrong-bytes.json",
+      "sha256": "dcb5c069545e3debef95fbd9351ad9a47ecbc7c1cadc3858c0a6695ea88606c7",
+      "length": 26012616,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/candidates--candidate-qualification-x86_64-apple-darwin-1--wrong-bytes.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-x86_64-apple-darwin-1/corrupt-archive.json",
+      "sha256": "2e5a8c2e13cf7c92b79606177bf5c326bf1dadd6f43bf7f4f7023897c4a8101c",
+      "length": 170,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/candidates--candidate-qualification-x86_64-apple-darwin-1--corrupt-archive.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-x86_64-apple-darwin-1/plan.json",
+      "sha256": "5e1969ffe55f895ec0babd29f44c06805f02fbd3666f68f904bbe8ee30876b3b",
+      "length": 13916,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/candidates--candidate-qualification-x86_64-apple-darwin-1--plan.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-x86_64-apple-darwin-1/report.json",
+      "sha256": "ab039bc1a1c85f26f4979d0853e089b6b72f3bbe37f57d3b2985093610505140",
+      "length": 26011821,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/candidates--candidate-qualification-x86_64-apple-darwin-1--report.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-x86_64-apple-darwin-1/acquisition.json",
+      "sha256": "caae8b5ce416eff16321d0e0deee5bc6d577c211970e1cfb92e94eb822dd2d25",
+      "length": 126,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/candidates--candidate-qualification-x86_64-apple-darwin-1--acquisition.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-aarch64-apple-darwin-1/wrong-bytes.json",
+      "sha256": "706245acafe1bd8b7b032758ee29ba5be921f9fb8ba871bccf219f26a0a18b71",
+      "length": 26012623,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/candidates--candidate-qualification-aarch64-apple-darwin-1--wrong-bytes.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-aarch64-apple-darwin-1/corrupt-archive.json",
+      "sha256": "d293f944fdd29a56aeb5c4e9e44a8acd99fbbb3d9552a90cc9eb8aad1dc1d6d1",
+      "length": 172,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/candidates--candidate-qualification-aarch64-apple-darwin-1--corrupt-archive.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-aarch64-apple-darwin-1/plan.json",
+      "sha256": "aae56a69259430e0a5aa83bc036e953570dd25a286fad39cd2da6e485591ef3a",
+      "length": 13916,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/candidates--candidate-qualification-aarch64-apple-darwin-1--plan.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-aarch64-apple-darwin-1/report.json",
+      "sha256": "18ab3effddc8e47f9739db57d4521d2eb3df1c038a09710796347d242e4fe029",
+      "length": 26011828,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/candidates--candidate-qualification-aarch64-apple-darwin-1--report.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-aarch64-apple-darwin-1/acquisition.json",
+      "sha256": "caae8b5ce416eff16321d0e0deee5bc6d577c211970e1cfb92e94eb822dd2d25",
+      "length": 126,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/candidates--candidate-qualification-aarch64-apple-darwin-1--acquisition.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-aarch64-unknown-linux-gnu-1/wrong-bytes.json",
+      "sha256": "023713ffac15f0a500a185e9ebba9cf3371c1073bec89fc9e6cbbb1ff4e573be",
+      "length": 23045257,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/candidates--candidate-qualification-aarch64-unknown-linux-gnu-1--wrong-bytes.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-aarch64-unknown-linux-gnu-1/corrupt-archive.json",
+      "sha256": "82cc3298ec0de54957a653ff1ad769a06adc7ecf95a36894ea9d1bf3b618952d",
+      "length": 182,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/candidates--candidate-qualification-aarch64-unknown-linux-gnu-1--corrupt-archive.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-aarch64-unknown-linux-gnu-1/plan.json",
+      "sha256": "998be1811c772cee8ae18022d1a04b7f97288d243a80ccf40687856f72e44638",
+      "length": 13973,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/candidates--candidate-qualification-aarch64-unknown-linux-gnu-1--plan.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-aarch64-unknown-linux-gnu-1/report.json",
+      "sha256": "59457169bc62c2d418721a8baee287240c5a24e71df073cb62fe79b33bf07d9f",
+      "length": 23044462,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/candidates--candidate-qualification-aarch64-unknown-linux-gnu-1--report.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-aarch64-unknown-linux-gnu-1/acquisition.json",
+      "sha256": "caae8b5ce416eff16321d0e0deee5bc6d577c211970e1cfb92e94eb822dd2d25",
+      "length": 126,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/candidates--candidate-qualification-aarch64-unknown-linux-gnu-1--acquisition.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-x86_64-pc-windows-msvc-1/wrong-bytes.json",
+      "sha256": "56b6f1631202cf801cd87be7a43a9c44e8070bc6af3683afda9882d73a00e0aa",
+      "length": 25791521,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/candidates--candidate-qualification-x86_64-pc-windows-msvc-1--wrong-bytes.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-x86_64-pc-windows-msvc-1/corrupt-archive.json",
+      "sha256": "14917b0dd5c0d132a39a1b8a988625000b26d8c9f83f57c358445d524d227fbf",
+      "length": 173,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/candidates--candidate-qualification-x86_64-pc-windows-msvc-1--corrupt-archive.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-x86_64-pc-windows-msvc-1/plan.json",
+      "sha256": "23fd648373e15b7d33d34c7ddf4efa736eb59b92e47d6c41d27119174c0acda8",
+      "length": 13854,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/candidates--candidate-qualification-x86_64-pc-windows-msvc-1--plan.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-x86_64-pc-windows-msvc-1/report.json",
+      "sha256": "0624f032bdb62005c562120985fe7ab9ab1eb6da8f47d0fe9fba356f85425928",
+      "length": 25790726,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/candidates--candidate-qualification-x86_64-pc-windows-msvc-1--report.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-candidates/candidate-qualification-x86_64-pc-windows-msvc-1/acquisition.json",
+      "sha256": "caae8b5ce416eff16321d0e0deee5bc6d577c211970e1cfb92e94eb822dd2d25",
+      "length": 126,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/candidates--candidate-qualification-x86_64-pc-windows-msvc-1--acquisition.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-merge.json",
+      "sha256": "875999e38f1d2f5d15f87309bf817d4811f26ce14fa38d407daaa7e0368775c9",
+      "length": 123,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/asm198x-conditional-context-final-merge.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-native200.json",
+      "sha256": "54044373816513ed35af6ff233a9eb2bc73f34f2ed6929b16e11ed7a29fb9cfe",
+      "length": 207738,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/asm198x-conditional-context-native200.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-checked-node.log",
+      "sha256": "d1c2847c71001b69f6c4d7f61f26af8605716558b0f58b5a6f7e536fe6ab044c",
+      "length": 9384,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/asm198x-conditional-context-checked-node.log.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-size-native.json",
+      "sha256": "88cf69aeb1d8b07f09a8f138e14129c15bde1730d8fd82ef4337125430d4a7ea",
+      "length": 3439,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/asm198x-conditional-context-size-native.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-span-green.log",
+      "sha256": "c92af26b0cc6603012173904ee360f974da7b44b57dae6826a662c2d4c1a4cb1",
+      "length": 513,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/asm198x-conditional-context-span-green.log.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-clippy.log",
+      "sha256": "cea2c0f28c5ba6e6239a8503ed28727432638a84ccfc51e09da54c18c5c7bdf8",
+      "length": 1353,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/asm198x-conditional-context-clippy.log.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-replay-checked.py",
+      "sha256": "da6b3bc66155df4f32b26724adc9c6951b6fa8d0c3dc0698519308e56e029fad",
+      "length": 2581,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/asm198x-conditional-context-replay-checked.py.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-build.log",
+      "sha256": "e711616b28cc8e2efaf0d1d4958e6f240f690e5d0ee9314bf90eaf0eaf9be6fc",
+      "length": 185,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/asm198x-conditional-context-final-build.log.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-focused.log",
+      "sha256": "75ac57c0e3459d73dd3110d8a5143cf72e123cbe7dd9db47f965b14007fccf4f",
+      "length": 711,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/asm198x-conditional-context-focused.log.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-summary.json",
+      "sha256": "4089cdda8fbbc6b42f94d7d88c82c078846d6189a69e3d9601de1c51a5aa55fc",
+      "length": 2777,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/asm198x-conditional-context-final-summary.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-merge-retry-note.json",
+      "sha256": "16b334833b8f55045455191b2e232742d092c63da34763138d561098901288ab",
+      "length": 330,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/asm198x-conditional-context-final-merge-retry-note.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-node.log",
+      "sha256": "03e692c66bb022f9db3d1a026b106e5fb3bfc0613a961fc6e42b89db5f0732be",
+      "length": 9372,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/asm198x-conditional-context-final-node.log.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-after.json",
+      "sha256": "690cdc95bdbb50381133e69350d6562728c7fc91f36ec73a808b99ea00a10356",
+      "length": 64028,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/asm198x-conditional-context-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-generated-before.json",
+      "sha256": "7f7186d7873efe7c65640bc391eba6c404efe6f0242c495e2e212b48c6ac784b",
+      "length": 82754,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/asm198x-conditional-context-generated-before.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-span-red.log",
+      "sha256": "1543d6e9dc41badb24ed50a9864eaf45bace93560f82ed37cbb32f2252934710",
+      "length": 1405,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/asm198x-conditional-context-span-red.log.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-qualified-replay.log",
+      "sha256": "d3d70e87743f7c86daea2ddcec6f75bd8384410588e65607ce1d8d941f738a3e",
+      "length": 608,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/asm198x-conditional-context-qualified-replay.log.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-checked-full.log",
+      "sha256": "35ea184bc68f1872c94a58041bd9b5567ff6b572d3545bfdc572ccda76422f7e",
+      "length": 70206,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/asm198x-conditional-context-checked-full.log.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-incomplete-full.log",
+      "sha256": "cff2aece1a902646cb6629db6548ccc20670ad3a3af4bd05d9db5efad93ad43c",
+      "length": 63362,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/asm198x-conditional-context-incomplete-full.log.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-clippy.log",
+      "sha256": "c35e683184cd6ed67e7c7e4ef5d4178a963601c5a6bad387937e8a9fdd3ada62",
+      "length": 288,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/asm198x-conditional-context-final-clippy.log.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-pr.md",
+      "sha256": "98f2af42f57c38265117c88197dc1eb6af136b4d30c11c445b4d360c2c944b19",
+      "length": 1422,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/asm198x-conditional-context-final-pr.md.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-checked-clippy.log",
+      "sha256": "4f297535de602c1088d200f3b19f93c63e25cea67da292890cc8de78de984992",
+      "length": 288,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/asm198x-conditional-context-checked-clippy.log.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-pre-size-guard-full.log",
+      "sha256": "f7ac26f414a44e00c103f7260e840619e06a3c054a810ca74c826b53e1f97c4b",
+      "length": 68181,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/asm198x-conditional-context-pre-size-guard-full.log.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-checked-build.log",
+      "sha256": "ee40edd1f594537ace8417e9f1df430c72ea74bad959a9e11b480f57085d2d9b",
+      "length": 185,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/asm198x-conditional-context-checked-build.log.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-after.json",
+      "sha256": "11ff8d9c367b54f9dad7c08e1cc4e7a112fa32c62663c86221129dd1fd115e82",
+      "length": 81734,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/asm198x-conditional-context-final-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-size-after.json",
+      "sha256": "352937881a4449b1a9bb5dcc207f696b64096488e75f752644f35ef8bdee007d",
+      "length": 1636,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/asm198x-conditional-context-size-after.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-4510.log",
+      "sha256": "1c1ce04484a7e9b16a2a6407590c8b20213f5284ea8f1d1ffd12ec9500e391c3",
+      "length": 157,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/asm198x-conditional-context-final-4510.log.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-merge-verification.json",
+      "sha256": "7e86608b2b859874cfe00f22423bba7268d9bfee87c124eaa3bf9148fd037327",
+      "length": 283,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/asm198x-conditional-context-final-merge-verification.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-fixture.log",
+      "sha256": "abda6ffb8ed5d0cadccdcc5fa31f3713623091f7498ab6d1f22b286773378033",
+      "length": 775,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/asm198x-conditional-context-fixture.log.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-head",
+      "sha256": "cd0d02596b75dd6dea826227119218d08ee352a8933f415d2ffb6740ce723398",
+      "length": 41,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/asm198x-conditional-context-final-head.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-merge-status.json",
+      "sha256": "20d645eb79f72fd1fecda0b5e4acb5a48f3a1c93faba8e7ab90996283c40bd9e",
+      "length": 19583,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/asm198x-conditional-context-final-merge-status.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-build.log",
+      "sha256": "0e067de00cceef850d670c5da393299da41f55e955113acbb2a811afad73b379",
+      "length": 185,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/asm198x-conditional-context-build.log.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-qualified-full.log",
+      "sha256": "51e1a44a747585e88e9fdf6e1994b3d9df81afdc401aff3b4c7aec24d4079f46",
+      "length": 152259,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/asm198x-conditional-context-qualified-full.log.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-native185.json",
+      "sha256": "98ebfbbd3b90a09cf017ca44917afe26b8a27af5b0f6886c3395ccffd7734d1c",
+      "length": 193320,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/asm198x-conditional-context-native185.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-checked-focused.log",
+      "sha256": "b530944bfef0263eb8ff82a69501147bfcba9ee1960f8c8b5b45cc42d8dcf6cd",
+      "length": 1169,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/asm198x-conditional-context-checked-focused.log.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-qualified-clippy.log",
+      "sha256": "ad669498fd0b8430819053d9e6719a8aa61701383ca9707a4a62a90a45b90177",
+      "length": 288,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/asm198x-conditional-context-qualified-clippy.log.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-ci.log",
+      "sha256": "ba8ffba1711953007998210accf08f2d5e307ae8a051b82e8a7844bee10a24da",
+      "length": 7388,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/asm198x-conditional-context-final-ci.log.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-conditional-context-final-ci.json",
+      "sha256": "a2cd05b63a493eca82fa64cd0c83d9ca460d248262dee8cda3747c347dff4449",
+      "length": 237679,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/qualification-916/asm198x-conditional-context-final-ci.json.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/private/tmp/asm198x-audit-conditional-context-candidates.py",
+      "sha256": "9221413a2892c39a4bf8104dd2954248afe914a76175d361030bbf3eda312caf",
+      "length": 14832,
+      "retained": "docs/plans/2026-10-20-ca65-source-query-effects/conditional-context-local-qualification-916/asm198x-audit-conditional-context-candidates.py.gz",
+      "retained_commit": "2be51b69263333540922b647a843733a1f6653da"
+    },
+    {
+      "path": "/Users/stevehill/Projects/198x/Asm198x/asm198x-ca65-text-consumers/.ruff_cache/CACHEDIR.TAG",
+      "sha256": "5953156d7e0c564a427251316eaf26f8870e6483ae2197f916b630e4f93e31ae",
+      "length": 43,
+      "disposable_task_created_ruff_cache": true
+    },
+    {
+      "path": "/Users/stevehill/Projects/198x/Asm198x/asm198x-ca65-text-consumers/.ruff_cache/.gitignore",
+      "sha256": "9e3a60f1e6ec4ae60215c11d54b171392745ec25e9dded433d5bd921363af316",
+      "length": 35,
+      "disposable_task_created_ruff_cache": true
+    },
+    {
+      "path": "/Users/stevehill/Projects/198x/Asm198x/asm198x-ca65-text-consumers/.ruff_cache/0.16.4/5087536113277601618",
+      "sha256": "36e33bc70a081499a95334a7abb29fb7f531338ae744098c919854a69b5a1ab7",
+      "length": 260,
+      "disposable_task_created_ruff_cache": true
+    }
+  ],
+  "active_owned_processes": [],
+  "df_before": "Filesystem   1024-blocks      Used Available Capacity  iused     ifree %iused  Mounted on\n/dev/disk3s5   971350180 884627656  42152936    96% 10633047 421529360    2%   /System/Volumes/Data\n",
+  "df_after": "Filesystem   1024-blocks      Used Available Capacity  iused     ifree %iused  Mounted on\n/dev/disk3s5   971350180 884226428  42554164    96% 10632856 425541640    2%   /System/Volumes/Data\n"
+}

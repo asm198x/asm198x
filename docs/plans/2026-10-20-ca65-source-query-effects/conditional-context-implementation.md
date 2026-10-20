@@ -43,3 +43,17 @@ stamping helper. Its two tests and the five deferred/query tests pass.
 This is a conditional consumer slice of the approved design. Normal data-list
 operands, repeat counts and other remaining numeric/string consumers still need
 ordered live integration under #795; this slice does not close that issue.
+
+## Checked completion
+
+#916 merged after all 29 required CI checks and five actual native archives
+passed. Full local verification passed 1,641 Rust/Lua tests (38 ignored),
+115 Node checks and lint/docs checks. The clean 4510 execution matches 564
+bytes, verifies seven processes/fourteen streams and rejects a changed byte.
+The merged tree matches qualified source
+5408b4790fa88f22c127201f70f0d7e57ecde3cd. Final qualification is retained in
+qualification-916 and conditional-context-local-qualification-916. The initial
+merge API request returned an error; GitHub still reported the same head/base
+as open and rebaseable, all gates were rechecked, and the retry merged. The
+positive merge/tree receipts are retained rather than inferring success from
+the request. Cleanup proofs are in conditional-context-cleanup-916.

@@ -1,57 +1,61 @@
 # Source-query implementation checkpoint
 
-The approved #795 design remains partly implemented. #915 merged conditional
-required-name admission at 301e1fe2fc4ad65ac00debaf88d4d2d7da2f9cc3, with
-qualified source 0e963625f5dd814e2dc0f135512c34819823b709. The merged tree is
-identical to the qualified tree. All 1,639 Rust/Lua tests pass (38 ignored),
-along with 115 Node checks, Clippy/fmt and docs/version checks. All 29 required
-CI checks and five native archives pass; each archive ran 101 required cohorts,
-156 query-admission commands and 1,229 classifier commands, plus both negative
-controls. The initial macOS Lua job acquired no runner; the exact capacity
-annotations and successful same-commit retry are retained in qualification-915.
+#916 merged the live conditional source context at
+f6bf23efc1b52949066836cb47531fb9aef935fd. Qualified source is
+5408b4790fa88f22c127201f70f0d7e57ecde3cd; the merged tree is identical.
+All 1,641 Rust/Lua tests pass (38 ignored), plus 115 Node checks,
+Clippy/fmt/Ruff and docs/version checks. All 29 required CI checks pass.
+Five actual native archives each pass 102 required cohorts, 725 conditional
+commands and both negative controls. The fresh 4510 build matches all 564
+reference bytes and verifies fourteen streams. The predecessor archive fails
+only the new conditional cohort. The checked merge required one API retry;
+the unchanged head/base and final positive merge/tree receipts are retained.
 
-The 54-case admission audit now matches 51 cases, fixing twelve wrong
-acceptances. Three logical .const controls remain explicitly excluded under
-#795. Eighteen supplementary native short-circuit/.ifnconst controls all match,
-fixing nine additional wrong acceptances. All 2,194 earlier replay cases retain
-every prior match. The classifier fixture now includes all 314 cases, with its
-last undefined-name wrong acceptance fixed and no exclusions.
+The final conditional audit has 200 cases, with 179 native accepts and 21
+refusals. All 197 supported cases match, fixing 72 of the predecessor's 75
+differences. Three ordinary-label sizeof cases remain explicitly under #798.
+All 2,266 prior cases retain every previous native match. #795 remains open
+for data-list operands, repeat counts and other numeric/string consumers.
+The checked live context and pure defaults are now in place; this is not a
+claim that all source queries across the language have been completed.
 
 ## Retained task workspaces
 
-- `/Users/stevehill/Projects/198x/Asm198x/asm198x-ca65-text-consumers` is the sole
-  task worktree. Reuse it for #795; remove with git worktree remove after the
-  issue is complete, after inspecting all tracked, untracked and ignored files
-  and positively verifying retained commits and evidence.
+- `/Users/stevehill/Projects/198x/Asm198x/asm198x-ca65-text-consumers` remains the
+  sole task worktree for #795. Reuse it for data-list integration, then remove
+  with git worktree remove when the issue is complete, after inspecting all
+  tracked, untracked and ignored content and verifying retained source/evidence.
 - `/private/tmp/asm198x-text-consumers-build` is the reusable task build cache.
-  Remove after #795 work finishes and task-owned build/test processes exit.
-- `/private/tmp/asm198x-query-admission-producer` is the next frozen baseline:
-  source 0e963625f5dd814e2dc0f135512c34819823b709. identity.json records both
-  executable hashes and the source tree/lock. asm198x is the replay producer;
-  asm198x-lua is the release-feature archive producer. Complete records are
-  retained in query-admission-local-qualification-915 and qualification-915.
-  Remove after the next corrected producer is qualified and retained.
-- `/private/tmp/asm198x-query-admission-local-package` is the 101-cohort
-  predecessor archive for the next required-cohort control. Remove after the
-  next cohort rejects it and the archive hashes/reports are retained.
+  Remove after #795 finishes and all task-owned build/test processes exit.
+- `/private/tmp/asm198x-conditional-context-final-producer` is the new frozen
+  baseline: source 5408b4790fa88f22c127201f70f0d7e57ecde3cd. identity.json records
+  the qualified source tree, lock and executable hash. Its replay-summary.json
+  covers 2,466 retained native cases. The supplementary eighteen-case input is
+  now durable at conditional-context-prior-short-circuit-native.json rather
+  than depending on the retired predecessor directory. Remove after the next
+  corrected producer is qualified and its complete evidence is retained.
+- `/private/tmp/asm198x-conditional-context-final-local-package` is the
+  102-cohort predecessor archive for the next required-cohort control. Remove
+  after the next cohort rejects it and hashes/reports are durably retained.
 
-The old classifier producer/package, new clean 4510 workspace, five downloaded
-native reports and task-only helpers/logs were removed after exact retention
-checks. query-admission-cleanup-915/index.json records every verified file,
-source retention, removed directory and df readings. No task-owned build, test,
-archive qualification or CI monitor remains running. The original checkout
-stays at local main 47fc51643eb98ecdd5ef2f64cfc5035bee52997e; no additional
-worktrees were created.
+Seven completed directories were removed after inspection and exact retention
+checks: the previous producer/package, two superseded preflight producers, the
+finished clean 4510 workspace, five native report downloads and the task-created
+Ruff cache. Task-only helpers/logs were also removed. The complete proof and df
+readings are in conditional-context-cleanup-916/index.json. Final local and
+five-host evidence is in conditional-context-local-qualification-916 and
+qualification-916; incomplete/failed preflight remains explicitly separate.
+No task-owned build, test, archive-control or CI monitor remains running.
+The original checkout remains clean at local main
+47fc51643eb98ecdd5ef2f64cfc5035bee52997e. No extra worktrees were created.
 
 ## Next implementation
 
-Connect the approved opt-in source parser hooks and live Reader/Projection
-context. Consume ordinary names, .const and numeric string arguments at their
-native expression positions. Reuse Deferred source classification, the existing
-shared scope environment and original bound lookup keys. The conditional
-source_reads metadata now demonstrates final admission; extend that seam to
-live .const/numeric arguments before short-circuit folding discards names.
-Query-only arguments stay non-reading; inactive/unused source stays lazy and
-formatting stays syntax-only. The retained 128-case ordering matrix, 54-case
-admission matrix, supplementary eighteen controls and earlier source/text
-matrices remain the acceptance evidence before #795 can close.
+Extend the approved live source context to data-list operands at their read
+positions. Preserve preceding name queries, string token ownership, native
+source ordering and original bound keys for final admission. Delegate scoping
+and source classification to the existing reader/projection machinery and keep
+formatting syntax-only. The retained root/scoped order, string consumer,
+admission and conditional matrices are the next acceptance baseline. Keep
+#798 label/procedure-size work explicit rather than supplying layout values to
+source-time expressions.
