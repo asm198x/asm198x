@@ -1,0 +1,1124 @@
+[
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-local-package/asm198x-aarch64-apple-darwin.tar.xz.sha256",
+    "retained": "asm198x-external-bindings-final-local-package--asm198x-aarch64-apple-darwin.tar.xz.sha256.gz",
+    "bytes": 102,
+    "sha256": "276616bdd37fc958eb066fd475d6c76907523134388b05f31c1f5779ce6f6ee3"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-local-package/corrupt-archive.json",
+    "retained": "asm198x-external-bindings-final-local-package--corrupt-archive.json.gz",
+    "bytes": 172,
+    "sha256": "d293f944fdd29a56aeb5c4e9e44a8acd99fbbb3d9552a90cc9eb8aad1dc1d6d1"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-local-package/corrupt-archive.log",
+    "retained": "asm198x-external-bindings-final-local-package--corrupt-archive.log.gz",
+    "bytes": 973,
+    "sha256": "c02ef4e8d061ade59ecc667b2210c2884a361ba6013e40aadd083cd6de6a6531"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-local-package/predecessor.json",
+    "retained": "asm198x-external-bindings-final-local-package--predecessor.json.gz",
+    "bytes": 26011739,
+    "sha256": "c3f1ee98cdb5a2ea9df0fe5f2c4de83cb846b2e88f454ded62a50dea303c2bd3"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-local-package/predecessor.log",
+    "retained": "asm198x-external-bindings-final-local-package--predecessor.log.gz",
+    "bytes": 101,
+    "sha256": "3389270f0f20003e29bd7cd34ff88bf71fbf04a1ac0c4776560eaefe765552b7"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-local-package/report.json",
+    "retained": "asm198x-external-bindings-final-local-package--report.json.gz",
+    "bytes": 31106034,
+    "sha256": "a794419dfe7735bdb16877f72105e562a4dfb35ec48298fd4e5498a0bf1c2dfa"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-local-package/report.log",
+    "retained": "asm198x-external-bindings-final-local-package--report.log.gz",
+    "bytes": 77,
+    "sha256": "10f8c963ffb5e59ed1a1fb70cd5b5a01607103564b2d789c57bd55e036e2c112"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-local-package/summary.json",
+    "retained": "asm198x-external-bindings-final-local-package--summary.json.gz",
+    "bytes": 514,
+    "sha256": "934e62f24e5bbb1b1558eb95cc2f5e12fb5e623a8059706111e3ad7b104bdbf2"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-local-package/wrong-bytes.json",
+    "retained": "asm198x-external-bindings-final-local-package--wrong-bytes.json.gz",
+    "bytes": 31106829,
+    "sha256": "dc1ee52f3908ee7fa86035682d29f87ccc9c99ee4440f6837a5f4683967d4882"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-local-package/wrong-bytes.log",
+    "retained": "asm198x-external-bindings-final-local-package--wrong-bytes.log.gz",
+    "bytes": 130,
+    "sha256": "0cbccfe8ac2a912a9451a3712f2b2aaeef9c1bef479da1918957e7a47f6cfd44"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-clean-4510/logs/assembler-version.stderr",
+    "retained": "asm198x-external-bindings-clean-4510--logs--assembler-version.stderr.gz",
+    "bytes": 16,
+    "sha256": "cd9267fb50974330b2596f8f7d386346ec0227b2e2b702cb761d363dfa13a8c2"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-clean-4510/logs/assembler-version.stdout",
+    "retained": "asm198x-external-bindings-clean-4510--logs--assembler-version.stdout.gz",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-clean-4510/logs/build-assembler.stderr",
+    "retained": "asm198x-external-bindings-clean-4510--logs--build-assembler.stderr.gz",
+    "bytes": 1320,
+    "sha256": "704e108265313db2fe31826c0d2fc7a2b284d9fe8e1e8147bc46fa85b6f335cd"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-clean-4510/logs/build-assembler.stdout",
+    "retained": "asm198x-external-bindings-clean-4510--logs--build-assembler.stdout.gz",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-clean-4510/logs/cc65-4510-opcodes--opcode-space-assembler-0.stderr",
+    "retained": "asm198x-external-bindings-clean-4510--logs--cc65-4510-opcodes--opcode-space-assembler-0.stderr.gz",
+    "bytes": 51,
+    "sha256": "d0f2bb0a758878171f47aca2c415910cd2bb55a06fb1b89e28d6e8ced2d21477"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-clean-4510/logs/cc65-4510-opcodes--opcode-space-assembler-0.stdout",
+    "retained": "asm198x-external-bindings-clean-4510--logs--cc65-4510-opcodes--opcode-space-assembler-0.stdout.gz",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-clean-4510/logs/cc65-4510-opcodes--opcode-space-reference-0.stderr",
+    "retained": "asm198x-external-bindings-clean-4510--logs--cc65-4510-opcodes--opcode-space-reference-0.stderr.gz",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-clean-4510/logs/cc65-4510-opcodes--opcode-space-reference-0.stdout",
+    "retained": "asm198x-external-bindings-clean-4510--logs--cc65-4510-opcodes--opcode-space-reference-0.stdout.gz",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-clean-4510/logs/cc65-4510-opcodes--opcode-space-reference-1.stderr",
+    "retained": "asm198x-external-bindings-clean-4510--logs--cc65-4510-opcodes--opcode-space-reference-1.stderr.gz",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-clean-4510/logs/cc65-4510-opcodes--opcode-space-reference-1.stdout",
+    "retained": "asm198x-external-bindings-clean-4510--logs--cc65-4510-opcodes--opcode-space-reference-1.stdout.gz",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-clean-4510/logs/cc65-4510-opcodes--opcode-space-version-ca65.stderr",
+    "retained": "asm198x-external-bindings-clean-4510--logs--cc65-4510-opcodes--opcode-space-version-ca65.stderr.gz",
+    "bytes": 17,
+    "sha256": "5c22de95322cb1d858e9690b5e3c6e83984c27c5120ff12c49f8dc9679ed2dbc"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-clean-4510/logs/cc65-4510-opcodes--opcode-space-version-ca65.stdout",
+    "retained": "asm198x-external-bindings-clean-4510--logs--cc65-4510-opcodes--opcode-space-version-ca65.stdout.gz",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-clean-4510/logs/cc65-4510-opcodes--opcode-space-version-ld65.stderr",
+    "retained": "asm198x-external-bindings-clean-4510--logs--cc65-4510-opcodes--opcode-space-version-ld65.stderr.gz",
+    "bytes": 17,
+    "sha256": "acf0ea5dbac2ff34c3733f092c38a357dd02d80c0d1edf0e05e8a36b92b62445"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-clean-4510/logs/cc65-4510-opcodes--opcode-space-version-ld65.stdout",
+    "retained": "asm198x-external-bindings-clean-4510--logs--cc65-4510-opcodes--opcode-space-version-ld65.stdout.gz",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-clean-4510/report.json",
+    "retained": "asm198x-external-bindings-clean-4510--report.json.gz",
+    "bytes": 12690,
+    "sha256": "6a0c4093888c880a65e22151519fa05cdbbf014c8f6e374141a837e4ee0f0e1c"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/after.json",
+    "retained": "asm198x-external-bindings-final-producer--after.json.gz",
+    "bytes": 729413,
+    "sha256": "d5e978e334c22c5dca8128df8c8d7cd8d21c99f12af4b88caf8dbd0a34413be5"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/after.json.log",
+    "retained": "asm198x-external-bindings-final-producer--after.json.log.gz",
+    "bytes": 26,
+    "sha256": "a51a485e0ccb1672c50ab956f1a3a4164092588fa397246df4a7f8f0375d8bf1"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/alias-after.json",
+    "retained": "asm198x-external-bindings-final-producer--alias-after.json.gz",
+    "bytes": 4516,
+    "sha256": "f6c5b29e77b7c4ffffb4d36b45e610066607c849d5e72beb945a2f590fa9bd53"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/conditional-after.json",
+    "retained": "asm198x-external-bindings-final-producer--conditional-after.json.gz",
+    "bytes": 100123,
+    "sha256": "060889fa05a36a19b19e21f286cfe90617633657bcd47565938874d4b2a7af34"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/external-after.json",
+    "retained": "asm198x-external-bindings-final-producer--external-after.json.gz",
+    "bytes": 729413,
+    "sha256": "d5e978e334c22c5dca8128df8c8d7cd8d21c99f12af4b88caf8dbd0a34413be5"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/identity.json",
+    "retained": "asm198x-external-bindings-final-producer--identity.json.gz",
+    "bytes": 295,
+    "sha256": "de3df4be6e9a8f57bdf9840646fda80e4a9531fa2b2223b90c9b450e0809bda2"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/query-admission-after.json",
+    "retained": "asm198x-external-bindings-final-producer--query-admission-after.json.gz",
+    "bytes": 27899,
+    "sha256": "8a1f7b239e41f7721cafc711547150e505715efe25f6a54f6cf730b369bbfcba"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/query-extended-after.json",
+    "retained": "asm198x-external-bindings-final-producer--query-extended-after.json.gz",
+    "bytes": 71109,
+    "sha256": "de5a7cb45d6ffa992705adfae6b4dc37734a88b644897b2721a67e0676c54202"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/query-original-after.json",
+    "retained": "asm198x-external-bindings-final-producer--query-original-after.json.gz",
+    "bytes": 28749,
+    "sha256": "2de95505d7114fb0a514bde691c099db97cf988a65e74c37051b6fa6b6c65dda"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/query-short-circuit-after.json",
+    "retained": "asm198x-external-bindings-final-producer--query-short-circuit-after.json.gz",
+    "bytes": 9730,
+    "sha256": "7c0ff53e187e754b7e6c9762fd631a6fd5a057946a4cc9d77a28f65b3d891437"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/alias-after.json",
+    "retained": "asm198x-external-bindings-final-producer--replay--alias-after.json.gz",
+    "bytes": 4516,
+    "sha256": "f6c5b29e77b7c4ffffb4d36b45e610066607c849d5e72beb945a2f590fa9bd53"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/alias.log",
+    "retained": "asm198x-external-bindings-final-producer--replay--alias.log.gz",
+    "bytes": 22,
+    "sha256": "873a2f696ecdba8a1b95ca39106cac5141cab37ebda54726c474947ecbf7cd99"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/conditional-context-after.json",
+    "retained": "asm198x-external-bindings-final-producer--replay--conditional-context-after.json.gz",
+    "bytes": 100123,
+    "sha256": "060889fa05a36a19b19e21f286cfe90617633657bcd47565938874d4b2a7af34"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/conditional-context.log",
+    "retained": "asm198x-external-bindings-final-producer--replay--conditional-context.log.gz",
+    "bytes": 24,
+    "sha256": "b7952288f8bde63cd5eb84897660ec0a2d67571c9ff994e4d2f742054244d7e2"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/query-admission-after.json",
+    "retained": "asm198x-external-bindings-final-producer--replay--query-admission-after.json.gz",
+    "bytes": 27899,
+    "sha256": "8a1f7b239e41f7721cafc711547150e505715efe25f6a54f6cf730b369bbfcba"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/query-admission.log",
+    "retained": "asm198x-external-bindings-final-producer--replay--query-admission.log.gz",
+    "bytes": 23,
+    "sha256": "093afc371fc7a3fa97a09102d0d377d9bb9b24e9056791f85c8369d75262e5f2"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/query-extended-after.json",
+    "retained": "asm198x-external-bindings-final-producer--replay--query-extended-after.json.gz",
+    "bytes": 71109,
+    "sha256": "de5a7cb45d6ffa992705adfae6b4dc37734a88b644897b2721a67e0676c54202"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/query-extended.log",
+    "retained": "asm198x-external-bindings-final-producer--replay--query-extended.log.gz",
+    "bytes": 25,
+    "sha256": "b9eed9c0dc1e92448935190cc51ed75300444fbed5d43e6e123ef73abb4872f5"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/query-original-after.json",
+    "retained": "asm198x-external-bindings-final-producer--replay--query-original-after.json.gz",
+    "bytes": 28749,
+    "sha256": "2de95505d7114fb0a514bde691c099db97cf988a65e74c37051b6fa6b6c65dda"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/query-original.log",
+    "retained": "asm198x-external-bindings-final-producer--replay--query-original.log.gz",
+    "bytes": 24,
+    "sha256": "a17c8670517a56d761be0bbd716efb70b349f91ecee350506152fcac8d950980"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/query-short-circuit-after.json",
+    "retained": "asm198x-external-bindings-final-producer--replay--query-short-circuit-after.json.gz",
+    "bytes": 9730,
+    "sha256": "7c0ff53e187e754b7e6c9762fd631a6fd5a057946a4cc9d77a28f65b3d891437"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/query-short-circuit.log",
+    "retained": "asm198x-external-bindings-final-producer--replay--query-short-circuit.log.gz",
+    "bytes": 23,
+    "sha256": "df3c5df809bd341e3b0242f2d16312e6689f8fffb915c938c57cb1caf766eed3"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/scope-deferred-followups-native-after.json",
+    "retained": "asm198x-external-bindings-final-producer--replay--scope-deferred-followups-native-after.json.gz",
+    "bytes": 11311,
+    "sha256": "296671df68450c1d6b1baf1696089295a5d9ef9b3de3a59dab90e3da72a7031b"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/scope-deferred-followups-native.log",
+    "retained": "asm198x-external-bindings-final-producer--replay--scope-deferred-followups-native.log.gz",
+    "bytes": 24,
+    "sha256": "e643ac46d9c5324fb8b1ad90e6d10eb85e404914a20bb6f50a77fee056d37da1"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/scope-native-completed-phase-probes-after.json",
+    "retained": "asm198x-external-bindings-final-producer--replay--scope-native-completed-phase-probes-after.json.gz",
+    "bytes": 54679,
+    "sha256": "cb3a6b7b11ac198357633085def2191775b39da61f46769b2c2d809a95003875"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/scope-native-completed-phase-probes.log",
+    "retained": "asm198x-external-bindings-final-producer--replay--scope-native-completed-phase-probes.log.gz",
+    "bytes": 24,
+    "sha256": "71f31a10ebd80b379a18a625a0ad976852e11bf36961f1623587608400709501"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/scope-native-negative-memory-probes-after.json",
+    "retained": "asm198x-external-bindings-final-producer--replay--scope-native-negative-memory-probes-after.json.gz",
+    "bytes": 14411,
+    "sha256": "1db382f895d2747af7091771c34a89b73da8e65a31075c651c2f8e4ab8a0c93c"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/scope-native-negative-memory-probes.log",
+    "retained": "asm198x-external-bindings-final-producer--replay--scope-native-negative-memory-probes.log.gz",
+    "bytes": 23,
+    "sha256": "88985c4139e147cd3696557611e14b098eaa2d8d363f898617b8e631be9ab471"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/scope-native-phase-probes-after.json",
+    "retained": "asm198x-external-bindings-final-producer--replay--scope-native-phase-probes-after.json.gz",
+    "bytes": 55194,
+    "sha256": "b194af83fe8cac1f357d837533ea9893b51356a4bd8e195b459d5a34eef1a0e4"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/scope-native-phase-probes.log",
+    "retained": "asm198x-external-bindings-final-producer--replay--scope-native-phase-probes.log.gz",
+    "bytes": 24,
+    "sha256": "8ef7b8fdc003db8a33645d819c91dce59c3dfef06e32ebe18a205dc9704cb9b1"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/scope-native-query-probes-after.json",
+    "retained": "asm198x-external-bindings-final-producer--replay--scope-native-query-probes-after.json.gz",
+    "bytes": 17370,
+    "sha256": "fc5d6e1b3c6f6aa728719d9dc065a4b31bc51341599ea2db06c6cd57f3eef013"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/scope-native-query-probes.log",
+    "retained": "asm198x-external-bindings-final-producer--replay--scope-native-query-probes.log.gz",
+    "bytes": 23,
+    "sha256": "d3155dc6a65648a9cfc99587238f290a9f2fcf77bac64270f63fdbb0ccf1b1a5"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/scope-native-stream-probes-after.json",
+    "retained": "asm198x-external-bindings-final-producer--replay--scope-native-stream-probes-after.json.gz",
+    "bytes": 3260,
+    "sha256": "23f15a097b2b1a0ad226436ec644f874cabede863e1c2756910f8d26a434358e"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/scope-native-stream-probes.log",
+    "retained": "asm198x-external-bindings-final-producer--replay--scope-native-stream-probes.log.gz",
+    "bytes": 22,
+    "sha256": "6af141c5fba928809b9e610249fb427969205179087def4ee79b9be28fdc5538"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/scope-native-width-probes-after.json",
+    "retained": "asm198x-external-bindings-final-producer--replay--scope-native-width-probes-after.json.gz",
+    "bytes": 72791,
+    "sha256": "e106a25ec24e0cf26e287848b4ceb59c9223712600a695158e3145d57b38fdbd"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/scope-native-width-probes.log",
+    "retained": "asm198x-external-bindings-final-producer--replay--scope-native-width-probes.log.gz",
+    "bytes": 24,
+    "sha256": "a78433b7bb8e7fc755fdbcdfe2f93725202a1570266f47dc02ba24822e7d87da"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/source-constancy-after.json",
+    "retained": "asm198x-external-bindings-final-producer--replay--source-constancy-after.json.gz",
+    "bytes": 158173,
+    "sha256": "ad292fa718cbc14fbf7b3aa282030b9af3261d1e466986287b6ac3bb7ff29cc9"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/source-constancy.log",
+    "retained": "asm198x-external-bindings-final-producer--replay--source-constancy.log.gz",
+    "bytes": 24,
+    "sha256": "ccfd86e5ef921d8586f46b7109fc8aa3648ac8b954b51d8c853a10bcf87fe1d1"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/strings-consumer-native-after.json",
+    "retained": "asm198x-external-bindings-final-producer--replay--strings-consumer-native-after.json.gz",
+    "bytes": 33870,
+    "sha256": "f6e6794c65cf5b223051eabde912c73fd64c3818ce83da46960c4004af4e350c"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/strings-consumer-native.log",
+    "retained": "asm198x-external-bindings-final-producer--replay--strings-consumer-native.log.gz",
+    "bytes": 23,
+    "sha256": "b9e8e26b46459becc2381c9da2488704c28b7a822cbe2688f55460c6aa675f2d"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/strings-flat-native-after.json",
+    "retained": "asm198x-external-bindings-final-producer--replay--strings-flat-native-after.json.gz",
+    "bytes": 264293,
+    "sha256": "92f32b156479e97f585af3bce3c1d89ddd352c74d38fa2684025786fbdea6fa9"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/strings-flat-native.log",
+    "retained": "asm198x-external-bindings-final-producer--replay--strings-flat-native.log.gz",
+    "bytes": 24,
+    "sha256": "7d6bc0dcdd5efde6441d0924a32d08fbae1cf7ea0708df2495fec24b51863df0"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/strings-guard-native-after.json",
+    "retained": "asm198x-external-bindings-final-producer--replay--strings-guard-native-after.json.gz",
+    "bytes": 3374,
+    "sha256": "e214b861175d9b45417f44063aa956f2f6c8d54f8ec0bed74c5e37cbf5dc7183"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/strings-guard-native.log",
+    "retained": "asm198x-external-bindings-final-producer--replay--strings-guard-native.log.gz",
+    "bytes": 22,
+    "sha256": "716196d4a1acfae4d76a740b22629afa94eb33ddbed1f67f87e8a719e7b92128"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/strings-index-scope-native-after.json",
+    "retained": "asm198x-external-bindings-final-producer--replay--strings-index-scope-native-after.json.gz",
+    "bytes": 2177,
+    "sha256": "f59bab3cbe46a39304d606080d40a2d9bdf7e700a7038db2eff7366182e82f0a"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/strings-index-scope-native.log",
+    "retained": "asm198x-external-bindings-final-producer--replay--strings-index-scope-native.log.gz",
+    "bytes": 22,
+    "sha256": "2f2e77c26435b73ea9c8a56029baa7ba1397ac741a54e66287d433d3ea1ef920"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/strings-lifetime-native-after.json",
+    "retained": "asm198x-external-bindings-final-producer--replay--strings-lifetime-native-after.json.gz",
+    "bytes": 17756,
+    "sha256": "8db11dcf761825f0826305d4b3c1f9fe241dbf3e68fe4f0b087663c796bbdd5f"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/strings-lifetime-native.log",
+    "retained": "asm198x-external-bindings-final-producer--replay--strings-lifetime-native.log.gz",
+    "bytes": 23,
+    "sha256": "514fc3dfcaee4516e51552b0cdd34ead3f86b1886d1b14c0916bf6a27eddfa1e"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/strings-numeric-string-arity-native-after.json",
+    "retained": "asm198x-external-bindings-final-producer--replay--strings-numeric-string-arity-native-after.json.gz",
+    "bytes": 12959,
+    "sha256": "626be4f3817bae146851724e0d9379be3cda5840f0380ca051bf99256fb11610"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/strings-numeric-string-arity-native.log",
+    "retained": "asm198x-external-bindings-final-producer--replay--strings-numeric-string-arity-native.log.gz",
+    "bytes": 23,
+    "sha256": "240b59ba1cd8b9c841326f70f70ac0d7aea2c9aa21522ca4a39788ae32a769bc"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/strings-text-consumer-native-after.json",
+    "retained": "asm198x-external-bindings-final-producer--replay--strings-text-consumer-native-after.json.gz",
+    "bytes": 3106,
+    "sha256": "9fd2d372dc295d8117aea053fb589557e9240f8a4990ed6cd2305dbe452fd058"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/strings-text-consumer-native.log",
+    "retained": "asm198x-external-bindings-final-producer--replay--strings-text-consumer-native.log.gz",
+    "bytes": 22,
+    "sha256": "6af141c5fba928809b9e610249fb427969205179087def4ee79b9be28fdc5538"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/summary.json",
+    "retained": "asm198x-external-bindings-final-producer--replay--summary.json.gz",
+    "bytes": 7733,
+    "sha256": "ddada89a49fff4d54b95cb2cf1c5a33824432048abd5b266897f5c0dca2cd18e"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/text-assertion-native-after.json",
+    "retained": "asm198x-external-bindings-final-producer--replay--text-assertion-native-after.json.gz",
+    "bytes": 61523,
+    "sha256": "641ff3887b7f51642943e1b735126ab440362f52daffd17306cdd5625237f6be"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/text-assertion-native.log",
+    "retained": "asm198x-external-bindings-final-producer--replay--text-assertion-native.log.gz",
+    "bytes": 24,
+    "sha256": "2a5186129ffc93cc656e327ec558825a4e98d9e64a7640983bfaee47449159e3"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/text-native-after.json",
+    "retained": "asm198x-external-bindings-final-producer--replay--text-native-after.json.gz",
+    "bytes": 200388,
+    "sha256": "7e7d0751168e9d219f1df3907fe3441c7ffcff3ef632357076aa216cf84b0d54"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay/text-native.log",
+    "retained": "asm198x-external-bindings-final-producer--replay--text-native.log.gz",
+    "bytes": 24,
+    "sha256": "57eeca1637267a9f1871fea999e250c5264f5da1fc8f10e1611b906f5f1a85ea"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/replay-summary.json",
+    "retained": "asm198x-external-bindings-final-producer--replay-summary.json.gz",
+    "bytes": 8197,
+    "sha256": "0152af32e80a3558f5071839419e95aa94dfe8d0a3088e287bbebc10c2e6fc1e"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/scope-deferred-followups-native-after.json",
+    "retained": "asm198x-external-bindings-final-producer--scope-deferred-followups-native-after.json.gz",
+    "bytes": 11311,
+    "sha256": "296671df68450c1d6b1baf1696089295a5d9ef9b3de3a59dab90e3da72a7031b"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/scope-native-completed-phase-probes-after.json",
+    "retained": "asm198x-external-bindings-final-producer--scope-native-completed-phase-probes-after.json.gz",
+    "bytes": 54679,
+    "sha256": "cb3a6b7b11ac198357633085def2191775b39da61f46769b2c2d809a95003875"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/scope-native-negative-memory-probes-after.json",
+    "retained": "asm198x-external-bindings-final-producer--scope-native-negative-memory-probes-after.json.gz",
+    "bytes": 14411,
+    "sha256": "1db382f895d2747af7091771c34a89b73da8e65a31075c651c2f8e4ab8a0c93c"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/scope-native-phase-probes-after.json",
+    "retained": "asm198x-external-bindings-final-producer--scope-native-phase-probes-after.json.gz",
+    "bytes": 55194,
+    "sha256": "b194af83fe8cac1f357d837533ea9893b51356a4bd8e195b459d5a34eef1a0e4"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/scope-native-query-probes-after.json",
+    "retained": "asm198x-external-bindings-final-producer--scope-native-query-probes-after.json.gz",
+    "bytes": 17370,
+    "sha256": "fc5d6e1b3c6f6aa728719d9dc065a4b31bc51341599ea2db06c6cd57f3eef013"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/scope-native-stream-probes-after.json",
+    "retained": "asm198x-external-bindings-final-producer--scope-native-stream-probes-after.json.gz",
+    "bytes": 3260,
+    "sha256": "23f15a097b2b1a0ad226436ec644f874cabede863e1c2756910f8d26a434358e"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/scope-native-width-probes-after.json",
+    "retained": "asm198x-external-bindings-final-producer--scope-native-width-probes-after.json.gz",
+    "bytes": 72791,
+    "sha256": "e106a25ec24e0cf26e287848b4ceb59c9223712600a695158e3145d57b38fdbd"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/source-constancy-after.json",
+    "retained": "asm198x-external-bindings-final-producer--source-constancy-after.json.gz",
+    "bytes": 158173,
+    "sha256": "ad292fa718cbc14fbf7b3aa282030b9af3261d1e466986287b6ac3bb7ff29cc9"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/strings-consumer-native-after.json",
+    "retained": "asm198x-external-bindings-final-producer--strings-consumer-native-after.json.gz",
+    "bytes": 33870,
+    "sha256": "f6e6794c65cf5b223051eabde912c73fd64c3818ce83da46960c4004af4e350c"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/strings-flat-native-after.json",
+    "retained": "asm198x-external-bindings-final-producer--strings-flat-native-after.json.gz",
+    "bytes": 264293,
+    "sha256": "92f32b156479e97f585af3bce3c1d89ddd352c74d38fa2684025786fbdea6fa9"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/strings-guard-native-after.json",
+    "retained": "asm198x-external-bindings-final-producer--strings-guard-native-after.json.gz",
+    "bytes": 3374,
+    "sha256": "e214b861175d9b45417f44063aa956f2f6c8d54f8ec0bed74c5e37cbf5dc7183"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/strings-index-scope-native-after.json",
+    "retained": "asm198x-external-bindings-final-producer--strings-index-scope-native-after.json.gz",
+    "bytes": 2177,
+    "sha256": "f59bab3cbe46a39304d606080d40a2d9bdf7e700a7038db2eff7366182e82f0a"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/strings-lifetime-native-after.json",
+    "retained": "asm198x-external-bindings-final-producer--strings-lifetime-native-after.json.gz",
+    "bytes": 17756,
+    "sha256": "8db11dcf761825f0826305d4b3c1f9fe241dbf3e68fe4f0b087663c796bbdd5f"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/strings-numeric-string-arity-native-after.json",
+    "retained": "asm198x-external-bindings-final-producer--strings-numeric-string-arity-native-after.json.gz",
+    "bytes": 12959,
+    "sha256": "626be4f3817bae146851724e0d9379be3cda5840f0380ca051bf99256fb11610"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/strings-text-consumer-native-after.json",
+    "retained": "asm198x-external-bindings-final-producer--strings-text-consumer-native-after.json.gz",
+    "bytes": 3106,
+    "sha256": "9fd2d372dc295d8117aea053fb589557e9240f8a4990ed6cd2305dbe452fd058"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/text-assertion-native-after.json",
+    "retained": "asm198x-external-bindings-final-producer--text-assertion-native-after.json.gz",
+    "bytes": 61523,
+    "sha256": "641ff3887b7f51642943e1b735126ab440362f52daffd17306cdd5625237f6be"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/text-native-after.json",
+    "retained": "asm198x-external-bindings-final-producer--text-native-after.json.gz",
+    "bytes": 200388,
+    "sha256": "7e7d0751168e9d219f1df3907fe3441c7ffcff3ef632357076aa216cf84b0d54"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/tokens-after.json",
+    "retained": "asm198x-external-bindings-final-producer--tokens-after.json.gz",
+    "bytes": 3079,
+    "sha256": "dfe9dc85ed1fdc4ed8cf6ce2d1013f7d0cfc9f8567cb1a353cdcf1cd862ac633"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/visibility-after.json",
+    "retained": "asm198x-external-bindings-final-producer--visibility-after.json.gz",
+    "bytes": 139903,
+    "sha256": "778b1e4456cedccd7538bda3da28d06c58a68736f8b376a73447a966b4a9d003"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/visibility-after.json.log",
+    "retained": "asm198x-external-bindings-final-producer--visibility-after.json.log.gz",
+    "bytes": 24,
+    "sha256": "a9ac22cc3cb335d8bc46e80504b0272a6fd4cacde5f1c26cee43f0319b418f65"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/visibility-token-final-after.json",
+    "retained": "asm198x-external-bindings-final-producer--visibility-token-final-after.json.gz",
+    "bytes": 3079,
+    "sha256": "dfe9dc85ed1fdc4ed8cf6ce2d1013f7d0cfc9f8567cb1a353cdcf1cd862ac633"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-final-producer/visibility-token-final-after.json.log",
+    "retained": "asm198x-external-bindings-final-producer--visibility-token-final-after.json.log.gz",
+    "bytes": 22,
+    "sha256": "716196d4a1acfae4d76a740b22629afa94eb33ddbed1f67f87e8a719e7b92128"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-committed-release-build.log",
+    "retained": "asm198x-external-bindings-committed-release-build.log.gz",
+    "bytes": 59,
+    "sha256": "2128bc9dead89e34f99e868ec155f655443efa9322c1f89f8198bdc9f84917df"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-4510.log",
+    "retained": "asm198x-external-bindings-4510.log.gz",
+    "bytes": 157,
+    "sha256": "1c1ce04484a7e9b16a2a6407590c8b20213f5284ea8f1d1ffd12ec9500e391c3"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-merge-source.json",
+    "retained": "asm198x-external-bindings-merge-source.json.gz",
+    "bytes": 223,
+    "sha256": "6cf79d6a35720f40f56b46847b58074f09d23687116f0888e5c33513a59fbd4d"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/alias-after.json",
+    "retained": "asm198x-external-bindings-first-replay--alias-after.json.gz",
+    "bytes": 4456,
+    "sha256": "74f3bdb8956735b9b38a415406efde752ae4ddcd7f2c0d1c4019f6adf4452d15"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/alias.log",
+    "retained": "asm198x-external-bindings-first-replay--alias.log.gz",
+    "bytes": 22,
+    "sha256": "873a2f696ecdba8a1b95ca39106cac5141cab37ebda54726c474947ecbf7cd99"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/conditional-context-after.json",
+    "retained": "asm198x-external-bindings-first-replay--conditional-context-after.json.gz",
+    "bytes": 98917,
+    "sha256": "ed4627c2dfa45db29f20d25e51157ec846f1d5b870d54795f0e54e31e39b2f22"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/conditional-context.log",
+    "retained": "asm198x-external-bindings-first-replay--conditional-context.log.gz",
+    "bytes": 24,
+    "sha256": "b7952288f8bde63cd5eb84897660ec0a2d67571c9ff994e4d2f742054244d7e2"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/query-admission-after.json",
+    "retained": "asm198x-external-bindings-first-replay--query-admission-after.json.gz",
+    "bytes": 27569,
+    "sha256": "840a7b1e3a29c960eebd1806ac5a11bbeed3e80d08fb3bc07b58f131e6da0ce3"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/query-admission.log",
+    "retained": "asm198x-external-bindings-first-replay--query-admission.log.gz",
+    "bytes": 23,
+    "sha256": "093afc371fc7a3fa97a09102d0d377d9bb9b24e9056791f85c8369d75262e5f2"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/query-extended-after.json",
+    "retained": "asm198x-external-bindings-first-replay--query-extended-after.json.gz",
+    "bytes": 70335,
+    "sha256": "0552cdc5948016709c937b78c08e1e15496f371358ad37f05f9f9ef51ae4622e"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/query-extended.log",
+    "retained": "asm198x-external-bindings-first-replay--query-extended.log.gz",
+    "bytes": 25,
+    "sha256": "b9eed9c0dc1e92448935190cc51ed75300444fbed5d43e6e123ef73abb4872f5"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/query-original-after.json",
+    "retained": "asm198x-external-bindings-first-replay--query-original-after.json.gz",
+    "bytes": 28407,
+    "sha256": "44f2a8adf07e0cc271d93e5d92412521fba9cc254fdb5f73d99553e21c9379f7"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/query-original.log",
+    "retained": "asm198x-external-bindings-first-replay--query-original.log.gz",
+    "bytes": 24,
+    "sha256": "a17c8670517a56d761be0bbd716efb70b349f91ecee350506152fcac8d950980"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/query-short-circuit-after.json",
+    "retained": "asm198x-external-bindings-first-replay--query-short-circuit-after.json.gz",
+    "bytes": 9616,
+    "sha256": "7787bddce9372e07aec2df6dc75cae1e7c1ebd3960b0e0bcdad51f44c279fab0"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/query-short-circuit.log",
+    "retained": "asm198x-external-bindings-first-replay--query-short-circuit.log.gz",
+    "bytes": 23,
+    "sha256": "df3c5df809bd341e3b0242f2d16312e6689f8fffb915c938c57cb1caf766eed3"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/scope-deferred-followups-native-after.json",
+    "retained": "asm198x-external-bindings-first-replay--scope-deferred-followups-native-after.json.gz",
+    "bytes": 11173,
+    "sha256": "fce80507a16e2e3c5b0b85bcf1194c49c13f7c682248b420d6898ba5c61b60f5"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/scope-deferred-followups-native.log",
+    "retained": "asm198x-external-bindings-first-replay--scope-deferred-followups-native.log.gz",
+    "bytes": 24,
+    "sha256": "e643ac46d9c5324fb8b1ad90e6d10eb85e404914a20bb6f50a77fee056d37da1"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/scope-native-completed-phase-probes-after.json",
+    "retained": "asm198x-external-bindings-first-replay--scope-native-completed-phase-probes-after.json.gz",
+    "bytes": 54043,
+    "sha256": "c6488c8fa37e00c62a799dcc2197c11f48e2b5339308f35a8399f6b58681ee1d"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/scope-native-completed-phase-probes.log",
+    "retained": "asm198x-external-bindings-first-replay--scope-native-completed-phase-probes.log.gz",
+    "bytes": 24,
+    "sha256": "71f31a10ebd80b379a18a625a0ad976852e11bf36961f1623587608400709501"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/scope-native-negative-memory-probes-after.json",
+    "retained": "asm198x-external-bindings-first-replay--scope-native-negative-memory-probes-after.json.gz",
+    "bytes": 14237,
+    "sha256": "cf02275e83dd28202293a67e87e224eca53fac1c496eb313d5d4658a591481bf"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/scope-native-negative-memory-probes.log",
+    "retained": "asm198x-external-bindings-first-replay--scope-native-negative-memory-probes.log.gz",
+    "bytes": 23,
+    "sha256": "88985c4139e147cd3696557611e14b098eaa2d8d363f898617b8e631be9ab471"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/scope-native-phase-probes-after.json",
+    "retained": "asm198x-external-bindings-first-replay--scope-native-phase-probes-after.json.gz",
+    "bytes": 54552,
+    "sha256": "aba70ace3caf1b406c3c41c3105e439fd5e295e53a66b99a1d285d914dc5dda9"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/scope-native-phase-probes.log",
+    "retained": "asm198x-external-bindings-first-replay--scope-native-phase-probes.log.gz",
+    "bytes": 24,
+    "sha256": "8ef7b8fdc003db8a33645d819c91dce59c3dfef06e32ebe18a205dc9704cb9b1"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/scope-native-query-probes-after.json",
+    "retained": "asm198x-external-bindings-first-replay--scope-native-query-probes-after.json.gz",
+    "bytes": 17154,
+    "sha256": "98c31376bd68c59a3bfacee46e1078353a100e5c87efbc793c2aa00cf59b3360"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/scope-native-query-probes.log",
+    "retained": "asm198x-external-bindings-first-replay--scope-native-query-probes.log.gz",
+    "bytes": 23,
+    "sha256": "d3155dc6a65648a9cfc99587238f290a9f2fcf77bac64270f63fdbb0ccf1b1a5"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/scope-native-stream-probes-after.json",
+    "retained": "asm198x-external-bindings-first-replay--scope-native-stream-probes-after.json.gz",
+    "bytes": 3218,
+    "sha256": "e5bd61ff16c340915e2fce29502a36d80be684d2cca4cf6fbb83f297cce4311e"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/scope-native-stream-probes.log",
+    "retained": "asm198x-external-bindings-first-replay--scope-native-stream-probes.log.gz",
+    "bytes": 22,
+    "sha256": "6af141c5fba928809b9e610249fb427969205179087def4ee79b9be28fdc5538"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/scope-native-width-probes-after.json",
+    "retained": "asm198x-external-bindings-first-replay--scope-native-width-probes-after.json.gz",
+    "bytes": 71921,
+    "sha256": "9cbf5a7176790e9dc38c1b757033d8d36bea12015c788d48c886443409eb89e9"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/scope-native-width-probes.log",
+    "retained": "asm198x-external-bindings-first-replay--scope-native-width-probes.log.gz",
+    "bytes": 24,
+    "sha256": "a78433b7bb8e7fc755fdbcdfe2f93725202a1570266f47dc02ba24822e7d87da"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/source-constancy-after.json",
+    "retained": "asm198x-external-bindings-first-replay--source-constancy-after.json.gz",
+    "bytes": 156283,
+    "sha256": "29d634b1e028cfc69ff30c18a9a65b5d33242f5832fb5dda1f503e27d40c1965"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/source-constancy.log",
+    "retained": "asm198x-external-bindings-first-replay--source-constancy.log.gz",
+    "bytes": 24,
+    "sha256": "ccfd86e5ef921d8586f46b7109fc8aa3648ac8b954b51d8c853a10bcf87fe1d1"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/strings-consumer-native-after.json",
+    "retained": "asm198x-external-bindings-first-replay--strings-consumer-native-after.json.gz",
+    "bytes": 33450,
+    "sha256": "e891376432a1db7cf17d844fedad03d05afaaf4bf99d780b9b7301f87e22092d"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/strings-consumer-native.log",
+    "retained": "asm198x-external-bindings-first-replay--strings-consumer-native.log.gz",
+    "bytes": 23,
+    "sha256": "b9e8e26b46459becc2381c9da2488704c28b7a822cbe2688f55460c6aa675f2d"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/strings-flat-native-after.json",
+    "retained": "asm198x-external-bindings-first-replay--strings-flat-native-after.json.gz",
+    "bytes": 260843,
+    "sha256": "0df67c586fa89d8a8b2824cb39260fb673543f06fb1debe0bba34e3886f40a55"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/strings-flat-native.log",
+    "retained": "asm198x-external-bindings-first-replay--strings-flat-native.log.gz",
+    "bytes": 24,
+    "sha256": "7d6bc0dcdd5efde6441d0924a32d08fbae1cf7ea0708df2495fec24b51863df0"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/strings-guard-native-after.json",
+    "retained": "asm198x-external-bindings-first-replay--strings-guard-native-after.json.gz",
+    "bytes": 3332,
+    "sha256": "a0f97c31793ba2380805778922ae96d6626bfa13c2b12050dbd560a334b8511c"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/strings-guard-native.log",
+    "retained": "asm198x-external-bindings-first-replay--strings-guard-native.log.gz",
+    "bytes": 22,
+    "sha256": "716196d4a1acfae4d76a740b22629afa94eb33ddbed1f67f87e8a719e7b92128"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/strings-index-scope-native-after.json",
+    "retained": "asm198x-external-bindings-first-replay--strings-index-scope-native-after.json.gz",
+    "bytes": 2147,
+    "sha256": "04d68e22ff8506a3918d1432d056911e5c90a569b19a01a5ee22e95f55bf7740"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/strings-index-scope-native.log",
+    "retained": "asm198x-external-bindings-first-replay--strings-index-scope-native.log.gz",
+    "bytes": 22,
+    "sha256": "2f2e77c26435b73ea9c8a56029baa7ba1397ac741a54e66287d433d3ea1ef920"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/strings-lifetime-native-after.json",
+    "retained": "asm198x-external-bindings-first-replay--strings-lifetime-native-after.json.gz",
+    "bytes": 17534,
+    "sha256": "a75dc3d7df457bfa7885b2b07bf9fe23bed2c0791892fe00b09870889245b7ca"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/strings-lifetime-native.log",
+    "retained": "asm198x-external-bindings-first-replay--strings-lifetime-native.log.gz",
+    "bytes": 23,
+    "sha256": "514fc3dfcaee4516e51552b0cdd34ead3f86b1886d1b14c0916bf6a27eddfa1e"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/strings-numeric-string-arity-native-after.json",
+    "retained": "asm198x-external-bindings-first-replay--strings-numeric-string-arity-native-after.json.gz",
+    "bytes": 12797,
+    "sha256": "49ef0e95eee44b1401f2b530bd0f3580d84f2deba1d50c8cf280ef73e2532f43"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/strings-numeric-string-arity-native.log",
+    "retained": "asm198x-external-bindings-first-replay--strings-numeric-string-arity-native.log.gz",
+    "bytes": 23,
+    "sha256": "240b59ba1cd8b9c841326f70f70ac0d7aea2c9aa21522ca4a39788ae32a769bc"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/strings-text-consumer-native-after.json",
+    "retained": "asm198x-external-bindings-first-replay--strings-text-consumer-native-after.json.gz",
+    "bytes": 3064,
+    "sha256": "8e66f296ed414c17a4343b6f08c2b137e5ba9697610080bc4ac3f3235374e3a1"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/strings-text-consumer-native.log",
+    "retained": "asm198x-external-bindings-first-replay--strings-text-consumer-native.log.gz",
+    "bytes": 22,
+    "sha256": "6af141c5fba928809b9e610249fb427969205179087def4ee79b9be28fdc5538"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/summary.json",
+    "retained": "asm198x-external-bindings-first-replay--summary.json.gz",
+    "bytes": 7733,
+    "sha256": "ddada89a49fff4d54b95cb2cf1c5a33824432048abd5b266897f5c0dca2cd18e"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/text-assertion-native-after.json",
+    "retained": "asm198x-external-bindings-first-replay--text-assertion-native-after.json.gz",
+    "bytes": 60773,
+    "sha256": "308649dc952cd9febd4bcb41407e1e86bd5ea90a3708f25960afa12b791eea60"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/text-assertion-native.log",
+    "retained": "asm198x-external-bindings-first-replay--text-assertion-native.log.gz",
+    "bytes": 24,
+    "sha256": "2a5186129ffc93cc656e327ec558825a4e98d9e64a7640983bfaee47449159e3"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/text-native-after.json",
+    "retained": "asm198x-external-bindings-first-replay--text-native-after.json.gz",
+    "bytes": 198006,
+    "sha256": "abd14dc4802c7d0b71fceacecb5faf8c0df311ebb9ad2fa36b08b21f57508a71"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-first-replay/text-native.log",
+    "retained": "asm198x-external-bindings-first-replay--text-native.log.gz",
+    "bytes": 24,
+    "sha256": "57eeca1637267a9f1871fea999e250c5264f5da1fc8f10e1611b906f5f1a85ea"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-candidates/candidate-qualification-aarch64-apple-darwin-1/acquisition.json",
+    "retained": "asm198x-external-bindings-candidates--candidate-qualification-aarch64-apple-darwin-1--acquisition.json.gz",
+    "bytes": 126,
+    "sha256": "6dad8626d8a6e227b702722c1b6e7d7c6c059c1dd6dd4a516cbac33c131a49d8"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-candidates/candidate-qualification-aarch64-apple-darwin-1/corrupt-archive.json",
+    "retained": "asm198x-external-bindings-candidates--candidate-qualification-aarch64-apple-darwin-1--corrupt-archive.json.gz",
+    "bytes": 172,
+    "sha256": "d293f944fdd29a56aeb5c4e9e44a8acd99fbbb3d9552a90cc9eb8aad1dc1d6d1"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-candidates/candidate-qualification-aarch64-apple-darwin-1/plan.json",
+    "retained": "asm198x-external-bindings-candidates--candidate-qualification-aarch64-apple-darwin-1--plan.json.gz",
+    "bytes": 13916,
+    "sha256": "aae56a69259430e0a5aa83bc036e953570dd25a286fad39cd2da6e485591ef3a"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-candidates/candidate-qualification-aarch64-apple-darwin-1/report.json",
+    "retained": "asm198x-external-bindings-candidates--candidate-qualification-aarch64-apple-darwin-1--report.json.gz",
+    "bytes": 31107135,
+    "sha256": "ee6178223b8754839b8f7d51d6c7711dcdbe5c405a942b3faa253a30804ae249"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-candidates/candidate-qualification-aarch64-apple-darwin-1/wrong-bytes.json",
+    "retained": "asm198x-external-bindings-candidates--candidate-qualification-aarch64-apple-darwin-1--wrong-bytes.json.gz",
+    "bytes": 31107930,
+    "sha256": "305014f61c8b60f4c9b35005c80368d0222cbaa6d576e218c7ad66c771047316"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-candidates/candidate-qualification-aarch64-unknown-linux-gnu-1/acquisition.json",
+    "retained": "asm198x-external-bindings-candidates--candidate-qualification-aarch64-unknown-linux-gnu-1--acquisition.json.gz",
+    "bytes": 126,
+    "sha256": "6dad8626d8a6e227b702722c1b6e7d7c6c059c1dd6dd4a516cbac33c131a49d8"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-candidates/candidate-qualification-aarch64-unknown-linux-gnu-1/corrupt-archive.json",
+    "retained": "asm198x-external-bindings-candidates--candidate-qualification-aarch64-unknown-linux-gnu-1--corrupt-archive.json.gz",
+    "bytes": 182,
+    "sha256": "82cc3298ec0de54957a653ff1ad769a06adc7ecf95a36894ea9d1bf3b618952d"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-candidates/candidate-qualification-aarch64-unknown-linux-gnu-1/plan.json",
+    "retained": "asm198x-external-bindings-candidates--candidate-qualification-aarch64-unknown-linux-gnu-1--plan.json.gz",
+    "bytes": 13973,
+    "sha256": "998be1811c772cee8ae18022d1a04b7f97288d243a80ccf40687856f72e44638"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-candidates/candidate-qualification-aarch64-unknown-linux-gnu-1/report.json",
+    "retained": "asm198x-external-bindings-candidates--candidate-qualification-aarch64-unknown-linux-gnu-1--report.json.gz",
+    "bytes": 27637041,
+    "sha256": "44039f614310a5626c2f6201b340b95d65249efe9de112d9ab025656b14315b4"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-candidates/candidate-qualification-aarch64-unknown-linux-gnu-1/wrong-bytes.json",
+    "retained": "asm198x-external-bindings-candidates--candidate-qualification-aarch64-unknown-linux-gnu-1--wrong-bytes.json.gz",
+    "bytes": 27637836,
+    "sha256": "2bdbd0546531d223fc5a7a19775b146d81f30cff127a82cfeb2c6600f12fa153"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-candidates/candidate-qualification-x86_64-pc-windows-msvc-1/acquisition.json",
+    "retained": "asm198x-external-bindings-candidates--candidate-qualification-x86_64-pc-windows-msvc-1--acquisition.json.gz",
+    "bytes": 126,
+    "sha256": "6dad8626d8a6e227b702722c1b6e7d7c6c059c1dd6dd4a516cbac33c131a49d8"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-candidates/candidate-qualification-x86_64-pc-windows-msvc-1/corrupt-archive.json",
+    "retained": "asm198x-external-bindings-candidates--candidate-qualification-x86_64-pc-windows-msvc-1--corrupt-archive.json.gz",
+    "bytes": 173,
+    "sha256": "14917b0dd5c0d132a39a1b8a988625000b26d8c9f83f57c358445d524d227fbf"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-candidates/candidate-qualification-x86_64-pc-windows-msvc-1/plan.json",
+    "retained": "asm198x-external-bindings-candidates--candidate-qualification-x86_64-pc-windows-msvc-1--plan.json.gz",
+    "bytes": 13854,
+    "sha256": "23fd648373e15b7d33d34c7ddf4efa736eb59b92e47d6c41d27119174c0acda8"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-candidates/candidate-qualification-x86_64-pc-windows-msvc-1/report.json",
+    "retained": "asm198x-external-bindings-candidates--candidate-qualification-x86_64-pc-windows-msvc-1--report.json.gz",
+    "bytes": 30855766,
+    "sha256": "dc863cfac70946b074f29fa48d2ca26c0295edc68ebf596e9c1c2c43ee562feb"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-candidates/candidate-qualification-x86_64-pc-windows-msvc-1/wrong-bytes.json",
+    "retained": "asm198x-external-bindings-candidates--candidate-qualification-x86_64-pc-windows-msvc-1--wrong-bytes.json.gz",
+    "bytes": 30856561,
+    "sha256": "bb740adb235b2c11c837d66558b2adecca9554ce1c5953c2179edd3630175196"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-candidates/candidate-qualification-x86_64-unknown-linux-gnu-1/acquisition.json",
+    "retained": "asm198x-external-bindings-candidates--candidate-qualification-x86_64-unknown-linux-gnu-1--acquisition.json.gz",
+    "bytes": 126,
+    "sha256": "6dad8626d8a6e227b702722c1b6e7d7c6c059c1dd6dd4a516cbac33c131a49d8"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-candidates/candidate-qualification-x86_64-unknown-linux-gnu-1/corrupt-archive.json",
+    "retained": "asm198x-external-bindings-candidates--candidate-qualification-x86_64-unknown-linux-gnu-1--corrupt-archive.json.gz",
+    "bytes": 180,
+    "sha256": "0b4d2d082c9b8af180fc479d18fb2de3e8d2e64a19155e533d87f86ef97ccf07"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-candidates/candidate-qualification-x86_64-unknown-linux-gnu-1/plan.json",
+    "retained": "asm198x-external-bindings-candidates--candidate-qualification-x86_64-unknown-linux-gnu-1--plan.json.gz",
+    "bytes": 13973,
+    "sha256": "998be1811c772cee8ae18022d1a04b7f97288d243a80ccf40687856f72e44638"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-candidates/candidate-qualification-x86_64-unknown-linux-gnu-1/report.json",
+    "retained": "asm198x-external-bindings-candidates--candidate-qualification-x86_64-unknown-linux-gnu-1--report.json.gz",
+    "bytes": 27637034,
+    "sha256": "ca7806a6a0b9c91b639d3043be3b097522f49830f21cf0af8bcc8c208c57cf3e"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-candidates/candidate-qualification-x86_64-unknown-linux-gnu-1/wrong-bytes.json",
+    "retained": "asm198x-external-bindings-candidates--candidate-qualification-x86_64-unknown-linux-gnu-1--wrong-bytes.json.gz",
+    "bytes": 27637829,
+    "sha256": "8da41d7ad76a8fea2c0648501a1d5b93d13ce8154d83262b29c25ea1c7b2ee14"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-next-data-plan.md",
+    "retained": "asm198x-external-bindings-next-data-plan.md.gz",
+    "bytes": 2836,
+    "sha256": "ddcac991c60a8878627d69a3802f0b834bc140b3a8e02500c0e3e462d9889d54"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-next-data-context-native.json",
+    "retained": "asm198x-external-bindings-next-data-context-native.json.gz",
+    "bytes": 513648,
+    "sha256": "01a80a48f1d49d7d51f77580cfc8c1f2d3c95a929f272d9edb5d999ecc0fbc1a"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-next-data-context-before.json",
+    "retained": "asm198x-external-bindings-next-data-context-before.json.gz",
+    "bytes": 264583,
+    "sha256": "fcff43cc58487b4a9eb903b89715f3e39f79aad8b723c8444f45a5f74f5089d6"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-next-data-context-before.json.log",
+    "retained": "asm198x-external-bindings-next-data-context-before.json.log.gz",
+    "bytes": 26,
+    "sha256": "ceb3b9e60dc332b401653d39ca7deb1e1553d8fdce2a8e1660d89ea86a655519"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-next-numeric-consumers-before.json.log",
+    "retained": "asm198x-external-bindings-next-numeric-consumers-before.json.log.gz",
+    "bytes": 24,
+    "sha256": "1d8074cbd2a4395b18e8cb7cec08666fecb6abf59aa9b081d7973c39a6b5dcd2"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-next-numeric-consumers-before.json",
+    "retained": "asm198x-external-bindings-next-numeric-consumers-before.json.gz",
+    "bytes": 24851,
+    "sha256": "db99aed8088431bdd3ab8cb568d35a7608c1bb1701a995669e0d53b20447c8ae"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-next-numeric-consumers-native.json",
+    "retained": "asm198x-external-bindings-next-numeric-consumers-native.json.gz",
+    "bytes": 53444,
+    "sha256": "6b09d3d2cd8e47be5dfd8ec6870e6ca7cd4e7af8bf26d6f430f46392b756ea77"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-next-baselines.json",
+    "retained": "asm198x-external-bindings-next-baselines.json.gz",
+    "bytes": 700,
+    "sha256": "5bed75ee7dd894b8bcb0f3b4ab65e6bd15d904d126298b967d8b467ca31a0cdb"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-replay.py",
+    "retained": "asm198x-external-bindings-replay.py.gz",
+    "bytes": 2843,
+    "sha256": "79c3db9afa8b24a44673ac1ec632040e8f1935dc9681a3b7ab077e29dc5e12db"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-download.py",
+    "retained": "asm198x-external-bindings-download.py.gz",
+    "bytes": 1279,
+    "sha256": "d8e4cc7a68d9fefe7eb0f3f0b00643dcefa3a113dcbcbe510a42cbc23844c926"
+  },
+  {
+    "source": "/private/tmp/asm198x-audit-external-bindings-candidates.py",
+    "retained": "asm198x-audit-external-bindings-candidates.py.gz",
+    "bytes": 14928,
+    "sha256": "b5b9917b2455d2b05585c97fb1815442346f450b8ed51ee8b75dfa9d0c4e45dc"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-coverage-workflow.yml",
+    "retained": "asm198x-external-bindings-coverage-workflow.yml.gz",
+    "bytes": 9754,
+    "sha256": "573b3b49c3aa7f0a002e90d337dca5783e43074aa64ff9c598db2f3c89377a5c"
+  }
+]
