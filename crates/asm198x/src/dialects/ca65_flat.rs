@@ -2272,8 +2272,8 @@ impl text::TextSyntax for Ca65Text<'_> {
                 let mut same = a.len() == b.len();
                 for (x, y) in a.iter().zip(&b) {
                     let value = |token: &Token| -> Result<Vec<u8>, AsmError> {
-                        if StringTokens::is_handle(token.text) {
-                            self.strings.resolve(token.text, line)
+                        if StringTokens::is_handle(token.text()) {
+                            self.strings.resolve(token.text(), line)
                         } else {
                             Ok(token_value(token).into_bytes())
                         }
@@ -2405,15 +2405,15 @@ fn arity(args: &[text::Arg], want: usize, name: &str, line: usize) -> Result<(),
 /// else by nothing, because its kind already said everything.
 fn token_value(token: &Token) -> String {
     match token.kind {
-        TokenKind::Number => match parse_number(token.text, 0) {
+        TokenKind::Number => match parse_number(token.text(), 0) {
             Ok(n) => n.to_string(),
-            Err(_) => token.text.to_string(),
+            Err(_) => token.text().to_string(),
         },
         TokenKind::Str | TokenKind::Char => token
-            .text
+            .text()
             .trim_matches(|c| c == '"' || c == '\'')
             .to_string(),
-        TokenKind::Ident => token.text.to_string(),
+        TokenKind::Ident => token.text().to_string(),
         _ => String::new(),
     }
 }
@@ -2455,7 +2455,7 @@ fn token_list<'a>(arg: &'a text::Arg, name: &str, line: usize) -> Result<&'a str
 
 /// The source slice covering `tokens[from..to]`, clamped to what is there —
 /// ca65 stops at the end of the list rather than refusing.
-fn token_slice<'a>(list: &'a str, tokens: &[Token<'a>], from: usize, to: usize) -> &'a str {
+fn token_slice<'a>(list: &'a str, tokens: &[Token], from: usize, to: usize) -> &'a str {
     let to = to.min(tokens.len());
     if from >= to {
         return "";
