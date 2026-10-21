@@ -1,0 +1,10 @@
+{
+  "removed_roots": 83,
+  "removed_regular_files": 1246,
+  "df_after": "Filesystem   1024-blocks      Used Available Capacity  iused     ifree %iused  Mounted on\n/dev/disk3s5   971350180 907708388  14872708    99% 11058938 148727080    7%   /System/Volumes/Data\n",
+  "retained_caches": [
+    "/private/tmp/asm198x-scalar-build",
+    "/private/tmp/asm198x-scalar-release-build"
+  ],
+  "reason_caches_retained": "Actively reused by independent #921 in the same task worktree; disposable after its checked replacement is retained."
+}
