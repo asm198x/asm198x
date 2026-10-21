@@ -1,0 +1,21 @@
+{
+  "task_owned": true,
+  "files": [
+    {
+      "path": ".ruff_cache/.gitignore",
+      "bytes": 35,
+      "sha256": "9e3a60f1e6ec4ae60215c11d54b171392745ec25e9dded433d5bd921363af316"
+    },
+    {
+      "path": ".ruff_cache/0.16.4/10202317705813530453",
+      "bytes": 332,
+      "sha256": "1e6619857deee91139337c3900417a8dfa6797279d4ff27af34a6c75454b8571"
+    },
+    {
+      "path": ".ruff_cache/CACHEDIR.TAG",
+      "bytes": 43,
+      "sha256": "5953156d7e0c564a427251316eaf26f8870e6483ae2197f916b630e4f93e31ae"
+    }
+  ],
+  "removed": ".ruff_cache"
+}

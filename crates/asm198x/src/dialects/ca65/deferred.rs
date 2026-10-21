@@ -8,7 +8,7 @@ use super::{AsmError, Expr, Kind, collect_syms, map_expr_syms, split_scope_ref};
 
 pub(super) struct Definition {
     pub value: Expr,
-    source_value: Expr,
+    pub source_value: Expr,
     pub span: Span,
     pub position: usize,
     source: DefinitionSource,
@@ -20,9 +20,29 @@ pub(super) struct Deferred {
     /// Ordinary dependencies of selected predicates survive numeric folding.
     /// Keep the bound lookup key: normal scoped fallback differs from `::X`.
     pub source_reads: Vec<(String, Span)>,
+    /// Source address-size declarations under the existing lexical keys.
+    /// These are not numeric values and do not define an external symbol.
+    pub declarations: BTreeMap<String, VisibilityBinding>,
     waiting: BTreeMap<String, BTreeSet<String>>,
     remaining: BTreeMap<String, BTreeSet<String>>,
     size_cache: std::cell::RefCell<BTreeMap<String, SizeHint>>,
+}
+
+/// Facts about an existing lexical binding, not a second symbol namespace.
+#[derive(Clone, Default)]
+pub(super) struct VisibilityBinding {
+    pub declared_byte: Option<bool>,
+    pub source_byte: Option<bool>,
+    pub imported: bool,
+    pub global: bool,
+    pub exported: bool,
+    pub export_reference: Option<String>,
+}
+
+impl VisibilityBinding {
+    pub fn is_external(&self) -> bool {
+        self.imported || (self.global && !self.exported)
+    }
 }
 
 fn symbols(value: &Expr) -> BTreeSet<String> {
@@ -391,6 +411,10 @@ impl Deferred {
                     || labels.contains_key(name)
                     || zero_page.contains(name)
                     || self.definitions.contains_key(name)
+                    || self
+                        .declarations
+                        .get(name)
+                        .is_some_and(|decl| decl.source_byte.is_some())
             })
             .remove(&key)
             .unwrap_or_else(|| key.clone());
@@ -422,11 +446,23 @@ impl Deferred {
                 found.insert(key, hint);
                 continue;
             }
-            if zero_page.contains(&key) || labels.get(&key).is_some_and(|seg| seg == "ZEROPAGE") {
+            if zero_page.contains(&key)
+                || self
+                    .declarations
+                    .get(&key)
+                    .and_then(|decl| decl.source_byte)
+                    == Some(true)
+                || labels.get(&key).is_some_and(|seg| seg == "ZEROPAGE")
+            {
                 found.insert(key, SizeHint::sized(true));
                 continue;
             }
-            if labels.contains_key(&key) {
+            if labels.contains_key(&key)
+                || self
+                    .declarations
+                    .get(&key)
+                    .is_some_and(|decl| decl.source_byte.is_some())
+            {
                 found.insert(key, SizeHint::sized(false));
                 continue;
             }

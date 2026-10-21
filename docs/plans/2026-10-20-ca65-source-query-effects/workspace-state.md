@@ -47,8 +47,9 @@ Keep these exact workspaces while #810/#795 continues:
   worktree; reuse for #810, then #917/#795. Remove with git worktree remove only
   after all unique tracked/untracked/ignored work and commits are retained.
 - /private/tmp/asm198x-text-consumers-build: reusable task build cache. The debug
-  CLI was last compiled during the rejected import trial; it is not a frozen
-  baseline. Rebuild on the new #810 branch before using it. Remove at task end.
+  CLI now contains the #810 implementation under verification. It is not a
+  frozen baseline. Do not rebuild it while the workspace suite runs. Remove
+  this cache at task end.
 - /private/tmp/asm198x-conditional-context-final-producer: qualified #916 frozen
   binary, identity and 23-dataset replay summary (2,466 cases). Keep until the
   next checked replacement is qualified and all evidence is durably retained.
@@ -61,7 +62,44 @@ Keep these exact workspaces while #810/#795 continues:
   predecessor until #810 is checked and #917 is rebased/requalified. Its
   metadata/outcomes are durably retained; it is not a successful candidate.
 
-No task-owned build/test/archive/monitor process remains running. The two
-superseded native candidate workflows and CI runs are stopped. Temporary
-helpers from this slice were retained and removed; recreate from retained
-sources when needed. Shared CI/rebase helpers still pre-existed in /private/tmp.
+The two superseded #917 native candidate workflows and CI runs are stopped.
+Shared CI/rebase helpers still pre-exist in /private/tmp.
+
+## #810 implementation under verification
+
+Branch fix/ca65-scoped-external-bindings starts at merged #916. Its native
+baseline/design commits are pushed; the implementation has not yet been
+qualified or merged. The full 1,390-case audit improves from 946 to 1,378
+matches, the prior visibility matrix from 223 to 266, with no previous match
+lost. Twenty valid numeric source-query cases remain #795. Six additional
+lexical controls preserve valid .ident-generated names and expose the two
+legacy plain register-name acceptances tracked in #918.
+
+The focused Rust suite, all-target Lua Clippy, 115 Node/setup tests, docs,
+versions and ecosystem checks passed. All 2,466 old regression cases retained
+their previous native matches. The full workspace suite passed 1642 tests, with 38 ignored; the
+release-executable replay also retained every old match. Native archive
+qualification is still pending; no release qualification is claimed yet.
+The required package cohort now inventories 1,646 supported cases and every
+exclusion explicitly. See ../2026-10-21-ca65-scoped-externals/.
+
+Additional task-owned temporary directories to retain until qualification and
+remote evidence retention, then inspect and remove:
+
+- /private/tmp/asm198x-external-bindings-first-replay: development regression
+  matrices before the final numeric admission guard.
+- /private/tmp/asm198x-external-bindings-final-replay: final debug executable's
+  23 retained matrices and summary.
+- /private/tmp/asm198x-external-bindings-release-build: isolated release cache,
+  separate from the live full-suite CLI. Remove after its artifact is retained.
+- /private/tmp/asm198x-external-bindings-final-producer: frozen release binary
+  and its replay. Bind its identity to clean committed source before final use.
+
+Temporary files prefixed asm198x-external-bindings- and the adapted
+asm198x-audit-external-bindings-candidates.py belong to this task. Preserve
+verification logs/helpers with hashes before deleting them. Do not delete
+unknown sibling directories or the shared native source checkout.
+
+- /private/tmp/asm198x-external-bindings-final-local-package: local native
+  release archive and checksum prepared for qualification; remove after
+  checked replacement and durable evidence retention.

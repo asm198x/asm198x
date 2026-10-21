@@ -315,23 +315,67 @@ fn live_text(
     } else {
         ca65_flat::Target::Mos6502
     };
+    let admission = |text: &str, line: usize| {
+        if st.deferred.declarations.is_empty() {
+            return Ok(());
+        }
+        let Ok(value) = super::constant_value(text, line) else {
+            return Ok(());
+        };
+        let failure = std::cell::RefCell::new(None);
+        let value = map_expr_syms(&value, &|name| match reader.query_key(name, line) {
+            Ok(key) => Some(Expr::Sym(key)),
+            Err(error) => {
+                *failure.borrow_mut() = Some(error);
+                None
+            }
+        });
+        if let Some(error) = failure.into_inner() {
+            return Err(error);
+        }
+        let facts = SourceFacts {
+            consts: &st.consts,
+            label_seg: &st.label_seg,
+            deferred: &st.deferred,
+            stmts: &st.stmts,
+            seg: &st.seg,
+            final_globals: false,
+        };
+        if reads_external(&value, &facts) {
+            if weighs_nothing(&value, st) {
+                return Err(AsmError::unsupported(
+                    line,
+                    "numeric text over external expressions needs ordered source evaluation (#795)",
+                ));
+            }
+            return Err(AsmError::new(
+                line,
+                "numeric text requires a constant expression; this symbol is external",
+            ));
+        }
+        Ok(())
+    };
     ca65_flat::expand_ca65_line(
         source,
-        target,
-        &st.consts,
-        (&reader.text_names, &reader.strings),
-        reader.repeat_registers.map(|selected| {
-            if selected {
-                ca65_flat::Target::Csg4510
-            } else {
-                ca65_flat::Target::Mos6502
-            }
-        }),
-        reader
-            .scopes
-            .len()
-            .saturating_sub(reader.records.iter().filter(|open| open.owns_scope).count()),
         line,
+        ca65_flat::LineText {
+            target,
+            numbers: &st.consts,
+            defined: &reader.text_names,
+            strings: &reader.strings,
+            token_target: reader.repeat_registers.map(|selected| {
+                if selected {
+                    ca65_flat::Target::Csg4510
+                } else {
+                    ca65_flat::Target::Mos6502
+                }
+            }),
+            depth: reader
+                .scopes
+                .len()
+                .saturating_sub(reader.records.iter().filter(|open| open.owns_scope).count()),
+            admission: Some(&admission),
+        },
     )
 }
 
@@ -1360,22 +1404,94 @@ fn fold_condition(
 /// Constancy uses the retained source graph, before any final addresses or
 /// outward scope fallback exist. Cache each alias once so shared subexpressions
 /// and long chains do not become recursively expanded expression trees.
-fn segment_weights(expr: &Expr, st: &Projection) -> Option<BTreeMap<String, i64>> {
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord)]
+enum SourceBasis {
+    Segment(String),
+    External(String),
+}
+
+struct SourceFacts<'a> {
+    consts: &'a BTreeMap<String, i64>,
+    label_seg: &'a BTreeMap<String, String>,
+    deferred: &'a super::deferred::Deferred,
+    stmts: &'a [Stmt],
+    seg: &'a str,
+    final_globals: bool,
+}
+
+fn reads_external(value: &Expr, st: &SourceFacts<'_>) -> bool {
+    let mut names = BTreeSet::new();
+    collect_syms(&Kind::Bytes(vec![value.clone()]), &mut names);
+    for (_, source, _) in st.deferred.source_definitions(value) {
+        collect_syms(&Kind::Bytes(vec![source.clone()]), &mut names);
+    }
+    names.into_iter().any(|name| {
+        let key = super::split_scope_ref(&name).map_or_else(
+            || name.clone(),
+            |(path, name)| {
+                if path.is_empty() {
+                    name.to_string()
+                } else {
+                    format!("{path}::{name}")
+                }
+            },
+        );
+        st.deferred
+            .declarations
+            .get(&key)
+            .is_some_and(|decl| decl.is_external() || (!st.final_globals && decl.global))
+            && !st.consts.contains_key(&key)
+            && !st.label_seg.contains_key(&key)
+            && !st.deferred.definitions.contains_key(&key)
+    })
+}
+
+/// Zero multiplication can erase relocation, but not an unresolved symbol.
+/// Logical short-circuiting is handled separately by the numeric evaluator.
+fn source_names_admitted(value: &Expr, st: &SourceFacts<'_>) -> bool {
+    let mut names = BTreeSet::new();
+    collect_syms(&Kind::Bytes(vec![value.clone()]), &mut names);
+    for (_, source, _) in st.deferred.source_definitions(value) {
+        collect_syms(&Kind::Bytes(vec![source.clone()]), &mut names);
+    }
+    names.into_iter().all(|name| {
+        let key = super::split_scope_ref(&name).map_or_else(
+            || name.clone(),
+            |(path, name)| {
+                if path.is_empty() {
+                    name.to_string()
+                } else {
+                    format!("{path}::{name}")
+                }
+            },
+        );
+        st.consts.contains_key(&key)
+            || st.label_seg.contains_key(&key)
+            || st.deferred.definitions.contains_key(&key)
+            || st
+                .deferred
+                .declarations
+                .get(&key)
+                .is_some_and(|decl| decl.imported || (st.final_globals && decl.is_external()))
+    })
+}
+
+fn segment_weights(expr: &Expr, st: &SourceFacts<'_>) -> Option<BTreeMap<SourceBasis, i64>> {
     let mut aliases = BTreeMap::new();
     for (name, value, position) in st.deferred.source_definitions(expr) {
         let pc_seg = &st.stmts.get(position)?.seg;
         let weights = expression_weights(value, st, &aliases, pc_seg);
         aliases.insert(name.to_string(), weights);
     }
-    expression_weights(expr, st, &aliases, &st.seg)
+    expression_weights(expr, st, &aliases, st.seg)
 }
 
 fn expression_weights(
     expr: &Expr,
-    st: &Projection,
-    aliases: &BTreeMap<String, Option<BTreeMap<String, i64>>>,
+    st: &SourceFacts<'_>,
+    aliases: &BTreeMap<String, Option<BTreeMap<SourceBasis, i64>>>,
     pc_seg: &str,
-) -> Option<BTreeMap<String, i64>> {
+) -> Option<BTreeMap<SourceBasis, i64>> {
     let mut weights = BTreeMap::new();
     walk_weights(expr, 1, st, aliases, pc_seg, &mut weights)?;
     Some(weights)
@@ -1384,19 +1500,27 @@ fn expression_weights(
 /// Whether every known segment contribution cancels. An unresolved source
 /// name has no classification, even when final binding could find an outer name.
 fn weighs_nothing(expr: &Expr, st: &Projection) -> bool {
-    segment_weights(expr, st).is_some_and(|w| w.values().all(|&n| n == 0))
+    let facts = SourceFacts {
+        consts: &st.consts,
+        label_seg: &st.label_seg,
+        deferred: &st.deferred,
+        stmts: &st.stmts,
+        seg: &st.seg,
+        final_globals: false,
+    };
+    segment_weights(expr, &facts).is_some_and(|w| w.values().all(|&n| n == 0))
 }
 
 fn walk_weights(
     expr: &Expr,
     sign: i64,
-    st: &Projection,
-    aliases: &BTreeMap<String, Option<BTreeMap<String, i64>>>,
+    st: &SourceFacts<'_>,
+    aliases: &BTreeMap<String, Option<BTreeMap<SourceBasis, i64>>>,
     pc_seg: &str,
-    weights: &mut BTreeMap<String, i64>,
+    weights: &mut BTreeMap<SourceBasis, i64>,
 ) -> Option<()> {
     use crate::engine::BinOp as Op;
-    let mut carry = |seg: String, amount: i64| {
+    let mut carry = |seg: SourceBasis, amount: i64| {
         let weight = weights.entry(seg).or_insert(0i64);
         *weight = weight.checked_add(amount)?;
         Some(())
@@ -1424,7 +1548,7 @@ fn walk_weights(
     };
     match expr {
         Expr::Num(_) => Some(()),
-        Expr::Pc => carry(pc_seg.to_string(), sign),
+        Expr::Pc => carry(SourceBasis::Segment(pc_seg.to_string()), sign),
         Expr::Sym(name) => {
             let key = super::split_scope_ref(name).map_or_else(
                 || name.clone(),
@@ -1445,7 +1569,18 @@ fn walk_weights(
                 }
                 return Some(());
             }
-            carry(st.label_seg.get(&key)?.clone(), sign)
+            if let Some(segment) = st.label_seg.get(&key) {
+                carry(SourceBasis::Segment(segment.clone()), sign)
+            } else if st
+                .deferred
+                .declarations
+                .get(&key)
+                .is_some_and(|decl| decl.imported || (st.final_globals && decl.is_external()))
+            {
+                carry(SourceBasis::External(key), sign)
+            } else {
+                None
+            }
         }
         Expr::Bin(Op::Add, a, b) => {
             walk_weights(a, sign, st, aliases, pc_seg, weights)?;
@@ -1459,8 +1594,10 @@ fn walk_weights(
         Expr::Bin(Op::Mul, a, b) => {
             let left = number(a);
             let right = number(b);
-            if left == Some(0) || right == Some(0) {
-                Some(())
+            if left == Some(0) {
+                source_names_admitted(b, st).then_some(())
+            } else if right == Some(0) {
+                source_names_admitted(a, st).then_some(())
             } else if let Some(factor) = right {
                 walk_weights(a, sign.checked_mul(factor)?, st, aliases, pc_seg, weights)
             } else if let Some(factor) = left {
@@ -1677,9 +1814,219 @@ fn project_selected(
     Ok(())
 }
 
+/// Check relocatable external byte data before binding exported numeric values.
+/// Locally defined globals may have become constants by the end of assembly.
+pub(super) fn validate_external_bytes(parsed: &Parsed) -> Result<(), AsmError> {
+    if !parsed
+        .deferred
+        .declarations
+        .values()
+        .any(|decl| decl.is_external())
+    {
+        return Ok(());
+    }
+    let zero_page = parsed
+        .deferred
+        .declarations
+        .iter()
+        .filter(|(_, decl)| decl.source_byte == Some(true))
+        .map(|(name, _)| name.clone())
+        .collect();
+    for stmt in &parsed.stmts {
+        let values = match &stmt.kind {
+            Kind::Bytes(values) => values.as_slice(),
+            Kind::Insn {
+                operand: mos6502::OperandSyntax::Immediate(value),
+                ..
+            }
+            | Kind::BitBranch {
+                zero_page: value, ..
+            } => std::slice::from_ref(value),
+            _ => continue,
+        };
+        let facts = SourceFacts {
+            consts: &parsed.consts,
+            label_seg: &parsed.label_seg,
+            deferred: &parsed.deferred,
+            stmts: &parsed.stmts,
+            seg: &stmt.seg,
+            final_globals: true,
+        };
+        for value in values {
+            if parsed.deferred.size_hint(
+                value,
+                &parsed.consts,
+                &parsed.label_seg,
+                &zero_page,
+                stmt.seg == "ZEROPAGE",
+                stmt.line,
+            ) == Some(false)
+                && reads_external(value, &facts)
+                && !segment_weights(value, &facts)
+                    .is_some_and(|weights| weights.values().all(|&weight| weight == 0))
+            {
+                return Err(super::statement_error(
+                    AsmError::new(
+                        stmt.line,
+                        "byte data requires a zero-page expression; this external is absolute",
+                    ),
+                    stmt.file,
+                    &stmt.expansion_frames,
+                ));
+            }
+        }
+    }
+    Ok(())
+}
+
+fn record_visibility(
+    kind: &Kind,
+    span: &crate::span::Span,
+    st: &mut Projection,
+) -> Result<(), AsmError> {
+    let Kind::Visible {
+        rule,
+        zero_page,
+        names,
+        ..
+    } = kind
+    else {
+        return Ok(());
+    };
+    for name in names {
+        let key = super::split_scope_ref(name).map_or_else(
+            || name.clone(),
+            |(path, name)| {
+                if path.is_empty() {
+                    name.to_string()
+                } else {
+                    format!("{path}::{name}")
+                }
+            },
+        );
+        let defined = st.consts.contains_key(&key)
+            || st.label_seg.contains_key(&key)
+            || st.deferred.definitions.contains_key(&key);
+        let mut declaration = st
+            .deferred
+            .declarations
+            .get(&key)
+            .cloned()
+            .unwrap_or_default();
+        if !defined
+            && declaration
+                .declared_byte
+                .is_some_and(|byte| byte != *zero_page)
+        {
+            return Err(AsmError::at(
+                span.clone(),
+                format!(
+                    "address size mismatch for symbol `{}`",
+                    super::display_label(&key)
+                ),
+            ));
+        }
+        if (*rule == super::VisRule::MustBeDefined && declaration.imported)
+            || (*rule == super::VisRule::MustNotBeDefined && declaration.exported)
+        {
+            return Err(AsmError::at(
+                span.clone(),
+                format!(
+                    "symbol `{}` cannot be both imported and exported",
+                    super::display_label(&key)
+                ),
+            ));
+        }
+        if declaration.source_byte.is_none()
+            && matches!(
+                rule,
+                super::VisRule::MustNotBeDefined | super::VisRule::EitherWay
+            )
+        {
+            let inherited = if *rule == super::VisRule::EitherWay && declaration.exported {
+                declaration.export_reference.as_ref().and_then(|reference| {
+                    st.deferred.size_hint(
+                        &Expr::Sym(reference.clone()),
+                        &st.consts,
+                        &st.label_seg,
+                        &st.zero_page_names,
+                        st.seg == "ZEROPAGE",
+                        span.line as usize,
+                    )
+                })
+            } else {
+                None
+            };
+            declaration.source_byte = Some(*zero_page || inherited.unwrap_or(false));
+        }
+        declaration.declared_byte.get_or_insert(*zero_page);
+        match rule {
+            super::VisRule::MustNotBeDefined => declaration.imported = true,
+            super::VisRule::EitherWay => declaration.global = true,
+            super::VisRule::MustBeDefined => {
+                declaration.exported = true;
+                declaration
+                    .export_reference
+                    .get_or_insert_with(|| name.clone());
+            }
+        }
+        st.deferred.declarations.insert(key.clone(), declaration);
+        st.deferred.invalidate_size(&key);
+    }
+    Ok(())
+}
+
 /// Project one ordinary node — the body of the original projection loop.
 fn project_one(node: &crate::ast::Node, st: &mut Projection) -> Result<(), AsmError> {
     use crate::ast::{Item, Operand};
+    if let Some(Item::Native(payload)) = &node.item
+        && let Some(kind) = payload.as_any().downcast_ref::<Kind>()
+    {
+        record_visibility(kind, &node.span, st)?;
+        let operand = match kind {
+            Kind::Org(value) => Some((value, false)),
+            Kind::Insn {
+                address_size: Some(super::AddressSize::ZeroPage),
+                operand:
+                    mos6502::OperandSyntax::Direct(value) | mos6502::OperandSyntax::Indexed(value, _),
+                ..
+            } => Some((value, true)),
+            _ => None,
+        };
+        if let Some((value, forced)) = operand {
+            let facts = SourceFacts {
+                consts: &st.consts,
+                label_seg: &st.label_seg,
+                deferred: &st.deferred,
+                stmts: &st.stmts,
+                seg: &st.seg,
+                final_globals: false,
+            };
+            if reads_external(value, &facts)
+                && if forced {
+                    st.deferred.size_hint(
+                        value,
+                        &st.consts,
+                        &st.label_seg,
+                        &st.zero_page_names,
+                        st.seg == "ZEROPAGE",
+                        node.span.line as usize,
+                    ) == Some(false)
+                } else {
+                    !weighs_nothing(value, st)
+                }
+            {
+                return Err(AsmError::at(
+                    node.span.clone(),
+                    if forced {
+                        "illegal addressing mode: this external is absolute"
+                    } else {
+                        "`.org` requires a constant expression; this symbol is external"
+                    },
+                ));
+            }
+        }
+    }
     if let Some(Item::Native(payload)) = &node.item {
         let kind = payload
             .as_any()
@@ -1906,6 +2253,11 @@ fn project_one(node: &crate::ast::Node, st: &mut Projection) -> Result<(), AsmEr
                             || label_seg.contains_key(name)
                             || st.zero_page_names.contains(name)
                             || st.deferred.definitions.contains_key(name)
+                            || st
+                                .deferred
+                                .declarations
+                                .get(name)
+                                .is_some_and(|decl| decl.source_byte.is_some())
                     });
                     let env: BTreeMap<String, i64> = names
                         .into_iter()

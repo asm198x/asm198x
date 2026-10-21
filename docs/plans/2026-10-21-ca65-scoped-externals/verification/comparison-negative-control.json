@@ -1,0 +1,6 @@
+{
+  "mutation": "remove one previous native match",
+  "case": "import_unused_outer_inactive",
+  "rejected": true,
+  "reason": "previous native match lost"
+}
