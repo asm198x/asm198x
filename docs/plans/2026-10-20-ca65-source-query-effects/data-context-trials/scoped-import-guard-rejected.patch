@@ -1,0 +1,16 @@
+diff --git i/crates/asm198x/src/dialects/ca65/mod.rs w/crates/asm198x/src/dialects/ca65/mod.rs
+index 393e6fb5..c1ef7031 100644
+--- i/crates/asm198x/src/dialects/ca65/mod.rs
++++ w/crates/asm198x/src/dialects/ca65/mod.rs
+@@ -2223,6 +2223,11 @@ impl Walker {
+         {
+             for name in names {
+                 if *rule == VisRule::MustNotBeDefined {
++                    // A declaration forbids a definition in its own scope;
++                    // it must not prohibit an enclosing binding of that name.
++                    if self.expand_text_defines {
++                        *name = self.constant_key_at(name, line, false)?;
++                    }
+                     continue;
+                 }
+                 let key = if define.is_none() {

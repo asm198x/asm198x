@@ -1,0 +1,842 @@
+[
+  {
+    "source": "/private/tmp/asm198x-data-context-4510.log",
+    "retained": "asm198x-data-context-4510.log.gz",
+    "bytes": 157,
+    "sha256": "1c1ce04484a7e9b16a2a6407590c8b20213f5284ea8f1d1ffd12ec9500e391c3"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-clippy.log",
+    "retained": "asm198x-data-context-clippy.log.gz",
+    "bytes": 288,
+    "sha256": "97edf1a5b84db0e3488948d99b500f44064c89c83b79640210d78751350e4b4a"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-design.tmp",
+    "retained": "asm198x-data-context-design.tmp.gz",
+    "bytes": 4314,
+    "sha256": "ee8f49ea85cd8bc62a82bc8f0a9bf90d5978366e1fdf7115e90b343a6ffe68cb"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-docs.log",
+    "retained": "asm198x-data-context-docs.log.gz",
+    "bytes": 118,
+    "sha256": "850fb02c80b3af4d7c04ac1360de437f687bcf6b9a2f733160e4bd10ce98a165"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-ci.json",
+    "retained": "asm198x-data-context-final-ci.json.gz",
+    "bytes": 239012,
+    "sha256": "aac08d3b0d3c48dea1ebf3f3c078460ddfea80eb72e9e186eb8493538eae8364"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-ci.log",
+    "retained": "asm198x-data-context-final-ci.log.gz",
+    "bytes": 1431,
+    "sha256": "ea7108a6c7955452e9da42cb016f45cbb11254eecc33d516995b7e1984ea9c83"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-clippy.log",
+    "retained": "asm198x-data-context-final-clippy.log.gz",
+    "bytes": 288,
+    "sha256": "0c9f6c9c09fc44f3d64b5df80bf5d681bd706a338f0abbf3f735cadf4bedc2ee"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-focused.log",
+    "retained": "asm198x-data-context-final-focused.log.gz",
+    "bytes": 59132,
+    "sha256": "3fdc6c23f19fbeb7e568dfab0140f18edde8eb6da0f29dea40fdcf470682e749"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-node.log",
+    "retained": "asm198x-data-context-final-node.log.gz",
+    "bytes": 9360,
+    "sha256": "0588f697b5a6612c5bdbf3c3562b600d6b85d074c4fc5e17a4571c57ee6ed542"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay.log",
+    "retained": "asm198x-data-context-final-replay.log.gz",
+    "bytes": 790,
+    "sha256": "6e7bcbc4646b66d47d461cde9862a962e838818254e40afffed17bf337385d55"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-stop",
+    "retained": "asm198x-data-context-final-stop.gz",
+    "bytes": 78,
+    "sha256": "b10ca44212bce44795f2d20c6a37ea7af27ee8b3ca4c3320967d14fad7a2bd1a"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-focused.log",
+    "retained": "asm198x-data-context-focused.log.gz",
+    "bytes": 1226,
+    "sha256": "6cd85e2d3189966520062674707dbe60886bbf79f183c6f354a49b30db67335b"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-full.log",
+    "retained": "asm198x-data-context-full.log.gz",
+    "bytes": 59729,
+    "sha256": "986f82b5a1829c044584cd90b83e49eb6653c8017d56a53bc6450cbff933963d"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-import-after.json",
+    "retained": "asm198x-data-context-import-after.json.gz",
+    "bytes": 135911,
+    "sha256": "82688870e7b855c572884ccefe76dc09cdb6c96650670e7ac007e9bc163c586b"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-import-before.json",
+    "retained": "asm198x-data-context-import-before.json.gz",
+    "bytes": 139747,
+    "sha256": "4afaa44e11813ab498abc5baad435c498c04731f73306a463636392861e5cbc7"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-local-controls.py",
+    "retained": "asm198x-data-context-local-controls.py.gz",
+    "bytes": 2779,
+    "sha256": "b49247cff9131439ae7a7b63c74a1423a00ca66de01bc29ecf620d591d766961"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-next-after.json",
+    "retained": "asm198x-data-context-next-after.json.gz",
+    "bytes": 24443,
+    "sha256": "e6eb8f6dc256767e627e99a43f223ef63ed69a06bff11a9bc3fbdf42b6e20935"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-next-native.json",
+    "retained": "asm198x-data-context-next-native.json.gz",
+    "bytes": 53444,
+    "sha256": "6b09d3d2cd8e47be5dfd8ec6870e6ca7cd4e7af8bf26d6f430f46392b756ea77"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-next-probe.py",
+    "retained": "asm198x-data-context-next-probe.py.gz",
+    "bytes": 2199,
+    "sha256": "c4d8ec57d9bec4800b4fcdde698e70d3ce9046b5a23ce70991503d6db7df6bca"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-node.log",
+    "retained": "asm198x-data-context-node.log.gz",
+    "bytes": 6033,
+    "sha256": "095236f864efe22ec575196de8a290b0102dd6d1c403c3dc2442d68979ddb61a"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-pr.md",
+    "retained": "asm198x-data-context-pr.md.gz",
+    "bytes": 1103,
+    "sha256": "800a20be178c7cbd566958beb340af8ec64f48cb2b05294508665f77a2ade211"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-qualified-focused.log",
+    "retained": "asm198x-data-context-qualified-focused.log.gz",
+    "bytes": 59666,
+    "sha256": "a5fc9a327f267c8826e3485be11e23d278f9b18c9b895b0cfed545bc2a84243d"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-qualified-full.log",
+    "retained": "asm198x-data-context-qualified-full.log.gz",
+    "bytes": 70750,
+    "sha256": "12a16b514c28b292adea569b2afcc649bf37212a6958604c5c7229e978e619d0"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-qualified-replay.log",
+    "retained": "asm198x-data-context-qualified-replay.log.gz",
+    "bytes": 790,
+    "sha256": "6e7bcbc4646b66d47d461cde9862a962e838818254e40afffed17bf337385d55"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-4510.log",
+    "retained": "asm198x-data-context-v2-4510.log.gz",
+    "bytes": 157,
+    "sha256": "1c1ce04484a7e9b16a2a6407590c8b20213f5284ea8f1d1ffd12ec9500e391c3"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-artifacts.json",
+    "retained": "asm198x-data-context-v2-artifacts.json.gz",
+    "bytes": 2962,
+    "sha256": "78d6cdcb5ab6f353f6ff9ad987d634d2698b3d66901ec9c8101d5bb029c61e9f"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-ci.json",
+    "retained": "asm198x-data-context-v2-ci.json.gz",
+    "bytes": 239033,
+    "sha256": "df51119b1d393860460fc05f9fcf955a41fd5a593d21e2292c55635d9ea3bb5b"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-ci.log",
+    "retained": "asm198x-data-context-v2-ci.log.gz",
+    "bytes": 3232,
+    "sha256": "3fe3ff796a57ca28c6f1bec6b5a961e3942ae5652c750cfbaa5b92d9195a809b"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-clippy.log",
+    "retained": "asm198x-data-context-v2-clippy.log.gz",
+    "bytes": 288,
+    "sha256": "db49b4783b28fb0b3add95c802f79cb80379ef492612e98592edeca42eefb6d9"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-focused.log",
+    "retained": "asm198x-data-context-v2-focused.log.gz",
+    "bytes": 1616,
+    "sha256": "78aa48c8cb7375b5add39ff90fdc2c4c538853d6adb74cd8ea6ce2c91177e0ab"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-full.log",
+    "retained": "asm198x-data-context-v2-full.log.gz",
+    "bytes": 81190,
+    "sha256": "c915000d22dc21e86e84af2b477d40a52322549492305f14e7a2be403cdf5c42"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-local-controls.log",
+    "retained": "asm198x-data-context-v2-local-controls.log.gz",
+    "bytes": 1622,
+    "sha256": "56c1fef3f89c4c7ffe2d70ee14bb6c56c4b4b616e5d2e08b96ee99c38058cef1"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-native-failure.log",
+    "retained": "asm198x-data-context-v2-native-failure.log.gz",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-node.log",
+    "retained": "asm198x-data-context-v2-node.log.gz",
+    "bytes": 9400,
+    "sha256": "788048130b34ab85d79f3d33bde435d3fb7515735e9d6be1da80f5ae1fa1d2f5"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay.log",
+    "retained": "asm198x-data-context-v2-replay.log.gz",
+    "bytes": 790,
+    "sha256": "6e7bcbc4646b66d47d461cde9862a962e838818254e40afffed17bf337385d55"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-runs-before-stop.json",
+    "retained": "asm198x-data-context-v2-runs-before-stop.json.gz",
+    "bytes": 598,
+    "sha256": "aaa6abbeee28714610ae488993defe0e80639ca7fecd9e1da654a2f39ac2f5ca"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v3-focused.log",
+    "retained": "asm198x-data-context-v3-focused.log.gz",
+    "bytes": 2297,
+    "sha256": "1513741271958ac6438a7aeef16bcd319599a2bb4b817a9ca05181430e604075"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-versions.log",
+    "retained": "asm198x-data-context-versions.log.gz",
+    "bytes": 66,
+    "sha256": "86573d0aa21805a5bc8f1f7d113a12d243521d1907836723f37df91a52d66bd6"
+  },
+  {
+    "source": "/private/tmp/asm198x-audit-data-context-candidates.py",
+    "retained": "asm198x-audit-data-context-candidates.py.gz",
+    "bytes": 14912,
+    "sha256": "4ac28b66cc99e73c0dda807118411e511754127508000bca76c1f9b1d75f0302"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/scope-native-phase-probes.log",
+    "retained": "asm198x-data-context-v2-replay--scope-native-phase-probes.log.gz",
+    "bytes": 24,
+    "sha256": "4e051755fb66484ea1403cb8323776a552de607644a2e742e084120710d4ea5e"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/query-original-after.json",
+    "retained": "asm198x-data-context-v2-replay--query-original-after.json.gz",
+    "bytes": 27270,
+    "sha256": "782e8f4a104d12974c6094934d61b62364cfdd06af44dea30777e603d3cfea1b"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/summary.json",
+    "retained": "asm198x-data-context-v2-replay--summary.json.gz",
+    "bytes": 7736,
+    "sha256": "46fe065c0022f041bd0f125f0efb682ff62e80af41f2cc23d9849cd897c5db94"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/scope-native-stream-probes.log",
+    "retained": "asm198x-data-context-v2-replay--scope-native-stream-probes.log.gz",
+    "bytes": 22,
+    "sha256": "6af141c5fba928809b9e610249fb427969205179087def4ee79b9be28fdc5538"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/alias.log",
+    "retained": "asm198x-data-context-v2-replay--alias.log.gz",
+    "bytes": 22,
+    "sha256": "873a2f696ecdba8a1b95ca39106cac5141cab37ebda54726c474947ecbf7cd99"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/strings-consumer-native-after.json",
+    "retained": "asm198x-data-context-v2-replay--strings-consumer-native-after.json.gz",
+    "bytes": 33330,
+    "sha256": "5f451ebe34adc9f3c6c16c67cb1d3590b12e79105ea8b9446c911f91c4cb1fc8"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/strings-numeric-string-arity-native-after.json",
+    "retained": "asm198x-data-context-v2-replay--strings-numeric-string-arity-native-after.json.gz",
+    "bytes": 12771,
+    "sha256": "ba8ad17bbb3b26f0b359793362aa8db423f1c02cef5567797339fd27d25e7758"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/scope-deferred-followups-native-after.json",
+    "retained": "asm198x-data-context-v2-replay--scope-deferred-followups-native-after.json.gz",
+    "bytes": 10849,
+    "sha256": "95a8d30aaf2fdb483a3e3d02b4e9e97b1db1709020af5d1bd4bb0bbc3afb808e"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/strings-index-scope-native-after.json",
+    "retained": "asm198x-data-context-v2-replay--strings-index-scope-native-after.json.gz",
+    "bytes": 2141,
+    "sha256": "d1b50fb47e7dcf2eed178424a7941c952f54449fb9c805ec53c36184caf3db85"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/strings-flat-native.log",
+    "retained": "asm198x-data-context-v2-replay--strings-flat-native.log.gz",
+    "bytes": 24,
+    "sha256": "7d6bc0dcdd5efde6441d0924a32d08fbae1cf7ea0708df2495fec24b51863df0"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/query-short-circuit-after.json",
+    "retained": "asm198x-data-context-v2-replay--query-short-circuit-after.json.gz",
+    "bytes": 9578,
+    "sha256": "e4b80cc1e1c683cc8686074f5920c3909864802d5c847043b0300d3a8529f53a"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/strings-lifetime-native-after.json",
+    "retained": "asm198x-data-context-v2-replay--strings-lifetime-native-after.json.gz",
+    "bytes": 17460,
+    "sha256": "0320a303d19f21d8a3657e689bc6b3016cb0edb8b95c307947b1dd1f26e90d77"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/text-assertion-native.log",
+    "retained": "asm198x-data-context-v2-replay--text-assertion-native.log.gz",
+    "bytes": 24,
+    "sha256": "2a5186129ffc93cc656e327ec558825a4e98d9e64a7640983bfaee47449159e3"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/scope-native-completed-phase-probes.log",
+    "retained": "asm198x-data-context-v2-replay--scope-native-completed-phase-probes.log.gz",
+    "bytes": 24,
+    "sha256": "752c3f6d703b9396789fb57502d17d1804e1b30875d94645c4a21fc862200a86"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/text-assertion-native-after.json",
+    "retained": "asm198x-data-context-v2-replay--text-assertion-native-after.json.gz",
+    "bytes": 60523,
+    "sha256": "22dac3bbca58fc16be59b32e6b7d7c0e3f94bfe8a564f1a32a7415acf42bb0a5"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/query-extended.log",
+    "retained": "asm198x-data-context-v2-replay--query-extended.log.gz",
+    "bytes": 24,
+    "sha256": "63c51be25330a4781593bec487b6e435284db88a419efad6b89b69c704e41980"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/query-admission.log",
+    "retained": "asm198x-data-context-v2-replay--query-admission.log.gz",
+    "bytes": 23,
+    "sha256": "fb03ee0f8f1c6448f3c83160edf85c87e3f8b1b7e60bbec3d8f2fad3f12f044c"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/query-admission-after.json",
+    "retained": "asm198x-data-context-v2-replay--query-admission-after.json.gz",
+    "bytes": 27619,
+    "sha256": "fa18d60568b5aa952a607f1ea6cfb34fbeb13651382890fb823e74e332e7b132"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/text-native-after.json",
+    "retained": "asm198x-data-context-v2-replay--text-native-after.json.gz",
+    "bytes": 197212,
+    "sha256": "1f4eec5b88acd8bacd63dad1c9653f37bb988b948f5b284dd63d95272c514c52"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/strings-consumer-native.log",
+    "retained": "asm198x-data-context-v2-replay--strings-consumer-native.log.gz",
+    "bytes": 23,
+    "sha256": "b9e8e26b46459becc2381c9da2488704c28b7a822cbe2688f55460c6aa675f2d"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/scope-native-width-probes-after.json",
+    "retained": "asm198x-data-context-v2-replay--scope-native-width-probes-after.json.gz",
+    "bytes": 71631,
+    "sha256": "76baea49fda1f001a381145d700cefc348d1167c2abbbb71fd8fee19e51a95c1"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/scope-native-negative-memory-probes-after.json",
+    "retained": "asm198x-data-context-v2-replay--scope-native-negative-memory-probes-after.json.gz",
+    "bytes": 14179,
+    "sha256": "6ce9ea4529219ba94d6f377be7eeb2ea998490b85a2a615f36320cdcfbcae668"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/scope-native-query-probes-after.json",
+    "retained": "asm198x-data-context-v2-replay--scope-native-query-probes-after.json.gz",
+    "bytes": 17087,
+    "sha256": "420ab7170cfdf353283fabf4038c6938aa81d08c0115b5fd50934c4bcfe46c6a"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/source-constancy-after.json",
+    "retained": "asm198x-data-context-v2-replay--source-constancy-after.json.gz",
+    "bytes": 155653,
+    "sha256": "6b8c6f77e966e6691cf3218ecf6d3f150fdd8c2dea4694047a5dd3207c303278"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/strings-numeric-string-arity-native.log",
+    "retained": "asm198x-data-context-v2-replay--strings-numeric-string-arity-native.log.gz",
+    "bytes": 23,
+    "sha256": "240b59ba1cd8b9c841326f70f70ac0d7aea2c9aa21522ca4a39788ae32a769bc"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/text-native.log",
+    "retained": "asm198x-data-context-v2-replay--text-native.log.gz",
+    "bytes": 24,
+    "sha256": "57eeca1637267a9f1871fea999e250c5264f5da1fc8f10e1611b906f5f1a85ea"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/query-extended-after.json",
+    "retained": "asm198x-data-context-v2-replay--query-extended-after.json.gz",
+    "bytes": 64620,
+    "sha256": "77b83cad5175133e498fbe89864ca4789fbe0d4c484ba7d323d7f76c3c41b402"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/strings-guard-native.log",
+    "retained": "asm198x-data-context-v2-replay--strings-guard-native.log.gz",
+    "bytes": 22,
+    "sha256": "716196d4a1acfae4d76a740b22629afa94eb33ddbed1f67f87e8a719e7b92128"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/scope-native-phase-probes-after.json",
+    "retained": "asm198x-data-context-v2-replay--scope-native-phase-probes-after.json.gz",
+    "bytes": 53516,
+    "sha256": "2ad41bc75f60b93d0c8dd07ee6d15ab78a76b5b4932f2702d57dd7b8e961d10a"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/query-original.log",
+    "retained": "asm198x-data-context-v2-replay--query-original.log.gz",
+    "bytes": 23,
+    "sha256": "459e48b6132fac70b7c8695a15fadb1e0034801b8e1dad30bce9483e216cf01c"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/strings-text-consumer-native-after.json",
+    "retained": "asm198x-data-context-v2-replay--strings-text-consumer-native-after.json.gz",
+    "bytes": 3050,
+    "sha256": "d95daa40b78216e7f371c62523729f7b9203fb6e8a5934bcfe1aa77aeee53c88"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/strings-text-consumer-native.log",
+    "retained": "asm198x-data-context-v2-replay--strings-text-consumer-native.log.gz",
+    "bytes": 22,
+    "sha256": "6af141c5fba928809b9e610249fb427969205179087def4ee79b9be28fdc5538"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/query-short-circuit.log",
+    "retained": "asm198x-data-context-v2-replay--query-short-circuit.log.gz",
+    "bytes": 23,
+    "sha256": "df3c5df809bd341e3b0242f2d16312e6689f8fffb915c938c57cb1caf766eed3"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/scope-native-query-probes.log",
+    "retained": "asm198x-data-context-v2-replay--scope-native-query-probes.log.gz",
+    "bytes": 23,
+    "sha256": "d72f1324e00d9bcc1b86a56bb6e6404f9659123a7e9cc29f58f935b0aa891f99"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/conditional-context-after.json",
+    "retained": "asm198x-data-context-v2-replay--conditional-context-after.json.gz",
+    "bytes": 98515,
+    "sha256": "8df9fddf7515c4e5808a99301899ae3cc90f06436c8ff41f292200dc24178b87"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/scope-native-stream-probes-after.json",
+    "retained": "asm198x-data-context-v2-replay--scope-native-stream-probes-after.json.gz",
+    "bytes": 3204,
+    "sha256": "d45e6e90929704d08a72ba70cc62c20b5eb34a9ef6712c0ee1829f51c924fec9"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/strings-flat-native-after.json",
+    "retained": "asm198x-data-context-v2-replay--strings-flat-native-after.json.gz",
+    "bytes": 259693,
+    "sha256": "d554a856545255ad786329d35adc339b7c02b225cbcd8451065ba703f219aafe"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/conditional-context.log",
+    "retained": "asm198x-data-context-v2-replay--conditional-context.log.gz",
+    "bytes": 24,
+    "sha256": "b7952288f8bde63cd5eb84897660ec0a2d67571c9ff994e4d2f742054244d7e2"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/strings-lifetime-native.log",
+    "retained": "asm198x-data-context-v2-replay--strings-lifetime-native.log.gz",
+    "bytes": 23,
+    "sha256": "514fc3dfcaee4516e51552b0cdd34ead3f86b1886d1b14c0916bf6a27eddfa1e"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/strings-guard-native-after.json",
+    "retained": "asm198x-data-context-v2-replay--strings-guard-native-after.json.gz",
+    "bytes": 3318,
+    "sha256": "d7c95198a8d075ae031c4b2fa4d8c6b84a8b32c7613c269efbf3e25cd75d28a4"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/strings-index-scope-native.log",
+    "retained": "asm198x-data-context-v2-replay--strings-index-scope-native.log.gz",
+    "bytes": 22,
+    "sha256": "2f2e77c26435b73ea9c8a56029baa7ba1397ac741a54e66287d433d3ea1ef920"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/alias-after.json",
+    "retained": "asm198x-data-context-v2-replay--alias-after.json.gz",
+    "bytes": 4436,
+    "sha256": "6de4779758454cd6f17210c1bd804e293896626788ece5d0212e1983614e325b"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/scope-native-completed-phase-probes-after.json",
+    "retained": "asm198x-data-context-v2-replay--scope-native-completed-phase-probes-after.json.gz",
+    "bytes": 53009,
+    "sha256": "ba5214c708d65aa31f459b55dffebc372e680b77ec20d00fbf6369030c3d7fa6"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/source-constancy.log",
+    "retained": "asm198x-data-context-v2-replay--source-constancy.log.gz",
+    "bytes": 24,
+    "sha256": "ccfd86e5ef921d8586f46b7109fc8aa3648ac8b954b51d8c853a10bcf87fe1d1"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/scope-deferred-followups-native.log",
+    "retained": "asm198x-data-context-v2-replay--scope-deferred-followups-native.log.gz",
+    "bytes": 23,
+    "sha256": "15a4c2c0ffd0e369791d3b3898410aa6eb729532d1679381cbc1f438ff114f4a"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/scope-native-negative-memory-probes.log",
+    "retained": "asm198x-data-context-v2-replay--scope-native-negative-memory-probes.log.gz",
+    "bytes": 23,
+    "sha256": "88985c4139e147cd3696557611e14b098eaa2d8d363f898617b8e631be9ab471"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-replay/scope-native-width-probes.log",
+    "retained": "asm198x-data-context-v2-replay--scope-native-width-probes.log.gz",
+    "bytes": 24,
+    "sha256": "a78433b7bb8e7fc755fdbcdfe2f93725202a1570266f47dc02ba24822e7d87da"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-clean-4510/report.json",
+    "retained": "asm198x-data-context-clean-4510--report.json.gz",
+    "bytes": 12639,
+    "sha256": "4009307a3c0b897d4b176464f2ae1bd0b56f10e95118c54485810273f10ded46"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-clean-4510/logs/cc65-4510-opcodes--opcode-space-version-ld65.stdout",
+    "retained": "asm198x-data-context-clean-4510--logs--cc65-4510-opcodes--opcode-space-version-ld65.stdout.gz",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-clean-4510/logs/build-assembler.stdout",
+    "retained": "asm198x-data-context-clean-4510--logs--build-assembler.stdout.gz",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-clean-4510/logs/assembler-version.stderr",
+    "retained": "asm198x-data-context-clean-4510--logs--assembler-version.stderr.gz",
+    "bytes": 16,
+    "sha256": "cd9267fb50974330b2596f8f7d386346ec0227b2e2b702cb761d363dfa13a8c2"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-clean-4510/logs/cc65-4510-opcodes--opcode-space-version-ca65.stderr",
+    "retained": "asm198x-data-context-clean-4510--logs--cc65-4510-opcodes--opcode-space-version-ca65.stderr.gz",
+    "bytes": 17,
+    "sha256": "5c22de95322cb1d858e9690b5e3c6e83984c27c5120ff12c49f8dc9679ed2dbc"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-clean-4510/logs/cc65-4510-opcodes--opcode-space-reference-0.stdout",
+    "retained": "asm198x-data-context-clean-4510--logs--cc65-4510-opcodes--opcode-space-reference-0.stdout.gz",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-clean-4510/logs/cc65-4510-opcodes--opcode-space-reference-0.stderr",
+    "retained": "asm198x-data-context-clean-4510--logs--cc65-4510-opcodes--opcode-space-reference-0.stderr.gz",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-clean-4510/logs/cc65-4510-opcodes--opcode-space-version-ca65.stdout",
+    "retained": "asm198x-data-context-clean-4510--logs--cc65-4510-opcodes--opcode-space-version-ca65.stdout.gz",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-clean-4510/logs/assembler-version.stdout",
+    "retained": "asm198x-data-context-clean-4510--logs--assembler-version.stdout.gz",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-clean-4510/logs/cc65-4510-opcodes--opcode-space-version-ld65.stderr",
+    "retained": "asm198x-data-context-clean-4510--logs--cc65-4510-opcodes--opcode-space-version-ld65.stderr.gz",
+    "bytes": 17,
+    "sha256": "acf0ea5dbac2ff34c3733f092c38a357dd02d80c0d1edf0e05e8a36b92b62445"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-clean-4510/logs/build-assembler.stderr",
+    "retained": "asm198x-data-context-clean-4510--logs--build-assembler.stderr.gz",
+    "bytes": 1320,
+    "sha256": "0afcceb1ca44634b1b1b4ee5a9d79c0d278a87ff87da2c6ef6dcd98524f883f9"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-clean-4510/logs/cc65-4510-opcodes--opcode-space-assembler-0.stdout",
+    "retained": "asm198x-data-context-clean-4510--logs--cc65-4510-opcodes--opcode-space-assembler-0.stdout.gz",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-clean-4510/logs/cc65-4510-opcodes--opcode-space-reference-1.stdout",
+    "retained": "asm198x-data-context-clean-4510--logs--cc65-4510-opcodes--opcode-space-reference-1.stdout.gz",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-clean-4510/logs/cc65-4510-opcodes--opcode-space-reference-1.stderr",
+    "retained": "asm198x-data-context-clean-4510--logs--cc65-4510-opcodes--opcode-space-reference-1.stderr.gz",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-clean-4510/logs/cc65-4510-opcodes--opcode-space-assembler-0.stderr",
+    "retained": "asm198x-data-context-clean-4510--logs--cc65-4510-opcodes--opcode-space-assembler-0.stderr.gz",
+    "bytes": 51,
+    "sha256": "d0f2bb0a758878171f47aca2c415910cd2bb55a06fb1b89e28d6e8ced2d21477"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-clean-4510/report.json",
+    "retained": "asm198x-data-context-v2-clean-4510--report.json.gz",
+    "bytes": 12670,
+    "sha256": "d8d8767f4d45b23e21d8b95fa5d0433f189c213fa9edf3b6e797749b9102c9bd"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-clean-4510/logs/cc65-4510-opcodes--opcode-space-version-ld65.stdout",
+    "retained": "asm198x-data-context-v2-clean-4510--logs--cc65-4510-opcodes--opcode-space-version-ld65.stdout.gz",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-clean-4510/logs/build-assembler.stdout",
+    "retained": "asm198x-data-context-v2-clean-4510--logs--build-assembler.stdout.gz",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-clean-4510/logs/assembler-version.stderr",
+    "retained": "asm198x-data-context-v2-clean-4510--logs--assembler-version.stderr.gz",
+    "bytes": 16,
+    "sha256": "cd9267fb50974330b2596f8f7d386346ec0227b2e2b702cb761d363dfa13a8c2"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-clean-4510/logs/cc65-4510-opcodes--opcode-space-version-ca65.stderr",
+    "retained": "asm198x-data-context-v2-clean-4510--logs--cc65-4510-opcodes--opcode-space-version-ca65.stderr.gz",
+    "bytes": 17,
+    "sha256": "5c22de95322cb1d858e9690b5e3c6e83984c27c5120ff12c49f8dc9679ed2dbc"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-clean-4510/logs/cc65-4510-opcodes--opcode-space-reference-0.stdout",
+    "retained": "asm198x-data-context-v2-clean-4510--logs--cc65-4510-opcodes--opcode-space-reference-0.stdout.gz",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-clean-4510/logs/cc65-4510-opcodes--opcode-space-reference-0.stderr",
+    "retained": "asm198x-data-context-v2-clean-4510--logs--cc65-4510-opcodes--opcode-space-reference-0.stderr.gz",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-clean-4510/logs/cc65-4510-opcodes--opcode-space-version-ca65.stdout",
+    "retained": "asm198x-data-context-v2-clean-4510--logs--cc65-4510-opcodes--opcode-space-version-ca65.stdout.gz",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-clean-4510/logs/assembler-version.stdout",
+    "retained": "asm198x-data-context-v2-clean-4510--logs--assembler-version.stdout.gz",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-clean-4510/logs/cc65-4510-opcodes--opcode-space-version-ld65.stderr",
+    "retained": "asm198x-data-context-v2-clean-4510--logs--cc65-4510-opcodes--opcode-space-version-ld65.stderr.gz",
+    "bytes": 17,
+    "sha256": "acf0ea5dbac2ff34c3733f092c38a357dd02d80c0d1edf0e05e8a36b92b62445"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-clean-4510/logs/build-assembler.stderr",
+    "retained": "asm198x-data-context-v2-clean-4510--logs--build-assembler.stderr.gz",
+    "bytes": 1320,
+    "sha256": "51c4d0ab4e8fe55ddab02761df2cb5707a6b7570b5f31860a8dd2990d37d0f75"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-clean-4510/logs/cc65-4510-opcodes--opcode-space-assembler-0.stdout",
+    "retained": "asm198x-data-context-v2-clean-4510--logs--cc65-4510-opcodes--opcode-space-assembler-0.stdout.gz",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-clean-4510/logs/cc65-4510-opcodes--opcode-space-reference-1.stdout",
+    "retained": "asm198x-data-context-v2-clean-4510--logs--cc65-4510-opcodes--opcode-space-reference-1.stdout.gz",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-clean-4510/logs/cc65-4510-opcodes--opcode-space-reference-1.stderr",
+    "retained": "asm198x-data-context-v2-clean-4510--logs--cc65-4510-opcodes--opcode-space-reference-1.stderr.gz",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-clean-4510/logs/cc65-4510-opcodes--opcode-space-assembler-0.stderr",
+    "retained": "asm198x-data-context-v2-clean-4510--logs--cc65-4510-opcodes--opcode-space-assembler-0.stderr.gz",
+    "bytes": 51,
+    "sha256": "d0f2bb0a758878171f47aca2c415910cd2bb55a06fb1b89e28d6e8ced2d21477"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-failure-candidates/aarch64-apple-darwin/plan.json",
+    "retained": "asm198x-data-context-v2-failure-candidates--aarch64-apple-darwin--plan.json.gz",
+    "bytes": 13916,
+    "sha256": "aae56a69259430e0a5aa83bc036e953570dd25a286fad39cd2da6e485591ef3a"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-failure-candidates/aarch64-apple-darwin/report.json",
+    "retained": "asm198x-data-context-v2-failure-candidates--aarch64-apple-darwin--report.json.gz",
+    "bytes": 27450215,
+    "sha256": "4ddc7942750aa7027398dd1f953063ed613bd26f906da1bfdd2836405b78860f"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-failure-candidates/aarch64-apple-darwin/acquisition.json",
+    "retained": "asm198x-data-context-v2-failure-candidates--aarch64-apple-darwin--acquisition.json.gz",
+    "bytes": 126,
+    "sha256": "7d961a2c7102d1c40a963e73b5a3ff23cfb3dfda654ed1255ba38c4ab9094fd2"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-failure-candidates/x86_64-pc-windows-msvc/plan.json",
+    "retained": "asm198x-data-context-v2-failure-candidates--x86_64-pc-windows-msvc--plan.json.gz",
+    "bytes": 13854,
+    "sha256": "23fd648373e15b7d33d34c7ddf4efa736eb59b92e47d6c41d27119174c0acda8"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-failure-candidates/x86_64-pc-windows-msvc/report.json",
+    "retained": "asm198x-data-context-v2-failure-candidates--x86_64-pc-windows-msvc--report.json.gz",
+    "bytes": 27221885,
+    "sha256": "bd0269f91bd19c3c86ead03651d451cb621143cfa8ccfa6f329ee9e49c9ea89c"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-failure-candidates/x86_64-pc-windows-msvc/acquisition.json",
+    "retained": "asm198x-data-context-v2-failure-candidates--x86_64-pc-windows-msvc--acquisition.json.gz",
+    "bytes": 126,
+    "sha256": "7d961a2c7102d1c40a963e73b5a3ff23cfb3dfda654ed1255ba38c4ab9094fd2"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-failure-candidates/x86_64-unknown-linux-gnu/plan.json",
+    "retained": "asm198x-data-context-v2-failure-candidates--x86_64-unknown-linux-gnu--plan.json.gz",
+    "bytes": 13973,
+    "sha256": "998be1811c772cee8ae18022d1a04b7f97288d243a80ccf40687856f72e44638"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-failure-candidates/x86_64-unknown-linux-gnu/report.json",
+    "retained": "asm198x-data-context-v2-failure-candidates--x86_64-unknown-linux-gnu--report.json.gz",
+    "bytes": 24343350,
+    "sha256": "74ea45fb48608463ed095324fd43466a321536d49e40ce119ac747709e9cbd16"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-failure-candidates/x86_64-unknown-linux-gnu/acquisition.json",
+    "retained": "asm198x-data-context-v2-failure-candidates--x86_64-unknown-linux-gnu--acquisition.json.gz",
+    "bytes": 126,
+    "sha256": "7d961a2c7102d1c40a963e73b5a3ff23cfb3dfda654ed1255ba38c4ab9094fd2"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-failure-candidates/aarch64-unknown-linux-gnu/plan.json",
+    "retained": "asm198x-data-context-v2-failure-candidates--aarch64-unknown-linux-gnu--plan.json.gz",
+    "bytes": 13973,
+    "sha256": "998be1811c772cee8ae18022d1a04b7f97288d243a80ccf40687856f72e44638"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-failure-candidates/aarch64-unknown-linux-gnu/report.json",
+    "retained": "asm198x-data-context-v2-failure-candidates--aarch64-unknown-linux-gnu--report.json.gz",
+    "bytes": 24343357,
+    "sha256": "f2764848ddea41b16af443b245b83b9db998e5a1a2b57d2b3aa51ce9dbb01f51"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-failure-candidates/aarch64-unknown-linux-gnu/acquisition.json",
+    "retained": "asm198x-data-context-v2-failure-candidates--aarch64-unknown-linux-gnu--acquisition.json.gz",
+    "bytes": 126,
+    "sha256": "7d961a2c7102d1c40a963e73b5a3ff23cfb3dfda654ed1255ba38c4ab9094fd2"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-local-package/wrong-bytes.log",
+    "retained": "asm198x-data-context-v2-local-package--wrong-bytes.log.gz",
+    "bytes": 152,
+    "sha256": "30702177f0c11a398685d279a1fa4903ae5b414830d2014e1d4294ca34ff6ec3"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-local-package/wrong-bytes.json",
+    "retained": "asm198x-data-context-v2-local-package--wrong-bytes.json.gz",
+    "bytes": 27449908,
+    "sha256": "112b8f60456b101c1b1fdb57eb3adb838c844aa072e44fc109c69263a0d04546"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-local-package/corrupt-archive.json",
+    "retained": "asm198x-data-context-v2-local-package--corrupt-archive.json.gz",
+    "bytes": 172,
+    "sha256": "d293f944fdd29a56aeb5c4e9e44a8acd99fbbb3d9552a90cc9eb8aad1dc1d6d1"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-local-package/predecessor.json",
+    "retained": "asm198x-data-context-v2-local-package--predecessor.json.gz",
+    "bytes": 26012137,
+    "sha256": "84d3997f299271b71903fe1900f0cec521c63293704cd0f0fa89370c8351de1d"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-local-package/report.log",
+    "retained": "asm198x-data-context-v2-local-package--report.log.gz",
+    "bytes": 99,
+    "sha256": "747baab8d67926b4dd332e40d15a6d61395bfead86d1e83d3985b0e03e6e15ac"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-local-package/report.json",
+    "retained": "asm198x-data-context-v2-local-package--report.json.gz",
+    "bytes": 27449114,
+    "sha256": "ef95d5f2d280e9b0ede5d53e6a7d0092546c98580ca0bda5adcf059607d7db35"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-local-package/corrupt-archive.log",
+    "retained": "asm198x-data-context-v2-local-package--corrupt-archive.log.gz",
+    "bytes": 973,
+    "sha256": "44db34cbf6a5ac5d13881dba71f251066b27cfb337bb1b3e2d0fe6d68951d774"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-local-package/asm198x-aarch64-apple-darwin.tar.xz.sha256",
+    "retained": "asm198x-data-context-v2-local-package--asm198x-aarch64-apple-darwin.tar.xz.sha256.gz",
+    "bytes": 102,
+    "sha256": "f18aafe7fd61044226a696b1836cef755e29a9e858a4095a592211c993efc3c2"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-local-package/predecessor.log",
+    "retained": "asm198x-data-context-v2-local-package--predecessor.log.gz",
+    "bytes": 97,
+    "sha256": "a7a31aee6a6de1511cc44f1b4ae744aa75b6e9a76388538cf76b6689a2f6440b"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-producer/identity.json",
+    "retained": "asm198x-data-context-v2-producer--identity.json.gz",
+    "bytes": 295,
+    "sha256": "cc8795b63ea5c17eadf55c748b4283a693f9438de4c2e4590f919560b71b8dc6"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-producer/build.log",
+    "retained": "asm198x-data-context-v2-producer--build.log.gz",
+    "bytes": 173,
+    "sha256": "6e0fa3401bce39bc57decdba6c44288c0ae5a82818607697f360b209c327235b"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-producer/data-after.json",
+    "retained": "asm198x-data-context-v2-producer--data-after.json.gz",
+    "bytes": 254929,
+    "sha256": "a313091dbf925280033f12b06203b5a00b888a3e9661e7421b1f3fe57dd35ba1"
+  }
+]

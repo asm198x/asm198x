@@ -28,3 +28,21 @@ constructor controls. The source-aware parser recognizes the qualified `.ident`
 component at its read position. Both active PR workflows were cancelled and the
 bounded monitor stopped; ce3955 is not qualified for merge. Its producer and
 replay receipts are retained here only as superseded preflight evidence.
+
+## Rolled-back scoped import guard
+
+The final 515-case data matrix passes on 48e2428d, but the complete workspace and
+actual native archives reject the candidate because `import_queries_before_definition`
+is incorrectly accepted. Native refuses the definition as already imported.
+The old scoped-constancy refusal had masked the existing #810 import-key defect.
+
+A narrow trial qualified the imported guard through constant_key_at. That
+restored the new refusal but lost nine previous matches in the 274-case native
+import/export matrix: four import/importzp fallback cases and five mixed
+visibility cases. The old producer matches 223; the trial matches 246, with nine
+regressions, so its higher total is not qualification. The patch is retained
+and rolled back. No import-guard trial was committed or pushed as source.
+The approved #803 design explicitly deferred coupled import/global allocation,
+same-file external resolution and source address-size behavior to #810.
+Stop this attempt under the user-supplied rollback rule; agree the next scope
+before further implementation. PR #917 must remain unmerged.
