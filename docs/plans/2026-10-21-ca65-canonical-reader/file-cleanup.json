@@ -1,0 +1,26 @@
+{
+  "retained_remote_commit": "f98455b594b012d063b5d1623eb37ab00e74f91f",
+  "removed_roots": [
+    "/private/tmp/asm198x-reader-file-build.log",
+    "/private/tmp/asm198x-reader-file-clippy.log",
+    "/private/tmp/asm198x-reader-file-contract.log",
+    "/private/tmp/asm198x-reader-file-contracts.log",
+    "/private/tmp/asm198x-reader-file-fmt.log",
+    "/private/tmp/asm198x-reader-file-focused.json",
+    "/private/tmp/asm198x-reader-file-focused.log",
+    "/private/tmp/asm198x-reader-file-library.log",
+    "/private/tmp/asm198x-reader-file-memory.log",
+    "/private/tmp/asm198x-reader-file-replay",
+    "/private/tmp/asm198x-reader-file-replay.log"
+  ],
+  "removed_files": 89,
+  "process_check": "no task-owned file/check processes remain",
+  "worktree": "/Users/stevehill/Projects/198x/Asm198x/asm198x-ca65-text-consumers",
+  "removal_condition": "full #924 reader qualified and merged; active work/evidence retained",
+  "preserved": [
+    "/private/tmp/asm198x-empty-producer",
+    "/private/tmp/asm198x-empty-local-package",
+    "/private/tmp/asm198x-scalar-build",
+    "/private/tmp/asm198x-scalar-release-build"
+  ]
+}
