@@ -1,108 +1,85 @@
-# Source-query checkpoint after checked #810
+# Source-query checkpoint after checked #920
 
-#810 is closed through rebase-merged #919 at
-75dad590bd8d3e032729bc596f7d3ab3b49a59aa. Its tree exactly equals qualified
-source 9e448f2c496c5c6641164ddb8097f34f28cf4bf9. All 29 exact-head checks and
-five workflow gates are satisfied. All five actual native archives pass 103
-cohorts, including 5,441 commands for 1,646 external cases; both corruption
-controls reject as intended. Full workspace tests: 1,642 passed, 38 ignored.
-Coverage: 87.72%. Local archive, predecessor omission control and fresh
-564-byte / fourteen-stream 4510 replay pass their intended checks.
+#919 closed #810 through merged 75dad590bd8d3e032729bc596f7d3ab3b49a59aa.
+#920 is now rebase-merged at 15a2c6dc3492a88f77495e4fa162189e43870c82; its tree
+exactly matches qualified source 14295cef80345ac2e38ac16eb2ff20b162595956.
+Draft #917 is closed as superseded. Its original source branch at 48e2428d and
+rejected audit ref 14faff80 remain retained; no shared history was rewritten.
 
-Complete native/local/CI/merge evidence is retained on
- audit/ca65-scoped-externals-919 in
- docs/plans/2026-10-21-ca65-scoped-externals/qualification-919.
-Cleanup receipts are in cleanup-919. Fifty-five completed temporary paths
-(804 files, about 535 MB logical size) were inspected, retained and removed.
-All task-owned build/test/archive/monitor processes exited. The original
-checkout remains clean and untouched at local main 47fc5164.
+All 29 required check names passed, including metadata reruns: 32 check
+instances and seven runs across five workflow types. A description edit queued
+new checks after the first green snapshot, so GitHub safely rejected the first
+merge with HTTP 405. The newly triggered checks completed; the full gate was
+re-read before the successful rebase merge. All five actual native archives
+and source-lock receipts pass 104 cohorts, including every one of the 515 data
+cases / 1,853 data command stages and the existing external-binding contract.
+Both corruption controls reject. Local artifact-only qualification passes,
+and the #810 predecessor fails only the new data cohort. Fresh 4510 verification
+passes all 564 bytes and fourteen streams and rejects a changed byte.
 
-## Resume #795 data queries
+The full Lua workspace suite passes 1,643 tests, with 38 ignored. Clippy,
+115 Node/setup tests and docs/version/ecosystem checks pass. Actual coverage is
+87.74%. All 515 data cases match native, fixing 186 differences; every prior
+match across 26 matrices / 4,136 cases survives in debug and release. The
+original source-query matrix now matches all 56 cases and visibility all 274.
 
-Draft #917 remains deliberately unmerged at source
-48e2428d565e3c7a010ae50963198b47b76e9650. Its 515 native data cases passed,
-but a #810 import violation was masked by the previous constancy refusal.
-The rejected guard-only attempt and four failed native reports are retained
-on audit/ca65-data-context-917 at 14faff80. Do not repeat the guard patch or
-weaken any test. #810 now supplies the complete coupled binding contract.
+Final qualification, merge and safe retry evidence is retained on
+ audit/ca65-data-context-920 in data-context-v3-qualification-920. The separate
+range audit is in docs/plans/2026-10-21-ca65-linked-faraddr on that audit ref.
+Cleanup receipts are in data-context-v3-cleanup-920. Fifty completed temporary
+paths, including 186,841 inspected files and the completed Rust cache, were
+removed after remote retention and lock/process checks. The complete inventory
+is compressed; its first uncompressed push drew GitHub's large-file warning,
+which was corrected without rewriting pushed history. df observed about
+1.6 GiB more available after deletion. All task-owned processes exited.
 
-Start a new branch at the checked #919 merged base. Reapply only the implementation changes from
-ce3955b3 and 48e2428d; preserve the original draft branch and audit refs.
-The concrete next plan is retained as the gzip file
-qualification-919/asm198x-external-bindings-next-data-plan.md.gz on the #919
-audit ref. Write it into the source-query plans folder before code changes.
-Use the already approved source-aware context design and existing reader/scope
-seams; keep all new external checks and the pure-text admission guard wherever
-live ordered evaluation has not replaced it.
+## Remaining work
 
-The frozen #810 executable still differs on 186 of 515 data cases. The next
-numeric-consumer audit still differs on 30 of 50 native accepts (20 lazy
-controls pass). Both new baselines and native facts are retained in #919's
-qualification directory. The full retained replay now contains 26 matrices /
-4,136 cases. #918 separately tracks register-token provenance for visibility
-names, preserving valid .ident-generated names.
+Continue #795's approved source-aware design through the remaining numeric
+consumers. Its 50-case audit still has 30 differences, in repeat counts,
+reserve/fill, align/fill, assertions, numeric output strings, incbin bounds and
+include names. Data/conditional contexts now work; reuse those live reader/
+projection/expression seams. Preserve name-only queries, source-time types,
+provenance, byte-string ownership and lazy reading. Broaden native admission
+and ordering controls before changing these consumers. The existing external
+cancellation cases also remain explicitly inventoried under #795.
 
-## Retained workspaces
+#921 is the independent configured-ca65 faraddr range bug. Its 90-case native
+audit has 51 accepts and 39 refusals; qualified #810 and the data candidate both
+match 57 and wrongly accept 33. Portable capture is verified. The immutable
+issue evidence is on audit/ca65-data-context-920 at 38b55d76. Reuse the existing
+approved unsigned Sized policy while retaining the original expression until
+layout; write the exact implementation/files/tests plan before code changes.
+#918 separately tracks register-token provenance for visibility names. Existing
+sizeof gaps remain #798. Do not treat these known gaps as completed parity.
+
+The main-rules API now enforces pull requests and 15 status checks. AGENTS.md's
+sentence saying main is unprotected is stale: correct that descriptive sentence
+in the next checked source PR, preserving the stronger full CI/native/rebase
+convention. PR-description edits trigger metadata workflows; observe those new
+runs completing before the final merge request.
+
+## Retained active workspaces
 
 - /Users/stevehill/Projects/198x/Asm198x/asm198x-ca65-text-consumers: sole active
-  task worktree, now on fix/ca65-ordered-data-queries-v3, based at checked #919.
-  Remove with git worktree remove only after every unique change and commit
-  is retained and the continuing audit is finished.
-- /private/tmp/asm198x-text-consumers-build: shared debug cache for continuing
-  tests. Its CLI now contains the uncommitted ordered-data candidate under verification. Do not rebuild while a
-  full suite runs; remove at the end of the continuing task.
-- /private/tmp/asm198x-external-bindings-final-producer: qualified #810 frozen
-  release executable, identity and 26-matrix replay recipe. Executable SHA is
-  6481805788612c6da60b2db2bd38c6e5693d44ebf35a6f6be1696460f27c0ea0.
-  Keep until the next checked replacement is qualified and retained.
-- /private/tmp/asm198x-external-bindings-final-local-package: qualified local
-  artifact-only #810 archive and controls; keep for the next omission control.
-  Remove after a checked replacement and positive recovery inspection.
-- /private/tmp/asm198x-data-context-v2-producer: rejected #917 source 48e2428d
-  frozen executable (SHA e68edf1e9d4dd73044df9ff21d56e422dacca306e155f33e874a332140c8d28f).
-  Keep until the data replacement is checked, then inspect/retain/remove it.
+  task worktree, currently on audit/ca65-data-context-920. Reuse for the next
+  slice based on checked merged main 15a2c6dc. The original checkout remains
+  clean and untouched at local main 47fc5164. Remove this linked worktree only
+  after the continuing audit is finished and all unique work is retained.
+- /private/tmp/asm198x-data-context-v3-producer: qualified frozen release
+  executable b95498886cb76841ff4831c9018eaefb1efc859b3e86bf3fb70f7722bc9f9f43,
+  clean committed-source identity and complete 29-matrix / 4,791-case baseline.
+  Every native fact is copied into its facts directory with hashes, so future
+  source/fact edits cannot change the baseline. Keep until the next checked
+  replacement is qualified and retained.
+- /private/tmp/asm198x-data-context-v3-local-package: qualified 104-cohort local
+  archive and controls. Keep as the next omission-control predecessor; remove
+  after a checked replacement and positive recovery inspection.
 
-The old #916 producer/archive and #810's isolated build cache, raw candidate
-reports, coverage download, fresh audit directory, two debug replays, staging
-and temporary helpers/logs have been removed after remote retention checks.
+The old #810 and rejected #917 producers/archives, #920 build/cache/replay/
+coverage/raw-candidate directories, range-audit staging and temporary helpers/
+logs have been removed. /private/tmp/asm198x-text-consumers-build no longer
+exists; recreate it only when needed. A non-incremental task build can bound
+future cache growth without changing tests, assertions or project profiles.
 Shared native sources at /private/tmp/asm198x-address-size-sources and the
 pre-existing shared CI/rebase helpers remain; do not delete unknown siblings.
-
-
-## Active ordered-data implementation
-
-The plan/baseline commit 71d38b7e is pushed on
-fix/ca65-ordered-data-queries-v3. Only the implementation changes from ce3955b3
-and 48e2428d were reapplied on the checked merged base; the rejected receipts
-remain on their audit refs. The four mechanical overlaps retained both fixtures,
-both mandatory cohorts and the existing pure external admission guard. There
-are no unresolved Git conflicts. Source remains uncommitted pending full tests.
-
-All 515 data controls now match native, fixing 186 differences. All 4,136 old
-cases retain their previous native matches. Focused tests pass, including all
-1,646 external cases and the old import failure. Clippy and 115 Node/setup tests
-pass; the full workspace suite passes 1,643 tests (38 ignored). Shared CLI must remain frozen.
-
-Additional active task directories:
-
-- /private/tmp/asm198x-data-context-v3-replay: 26-matrix debug replay and summary;
-  retain with final evidence, then remove after remote retention checks.
-- /private/tmp/asm198x-data-context-v3-release-build: isolated release cache;
-  freeze its executable and verify against clean committed source before final
-  qualification; remove after a retained checked replacement.
-
-Files prefixed asm198x-data-context-v3- in /private/tmp belong to this slice:
-source patch, apply log, plan commit output, replay helper and verification logs.
-Inspect and retain them before cleanup. No new worktree was created.
-
-- /private/tmp/asm198x-data-context-v3-producer: frozen release executable and
-  native replay; verify its identity against clean committed source before
-  actual qualification, then retain until the next checked replacement.
-- /private/tmp/asm198x-data-context-v3-local-package: prepared local archive,
-  currently unqualified; keep for the imminent positive and negative controls.
-- /private/tmp/asm198x-ca65-linked-faraddr-audit: independent 90-case native
-  range audit, comparing both qualified #810 and the data candidate. Both have
-  the same 33 false acceptances; no matching open issue was found. Retain this
-  audit separately and file its evidence after the current source commit.
-- /private/tmp/asm198x-audit-data-context-v3-candidates.py: actual native report
-  inspector adapted for the required data cohort; retain before cleanup.
