@@ -1,0 +1,17 @@
+[
+  {
+    "path": ".ruff_cache/.gitignore",
+    "bytes": 35,
+    "sha256": "9e3a60f1e6ec4ae60215c11d54b171392745ec25e9dded433d5bd921363af316"
+  },
+  {
+    "path": ".ruff_cache/0.16.4/5087536113277601618",
+    "bytes": 308,
+    "sha256": "03d73cbe364abf25d1c0259bd922b16b1d486be3c6b3cfd06be7ec88a3a46328"
+  },
+  {
+    "path": ".ruff_cache/CACHEDIR.TAG",
+    "bytes": 43,
+    "sha256": "5953156d7e0c564a427251316eaf26f8870e6483ae2197f916b630e4f93e31ae"
+  }
+]

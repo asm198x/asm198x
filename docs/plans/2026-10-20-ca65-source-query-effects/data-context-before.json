@@ -416,7 +416,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-yof2xf6i/byte_zero_missing_included.inc:2: error: `MISSING` is not defined anywhere in this source\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-1o76mw68/byte_zero_missing_included.inc:2: error: `MISSING` is not defined anywhere in this source\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": true
     },
@@ -606,7 +606,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-yof2xf6i/byte_query_only_included.inc:2: error: `\u0001ref\u0001MISSING` is not defined anywhere in this source\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-1o76mw68/byte_query_only_included.inc:2: error: `\u0001ref\u0001MISSING` is not defined anywhere in this source\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": false
     },
@@ -1081,7 +1081,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-yof2xf6i/word_zero_missing_included.inc:2: error: `MISSING` is not defined anywhere in this source\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-1o76mw68/word_zero_missing_included.inc:2: error: `MISSING` is not defined anywhere in this source\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": true
     },
@@ -1271,7 +1271,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-yof2xf6i/word_query_only_included.inc:2: error: `\u0001ref\u0001MISSING` is not defined anywhere in this source\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-1o76mw68/word_query_only_included.inc:2: error: `\u0001ref\u0001MISSING` is not defined anywhere in this source\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": false
     },
@@ -1746,7 +1746,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-yof2xf6i/dbyt_zero_missing_included.inc:2: error: `MISSING` is not defined anywhere in this source\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-1o76mw68/dbyt_zero_missing_included.inc:2: error: `MISSING` is not defined anywhere in this source\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": true
     },
@@ -1936,7 +1936,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-yof2xf6i/dbyt_query_only_included.inc:2: error: `\u0001ref\u0001MISSING` is not defined anywhere in this source\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-1o76mw68/dbyt_query_only_included.inc:2: error: `\u0001ref\u0001MISSING` is not defined anywhere in this source\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": false
     },
@@ -2411,7 +2411,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-yof2xf6i/dword_zero_missing_included.inc:2: error: `MISSING` is not defined anywhere in this source\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-1o76mw68/dword_zero_missing_included.inc:2: error: `MISSING` is not defined anywhere in this source\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": true
     },
@@ -2601,7 +2601,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-yof2xf6i/dword_query_only_included.inc:2: error: `\u0001ref\u0001MISSING` is not defined anywhere in this source\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-1o76mw68/dword_query_only_included.inc:2: error: `\u0001ref\u0001MISSING` is not defined anywhere in this source\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": false
     },
@@ -3076,7 +3076,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-yof2xf6i/lobytes_zero_missing_included.inc:2: error: `MISSING` is not defined anywhere in this source\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-1o76mw68/lobytes_zero_missing_included.inc:2: error: `MISSING` is not defined anywhere in this source\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": true
     },
@@ -3266,7 +3266,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-yof2xf6i/lobytes_query_only_included.inc:2: error: `\u0001ref\u0001MISSING` is not defined anywhere in this source\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-1o76mw68/lobytes_query_only_included.inc:2: error: `\u0001ref\u0001MISSING` is not defined anywhere in this source\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": false
     },
@@ -3741,7 +3741,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-yof2xf6i/hibytes_zero_missing_included.inc:2: error: `MISSING` is not defined anywhere in this source\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-1o76mw68/hibytes_zero_missing_included.inc:2: error: `MISSING` is not defined anywhere in this source\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": true
     },
@@ -3931,7 +3931,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-yof2xf6i/hibytes_query_only_included.inc:2: error: `\u0001ref\u0001MISSING` is not defined anywhere in this source\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-1o76mw68/hibytes_query_only_included.inc:2: error: `\u0001ref\u0001MISSING` is not defined anywhere in this source\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": false
     },
@@ -4406,7 +4406,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-yof2xf6i/bankbytes_zero_missing_included.inc:2: error: `MISSING` is not defined anywhere in this source\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-1o76mw68/bankbytes_zero_missing_included.inc:2: error: `MISSING` is not defined anywhere in this source\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": true
     },
@@ -4596,7 +4596,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-yof2xf6i/bankbytes_query_only_included.inc:2: error: `\u0001ref\u0001MISSING` is not defined anywhere in this source\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-1o76mw68/bankbytes_query_only_included.inc:2: error: `\u0001ref\u0001MISSING` is not defined anywhere in this source\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": false
     },
@@ -5071,7 +5071,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-yof2xf6i/faraddr_zero_missing_included.inc:2: error: `MISSING` is not defined anywhere in this source\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-1o76mw68/faraddr_zero_missing_included.inc:2: error: `MISSING` is not defined anywhere in this source\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": true
     },
@@ -5261,7 +5261,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-yof2xf6i/faraddr_query_only_included.inc:2: error: `\u0001ref\u0001MISSING` is not defined anywhere in this source\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-1o76mw68/faraddr_query_only_included.inc:2: error: `\u0001ref\u0001MISSING` is not defined anywhere in this source\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": false
     },
@@ -5451,7 +5451,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-yof2xf6i/sprintf_inside_included.inc:2: error: `.sprintf` needs a number it can work out where it stands, and `.ref(VALUE)` is not one: this pass runs before the layout, so a label's address cannot be reached from here\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-1o76mw68/sprintf_inside_included.inc:2: error: `.sprintf` needs a number it can work out where it stands, and `.ref(VALUE)` is not one: this pass runs before the layout, so a label's address cannot be reached from here\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": false
     },
@@ -5736,7 +5736,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-yof2xf6i/asciiz_list_included.inc:2: error: `.sprintf` needs a number it can work out where it stands, and `.ref(VALUE)` is not one: this pass runs before the layout, so a label's address cannot be reached from here\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-1o76mw68/asciiz_list_included.inc:2: error: `.sprintf` needs a number it can work out where it stands, and `.ref(VALUE)` is not one: this pass runs before the layout, so a label's address cannot be reached from here\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": false
     },
@@ -6021,7 +6021,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-yof2xf6i/current_string_included.inc:1: error: `.sprintf` needs a number it can work out where it stands, and `.defined(HERE)` is not one: this pass runs before the layout, so a label's address cannot be reached from here\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-1o76mw68/current_string_included.inc:1: error: `.sprintf` needs a number it can work out where it stands, and `.defined(HERE)` is not one: this pass runs before the layout, so a label's address cannot be reached from here\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": false
     },
@@ -6116,7 +6116,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-yof2xf6i/cheap_current_included.inc:2: error: no preceding global symbol for `@here`\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-1o76mw68/cheap_current_included.inc:2: error: no preceding global symbol for `@here`\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": false
     },
@@ -6211,7 +6211,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-yof2xf6i/scoped_included.inc:3: error: `.const` cannot answer for `VALUE`: this pass keeps no scope stack, so a constant inside a `.proc` or `.scope` is invisible to it\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-1o76mw68/scoped_included.inc:3: error: `.const` cannot answer for `VALUE`: this pass keeps no scope stack, so a constant inside a `.proc` or `.scope` is invisible to it\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": false
     },
@@ -6306,7 +6306,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-yof2xf6i/scoped_shadow_included.inc:3: error: `.const` cannot answer for `VALUE`: this pass keeps no scope stack, so a constant inside a `.proc` or `.scope` is invisible to it\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-1o76mw68/scoped_shadow_included.inc:3: error: `.const` cannot answer for `VALUE`: this pass keeps no scope stack, so a constant inside a `.proc` or `.scope` is invisible to it\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": false
     },
@@ -6401,7 +6401,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-yof2xf6i/explicit_missing_included.inc:3: error: `.const` cannot answer for `::VALUE`: this pass keeps no scope stack, so a constant inside a `.proc` or `.scope` is invisible to it\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-1o76mw68/explicit_missing_included.inc:3: error: `.const` cannot answer for `::VALUE`: this pass keeps no scope stack, so a constant inside a `.proc` or `.scope` is invisible to it\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": true
     },
@@ -6781,7 +6781,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-yof2xf6i/generated_head_included.inc:2: error: `HERE` is not defined anywhere in this source\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-1o76mw68/generated_head_included.inc:2: error: `HERE` is not defined anywhere in this source\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": false
     },
@@ -6876,7 +6876,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-yof2xf6i/left_list_included.inc:2: error: expected `,` or `)` in `.ref(...)`\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-1o76mw68/left_list_included.inc:2: error: expected `,` or `)` in `.ref(...)`\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": true
     },
@@ -7161,7 +7161,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-yof2xf6i/right_list_included.inc:2: error: expected a value\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-1o76mw68/right_list_included.inc:2: error: expected a value\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": true
     },
@@ -7446,7 +7446,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-yof2xf6i/mid_list_included.inc:2: error: expected `,` or `)` in `.ref(...)`\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-1o76mw68/mid_list_included.inc:2: error: expected `,` or `)` in `.ref(...)`\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": true
     },
@@ -9251,7 +9251,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-yof2xf6i/scoped_known_included.inc:3: error: `.const` cannot answer for `v`: this pass keeps no scope stack, so a constant inside a `.proc` or `.scope` is invisible to it\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-1o76mw68/scoped_known_included.inc:3: error: `.const` cannot answer for `v`: this pass keeps no scope stack, so a constant inside a `.proc` or `.scope` is invisible to it\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": false
     },
@@ -9346,7 +9346,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-yof2xf6i/qualified_missing_included.inc:2: error: `.const` cannot answer for `pa::N`: this pass keeps no scope stack, so a constant inside a `.proc` or `.scope` is invisible to it\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-1o76mw68/qualified_missing_included.inc:2: error: `.const` cannot answer for `pa::N`: this pass keeps no scope stack, so a constant inside a `.proc` or `.scope` is invisible to it\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": true
     },
@@ -9485,6 +9485,291 @@
     },
     {
       "name": "selector_arithmetic_unused",
+      "argv": [
+        "/private/tmp/asm198x-conditional-context-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "qualified_generated_direct",
+      "argv": [
+        "/private/tmp/asm198x-conditional-context-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "070010",
+      "matches_native": true
+    },
+    {
+      "name": "qualified_generated_included",
+      "argv": [
+        "/private/tmp/asm198x-conditional-context-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "070010",
+      "matches_native": true
+    },
+    {
+      "name": "qualified_generated_macro",
+      "argv": [
+        "/private/tmp/asm198x-conditional-context-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "070010",
+      "matches_native": true
+    },
+    {
+      "name": "qualified_generated_inactive",
+      "argv": [
+        "/private/tmp/asm198x-conditional-context-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "qualified_generated_unused",
+      "argv": [
+        "/private/tmp/asm198x-conditional-context-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "qualified_generated_order_direct",
+      "argv": [
+        "/private/tmp/asm198x-conditional-context-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000003000000",
+      "matches_native": false
+    },
+    {
+      "name": "qualified_generated_order_included",
+      "argv": [
+        "/private/tmp/asm198x-conditional-context-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000003000000",
+      "matches_native": false
+    },
+    {
+      "name": "qualified_generated_order_macro",
+      "argv": [
+        "/private/tmp/asm198x-conditional-context-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000003000000",
+      "matches_native": false
+    },
+    {
+      "name": "qualified_generated_order_inactive",
+      "argv": [
+        "/private/tmp/asm198x-conditional-context-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "qualified_generated_order_unused",
+      "argv": [
+        "/private/tmp/asm198x-conditional-context-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "root_generated_order_direct",
+      "argv": [
+        "/private/tmp/asm198x-conditional-context-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000201",
+      "matches_native": true
+    },
+    {
+      "name": "root_generated_order_included",
+      "argv": [
+        "/private/tmp/asm198x-conditional-context-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000201",
+      "matches_native": true
+    },
+    {
+      "name": "root_generated_order_macro",
+      "argv": [
+        "/private/tmp/asm198x-conditional-context-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000201",
+      "matches_native": true
+    },
+    {
+      "name": "root_generated_order_inactive",
+      "argv": [
+        "/private/tmp/asm198x-conditional-context-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "root_generated_order_unused",
       "argv": [
         "/private/tmp/asm198x-conditional-context-final-producer/asm198x",
         "--dialect",

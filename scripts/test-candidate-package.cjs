@@ -993,8 +993,8 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
     });
     test('ca65_data_context', () => {
       const facts = require('../crates/asm198x/tests/fixtures/ca65-data-context.json');
-      assert.equal(facts.cases.length, 500);
-      assert.equal(facts.audit_case_count, 500);
+      assert.equal(facts.cases.length, 515);
+      assert.equal(facts.audit_case_count, 515);
       assert.deepEqual(facts.excluded_audit_cases, {});
       for (const [name, text] of Object.entries(facts.files)) {
         fs.mkdirSync(path.dirname(path.join(root, name)), { recursive: true }); write(name, text);

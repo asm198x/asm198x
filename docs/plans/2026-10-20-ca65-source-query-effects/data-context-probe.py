@@ -90,6 +90,13 @@ def cases() -> dict[str, str]:
             "selector_arithmetic": "VALUE=2\n.byte .left(1,{1})+.const(VALUE),.ref(VALUE)\n",
         }
     )
+    bodies.update(
+        {
+            "qualified_generated": '.scope outer\n.ident("A"):.byte 7\n.endscope\n.word outer::.ident("A")\n',
+            "qualified_generated_order": '.scope outer\nVALUE1=3\n.endscope\nVALUE=2\n.word .ref(VALUE),outer::.ident(.sprintf("VALUE%d",.const(VALUE))),.ref(VALUE)\n',
+            "root_generated_order": 'VALUE=2\n.byte .ref(VALUE),::.ident("VALUE"),.ref(VALUE)\n',
+        }
+    )
     out = {}
     for name, body in bodies.items():
         for context in ["direct", "included", "macro", "inactive", "unused"]:
@@ -109,7 +116,7 @@ def cases() -> dict[str, str]:
             else:
                 source = body
             out[key] = source
-    assert len(out) == 500
+    assert len(out) == 515
     return out
 
 

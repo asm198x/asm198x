@@ -1,6 +1,6 @@
 {
   "binary": "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
-  "sha256": "5beaa625aa73f8e99e76a4c298c3030a91f6c0bc601dadf731bd50e6e3e3b713",
+  "sha256": "b79a32573b666b71beb043a435c144f036eb67def68ebf599464cfc1d51e85f3",
   "results": [
     {
       "name": "byte_list_direct",
@@ -321,7 +321,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8_o20n_3/byte_logical_missing_included.inc:2:1: error: undefined symbol `MISSING`\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8s6z5wro/byte_logical_missing_included.inc:2:1: error: undefined symbol `MISSING`\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": true
     },
@@ -416,7 +416,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8_o20n_3/byte_zero_missing_included.inc:2:1: error: undefined symbol `MISSING`\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8s6z5wro/byte_zero_missing_included.inc:2:1: error: undefined symbol `MISSING`\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": true
     },
@@ -986,7 +986,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8_o20n_3/word_logical_missing_included.inc:2:1: error: undefined symbol `MISSING`\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8s6z5wro/word_logical_missing_included.inc:2:1: error: undefined symbol `MISSING`\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": true
     },
@@ -1081,7 +1081,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8_o20n_3/word_zero_missing_included.inc:2:1: error: undefined symbol `MISSING`\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8s6z5wro/word_zero_missing_included.inc:2:1: error: undefined symbol `MISSING`\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": true
     },
@@ -1651,7 +1651,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8_o20n_3/dbyt_logical_missing_included.inc:2:1: error: undefined symbol `MISSING`\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8s6z5wro/dbyt_logical_missing_included.inc:2:1: error: undefined symbol `MISSING`\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": true
     },
@@ -1746,7 +1746,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8_o20n_3/dbyt_zero_missing_included.inc:2:1: error: undefined symbol `MISSING`\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8s6z5wro/dbyt_zero_missing_included.inc:2:1: error: undefined symbol `MISSING`\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": true
     },
@@ -2316,7 +2316,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8_o20n_3/dword_logical_missing_included.inc:2:1: error: undefined symbol `MISSING`\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8s6z5wro/dword_logical_missing_included.inc:2:1: error: undefined symbol `MISSING`\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": true
     },
@@ -2411,7 +2411,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8_o20n_3/dword_zero_missing_included.inc:2:1: error: undefined symbol `MISSING`\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8s6z5wro/dword_zero_missing_included.inc:2:1: error: undefined symbol `MISSING`\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": true
     },
@@ -2981,7 +2981,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8_o20n_3/lobytes_logical_missing_included.inc:2:1: error: undefined symbol `MISSING`\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8s6z5wro/lobytes_logical_missing_included.inc:2:1: error: undefined symbol `MISSING`\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": true
     },
@@ -3076,7 +3076,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8_o20n_3/lobytes_zero_missing_included.inc:2:1: error: undefined symbol `MISSING`\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8s6z5wro/lobytes_zero_missing_included.inc:2:1: error: undefined symbol `MISSING`\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": true
     },
@@ -3646,7 +3646,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8_o20n_3/hibytes_logical_missing_included.inc:2:1: error: undefined symbol `MISSING`\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8s6z5wro/hibytes_logical_missing_included.inc:2:1: error: undefined symbol `MISSING`\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": true
     },
@@ -3741,7 +3741,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8_o20n_3/hibytes_zero_missing_included.inc:2:1: error: undefined symbol `MISSING`\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8s6z5wro/hibytes_zero_missing_included.inc:2:1: error: undefined symbol `MISSING`\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": true
     },
@@ -4311,7 +4311,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8_o20n_3/bankbytes_logical_missing_included.inc:2:1: error: undefined symbol `MISSING`\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8s6z5wro/bankbytes_logical_missing_included.inc:2:1: error: undefined symbol `MISSING`\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": true
     },
@@ -4406,7 +4406,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8_o20n_3/bankbytes_zero_missing_included.inc:2:1: error: undefined symbol `MISSING`\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8s6z5wro/bankbytes_zero_missing_included.inc:2:1: error: undefined symbol `MISSING`\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": true
     },
@@ -4976,7 +4976,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8_o20n_3/faraddr_logical_missing_included.inc:2:1: error: undefined symbol `MISSING`\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8s6z5wro/faraddr_logical_missing_included.inc:2:1: error: undefined symbol `MISSING`\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": true
     },
@@ -5071,7 +5071,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8_o20n_3/faraddr_zero_missing_included.inc:2:1: error: undefined symbol `MISSING`\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8s6z5wro/faraddr_zero_missing_included.inc:2:1: error: undefined symbol `MISSING`\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": true
     },
@@ -6401,7 +6401,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8_o20n_3/explicit_missing_included.inc:3:1: error: undefined symbol `VALUE`\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8s6z5wro/explicit_missing_included.inc:3:1: error: undefined symbol `VALUE`\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": true
     },
@@ -6876,7 +6876,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8_o20n_3/left_list_included.inc:2:1: error: expected `)` in `.ref(...)`\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8s6z5wro/left_list_included.inc:2:1: error: expected `)` in `.ref(...)`\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": true
     },
@@ -7161,7 +7161,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8_o20n_3/right_list_included.inc:2:1: error: expected a value\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8s6z5wro/right_list_included.inc:2:1: error: expected a value\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": true
     },
@@ -7446,7 +7446,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8_o20n_3/mid_list_included.inc:2:1: error: expected `)` in `.ref(...)`\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8s6z5wro/mid_list_included.inc:2:1: error: expected `)` in `.ref(...)`\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": true
     },
@@ -9061,7 +9061,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8_o20n_3/imported_const_included.inc:2:1: error: undefined symbol `ext`\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8s6z5wro/imported_const_included.inc:2:1: error: undefined symbol `ext`\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": true
     },
@@ -9156,7 +9156,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8_o20n_3/imported_zero_included.inc:2:1: error: undefined symbol `ext`\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8s6z5wro/imported_zero_included.inc:2:1: error: undefined symbol `ext`\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": true
     },
@@ -9346,7 +9346,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8_o20n_3/qualified_missing_included.inc:2:1: error: no such scope `pa`\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-end-token-8s6z5wro/qualified_missing_included.inc:2:1: error: no such scope `pa`\nincluded from input.s:1\n",
       "hex": "70726576696f757320696d616765",
       "matches_native": true
     },
@@ -9485,6 +9485,291 @@
     },
     {
       "name": "selector_arithmetic_unused",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "qualified_generated_direct",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "070010",
+      "matches_native": true
+    },
+    {
+      "name": "qualified_generated_included",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "070010",
+      "matches_native": true
+    },
+    {
+      "name": "qualified_generated_macro",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "070010",
+      "matches_native": true
+    },
+    {
+      "name": "qualified_generated_inactive",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "qualified_generated_unused",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "qualified_generated_order_direct",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000003000100",
+      "matches_native": true
+    },
+    {
+      "name": "qualified_generated_order_included",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000003000100",
+      "matches_native": true
+    },
+    {
+      "name": "qualified_generated_order_macro",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 6 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000003000100",
+      "matches_native": true
+    },
+    {
+      "name": "qualified_generated_order_inactive",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "qualified_generated_order_unused",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "root_generated_order_direct",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000201",
+      "matches_native": true
+    },
+    {
+      "name": "root_generated_order_included",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000201",
+      "matches_native": true
+    },
+    {
+      "name": "root_generated_order_macro",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "000201",
+      "matches_native": true
+    },
+    {
+      "name": "root_generated_order_inactive",
+      "argv": [
+        "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin",
+        "--debug=out.debug198x"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\nwrote out.debug198x (debug sidecar)\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "root_generated_order_unused",
       "argv": [
         "/private/tmp/asm198x-text-consumers-build/debug/asm198x",
         "--dialect",

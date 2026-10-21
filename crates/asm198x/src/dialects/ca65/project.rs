@@ -1169,6 +1169,7 @@ impl mos6502::ExprSource for SourceContext<'_> {
             name.to_ascii_lowercase().as_str(),
             ".ref" | ".referenced" | ".def" | ".defined" | ".sizeof"
         ) || ca65_flat::is_text_function(&name.to_ascii_lowercase())
+            || name.to_ascii_lowercase().ends_with("::.ident")
     }
 
     fn symbol(&self, name: &str, line: usize) -> Result<Expr, AsmError> {
@@ -1179,6 +1180,19 @@ impl mos6502::ExprSource for SourceContext<'_> {
     fn function(&self, name: &str, args: &str, _line: usize) -> Result<Expr, AsmError> {
         let line = self.span.line as usize;
         let source = format!("{name}({args})");
+        if name.to_ascii_lowercase().ends_with("::.ident") {
+            // A constructor is a component of the qualified name, not a
+            // function whose numeric name happens to contain a scope path.
+            let prefix = &name[..name.len() - ".ident".len()];
+            let generated = self.expand(&format!(".ident({args})"), line)?;
+            return super::parse_value_source(
+                &self.reader.anons,
+                self.reader.scope_env.anchor_str(),
+                &format!("{prefix}{generated}"),
+                line,
+                Some(self),
+            );
+        }
         match name.to_ascii_lowercase().as_str() {
             ".const" => {
                 if ca65_flat::split_fields(args, usize::MAX).len() != 1 || args.trim().is_empty() {

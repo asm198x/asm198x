@@ -28,5 +28,23 @@
     "retained": "versions.log.gz",
     "bytes": 66,
     "sha256": "86573d0aa21805a5bc8f1f7d113a12d243521d1907836723f37df91a52d66bd6"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-focused.log",
+    "retained": "v2-focused.log.gz",
+    "bytes": 1616,
+    "sha256": "78aa48c8cb7375b5add39ff90fdc2c4c538853d6adb74cd8ea6ce2c91177e0ab"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-clippy.log",
+    "retained": "v2-clippy.log.gz",
+    "bytes": 288,
+    "sha256": "db49b4783b28fb0b3add95c802f79cb80379ef492612e98592edeca42eefb6d9"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-v2-node.log",
+    "retained": "v2-node.log.gz",
+    "bytes": 9400,
+    "sha256": "788048130b34ab85d79f3d33bde435d3fb7515735e9d6be1da80f5ae1fa1d2f5"
   }
 ]
