@@ -1,0 +1,47 @@
+{
+  "retained_remote_commit": "b5cec81ae0841737c0d423eee5dd0927a3f13d78",
+  "retained_files": 185,
+  "issue_urls": {
+    "/private/tmp/asm198x-ca65-unary-plus-issue-url": "https://github.com/asm198x/asm198x/issues/931",
+    "/private/tmp/asm198x-ca65-lookahead-issue-url": "https://github.com/asm198x/asm198x/issues/932"
+  },
+  "removed_roots": [
+    "/private/tmp/asm198x-reader-allocation-audits-format.log",
+    "/private/tmp/asm198x-reader-allocation-audits-ruff.log",
+    "/private/tmp/asm198x-reader-allocation-build.log",
+    "/private/tmp/asm198x-reader-allocation-checked-build.log",
+    "/private/tmp/asm198x-reader-allocation-checked-replay",
+    "/private/tmp/asm198x-reader-allocation-checked-replay.log",
+    "/private/tmp/asm198x-reader-allocation-clippy.log",
+    "/private/tmp/asm198x-reader-allocation-contract.log",
+    "/private/tmp/asm198x-reader-allocation-fmt.log",
+    "/private/tmp/asm198x-reader-allocation-focused",
+    "/private/tmp/asm198x-reader-allocation-replay",
+    "/private/tmp/asm198x-reader-allocation-replay-format-final.log",
+    "/private/tmp/asm198x-reader-allocation-replay-format.log",
+    "/private/tmp/asm198x-reader-allocation-replay-ruff-final.log",
+    "/private/tmp/asm198x-reader-allocation-replay-ruff.log",
+    "/private/tmp/asm198x-reader-allocation-workspace.log",
+    "/private/tmp/asm198x-ca65-unary-plus-baseline.log",
+    "/private/tmp/asm198x-ca65-unary-plus-compare.log",
+    "/private/tmp/asm198x-ca65-unary-plus-format.log",
+    "/private/tmp/asm198x-ca65-unary-plus-issue-url",
+    "/private/tmp/asm198x-ca65-unary-plus-native.log",
+    "/private/tmp/asm198x-ca65-unary-plus-ruff.log",
+    "/private/tmp/asm198x-ca65-lookahead-compare.log",
+    "/private/tmp/asm198x-ca65-lookahead-format.log",
+    "/private/tmp/asm198x-ca65-lookahead-issue-url",
+    "/private/tmp/asm198x-ca65-lookahead-native.log",
+    "/private/tmp/asm198x-ca65-lookahead-ruff.log"
+  ],
+  "removed_files": 187,
+  "process_check": "no task-owned allocation/audit/build processes remain",
+  "worktree": "/Users/stevehill/Projects/198x/Asm198x/asm198x-ca65-text-consumers",
+  "retained_worktree_reason": "approved full #924 reader is unfinished; #931/#932 and remaining consumers still need implementation",
+  "preserved": [
+    "/private/tmp/asm198x-empty-producer",
+    "/private/tmp/asm198x-empty-local-package",
+    "/private/tmp/asm198x-scalar-build",
+    "/private/tmp/asm198x-scalar-release-build"
+  ]
+}
