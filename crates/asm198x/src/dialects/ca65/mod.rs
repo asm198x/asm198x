@@ -42,6 +42,7 @@ mod deferred;
 mod format;
 mod link;
 mod project;
+pub(super) mod reader;
 pub(super) mod string_tokens;
 pub(crate) use link::VisRule;
 use link::{Emit, Resolved, area_usage, emit, link, resolve};
