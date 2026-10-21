@@ -329,6 +329,51 @@ fn assertion_and_message_fields_retain_native_reads_and_ignored_tail_rules() {
     verify_fixture(fixture, 80);
 }
 
+#[test]
+fn repeat_headers_retain_native_count_order_and_identifier_kinds() {
+    let fixture = include_str!("fixtures/ca65-repeat-context.json");
+    let facts: serde_json::Value = serde_json::from_str(fixture).expect("native captures");
+    assert_eq!(facts["scalar_audit_case_count"], 320);
+    let mut scalar = std::collections::BTreeSet::new();
+    let mut counters = std::collections::BTreeSet::new();
+    for case in facts["cases"].as_array().expect("repeat cases") {
+        let name = case["name"].as_str().expect("name");
+        if name.starts_with("repeat_") {
+            assert!(scalar.insert(name));
+        } else {
+            assert!(counters.insert(name));
+        }
+    }
+    assert_eq!(scalar.len(), 80);
+    assert_eq!(counters.len(), 18);
+    let others = facts["out_of_scope_scalar_cases"]
+        .as_array()
+        .expect("other scalar grammars");
+    assert_eq!(others.len(), 240);
+    for name in others {
+        let name = name.as_str().expect("name");
+        assert!(!name.starts_with("repeat_"));
+        assert!(scalar.insert(name));
+    }
+    let scalar_inventory: std::collections::BTreeSet<_> = facts["scalar_audit_names"]
+        .as_array()
+        .expect("scalar inventory")
+        .iter()
+        .map(|name| name.as_str().expect("name"))
+        .collect();
+    assert_eq!(scalar_inventory.len(), 320);
+    assert_eq!(scalar, scalar_inventory);
+    let counter_inventory: std::collections::BTreeSet<_> = facts["counter_audit_names"]
+        .as_array()
+        .expect("counter inventory")
+        .iter()
+        .map(|name| name.as_str().expect("name"))
+        .collect();
+    assert_eq!(counter_inventory.len(), 18);
+    assert_eq!(counters, counter_inventory);
+    verify_fixture(fixture, 98);
+}
+
 fn verify_fixture(fixture: &str, count: usize) {
     let facts: serde_json::Value = serde_json::from_str(fixture).expect("native captures");
     let cases = facts["cases"].as_array().expect("cases");

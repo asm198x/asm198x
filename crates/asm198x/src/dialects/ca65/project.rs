@@ -489,9 +489,8 @@ fn project_nodes(
                 continue;
             }
             Some(Item::Repeat { head, body, .. }) => {
-                let line = node.span.line as usize;
                 let head = read_block_head(node, head, st, sw)?;
-                let (count, var) = fold_repeat(&head, st, &sw.reader, line).map_err(|e| {
+                let (count, var) = fold_repeat(&head, st, &sw.reader, &node.span).map_err(|e| {
                     super::statement_error(e, node.span.file, &node.span.expansion_frames)
                 })?;
                 if st.token_depth == 0 {
@@ -588,7 +587,7 @@ fn read_block_head(
     let tail = label.map_or(processed.trim(), |(_, tail)| tail);
     let numeric = matches!(
         split_first_word(tail).0.to_ascii_lowercase().as_str(),
-        ".if" | ".elseif" | ".ifconst" | ".ifnconst"
+        ".if" | ".elseif" | ".ifconst" | ".ifnconst" | ".repeat"
     );
     let processed = if numeric {
         match label {
@@ -1815,36 +1814,26 @@ fn walk_weights(
 /// Fold a `.repeat n[, var]` head into its count and optional loop variable.
 fn fold_repeat(
     head: &str,
-    st: &Projection,
+    st: &mut Projection,
     reader: &Walker,
-    line: usize,
+    span: &crate::span::Span,
 ) -> Result<(i64, Option<String>), AsmError> {
     let (_, args) = split_first_word(head.trim());
-    let (count_text, var) = match args.split_once(',') {
-        Some((c, v)) => (c.trim(), Some(v.trim().to_string())),
-        None => (args.trim(), None),
+    let source = SourceContext {
+        reader,
+        projection: st,
+        span,
+        required: std::cell::RefCell::new(Vec::new()),
     };
-    if count_text.is_empty() {
-        return Err(AsmError::new(line, "`.repeat` needs a count"));
+    let result = super::reader::repetition(args, span.line as usize, source.text_context());
+    for value in source.required.into_inner() {
+        st.deferred.require_source_names(&value, span);
     }
-    let expr = reader.source_value(count_text, line)?;
-    let count = fold_const(&expr, &st.consts, line)?;
-    // ca65: a negative count is `Range error`, where zero is no iterations.
-    if count < 0 {
-        return Err(AsmError::new(
-            line,
-            format!("`.repeat {count}`: a repetition count may not be negative"),
-        ));
-    }
-    if let Some(name) = &var
-        && !is_ident(name)
-    {
-        return Err(AsmError::new(
-            line,
-            "`.repeat` needs an identifier after the comma",
-        ));
-    }
-    Ok((count, var))
+    result.map_err(|error| {
+        let mut error = reader.strings.error(error);
+        error.span.get_or_insert_with(|| span.clone());
+        error
+    })
 }
 
 /// Substitute a `.repeat`'s loop variables into an expression.

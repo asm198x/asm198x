@@ -851,3 +851,31 @@ impl Input<'_> {
         Ok(text)
     }
 }
+
+/// A repeat header is one count and an optional identifier token, rather than
+/// source split on the first authored comma. Constructors retain their kinds.
+pub(super) fn repetition(
+    source: &str,
+    line: usize,
+    live: ca65_flat::LiveText<'_>,
+) -> Result<(i64, Option<String>), AsmError> {
+    let mut input = Input::new(source, &live, line);
+    let count = input.number()?;
+    if count < 0 {
+        return Err(AsmError::new(line, "repetition count may not be negative"));
+    }
+    let counter = if input.peek()?.is_none() {
+        None
+    } else {
+        input.require(",")?;
+        let token = input
+            .next()?
+            .filter(|token| token.kind == TokenKind::Ident && super::is_ident(token.text()))
+            .ok_or_else(|| AsmError::new(line, "`.repeat` needs an identifier after the comma"))?;
+        Some(token.text().to_string())
+    };
+    if input.peek()?.is_some() {
+        return Err(AsmError::new(line, "unexpected tokens after repeat header"));
+    }
+    Ok((count, counter))
+}
