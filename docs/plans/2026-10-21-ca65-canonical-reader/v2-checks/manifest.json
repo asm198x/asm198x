@@ -1,0 +1,783 @@
+{
+  "roots": [
+    "/private/tmp/asm198x-reader-v2-cherry.log",
+    "/private/tmp/asm198x-reader-v2-clippy.log",
+    "/private/tmp/asm198x-reader-v2-docs.log",
+    "/private/tmp/asm198x-reader-v2-empty.log",
+    "/private/tmp/asm198x-reader-v2-fmt.log",
+    "/private/tmp/asm198x-reader-v2-library.log",
+    "/private/tmp/asm198x-reader-v2-numeric-tests.log",
+    "/private/tmp/asm198x-reader-v2-replay",
+    "/private/tmp/asm198x-reader-v2-replay.log",
+    "/private/tmp/asm198x-reader-v2-replay.py"
+  ],
+  "files": [
+    {
+      "path": "/private/tmp/asm198x-reader-v2-cherry.log",
+      "root": "/private/tmp/asm198x-reader-v2-cherry.log",
+      "sha256": "289e127e8cde81cafe384dc8b825b06ee11ebe0ba09eea3b1b262dfab4a121c8",
+      "blob": "blobs/289e127e8cde81cafe384dc8b825b06ee11ebe0ba09eea3b1b262dfab4a121c8.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-clippy.log",
+      "root": "/private/tmp/asm198x-reader-v2-clippy.log",
+      "sha256": "03f3db390a7f695216f7544f2de0e270b9ca0af4e287db79275740267e49761b",
+      "blob": "blobs/03f3db390a7f695216f7544f2de0e270b9ca0af4e287db79275740267e49761b.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-docs.log",
+      "root": "/private/tmp/asm198x-reader-v2-docs.log",
+      "sha256": "850fb02c80b3af4d7c04ac1360de437f687bcf6b9a2f733160e4bd10ce98a165",
+      "blob": "blobs/850fb02c80b3af4d7c04ac1360de437f687bcf6b9a2f733160e4bd10ce98a165.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-empty.log",
+      "root": "/private/tmp/asm198x-reader-v2-empty.log",
+      "sha256": "7b08cd4a9e453cc213cf0155a9650004f2eb46a7206453abec8ae93d6cae3ccd",
+      "blob": "blobs/7b08cd4a9e453cc213cf0155a9650004f2eb46a7206453abec8ae93d6cae3ccd.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-fmt.log",
+      "root": "/private/tmp/asm198x-reader-v2-fmt.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "blob": "blobs/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-library.log",
+      "root": "/private/tmp/asm198x-reader-v2-library.log",
+      "sha256": "22e652816ed1445957ef85d5257edbada0c102e9361b56a0ded8dc99817291a5",
+      "blob": "blobs/22e652816ed1445957ef85d5257edbada0c102e9361b56a0ded8dc99817291a5.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-numeric-tests.log",
+      "root": "/private/tmp/asm198x-reader-v2-numeric-tests.log",
+      "sha256": "6eaf4242dbcf115325e1c04fea576fa5d6e986e542ba7a85583f79a190b1f9e3",
+      "blob": "blobs/6eaf4242dbcf115325e1c04fea576fa5d6e986e542ba7a85583f79a190b1f9e3.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/alias-after.json",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "569e2d7ac817fc3bad57db1a83ce4339236ab28d519a7de4c4e14c841ac4b26c",
+      "blob": "blobs/569e2d7ac817fc3bad57db1a83ce4339236ab28d519a7de4c4e14c841ac4b26c.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/alias.log",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "873a2f696ecdba8a1b95ca39106cac5141cab37ebda54726c474947ecbf7cd99",
+      "blob": "blobs/873a2f696ecdba8a1b95ca39106cac5141cab37ebda54726c474947ecbf7cd99.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/canonical-fields-after.json",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "3035f96bca86d45d074ba15f6fc4110df8751af6b5abaf209cda9d6f9a958496",
+      "blob": "blobs/3035f96bca86d45d074ba15f6fc4110df8751af6b5abaf209cda9d6f9a958496.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/canonical-fields.log",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "d81ca59eda9b5f39cc0815f4b45142e81a0c97baf1384b8e6b7aff205314bd1f",
+      "blob": "blobs/d81ca59eda9b5f39cc0815f4b45142e81a0c97baf1384b8e6b7aff205314bd1f.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/captured-braces-after.json",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "6cd7903731e23d4fc906d4436b07964e58f066375d597ebbed9a2e6f78078b5a",
+      "blob": "blobs/6cd7903731e23d4fc906d4436b07964e58f066375d597ebbed9a2e6f78078b5a.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/captured-braces.log",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "45d10eea1a924fa7a3c7370d346db0c57ba58f710afa319ad31ac500f761b04e",
+      "blob": "blobs/45d10eea1a924fa7a3c7370d346db0c57ba58f710afa319ad31ac500f761b04e.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/captured-empty-calls-after.json",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "059dbe7851c18cab9de13a8958f86b89a49020c34dd2808a8f429a2d9fc49baf",
+      "blob": "blobs/059dbe7851c18cab9de13a8958f86b89a49020c34dd2808a8f429a2d9fc49baf.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/captured-empty-calls.log",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "7f40f17ac0b366aa10f25e72d763a6ce32047ae7cb9fc2f9d16e66d0cc6ae42f",
+      "blob": "blobs/7f40f17ac0b366aa10f25e72d763a6ce32047ae7cb9fc2f9d16e66d0cc6ae42f.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/captured-numbers-after.json",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "41d521d1687ebc2506702e92ef66ccfbf8ed65fcdd9fce6d0ddccf6dad8c032a",
+      "blob": "blobs/41d521d1687ebc2506702e92ef66ccfbf8ed65fcdd9fce6d0ddccf6dad8c032a.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/captured-numbers.log",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "fd4640fecd679abb1a168b88e568ed384901b741511919472e54a0d248e95002",
+      "blob": "blobs/fd4640fecd679abb1a168b88e568ed384901b741511919472e54a0d248e95002.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/conditional-context-after.json",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "22b3cab5467996c728e0a31f3ae19a66438a533a7957cdac28e02b91077043e3",
+      "blob": "blobs/22b3cab5467996c728e0a31f3ae19a66438a533a7957cdac28e02b91077043e3.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/conditional-context.log",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "b7952288f8bde63cd5eb84897660ec0a2d67571c9ff994e4d2f742054244d7e2",
+      "blob": "blobs/b7952288f8bde63cd5eb84897660ec0a2d67571c9ff994e4d2f742054244d7e2.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/configured-faraddr-after.json",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "21b7212084b4ee88cb4a979d0c6928c7d554b903dd1a5dfea58366b414b40cd2",
+      "blob": "blobs/21b7212084b4ee88cb4a979d0c6928c7d554b903dd1a5dfea58366b414b40cd2.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/configured-faraddr.log",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "74d590c7488c14edcad41ef6dbfea28d584b0ff953d87cb6f1d71405905f5fff",
+      "blob": "blobs/74d590c7488c14edcad41ef6dbfea28d584b0ff953d87cb6f1d71405905f5fff.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/data-context-after.json",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "74770c68fe22de433ca0d9a8cef374f1849d05a65f3abdf778d9d60f1d68ea7e",
+      "blob": "blobs/74770c68fe22de433ca0d9a8cef374f1849d05a65f3abdf778d9d60f1d68ea7e.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/data-context.log",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "660abe89236facca8143e232353be48ad59a7f405d0b22ff1d7f767504ca8b6e",
+      "blob": "blobs/660abe89236facca8143e232353be48ad59a7f405d0b22ff1d7f767504ca8b6e.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/empty-calls-after.json",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "81b0586d9beab34f37e940c96d6e49be48c5e36ee05fc2e57f047bc80300f1c5",
+      "blob": "blobs/81b0586d9beab34f37e940c96d6e49be48c5e36ee05fc2e57f047bc80300f1c5.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/empty-calls.log",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "a4082c3b260001764c97b231e9ff494357a9fc54e364594a51091a23d0c3c26f",
+      "blob": "blobs/a4082c3b260001764c97b231e9ff494357a9fc54e364594a51091a23d0c3c26f.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/external-after.json",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "f0c02feb2718935064d1df26e87eb5c1ce8f0630ae1c82871dedd34d43f6b2a7",
+      "blob": "blobs/f0c02feb2718935064d1df26e87eb5c1ce8f0630ae1c82871dedd34d43f6b2a7.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/external.log",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "a51a485e0ccb1672c50ab956f1a3a4164092588fa397246df4a7f8f0375d8bf1",
+      "blob": "blobs/a51a485e0ccb1672c50ab956f1a3a4164092588fa397246df4a7f8f0375d8bf1.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/file-fields-after.json",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "6ccb6cd9b4199ed6eb914973fed12d004d4ce7a6508201ac73ba5ef87084dbf6",
+      "blob": "blobs/6ccb6cd9b4199ed6eb914973fed12d004d4ce7a6508201ac73ba5ef87084dbf6.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/file-fields.log",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "8932756378c44850c84a18c4aa74b51f488eff50f86397f307725dfcdc48e649",
+      "blob": "blobs/8932756378c44850c84a18c4aa74b51f488eff50f86397f307725dfcdc48e649.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/generated-fields-after.json",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "1ab53da6250a6c9ec3c5ba27a925bd5e220f28fe244f8a5ae7d762adc7893f24",
+      "blob": "blobs/1ab53da6250a6c9ec3c5ba27a925bd5e220f28fe244f8a5ae7d762adc7893f24.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/generated-fields.log",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "dfe7c001cfbec177a2f75aec610c101a9e8f2f215f95339cc5e04795da7ae28f",
+      "blob": "blobs/dfe7c001cfbec177a2f75aec610c101a9e8f2f215f95339cc5e04795da7ae28f.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/linked-faraddr-after.json",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "d67413013d243a1fcd5c1d6a9cf1609ff9ab71055b258e5f407088f60b1910e1",
+      "blob": "blobs/d67413013d243a1fcd5c1d6a9cf1609ff9ab71055b258e5f407088f60b1910e1.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/linked-faraddr.log",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "1b6c0720e1f91c2d04c2af7f41b9bf6070483c367a06b0c668986d7be6237ca6",
+      "blob": "blobs/1b6c0720e1f91c2d04c2af7f41b9bf6070483c367a06b0c668986d7be6237ca6.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/numeric-consumers-after.json",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "e9d5b892e569bb30515a0c21825f8a81e3da569379ec152f114bb2e68e83cfad",
+      "blob": "blobs/e9d5b892e569bb30515a0c21825f8a81e3da569379ec152f114bb2e68e83cfad.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/numeric-consumers.log",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "1d8074cbd2a4395b18e8cb7cec08666fecb6abf59aa9b081d7973c39a6b5dcd2",
+      "blob": "blobs/1d8074cbd2a4395b18e8cb7cec08666fecb6abf59aa9b081d7973c39a6b5dcd2.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/query-admission-after.json",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "18082c4f5ef57b2963c72c91e4869894c1b4acc582451effb12a4a8984fa987d",
+      "blob": "blobs/18082c4f5ef57b2963c72c91e4869894c1b4acc582451effb12a4a8984fa987d.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/query-admission.log",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "fb03ee0f8f1c6448f3c83160edf85c87e3f8b1b7e60bbec3d8f2fad3f12f044c",
+      "blob": "blobs/fb03ee0f8f1c6448f3c83160edf85c87e3f8b1b7e60bbec3d8f2fad3f12f044c.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/query-extended-after.json",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "ed081e5686d222b18db07a814b38940e7ef4cd73276933b49951242228145ef8",
+      "blob": "blobs/ed081e5686d222b18db07a814b38940e7ef4cd73276933b49951242228145ef8.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/query-extended.log",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "63c51be25330a4781593bec487b6e435284db88a419efad6b89b69c704e41980",
+      "blob": "blobs/63c51be25330a4781593bec487b6e435284db88a419efad6b89b69c704e41980.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/query-original-after.json",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "1b99616dc80a6818e44f154c48bfc059a667c08228859b4a5abd2b4e33ea094b",
+      "blob": "blobs/1b99616dc80a6818e44f154c48bfc059a667c08228859b4a5abd2b4e33ea094b.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/query-original.log",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "459e48b6132fac70b7c8695a15fadb1e0034801b8e1dad30bce9483e216cf01c",
+      "blob": "blobs/459e48b6132fac70b7c8695a15fadb1e0034801b8e1dad30bce9483e216cf01c.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/query-short-circuit-after.json",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "b21f850f915070c1733fb35e8110e652247427f84119f5d93ae033c74a18cc7d",
+      "blob": "blobs/b21f850f915070c1733fb35e8110e652247427f84119f5d93ae033c74a18cc7d.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/query-short-circuit.log",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "df3c5df809bd341e3b0242f2d16312e6689f8fffb915c938c57cb1caf766eed3",
+      "blob": "blobs/df3c5df809bd341e3b0242f2d16312e6689f8fffb915c938c57cb1caf766eed3.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/repeat-names-after.json",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "6ec199c326de4d670e746e0bbdde555d1dd2d9c7e1f431438a57e1af88f90653",
+      "blob": "blobs/6ec199c326de4d670e746e0bbdde555d1dd2d9c7e1f431438a57e1af88f90653.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/repeat-names.log",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "ea040e2b4a60c347b71a8d8c9d583ee82c069b714e0be087800d071a6ae43f19",
+      "blob": "blobs/ea040e2b4a60c347b71a8d8c9d583ee82c069b714e0be087800d071a6ae43f19.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/scalar-fields-after.json",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "8ce85878efa994b8bb41ae0ebb2fb2bf05756e823bc7422a407371660ba0f10d",
+      "blob": "blobs/8ce85878efa994b8bb41ae0ebb2fb2bf05756e823bc7422a407371660ba0f10d.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/scalar-fields.log",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "e48f297f2f260824f500cbfc44ff261fdb3991176502c73ebb4e8ee591265d42",
+      "blob": "blobs/e48f297f2f260824f500cbfc44ff261fdb3991176502c73ebb4e8ee591265d42.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/scope-deferred-followups-native-after.json",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "39e35f44da0ab029d825a94d1f1f314c26bb061344a56f52f0ff99a60a66a1b3",
+      "blob": "blobs/39e35f44da0ab029d825a94d1f1f314c26bb061344a56f52f0ff99a60a66a1b3.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/scope-deferred-followups-native.log",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "15a4c2c0ffd0e369791d3b3898410aa6eb729532d1679381cbc1f438ff114f4a",
+      "blob": "blobs/15a4c2c0ffd0e369791d3b3898410aa6eb729532d1679381cbc1f438ff114f4a.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/scope-native-completed-phase-probes-after.json",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "070540c81e2a4f49041779a42993432d94fdb75c0951c07750c81df06285f026",
+      "blob": "blobs/070540c81e2a4f49041779a42993432d94fdb75c0951c07750c81df06285f026.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/scope-native-completed-phase-probes.log",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "752c3f6d703b9396789fb57502d17d1804e1b30875d94645c4a21fc862200a86",
+      "blob": "blobs/752c3f6d703b9396789fb57502d17d1804e1b30875d94645c4a21fc862200a86.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/scope-native-negative-memory-probes-after.json",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "d549ed37522589124920badfe4a7ff4c36230ee0dec7f00e32c67131b01a34f2",
+      "blob": "blobs/d549ed37522589124920badfe4a7ff4c36230ee0dec7f00e32c67131b01a34f2.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/scope-native-negative-memory-probes.log",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "88985c4139e147cd3696557611e14b098eaa2d8d363f898617b8e631be9ab471",
+      "blob": "blobs/88985c4139e147cd3696557611e14b098eaa2d8d363f898617b8e631be9ab471.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/scope-native-phase-probes-after.json",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "8133dde06b36a1666c605ad6a8da1a7a55de117f5a31728abc5441d562634301",
+      "blob": "blobs/8133dde06b36a1666c605ad6a8da1a7a55de117f5a31728abc5441d562634301.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/scope-native-phase-probes.log",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "4e051755fb66484ea1403cb8323776a552de607644a2e742e084120710d4ea5e",
+      "blob": "blobs/4e051755fb66484ea1403cb8323776a552de607644a2e742e084120710d4ea5e.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/scope-native-query-probes-after.json",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "de4fd361b3814b16be71e8d3fa4d1924d0ddc1e4f3b3ad7d6474c23162d2949e",
+      "blob": "blobs/de4fd361b3814b16be71e8d3fa4d1924d0ddc1e4f3b3ad7d6474c23162d2949e.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/scope-native-query-probes.log",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "d72f1324e00d9bcc1b86a56bb6e6404f9659123a7e9cc29f58f935b0aa891f99",
+      "blob": "blobs/d72f1324e00d9bcc1b86a56bb6e6404f9659123a7e9cc29f58f935b0aa891f99.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/scope-native-stream-probes-after.json",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "991d1ec50586f5a148cb476d39ea901251480e21559bf9c4a254f32de1286a55",
+      "blob": "blobs/991d1ec50586f5a148cb476d39ea901251480e21559bf9c4a254f32de1286a55.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/scope-native-stream-probes.log",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "6af141c5fba928809b9e610249fb427969205179087def4ee79b9be28fdc5538",
+      "blob": "blobs/6af141c5fba928809b9e610249fb427969205179087def4ee79b9be28fdc5538.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/scope-native-width-probes-after.json",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "f741622b1425ee453282ce424cad63fa33320d278d70f8dac61864bbcaac4815",
+      "blob": "blobs/f741622b1425ee453282ce424cad63fa33320d278d70f8dac61864bbcaac4815.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/scope-native-width-probes.log",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "a78433b7bb8e7fc755fdbcdfe2f93725202a1570266f47dc02ba24822e7d87da",
+      "blob": "blobs/a78433b7bb8e7fc755fdbcdfe2f93725202a1570266f47dc02ba24822e7d87da.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/source-constancy-after.json",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "d09b4fb218815b3c95cbe80f13ad9601a163bb4cd7d2bed3e809c25520d701a2",
+      "blob": "blobs/d09b4fb218815b3c95cbe80f13ad9601a163bb4cd7d2bed3e809c25520d701a2.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/source-constancy.log",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "ccfd86e5ef921d8586f46b7109fc8aa3648ac8b954b51d8c853a10bcf87fe1d1",
+      "blob": "blobs/ccfd86e5ef921d8586f46b7109fc8aa3648ac8b954b51d8c853a10bcf87fe1d1.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/strings-consumer-native-after.json",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "dacd8f512c1ca62a2d73f032261dc45760bf96bdf81b3cfe07e68fce859565e5",
+      "blob": "blobs/dacd8f512c1ca62a2d73f032261dc45760bf96bdf81b3cfe07e68fce859565e5.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/strings-consumer-native.log",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "b9e8e26b46459becc2381c9da2488704c28b7a822cbe2688f55460c6aa675f2d",
+      "blob": "blobs/b9e8e26b46459becc2381c9da2488704c28b7a822cbe2688f55460c6aa675f2d.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/strings-flat-native-after.json",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "b7b1afab1f8c2f288c8c55c7e389910c45fb315506e50a6c9a2a79b0e2f7dcd9",
+      "blob": "blobs/b7b1afab1f8c2f288c8c55c7e389910c45fb315506e50a6c9a2a79b0e2f7dcd9.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/strings-flat-native.log",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "7d6bc0dcdd5efde6441d0924a32d08fbae1cf7ea0708df2495fec24b51863df0",
+      "blob": "blobs/7d6bc0dcdd5efde6441d0924a32d08fbae1cf7ea0708df2495fec24b51863df0.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/strings-guard-native-after.json",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "8fca12a786ec0444b7c6c9849a1c70f3e8c87eb08a476efd5ff27ffbd7dae6df",
+      "blob": "blobs/8fca12a786ec0444b7c6c9849a1c70f3e8c87eb08a476efd5ff27ffbd7dae6df.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/strings-guard-native.log",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "716196d4a1acfae4d76a740b22629afa94eb33ddbed1f67f87e8a719e7b92128",
+      "blob": "blobs/716196d4a1acfae4d76a740b22629afa94eb33ddbed1f67f87e8a719e7b92128.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/strings-index-scope-native-after.json",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "bfbf9364c72096a668f9c3ce3e0b3a3c903dedf927900bdf69b2e84b0c0baf00",
+      "blob": "blobs/bfbf9364c72096a668f9c3ce3e0b3a3c903dedf927900bdf69b2e84b0c0baf00.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/strings-index-scope-native.log",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "2f2e77c26435b73ea9c8a56029baa7ba1397ac741a54e66287d433d3ea1ef920",
+      "blob": "blobs/2f2e77c26435b73ea9c8a56029baa7ba1397ac741a54e66287d433d3ea1ef920.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/strings-lifetime-native-after.json",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "9ce1d9e0e1ea366731288cd8d3afb77f0b8c3b5c37b8a2d9bf03f92e0ea42540",
+      "blob": "blobs/9ce1d9e0e1ea366731288cd8d3afb77f0b8c3b5c37b8a2d9bf03f92e0ea42540.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/strings-lifetime-native.log",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "514fc3dfcaee4516e51552b0cdd34ead3f86b1886d1b14c0916bf6a27eddfa1e",
+      "blob": "blobs/514fc3dfcaee4516e51552b0cdd34ead3f86b1886d1b14c0916bf6a27eddfa1e.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/strings-numeric-string-arity-native-after.json",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "63802e0a1d1f6fdc353d64c201e1a3c6a12760a9c4f94cf4a1cdfa6ea75173c6",
+      "blob": "blobs/63802e0a1d1f6fdc353d64c201e1a3c6a12760a9c4f94cf4a1cdfa6ea75173c6.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/strings-numeric-string-arity-native.log",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "240b59ba1cd8b9c841326f70f70ac0d7aea2c9aa21522ca4a39788ae32a769bc",
+      "blob": "blobs/240b59ba1cd8b9c841326f70f70ac0d7aea2c9aa21522ca4a39788ae32a769bc.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/strings-text-consumer-native-after.json",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "67dcda70c4256292fcc1c696c0d880e13f44d309bbe252250691c6db0cd670d0",
+      "blob": "blobs/67dcda70c4256292fcc1c696c0d880e13f44d309bbe252250691c6db0cd670d0.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/strings-text-consumer-native.log",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "6af141c5fba928809b9e610249fb427969205179087def4ee79b9be28fdc5538",
+      "blob": "blobs/6af141c5fba928809b9e610249fb427969205179087def4ee79b9be28fdc5538.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/summary.json",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "0b8b143284cee33416239fad60ac4e83cde05fdf78f908bb164543e6ddfc9353",
+      "blob": "blobs/0b8b143284cee33416239fad60ac4e83cde05fdf78f908bb164543e6ddfc9353.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/text-assertion-native-after.json",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "55a60f8e7b0e41681938306501eee9a6f3c0fc7bc0234a3346f399f61fae6113",
+      "blob": "blobs/55a60f8e7b0e41681938306501eee9a6f3c0fc7bc0234a3346f399f61fae6113.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/text-assertion-native.log",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "2a5186129ffc93cc656e327ec558825a4e98d9e64a7640983bfaee47449159e3",
+      "blob": "blobs/2a5186129ffc93cc656e327ec558825a4e98d9e64a7640983bfaee47449159e3.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/text-native-after.json",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "aa79f511a138115c6694acbfc3d1958e4a6cd3ab4429024787ab0714d73610c2",
+      "blob": "blobs/aa79f511a138115c6694acbfc3d1958e4a6cd3ab4429024787ab0714d73610c2.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/text-native.log",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "57eeca1637267a9f1871fea999e250c5264f5da1fc8f10e1611b906f5f1a85ea",
+      "blob": "blobs/57eeca1637267a9f1871fea999e250c5264f5da1fc8f10e1611b906f5f1a85ea.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/tokens-after.json",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "343f49aefdbda89bf71a361d8b7bbd4a51b3a6f95d100aa00aaff135b893242f",
+      "blob": "blobs/343f49aefdbda89bf71a361d8b7bbd4a51b3a6f95d100aa00aaff135b893242f.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/tokens.log",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "716196d4a1acfae4d76a740b22629afa94eb33ddbed1f67f87e8a719e7b92128",
+      "blob": "blobs/716196d4a1acfae4d76a740b22629afa94eb33ddbed1f67f87e8a719e7b92128.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/visibility-after.json",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "2d858442b712ea9e1ec8748df4730ae421384e69c07b43072c17c983772b9b2f",
+      "blob": "blobs/2d858442b712ea9e1ec8748df4730ae421384e69c07b43072c17c983772b9b2f.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay/visibility.log",
+      "root": "/private/tmp/asm198x-reader-v2-replay",
+      "sha256": "2fcd0d9871758ef3434623933fa86abb5305e94811ec77c541ff7cfc9f88d639",
+      "blob": "blobs/2fcd0d9871758ef3434623933fa86abb5305e94811ec77c541ff7cfc9f88d639.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay.log",
+      "root": "/private/tmp/asm198x-reader-v2-replay.log",
+      "sha256": "6e0997d7f858fb280415183ec9e360b1a1543ceb41ff9551f8577b74e2b304c0",
+      "blob": "blobs/6e0997d7f858fb280415183ec9e360b1a1543ceb41ff9551f8577b74e2b304c0.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-reader-v2-replay.py",
+      "root": "/private/tmp/asm198x-reader-v2-replay.py",
+      "sha256": "0290abfec3923624801ad475efa47e01646cb388f85e410f7dfa9eef5cd9b285",
+      "blob": "blobs/0290abfec3923624801ad475efa47e01646cb388f85e410f7dfa9eef5cd9b285.gz"
+    }
+  ],
+  "replay": {
+    "binary_sha256": "15fbaa0742d12ffe624d20e63a30c854009a156e5bb245ada4682d64e5084871",
+    "matrices": [
+      {
+        "label": "query-original",
+        "cases": 56,
+        "native_matches": 56,
+        "changed_outcomes": []
+      },
+      {
+        "label": "query-extended",
+        "cases": 128,
+        "native_matches": 128,
+        "changed_outcomes": []
+      },
+      {
+        "label": "alias",
+        "cases": 9,
+        "native_matches": 9,
+        "changed_outcomes": []
+      },
+      {
+        "label": "source-constancy",
+        "cases": 314,
+        "native_matches": 314,
+        "changed_outcomes": []
+      },
+      {
+        "label": "scope-native-phase-probes",
+        "cases": 106,
+        "native_matches": 106,
+        "changed_outcomes": []
+      },
+      {
+        "label": "scope-native-completed-phase-probes",
+        "cases": 105,
+        "native_matches": 105,
+        "changed_outcomes": []
+      },
+      {
+        "label": "scope-native-width-probes",
+        "cases": 144,
+        "native_matches": 144,
+        "changed_outcomes": []
+      },
+      {
+        "label": "scope-deferred-followups-native",
+        "cases": 22,
+        "native_matches": 18,
+        "changed_outcomes": []
+      },
+      {
+        "label": "scope-native-query-probes",
+        "cases": 35,
+        "native_matches": 34,
+        "changed_outcomes": []
+      },
+      {
+        "label": "scope-native-stream-probes",
+        "cases": 6,
+        "native_matches": 6,
+        "changed_outcomes": []
+      },
+      {
+        "label": "scope-native-negative-memory-probes",
+        "cases": 28,
+        "native_matches": 28,
+        "changed_outcomes": []
+      },
+      {
+        "label": "strings-consumer-native",
+        "cases": 69,
+        "native_matches": 69,
+        "changed_outcomes": []
+      },
+      {
+        "label": "strings-guard-native",
+        "cases": 6,
+        "native_matches": 4,
+        "changed_outcomes": []
+      },
+      {
+        "label": "strings-lifetime-native",
+        "cases": 36,
+        "native_matches": 27,
+        "changed_outcomes": []
+      },
+      {
+        "label": "strings-numeric-string-arity-native",
+        "cases": 26,
+        "native_matches": 26,
+        "changed_outcomes": []
+      },
+      {
+        "label": "strings-index-scope-native",
+        "cases": 4,
+        "native_matches": 2,
+        "changed_outcomes": []
+      },
+      {
+        "label": "strings-text-consumer-native",
+        "cases": 6,
+        "native_matches": 6,
+        "changed_outcomes": []
+      },
+      {
+        "label": "strings-flat-native",
+        "cases": 574,
+        "native_matches": 574,
+        "changed_outcomes": []
+      },
+      {
+        "label": "text-native",
+        "cases": 396,
+        "native_matches": 396,
+        "changed_outcomes": []
+      },
+      {
+        "label": "text-assertion-native",
+        "cases": 124,
+        "native_matches": 124,
+        "changed_outcomes": []
+      },
+      {
+        "label": "query-admission",
+        "cases": 54,
+        "native_matches": 54,
+        "changed_outcomes": []
+      },
+      {
+        "label": "query-short-circuit",
+        "cases": 18,
+        "native_matches": 18,
+        "changed_outcomes": []
+      },
+      {
+        "label": "conditional-context",
+        "cases": 200,
+        "native_matches": 197,
+        "changed_outcomes": []
+      },
+      {
+        "label": "external",
+        "cases": 1390,
+        "native_matches": 1378,
+        "changed_outcomes": []
+      },
+      {
+        "label": "visibility",
+        "cases": 274,
+        "native_matches": 274,
+        "changed_outcomes": []
+      },
+      {
+        "label": "tokens",
+        "cases": 6,
+        "native_matches": 4,
+        "changed_outcomes": []
+      },
+      {
+        "label": "data-context",
+        "cases": 515,
+        "native_matches": 515,
+        "changed_outcomes": []
+      },
+      {
+        "label": "linked-faraddr",
+        "cases": 90,
+        "native_matches": 90,
+        "changed_outcomes": []
+      },
+      {
+        "label": "numeric-consumers",
+        "cases": 50,
+        "native_matches": 20,
+        "changed_outcomes": []
+      },
+      {
+        "label": "generated-fields",
+        "cases": 40,
+        "native_matches": 40,
+        "changed_outcomes": []
+      },
+      {
+        "label": "repeat-names",
+        "cases": 18,
+        "native_matches": 15,
+        "changed_outcomes": []
+      },
+      {
+        "label": "scalar-fields",
+        "cases": 320,
+        "native_matches": 218,
+        "changed_outcomes": []
+      },
+      {
+        "label": "file-fields",
+        "cases": 200,
+        "native_matches": 137,
+        "changed_outcomes": []
+      },
+      {
+        "label": "configured-faraddr",
+        "cases": 190,
+        "native_matches": 190,
+        "changed_outcomes": []
+      },
+      {
+        "label": "canonical-fields",
+        "cases": 100,
+        "native_matches": 91,
+        "changed_outcomes": []
+      },
+      {
+        "label": "empty-calls",
+        "cases": 840,
+        "native_matches": 722,
+        "changed_outcomes": []
+      },
+      {
+        "label": "captured-numbers",
+        "cases": 330,
+        "native_matches": 238,
+        "changed_outcomes": []
+      },
+      {
+        "label": "captured-braces",
+        "cases": 225,
+        "native_matches": 132,
+        "changed_outcomes": []
+      },
+      {
+        "label": "captured-empty-calls",
+        "cases": 255,
+        "native_matches": 191,
+        "changed_outcomes": []
+      }
+    ]
+  }
+}

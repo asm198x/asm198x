@@ -1,7 +1,7 @@
 # Canonical ca65 reader implementation
 
-The user selected the full reader redesign. Start from checked #925 main
-`ee522abd40a0bfa7a61b5581679679690717ccff`; retain the shared numeric grammar,
+The user selected the full reader redesign. The current v2 branch starts from
+checked #929 main `71ee7240a8518c2deadd4340d9e10d0dd6bd33d9`; retain the shared numeric grammar,
 existing scope environment and shared TextSyntax/StringTokens mechanics.
 Neither rejected #922 reader implementation is a donor for source changes.
 
@@ -35,26 +35,49 @@ Neither rejected #922 reader implementation is a donor for source changes.
    with corruption and predecessor controls. Use checked PR/rebase workflow.
 
 Each implementation commit must build and pass checks appropriate to its seam.
-Keep the single existing task worktree and reuse its caches. The frozen #925
-producer/archive replace #920 as baseline. Preserve evidence and remove task
+Keep the single existing task worktree and reuse its caches. The frozen #929
+producer/archive replace #925 as baseline. Preserve evidence and remove task
 artifacts/processes before finishing. Public AST/API breaks and new dependencies
 require separate approval; this plan does not introduce either.
 
-## Next implementation baseline
+## Current implementation baseline
 
-The classifier move, borrowed numeric grammar and owned token preparation are
-pushed through 172f9da8d42a30b699a25a42d125eba130bb9e35. They do not implement
-the full reader or close its compatibility issues. Before the next behavior
-change, move those preparations onto checked #929 after it merges, retaining
-its empty-vector syntax and diagnostic fixes rather than copying the old
-numeric parser wholesale. #929 source is 9b0daf2efaf8f413792a0c7cee24f2ec9717590d;
-its five-host qualification was still pending when this note was written.
+The original preparation history is retained on fix/ca65-canonical-reader at
+dccdc1b40cf2b9d432efff046eca2fe8eaeb85b9. The v2 branch starts from checked
+#929 main 71ee7240a8518c2deadd4340d9e10d0dd6bd33d9 and preserves its numeric
+empty-vector syntax and diagnostic fixes. All five native archives and final
+metadata checks passed before that merge; complete recovery evidence and verified
+112-root/615-file cleanup are retained on audit/ca65-empty-calls-929 at
+bb01746d76a1f4990abebcf01d60f0aac20fa492.
 
-The frozen successor at /private/tmp/asm198x-empty-producer has 38 matrices,
-7,054 case rows and 6,509 native matches. These are regression controls with
-duplicate contexts and known gaps, not a completion percentage. Replay each
-matrix using its recorded comparator and explicit dialect handling; the three
-new mixed-reader matrices cannot use one global flat/configured switch. Keep
-all prior matches, and include #928/#930's valid and invalid counterparts in
-the full-reader migration's mandatory fixture inventory. Retain source/evidence
-before replacing the predecessor or deleting task diagnostics.
+The successor /private/tmp/asm198x-empty-producer holds 39 matrices, 7,309 case
+rows and 6,700 native matches. These include duplicate contexts and known gaps,
+not a completion percentage. Replay each matrix with its recorded comparator
+and explicit dialect handling; mixed-reader matrices cannot use one global
+flat/configured switch. Keep every prior outcome during preparation and every
+prior native match during semantic migration. Retain accepted and refused
+controls together, and namespace matrix-local names in combined inventories.
+
+## Checked successor preparation
+
+The v2 branch retains the preparation history on checked #929 without rewriting
+any pushed branch. The one numeric-parser conflict was resolved by combining
+the borrowed peek/advance interface with #929's empty-vector call grammar.
+All 777 library tests passed at that conflict checkpoint. The owned token and
+provenance preparations are then replayed, and the 722-case #927 fixture and
+all 39 successor matrices must retain every outcome before v2 is pushed.
+
+Current baseline: /private/tmp/asm198x-empty-producer, immutable executable
+SHA e851007448fb971890c98258fe7b5429ed890a7e3f19e3715dd1dbe788b0006e,
+39 matrices / 7,309 rows / 6,700 native matches. Numeric/brace/empty capture
+sources are retained on audit/ca65-captured-numbers-928 at
+f89cb4c0a02752f44a787d8312b836ae195ca5bc. The empty-capture extension confirms
+all 63 selected constructor errors, 30 flat numeric-capture gaps (#928) and 34
+inactive gaps (#895); 75 observations improve over checked #925 with no lost
+matches. Keep numeric captured calls unevaluated, namespace matrix-local case
+names, and require new controls for generated selector brace tokens.
+
+No semantic consumer has yet moved to the canonical stream. The next code step
+is ordered token consumption over the retained owned kinds and numeric grammar,
+then all linked directive/header/data/file fields and the flat/syntax adapters.
+The full reader remains #924; this preparation does not close its issues.
