@@ -1,0 +1,12 @@
+{
+  "removed_roots": 56,
+  "removed_regular_files": 261,
+  "df_after": "Filesystem   1024-blocks      Used Available Capacity  iused     ifree %iused  Mounted on\n/dev/disk3s5   971350180 892286172  30295924    97% 11106443 302959240    4%   /System/Volumes/Data\n",
+  "retained": [
+    "/private/tmp/asm198x-faraddr-producer",
+    "/private/tmp/asm198x-faraddr-local-package",
+    "/private/tmp/asm198x-scalar-build",
+    "/private/tmp/asm198x-scalar-release-build"
+  ],
+  "reason": "Checked #925 baseline and actively reused caches for the approved canonical reader; remove after a checked successor replaces the baseline or reader work finishes."
+}
