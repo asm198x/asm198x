@@ -4208,7 +4208,16 @@ fn parse_assert(
         Some(source) => source.value(condition, line)?,
         None => parse_value(anons, anchor, condition, line)?,
     };
-    let action = parts.get(1).map(|a| a.trim().to_ascii_lowercase());
+    let action = parts
+        .get(1)
+        .map(|action| {
+            let text = match source {
+                Some(source) => source.text(action, line)?,
+                None => action.to_string(),
+            };
+            Ok::<_, AsmError>(text.trim().to_ascii_lowercase())
+        })
+        .transpose()?;
     let fatal = match action.as_deref() {
         Some("error" | "lderror") => true,
         Some("warning" | "ldwarning") => false,

@@ -127,9 +127,9 @@ fn data_source_queries_follow_native_read_order() {
 fn scalar_source_queries_follow_native_read_order() {
     let fixture = include_str!("fixtures/ca65-scalar-context.json");
     let facts: serde_json::Value = serde_json::from_str(fixture).expect("native captures");
-    assert_eq!(facts["audit_case_count"], 280);
+    assert_eq!(facts["audit_case_count"], 320);
     assert_eq!(facts["excluded_audit_cases"], serde_json::json!({}));
-    verify_fixture(fixture, 280);
+    verify_fixture(fixture, 320);
 }
 
 fn verify_fixture(fixture: &str, count: usize) {

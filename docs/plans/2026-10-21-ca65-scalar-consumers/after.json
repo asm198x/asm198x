@@ -1,6 +1,6 @@
 {
   "binary": "/private/tmp/asm198x-scalar-build/debug/asm198x",
-  "sha256": "3201073a9aba3224fb3eb8499ca7527692997d09a30987b171e7046ba80ce174",
+  "sha256": "5e173375ec35311757415ddd9632e48bf62fd651beddbe8df882a21e62436ada",
   "results": [
     {
       "name": "repeat_constant_direct",
@@ -1745,7 +1745,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-jfq0j737/repeat_missing_included.inc:2:1: error: undefined symbol `MISSING`\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-c0sw0n3d/repeat_missing_included.inc:2:1: error: undefined symbol `MISSING`\nincluded from input.s:1\n",
       "hex": null,
       "native_hex": null,
       "matches": true
@@ -1840,7 +1840,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-jfq0j737/res_missing_included.inc:2:1: error: undefined symbol `MISSING`\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-c0sw0n3d/res_missing_included.inc:2:1: error: undefined symbol `MISSING`\nincluded from input.s:1\n",
       "hex": null,
       "native_hex": null,
       "matches": true
@@ -1935,7 +1935,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-jfq0j737/align_missing_included.inc:3:1: error: `.align` boundary must be positive\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-c0sw0n3d/align_missing_included.inc:3:1: error: `.align` boundary must be positive\nincluded from input.s:1\n",
       "hex": null,
       "native_hex": null,
       "matches": true
@@ -2220,7 +2220,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-jfq0j737/align_forward_included.inc:3:1: error: `.align` boundary must be positive\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-c0sw0n3d/align_forward_included.inc:3:1: error: `.align` boundary must be positive\nincluded from input.s:1\n",
       "hex": null,
       "native_hex": null,
       "matches": true
@@ -2315,7 +2315,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-jfq0j737/repeat_zero_missing_included.inc:2:1: error: undefined symbol `MISSING`\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-c0sw0n3d/repeat_zero_missing_included.inc:2:1: error: undefined symbol `MISSING`\nincluded from input.s:1\n",
       "hex": null,
       "native_hex": null,
       "matches": true
@@ -2410,7 +2410,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-jfq0j737/res_zero_missing_included.inc:2:1: error: undefined symbol `MISSING`\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-c0sw0n3d/res_zero_missing_included.inc:2:1: error: undefined symbol `MISSING`\nincluded from input.s:1\n",
       "hex": null,
       "native_hex": null,
       "matches": true
@@ -2505,7 +2505,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-jfq0j737/align_zero_missing_included.inc:3:1: error: `.align` boundary must be positive\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-c0sw0n3d/align_zero_missing_included.inc:3:1: error: `.align` boundary must be positive\nincluded from input.s:1\n",
       "hex": null,
       "native_hex": null,
       "matches": true
@@ -2980,7 +2980,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-jfq0j737/res_fill_missing_included.inc:2:1: error: undefined symbol `MISSING`\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-c0sw0n3d/res_fill_missing_included.inc:2:1: error: undefined symbol `MISSING`\nincluded from input.s:1\n",
       "hex": null,
       "native_hex": null,
       "matches": true
@@ -3075,7 +3075,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-jfq0j737/res_fill_range_included.inc:2:1: error: `.res` fill must be a byte\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-c0sw0n3d/res_fill_range_included.inc:2:1: error: `.res` fill must be a byte\nincluded from input.s:1\n",
       "hex": null,
       "native_hex": null,
       "matches": true
@@ -3550,7 +3550,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-jfq0j737/align_fill_missing_included.inc:2:1: error: undefined symbol `MISSING`\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-c0sw0n3d/align_fill_missing_included.inc:2:1: error: undefined symbol `MISSING`\nincluded from input.s:1\n",
       "hex": null,
       "native_hex": null,
       "matches": true
@@ -3645,7 +3645,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-jfq0j737/align_fill_range_included.inc:2:1: error: `.align` fill must be a byte\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-c0sw0n3d/align_fill_range_included.inc:2:1: error: `.align` fill must be a byte\nincluded from input.s:1\n",
       "hex": null,
       "native_hex": null,
       "matches": true
@@ -4120,7 +4120,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-jfq0j737/repeat_cycle_included.inc:1:1: error: circular definition of symbol `FIRST`\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-c0sw0n3d/repeat_cycle_included.inc:1:1: error: circular definition of symbol `FIRST`\nincluded from input.s:1\n",
       "hex": null,
       "native_hex": null,
       "matches": true
@@ -4595,7 +4595,7 @@
       ],
       "exit": 0,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-jfq0j737/assert_message_failure_included.inc: line 2: warning: 2\nassembled + linked 1 byte(s) -> out.bin\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-c0sw0n3d/assert_message_failure_included.inc: line 2: warning: 2\nassembled + linked 1 byte(s) -> out.bin\n",
       "hex": "01",
       "native_hex": "01",
       "matches": true
@@ -4690,7 +4690,7 @@
       ],
       "exit": 0,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-jfq0j737/out_number_included.inc: line 2: note: 2\nassembled + linked 1 byte(s) -> out.bin\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-c0sw0n3d/out_number_included.inc: line 2: note: 2\nassembled + linked 1 byte(s) -> out.bin\n",
       "hex": "01",
       "native_hex": "01",
       "matches": true
@@ -4785,7 +4785,7 @@
       ],
       "exit": 0,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-jfq0j737/out_nested_included.inc: line 2: note: x02\nassembled + linked 1 byte(s) -> out.bin\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-c0sw0n3d/out_nested_included.inc: line 2: note: x02\nassembled + linked 1 byte(s) -> out.bin\n",
       "hex": "01",
       "native_hex": "01",
       "matches": true
@@ -4880,7 +4880,7 @@
       ],
       "exit": 0,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-jfq0j737/out_selector_included.inc: line 2: note: 2\nassembled + linked 1 byte(s) -> out.bin\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-c0sw0n3d/out_selector_included.inc: line 2: note: 2\nassembled + linked 1 byte(s) -> out.bin\n",
       "hex": "01",
       "native_hex": "01",
       "matches": true
@@ -4975,7 +4975,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-jfq0j737/out_tail_included.inc:2:1: error: `.out` takes one string\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-c0sw0n3d/out_tail_included.inc:2:1: error: `.out` takes one string\nincluded from input.s:1\n",
       "hex": null,
       "native_hex": null,
       "matches": true
@@ -5070,7 +5070,7 @@
       ],
       "exit": 0,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-jfq0j737/warning_tail_included.inc: line 2: warning: plain\nassembled + linked 1 byte(s) -> out.bin\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-c0sw0n3d/warning_tail_included.inc: line 2: warning: plain\nassembled + linked 1 byte(s) -> out.bin\n",
       "hex": "01",
       "native_hex": "01",
       "matches": true
@@ -5165,7 +5165,7 @@
       ],
       "exit": 0,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-jfq0j737/warning_number_included.inc: line 2: warning: 2\nassembled + linked 1 byte(s) -> out.bin\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-c0sw0n3d/warning_number_included.inc: line 2: warning: 2\nassembled + linked 1 byte(s) -> out.bin\n",
       "hex": "01",
       "native_hex": "01",
       "matches": true
@@ -5260,7 +5260,7 @@
       ],
       "exit": 1,
       "stdout": "",
-      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-jfq0j737/error_number_included.inc:2: error: 2\nincluded from input.s:1\n",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-c0sw0n3d/error_number_included.inc:2: error: 2\nincluded from input.s:1\n",
       "hex": null,
       "native_hex": null,
       "matches": true
@@ -5305,6 +5305,766 @@
     },
     {
       "name": "error_number_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "repeat_ident_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0001",
+      "native_hex": "0001",
+      "matches": true
+    },
+    {
+      "name": "repeat_ident_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0001",
+      "native_hex": "0001",
+      "matches": true
+    },
+    {
+      "name": "repeat_ident_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0001",
+      "native_hex": "0001",
+      "matches": true
+    },
+    {
+      "name": "repeat_ident_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "repeat_ident_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "repeat_selector_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0001",
+      "native_hex": "0001",
+      "matches": true
+    },
+    {
+      "name": "repeat_selector_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0001",
+      "native_hex": "0001",
+      "matches": true
+    },
+    {
+      "name": "repeat_selector_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0001",
+      "native_hex": "0001",
+      "matches": true
+    },
+    {
+      "name": "repeat_selector_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "repeat_selector_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "repeat_generated_read_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0001",
+      "native_hex": "0001",
+      "matches": true
+    },
+    {
+      "name": "repeat_generated_read_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0001",
+      "native_hex": "0001",
+      "matches": true
+    },
+    {
+      "name": "repeat_generated_read_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0001",
+      "native_hex": "0001",
+      "matches": true
+    },
+    {
+      "name": "repeat_generated_read_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "repeat_generated_read_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "repeat_generated_own_read_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+      "hex": "00010101",
+      "native_hex": "00010101",
+      "matches": true
+    },
+    {
+      "name": "repeat_generated_own_read_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+      "hex": "00010101",
+      "native_hex": "00010101",
+      "matches": true
+    },
+    {
+      "name": "repeat_generated_own_read_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+      "hex": "00010101",
+      "native_hex": "00010101",
+      "matches": true
+    },
+    {
+      "name": "repeat_generated_own_read_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "repeat_generated_own_read_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "assert_ident_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "assert_ident_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "assert_ident_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "assert_ident_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "assert_ident_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "assert_selector_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "assert_selector_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "assert_selector_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "assert_selector_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "assert_selector_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "assert_action_read_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: `.assert` needs an action: `warning`, `error`, `ldwarning` or `lderror`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "assert_action_read_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-c0sw0n3d/assert_action_read_included.inc:2:1: error: `.assert` needs an action: `warning`, `error`, `ldwarning` or `lderror`\nincluded from input.s:1\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "assert_action_read_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6:1: error: `.assert` needs an action: `warning`, `error`, `ldwarning` or `lderror`\nin expansion of macro `run` defined at input.s:1, invoked at input.s:6\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "assert_action_read_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "assert_action_read_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "assert_tail_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1:1: error: `.sprintf` needs a number it can work out where it stands, and `MISSING` is not one: this pass runs before the layout, so a label's address cannot be reached from here\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "assert_tail_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-c0sw0n3d/assert_tail_included.inc:1:1: error: `.sprintf` needs a number it can work out where it stands, and `MISSING` is not one: this pass runs before the layout, so a label's address cannot be reached from here\nincluded from input.s:1\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "assert_tail_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5:1: error: `.sprintf` needs a number it can work out where it stands, and `MISSING` is not one: this pass runs before the layout, so a label's address cannot be reached from here\nin expansion of macro `run` defined at input.s:1, invoked at input.s:5\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "assert_tail_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "assert_tail_unused",
       "argv": [
         "/private/tmp/asm198x-scalar-build/debug/asm198x",
         "--dialect",

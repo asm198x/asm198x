@@ -1793,11 +1793,16 @@ fn fold_repeat(
         span,
         required: std::cell::RefCell::new(Vec::new()),
     };
-    let count = ca65_flat::LiveNumbers::number(&source, count_text, line);
+    let result: Result<_, AsmError> = (|| {
+        let count = ca65_flat::LiveNumbers::number(&source, count_text, line)?
+            .ok_or_else(|| AsmError::new(line, "`.repeat` count must be a constant"))?;
+        let var = var.map(|name| source.expand(&name, line)).transpose()?;
+        Ok((count, var))
+    })();
     for value in source.required.into_inner() {
         st.deferred.require_source_names(&value, span);
     }
-    let count = count?.ok_or_else(|| AsmError::new(line, "`.repeat` count must be a constant"))?;
+    let (count, var) = result?;
     // ca65: a negative count is `Range error`, where zero is no iterations.
     if count < 0 {
         return Err(AsmError::new(

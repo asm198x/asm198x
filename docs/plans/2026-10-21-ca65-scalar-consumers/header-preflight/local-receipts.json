@@ -1,0 +1,37 @@
+[
+  {
+    "name": "asm198x-scalar-workspace.log",
+    "sha256": "2035f6bd64f934df520daf6fe6e864e87eb83b44f2b85fced37ba1879174e836",
+    "bytes": 151927
+  },
+  {
+    "name": "asm198x-scalar-header-focused.log",
+    "sha256": "6bc478a83bb149ebe3ec0f1362a5cbf7ac9ae97dc31a5f4babe47e64866a0be3",
+    "bytes": 540
+  },
+  {
+    "name": "asm198x-scalar-header-clippy.log",
+    "sha256": "b0093cee66b6148acbe60ae87131899eabc196d6f6d229b753c44f84f73b4b9a",
+    "bytes": 186
+  },
+  {
+    "name": "asm198x-scalar-header-build.log",
+    "sha256": "33f663cd284a3ec0a346f8d70f324e9dd7b4b1327497a90fa1fabbac0e4421f9",
+    "bytes": 186
+  },
+  {
+    "name": "asm198x-scalar-final-node.log",
+    "sha256": "bddbfd0eac168a33b43aeed5bffccebe0c7976572bd5de41693d19db7b453738",
+    "bytes": 9391
+  },
+  {
+    "name": "asm198x-scalar-final-fmt.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  {
+    "name": "summary.json",
+    "sha256": "9bc874e0d00eebc21cce461069b9a655b01c4e986cf06401b65ab9f2d4bc7e93",
+    "bytes": 10476
+  }
+]

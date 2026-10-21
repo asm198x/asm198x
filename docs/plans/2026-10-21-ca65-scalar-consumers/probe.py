@@ -1,4 +1,5 @@
 """Capture scalar-consumer source ordering against native ca65/ld65."""
+
 import importlib.util
 from pathlib import Path
 
@@ -21,10 +22,14 @@ def cases() -> dict[str, str]:
     }
     for name, value in counts.items():
         tail = "LATER=2\n" if name == "forward" else ""
-        bodies["repeat_" + name] = f"VALUE=2\n.repeat {value}, INDEX\n.byte INDEX,.ref(VALUE)\n.endrepeat\n.byte .ref(VALUE)\n{tail}"
+        bodies["repeat_" + name] = (
+            f"VALUE=2\n.repeat {value}, INDEX\n.byte INDEX,.ref(VALUE)\n.endrepeat\n.byte .ref(VALUE)\n{tail}"
+        )
         for directive in ["res", "align"]:
             prefix = ".byte 7\n" if directive == "align" else ""
-            bodies[directive + "_" + name] = f"VALUE=2\n{prefix}.{directive} {value},.ref(VALUE)\n.byte .ref(VALUE)\n{tail}"
+            bodies[directive + "_" + name] = (
+                f"VALUE=2\n{prefix}.{directive} {value},.ref(VALUE)\n.byte .ref(VALUE)\n{tail}"
+            )
     for directive in ["res", "align"]:
         for name, fill in {
             "fill_constant": ".const(VALUE)",
@@ -34,26 +39,42 @@ def cases() -> dict[str, str]:
             "fill_missing": ".const(MISSING)",
             "fill_range": "256",
         }.items():
-            bodies[directive + "_" + name] = f"VALUE=2\n.{directive} 2,{fill}\n.byte .ref(VALUE)\n"
-    bodies.update({
-        "zero_res_fill": "VALUE=2\n.res 0,VALUE\n.byte .ref(VALUE)\n",
-        "no_padding_align_fill": "VALUE=2\n.align 1,VALUE\n.byte .ref(VALUE)\n",
-        "repeat_difference": "LEFT:.byte 0\nRIGHT:.byte 0\n.repeat .const(RIGHT-LEFT)\n.byte 7\n.endrepeat\n",
-        "repeat_scoped": "VALUE=2\n.scope INNER\n.repeat .const(VALUE), INDEX\n.byte .ref(VALUE)\n.endrepeat\n.byte .ref(VALUE)\n.endscope\n",
-        "repeat_cycle": "FIRST=SECOND\nSECOND=FIRST\n.repeat .const(FIRST)\n.byte 7\n.endrepeat\n",
-        "assert_order": 'VALUE=2\n.assert .ref(VALUE)+.const(VALUE)=1,error,"order"\n.byte .ref(VALUE)\n',
-        "assert_deferred": '.assert LATER=7,error,"later"\nLATER=7\n.byte 9\n',
-        "assert_message": 'VALUE=2\n.assert 1,error,.sprintf("%d",VALUE)\n.byte .ref(VALUE)\n',
-        "assert_message_order": 'VALUE=2\n.assert .const(VALUE),error,.sprintf("%d",.ref(VALUE))\n.byte .ref(VALUE)\n',
-        "assert_message_failure": 'VALUE=2\n.assert 0,warning,.sprintf("%d",VALUE)\n.byte .ref(VALUE)\n',
-        "out_number": 'VALUE=2\n.out .sprintf("%d",VALUE)\n.byte .ref(VALUE)\n',
-        "out_nested": 'VALUE=2\n.out .concat("x",.sprintf("%d%d",.ref(VALUE),VALUE))\n.byte .ref(VALUE)\n',
-        "out_selector": 'VALUE=2\n.out .left(50,{.sprintf("%d",VALUE)})\n.byte .ref(VALUE)\n',
-        "out_tail": 'VALUE=2\n.out "plain",.sprintf("%d",VALUE)\n.byte .ref(VALUE)\n',
-        "warning_tail": 'VALUE=2\n.warning "plain",.sprintf("%d",VALUE)\n.byte .ref(VALUE)\n',
-        "warning_number": 'VALUE=2\n.warning .sprintf("%d",VALUE)\n.byte .ref(VALUE)\n',
-        "error_number": 'VALUE=2\n.error .sprintf("%d",VALUE)\n.byte .ref(VALUE)\n',
-    })
+            bodies[directive + "_" + name] = (
+                f"VALUE=2\n.{directive} 2,{fill}\n.byte .ref(VALUE)\n"
+            )
+    bodies.update(
+        {
+            "zero_res_fill": "VALUE=2\n.res 0,VALUE\n.byte .ref(VALUE)\n",
+            "no_padding_align_fill": "VALUE=2\n.align 1,VALUE\n.byte .ref(VALUE)\n",
+            "repeat_difference": "LEFT:.byte 0\nRIGHT:.byte 0\n.repeat .const(RIGHT-LEFT)\n.byte 7\n.endrepeat\n",
+            "repeat_scoped": "VALUE=2\n.scope INNER\n.repeat .const(VALUE), INDEX\n.byte .ref(VALUE)\n.endrepeat\n.byte .ref(VALUE)\n.endscope\n",
+            "repeat_cycle": "FIRST=SECOND\nSECOND=FIRST\n.repeat .const(FIRST)\n.byte 7\n.endrepeat\n",
+            "assert_order": 'VALUE=2\n.assert .ref(VALUE)+.const(VALUE)=1,error,"order"\n.byte .ref(VALUE)\n',
+            "assert_deferred": '.assert LATER=7,error,"later"\nLATER=7\n.byte 9\n',
+            "assert_message": 'VALUE=2\n.assert 1,error,.sprintf("%d",VALUE)\n.byte .ref(VALUE)\n',
+            "assert_message_order": 'VALUE=2\n.assert .const(VALUE),error,.sprintf("%d",.ref(VALUE))\n.byte .ref(VALUE)\n',
+            "assert_message_failure": 'VALUE=2\n.assert 0,warning,.sprintf("%d",VALUE)\n.byte .ref(VALUE)\n',
+            "out_number": 'VALUE=2\n.out .sprintf("%d",VALUE)\n.byte .ref(VALUE)\n',
+            "out_nested": 'VALUE=2\n.out .concat("x",.sprintf("%d%d",.ref(VALUE),VALUE))\n.byte .ref(VALUE)\n',
+            "out_selector": 'VALUE=2\n.out .left(50,{.sprintf("%d",VALUE)})\n.byte .ref(VALUE)\n',
+            "out_tail": 'VALUE=2\n.out "plain",.sprintf("%d",VALUE)\n.byte .ref(VALUE)\n',
+            "warning_tail": 'VALUE=2\n.warning "plain",.sprintf("%d",VALUE)\n.byte .ref(VALUE)\n',
+            "warning_number": 'VALUE=2\n.warning .sprintf("%d",VALUE)\n.byte .ref(VALUE)\n',
+            "error_number": 'VALUE=2\n.error .sprintf("%d",VALUE)\n.byte .ref(VALUE)\n',
+        }
+    )
+    bodies.update(
+        {
+            "repeat_ident": '.repeat 2,.ident("INDEX")\n.byte INDEX\n.endrepeat\n',
+            "repeat_selector": ".repeat 2,.left(1,{INDEX})\n.byte INDEX\n.endrepeat\n",
+            "repeat_generated_read": 'VALUE=2\n.repeat .const(VALUE),.ident(.sprintf("INDEX%d",.ref(VALUE)))\n.byte INDEX1,.ref(VALUE)\n.endrepeat\n',
+            "repeat_generated_own_read": 'VALUE=2\n.repeat 2,.ident(.sprintf("INDEX%d",VALUE))\n.byte INDEX2,.ref(VALUE)\n.endrepeat\n',
+            "assert_ident": '.assert 1,.ident("error"),"ok"\n.byte 9\n',
+            "assert_selector": '.assert 1,.left(1,{error}),"ok"\n.byte 9\n',
+            "assert_action_read": 'VALUE=2\n.assert 1,.ident(.sprintf("%s",.concat("err",.string(VALUE),"or"))),"ok"\n.byte .ref(VALUE)\n',
+            "assert_tail": '.assert 1,error,"ok",.sprintf("%d",MISSING)\n.byte 9\n',
+        }
+    )
     prepared = {}
     for name, body in bodies.items():
         for context in ["direct", "included", "macro", "inactive", "unused"]:
@@ -62,7 +83,12 @@ def cases() -> dict[str, str]:
                 FILES[key + ".inc"] = body
                 source = f'.include "{key}.inc"\n'
             elif context in ["macro", "unused"]:
-                source = ".macro run\n" + body + ".endmacro\n" + ("run\n" if context == "macro" else ".byte 9\n")
+                source = (
+                    ".macro run\n"
+                    + body
+                    + ".endmacro\n"
+                    + ("run\n" if context == "macro" else ".byte 9\n")
+                )
             elif context == "inactive":
                 source = ".if 0\n" + body + ".endif\n.byte 9\n"
             else:
@@ -72,7 +98,9 @@ def cases() -> dict[str, str]:
 
 
 if __name__ == "__main__":
-    spec = importlib.util.spec_from_file_location("capture", ROOT / "docs/plans/2026-10-19-ca65-scope-binding/probe.py")
+    spec = importlib.util.spec_from_file_location(
+        "capture", ROOT / "docs/plans/2026-10-19-ca65-scope-binding/probe.py"
+    )
     assert spec and spec.loader
     capture = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(capture)

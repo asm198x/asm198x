@@ -1,7 +1,7 @@
 # Scalar source-order baseline
 
-The 280-case native matrix accepts 238 and refuses 42. The checked #920
-producer differs on 96 cases. All native processes completed within their
+The 320-case native matrix accepts 272 and refuses 48. The checked #920
+producer differs on 102 cases. All native processes completed within their
 10-second limit; comparison runs use the frozen executable identity in before.json.
 
 Repeat/reserve/alignment count and fill functions currently run in a pure whole-line
@@ -19,10 +19,10 @@ with live numeric callbacks, rather than stopping after the leading string.
 The earlier 50-case audit remains independent: this slice targets 40 scalar cases;
 the remaining 10 include/incbin cases stay under #795 for the following slice.
 
-The first implementation matches all 280 corrected cases with no lost baseline match.
+The first implementation matches all 320 corrected cases with no lost baseline match.
 
-The corrected matrix has 56 bodies across direct/include/macro/inactive/unused
-contexts: 238 native accepts and 42 refusals. All 96 predecessor differences are
+The corrected matrix has 64 bodies across direct/include/macro/inactive/unused
+contexts: 272 native accepts and 48 refusals. All 102 predecessor differences are
 fixed. The 29 immutable predecessor matrices cover 4,791 cases; no prior match
 was lost. The earlier numeric-consumer subset improves 20/50 to 44/50: only the
 six active include/incbin operand cases remain. The 515 data and 1,390 external
@@ -40,3 +40,12 @@ expression, public AST, dependencies or binding decisions changed.
 The main-rules API in main-rules.json confirms pull requests and 15 named required
 checks. AGENTS.md now describes that protection without weakening the stronger
 full-check/native-qualification/rebase convention.
+
+The extended header controls found twelve regressions in the first candidate:
+repeat-variable constructors and assertion-action constructors had been left
+unexpanded. That candidate is rejected in header-preflight/. The corrected
+reader consumes these fields after their count or condition through the same
+live context. The complete 320-case native capture now matches, including six
+previous generated-repeat source-order mismatches. The first candidate's full
+workspace suite passed 1,644 tests with 38 ignored, demonstrating why that green
+result alone was insufficient. Qualification restarts for the corrected source.
