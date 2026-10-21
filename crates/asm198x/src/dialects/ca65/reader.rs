@@ -4,6 +4,8 @@
 //! retain authored spelling and opaque string handles; classification does not
 //! evaluate names, expand source functions or validate skipped directives.
 
+use std::rc::Rc;
+
 use super::string_tokens::StringTokens;
 use crate::dialects::ca65_flat::Target;
 
@@ -14,7 +16,7 @@ use crate::dialects::ca65_flat::Target;
 /// character literal is not a number, and each dot-keyword and each punctuation
 /// mark is its own kind — `.match({.byte},{.word})` is 0 where
 /// `.match({abc},{abd})` is 1.
-#[derive(PartialEq, Eq, Debug)]
+#[derive(Clone, PartialEq, Eq, Debug)]
 pub(crate) enum TokenKind {
     Number,
     Char,
@@ -30,11 +32,18 @@ pub(crate) enum TokenKind {
 
 /// One token, with the slice of source it came from so a sub-list can be
 /// spliced back as the author wrote it rather than re-rendered.
-pub(crate) struct Token<'a> {
+#[derive(Clone)]
+pub(crate) struct Token {
     pub(crate) kind: TokenKind,
-    pub(crate) text: &'a str,
+    source: Rc<str>,
     pub(crate) start: usize,
     pub(crate) end: usize,
+}
+
+impl Token {
+    pub(crate) fn text(&self) -> &str {
+        &self.source[self.start..self.end]
+    }
 }
 
 /// ca65's two-character operators, longest-match-first.
@@ -42,7 +51,8 @@ const OPERATORS: &[&str] = &["::", "<<", ">>", "<=", ">=", "<>", "&&", "||"];
 
 /// Split a token list into tokens. Whitespace separates and is not a token, so
 /// `{+ +}` and `{++}` are the same two tokens.
-pub(crate) fn tokens(text: &str, target: Target) -> Vec<Token<'_>> {
+pub(crate) fn tokens(text: &str, target: Target) -> Vec<Token> {
+    let source: Rc<str> = text.into();
     let bytes = text.as_bytes();
     let mut out = Vec::new();
     let mut i = 0usize;
@@ -133,7 +143,7 @@ pub(crate) fn tokens(text: &str, target: Target) -> Vec<Token<'_>> {
         };
         out.push(Token {
             kind,
-            text: &text[start..i],
+            source: Rc::clone(&source),
             start,
             end: i,
         });
