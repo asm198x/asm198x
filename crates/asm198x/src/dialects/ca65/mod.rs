@@ -475,24 +475,79 @@ fn assemble_program(
             .filter(|k| k.starts_with(SCOPE_MARK))
             .cloned()
             .collect();
-        let targets = scope_targets(&scoped, &|name| known.contains(&name.to_string()));
-        for (name, span) in &parsed.deferred.source_reads {
+        let targets = scope_targets(&scoped, &|name| {
+            known.contains(&name.to_string())
+                || parsed
+                    .deferred
+                    .declarations
+                    .get(name)
+                    .is_some_and(|decl| decl.is_external())
+        });
+        // An external binds through an explicit export of its public spelling,
+        // never through ordinary enclosing-scope fallback. Keep its declaration
+        // key separate so an imported value is not mistaken for a definition.
+        let mut exports = BTreeMap::new();
+        for stmt in &parsed.stmts {
+            if let Kind::Visible { rule, names, .. } = &stmt.kind
+                && *rule != VisRule::MustNotBeDefined
+            {
+                for name in names {
+                    let target = targets.get(name).unwrap_or(name);
+                    if known.contains(target) {
+                        let external = target.rsplit("::").next().unwrap_or(target).to_string();
+                        if let Some(previous) = exports.insert(external.clone(), target.clone())
+                            && previous != *target
+                        {
+                            return Err(statement_error(
+                                AsmError::new(
+                                    stmt.line,
+                                    format!("duplicate external identifier `{external}`"),
+                                ),
+                                stmt.file,
+                                &stmt.expansion_frames,
+                            ));
+                        }
+                    }
+                }
+            }
+        }
+        let external_targets: BTreeMap<String, String> = parsed
+            .deferred
+            .declarations
+            .iter()
+            .filter(|(key, declaration)| declaration.is_external() && !known.contains(*key))
+            .map(|(key, _)| key)
+            .filter_map(|key| {
+                let spelling = key.rsplit("::").next().unwrap_or(key);
+                exports
+                    .get(spelling)
+                    .map(|target| (key.clone(), target.clone()))
+            })
+            .collect();
+        let value_target = |name: &String| {
             let target = targets.get(name).unwrap_or(name);
-            if !known.contains(target) {
+            external_targets.get(target).unwrap_or(target).clone()
+        };
+        for (name, span) in &parsed.deferred.source_reads {
+            let target = value_target(name);
+            if !known.contains(&target) {
                 return Err(AsmError::at(
                     span.clone(),
-                    format!("undefined symbol `{}`", display_label(target)),
+                    format!("undefined symbol `{}`", display_label(&target)),
                 ));
             }
         }
         for definition in parsed.deferred.definitions.values_mut() {
+            definition.source_value = map_expr_syms(&definition.source_value, &|name| {
+                targets.get(name).map(|target| Expr::Sym(target.clone()))
+            });
             definition.value = map_expr_syms(&definition.value, &|name| {
                 targets.get(name).map(|target| Expr::Sym(target.clone()))
             });
         }
         for stmt in &mut parsed.stmts {
             stmt.kind = map_kind_syms(&stmt.kind, &|name| {
-                targets.get(name).map(|t| Expr::Sym(t.clone()))
+                targets.get(name).map(|target| Expr::Sym(target.clone()))
             });
             if let Kind::Visible { rule, names, .. } = &mut stmt.kind
                 && *rule != VisRule::MustNotBeDefined
@@ -506,7 +561,7 @@ fn assemble_program(
             if let Some(bound) = &mut stmt.bound_insn {
                 for operand in &mut bound.operands {
                     *operand = map_expr_syms(operand, &|name| {
-                        targets.get(name).map(|t| Expr::Sym(t.clone()))
+                        targets.get(name).map(|target| Expr::Sym(target.clone()))
                     });
                 }
             }
@@ -529,6 +584,30 @@ fn assemble_program(
                         stmt.file,
                         &stmt.expansion_frames,
                     ));
+                }
+            }
+        }
+        project::validate_external_bytes(&parsed)?;
+        for definition in parsed.deferred.definitions.values_mut() {
+            definition.value = map_expr_syms(&definition.value, &|name| {
+                external_targets
+                    .get(name)
+                    .map(|target| Expr::Sym(target.clone()))
+            });
+        }
+        for stmt in &mut parsed.stmts {
+            stmt.kind = map_kind_syms(&stmt.kind, &|name| {
+                external_targets
+                    .get(name)
+                    .map(|target| Expr::Sym(target.clone()))
+            });
+            if let Some(bound) = &mut stmt.bound_insn {
+                for operand in &mut bound.operands {
+                    *operand = map_expr_syms(operand, &|name| {
+                        external_targets
+                            .get(name)
+                            .map(|target| Expr::Sym(target.clone()))
+                    });
                 }
             }
         }
@@ -2222,6 +2301,27 @@ impl Walker {
         } = &mut out
         {
             for name in names {
+                if self.expand_text_defines
+                    && matches!(rule, VisRule::MustNotBeDefined | VisRule::EitherWay)
+                {
+                    // parse_visible already checked this declaration's name
+                    // grammar. Constant-definition register rules cannot be
+                    // reapplied after an .ident constructor has produced a name.
+                    let key = qualify(&self.path(), name);
+                    let defined =
+                        self.consts.contains_key(&key) || self.source_known.contains(&key);
+                    if *rule == VisRule::MustNotBeDefined && defined {
+                        return Err(AsmError::new(
+                            line,
+                            format!("symbol `{name}` is already defined"),
+                        ));
+                    }
+                    if !defined {
+                        self.source_unresolved.borrow_mut().insert(key.clone());
+                    }
+                    *name = key;
+                    continue;
+                }
                 if *rule == VisRule::MustNotBeDefined {
                     continue;
                 }

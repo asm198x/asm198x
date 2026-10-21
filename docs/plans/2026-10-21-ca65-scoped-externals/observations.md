@@ -1,30 +1,52 @@
-# Native boundary before implementation
+# Scoped external bindings
 
-The 650-case ca65/ld65 V2.18 audit has 554 accepts and 96 refusals. The frozen
-qualified #916 producer differs on 207. All sources/configs/process streams,
-tool identities, bytes and the producer hash are retained in native.json and
-before.json. This is a baseline, not a claim of support.
+The complete ca65/ld65 V2.18 audit has 1,390 cases: 1,126 accepts and 264
+refusals. The frozen qualified #916 executable differs on 444. The development
+implementation differs on 12; all twelve are explicit refusals of valid numeric
+source-query expressions assigned to #795. The 274-case prior visibility audit
+improves from 223 to 266 matches, retaining every previous match. Its eight
+remaining scoped data-constancy cases also belong to #795.
 
-An import/global allocates a current-scope unresolved binding and masks an outer
-value, but native .defined still returns false. A query-only .defined does not
-create an ordinary read; .const does. An explicitly exported root value can
-satisfy the external at final linking while source-time .const remains false.
-External RED-RED and RED*0 classify constant; <RED and RED+0 do not.
+Sources, configurations, native process streams and tool hashes are retained
+in native.json. before.json and visibility-before.json identify the frozen
+predecessor executable. after.json, visibility-after.json and
+visibility-token-final-after.json identify the development executable. These
+are native comparisons, not release qualification. Earlier development
+comparisons are retained under their original first/second/third/consumer names.
 
-An absolute import with final exported RED=2 selects AD0200; its zp spelling
-selects A502. A bare absolute external used as byte data is refused even though
-the final value fits a byte; a low-byte extractor and algebraic cancellation
-are separate native boundaries. Final values cannot stand in for source width.
+An import/global allocates an unresolved binding in its current scope and masks
+an outer value, while native .defined returns false. Name-only queries do not
+create ordinary reads; .const does. Imported RED-RED and RED*0 classify constant;
+pending global or ordinary unresolved names do not. Logical short-circuit
+expressions can classify constant while retaining their ordinary source reads.
 
-A global before a local forward definition selects absolute while unresolved,
-then zero-page once RED=2 is read. A globalzp pins the unresolved use to zero
-page. Exportzp alone does not shorten an unresolved forward instruction. All
-three operations are measured before and after local definitions.
+An explicit export can satisfy an external's final value without changing its
+source constancy or width. With exported RED=2, an absolute import selects
+AD0200; importzp selects A502. Byte data and immediates using the absolute
+external are refused even though 2 fits a byte. Low-byte extraction and
+algebraic cancellation have distinct native outcomes. A forward global that
+later becomes a local constant may emit byte data at assembly completion.
 
-The coupled root cause is visible in the current seams: import operands stay
-bare; global lookup can fall back to an outer definition; source hint/final
-lookup has no external declaration key; and the fused final value model lacks
-an explicit export-to-external binding step. Qualifying only the import guard
-was already rejected with nine native regressions. Finish these responsibilities
-together, using metadata under the existing lexical keys, not a second scope
-model, numeric placeholders or copied final values in the source environment.
+A global before a local forward definition selects an absolute instruction,
+then zero page once RED=2 is read. Globalzp pins the unresolved use to zero
+page. Exportzp alone does not shorten a forward instruction. Mixed export and
+global declarations preserve the measured declaration-order width behavior.
+Size mismatches and import/export conflicts refuse at the declaration.
+
+The root cause spans declaration allocation, source classification, address
+size and fused linking. Previously imports stayed bare, globals could find a
+parent, and no explicit external-to-export binding preserved the original
+source type. The fix records declaration facts under existing lexical keys,
+validates source-width constraints before substituting exported values, and
+retains the separate source expression graph. It introduces no namespace tree,
+public AST fields, dependency, object linker or layout-time string evaluation.
+
+The fixture inventories all 1,670 audited names: 1,390 new cases, 274 old cases
+and six lexical controls. Its 1,646 supported cases include 1,265 native accepts
+and 381 refusals. Twenty exclusions remain #795; four lexical audit-only cases
+remain #918. The latter separates native-invalid plain register spellings from
+valid names produced by .ident. Existing generated-name matches are preserved.
+verify_comparisons.py checks the complete disposition and rejects any lost
+predecessor match. The Rust harness and mandatory ca65_scoped_externals package
+cohort verify bytes, JSON, formatting, symbols, sections and refusal output
+preservation. The fixture generator rejects missing or duplicate audit names.

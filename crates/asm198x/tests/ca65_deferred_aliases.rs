@@ -82,6 +82,38 @@ fn conditional_source_queries_follow_native_read_order() {
     verify_fixture(include_str!("fixtures/ca65-conditional-context.json"), 197);
 }
 
+#[test]
+fn external_bindings_keep_native_source_types_and_exported_values() {
+    let fixture = include_str!("fixtures/ca65-scoped-externals.json");
+    let facts: serde_json::Value = serde_json::from_str(fixture).expect("native captures");
+    assert_eq!(facts["audit_case_count"], 1670);
+    let mut names = std::collections::BTreeSet::new();
+    for case in facts["cases"].as_array().expect("qualified cases") {
+        assert!(names.insert(case["name"].as_str().expect("case name")));
+    }
+    assert_eq!(names.len(), 1646);
+    for (field, count, issue) in [
+        ("excluded_audit_cases", 20, 795),
+        ("audit_only_cases", 4, 918),
+    ] {
+        let cases = facts[field].as_object().expect("audit disposition");
+        assert_eq!(cases.len(), count);
+        for (name, issues) in cases {
+            assert_eq!(issues, &serde_json::json!([issue]));
+            assert!(names.insert(name));
+        }
+    }
+    let inventory: std::collections::BTreeSet<_> = facts["audit_names"]
+        .as_array()
+        .expect("complete audit inventory")
+        .iter()
+        .map(|name| name.as_str().expect("audit name"))
+        .collect();
+    assert_eq!(inventory.len(), 1670);
+    assert_eq!(names, inventory);
+    verify_fixture(fixture, 1646);
+}
+
 fn verify_fixture(fixture: &str, count: usize) {
     let facts: serde_json::Value = serde_json::from_str(fixture).expect("native captures");
     let cases = facts["cases"].as_array().expect("cases");

@@ -1681,6 +1681,7 @@ pub(crate) fn expand_ca65_live(
         defined: Cow::Borrowed(live.defined),
         strings: Cow::Borrowed(live.strings),
         live: Some(live.context),
+        numeric_admission: None,
     };
     text::expand(&syntax, source)
         .map(|text| text.trim_end_matches('\n').to_string())
@@ -1692,28 +1693,42 @@ pub(crate) fn expand_ca65_live(
         })
 }
 
+type NumericAdmission<'a> = dyn Fn(&str, usize) -> Result<(), AsmError> + 'a;
+
+pub(crate) struct LineText<'a> {
+    pub target: Target,
+    pub token_target: Option<Target>,
+    pub numbers: &'a BTreeMap<String, i64>,
+    pub defined: &'a std::collections::BTreeSet<String>,
+    pub strings: &'a StringTokens,
+    pub depth: usize,
+    pub admission: Option<&'a NumericAdmission<'a>>,
+}
+
 pub(crate) fn expand_ca65_line(
     source: &str,
-    target: Target,
-    numbers: &BTreeMap<String, i64>,
-    text_state: (&std::collections::BTreeSet<String>, &StringTokens),
-    token_target: Option<Target>,
-    depth: usize,
     line: usize,
+    text: LineText<'_>,
 ) -> Result<String, AsmError> {
     let syntax = Ca65Text {
         live: None,
+        numeric_admission: text.admission,
         source_line: Some(line),
-        target,
-        token_target,
-        depth: std::cell::Cell::new(depth),
-        numbers: Cow::Borrowed(numbers),
-        defined: Cow::Borrowed(text_state.0),
-        strings: Cow::Borrowed(text_state.1),
+        target: text.target,
+        token_target: text.token_target,
+        depth: std::cell::Cell::new(text.depth),
+        numbers: Cow::Borrowed(text.numbers),
+        defined: Cow::Borrowed(text.defined),
+        strings: Cow::Borrowed(text.strings),
     };
     text::expand(&syntax, source)
         .map(|text| text.trim_end_matches('\n').to_string())
-        .map_err(|error| text_state.1.error(AsmError::new(line, error.message)))
+        .map_err(|mut error| {
+            if error.span.is_none() {
+                error.line = line;
+            }
+            text.strings.error(error)
+        })
 }
 
 /// Which CPU a ca65 parse is for.
@@ -1771,6 +1786,7 @@ impl Target {
 #[derive(Default)]
 struct Ca65Text<'a> {
     live: Option<&'a dyn LiveNumbers>,
+    numeric_admission: Option<&'a NumericAdmission<'a>>,
     source_line: Option<usize>,
     strings: Cow<'a, StringTokens>,
     /// How many `.proc`/`.scope` blocks are open around the line being read.
@@ -2001,7 +2017,12 @@ impl text::TextSyntax for Ca65Text<'_> {
     ) -> Result<Option<i64>, AsmError> {
         match self.live {
             Some(live) => live.number(text, line),
-            None => Ok(self.evaluate(text, numbers, line)),
+            None => {
+                if let Some(admit) = self.numeric_admission {
+                    admit(text, line)?;
+                }
+                Ok(self.evaluate(text, numbers, line))
+            }
         }
     }
 
