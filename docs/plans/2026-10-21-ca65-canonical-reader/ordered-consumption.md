@@ -4,12 +4,13 @@ Continue the approved #924 reader on 98be817ee5b462378caae5f3c557a05ad17c1c2b.
 The retained native matrices explain the failures; do not reuse rejected #922.
 
 1. In mos6502.rs distinguish ordinary source names from callable symbol tokens.
-   Consume a name through ExprSource before requesting the next input token.
-   Add an ExprTokens consumption hook for source calls; the buffered default
-   retains existing semantics, while the canonical adapter can read typed
-   arguments only when its atom is consumed. Preserve #929 empty-call grammar.
-   Verify the name-before-lookahead and call-after-advance invariants with an
-   effect-sensitive input, all library tests and native comparisons.
+   Give names and source calls explicit consumption hooks. Buffered names
+   retain their existing before-lookahead semantics; the canonical reader must
+   finish native scoped-name lookahead before recording the reference. #932's
+   retained audit corrects the original stronger claim: an adjacent constructor
+   can run here, while a physical operator stops this one-token lookahead.
+   Read typed call arguments when the atom is consumed. Preserve #929 empty-call
+   grammar and verify both the buffered contract and native consumption points.
 2. In ca65/reader.rs build one owned input stream with generated frames consumed
    before suspended input. Constructor expansion occurs at the consumed source
    position; captured numeric calls remain tokens. Preserve kinds across ident

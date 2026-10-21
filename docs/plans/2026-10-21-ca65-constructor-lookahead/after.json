@@ -1,0 +1,636 @@
+{
+  "binary": "/private/tmp/asm198x-scalar-build/debug/asm198x",
+  "sha256": "29791243fc92810758a5b7f5f49fb4074c631b5bd812b40560821150a5600047",
+  "results": [
+    {
+      "name": "ca65_adjacent_empty_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "02",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_adjacent_empty_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "02",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_adjacent_empty_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "02",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_adjacent_empty_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_adjacent_empty_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_adjacent_incomplete_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: expected a value\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_adjacent_incomplete_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-empty-call-compare-hg4_3y9p/ca65_adjacent_incomplete_included.inc:2:1: error: expected a value\nincluded from input.s:1\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_adjacent_incomplete_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5:1: error: expected a value\nin expansion of macro `run` defined at input.s:1, invoked at input.s:5\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_adjacent_incomplete_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_adjacent_incomplete_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_physical_operator_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "03",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_physical_operator_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "03",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_physical_operator_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "03",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_physical_operator_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_physical_operator_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_namespace_separator_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_namespace_separator_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_namespace_separator_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "07",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_namespace_separator_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_namespace_separator_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_selected_name_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "02",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_selected_name_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "02",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_selected_name_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "02",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_selected_name_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_selected_name_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_selected_fields_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0200",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_selected_fields_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0200",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_selected_fields_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0200",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_selected_fields_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_selected_fields_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_selected_physical_operator_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0201",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_selected_physical_operator_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0201",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_selected_physical_operator_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0201",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_selected_physical_operator_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_selected_physical_operator_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    }
+  ]
+}

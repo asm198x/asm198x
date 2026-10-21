@@ -607,6 +607,8 @@ pub(crate) trait ExprTokens {
     fn peek(&mut self) -> Result<Option<&Tok>, AsmError>;
     fn advance(&mut self);
 
+    /// Consume the reader's name grammar. Buffered names need no further
+    /// input; a scoped source reader may finish its native name lookahead.
     fn source_name(
         &mut self,
         name: &str,
@@ -672,7 +674,7 @@ pub(crate) fn parse_expr_tokens(
 pub(crate) enum Tok {
     Num(i64),
     Sym(String),
-    /// An ordinary source name, read before any lookahead beyond the name.
+    /// A source name consumed through the reader's name grammar.
     SourceName(String),
     SourceCall {
         name: String,

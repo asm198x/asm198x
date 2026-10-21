@@ -234,6 +234,31 @@ fn allocation_fields_consume_source_effects_before_later_operands() {
     verify_fixture(fixture, 160);
 }
 
+#[test]
+fn constructor_lookahead_matches_native_name_and_caller_token_order() {
+    let fixture = include_str!("fixtures/ca65-constructor-lookahead.json");
+    let facts: serde_json::Value = serde_json::from_str(fixture).expect("native captures");
+    let cases = facts["cases"].as_array().expect("native cases");
+    let names: std::collections::BTreeSet<_> = cases
+        .iter()
+        .map(|case| case["name"].as_str().expect("name"))
+        .collect();
+    assert_eq!(names.len(), 35);
+    assert_eq!(
+        cases
+            .iter()
+            .filter(|case| case["native"]
+                .as_array()
+                .expect("stages")
+                .last()
+                .expect("outcome")["exit"]
+                == 1)
+            .count(),
+        3
+    );
+    verify_fixture(fixture, 35);
+}
+
 fn verify_fixture(fixture: &str, count: usize) {
     let facts: serde_json::Value = serde_json::from_str(fixture).expect("native captures");
     let cases = facts["cases"].as_array().expect("cases");

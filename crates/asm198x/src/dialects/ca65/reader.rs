@@ -360,7 +360,15 @@ impl<'a> Input<'a> {
             } else {
                 start
             };
-            return Ok(list.into_iter().skip(start).take(count).collect());
+            // Native saves the caller's current token before pushing the
+            // selected list. Obtaining it can run an adjacent constructor.
+            let following = self.next()?;
+            return Ok(list
+                .into_iter()
+                .skip(start)
+                .take(count)
+                .chain(following)
+                .collect());
         }
         if name == ".string" {
             let named = self
@@ -529,20 +537,10 @@ impl mos6502::ExprTokens for Numeric<'_, '_> {
         if name == "::" {
             name.push_str(&self.name_component()?);
         }
-        loop {
-            // Inspect the next physical/generated token without executing a
-            // following constructor before this ordinary name is referenced.
-            if self.input.current.is_none() {
-                self.input.current = self.input.raw();
-            }
-            if !self
-                .input
-                .current
-                .as_ref()
-                .is_some_and(|t| t.text() == "::")
-            {
-                break;
-            }
+        // Finishing a native scoped name obtains its next current token
+        // before the reference is recorded. An adjacent constructor can
+        // provide `::`; a physical operator stops this lookahead.
+        while self.input.at("::")? {
             self.input.current = None;
             name.push_str("::");
             name.push_str(&self.name_component()?);

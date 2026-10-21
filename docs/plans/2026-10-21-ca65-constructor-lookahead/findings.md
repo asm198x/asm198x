@@ -25,3 +25,10 @@ Fix these consumption points within the approved owned reader. Keep the shared
 numeric grammar, existing scope environment, generated kinds and caller-token
 priority. Update the work plan's claim rather than treating the old mock-input
 assertion as native evidence. This is a required correction before #924 merges.
+
+The implemented correction now matches all 35 controls and their complete CLI
+contracts. The full workspace passes 1,651 Rust/Lua/doc tests with 38 existing
+ignored; Clippy -D warnings and formatting pass. All 6,790 predecessor matches
+survive the 39-matrix / 7,309-row unchanged-executable replay. Hashed lossless
+receipts are retained in checks/. This resolves the measured code gap on the
+reader branch; #932 remains open until the owning full reader is merged.
