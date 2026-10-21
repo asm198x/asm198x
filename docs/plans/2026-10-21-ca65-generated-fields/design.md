@@ -1,6 +1,6 @@
 # Source token cursor for generated ca65 fields (#795)
 
-Status: proposed; no cursor implementation yet. The existing #795 expression
+Status: superseded by the user-selected [full reader redesign](full-reader-design.md); no cursor implementation. The existing #795 expression
 context remains approved. This proposal adds a shared prefix/token cursor for
 field consumers, beyond the current one-expression callback.
 

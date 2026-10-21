@@ -1,0 +1,11 @@
+{
+  "roots": 83,
+  "files": 1246,
+  "logical_bytes": 768439886,
+  "retained_data_files": 1239,
+  "excluded_caches": [
+    "asm198x-scalar-build",
+    "asm198x-scalar-release-build"
+  ],
+  "df_before": "Filesystem   1024-blocks      Used Available Capacity  iused     ifree %iused  Mounted on\n/dev/disk3s5   971350180 907363408  15217688    99% 11056908 152176880    7%   /System/Volumes/Data\n"
+}
