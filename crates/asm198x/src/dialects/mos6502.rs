@@ -589,20 +589,9 @@ pub(crate) fn parse_expr_source(
     if tokens.is_empty() {
         return Err(AsmError::new(line, "expected a value"));
     }
-    let mut parser = ExprParser {
-        source,
-        tokens,
-        pos: 0,
-        line,
-        prec: opts.prec,
-        caret: opts.caret,
-        function: opts.function,
-        compare_opts: opts.compare,
-        logical: opts.logical,
-        logical_not_tight: opts.logical_not_tight,
-    };
-    let expr = parser.expr()?;
-    if parser.pos != parser.tokens.len() {
+    let mut tokens = BufferedExprTokens(tokens.into_iter().peekable());
+    let expr = parse_expr_tokens(&mut tokens, line, opts, source)?;
+    if tokens.peek()?.is_some() {
         return Err(AsmError::new(
             line,
             format!("unexpected trailing tokens in `{}`", raw.trim()),
@@ -611,8 +600,50 @@ pub(crate) fn parse_expr_source(
     Ok(expr)
 }
 
+/// A numeric token source shared with source readers. Repeated lookahead must
+/// return the same token; advancing discards it without reading ahead. Symbol
+/// and query effects stay at their grammar consumption points.
+pub(crate) trait ExprTokens {
+    fn peek(&mut self) -> Result<Option<&Tok>, AsmError>;
+    fn advance(&mut self);
+}
+
+struct BufferedExprTokens(std::iter::Peekable<std::vec::IntoIter<Tok>>);
+
+impl ExprTokens for BufferedExprTokens {
+    fn peek(&mut self) -> Result<Option<&Tok>, AsmError> {
+        Ok(self.0.peek())
+    }
+
+    fn advance(&mut self) {
+        self.0.next();
+    }
+}
+
+/// Consume one expression using the shared operator grammar, leaving its
+/// delimiter unread. Whole-input callers use `parse_expr_source` instead.
+pub(crate) fn parse_expr_tokens(
+    tokens: &mut dyn ExprTokens,
+    line: usize,
+    opts: ExprOpts,
+    source: Option<&dyn ExprSource>,
+) -> Result<Expr, AsmError> {
+    ExprParser {
+        source,
+        tokens,
+        line,
+        prec: opts.prec,
+        caret: opts.caret,
+        function: opts.function,
+        compare_opts: opts.compare,
+        logical: opts.logical,
+        logical_not_tight: opts.logical_not_tight,
+    }
+    .expr()
+}
+
 #[derive(Clone)]
-enum Tok {
+pub(crate) enum Tok {
     Num(i64),
     Sym(String),
     SourceCall {
@@ -654,10 +685,8 @@ enum Tok {
     /// Modulo: ca65's `.mod`, and ACME's infix `%`. A leading `%` remains a
     /// binary literal in both dialects.
     Mod,
-    /// Argument separator inside a function call. Nothing else in an
-    /// expression takes one — every caller splits its operand list on commas
-    /// before an expression reaches here, and does so paren-aware, so a
-    /// comma survives only inside `f(a,b)`.
+    /// Function-argument or source-field separator. The expression reader
+    /// leaves a field separator unread for the enclosing source grammar.
     Comma,
 }
 
@@ -1062,8 +1091,7 @@ fn tokenize(
 
 struct ExprParser<'a> {
     source: Option<&'a dyn ExprSource>,
-    tokens: Vec<Tok>,
-    pos: usize,
+    tokens: &'a mut dyn ExprTokens,
     line: usize,
     prec: BytePrec,
     caret: Caret,
@@ -1094,9 +1122,9 @@ impl ExprParser<'_> {
     fn logical_not(&mut self) -> Result<Expr, AsmError> {
         if self.logical
             && !self.logical_not_tight
-            && matches!(self.tokens.get(self.pos), Some(Tok::LogNot))
+            && matches!(self.tokens.peek()?, Some(Tok::LogNot))
         {
-            self.pos += 1;
+            self.tokens.advance();
             return Ok(Expr::LogNot(Box::new(self.logical_not()?)));
         }
         self.logical_or()
@@ -1104,8 +1132,8 @@ impl ExprParser<'_> {
 
     fn logical_or(&mut self) -> Result<Expr, AsmError> {
         let mut left = self.logical_and()?;
-        while self.logical && matches!(self.tokens.get(self.pos), Some(Tok::LogOr)) {
-            self.pos += 1;
+        while self.logical && matches!(self.tokens.peek()?, Some(Tok::LogOr)) {
+            self.tokens.advance();
             let right = self.logical_and()?;
             left = Expr::Bin(BinOp::LogOr, Box::new(left), Box::new(right));
         }
@@ -1115,12 +1143,12 @@ impl ExprParser<'_> {
     fn logical_and(&mut self) -> Result<Expr, AsmError> {
         let mut left = self.compare()?;
         while self.logical {
-            let op = match self.tokens.get(self.pos) {
+            let op = match self.tokens.peek()? {
                 Some(Tok::LogAnd) => BinOp::LogAnd,
                 Some(Tok::LogXor) => BinOp::LogXor,
                 _ => break,
             };
-            self.pos += 1;
+            self.tokens.advance();
             let right = self.compare()?;
             left = Expr::Bin(op, Box::new(left), Box::new(right));
         }
@@ -1148,9 +1176,9 @@ impl ExprParser<'_> {
     /// negated here, so `Expr` evaluation stays dialect-agnostic.
     fn compare(&mut self) -> Result<Expr, AsmError> {
         let mut left = self.ladder()?;
-        while let Some(Tok::Cmp(op)) = self.tokens.get(self.pos) {
+        while let Some(Tok::Cmp(op)) = self.tokens.peek()? {
             let op = *op;
-            self.pos += 1;
+            self.tokens.advance();
             let right = self.ladder()?;
             let cmp = Expr::Bin(op, Box::new(left), Box::new(right));
             left = if self.compare_opts.minus_one {
@@ -1167,8 +1195,8 @@ impl ExprParser<'_> {
 
     fn acme_or(&mut self) -> Result<Expr, AsmError> {
         let mut left = self.acme_xor()?;
-        while matches!(self.tokens.get(self.pos), Some(Tok::Or)) {
-            self.pos += 1;
+        while matches!(self.tokens.peek()?, Some(Tok::Or)) {
+            self.tokens.advance();
             let right = self.acme_xor()?;
             left = Expr::Bin(BinOp::Or, Box::new(left), Box::new(right));
         }
@@ -1177,8 +1205,8 @@ impl ExprParser<'_> {
 
     fn acme_xor(&mut self) -> Result<Expr, AsmError> {
         let mut left = self.acme_and()?;
-        while matches!(self.tokens.get(self.pos), Some(Tok::Xor)) {
-            self.pos += 1;
+        while matches!(self.tokens.peek()?, Some(Tok::Xor)) {
+            self.tokens.advance();
             let right = self.acme_and()?;
             left = Expr::Bin(BinOp::Xor, Box::new(left), Box::new(right));
         }
@@ -1187,8 +1215,8 @@ impl ExprParser<'_> {
 
     fn acme_and(&mut self) -> Result<Expr, AsmError> {
         let mut left = self.acme_shift()?;
-        while matches!(self.tokens.get(self.pos), Some(Tok::And)) {
-            self.pos += 1;
+        while matches!(self.tokens.peek()?, Some(Tok::And)) {
+            self.tokens.advance();
             let right = self.acme_shift()?;
             left = Expr::Bin(BinOp::And, Box::new(left), Box::new(right));
         }
@@ -1198,12 +1226,12 @@ impl ExprParser<'_> {
     fn acme_shift(&mut self) -> Result<Expr, AsmError> {
         let mut left = self.acme_add_sub()?;
         loop {
-            let op = match self.tokens.get(self.pos) {
+            let op = match self.tokens.peek()? {
                 Some(Tok::Shl) => BinOp::Shl,
                 Some(Tok::Shr) => BinOp::Shr,
                 _ => break,
             };
-            self.pos += 1;
+            self.tokens.advance();
             let right = self.acme_add_sub()?;
             left = Expr::Bin(op, Box::new(left), Box::new(right));
         }
@@ -1213,12 +1241,12 @@ impl ExprParser<'_> {
     fn acme_add_sub(&mut self) -> Result<Expr, AsmError> {
         let mut left = self.acme_mul_div()?;
         loop {
-            let op = match self.tokens.get(self.pos) {
+            let op = match self.tokens.peek()? {
                 Some(Tok::Plus) => BinOp::Add,
                 Some(Tok::Minus) => BinOp::Sub,
                 _ => break,
             };
-            self.pos += 1;
+            self.tokens.advance();
             let right = self.acme_mul_div()?;
             left = Expr::Bin(op, Box::new(left), Box::new(right));
         }
@@ -1228,13 +1256,13 @@ impl ExprParser<'_> {
     fn acme_mul_div(&mut self) -> Result<Expr, AsmError> {
         let mut left = self.acme_power()?;
         loop {
-            let op = match self.tokens.get(self.pos) {
+            let op = match self.tokens.peek()? {
                 Some(Tok::Star) => BinOp::Mul,
                 Some(Tok::Slash) => BinOp::Div,
                 Some(Tok::Mod) => BinOp::Mod,
                 _ => break,
             };
-            self.pos += 1;
+            self.tokens.advance();
             let right = self.acme_power()?;
             left = Expr::Bin(op, Box::new(left), Box::new(right));
         }
@@ -1245,8 +1273,8 @@ impl ExprParser<'_> {
     /// `2^(3^2)` = 512).
     fn acme_power(&mut self) -> Result<Expr, AsmError> {
         let base = self.unary()?;
-        if matches!(self.tokens.get(self.pos), Some(Tok::Pow)) {
-            self.pos += 1;
+        if matches!(self.tokens.peek()?, Some(Tok::Pow)) {
+            self.tokens.advance();
             let exp = self.acme_power()?;
             Ok(Expr::Bin(BinOp::Pow, Box::new(base), Box::new(exp)))
         } else {
@@ -1257,12 +1285,12 @@ impl ExprParser<'_> {
     fn add_sub(&mut self) -> Result<Expr, AsmError> {
         let mut left = self.mul_div()?;
         loop {
-            let op = match self.tokens.get(self.pos) {
+            let op = match self.tokens.peek()? {
                 Some(Tok::Plus) => BinOp::Add,
                 Some(Tok::Minus) => BinOp::Sub,
                 _ => break,
             };
-            self.pos += 1;
+            self.tokens.advance();
             let right = self.mul_div()?;
             left = Expr::Bin(op, Box::new(left), Box::new(right));
         }
@@ -1272,14 +1300,14 @@ impl ExprParser<'_> {
     fn mul_div(&mut self) -> Result<Expr, AsmError> {
         let mut left = self.bit_or()?;
         loop {
-            let op = match self.tokens.get(self.pos) {
+            let op = match self.tokens.peek()? {
                 Some(Tok::Star) => BinOp::Mul,
                 Some(Tok::Slash) => BinOp::Div,
                 // ca65's `.mod` and ACME's `%` sit with `*` and `/`.
                 Some(Tok::Mod) => BinOp::Mod,
                 _ => break,
             };
-            self.pos += 1;
+            self.tokens.advance();
             let right = self.bit_or()?;
             left = Expr::Bin(op, Box::new(left), Box::new(right));
         }
@@ -1291,8 +1319,8 @@ impl ExprParser<'_> {
     // (bitwise) mode, so for 6502 each level falls straight through to `unary`.
     fn bit_or(&mut self) -> Result<Expr, AsmError> {
         let mut left = self.bit_xor()?;
-        while matches!(self.tokens.get(self.pos), Some(Tok::Or)) {
-            self.pos += 1;
+        while matches!(self.tokens.peek()?, Some(Tok::Or)) {
+            self.tokens.advance();
             let right = self.bit_xor()?;
             left = Expr::Bin(BinOp::Or, Box::new(left), Box::new(right));
         }
@@ -1301,8 +1329,8 @@ impl ExprParser<'_> {
 
     fn bit_xor(&mut self) -> Result<Expr, AsmError> {
         let mut left = self.bit_and()?;
-        while matches!(self.tokens.get(self.pos), Some(Tok::Xor)) {
-            self.pos += 1;
+        while matches!(self.tokens.peek()?, Some(Tok::Xor)) {
+            self.tokens.advance();
             let right = self.bit_and()?;
             left = Expr::Bin(BinOp::Xor, Box::new(left), Box::new(right));
         }
@@ -1311,8 +1339,8 @@ impl ExprParser<'_> {
 
     fn bit_and(&mut self) -> Result<Expr, AsmError> {
         let mut left = self.shift()?;
-        while matches!(self.tokens.get(self.pos), Some(Tok::And)) {
-            self.pos += 1;
+        while matches!(self.tokens.peek()?, Some(Tok::And)) {
+            self.tokens.advance();
             let right = self.shift()?;
             left = Expr::Bin(BinOp::And, Box::new(left), Box::new(right));
         }
@@ -1322,12 +1350,12 @@ impl ExprParser<'_> {
     fn shift(&mut self) -> Result<Expr, AsmError> {
         let mut left = self.unary()?;
         loop {
-            let op = match self.tokens.get(self.pos) {
+            let op = match self.tokens.peek()? {
                 Some(Tok::Shl) => BinOp::Shl,
                 Some(Tok::Shr) => BinOp::Shr,
                 _ => break,
             };
-            self.pos += 1;
+            self.tokens.advance();
             let right = self.unary()?;
             left = Expr::Bin(op, Box::new(left), Box::new(right));
         }
@@ -1335,24 +1363,24 @@ impl ExprParser<'_> {
     }
 
     fn unary(&mut self) -> Result<Expr, AsmError> {
-        if self.logical_not_tight && matches!(self.tokens.get(self.pos), Some(Tok::LogNot)) {
-            self.pos += 1;
+        if self.logical_not_tight && matches!(self.tokens.peek()?, Some(Tok::LogNot)) {
+            self.tokens.advance();
             return Ok(Expr::LogNot(Box::new(self.unary()?)));
         }
-        if matches!(self.tokens.get(self.pos), Some(Tok::Minus)) {
-            self.pos += 1;
+        if matches!(self.tokens.peek()?, Some(Tok::Minus)) {
+            self.tokens.advance();
             return Ok(Expr::Neg(Box::new(self.unary()?)));
         }
         // Loose byte prefixes also occur after a binary operator (2 * >value).
         // They still wrap the whole expression to their right.
         if matches!(self.prec, BytePrec::Loose) {
-            match self.tokens.get(self.pos) {
+            match self.tokens.peek()? {
                 Some(Tok::Lo) => {
-                    self.pos += 1;
+                    self.tokens.advance();
                     return Ok(Expr::Lo(Box::new(self.expr()?)));
                 }
                 Some(Tok::Hi) => {
-                    self.pos += 1;
+                    self.tokens.advance();
                     return Ok(Expr::Hi(Box::new(self.expr()?)));
                 }
                 _ => {}
@@ -1360,26 +1388,26 @@ impl ExprParser<'_> {
         }
         // Tight `<`/`>` are unary operators binding to the next term.
         if matches!(self.prec, BytePrec::Tight) {
-            match self.tokens.get(self.pos) {
+            match self.tokens.peek()? {
                 Some(Tok::Lo) => {
-                    self.pos += 1;
+                    self.tokens.advance();
                     return Ok(Expr::Lo(Box::new(self.unary()?)));
                 }
                 Some(Tok::Hi) => {
-                    self.pos += 1;
+                    self.tokens.advance();
                     return Ok(Expr::Hi(Box::new(self.unary()?)));
                 }
                 // In a ca65 dialect a leading `^` is the bank-byte prefix (as a
                 // binary operator it is XOR, handled at `bit_xor`).
                 Some(Tok::Xor) if self.caret == Caret::BankOrXor => {
-                    self.pos += 1;
+                    self.tokens.advance();
                     return Ok(Expr::Bank(Box::new(self.unary()?)));
                 }
                 _ => {}
             }
         }
-        if self.logical && matches!(self.tokens.get(self.pos), Some(Tok::BitNot)) {
-            self.pos += 1;
+        if self.logical && matches!(self.tokens.peek()?, Some(Tok::BitNot)) {
+            self.tokens.advance();
             return Ok(Expr::BitNot(Box::new(self.unary()?)));
         }
         self.atom()
@@ -1388,9 +1416,9 @@ impl ExprParser<'_> {
     /// One function argument: a string literal where the source wrote one,
     /// otherwise an ordinary expression.
     fn call_arg(&mut self) -> Result<ExprArg, AsmError> {
-        if let Some(Tok::Str(t)) = self.tokens.get(self.pos) {
+        if let Some(Tok::Str(t)) = self.tokens.peek()? {
             let t = t.clone();
-            self.pos += 1;
+            self.tokens.advance();
             return Ok(ExprArg::Text(t));
         }
         Ok(ExprArg::Value(self.expr()?))
@@ -1399,10 +1427,10 @@ impl ExprParser<'_> {
     fn atom(&mut self) -> Result<Expr, AsmError> {
         let tok = self
             .tokens
-            .get(self.pos)
+            .peek()?
             .cloned()
             .ok_or_else(|| AsmError::new(self.line, "expected a value"))?;
-        self.pos += 1;
+        self.tokens.advance();
         match tok {
             Tok::SourceCall { name, args } => self
                 .source
@@ -1418,24 +1446,24 @@ impl ExprParser<'_> {
                 // caller splits its operands on commas before an expression
                 // reaches here. A multi-argument function (`.max(a,b)`,
                 // rgbasm's `STRFMT`) needs that token first.
-                match (self.function, self.tokens.get(self.pos)) {
+                match (self.function, self.tokens.peek()?) {
                     (Some(build), Some(Tok::LParen)) => {
-                        self.pos += 1;
+                        self.tokens.advance();
                         let mut args = Vec::new();
-                        if !matches!(self.tokens.get(self.pos), Some(Tok::RParen)) {
+                        if !matches!(self.tokens.peek()?, Some(Tok::RParen)) {
                             args.push(self.call_arg()?);
-                            while matches!(self.tokens.get(self.pos), Some(Tok::Comma)) {
-                                self.pos += 1;
+                            while matches!(self.tokens.peek()?, Some(Tok::Comma)) {
+                                self.tokens.advance();
                                 args.push(self.call_arg()?);
                             }
                         }
-                        if !matches!(self.tokens.get(self.pos), Some(Tok::RParen)) {
+                        if !matches!(self.tokens.peek()?, Some(Tok::RParen)) {
                             return Err(AsmError::new(
                                 self.line,
                                 format!("expected `,` or `)` in `{s}(...)`"),
                             ));
                         }
-                        self.pos += 1;
+                        self.tokens.advance();
                         build(&s, args, self.line)
                     }
                     _ => match self.source {
@@ -1447,8 +1475,8 @@ impl ExprParser<'_> {
             Tok::Pc => Ok(Expr::Pc),
             Tok::LParen => {
                 let inner = self.expr()?;
-                if matches!(self.tokens.get(self.pos), Some(Tok::RParen)) {
-                    self.pos += 1;
+                if matches!(self.tokens.peek()?, Some(Tok::RParen)) {
+                    self.tokens.advance();
                     Ok(inner)
                 } else {
                     Err(AsmError::new(self.line, "expected `)`"))
@@ -1604,9 +1632,8 @@ mod tests {
             .map_err(|_| AsmError::new(line, "bad number"))
     }
 
-    fn eval(raw: &str, prec: BytePrec) -> i64 {
-        let env = BTreeMap::new();
-        let opts = ExprOpts {
+    fn options(prec: BytePrec) -> ExprOpts {
+        ExprOpts {
             logical: false,
             logical_not_tight: false,
             scoped_names: false,
@@ -1618,8 +1645,71 @@ mod tests {
             caret: Caret::Xor,
             at_is_pc: false,
             bang_is_or: false,
-        };
-        fold_const(&parse_expr(raw, 1, num, opts).expect("parse"), &env, 1).expect("fold")
+        }
+    }
+
+    fn eval(raw: &str, prec: BytePrec) -> i64 {
+        let env = BTreeMap::new();
+        fold_const(
+            &parse_expr(raw, 1, num, options(prec)).expect("parse"),
+            &env,
+            1,
+        )
+        .expect("fold")
+    }
+
+    #[test]
+    fn expression_tokens_leave_generated_fields_for_the_source_reader() {
+        // Native `.res .left(3,{1,2})+1` emits 03: the selector supplies
+        // `1,2`, and the suffix belongs to the fill field, not the count.
+        let mut tokens = BufferedExprTokens(
+            vec![Tok::Num(1), Tok::Comma, Tok::Num(2), Tok::Plus, Tok::Num(1)]
+                .into_iter()
+                .peekable(),
+        );
+        let count = parse_expr_tokens(&mut tokens, 1, options(BytePrec::Tight), None)
+            .expect("count before separator");
+        assert!(matches!(
+            tokens.peek().expect("lookahead"),
+            Some(Tok::Comma)
+        ));
+        tokens.advance();
+        let fill = parse_expr_tokens(&mut tokens, 1, options(BytePrec::Tight), None)
+            .expect("fill after separator");
+        assert!(tokens.peek().expect("end").is_none());
+        let env = BTreeMap::new();
+        assert_eq!(fold_const(&count, &env, 1).expect("count"), 1);
+        assert_eq!(fold_const(&fill, &env, 1).expect("fill"), 3);
+        assert_eq!(
+            fold_const(&fill, &env, 1).expect("fill"),
+            eval("2+1", BytePrec::Tight)
+        );
+        assert!(parse_expr("1,2+1", 1, num, options(BytePrec::Tight)).is_err());
+    }
+
+    #[test]
+    fn source_token_errors_are_not_treated_as_expression_end() {
+        struct FailingInput(Option<Tok>);
+        impl ExprTokens for FailingInput {
+            fn peek(&mut self) -> Result<Option<&Tok>, AsmError> {
+                self.0
+                    .as_ref()
+                    .map(Some)
+                    .ok_or_else(|| AsmError::new(7, "source token failure"))
+            }
+
+            fn advance(&mut self) {
+                self.0 = None;
+            }
+        }
+        let error = parse_expr_tokens(
+            &mut FailingInput(Some(Tok::Num(1))),
+            7,
+            options(BytePrec::Tight),
+            None,
+        )
+        .expect_err("lookahead failure must propagate");
+        assert_eq!(error.message, "source token failure");
     }
 
     /// A data list splits on the commas *between its items*, not on the ones
