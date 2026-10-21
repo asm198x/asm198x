@@ -1,0 +1,14 @@
+{
+  "audit_cases": 840,
+  "qualified_cases": 728,
+  "known_895_cases": 112,
+  "native_accept": 458,
+  "native_refuse": 270,
+  "qualified_mismatches": 228,
+  "mismatch_exits": {
+    "0": 198,
+    "101": 18,
+    "1": 12
+  },
+  "preflight_750_preserved": true
+}
