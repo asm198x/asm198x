@@ -61,8 +61,13 @@ architecture or changing the public contract.
 
 The empty-call interruption (#927/#929) also establishes that real no-argument
 calls differ from line-zero recognition probes. Native blank/tcount return 1/0;
-other captured empty functions are ordinary errors. The shared numeric syntax
+other selected empty calls in that audit are ordinary errors. The shared numeric syntax
 parser must accept an empty vector for a dialect builder to validate, so valid
 calls format without expansion. Preserve the flat text-pass macro-origin remap.
 Do not reintroduce the old first-argument requirement when moving the borrowed
 numeric parser preparation onto the checked successor.
+
+Keep selected argument validation distinct from a numeric function's unevaluated
+capture. The numeric token-list cases do not authorize validating arity or names
+inside such a capture; constructor parsing has different native rules. Probe
+empty numeric calls inside lists before extending that validation boundary.
