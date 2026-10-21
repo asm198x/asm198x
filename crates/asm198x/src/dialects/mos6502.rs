@@ -606,6 +606,21 @@ pub(crate) fn parse_expr_source(
 pub(crate) trait ExprTokens {
     fn peek(&mut self) -> Result<Option<&Tok>, AsmError>;
     fn advance(&mut self);
+
+    /// Read a source call after its head has been consumed. Ordered readers
+    /// can consume typed arguments here; buffered callers retain their source
+    /// callback. Looking ahead at a call must not perform this work.
+    fn source_call(
+        &mut self,
+        name: &str,
+        args: &str,
+        line: usize,
+        source: Option<&dyn ExprSource>,
+    ) -> Result<Expr, AsmError> {
+        source
+            .ok_or_else(|| AsmError::new(line, "source call requires a source context"))?
+            .function(name, args, line)
+    }
 }
 
 struct BufferedExprTokens(std::iter::Peekable<std::vec::IntoIter<Tok>>);
@@ -646,6 +661,8 @@ pub(crate) fn parse_expr_tokens(
 pub(crate) enum Tok {
     Num(i64),
     Sym(String),
+    /// An ordinary source name, read before any lookahead beyond the name.
+    SourceName(String),
     SourceCall {
         name: String,
         args: String,
@@ -732,6 +749,7 @@ fn tokenize(
             Some(
                 Tok::Num(_)
                     | Tok::Sym(_)
+                    | Tok::SourceName(_)
                     | Tok::SourceCall { .. }
                     | Tok::Pc
                     | Tok::RParen
@@ -770,7 +788,13 @@ fn tokenize(
                 if i == start + 1 {
                     return Err(AsmError::new(line, "expected a cheap-local name after `@`"));
                 }
-                tokens.push(Tok::Sym(chars[start..i].iter().collect()));
+                let name = chars[start..i].iter().collect();
+                let call = chars[i..].iter().find(|c| !c.is_whitespace()) == Some(&'(');
+                tokens.push(if source.is_some() && !call {
+                    Tok::SourceName(name)
+                } else {
+                    Tok::Sym(name)
+                });
             }
             '/' => {
                 tokens.push(Tok::Slash);
@@ -1075,7 +1099,12 @@ fn tokenize(
                     // token so it inherits the same precedence.
                     tokens.push(op);
                 } else {
-                    tokens.push(Tok::Sym(word));
+                    let call = chars[i..].iter().find(|c| !c.is_whitespace()) == Some(&'(');
+                    tokens.push(if source.is_some() && !call {
+                        Tok::SourceName(word)
+                    } else {
+                        Tok::Sym(word)
+                    });
                 }
             }
             other => {
@@ -1432,10 +1461,14 @@ impl ExprParser<'_> {
             .ok_or_else(|| AsmError::new(self.line, "expected a value"))?;
         self.tokens.advance();
         match tok {
-            Tok::SourceCall { name, args } => self
+            Tok::SourceCall { name, args } => {
+                self.tokens
+                    .source_call(&name, &args, self.line, self.source)
+            }
+            Tok::SourceName(name) => self
                 .source
-                .expect("source call has a context")
-                .function(&name, &args, self.line),
+                .ok_or_else(|| AsmError::new(self.line, "source name requires a source context"))?
+                .symbol(&name, self.line),
             Tok::Num(n) => Ok(Expr::Num(n)),
             Tok::Sym(s) => {
                 // `name(` is a call where the dialect has functions; anywhere
@@ -1685,6 +1718,84 @@ mod tests {
             eval("2+1", BytePrec::Tight)
         );
         assert!(parse_expr("1,2+1", 1, num, options(BytePrec::Tight)).is_err());
+    }
+
+    #[test]
+    fn source_names_are_read_before_later_input_and_calls_after_advance() {
+        use std::cell::RefCell;
+        let events = RefCell::new(Vec::new());
+        struct Source<'a>(&'a RefCell<Vec<&'static str>>);
+        impl ExprSource for Source<'_> {
+            fn recognizes(&self, name: &str) -> bool {
+                name == ".ref"
+            }
+            fn symbol(&self, name: &str, _line: usize) -> Result<Expr, AsmError> {
+                assert_eq!(name, "value");
+                self.0.borrow_mut().push("name");
+                Ok(Expr::Num(7))
+            }
+            fn function(&self, name: &str, args: &str, _line: usize) -> Result<Expr, AsmError> {
+                assert_eq!((name, args), (".ref", "value"));
+                assert_eq!(*self.0.borrow(), ["name", "consume call"]);
+                self.0.borrow_mut().push("query");
+                Ok(Expr::Num(1))
+            }
+        }
+        struct Input<'a> {
+            tokens: BufferedExprTokens,
+            consumed: usize,
+            events: &'a RefCell<Vec<&'static str>>,
+        }
+        impl ExprTokens for Input<'_> {
+            fn peek(&mut self) -> Result<Option<&Tok>, AsmError> {
+                if self.consumed > 0 && self.events.borrow().is_empty() {
+                    return Err(AsmError::new(1, "lookahead preceded the source name read"));
+                }
+                self.tokens.peek()
+            }
+            fn advance(&mut self) {
+                self.consumed += 1;
+                self.tokens.advance();
+            }
+            fn source_call(
+                &mut self,
+                name: &str,
+                args: &str,
+                line: usize,
+                source: Option<&dyn ExprSource>,
+            ) -> Result<Expr, AsmError> {
+                assert_eq!(self.consumed, 3);
+                assert_eq!(*self.events.borrow(), ["name"]);
+                self.events.borrow_mut().push("consume call");
+                source.expect("test source").function(name, args, line)
+            }
+        }
+        let source = Source(&events);
+        let opts = options(BytePrec::Tight);
+        let raw = tokenize("value + .ref(value)", 1, num, opts, Some(&source)).expect("tokens");
+        let eager = raw.iter().cloned().map(|token| match token {
+            Tok::SourceName(name) => Tok::Sym(name),
+            other => other,
+        });
+        let mut old_input = Input {
+            tokens: BufferedExprTokens(eager.collect::<Vec<_>>().into_iter().peekable()),
+            consumed: 0,
+            events: &events,
+        };
+        let error = parse_expr_tokens(&mut old_input, 1, opts, Some(&source))
+            .expect_err("old callable-name path must fail the input-order guard");
+        assert_eq!(error.message, "lookahead preceded the source name read");
+        assert!(events.borrow().is_empty());
+        let mut input = Input {
+            tokens: BufferedExprTokens(raw.into_iter().peekable()),
+            consumed: 0,
+            events: &events,
+        };
+        let expr =
+            parse_expr_tokens(&mut input, 1, opts, Some(&source)).expect("ordered expression");
+        assert!(input.peek().expect("end").is_none());
+        assert_eq!(fold_const(&expr, &BTreeMap::new(), 1).expect("value"), 8);
+        assert_eq!(*events.borrow(), ["name", "consume call", "query"]);
     }
 
     #[test]
