@@ -1,0 +1,13 @@
+{
+  "retention_commit": "e751ad44f0c14e316e3da9a2b38e83dcaf018b49",
+  "removed_roots": 112,
+  "removed_files": 615,
+  "preserved_roots": [
+    "/private/tmp/asm198x-empty-local-package",
+    "/private/tmp/asm198x-empty-producer"
+  ],
+  "active_task_processes": [],
+  "verified_removed": true,
+  "df_before": "Filesystem   1024-blocks      Used Available Capacity  iused     ifree %iused  Mounted on\n/dev/disk3s5   971350180 893125412  28406856    97% 11042528 284068560    4%   /System/Volumes/Data\n",
+  "df_after": "Filesystem   1024-blocks      Used Available Capacity  iused     ifree %iused  Mounted on\n/dev/disk3s5   971350180 892631712  28900556    97% 11041894 289005560    4%   /System/Volumes/Data\n"
+}
