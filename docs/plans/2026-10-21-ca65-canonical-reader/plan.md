@@ -77,7 +77,9 @@ inactive gaps (#895); 75 observations improve over checked #925 with no lost
 matches. Keep numeric captured calls unevaluated, namespace matrix-local case
 names, and require new controls for generated selector brace tokens.
 
-No semantic consumer has yet moved to the canonical stream. The next code step
-is ordered token consumption over the retained owned kinds and numeric grammar,
-then all linked directive/header/data/file fields and the flat/syntax adapters.
-The full reader remains #924; this preparation does not close its issues.
+The first semantic migration now moves complete linked data operand lists to
+owned canonical input, including captured queries and token constructors. The
+stream-controls plan and findings retain its native evidence and regression
+gates. The remaining linked scalar/header/file consumers and flat/syntax
+adapters still need migration. This partial implementation does not close #924
+and is not ready to merge independently of the approved full-reader design.

@@ -258,6 +258,28 @@ pub(crate) fn call<S: TextSyntax>(
     syntax.function(name, &split_args(arguments), &scope, line)
 }
 
+/// Invoke the shared string grammar with arguments already consumed by a
+/// source reader. Numeric arguments are values, so consulting them must not
+/// parse source again or repeat its effects.
+pub(crate) fn call_read<S: TextSyntax>(
+    syntax: &S,
+    name: &str,
+    arguments: &[Arg],
+    line: usize,
+) -> Result<Option<Folded>, AsmError> {
+    let numbers = BTreeMap::new();
+    let evaluate = |text: &str, _: &BTreeMap<String, i64>, _: usize| Ok(text.parse().ok());
+    syntax.function(
+        name,
+        arguments,
+        &Scope {
+            numbers: &numbers,
+            evaluate: &evaluate,
+        },
+        line,
+    )
+}
+
 /// Run the pass over a whole source.
 ///
 /// # Errors

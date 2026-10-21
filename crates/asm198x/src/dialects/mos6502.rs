@@ -607,6 +607,17 @@ pub(crate) trait ExprTokens {
     fn peek(&mut self) -> Result<Option<&Tok>, AsmError>;
     fn advance(&mut self);
 
+    fn source_name(
+        &mut self,
+        name: &str,
+        line: usize,
+        source: Option<&dyn ExprSource>,
+    ) -> Result<Expr, AsmError> {
+        source
+            .ok_or_else(|| AsmError::new(line, "source name requires a source context"))?
+            .symbol(name, line)
+    }
+
     /// Read a source call after its head has been consumed. Ordered readers
     /// can consume typed arguments here; buffered callers retain their source
     /// callback. Looking ahead at a call must not perform this work.
@@ -737,6 +748,19 @@ fn tokenize(
     opts: ExprOpts,
     source: Option<&dyn ExprSource>,
 ) -> Result<Vec<Tok>, AsmError> {
+    tokenize_fragment(raw, line, parse_number, opts, source, false)
+}
+
+/// Classify a fragment using the same lexical operator rules as whole input.
+/// Ordered token adapters supply whether the preceding token ended a value.
+pub(crate) fn tokenize_fragment(
+    raw: &str,
+    line: usize,
+    parse_number: fn(&str, usize) -> Result<i64, AsmError>,
+    opts: ExprOpts,
+    source: Option<&dyn ExprSource>,
+    initially_after_value: bool,
+) -> Result<Vec<Tok>, AsmError> {
     let chars: Vec<char> = raw.chars().collect();
     let mut tokens = Vec::new();
     let mut i = 0;
@@ -744,18 +768,19 @@ fn tokenize(
         // Whether the token before this one ended a value. A prefix operator
         // can only appear where one did not; an infix comparison only where
         // one did. That is the whole of how `<` tells its two meanings apart.
-        let after_value = matches!(
-            tokens.last(),
-            Some(
-                Tok::Num(_)
-                    | Tok::Sym(_)
-                    | Tok::SourceName(_)
-                    | Tok::SourceCall { .. }
-                    | Tok::Pc
-                    | Tok::RParen
-                    | Tok::Str(_)
-            )
-        );
+        let after_value = (tokens.is_empty() && initially_after_value)
+            || matches!(
+                tokens.last(),
+                Some(
+                    Tok::Num(_)
+                        | Tok::Sym(_)
+                        | Tok::SourceName(_)
+                        | Tok::SourceCall { .. }
+                        | Tok::Pc
+                        | Tok::RParen
+                        | Tok::Str(_)
+                )
+            );
         let c = chars[i];
         match c {
             ws if ws.is_whitespace() => i += 1,
@@ -1465,10 +1490,7 @@ impl ExprParser<'_> {
                 self.tokens
                     .source_call(&name, &args, self.line, self.source)
             }
-            Tok::SourceName(name) => self
-                .source
-                .ok_or_else(|| AsmError::new(self.line, "source name requires a source context"))?
-                .symbol(&name, self.line),
+            Tok::SourceName(name) => self.tokens.source_name(&name, self.line, self.source),
             Tok::Num(n) => Ok(Expr::Num(n)),
             Tok::Sym(s) => {
                 // `name(` is a call where the dialect has functions; anywhere

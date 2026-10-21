@@ -172,6 +172,31 @@ fn empty_source_calls_obey_native_argument_and_token_rules() {
     verify_fixture(fixture, 722);
 }
 
+#[test]
+fn canonical_source_stream_preserves_native_capture_and_token_kinds() {
+    let fixture = include_str!("fixtures/ca65-canonical-stream.json");
+    let facts: serde_json::Value = serde_json::from_str(fixture).expect("native captures");
+    let cases = facts["cases"].as_array().expect("native cases");
+    let names: std::collections::BTreeSet<_> = cases
+        .iter()
+        .map(|c| c["name"].as_str().expect("name"))
+        .collect();
+    assert_eq!(names.len(), 180);
+    assert_eq!(
+        cases
+            .iter()
+            .filter(|c| c["native"]
+                .as_array()
+                .expect("native stages")
+                .last()
+                .expect("native outcome")["exit"]
+                == 0)
+            .count(),
+        162
+    );
+    verify_fixture(fixture, 180);
+}
+
 fn verify_fixture(fixture: &str, count: usize) {
     let facts: serde_json::Value = serde_json::from_str(fixture).expect("native captures");
     let cases = facts["cases"].as_array().expect("cases");

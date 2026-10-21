@@ -3864,8 +3864,12 @@ fn parse_directive(
 }
 
 trait DataSource {
-    fn value(&self, text: &str, line: usize) -> Result<Expr, AsmError>;
-    fn tokens(&self, text: &str, line: usize) -> Result<String, AsmError>;
+    fn data(
+        &self,
+        text: &str,
+        line: usize,
+        grammar: reader::DataGrammar,
+    ) -> Result<Vec<Expr>, AsmError>;
 }
 
 fn parse_directive_source(
@@ -4240,31 +4244,19 @@ fn parse_data_list(
     line: usize,
     source: Option<&dyn DataSource>,
 ) -> Result<Vec<Expr>, AsmError> {
+    if let Some(source) = source {
+        return source.data(rest, line, reader::DataGrammar::Bytes);
+    }
     let rest = rest.trim();
     if rest.is_empty() {
         return Err(AsmError::new(line, "`.byte` needs a value"));
     }
     let mut out = Vec::new();
     for piece in ca65_flat::split_fields(rest, usize::MAX) {
-        // Only string-valued operands are expanded as text. Numeric calls
-        // remain at their parser position, after any preceding name query.
-        let expanded;
-        let piece = if let Some(source) = source {
-            expanded = source.tokens(piece, line)?;
-            &expanded
+        if let Some(bytes) = strings.data(piece, line)? {
+            out.extend(bytes.into_iter().map(|b| Expr::Num(i64::from(b))));
         } else {
-            piece
-        };
-        // A token selector can expose additional comma-separated operands.
-        for piece in ca65_flat::split_fields(piece, usize::MAX) {
-            if let Some(bytes) = strings.data(piece, line)? {
-                out.extend(bytes.into_iter().map(|b| Expr::Num(i64::from(b))));
-            } else {
-                out.push(match source {
-                    Some(source) => source.value(piece, line)?,
-                    None => parse_value(anons, anchor, piece, line)?,
-                });
-            }
+            out.push(parse_value(anons, anchor, piece, line)?);
         }
     }
     Ok(out)
@@ -4277,19 +4269,11 @@ fn parse_asciiz(
     line: usize,
     source: Option<&dyn DataSource>,
 ) -> Result<Vec<Expr>, AsmError> {
+    if let Some(source) = source {
+        return source.data(rest, line, reader::DataGrammar::Asciiz);
+    }
     Ok(strings
-        .asciiz(
-            ca65_flat::split_fields(rest, usize::MAX)
-                .into_iter()
-                .map(|piece| match source {
-                    Some(source) => source.tokens(piece, line),
-                    None => Ok(piece.to_string()),
-                })
-                .collect::<Result<Vec<_>, _>>()?
-                .iter()
-                .flat_map(|piece| ca65_flat::split_fields(piece, usize::MAX)),
-            line,
-        )?
+        .asciiz(ca65_flat::split_fields(rest, usize::MAX), line)?
         .into_iter()
         .map(|b| Expr::Num(i64::from(b)))
         .collect())
@@ -4302,27 +4286,17 @@ fn parse_value_list(
     line: usize,
     source: Option<&dyn DataSource>,
 ) -> Result<Vec<Expr>, AsmError> {
+    if let Some(source) = source {
+        return source.data(rest, line, reader::DataGrammar::Values);
+    }
     let rest = rest.trim();
     if rest.is_empty() {
         return Err(AsmError::new(line, "directive needs a value"));
     }
-    let mut out = Vec::new();
-    for piece in ca65_flat::split_fields(rest, usize::MAX) {
-        let expanded;
-        let piece = if let Some(source) = source {
-            expanded = source.tokens(piece, line)?;
-            &expanded
-        } else {
-            piece
-        };
-        for piece in ca65_flat::split_fields(piece, usize::MAX) {
-            out.push(match source {
-                Some(source) => source.value(piece, line)?,
-                None => parse_value(anons, anchor, piece, line)?,
-            });
-        }
-    }
-    Ok(out)
+    ca65_flat::split_fields(rest, usize::MAX)
+        .into_iter()
+        .map(|piece| parse_value(anons, anchor, piece, line))
+        .collect()
 }
 
 // ---------------------------------------------------------------------------
@@ -4363,33 +4337,35 @@ fn parse_value_source(
     if let Some((sign, level)) = anon_ref(t) {
         return Ok(Expr::Sym(anons.refer(sign, level, line)?));
     }
-    let expr = mos6502::parse_expr_source(
-        t,
-        line,
-        parse_number,
-        mos6502::ExprOpts {
-            logical: true,
-            logical_not_tight: false,
-            scoped_names: true,
-            fixed_point: false,
-            compare: mos6502::Compare {
-                eq: true,
-                eq_eq: false,
-                ne_angle: true,
-                ne_bang: false,
-                relational: true,
-                ordered_eq: true,
-                minus_one: false,
-            },
-            function: Some(expr_function_positional),
-            bang_is_or: false,
-            prec: BytePrec::Tight,
-            byte_prefix: true,
-            caret: mos6502::Caret::BankOrXor,
-            at_is_pc: false,
+    let expr = mos6502::parse_expr_source(t, line, parse_number, expression_options(), source)?;
+    bind_expression_names(expr, anchor, line)
+}
+
+fn expression_options() -> mos6502::ExprOpts {
+    mos6502::ExprOpts {
+        logical: true,
+        logical_not_tight: false,
+        scoped_names: true,
+        fixed_point: false,
+        compare: mos6502::Compare {
+            eq: true,
+            eq_eq: false,
+            ne_angle: true,
+            ne_bang: false,
+            relational: true,
+            ordered_eq: true,
+            minus_one: false,
         },
-        source,
-    )?;
+        function: Some(expr_function_positional),
+        bang_is_or: false,
+        prec: BytePrec::Tight,
+        byte_prefix: true,
+        caret: mos6502::Caret::BankOrXor,
+        at_is_pc: false,
+    }
+}
+
+fn bind_expression_names(expr: Expr, anchor: &str, line: usize) -> Result<Expr, AsmError> {
     // Bare names, arithmetic and name-query markers all share the same
     // cheap namespace. Binding only a bare operand loses that context.
     let failure = RefCell::new(None);

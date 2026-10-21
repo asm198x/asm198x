@@ -1653,11 +1653,42 @@ pub(crate) fn expand_ca65_macros(
     })
 }
 
+/// Source-time numeric reading required by a token constructor.
+#[derive(Clone, Copy)]
+pub(crate) enum NumericRead {
+    Constant,
+    Literal,
+    Constancy,
+}
+
 /// Borrowed source-time numeric semantics for linked ca65 text consumers.
 pub(crate) trait LiveNumbers {
     fn literal(&self, text: &str, line: usize) -> Result<Option<i64>, AsmError>;
     fn number(&self, text: &str, line: usize) -> Result<Option<i64>, AsmError>;
     fn constancy(&self, text: &str, line: usize) -> Result<i64, AsmError>;
+
+    fn expression_tokens(
+        &self,
+        _tokens: &mut dyn super::mos6502::ExprTokens,
+        line: usize,
+    ) -> Result<crate::engine::Expr, AsmError> {
+        Err(AsmError::new(
+            line,
+            "this context cannot consume source expressions",
+        ))
+    }
+
+    fn number_tokens(
+        &self,
+        _tokens: &mut dyn super::mos6502::ExprTokens,
+        _read: NumericRead,
+        line: usize,
+    ) -> Result<i64, AsmError> {
+        Err(AsmError::new(
+            line,
+            "this numeric context cannot consume source tokens",
+        ))
+    }
 }
 
 pub(crate) struct LiveText<'a> {
@@ -1681,6 +1712,16 @@ fn live_syntax<'a>(line: usize, live: &LiveText<'a>) -> Ca65Text<'a> {
         live: Some(live.context),
         numeric_admission: None,
     }
+}
+
+/// Shared string grammar for arguments consumed by the canonical reader.
+pub(crate) fn call_read_ca65(
+    name: &str,
+    arguments: &[text::Arg],
+    line: usize,
+    live: &LiveText<'_>,
+) -> Result<Option<text::Folded>, AsmError> {
+    text::call_read(&live_syntax(line, live), name, arguments, line)
 }
 
 /// Token selectors return source to the numeric reader, which must consume
@@ -2410,16 +2451,25 @@ fn arity(args: &[text::Arg], want: usize, name: &str, line: usize) -> Result<(),
 /// worth (`1` and `$1` are the same token), a string or character by its
 /// contents, an identifier by its name **case-sensitively**, and everything
 /// else by nothing, because its kind already said everything.
-fn token_value(token: &Token) -> String {
+pub(super) fn token_value(token: &Token) -> String {
     match token.kind {
         TokenKind::Number => match parse_number(token.text(), 0) {
             Ok(n) => n.to_string(),
             Err(_) => token.text().to_string(),
         },
-        TokenKind::Str | TokenKind::Char => token
-            .text()
-            .trim_matches(|c| c == '"' || c == '\'')
-            .to_string(),
+        TokenKind::Str | TokenKind::Char => {
+            let quote = if token.kind == TokenKind::Char {
+                '\''
+            } else {
+                '"'
+            };
+            let source = token.text();
+            source
+                .strip_prefix(quote)
+                .and_then(|s| s.strip_suffix(quote))
+                .unwrap_or(source)
+                .to_string()
+        }
         TokenKind::Ident => token.text().to_string(),
         _ => String::new(),
     }

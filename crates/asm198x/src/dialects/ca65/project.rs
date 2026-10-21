@@ -1142,19 +1142,22 @@ impl SourceContext<'_> {
                 line,
                 Some(self),
             )?;
-            let Kind::Bytes(mut values) =
-                self.reader.scope_syms(&Kind::Bytes(vec![value]), line)?
-            else {
-                unreachable!("source expression")
-            };
-            let value = values.pop().expect("one expression");
-            self.required.borrow_mut().push(value.clone());
-            Ok(value)
+            self.retain_read(value, line)
         })();
         result.map_err(|mut error: AsmError| {
             error.span.get_or_insert_with(|| self.span.clone());
             error
         })
+    }
+
+    fn retain_read(&self, value: Expr, line: usize) -> Result<Expr, AsmError> {
+        let Kind::Bytes(mut values) = self.reader.scope_syms(&Kind::Bytes(vec![value]), line)?
+        else {
+            unreachable!("source expression")
+        };
+        let value = values.pop().expect("one expression");
+        self.required.borrow_mut().push(value.clone());
+        Ok(value)
     }
 
     fn text_context(&self) -> ca65_flat::LiveText<'_> {
@@ -1217,6 +1220,9 @@ impl mos6502::ExprSource for SourceContext<'_> {
     }
 
     fn symbol(&self, name: &str, line: usize) -> Result<Expr, AsmError> {
+        if let Some((sign, level)) = super::anon_ref(name) {
+            return self.reader.anons.refer(sign, level, line).map(Expr::Sym);
+        }
         self.reader.source_value(name, line)?;
         Ok(Expr::Sym(name.to_string()))
     }
@@ -1238,6 +1244,13 @@ impl mos6502::ExprSource for SourceContext<'_> {
             );
         }
         match name.to_ascii_lowercase().as_str() {
+            ".tcount" | ".blank" | ".match" | ".xmatch" => super::reader::captured_query(
+                &name.to_ascii_lowercase(),
+                args,
+                line,
+                self.text_context(),
+            )
+            .map(Expr::Num),
             ".const" => {
                 if ca65_flat::split_fields(args, usize::MAX).len() != 1 || args.trim().is_empty() {
                     return Err(AsmError::new(line, "`.const` takes one expression"));
@@ -1282,6 +1295,49 @@ impl mos6502::ExprSource for SourceContext<'_> {
 }
 
 impl ca65_flat::LiveNumbers for SourceContext<'_> {
+    fn expression_tokens(
+        &self,
+        tokens: &mut dyn mos6502::ExprTokens,
+        line: usize,
+    ) -> Result<Expr, AsmError> {
+        let value =
+            mos6502::parse_expr_tokens(tokens, line, super::expression_options(), Some(self))?;
+        super::bind_expression_names(value, self.reader.scope_env.anchor_str(), line)
+    }
+
+    fn number_tokens(
+        &self,
+        tokens: &mut dyn mos6502::ExprTokens,
+        read: ca65_flat::NumericRead,
+        line: usize,
+    ) -> Result<i64, AsmError> {
+        let value = self.expression_tokens(tokens, line)?;
+        let value = self.retain_read(value, line)?;
+        if matches!(read, ca65_flat::NumericRead::Constancy) {
+            let st = self.projection;
+            st.deferred.study_source(
+                &value,
+                &st.consts,
+                &st.label_seg,
+                &st.zero_page_names,
+                st.seg == "ZEROPAGE",
+                line,
+            )?;
+            return Ok(i64::from(
+                self.fold(&value, line).is_ok() || weighs_nothing(&value, st),
+            ));
+        }
+        if matches!(read, ca65_flat::NumericRead::Literal) {
+            let mut names = BTreeSet::new();
+            super::collect_syms(&Kind::Bytes(vec![value.clone()]), &mut names);
+            if !names.is_empty() {
+                return Err(AsmError::new(line, "literal constant expression expected"));
+            }
+        }
+        self.fold(&value, line)
+            .map_err(|_| AsmError::new(line, "source-time constant expression expected"))
+    }
+
     fn literal(&self, text: &str, _line: usize) -> Result<Option<i64>, AsmError> {
         let line = self.span.line as usize;
         let value = self.read(text, line)?;
@@ -1319,40 +1375,13 @@ impl ca65_flat::LiveNumbers for SourceContext<'_> {
 }
 
 impl super::DataSource for SourceContext<'_> {
-    fn value(&self, text: &str, line: usize) -> Result<Expr, AsmError> {
-        // Keep the outer expression unbound until the reader's ordinary
-        // scope_syms pass; nested reads retain their original bound keys.
-        super::parse_value_source(
-            &self.reader.anons,
-            self.reader.scope_env.anchor_str(),
-            text,
-            line,
-            Some(self),
-        )
-    }
-
-    fn tokens(&self, text: &str, line: usize) -> Result<String, AsmError> {
-        let text = text.trim();
-        let Some((head, tail)) = text.split_once('(') else {
-            return Ok(text.to_string());
-        };
-        let open = head.len();
-        let head = head.trim();
-        if matches!(
-            head.to_ascii_lowercase().as_str(),
-            ".left" | ".mid" | ".right"
-        ) && super::super::text::matching_paren(text, open) == Some(text.len() - 1)
-            && let Some(args) = tail.strip_suffix(')')
-        {
-            self.select(head, args, line)
-        } else if matches!(
-            head.to_ascii_lowercase().as_str(),
-            ".sprintf" | ".concat" | ".string"
-        ) {
-            self.expand(text, line)
-        } else {
-            Ok(text.to_string())
-        }
+    fn data(
+        &self,
+        text: &str,
+        line: usize,
+        grammar: super::reader::DataGrammar,
+    ) -> Result<Vec<Expr>, AsmError> {
+        super::reader::data(text, line, grammar, self.text_context())
     }
 }
 
