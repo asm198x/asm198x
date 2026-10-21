@@ -1,0 +1,8 @@
+{
+  "cases": 200,
+  "files": 49,
+  "native_accepts": 170,
+  "native_refusals": 30,
+  "every_source_config_status_and_byte_reproduced": true,
+  "tool_hashes_match": true
+}
