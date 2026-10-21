@@ -1421,10 +1421,13 @@ impl ExprParser<'_> {
                 match (self.function, self.tokens.get(self.pos)) {
                     (Some(build), Some(Tok::LParen)) => {
                         self.pos += 1;
-                        let mut args = vec![self.call_arg()?];
-                        while matches!(self.tokens.get(self.pos), Some(Tok::Comma)) {
-                            self.pos += 1;
+                        let mut args = Vec::new();
+                        if !matches!(self.tokens.get(self.pos), Some(Tok::RParen)) {
                             args.push(self.call_arg()?);
+                            while matches!(self.tokens.get(self.pos), Some(Tok::Comma)) {
+                                self.pos += 1;
+                                args.push(self.call_arg()?);
+                            }
                         }
                         if !matches!(self.tokens.get(self.pos), Some(Tok::RParen)) {
                             return Err(AsmError::new(

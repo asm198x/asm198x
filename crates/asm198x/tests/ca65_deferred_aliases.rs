@@ -132,6 +132,46 @@ fn configured_far_addresses_check_full_values_at_each_item_pc() {
     verify_fixture(fixture, 190);
 }
 
+#[test]
+fn empty_source_calls_obey_native_argument_and_token_rules() {
+    let fixture = include_str!("fixtures/ca65-empty-calls.json");
+    let facts: serde_json::Value = serde_json::from_str(fixture).expect("native captures");
+    assert_eq!(facts["audit_case_count"], 840);
+    let mut names = std::collections::BTreeSet::new();
+    for fact in facts["cases"].as_array().expect("qualified cases") {
+        assert!(names.insert(fact["name"].as_str().expect("name")));
+    }
+    assert_eq!(names.len(), 722);
+    let excluded = facts["excluded_audit_cases"]
+        .as_object()
+        .expect("known gaps");
+    assert_eq!(excluded.len(), 118);
+    for (name, issues) in excluded {
+        if name.ends_with("_inactive") {
+            assert_eq!(issues, &serde_json::json!([895]));
+        } else {
+            assert_eq!(issues, &serde_json::json!([928]));
+            assert!(name.contains("_nested_const_tokens_"));
+            assert!(
+                name.ends_with("_direct")
+                    || name.ends_with("_included")
+                    || name.ends_with("_macro")
+            );
+        }
+        assert!(name.starts_with("65816_") || name.starts_with("huc6280_"));
+        assert!(names.insert(name));
+    }
+    let inventory: std::collections::BTreeSet<_> = facts["audit_names"]
+        .as_array()
+        .expect("complete inventory")
+        .iter()
+        .map(|name| name.as_str().expect("name"))
+        .collect();
+    assert_eq!(inventory.len(), 840);
+    assert_eq!(names, inventory);
+    verify_fixture(fixture, 722);
+}
+
 fn verify_fixture(fixture: &str, count: usize) {
     let facts: serde_json::Value = serde_json::from_str(fixture).expect("native captures");
     let cases = facts["cases"].as_array().expect("cases");
@@ -144,11 +184,13 @@ fn verify_fixture(fixture: &str, count: usize) {
     }
     for fact in cases {
         let name = fact["name"].as_str().expect("name");
-        let dialect = if name.starts_with("65816_") {
-            "65816"
-        } else {
-            "ca65"
-        };
+        let dialect = fact["dialect"].as_str().unwrap_or_else(|| {
+            if name.starts_with("65816_") {
+                "65816"
+            } else {
+                "ca65"
+            }
+        });
         std::fs::write(
             root.join("input.s"),
             fact["source"].as_str().expect("source"),
@@ -186,7 +228,11 @@ fn verify_fixture(fixture: &str, count: usize) {
             .last()
             .expect("native result")["exit"]
             == 0;
-        assert_eq!(result.status.success(), accepted, "{name}: {result:?}");
+        assert_eq!(
+            result.status.code(),
+            Some(if accepted { 0 } else { 1 }),
+            "{name}: {result:?}"
+        );
         if !accepted {
             let errors: serde_json::Value =
                 serde_json::from_slice(&result.stdout).expect("diagnostics");

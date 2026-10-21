@@ -1633,7 +1633,8 @@ pub(crate) fn expand_ca65(
             strings: Cow::Borrowed(&strings),
             ..Ca65Text::default()
         };
-        let resolved = text::expand(&text, &expanded.text).map_err(|e| strings.error(e))?;
+        let resolved = text::expand(&text, &expanded.text)
+            .map_err(|e| macros::remap_lines(strings.error(e), Some(&expanded.origins)))?;
         Ok(Some((resolved, expanded.origins)))
     })?;
     Ok(Ca65Expansion { expansion, strings })
@@ -1691,7 +1692,10 @@ pub(crate) fn select_ca65_live(
 ) -> Result<String, AsmError> {
     match text::call(&live_syntax(line, &live), name, arguments, line)? {
         Some(text::Folded::Bare(source)) => Ok(source),
-        _ => unreachable!("token selector returns source"),
+        _ => Err(AsmError::new(
+            line,
+            format!("`{name}` did not produce a token sequence"),
+        )),
     }
 }
 
@@ -2000,7 +2004,10 @@ impl text::TextSyntax for Ca65Text<'_> {
                 ".sprintf" | ".concat" | ".string" | ".ident" | ".left" | ".right" | ".mid"
             )
         } else {
-            !matches!(name.to_ascii_lowercase().as_str(), ".strlen" | ".strat")
+            !matches!(
+                name.to_ascii_lowercase().as_str(),
+                ".strlen" | ".strat" | ".blank" | ".tcount"
+            )
         }
     }
 
@@ -2101,17 +2108,17 @@ impl text::TextSyntax for Ca65Text<'_> {
         if !is_text_function(&lower) {
             return Ok(None);
         }
-        // Recognition probes use line zero. A real numeric string query must
-        // keep its native arity, even when the argument list is empty.
+        // Line zero is a recognition probe, not a selected source call.
         if args.is_empty() {
-            if line != 0 {
+            return if line == 0 {
+                Ok(Some(Folded::Text(String::new())))
+            } else {
                 match lower.as_str() {
-                    ".strlen" => arity(args, 1, name, line)?,
-                    ".strat" => arity(args, 2, name, line)?,
-                    _ => {}
+                    ".blank" => Ok(Some(Folded::Number(1))),
+                    ".tcount" => Ok(Some(Folded::Number(0))),
+                    _ => Err(AsmError::new(line, format!("`{name}` requires arguments"))),
                 }
-            }
-            return Ok(Some(Folded::Text(String::new())));
+            };
         }
         let source = format!(
             "{name}({})",

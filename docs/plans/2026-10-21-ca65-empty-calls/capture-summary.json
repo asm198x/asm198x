@@ -10,5 +10,6 @@
     "101": 18,
     "1": 12
   },
-  "preflight_750_preserved": true
+  "preflight_750_preserved": true,
+  "stage": "initial scope before the six pre-existing #928 cases were separated; see fix-summary.json"
 }

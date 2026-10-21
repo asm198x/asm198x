@@ -1,0 +1,12 @@
+{
+  "cases": 840,
+  "qualified_cases": 722,
+  "accepted": 452,
+  "refused": 270,
+  "cohort_processes": 2078,
+  "fixed_status_or_byte_results": 222,
+  "lost_matches": [],
+  "tracked_895_cases": 112,
+  "tracked_928_cases": 6,
+  "cli_sha256": "40c418d774a7411a1398e226718546503aa6937ad0007e0f2c2293069128610c"
+}
