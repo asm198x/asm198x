@@ -1,0 +1,3806 @@
+{
+  "binary": "/private/tmp/asm198x-scalar-final-producer/asm198x",
+  "sha256": "76066fe8048d203a7c567b43953d0fce193db8c756254617c1f71294575c4449",
+  "results": [
+    {
+      "name": "include_value_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "020000",
+      "native_hex": "020101",
+      "matches": false
+    },
+    {
+      "name": "include_value_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "020000",
+      "native_hex": "020101",
+      "matches": false
+    },
+    {
+      "name": "include_value_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000200",
+      "native_hex": "010201",
+      "matches": false
+    },
+    {
+      "name": "include_value_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "include_value_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "include_order_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: `.sprintf` needs a number it can work out where it stands, and `.ref(VALUE)+1` is not one: this pass runs before the layout, so a label's address cannot be reached from here\n",
+      "hex": null,
+      "native_hex": "010101",
+      "matches": false
+    },
+    {
+      "name": "include_order_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-1uwimbkn/include_order_included.inc:2: error: `.sprintf` needs a number it can work out where it stands, and `.ref(VALUE)+1` is not one: this pass runs before the layout, so a label's address cannot be reached from here\nincluded from input.s:1\n",
+      "hex": null,
+      "native_hex": "010101",
+      "matches": false
+    },
+    {
+      "name": "include_order_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: `.sprintf` needs a number it can work out where it stands, and `.ref(VALUE)+1` is not one: this pass runs before the layout, so a label's address cannot be reached from here\nin expansion of macro `run` defined at input.s:1, invoked at input.s:6\n",
+      "hex": null,
+      "native_hex": "010101",
+      "matches": false
+    },
+    {
+      "name": "include_order_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "include_order_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "include_reverse_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: `.sprintf` needs a number it can work out where it stands, and `1+.ref(VALUE)` is not one: this pass runs before the layout, so a label's address cannot be reached from here\n",
+      "hex": null,
+      "native_hex": "020101",
+      "matches": false
+    },
+    {
+      "name": "include_reverse_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-1uwimbkn/include_reverse_included.inc:2: error: `.sprintf` needs a number it can work out where it stands, and `1+.ref(VALUE)` is not one: this pass runs before the layout, so a label's address cannot be reached from here\nincluded from input.s:1\n",
+      "hex": null,
+      "native_hex": "020101",
+      "matches": false
+    },
+    {
+      "name": "include_reverse_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: `.sprintf` needs a number it can work out where it stands, and `1+.ref(VALUE)` is not one: this pass runs before the layout, so a label's address cannot be reached from here\nin expansion of macro `run` defined at input.s:1, invoked at input.s:6\n",
+      "hex": null,
+      "native_hex": "010201",
+      "matches": false
+    },
+    {
+      "name": "include_reverse_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "include_reverse_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "include_nested_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "020000",
+      "native_hex": "020101",
+      "matches": false
+    },
+    {
+      "name": "include_nested_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "020000",
+      "native_hex": "020101",
+      "matches": false
+    },
+    {
+      "name": "include_nested_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000200",
+      "native_hex": "010201",
+      "matches": false
+    },
+    {
+      "name": "include_nested_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "include_nested_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "include_selector_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "020000",
+      "native_hex": "020101",
+      "matches": false
+    },
+    {
+      "name": "include_selector_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "020000",
+      "native_hex": "020101",
+      "matches": false
+    },
+    {
+      "name": "include_selector_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000200",
+      "native_hex": "010201",
+      "matches": false
+    },
+    {
+      "name": "include_selector_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "include_selector_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "include_missing_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: `.sprintf` needs a number it can work out where it stands, and `MISSING` is not one: this pass runs before the layout, so a label's address cannot be reached from here\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "include_missing_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-1uwimbkn/include_missing_included.inc:2: error: `.sprintf` needs a number it can work out where it stands, and `MISSING` is not one: this pass runs before the layout, so a label's address cannot be reached from here\nincluded from input.s:1\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "include_missing_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: `.sprintf` needs a number it can work out where it stands, and `MISSING` is not one: this pass runs before the layout, so a label's address cannot be reached from here\nin expansion of macro `run` defined at input.s:1, invoked at input.s:6\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "include_missing_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "include_missing_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "include_query_only_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: `\u0001ref\u0001MISSING` is not defined anywhere in this source\n",
+      "hex": null,
+      "native_hex": "010000",
+      "matches": false
+    },
+    {
+      "name": "include_query_only_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-1uwimbkn/include_query_only_included.inc:2: error: `\u0001ref\u0001MISSING` is not defined anywhere in this source\nincluded from input.s:1\n",
+      "hex": null,
+      "native_hex": "010000",
+      "matches": false
+    },
+    {
+      "name": "include_query_only_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: `\u0001ref\u0001MISSING` is not defined anywhere in this source\nin expansion of macro `run` defined at input.s:1, invoked at input.s:6\n",
+      "hex": null,
+      "native_hex": "000100",
+      "matches": false
+    },
+    {
+      "name": "include_query_only_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "include_query_only_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_offset_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "00",
+      "native_hex": "4201",
+      "matches": false
+    },
+    {
+      "name": "incbin_offset_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "00",
+      "native_hex": "4201",
+      "matches": false
+    },
+    {
+      "name": "incbin_offset_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "00",
+      "native_hex": "4201",
+      "matches": false
+    },
+    {
+      "name": "incbin_offset_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_offset_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_order_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "00",
+      "native_hex": "4201",
+      "matches": false
+    },
+    {
+      "name": "incbin_order_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "00",
+      "native_hex": "4201",
+      "matches": false
+    },
+    {
+      "name": "incbin_order_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "00",
+      "native_hex": "4201",
+      "matches": false
+    },
+    {
+      "name": "incbin_order_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_order_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_reverse_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "00",
+      "native_hex": "4301",
+      "matches": false
+    },
+    {
+      "name": "incbin_reverse_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "00",
+      "native_hex": "4301",
+      "matches": false
+    },
+    {
+      "name": "incbin_reverse_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "00",
+      "native_hex": "4301",
+      "matches": false
+    },
+    {
+      "name": "incbin_reverse_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_reverse_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_size_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "4100",
+      "native_hex": "414201",
+      "matches": false
+    },
+    {
+      "name": "incbin_size_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "4100",
+      "native_hex": "414201",
+      "matches": false
+    },
+    {
+      "name": "incbin_size_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "4100",
+      "native_hex": "414201",
+      "matches": false
+    },
+    {
+      "name": "incbin_size_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_size_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_zero_size_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "00",
+      "native_hex": "01",
+      "matches": false
+    },
+    {
+      "name": "incbin_zero_size_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "00",
+      "native_hex": "01",
+      "matches": false
+    },
+    {
+      "name": "incbin_zero_size_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "00",
+      "native_hex": "01",
+      "matches": false
+    },
+    {
+      "name": "incbin_zero_size_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_zero_size_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_filename_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "4100",
+      "native_hex": "4201",
+      "matches": false
+    },
+    {
+      "name": "incbin_filename_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "4100",
+      "native_hex": "4201",
+      "matches": false
+    },
+    {
+      "name": "incbin_filename_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "4100",
+      "native_hex": "4201",
+      "matches": false
+    },
+    {
+      "name": "incbin_filename_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_filename_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_query_filename_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: `.sprintf` needs a number it can work out where it stands, and `.ref(VALUE)` is not one: this pass runs before the layout, so a label's address cannot be reached from here\n",
+      "hex": null,
+      "native_hex": "4201",
+      "matches": false
+    },
+    {
+      "name": "incbin_query_filename_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-1uwimbkn/incbin_query_filename_included.inc:2: error: `.sprintf` needs a number it can work out where it stands, and `.ref(VALUE)` is not one: this pass runs before the layout, so a label's address cannot be reached from here\nincluded from input.s:1\n",
+      "hex": null,
+      "native_hex": "4201",
+      "matches": false
+    },
+    {
+      "name": "incbin_query_filename_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: `.sprintf` needs a number it can work out where it stands, and `.ref(VALUE)` is not one: this pass runs before the layout, so a label's address cannot be reached from here\nin expansion of macro `run` defined at input.s:1, invoked at input.s:6\n",
+      "hex": null,
+      "native_hex": "4201",
+      "matches": false
+    },
+    {
+      "name": "incbin_query_filename_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_query_filename_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_nested_offset_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "00",
+      "native_hex": "4301",
+      "matches": false
+    },
+    {
+      "name": "incbin_nested_offset_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "00",
+      "native_hex": "4301",
+      "matches": false
+    },
+    {
+      "name": "incbin_nested_offset_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "00",
+      "native_hex": "4301",
+      "matches": false
+    },
+    {
+      "name": "incbin_nested_offset_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_nested_offset_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_missing_offset_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: `MISSING` is not defined anywhere in this source\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "incbin_missing_offset_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-1uwimbkn/incbin_missing_offset_included.inc:2: error: `MISSING` is not defined anywhere in this source\nincluded from input.s:1\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "incbin_missing_offset_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: `MISSING` is not defined anywhere in this source\nin expansion of macro `run` defined at input.s:1, invoked at input.s:6\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "incbin_missing_offset_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_missing_offset_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_missing_size_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: `MISSING` is not defined anywhere in this source\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "incbin_missing_size_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-1uwimbkn/incbin_missing_size_included.inc:2: error: `MISSING` is not defined anywhere in this source\nincluded from input.s:1\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "incbin_missing_size_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: `MISSING` is not defined anywhere in this source\nin expansion of macro `run` defined at input.s:1, invoked at input.s:6\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "incbin_missing_size_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_missing_size_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_query_only_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: `\u0001ref\u0001MISSING` is not defined anywhere in this source\n",
+      "hex": null,
+      "native_hex": "4200",
+      "matches": false
+    },
+    {
+      "name": "incbin_query_only_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-1uwimbkn/incbin_query_only_included.inc:2: error: `\u0001ref\u0001MISSING` is not defined anywhere in this source\nincluded from input.s:1\n",
+      "hex": null,
+      "native_hex": "4200",
+      "matches": false
+    },
+    {
+      "name": "incbin_query_only_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: `\u0001ref\u0001MISSING` is not defined anywhere in this source\nin expansion of macro `run` defined at input.s:1, invoked at input.s:6\n",
+      "hex": null,
+      "native_hex": "4200",
+      "matches": false
+    },
+    {
+      "name": "incbin_query_only_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_query_only_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "label_include_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: `.sprintf` needs a number it can work out where it stands, and `.defined(HERE)` is not one: this pass runs before the layout, so a label's address cannot be reached from here\n",
+      "hex": null,
+      "native_hex": "010000",
+      "matches": false
+    },
+    {
+      "name": "label_include_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-1uwimbkn/label_include_included.inc:2: error: `.sprintf` needs a number it can work out where it stands, and `.defined(HERE)` is not one: this pass runs before the layout, so a label's address cannot be reached from here\nincluded from input.s:1\n",
+      "hex": null,
+      "native_hex": "010000",
+      "matches": false
+    },
+    {
+      "name": "label_include_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: `.sprintf` needs a number it can work out where it stands, and `.defined(HERE)` is not one: this pass runs before the layout, so a label's address cannot be reached from here\nin expansion of macro `run` defined at input.s:1, invoked at input.s:6\n",
+      "hex": null,
+      "native_hex": "000100",
+      "matches": false
+    },
+    {
+      "name": "label_include_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "label_include_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "label_incbin_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "4200",
+      "native_hex": "4200",
+      "matches": true
+    },
+    {
+      "name": "label_incbin_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "4200",
+      "native_hex": "4200",
+      "matches": true
+    },
+    {
+      "name": "label_incbin_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "4200",
+      "native_hex": "4200",
+      "matches": true
+    },
+    {
+      "name": "label_incbin_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "label_incbin_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_forward_const_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "4100",
+      "native_hex": "4100",
+      "matches": true
+    },
+    {
+      "name": "incbin_forward_const_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "4100",
+      "native_hex": "4100",
+      "matches": true
+    },
+    {
+      "name": "incbin_forward_const_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "4100",
+      "native_hex": "4100",
+      "matches": true
+    },
+    {
+      "name": "incbin_forward_const_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_forward_const_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_forward_value_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: `.incbin` offset must be a constant expression: undefined symbol `LATER`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "incbin_forward_value_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-1uwimbkn/incbin_forward_value_included.inc:2: error: `.incbin` offset must be a constant expression: undefined symbol `LATER`\nincluded from input.s:1\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "incbin_forward_value_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:7: error: `.incbin` offset must be a constant expression: undefined symbol `LATER`\nin expansion of macro `run` defined at input.s:1, invoked at input.s:7\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "incbin_forward_value_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_forward_value_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_alias_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "4201",
+      "native_hex": "4201",
+      "matches": true
+    },
+    {
+      "name": "incbin_alias_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "4201",
+      "native_hex": "4201",
+      "matches": true
+    },
+    {
+      "name": "incbin_alias_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "4201",
+      "native_hex": "4201",
+      "matches": true
+    },
+    {
+      "name": "incbin_alias_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_alias_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_scoped_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `.const` cannot answer for `VALUE`: this pass keeps no scope stack, so a constant inside a `.proc` or `.scope` is invisible to it\n",
+      "hex": null,
+      "native_hex": "410100",
+      "matches": false
+    },
+    {
+      "name": "incbin_scoped_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-1uwimbkn/incbin_scoped_included.inc:3: error: `.const` cannot answer for `VALUE`: this pass keeps no scope stack, so a constant inside a `.proc` or `.scope` is invisible to it\nincluded from input.s:1\n",
+      "hex": null,
+      "native_hex": "410100",
+      "matches": false
+    },
+    {
+      "name": "incbin_scoped_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:9: error: `.const` cannot answer for `VALUE`: this pass keeps no scope stack, so a constant inside a `.proc` or `.scope` is invisible to it\nin expansion of macro `run` defined at input.s:1, invoked at input.s:9\n",
+      "hex": null,
+      "native_hex": "410100",
+      "matches": false
+    },
+    {
+      "name": "incbin_scoped_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_scoped_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "include_scoped_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `.const` cannot answer for `VALUE`: this pass keeps no scope stack, so a constant inside a `.proc` or `.scope` is invisible to it\n",
+      "hex": null,
+      "native_hex": "00010100",
+      "matches": false
+    },
+    {
+      "name": "include_scoped_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-1uwimbkn/include_scoped_included.inc:3: error: `.const` cannot answer for `VALUE`: this pass keeps no scope stack, so a constant inside a `.proc` or `.scope` is invisible to it\nincluded from input.s:1\n",
+      "hex": null,
+      "native_hex": "00010100",
+      "matches": false
+    },
+    {
+      "name": "include_scoped_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:9: error: `.const` cannot answer for `VALUE`: this pass keeps no scope stack, so a constant inside a `.proc` or `.scope` is invisible to it\nin expansion of macro `run` defined at input.s:1, invoked at input.s:9\n",
+      "hex": null,
+      "native_hex": "01000000",
+      "matches": false
+    },
+    {
+      "name": "include_scoped_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "include_scoped_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "include_name_query_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: `.sprintf` needs a number it can work out where it stands, and `.ref(MISSING)` is not one: this pass runs before the layout, so a label's address cannot be reached from here\n",
+      "hex": null,
+      "native_hex": "000000",
+      "matches": false
+    },
+    {
+      "name": "include_name_query_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-1uwimbkn/include_name_query_included.inc:2: error: `.sprintf` needs a number it can work out where it stands, and `.ref(MISSING)` is not one: this pass runs before the layout, so a label's address cannot be reached from here\nincluded from input.s:1\n",
+      "hex": null,
+      "native_hex": "000000",
+      "matches": false
+    },
+    {
+      "name": "include_name_query_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: `.sprintf` needs a number it can work out where it stands, and `.ref(MISSING)` is not one: this pass runs before the layout, so a label's address cannot be reached from here\nin expansion of macro `run` defined at input.s:1, invoked at input.s:6\n",
+      "hex": null,
+      "native_hex": "000000",
+      "matches": false
+    },
+    {
+      "name": "include_name_query_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "include_name_query_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_name_query_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "4100",
+      "native_hex": "4100",
+      "matches": true
+    },
+    {
+      "name": "incbin_name_query_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "4100",
+      "native_hex": "4100",
+      "matches": true
+    },
+    {
+      "name": "incbin_name_query_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "4100",
+      "native_hex": "4100",
+      "matches": true
+    },
+    {
+      "name": "incbin_name_query_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_name_query_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_zero_window_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "00",
+      "native_hex": "00",
+      "matches": true
+    },
+    {
+      "name": "incbin_zero_window_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "00",
+      "native_hex": "00",
+      "matches": true
+    },
+    {
+      "name": "incbin_zero_window_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "00",
+      "native_hex": "00",
+      "matches": true
+    },
+    {
+      "name": "incbin_zero_window_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_zero_window_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_end_offset_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "00",
+      "native_hex": "00",
+      "matches": true
+    },
+    {
+      "name": "incbin_end_offset_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "00",
+      "native_hex": "00",
+      "matches": true
+    },
+    {
+      "name": "incbin_end_offset_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "00",
+      "native_hex": "00",
+      "matches": true
+    },
+    {
+      "name": "incbin_end_offset_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_end_offset_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_large_offset_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:9: error: `payload.bin`: offset 5 is past the end of the 4-byte file\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "incbin_large_offset_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-1uwimbkn/incbin_large_offset_included.inc:2:9: error: `payload.bin`: offset 5 is past the end of the 4-byte file\nincluded from input.s:1\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "incbin_large_offset_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6:9: error: `payload.bin`: offset 5 is past the end of the 4-byte file\nin expansion of macro `run` defined at input.s:1, invoked at input.s:6\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "incbin_large_offset_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_large_offset_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_negative_offset_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:9: error: `payload.bin`: offset -1 must not be negative\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "incbin_negative_offset_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-1uwimbkn/incbin_negative_offset_included.inc:2:9: error: `payload.bin`: offset -1 must not be negative\nincluded from input.s:1\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "incbin_negative_offset_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6:9: error: `payload.bin`: offset -1 must not be negative\nin expansion of macro `run` defined at input.s:1, invoked at input.s:6\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "incbin_negative_offset_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_negative_offset_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_negative_size_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\n",
+      "hex": "4142434400",
+      "native_hex": "4142434400",
+      "matches": true
+    },
+    {
+      "name": "incbin_negative_size_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\n",
+      "hex": "4142434400",
+      "native_hex": "4142434400",
+      "matches": true
+    },
+    {
+      "name": "incbin_negative_size_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\n",
+      "hex": "4142434400",
+      "native_hex": "4142434400",
+      "matches": true
+    },
+    {
+      "name": "incbin_negative_size_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_negative_size_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_remainder_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+      "hex": "42434400",
+      "native_hex": "42434400",
+      "matches": true
+    },
+    {
+      "name": "incbin_remainder_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+      "hex": "42434400",
+      "native_hex": "42434400",
+      "matches": true
+    },
+    {
+      "name": "incbin_remainder_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 4 byte(s) -> out.bin\n",
+      "hex": "42434400",
+      "native_hex": "42434400",
+      "matches": true
+    },
+    {
+      "name": "incbin_remainder_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_remainder_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_all_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\n",
+      "hex": "4142434400",
+      "native_hex": "4142434400",
+      "matches": true
+    },
+    {
+      "name": "incbin_all_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\n",
+      "hex": "4142434400",
+      "native_hex": "4142434400",
+      "matches": true
+    },
+    {
+      "name": "incbin_all_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 5 byte(s) -> out.bin\n",
+      "hex": "4142434400",
+      "native_hex": "4142434400",
+      "matches": true
+    },
+    {
+      "name": "incbin_all_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_all_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "include_tail_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unexpected `,\u0001ca65-string:0\u0001` after the `.include` file name\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "include_tail_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-1uwimbkn/include_tail_included.inc:2: error: unexpected `,\u0001ca65-string:0\u0001` after the `.include` file name\nincluded from input.s:1\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "include_tail_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: unexpected `,\u0001ca65-string:0\u0001` after the `.include` file name\nin expansion of macro `run` defined at input.s:1, invoked at input.s:6\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "include_tail_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "include_tail_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_extra_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: `.incbin` takes at most a file name, an offset, and a size\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "incbin_extra_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-1uwimbkn/incbin_extra_included.inc:2: error: `.incbin` takes at most a file name, an offset, and a size\nincluded from input.s:1\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "incbin_extra_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: `.incbin` takes at most a file name, an offset, and a size\nin expansion of macro `run` defined at input.s:1, invoked at input.s:6\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "incbin_extra_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_extra_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "include_label_cancel_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000000",
+      "native_hex": "010000",
+      "matches": false
+    },
+    {
+      "name": "include_label_cancel_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000000",
+      "native_hex": "010000",
+      "matches": false
+    },
+    {
+      "name": "include_label_cancel_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 3 byte(s) -> out.bin\n",
+      "hex": "000000",
+      "native_hex": "000100",
+      "matches": false
+    },
+    {
+      "name": "include_label_cancel_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "include_label_cancel_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_label_cancel_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "4100",
+      "native_hex": "4200",
+      "matches": false
+    },
+    {
+      "name": "incbin_label_cancel_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "4100",
+      "native_hex": "4200",
+      "matches": false
+    },
+    {
+      "name": "incbin_label_cancel_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "4100",
+      "native_hex": "4200",
+      "matches": false
+    },
+    {
+      "name": "incbin_label_cancel_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_label_cancel_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "include_cycle_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: circular definition of symbol `FIRST`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "include_cycle_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-1uwimbkn/include_cycle_included.inc:2:1: error: circular definition of symbol `FIRST`\nincluded from input.s:1\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "include_cycle_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:8:1: error: circular definition of symbol `FIRST`\nin expansion of macro `run` defined at input.s:1, invoked at input.s:8\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "include_cycle_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "include_cycle_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_cycle_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: circular definition of symbol `FIRST`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "incbin_cycle_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-1uwimbkn/incbin_cycle_included.inc:2:1: error: circular definition of symbol `FIRST`\nincluded from input.s:1\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "incbin_cycle_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:8:1: error: circular definition of symbol `FIRST`\nin expansion of macro `run` defined at input.s:1, invoked at input.s:8\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "incbin_cycle_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_cycle_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-final-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    }
+  ]
+}

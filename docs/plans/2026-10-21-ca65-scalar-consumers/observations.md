@@ -19,7 +19,7 @@ with live numeric callbacks, rather than stopping after the leading string.
 The earlier 50-case audit remains independent: this slice targets 40 scalar cases;
 the remaining 10 include/incbin cases stay under #795 for the following slice.
 
-The first implementation matches all 320 corrected cases with no lost baseline match.
+The corrected implementation matches all 320 cases with no lost baseline match.
 
 The corrected matrix has 64 bodies across direct/include/macro/inactive/unused
 contexts: 272 native accepts and 48 refusals. All 102 predecessor differences are
