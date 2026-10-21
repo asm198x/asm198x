@@ -36,7 +36,7 @@ requiredCases.push('ca65_reserved_constants');
 requiredCases.push('ca65_label_delimiters');
 requiredCases.push('ca65_macro_definition_labels');
 requiredCases.push('ca65_record_allocators');
-requiredCases.push('ca65_deferred_aliases', 'ca65_source_constancy', 'ca65_query_admission', 'ca65_conditional_context', 'ca65_scoped_externals', 'ca65_data_context', 'ca65_linked_faraddr');
+requiredCases.push('ca65_deferred_aliases', 'ca65_source_constancy', 'ca65_query_admission', 'ca65_conditional_context', 'ca65_scoped_externals', 'ca65_data_context', 'ca65_linked_faraddr', 'ca65_empty_calls');
 requiredCases.push('ca65_scope_binding');
 requiredCases.push('ca65_unused_cycles');
 requiredCases.push('ca65_enum_expressions');
@@ -1118,6 +1118,66 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
           assert.deepEqual(shape(), before, fact.name + ': formatted symbols and addresses');
         } else {
           reject(p); assert(Array.isArray(JSON.parse(p.stdout)) && JSON.parse(p.stdout).length > 0, fact.name);
+          if (fact.query_error) {
+            const span = JSON.parse(p.stdout)[0].span;
+            const filename = span.path.replaceAll('\\', '/').split('/').at(-1);
+            assert.equal(filename, fact.query_error.path === 'input.s' ? 'cpu.s' : fact.query_error.path, fact.name);
+            assert.equal(span.line, fact.query_error.line, fact.name);
+            assert.deepEqual(span.expansion_frames.map(frame => frame.macro_name), fact.query_error.frames, fact.name);
+          }
+          for (const output of outputs) assert.equal(read(output).toString(), 'previous image', fact.name + ': ' + output);
+        }
+      }
+    });
+    test('ca65_empty_calls', () => {
+      const facts = require('../crates/asm198x/tests/fixtures/ca65-empty-calls.json');
+      assert.equal(facts.cases.length, 722);
+      assert.equal(facts.audit_case_count, 840);
+      const names = new Set(facts.cases.map(fact => fact.name));
+      assert.equal(names.size, 722);
+      assert.equal(Object.keys(facts.excluded_audit_cases).length, 118);
+      for (const [name, issues] of Object.entries(facts.excluded_audit_cases)) {
+        assert(/^(65816|huc6280)_/.test(name));
+        if (name.endsWith('_inactive')) assert.deepEqual(issues, [895]);
+        else {
+          assert.deepEqual(issues, [928]);
+          assert(name.includes('_nested_const_tokens_') && /_(direct|included|macro)$/.test(name));
+        }
+        assert(!names.has(name)); names.add(name);
+      }
+      assert.equal(names.size, 840);
+      assert.equal(facts.audit_names.length, 840);
+      assert.deepEqual([...names].sort(), [...facts.audit_names].sort());
+      for (const [name, text] of Object.entries(facts.files)) {
+        fs.mkdirSync(path.dirname(path.join(root, name)), { recursive: true }); write(name, text);
+      }
+      for (const fact of facts.cases) {
+        write('cpu.cfg', fact.config); write('cpu.s', fact.source);
+        const outputs = ['cpu.bin', 'scope.debug198x', 'scope.sym', 'scope.lst.json'];
+        for (const output of outputs) write(output, 'previous image');
+        const dialect = fact.dialect;
+        assert(['ca65', '65816', 'huc6280'].includes(dialect));
+        const assemble = input => run(['--dialect', dialect, ...(dialect === 'ca65' ? ['-C', 'cpu.cfg'] : []), input, '-o', 'cpu.bin', '--debug=scope.debug198x', '--sym=scope.sym', '--listing-json=scope.lst.json', '--message-format=json']);
+        const shape = () => read('scope.debug198x').toString().trim().split('\n').map(s => JSON.parse(s)).filter(r => r.t === 'symbol' || r.t === 'section');
+        const p = assemble('cpu.s');
+        if (fact.native.at(-1).exit === 0) {
+          assert.equal(p.status, 0, fact.name + ': ' + p.stderr);
+          assert.deepEqual(read('cpu.bin'), Buffer.from(fact.native_hex, 'hex'), fact.name);
+          assert.deepEqual(JSON.parse(p.stdout).bytes, Array.from(Buffer.from(fact.native_hex, 'hex')), fact.name + ': JSON bytes');
+          const before = shape();
+          const formatted = run(['fmt', '--dialect', dialect, 'cpu.s']);
+          assert.equal(formatted.status, 0, fact.name + ': ' + formatted.stderr);
+          write('scope-formatted.s', formatted.stdout);
+          const again = run(['fmt', '--dialect', dialect, 'scope-formatted.s']);
+          assert.equal(again.status, 0, fact.name + ': ' + again.stderr);
+          assert.equal(again.stdout, formatted.stdout, fact.name + ': idempotence');
+          const roundtrip = assemble('scope-formatted.s');
+          assert.equal(roundtrip.status, 0, fact.name + ': ' + roundtrip.stderr);
+          assert.deepEqual(read('cpu.bin'), Buffer.from(fact.native_hex, 'hex'), fact.name + ': formatted bytes');
+          assert.deepEqual(JSON.parse(roundtrip.stdout).bytes, Array.from(Buffer.from(fact.native_hex, 'hex')), fact.name + ': formatted JSON bytes');
+          assert.deepEqual(shape(), before, fact.name + ': formatted symbols and addresses');
+        } else {
+          assert.equal(p.status, 1, fact.name + ': ' + p.stderr); reject(p); assert(Array.isArray(JSON.parse(p.stdout)) && JSON.parse(p.stdout).length > 0, fact.name);
           if (fact.query_error) {
             const span = JSON.parse(p.stdout)[0].span;
             const filename = span.path.replaceAll('\\', '/').split('/').at(-1);

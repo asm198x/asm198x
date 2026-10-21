@@ -29,8 +29,15 @@ its preparation refactors are not part of this independent bug fix.
 
 The expanded capture exposes existing #895 for 112 flat-family inactive
 programs. Keep those in the complete audit inventory with explicit #895
-dispositions; qualify the other 728 cases. No existing test is disabled.
+dispositions; qualify 722 cases, with six existing .const token-list gaps tracked in #928. No existing test is disabled.
 Nested controls must prevent a real-call guard from making numeric functions
 fold inside captured lists: physical numeric calls remain tokens there, while
 constructors continue folding. Verify the shared brace-fold policy against
 native on all three paths before adopting it.
+
+The first producer-only brace-policy trial regressed six valid nested sprintf
+cases. Retain its results as rejected-brace-policy-after.json.gz. Restore the
+flat policy for unrelated numeric calls; exclude only blank/tcount from flat
+brace folding as required by their corrected empty-call results. The six
+pre-existing flat const-token counts remain explicit #928 dispositions. Native
+scope is 840 = 722 qualified + 112 (#895) + 6 (#928); no old matches may be lost.
