@@ -1312,5 +1312,23 @@
     "path": "asm198x-faraddr-workspace.log.gz",
     "sha256": "95b755c54d29cedfbb9f4c92c5d7da91a75adaebc10e11ad5df86b8f003bf773",
     "stored_sha256": "f79273ef25257a00b373a2e4d6e79ccbae7c95d514c32e55752696f5fc7b2c7c"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-merge.json",
+    "path": "asm198x-faraddr-merge.json.gz",
+    "sha256": "b41740345b61ddab8a3c49be103f8a418291204acf54b3a6b0499d90f1e7791d",
+    "stored_sha256": "f8b9b732450791a83790425d81dd9bce32b5019efb93639896300ccd7255f3fc"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-metadata-final.json",
+    "path": "asm198x-faraddr-metadata-final.json.gz",
+    "sha256": "d501359613f0eeb08928e44061f6ad7a369d5d25be092a5546c7aaa82fa5cd2f",
+    "stored_sha256": "c4baccc403277284d17f43017aed3273c8a1f8ab31d59f9d591b0fc591ae7056"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-metadata-before.json",
+    "path": "asm198x-faraddr-metadata-before.json.gz",
+    "sha256": "3200e0d3ab30e7e166693636d59ce1d012a1bef3ca88649cacd94207fdf2d039",
+    "stored_sha256": "24d9074d2183d457237f822c533096508f10a86827dd1f736bc071748b3c7708"
   }
 ]
