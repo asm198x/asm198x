@@ -3864,6 +3864,14 @@ fn parse_directive(
 }
 
 trait DataSource {
+    fn assertion(&self, text: &str, line: usize) -> Result<Kind, AsmError>;
+    fn message(
+        &self,
+        text: &str,
+        strict: bool,
+        severity: DiagSeverity,
+        line: usize,
+    ) -> Result<Kind, AsmError>;
     fn allocation(&self, directive: &str, text: &str, line: usize) -> Result<Kind, AsmError>;
     fn data(
         &self,
@@ -4033,6 +4041,9 @@ fn parse_directive_source(
         // string and ignore whatever follows it on the line — probed, not
         // assumed, because the two shapes read alike in the manual.
         "out" => {
+            if let Some(source) = source {
+                return source.message(rest, true, DiagSeverity::Note, line);
+            }
             let source = rest.trim();
             if !string_tokens::StringTokens::is_handle(source)
                 && (!source.starts_with('"') || !source[1..].contains('"'))
@@ -4051,12 +4062,18 @@ fn parse_directive_source(
             } else {
                 DiagSeverity::Error
             };
-            Ok(Kind::Message(
-                severity,
-                leading_string(rest, &consts.0.strings, line)?,
-            ))
+            match source {
+                Some(source) => source.message(rest, false, severity, line),
+                None => Ok(Kind::Message(
+                    severity,
+                    leading_string(rest, &consts.0.strings, line)?,
+                )),
+            }
         }
-        "assert" => parse_assert(anons, anchor, &consts.0.strings, rest, line),
+        "assert" => match source {
+            Some(source) => source.assertion(rest, line),
+            None => parse_assert(anons, anchor, &consts.0.strings, rest, line),
+        },
         "export" | "import" | "global" => parse_visible(
             match entry.id {
                 "export" => VisRule::MustBeDefined,

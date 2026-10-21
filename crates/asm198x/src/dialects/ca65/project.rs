@@ -768,6 +768,9 @@ fn sweep_line(
                     | "res"
                     | "align"
                     | "placement"
+                    | "assert"
+                    | "out"
+                    | "message"
             )
         });
     let processed = (if data {
@@ -1378,6 +1381,20 @@ impl ca65_flat::LiveNumbers for SourceContext<'_> {
 }
 
 impl super::DataSource for SourceContext<'_> {
+    fn assertion(&self, text: &str, line: usize) -> Result<Kind, AsmError> {
+        super::reader::assertion(text, line, self.text_context())
+    }
+
+    fn message(
+        &self,
+        text: &str,
+        strict: bool,
+        severity: super::DiagSeverity,
+        line: usize,
+    ) -> Result<Kind, AsmError> {
+        super::reader::message(text, strict, severity, line, self.text_context())
+    }
+
     fn allocation(&self, directive: &str, text: &str, line: usize) -> Result<Kind, AsmError> {
         super::reader::allocation(directive, text, line, self.text_context())
     }

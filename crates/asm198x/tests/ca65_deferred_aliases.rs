@@ -292,6 +292,43 @@ fn ca65_unary_plus_retains_native_precedence_and_captured_operators() {
     verify_fixture(fixture, 117);
 }
 
+#[test]
+fn assertion_and_message_fields_retain_native_reads_and_ignored_tail_rules() {
+    let fixture = include_str!("fixtures/ca65-message-context.json");
+    let facts: serde_json::Value = serde_json::from_str(fixture).expect("native captures");
+    assert_eq!(facts["audit_case_count"], 320);
+    let selected = |name: &str| {
+        ["assert_", "out_", "warning_", "error_"]
+            .iter()
+            .any(|prefix| name.starts_with(prefix))
+    };
+    let mut names = std::collections::BTreeSet::new();
+    for case in facts["cases"].as_array().expect("message cases") {
+        let name = case["name"].as_str().expect("name");
+        assert!(selected(name));
+        assert!(names.insert(name));
+    }
+    assert_eq!(names.len(), 80);
+    let others = facts["out_of_scope_audit_cases"]
+        .as_array()
+        .expect("other scalar grammars");
+    assert_eq!(others.len(), 240);
+    for name in others {
+        let name = name.as_str().expect("name");
+        assert!(!selected(name));
+        assert!(names.insert(name));
+    }
+    let inventory: std::collections::BTreeSet<_> = facts["audit_names"]
+        .as_array()
+        .expect("complete inventory")
+        .iter()
+        .map(|name| name.as_str().expect("name"))
+        .collect();
+    assert_eq!(inventory.len(), 320);
+    assert_eq!(names, inventory);
+    verify_fixture(fixture, 80);
+}
+
 fn verify_fixture(fixture: &str, count: usize) {
     let facts: serde_json::Value = serde_json::from_str(fixture).expect("native captures");
     let cases = facts["cases"].as_array().expect("cases");

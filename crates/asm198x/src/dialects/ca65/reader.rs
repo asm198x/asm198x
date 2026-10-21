@@ -765,3 +765,89 @@ pub(super) fn allocation(
     }
     Ok(kind)
 }
+
+/// Assertions keep their deferred condition, while their action and message
+/// are source-time fields on the same input (including generated separators).
+pub(super) fn assertion(
+    source: &str,
+    line: usize,
+    live: ca65_flat::LiveText<'_>,
+) -> Result<super::Kind, AsmError> {
+    let mut input = Input::new(source, &live, line);
+    let condition = live.context.expression_tokens(
+        &mut Numeric {
+            input: &mut input,
+            current: None,
+            after_value: false,
+        },
+        line,
+    )?;
+    input.require(",")?;
+    let action = input
+        .next()?
+        .filter(|token| token.kind == TokenKind::Ident)
+        .ok_or_else(|| AsmError::new(line, "assertion action identifier expected"))?;
+    let fatal = match action.text().to_ascii_lowercase().as_str() {
+        "error" | "lderror" => true,
+        "warning" | "ldwarning" => false,
+        _ => return Err(AsmError::new(line, "unknown assertion action")),
+    };
+    let message = if input.peek()?.is_none() {
+        "Assertion failed".into()
+    } else {
+        input.require(",")?;
+        input.text()?
+    };
+    if input.peek()?.is_some() {
+        return Err(AsmError::new(
+            line,
+            "unexpected tokens after assertion message",
+        ));
+    }
+    Ok(super::Kind::Assert(condition, fatal, message))
+}
+
+/// Message tails are token skips, not expressions. Native token constructors
+/// still run while warning/error tails are skipped; ordinary names stay inert.
+pub(super) fn message(
+    source: &str,
+    strict: bool,
+    severity: crate::engine::DiagSeverity,
+    line: usize,
+    live: ca65_flat::LiveText<'_>,
+) -> Result<super::Kind, AsmError> {
+    let mut input = Input::new(source, &live, line);
+    if strict
+        && !input
+            .peek()?
+            .is_some_and(|token| token.kind == TokenKind::Str)
+    {
+        return Err(AsmError::new(line, "`.out` takes one string"));
+    }
+    let text = input.text()?;
+    if strict {
+        if input.peek()?.is_some() {
+            return Err(AsmError::new(line, "`.out` takes one string"));
+        }
+    } else {
+        while input.next()?.is_some() {}
+    }
+    Ok(super::Kind::Message(severity, text))
+}
+
+impl Input<'_> {
+    fn text(&mut self) -> Result<String, AsmError> {
+        let token = self
+            .next()?
+            .filter(|token| token.kind == TokenKind::Str)
+            .ok_or_else(|| AsmError::new(self.line, "string constant expected"))?;
+        let (text, tail) = self.live.strings.text_prefix(token.text(), self.line)?;
+        if !tail.is_empty() {
+            return Err(AsmError::new(
+                self.line,
+                "unexpected tokens in string value",
+            ));
+        }
+        Ok(text)
+    }
+}
