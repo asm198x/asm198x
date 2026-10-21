@@ -746,8 +746,38 @@ fn sweep_line(
     }
     let processed = expanded.text.trim_end_matches('\n');
     let generated_label = super::split_generated_label_head(processed.trim_start()).is_some();
-    let processed = live_text(processed, st, &sw.reader, line)
-        .map_err(|e| super::statement_error(e, file, &node.span.expansion_frames))?;
+    let head = super::split_label_head(processed.trim_start())
+        .or_else(|| super::split_generated_label_head(processed.trim_start()));
+    let operation = head.map_or(processed, |(_, rest)| rest);
+    let word = split_first_word(operation.trim_start())
+        .0
+        .to_ascii_lowercase();
+    let data = sw.reader.records.is_empty()
+        && super::lookup(super::DIRECTIVES, &word).is_some_and(|entry| {
+            matches!(
+                entry.id,
+                "bytes"
+                    | "words"
+                    | "dbyt"
+                    | "dword"
+                    | "lobytes"
+                    | "hibytes"
+                    | "bankbytes"
+                    | "faraddr"
+                    | "asciiz"
+            )
+        });
+    let processed = (if data {
+        if let Some((_, rest)) = head {
+            let prefix = &processed[..processed.len() - rest.len()];
+            live_text(prefix, st, &sw.reader, line).map(|prefix| format!("{prefix}{rest}"))
+        } else {
+            Ok(processed.to_string())
+        }
+    } else {
+        live_text(processed, st, &sw.reader, line)
+    })
+    .map_err(|e| super::statement_error(e, file, &node.span.expansion_frames))?;
     let end_label = super::split_label_head(processed.trim())
         .filter(|(_, rest)| super::end_token_len(rest).is_some())
         .map(|(label, _)| label);
@@ -786,13 +816,30 @@ fn sweep_line(
     let start = sw.reader.nodes.len();
     // Bind through the ordinary label-only walk before stopping. Parsing the
     // remaining .end as an operation would instead report unsupported syntax.
-    let walked = sw.reader.walk_line(selected, line, file).map_err(|e| {
-        let mut error = super::statement_error(e, file, &node.span.expansion_frames);
-        if let Some(span) = error.span.as_mut() {
-            span.expansion_frames
-                .clone_from(&node.span.expansion_frames);
+    let walked = if data {
+        let mut parse = |reader: &Walker, label: Option<&crate::ast::Symbol>, rest: &str| {
+            // The ordinary reader has bound this label. Publish its segment
+            // before reading its operands, keeping the labelled statement intact.
+            if let Some(label) = label {
+                st.label_seg.insert(label.qualified.clone(), st.seg.clone());
+            }
+            read_data_source(rest, st, reader, &node.span)
+        };
+        sw.reader.read_line(selected, line, file, Some(&mut parse))
+    } else {
+        sw.reader.walk_line(selected, line, file)
+    }
+    .map_err(|error| {
+        if data && error.span.is_some() {
+            error
+        } else {
+            let mut error = super::statement_error(error, file, &node.span.expansion_frames);
+            if let Some(span) = error.span.as_mut() {
+                span.expansion_frames
+                    .clone_from(&node.span.expansion_frames);
+            }
+            error
         }
-        error
     });
     let mut drained: Vec<crate::ast::Node> = sw.reader.nodes.split_off(start);
     let walked = walked?;
@@ -1078,14 +1125,14 @@ fn consume_include(
 }
 
 /// Borrows the existing reader and projection; it owns only read requirements.
-struct ConditionalSource<'a> {
+struct SourceContext<'a> {
     reader: &'a Walker,
     projection: &'a Projection,
     span: &'a crate::span::Span,
     required: std::cell::RefCell<Vec<Expr>>,
 }
 
-impl ConditionalSource<'_> {
+impl SourceContext<'_> {
     fn read(&self, text: &str, line: usize) -> Result<Expr, AsmError> {
         let result = (|| {
             let value = super::parse_value_source(
@@ -1110,29 +1157,33 @@ impl ConditionalSource<'_> {
         })
     }
 
-    fn expand(&self, text: &str, line: usize) -> Result<String, AsmError> {
-        ca65_flat::expand_ca65_live(
-            text,
-            line,
-            ca65_flat::LiveText {
-                target: if self.reader.extension.is_some() {
+    fn text_context(&self) -> ca65_flat::LiveText<'_> {
+        ca65_flat::LiveText {
+            target: if self.reader.extension.is_some() {
+                ca65_flat::Target::Csg4510
+            } else {
+                ca65_flat::Target::Mos6502
+            },
+            token_target: self.reader.repeat_registers.map(|selected| {
+                if selected {
                     ca65_flat::Target::Csg4510
                 } else {
                     ca65_flat::Target::Mos6502
-                },
-                token_target: self.reader.repeat_registers.map(|selected| {
-                    if selected {
-                        ca65_flat::Target::Csg4510
-                    } else {
-                        ca65_flat::Target::Mos6502
-                    }
-                }),
-                numbers: &self.projection.consts,
-                strings: &self.reader.strings,
-                defined: &self.reader.text_names,
-                context: self,
-            },
-        )
+                }
+            }),
+            numbers: &self.projection.consts,
+            strings: &self.reader.strings,
+            defined: &self.reader.text_names,
+            context: self,
+        }
+    }
+
+    fn expand(&self, text: &str, line: usize) -> Result<String, AsmError> {
+        ca65_flat::expand_ca65_live(text, line, self.text_context())
+    }
+
+    fn select(&self, name: &str, args: &str, line: usize) -> Result<String, AsmError> {
+        ca65_flat::select_ca65_live(name, args, line, self.text_context())
     }
 
     fn fold(&self, value: &Expr, line: usize) -> Result<i64, AsmError> {
@@ -1156,12 +1207,13 @@ impl ConditionalSource<'_> {
     }
 }
 
-impl mos6502::ExprSource for ConditionalSource<'_> {
+impl mos6502::ExprSource for SourceContext<'_> {
     fn recognizes(&self, name: &str) -> bool {
         matches!(
             name.to_ascii_lowercase().as_str(),
             ".ref" | ".referenced" | ".def" | ".defined" | ".sizeof"
         ) || ca65_flat::is_text_function(&name.to_ascii_lowercase())
+            || name.to_ascii_lowercase().ends_with("::.ident")
     }
 
     fn symbol(&self, name: &str, line: usize) -> Result<Expr, AsmError> {
@@ -1172,6 +1224,19 @@ impl mos6502::ExprSource for ConditionalSource<'_> {
     fn function(&self, name: &str, args: &str, _line: usize) -> Result<Expr, AsmError> {
         let line = self.span.line as usize;
         let source = format!("{name}({args})");
+        if name.to_ascii_lowercase().ends_with("::.ident") {
+            // A constructor is a component of the qualified name, not a
+            // function whose numeric name happens to contain a scope path.
+            let prefix = &name[..name.len() - ".ident".len()];
+            let generated = self.expand(&format!(".ident({args})"), line)?;
+            return super::parse_value_source(
+                &self.reader.anons,
+                self.reader.scope_env.anchor_str(),
+                &format!("{prefix}{generated}"),
+                line,
+                Some(self),
+            );
+        }
         match name.to_ascii_lowercase().as_str() {
             ".const" => {
                 if ca65_flat::split_fields(args, usize::MAX).len() != 1 || args.trim().is_empty() {
@@ -1196,7 +1261,14 @@ impl mos6502::ExprSource for ConditionalSource<'_> {
                 }
             }
             _ => {
-                let expanded = self.expand(&source, line)?;
+                let expanded = if matches!(
+                    name.to_ascii_lowercase().as_str(),
+                    ".left" | ".right" | ".mid"
+                ) {
+                    self.select(name, args, line)?
+                } else {
+                    self.expand(&source, line)?
+                };
                 super::parse_value_source(
                     &self.reader.anons,
                     self.reader.scope_env.anchor_str(),
@@ -1209,7 +1281,7 @@ impl mos6502::ExprSource for ConditionalSource<'_> {
     }
 }
 
-impl ca65_flat::LiveNumbers for ConditionalSource<'_> {
+impl ca65_flat::LiveNumbers for SourceContext<'_> {
     fn literal(&self, text: &str, _line: usize) -> Result<Option<i64>, AsmError> {
         let line = self.span.line as usize;
         let value = self.read(text, line)?;
@@ -1246,13 +1318,81 @@ impl ca65_flat::LiveNumbers for ConditionalSource<'_> {
     }
 }
 
+impl super::DataSource for SourceContext<'_> {
+    fn value(&self, text: &str, line: usize) -> Result<Expr, AsmError> {
+        // Keep the outer expression unbound until the reader's ordinary
+        // scope_syms pass; nested reads retain their original bound keys.
+        super::parse_value_source(
+            &self.reader.anons,
+            self.reader.scope_env.anchor_str(),
+            text,
+            line,
+            Some(self),
+        )
+    }
+
+    fn tokens(&self, text: &str, line: usize) -> Result<String, AsmError> {
+        let text = text.trim();
+        let Some((head, tail)) = text.split_once('(') else {
+            return Ok(text.to_string());
+        };
+        let open = head.len();
+        let head = head.trim();
+        if matches!(
+            head.to_ascii_lowercase().as_str(),
+            ".left" | ".mid" | ".right"
+        ) && super::super::text::matching_paren(text, open) == Some(text.len() - 1)
+            && let Some(args) = tail.strip_suffix(')')
+        {
+            self.select(head, args, line)
+        } else if matches!(
+            head.to_ascii_lowercase().as_str(),
+            ".sprintf" | ".concat" | ".string"
+        ) {
+            self.expand(text, line)
+        } else {
+            Ok(text.to_string())
+        }
+    }
+}
+
+fn read_data_source(
+    text: &str,
+    st: &mut Projection,
+    reader: &Walker,
+    span: &crate::span::Span,
+) -> Result<Kind, AsmError> {
+    let source = SourceContext {
+        reader,
+        projection: st,
+        span,
+        required: std::cell::RefCell::new(Vec::new()),
+    };
+    let result = super::parse_directive_source(
+        &reader.anons,
+        reader.scope_env.anchor_str(),
+        &super::SourceConstants(reader),
+        text.trim_start().trim_start_matches('.'),
+        span.line as usize,
+        Some(&source),
+    );
+    for value in source.required.into_inner() {
+        st.deferred.require_source_names(&value, span);
+    }
+    result.map_err(|error| {
+        let mut error = reader.strings.error(error);
+        error.span.get_or_insert_with(|| span.clone());
+        error
+    })
+}
+
 fn read_conditional_source(
     text: &str,
     st: &mut Projection,
     reader: &Walker,
     span: &crate::span::Span,
 ) -> Result<Expr, ConditionError> {
-    let source = ConditionalSource {
+    let source = SourceContext {
         reader,
         projection: st,
         span,

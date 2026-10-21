@@ -114,6 +114,15 @@ fn external_bindings_keep_native_source_types_and_exported_values() {
     verify_fixture(fixture, 1646);
 }
 
+#[test]
+fn data_source_queries_follow_native_read_order() {
+    let fixture = include_str!("fixtures/ca65-data-context.json");
+    let facts: serde_json::Value = serde_json::from_str(fixture).expect("native captures");
+    assert_eq!(facts["audit_case_count"], 515);
+    assert_eq!(facts["excluded_audit_cases"], serde_json::json!({}));
+    verify_fixture(fixture, 515);
+}
+
 fn verify_fixture(fixture: &str, count: usize) {
     let facts: serde_json::Value = serde_json::from_str(fixture).expect("native captures");
     let cases = facts["cases"].as_array().expect("cases");
