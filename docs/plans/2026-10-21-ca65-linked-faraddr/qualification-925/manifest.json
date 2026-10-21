@@ -1,5 +1,23 @@
 [
   {
+    "source": "/private/tmp/asm198x-audit-faraddr-candidates.py",
+    "path": "asm198x-audit-faraddr-candidates.py.gz",
+    "sha256": "e219730e6955fea52075e044ccddcc580d6106903abba6366d9d09553b5a1afe",
+    "stored_sha256": "97003b4f67719fa696448b4b88bd7daa70a778a43a6324041e611c44488f9d4c"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-4510-verify.log",
+    "path": "asm198x-faraddr-4510-verify.log.gz",
+    "sha256": "d2889a2be3c5872b246842f95569bd56093915332c0300cc44bf904612a0723f",
+    "stored_sha256": "869bbd4426a372658b8934d0fe9c70d09b1619de7ce16f179ed9f4bfd5237aa1"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-4510.log",
+    "path": "asm198x-faraddr-4510.log.gz",
+    "sha256": "f877f2b9696b4ee3c15ce1fcfd2cc0dee75078cf80212bd12adf6dd3000a0044",
+    "stored_sha256": "54d273aa797260a724487b50ef06854694db7da1e06a1d1e111c448264ddcd7c"
+  },
+  {
     "source": "/private/tmp/asm198x-faraddr-4510/logs/assembler-version.stderr",
     "path": "asm198x-faraddr-4510__logs__assembler-version.stderr.gz",
     "sha256": "cd9267fb50974330b2596f8f7d386346ec0227b2e2b702cb761d363dfa13a8c2",
@@ -90,22 +108,22 @@
     "stored_sha256": "b5720a9eb05e2c077bc87a60a0677aaa94824f8c9e513aaa6a0cef8d88f4a581"
   },
   {
-    "source": "/private/tmp/asm198x-faraddr-4510-verify.log",
-    "path": "asm198x-faraddr-4510-verify.log.gz",
-    "sha256": "d2889a2be3c5872b246842f95569bd56093915332c0300cc44bf904612a0723f",
-    "stored_sha256": "869bbd4426a372658b8934d0fe9c70d09b1619de7ce16f179ed9f4bfd5237aa1"
-  },
-  {
-    "source": "/private/tmp/asm198x-faraddr-4510.log",
-    "path": "asm198x-faraddr-4510.log.gz",
-    "sha256": "f877f2b9696b4ee3c15ce1fcfd2cc0dee75078cf80212bd12adf6dd3000a0044",
-    "stored_sha256": "54d273aa797260a724487b50ef06854694db7da1e06a1d1e111c448264ddcd7c"
+    "source": "/private/tmp/asm198x-faraddr-acquire.log",
+    "path": "asm198x-faraddr-acquire.log.gz",
+    "sha256": "62e7e1c9676dbf439604a95e62fded66597e99512fa82318e49c9267d89d9a4a",
+    "stored_sha256": "1b310f5adef06618820231d81c3058ca4b611549e75dd3f6e0509c0918616b0d"
   },
   {
     "source": "/private/tmp/asm198x-faraddr-acquire.py",
     "path": "asm198x-faraddr-acquire.py.gz",
     "sha256": "411ebcb4f710a581627128479970ba45aa54cb2c7df8213c934244b5babf6ca6",
     "stored_sha256": "e5b0c1a0c673439d1078047434a9ac548f331098a5147e1c1a66e757a9a76b20"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-artifacts.json",
+    "path": "asm198x-faraddr-artifacts.json.gz",
+    "sha256": "27579acc27c35c8128833d577f19b348c44d825597d461a0bf4606e978432704",
+    "stored_sha256": "aa1c28994f5413b2db33bba1cd428c6066ac3108fe92d35e175f4b7abe9afeda"
   },
   {
     "source": "/private/tmp/asm198x-faraddr-before.log",
@@ -180,6 +198,66 @@
     "stored_sha256": "711200a1315ccac6404352625d0e9d1233d524ba4decf505d28238e4716c4a12"
   },
   {
+    "source": "/private/tmp/asm198x-faraddr-candidates/x86_64-apple-darwin/acquisition.json",
+    "path": "asm198x-faraddr-candidates__x86_64-apple-darwin__acquisition.json.gz",
+    "sha256": "a461ad973551f74867aae8794a0306ad9b8c26b814e93e6527c30acefc64b8ad",
+    "stored_sha256": "48a37b1d226a285f85c93730d468cc061c8352ab1c340763cae970ed3487edad"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-candidates/x86_64-apple-darwin/corrupt-archive.json",
+    "path": "asm198x-faraddr-candidates__x86_64-apple-darwin__corrupt-archive.json.gz",
+    "sha256": "2e5a8c2e13cf7c92b79606177bf5c326bf1dadd6f43bf7f4f7023897c4a8101c",
+    "stored_sha256": "15ee2fa7422b03f68a0bff17d12220fce0d8fa7b48b56c0608e2f97726af09a9"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-candidates/x86_64-apple-darwin/plan.json",
+    "path": "asm198x-faraddr-candidates__x86_64-apple-darwin__plan.json.gz",
+    "sha256": "5e1969ffe55f895ec0babd29f44c06805f02fbd3666f68f904bbe8ee30876b3b",
+    "stored_sha256": "e436cff0d6f73dfb81490a23f4fbd11e64613068b075e638cb26b46dd92d1458"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-candidates/x86_64-apple-darwin/report.json",
+    "path": "asm198x-faraddr-candidates__x86_64-apple-darwin__report.json.gz",
+    "sha256": "27fc5db02b891693af826fc1ec09bd95a86ace16bca55d437ecfbed909caba74",
+    "stored_sha256": "c4c1923690b6d47abf438f18a33b0d0c55d4d4c98b3402f449f53250fda49b54"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-candidates/x86_64-apple-darwin/wrong-bytes.json",
+    "path": "asm198x-faraddr-candidates__x86_64-apple-darwin__wrong-bytes.json.gz",
+    "sha256": "45063aebb23a70a50618c0ccffe6d0401d9d32edfb2d1718fbca0c9575e3ddea",
+    "stored_sha256": "9b950fe009fb55a83604aa14cd54dc8819507236a78872e2c9527866e822c7d1"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-candidates/x86_64-pc-windows-msvc/acquisition.json",
+    "path": "asm198x-faraddr-candidates__x86_64-pc-windows-msvc__acquisition.json.gz",
+    "sha256": "a461ad973551f74867aae8794a0306ad9b8c26b814e93e6527c30acefc64b8ad",
+    "stored_sha256": "48a37b1d226a285f85c93730d468cc061c8352ab1c340763cae970ed3487edad"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-candidates/x86_64-pc-windows-msvc/corrupt-archive.json",
+    "path": "asm198x-faraddr-candidates__x86_64-pc-windows-msvc__corrupt-archive.json.gz",
+    "sha256": "14917b0dd5c0d132a39a1b8a988625000b26d8c9f83f57c358445d524d227fbf",
+    "stored_sha256": "d54e002fd89448079056598192a1d526844f93235bc20e874a446e36266437f7"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-candidates/x86_64-pc-windows-msvc/plan.json",
+    "path": "asm198x-faraddr-candidates__x86_64-pc-windows-msvc__plan.json.gz",
+    "sha256": "23fd648373e15b7d33d34c7ddf4efa736eb59b92e47d6c41d27119174c0acda8",
+    "stored_sha256": "079f884b6def9abb1e5bbfe7a6cd7947ec5d3bc65a416a787d97df26b8448bd7"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-candidates/x86_64-pc-windows-msvc/report.json",
+    "path": "asm198x-faraddr-candidates__x86_64-pc-windows-msvc__report.json.gz",
+    "sha256": "aa3af1d1f41e5afb8c451ae458cb060d80a584326d6f34afb85a6a8a13020a2e",
+    "stored_sha256": "a08b97db40fcd608895199be46445a2bb4028a015b2530388c619082614be4d2"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-candidates/x86_64-pc-windows-msvc/wrong-bytes.json",
+    "path": "asm198x-faraddr-candidates__x86_64-pc-windows-msvc__wrong-bytes.json.gz",
+    "sha256": "9ea7e863d13e419c1ae3367c188625f515369907eac3d5d23c2b13be439299a8",
+    "stored_sha256": "cee49a174a5a0fdd756706c6c94b289605120fdaccad7cea7d3f386f591d798f"
+  },
+  {
     "source": "/private/tmp/asm198x-faraddr-candidates/x86_64-unknown-linux-gnu/acquisition.json",
     "path": "asm198x-faraddr-candidates__x86_64-unknown-linux-gnu__acquisition.json.gz",
     "sha256": "a461ad973551f74867aae8794a0306ad9b8c26b814e93e6527c30acefc64b8ad",
@@ -210,6 +288,18 @@
     "stored_sha256": "8682bc100d1acc184eef4045178b8b937d30859fe373d3072be798c39b7f8ec5"
   },
   {
+    "source": "/private/tmp/asm198x-faraddr-ci.json",
+    "path": "asm198x-faraddr-ci.json.gz",
+    "sha256": "0b0d491a74dac43c307e7d6f71fc587526c3c29e8c8dbd07a6dfbb14c4095b69",
+    "stored_sha256": "e35335b52fae8adac03dfe1366e26ae4b39238d344dba96bfe65ef426fdbe232"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-ci.log",
+    "path": "asm198x-faraddr-ci.log.gz",
+    "sha256": "211dd4fce12edac6b0af148bfea0069feb9fd55f97843c66ded7b39a678ecd17",
+    "stored_sha256": "64a0a8f6088796fa0e76af8d42b2c1c9e81d4392d3c24c601c251d2b5b343c49"
+  },
+  {
     "source": "/private/tmp/asm198x-faraddr-clippy.log",
     "path": "asm198x-faraddr-clippy.log.gz",
     "sha256": "12d1022ff4a0b5eb4d580ada609fcfa2513bb02c9218da418f15ba9eb316ccfc",
@@ -232,6 +322,18 @@
     "path": "asm198x-faraddr-ecosystem.log.gz",
     "sha256": "754302d8322aefbaf318b8f463f515d4df234338e1ac6d8cccf55b16c8f3f504",
     "stored_sha256": "c05ce9978d221760a0a4796ab4444fb3d3dd91bc255a84d32fefdb6ac7ef9689"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-extra.log",
+    "path": "asm198x-faraddr-extra.log.gz",
+    "sha256": "6bb71e8c58854f3812c1d19ae52807001919632036f9bb326518d7dfe5a689ca",
+    "stored_sha256": "db72291fc881794efc39d2aae6accac961e0395681ed7e8a96a50751419fd809"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-extra.py",
+    "path": "asm198x-faraddr-extra.py.gz",
+    "sha256": "050eba2ac1044100ce16ab990f2b75343aa73d5e0b6eb74103fb6e4654170d90",
+    "stored_sha256": "35eb464c630dd1ee7511b1fab7e69fcc3b6ca1d10e7f9bcedebb0030102f131f"
   },
   {
     "source": "/private/tmp/asm198x-faraddr-extra/file-after.json",
@@ -310,18 +412,6 @@
     "path": "asm198x-faraddr-extra__summary.json.gz",
     "sha256": "cbacf71d7cef146b12ef0d433ca2530b9c8338c615ba77c249876a88009161a3",
     "stored_sha256": "b86d4fc12068c21991adb45e2741c3c1037818d2852b9505c5cc33b0b0899b13"
-  },
-  {
-    "source": "/private/tmp/asm198x-faraddr-extra.log",
-    "path": "asm198x-faraddr-extra.log.gz",
-    "sha256": "6bb71e8c58854f3812c1d19ae52807001919632036f9bb326518d7dfe5a689ca",
-    "stored_sha256": "db72291fc881794efc39d2aae6accac961e0395681ed7e8a96a50751419fd809"
-  },
-  {
-    "source": "/private/tmp/asm198x-faraddr-extra.py",
-    "path": "asm198x-faraddr-extra.py.gz",
-    "sha256": "050eba2ac1044100ce16ab990f2b75343aa73d5e0b6eb74103fb6e4654170d90",
-    "stored_sha256": "35eb464c630dd1ee7511b1fab7e69fcc3b6ca1d10e7f9bcedebb0030102f131f"
   },
   {
     "source": "/private/tmp/asm198x-faraddr-fetch-main.log",
@@ -432,10 +522,544 @@
     "stored_sha256": "eb0549659d21212baede6342d625b65059d48bc3e0493d83bf00088446000c14"
   },
   {
+    "source": "/private/tmp/asm198x-faraddr-producer/alias-after.json",
+    "path": "asm198x-faraddr-producer__alias-after.json.gz",
+    "sha256": "1d9f7a4e3eb74a30ee3c1d9e122e7f26f2c3a2529e8fe895a4b82fb1dd440d8f",
+    "stored_sha256": "cb98598811df30e6c7834ede02b517348b5f9e21ca832a19551f0f7ec59ef13a"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/conditional-after.json",
+    "path": "asm198x-faraddr-producer__conditional-after.json.gz",
+    "sha256": "8f752aa86384fd8e8def380072525cbaf58eb21f95de46871f7fcb15f1b7dd7a",
+    "stored_sha256": "151b73d91c68e06e01404ae7711e650032960ffb861b67e87339707008d8135a"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/data-context-after.json",
+    "path": "asm198x-faraddr-producer__data-context-after.json.gz",
+    "sha256": "f0b1444fffbca33ad5543eb5daf2ebdcec936b03147927492f131db345774cb8",
+    "stored_sha256": "054f20480d5c74e19f0b1b4a858374fc9993f1a72653971b2457139b170526d0"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/external-after.json",
+    "path": "asm198x-faraddr-producer__external-after.json.gz",
+    "sha256": "1e935a8b9c36c06de4d4984f36b79f4449d520add7db836e7c7f8058aaf92196",
+    "stored_sha256": "5a09b9021f8f28fc6ebf288ae01ff440c6b34223e92a0a1b0ad1cb91c81f30ad"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/facts/alias.json",
+    "path": "asm198x-faraddr-producer__facts__alias.json.gz",
+    "sha256": "b313d37ec4f91013e083f13cfc1a9849736ffdd5213f4581d3184991a3dfe958",
+    "stored_sha256": "891fe682f45a33cb561da4b01adb2fe32011cf72a398c886f937b23366ae00ed"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/facts/conditional-context.json",
+    "path": "asm198x-faraddr-producer__facts__conditional-context.json.gz",
+    "sha256": "54044373816513ed35af6ff233a9eb2bc73f34f2ed6929b16e11ed7a29fb9cfe",
+    "stored_sha256": "8f432645c991562f2e7bb4ae1459fb338893b370c1f93565cf9135ab2ac7e4d5"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/facts/data-context.json",
+    "path": "asm198x-faraddr-producer__facts__data-context.json.gz",
+    "sha256": "01a80a48f1d49d7d51f77580cfc8c1f2d3c95a929f272d9edb5d999ecc0fbc1a",
+    "stored_sha256": "242470cd0237798a20ac515631fa71773070e5e8eba5f988618a0773137783ea"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/facts/external.json",
+    "path": "asm198x-faraddr-producer__facts__external.json.gz",
+    "sha256": "4d273ae272b2b71c807d7eaedcffc1a69f4f3b9b121f94383e360ffc78db8bed",
+    "stored_sha256": "04a7cd45f7d37ef9a1a4c1ca259eda97e75a50d1fdeb81e1fa061bc84d630e73"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/facts/linked-faraddr.json",
+    "path": "asm198x-faraddr-producer__facts__linked-faraddr.json.gz",
+    "sha256": "fe52d69d4790b4d3836d300ea8494d9b15cfddaa45868760999462e772d344d0",
+    "stored_sha256": "75fa80ec7792ad9b9d8aee7ffd2277b5c3e09a0183c50a9dd44a062b5eacfba1"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/facts/numeric-consumers.json",
+    "path": "asm198x-faraddr-producer__facts__numeric-consumers.json.gz",
+    "sha256": "6b09d3d2cd8e47be5dfd8ec6870e6ca7cd4e7af8bf26d6f430f46392b756ea77",
+    "stored_sha256": "53ebac2de26004166a75ecdc4c51a9c27facde960b77b60d5a90c250bd36809d"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/facts/query-admission.json",
+    "path": "asm198x-faraddr-producer__facts__query-admission.json.gz",
+    "sha256": "7b32ed1c0b81300497a1864791389d9c587376d4547a4800f4fd81f589dcd481",
+    "stored_sha256": "a4045dd191b28a49960c4471cfe7f7e36acdc181f2fadafcd6d874a17ac00f68"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/facts/query-extended.json",
+    "path": "asm198x-faraddr-producer__facts__query-extended.json.gz",
+    "sha256": "fd8e7f8186909be26895154066bdad7fab59ed1e07c222ea5c64d49aa9e42cc3",
+    "stored_sha256": "34e38aa2f78cdf8d57639931ecffd0901bb7deeb486806aab5685dd8cd5a056c"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/facts/query-original.json",
+    "path": "asm198x-faraddr-producer__facts__query-original.json.gz",
+    "sha256": "6f27143f3ada580fa299e618c7574f6aba891700c3c21aacc056a46bc83f468e",
+    "stored_sha256": "e592d28210d32e12dcedf2a08f47065baa034a2a82f24cba2a1d5bed8bf42965"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/facts/query-short-circuit.json",
+    "path": "asm198x-faraddr-producer__facts__query-short-circuit.json.gz",
+    "sha256": "0c67ea54a1cca643fab2765faf367606201ac1d54f7dc314b368ea65b72a5d00",
+    "stored_sha256": "bdbcc87467a9518ab9321d4f8ce93c6c6e15c3f0f2eddc46ce2c21e01b17e1b8"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/facts/scope-deferred-followups-native.json",
+    "path": "asm198x-faraddr-producer__facts__scope-deferred-followups-native.json.gz",
+    "sha256": "edb3a91a79ba59bf51e7ae8e4b152aa5aa8ff312550a721514d15c6dcd7cd925",
+    "stored_sha256": "9fc92e8c2b56f3a66ba443966c17b1be43279109d278b772157aeb1d07f51f42"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/facts/scope-native-completed-phase-probes.json",
+    "path": "asm198x-faraddr-producer__facts__scope-native-completed-phase-probes.json.gz",
+    "sha256": "49066df1a312c7b0d63b09d21b5c843e126299c7c38f73e128b20cbb9d8c7948",
+    "stored_sha256": "05b17a1229b02ba85dea3be54262e572e975ce59c1be2ef9e66a0111dd0a224d"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/facts/scope-native-negative-memory-probes.json",
+    "path": "asm198x-faraddr-producer__facts__scope-native-negative-memory-probes.json.gz",
+    "sha256": "5aff530a76327051b00343f60dd37adfeb98031dcc7bf866e2770eaf8d00be94",
+    "stored_sha256": "d70ad2257d617d45090e4971022a662a121d9f34c8db79560e6f8b0dc9776f19"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/facts/scope-native-phase-probes.json",
+    "path": "asm198x-faraddr-producer__facts__scope-native-phase-probes.json.gz",
+    "sha256": "251ba8b7a9711cd39d3571ddf457ac343e202ebbd8c9c26575aeb8135019185c",
+    "stored_sha256": "84e801a04abb26208d3673db88ab10c0117a5003a4a45f43dc8234db9c044a4b"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/facts/scope-native-query-probes.json",
+    "path": "asm198x-faraddr-producer__facts__scope-native-query-probes.json.gz",
+    "sha256": "cf9a6436c237a08f953762f360e994415b5eff0e1f7bca5e42e0ea90d649b861",
+    "stored_sha256": "a478432af7b47647b18a942b725fa0a2d531e3104c98bd523ef462d179fe0a1e"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/facts/scope-native-stream-probes.json",
+    "path": "asm198x-faraddr-producer__facts__scope-native-stream-probes.json.gz",
+    "sha256": "806c49dd089a9c575d0d37cbd641febd07b01b2b55d6cfa186086116a61f79a8",
+    "stored_sha256": "231840a5afe26df5973a5181304727672ea9aadbab922f4c19ae2404eff8792e"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/facts/scope-native-width-probes.json",
+    "path": "asm198x-faraddr-producer__facts__scope-native-width-probes.json.gz",
+    "sha256": "0b102fdd3d16493c33065ccde344177cbd28a1ea9eb0161cc2b92b110e991b6b",
+    "stored_sha256": "b38aff9a1b8b0f0f714149224daf9d7d3231e1b7308b0cf4d7c18a831fb8619f"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/facts/source-constancy.json",
+    "path": "asm198x-faraddr-producer__facts__source-constancy.json.gz",
+    "sha256": "c531891249f376eaada56f5aee558a26a33cc6343451bdcc70ee03bbe14f8d15",
+    "stored_sha256": "fad236757127a40154d7d5c581c3156e86b89c4a1dc787d304396e25a2444d0d"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/facts/strings-consumer-native.json",
+    "path": "asm198x-faraddr-producer__facts__strings-consumer-native.json.gz",
+    "sha256": "ee2b7cafa32b8395fe303721f3006e63aad93986545ff3c5be0e707a8b8f41e0",
+    "stored_sha256": "590776bf729e7d5f097679f46fdf37358bd03f5f98bc17e6649261d32ac5caf2"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/facts/strings-flat-native.json",
+    "path": "asm198x-faraddr-producer__facts__strings-flat-native.json.gz",
+    "sha256": "0c29b6a2e6a25ca0bfe321f217452d0341f71c4e8626758165983687c6655055",
+    "stored_sha256": "5b3d2d09346f4166b568c36b828a5f0e1e0d381048c391621ac5687d93047fed"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/facts/strings-guard-native.json",
+    "path": "asm198x-faraddr-producer__facts__strings-guard-native.json.gz",
+    "sha256": "b05a0aa964e8326cedea64ad09d8e35d92e26af64d994810b3a33bf2359b1a5a",
+    "stored_sha256": "f4885081ab236c2d419216dca798181a17bef54415032184efea836732595246"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/facts/strings-index-scope-native.json",
+    "path": "asm198x-faraddr-producer__facts__strings-index-scope-native.json.gz",
+    "sha256": "ac205eb86898d5175c249edb3d72854fc7c39c3aba8a87b885055c968fa6fee7",
+    "stored_sha256": "6b62aff3a2da86e10869d2255f8098f285a8281c241a947179554155b641a081"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/facts/strings-lifetime-native.json",
+    "path": "asm198x-faraddr-producer__facts__strings-lifetime-native.json.gz",
+    "sha256": "1178e26f8ae9a3fa1c48d820108f123289d50206f29227b2aca4478b33cfe50f",
+    "stored_sha256": "f4ab00b70b684f3523254d8ab2a78a2d9d5239f50aa154b1d00d8b79891b5134"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/facts/strings-numeric-string-arity-native.json",
+    "path": "asm198x-faraddr-producer__facts__strings-numeric-string-arity-native.json.gz",
+    "sha256": "6a9fdf36de46249d6a8bccbd5eb2284ecfe0f3b66385ae924186ce9cd342a923",
+    "stored_sha256": "a340a1da41bde5388f1fcc213aeeb2ec4e5abaaee80b0073822786ba7251134e"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/facts/strings-text-consumer-native.json",
+    "path": "asm198x-faraddr-producer__facts__strings-text-consumer-native.json.gz",
+    "sha256": "ee0adc76eee63b7ae0d4cb0921631d6772615d9f247ebae56a62c1686b0da193",
+    "stored_sha256": "c2a8df11f068bc4054e2bb5dc95479c2a650c81182942ef3c6f64208da0bced8"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/facts/text-assertion-native.json",
+    "path": "asm198x-faraddr-producer__facts__text-assertion-native.json.gz",
+    "sha256": "d3f68db44513d55561394f0d9f57033dd299930d73bd4621a232df2c7108e58f",
+    "stored_sha256": "475176be737567e218cf4f8e9a3bed885419969bfb7903583c143ed6903a0dc3"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/facts/text-native.json",
+    "path": "asm198x-faraddr-producer__facts__text-native.json.gz",
+    "sha256": "da14547542eea3d4f0286c5d83b7f9b8fbe6588399e095981a35930a1305758d",
+    "stored_sha256": "cf147830e6122126700973c333cbd2f7bf3c5bf08964bcc5bd6cc693cf1ebe9a"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/facts/tokens.json",
+    "path": "asm198x-faraddr-producer__facts__tokens.json.gz",
+    "sha256": "255bd6cd9a193c1f56f0824856d39484dd500a5b7bff07813f84b3adcdd40257",
+    "stored_sha256": "bce398ed4170e60779fd6c6f817d815801481cca86303a6612c928b3d3605621"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/facts/visibility.json",
+    "path": "asm198x-faraddr-producer__facts__visibility.json.gz",
+    "sha256": "8caa765515677dfd1d0c14e3dba1fd25a5605432042a6b7fd60ba734c06d9cbb",
+    "stored_sha256": "61ab78599ca0e05ef7e8280ffef18799fdfb439347abba1468882656b1440b45"
+  },
+  {
     "source": "/private/tmp/asm198x-faraddr-producer/identity.json",
     "path": "asm198x-faraddr-producer__identity.json.gz",
     "sha256": "63ef66ba1e6d391c4b1cc85194e5d3ab48873246fe9bf769e4e2e753596c6cf7",
     "stored_sha256": "71bf463ecf5480b737e893427c18718be5d4391da13dddd00ef5f54394c4cf3d"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/linked-faraddr-after.json",
+    "path": "asm198x-faraddr-producer__linked-faraddr-after.json.gz",
+    "sha256": "076f5dad2822170b40da53c692d7cfbf429245637131563653ef9bb0defe3138",
+    "stored_sha256": "6424eed067c34a5595c0a02db213db9fa3dee549d4e3764e453fb6c618b14939"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/numeric-consumers-after.json",
+    "path": "asm198x-faraddr-producer__numeric-consumers-after.json.gz",
+    "sha256": "820f09618f98b3fc6369ab559d17b96d0bc5479bcbde961e6c3d82b4923724fc",
+    "stored_sha256": "ca9280332c6fd13d65419a5496b55fc6452e4393d5ec17a48eec831419d14bfc"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/query-admission-after.json",
+    "path": "asm198x-faraddr-producer__query-admission-after.json.gz",
+    "sha256": "25bee5b6a00662f07d486e367b15da4c000740a4ca1697505e87bb0642fd8852",
+    "stored_sha256": "f282628771634a7d2f9b2b8b3ecc79dd77ea83d9e13ba6649fd3084a662f6822"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/query-extended-after.json",
+    "path": "asm198x-faraddr-producer__query-extended-after.json.gz",
+    "sha256": "03a82cf86def1917212f4a4d27dc2d8d099aeeba64108ebc3611c6fc9574d346",
+    "stored_sha256": "a4b940367fd4439bf637155dffe7a9a3a1c9a4de6c0ac38c11001e2aecb6520c"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/query-original-after.json",
+    "path": "asm198x-faraddr-producer__query-original-after.json.gz",
+    "sha256": "cd9602b27b117f574e096b77f9281628a3fe2be1dd545c7a498b179a587cb18e",
+    "stored_sha256": "6961c261c11ba04a550ecf02a247edb816fa442b36e8e030e14b907233c91808"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/query-short-circuit-after.json",
+    "path": "asm198x-faraddr-producer__query-short-circuit-after.json.gz",
+    "sha256": "87c77f96c0f354e0e6228313b09a8f0acbedd0ae4aa0e8b32fd9bd3be5f15b7b",
+    "stored_sha256": "9caf8131c93cd4f6322c0748c988d7f349dcf7bb482aade2eee8d57fdf8cf91c"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/replay-summary.json",
+    "path": "asm198x-faraddr-producer__replay-summary.json.gz",
+    "sha256": "3dbaaa2fc03bd70dcf958df1c0ce4e908fde7995f10c4cedce90a6ce59d5abbb",
+    "stored_sha256": "61ed2bcd518316fd2ced0cc98101d7c8255743a45d0c075df288ef8da2514906"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/replay/alias-after.json",
+    "path": "asm198x-faraddr-producer__replay__alias-after.json.gz",
+    "sha256": "1d9f7a4e3eb74a30ee3c1d9e122e7f26f2c3a2529e8fe895a4b82fb1dd440d8f",
+    "stored_sha256": "cb98598811df30e6c7834ede02b517348b5f9e21ca832a19551f0f7ec59ef13a"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/replay/conditional-context-after.json",
+    "path": "asm198x-faraddr-producer__replay__conditional-context-after.json.gz",
+    "sha256": "8f752aa86384fd8e8def380072525cbaf58eb21f95de46871f7fcb15f1b7dd7a",
+    "stored_sha256": "151b73d91c68e06e01404ae7711e650032960ffb861b67e87339707008d8135a"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/replay/data-context-after.json",
+    "path": "asm198x-faraddr-producer__replay__data-context-after.json.gz",
+    "sha256": "f0b1444fffbca33ad5543eb5daf2ebdcec936b03147927492f131db345774cb8",
+    "stored_sha256": "054f20480d5c74e19f0b1b4a858374fc9993f1a72653971b2457139b170526d0"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/replay/external-after.json",
+    "path": "asm198x-faraddr-producer__replay__external-after.json.gz",
+    "sha256": "1e935a8b9c36c06de4d4984f36b79f4449d520add7db836e7c7f8058aaf92196",
+    "stored_sha256": "5a09b9021f8f28fc6ebf288ae01ff440c6b34223e92a0a1b0ad1cb91c81f30ad"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/replay/linked-faraddr-after.json",
+    "path": "asm198x-faraddr-producer__replay__linked-faraddr-after.json.gz",
+    "sha256": "076f5dad2822170b40da53c692d7cfbf429245637131563653ef9bb0defe3138",
+    "stored_sha256": "6424eed067c34a5595c0a02db213db9fa3dee549d4e3764e453fb6c618b14939"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/replay/numeric-consumers-after.json",
+    "path": "asm198x-faraddr-producer__replay__numeric-consumers-after.json.gz",
+    "sha256": "820f09618f98b3fc6369ab559d17b96d0bc5479bcbde961e6c3d82b4923724fc",
+    "stored_sha256": "ca9280332c6fd13d65419a5496b55fc6452e4393d5ec17a48eec831419d14bfc"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/replay/query-admission-after.json",
+    "path": "asm198x-faraddr-producer__replay__query-admission-after.json.gz",
+    "sha256": "25bee5b6a00662f07d486e367b15da4c000740a4ca1697505e87bb0642fd8852",
+    "stored_sha256": "f282628771634a7d2f9b2b8b3ecc79dd77ea83d9e13ba6649fd3084a662f6822"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/replay/query-extended-after.json",
+    "path": "asm198x-faraddr-producer__replay__query-extended-after.json.gz",
+    "sha256": "03a82cf86def1917212f4a4d27dc2d8d099aeeba64108ebc3611c6fc9574d346",
+    "stored_sha256": "a4b940367fd4439bf637155dffe7a9a3a1c9a4de6c0ac38c11001e2aecb6520c"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/replay/query-original-after.json",
+    "path": "asm198x-faraddr-producer__replay__query-original-after.json.gz",
+    "sha256": "cd9602b27b117f574e096b77f9281628a3fe2be1dd545c7a498b179a587cb18e",
+    "stored_sha256": "6961c261c11ba04a550ecf02a247edb816fa442b36e8e030e14b907233c91808"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/replay/query-short-circuit-after.json",
+    "path": "asm198x-faraddr-producer__replay__query-short-circuit-after.json.gz",
+    "sha256": "87c77f96c0f354e0e6228313b09a8f0acbedd0ae4aa0e8b32fd9bd3be5f15b7b",
+    "stored_sha256": "9caf8131c93cd4f6322c0748c988d7f349dcf7bb482aade2eee8d57fdf8cf91c"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/replay/scope-deferred-followups-native-after.json",
+    "path": "asm198x-faraddr-producer__replay__scope-deferred-followups-native-after.json.gz",
+    "sha256": "201f2094c3dfc5bb85273a6bf8d06a42ffb160ce3b15fd6bfe8b560ca4803436",
+    "stored_sha256": "0e3b9e911431fc32bb831c15febe1115774383d75810fcbb7a8befb54b1ee581"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/replay/scope-native-completed-phase-probes-after.json",
+    "path": "asm198x-faraddr-producer__replay__scope-native-completed-phase-probes-after.json.gz",
+    "sha256": "41b60d9cc35e4bce7a61e85635fd937236294ea24d6d29ecf787eed4a4ee965b",
+    "stored_sha256": "8e2c893f91ccd2313b4e6eb3add2011a2912831346fe6c74dfd3699e7806afaf"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/replay/scope-native-negative-memory-probes-after.json",
+    "path": "asm198x-faraddr-producer__replay__scope-native-negative-memory-probes-after.json.gz",
+    "sha256": "9f06e902b738f440d1fd55bfe551a0c182719769672811f0b66899dae9aacaa6",
+    "stored_sha256": "54e18ac9cf9e177b1c8eb197b5e3e34e903a4caea9e1cf94152ee17e63727c04"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/replay/scope-native-phase-probes-after.json",
+    "path": "asm198x-faraddr-producer__replay__scope-native-phase-probes-after.json.gz",
+    "sha256": "3f180a164e621b90f844d408216ebd02a319ae23de5ec60c8beba8d6d686b73a",
+    "stored_sha256": "01f4182a540c9c69f78f9471a02c93e163435239bed35ebd1ff7da0d7b8ccf2e"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/replay/scope-native-query-probes-after.json",
+    "path": "asm198x-faraddr-producer__replay__scope-native-query-probes-after.json.gz",
+    "sha256": "b04b3b1c5a6563a7fd5f868ed1663dcb3a3da71278fc97afb106260a62c2e666",
+    "stored_sha256": "3998b080fd5fd6c6654bc2c6e971845d172a7b943e094ff2f36e902ac7877809"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/replay/scope-native-stream-probes-after.json",
+    "path": "asm198x-faraddr-producer__replay__scope-native-stream-probes-after.json.gz",
+    "sha256": "5274c0741addd9ef9353e23111e20c2597af2057fb4d42e32cd75f039c79ec79",
+    "stored_sha256": "a87b4c5ae56565a67a791400259a44ed34d8de9da789c5fca24668a2ad9e5a1f"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/replay/scope-native-width-probes-after.json",
+    "path": "asm198x-faraddr-producer__replay__scope-native-width-probes-after.json.gz",
+    "sha256": "3b4151da473c663277c451d2a7afa27036d8b3f7131744c23eb622feef1e1218",
+    "stored_sha256": "2d605aaf5d6ba696113038cb789537eff9e78303231289be909cdcd8d36aebb5"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/replay/source-constancy-after.json",
+    "path": "asm198x-faraddr-producer__replay__source-constancy-after.json.gz",
+    "sha256": "019b7616d6f23c51f9b8fdc4097b02d0660483c5a78a8f1969ea79e8242d6cec",
+    "stored_sha256": "3075b22e272e17619e945de05250a725098bb5e481b99b0ef1874f9ba0d88595"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/replay/strings-consumer-native-after.json",
+    "path": "asm198x-faraddr-producer__replay__strings-consumer-native-after.json.gz",
+    "sha256": "9d9a37bec94b0d67bbcec9ebadf18f1700e5ef08549b422ca3acb7f4d50e3ba1",
+    "stored_sha256": "667401bae3b9e485513498c4741dab576114664bdfaedefaebb5c7576d10f5a0"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/replay/strings-flat-native-after.json",
+    "path": "asm198x-faraddr-producer__replay__strings-flat-native-after.json.gz",
+    "sha256": "2e8880ec4732706bec48d86ec8dc367a10ba84d70609d3f3ba2960dd026a287d",
+    "stored_sha256": "0a705a5a121fe6a7051d8c94c95c2486f14790cc148d666737db4dc29840e0ab"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/replay/strings-guard-native-after.json",
+    "path": "asm198x-faraddr-producer__replay__strings-guard-native-after.json.gz",
+    "sha256": "130ff11ab05e430d8bfdfae22b064aaeb82ffadeac8b9fecaf12cb763c15795f",
+    "stored_sha256": "1708e0ea37668e3d119d100580d64b6391acad8f9fe6258f55fbe7c75d3dccc0"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/replay/strings-index-scope-native-after.json",
+    "path": "asm198x-faraddr-producer__replay__strings-index-scope-native-after.json.gz",
+    "sha256": "d0a688b826c48431a174a59c9a438d13624a2adb7c371ccbeb50d44a68da2044",
+    "stored_sha256": "77312da006aaaa77309f17af869dc052d321e147a180dcf9fc1983709449fd08"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/replay/strings-lifetime-native-after.json",
+    "path": "asm198x-faraddr-producer__replay__strings-lifetime-native-after.json.gz",
+    "sha256": "0bad734be4a46f7601256a45adedfdac458faa092e683792f751bd25c8b2894d",
+    "stored_sha256": "f57595c6c30022f8255f0d96abb11a8a172d8b4908b150a4f5c4cefa25cc2a91"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/replay/strings-numeric-string-arity-native-after.json",
+    "path": "asm198x-faraddr-producer__replay__strings-numeric-string-arity-native-after.json.gz",
+    "sha256": "ec2879721474b1626341e8ff75590d8f415d78cc555ac8ee6fb1a5101ba025a1",
+    "stored_sha256": "57fa299328fb271cabab10a55d09bc89605faa9797d63c59b4a516807562fef8"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/replay/strings-text-consumer-native-after.json",
+    "path": "asm198x-faraddr-producer__replay__strings-text-consumer-native-after.json.gz",
+    "sha256": "d9011a591fea8f3d0e8137667808b4b65d6e1bfc7a3b4316df404f52692035e3",
+    "stored_sha256": "e584f706be0dec2845c16078a62570137e1422369e733adfef88de62448ecf24"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/replay/summary.json",
+    "path": "asm198x-faraddr-producer__replay__summary.json.gz",
+    "sha256": "736b9f0deffadf335740ce6be36ed720fd3ee1ea6c2911e693fff570fd4ee43a",
+    "stored_sha256": "994eea87392dbf1d68f8e2fafdd47706e737da6da1efe242ad671f4bdbf7d07f"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/replay/text-assertion-native-after.json",
+    "path": "asm198x-faraddr-producer__replay__text-assertion-native-after.json.gz",
+    "sha256": "cf92ad5e05d89a3d14d82bdc7f6c1cac95652e7076d6915780bf5d01e34d03f4",
+    "stored_sha256": "fadfbae602e3d254fe6cd383039f1f2c726f3477bc2ad58381825ab6a9184eea"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/replay/text-native-after.json",
+    "path": "asm198x-faraddr-producer__replay__text-native-after.json.gz",
+    "sha256": "1ef50c4851c0afe7013d7373b6d8d4bf42d65cbbd9ae6f4374507ccb86e1ec14",
+    "stored_sha256": "bd02fc59a49d3ef24e150ffffcd84bdbce02f6d22660c5e8ac1b5e36e23a4103"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/replay/tokens-after.json",
+    "path": "asm198x-faraddr-producer__replay__tokens-after.json.gz",
+    "sha256": "84f9cb6865ab5eb1e5b69b2b1edb2aad39cd56b9a598185c21f520c732f93d18",
+    "stored_sha256": "a4286fc3462185bbe71dee4eadca283cbe03b6358b11fc13be6d9af49da98326"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/replay/visibility-after.json",
+    "path": "asm198x-faraddr-producer__replay__visibility-after.json.gz",
+    "sha256": "3e3b8529c8e370b0a62c8dd11b840c550d3f163c1f96a19f14fd847aad7760a7",
+    "stored_sha256": "5fe6072780aa54b2b72faac18a5e3b4ed4494c65c0ffa3373a36d202e7f5d9f5"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/scope-deferred-followups-native-after.json",
+    "path": "asm198x-faraddr-producer__scope-deferred-followups-native-after.json.gz",
+    "sha256": "201f2094c3dfc5bb85273a6bf8d06a42ffb160ce3b15fd6bfe8b560ca4803436",
+    "stored_sha256": "0e3b9e911431fc32bb831c15febe1115774383d75810fcbb7a8befb54b1ee581"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/scope-native-completed-phase-probes-after.json",
+    "path": "asm198x-faraddr-producer__scope-native-completed-phase-probes-after.json.gz",
+    "sha256": "41b60d9cc35e4bce7a61e85635fd937236294ea24d6d29ecf787eed4a4ee965b",
+    "stored_sha256": "8e2c893f91ccd2313b4e6eb3add2011a2912831346fe6c74dfd3699e7806afaf"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/scope-native-negative-memory-probes-after.json",
+    "path": "asm198x-faraddr-producer__scope-native-negative-memory-probes-after.json.gz",
+    "sha256": "9f06e902b738f440d1fd55bfe551a0c182719769672811f0b66899dae9aacaa6",
+    "stored_sha256": "54e18ac9cf9e177b1c8eb197b5e3e34e903a4caea9e1cf94152ee17e63727c04"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/scope-native-phase-probes-after.json",
+    "path": "asm198x-faraddr-producer__scope-native-phase-probes-after.json.gz",
+    "sha256": "3f180a164e621b90f844d408216ebd02a319ae23de5ec60c8beba8d6d686b73a",
+    "stored_sha256": "01f4182a540c9c69f78f9471a02c93e163435239bed35ebd1ff7da0d7b8ccf2e"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/scope-native-query-probes-after.json",
+    "path": "asm198x-faraddr-producer__scope-native-query-probes-after.json.gz",
+    "sha256": "b04b3b1c5a6563a7fd5f868ed1663dcb3a3da71278fc97afb106260a62c2e666",
+    "stored_sha256": "3998b080fd5fd6c6654bc2c6e971845d172a7b943e094ff2f36e902ac7877809"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/scope-native-stream-probes-after.json",
+    "path": "asm198x-faraddr-producer__scope-native-stream-probes-after.json.gz",
+    "sha256": "5274c0741addd9ef9353e23111e20c2597af2057fb4d42e32cd75f039c79ec79",
+    "stored_sha256": "a87b4c5ae56565a67a791400259a44ed34d8de9da789c5fca24668a2ad9e5a1f"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/scope-native-width-probes-after.json",
+    "path": "asm198x-faraddr-producer__scope-native-width-probes-after.json.gz",
+    "sha256": "3b4151da473c663277c451d2a7afa27036d8b3f7131744c23eb622feef1e1218",
+    "stored_sha256": "2d605aaf5d6ba696113038cb789537eff9e78303231289be909cdcd8d36aebb5"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/source-constancy-after.json",
+    "path": "asm198x-faraddr-producer__source-constancy-after.json.gz",
+    "sha256": "019b7616d6f23c51f9b8fdc4097b02d0660483c5a78a8f1969ea79e8242d6cec",
+    "stored_sha256": "3075b22e272e17619e945de05250a725098bb5e481b99b0ef1874f9ba0d88595"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/strings-consumer-native-after.json",
+    "path": "asm198x-faraddr-producer__strings-consumer-native-after.json.gz",
+    "sha256": "9d9a37bec94b0d67bbcec9ebadf18f1700e5ef08549b422ca3acb7f4d50e3ba1",
+    "stored_sha256": "667401bae3b9e485513498c4741dab576114664bdfaedefaebb5c7576d10f5a0"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/strings-flat-native-after.json",
+    "path": "asm198x-faraddr-producer__strings-flat-native-after.json.gz",
+    "sha256": "2e8880ec4732706bec48d86ec8dc367a10ba84d70609d3f3ba2960dd026a287d",
+    "stored_sha256": "0a705a5a121fe6a7051d8c94c95c2486f14790cc148d666737db4dc29840e0ab"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/strings-guard-native-after.json",
+    "path": "asm198x-faraddr-producer__strings-guard-native-after.json.gz",
+    "sha256": "130ff11ab05e430d8bfdfae22b064aaeb82ffadeac8b9fecaf12cb763c15795f",
+    "stored_sha256": "1708e0ea37668e3d119d100580d64b6391acad8f9fe6258f55fbe7c75d3dccc0"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/strings-index-scope-native-after.json",
+    "path": "asm198x-faraddr-producer__strings-index-scope-native-after.json.gz",
+    "sha256": "d0a688b826c48431a174a59c9a438d13624a2adb7c371ccbeb50d44a68da2044",
+    "stored_sha256": "77312da006aaaa77309f17af869dc052d321e147a180dcf9fc1983709449fd08"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/strings-lifetime-native-after.json",
+    "path": "asm198x-faraddr-producer__strings-lifetime-native-after.json.gz",
+    "sha256": "0bad734be4a46f7601256a45adedfdac458faa092e683792f751bd25c8b2894d",
+    "stored_sha256": "f57595c6c30022f8255f0d96abb11a8a172d8b4908b150a4f5c4cefa25cc2a91"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/strings-numeric-string-arity-native-after.json",
+    "path": "asm198x-faraddr-producer__strings-numeric-string-arity-native-after.json.gz",
+    "sha256": "ec2879721474b1626341e8ff75590d8f415d78cc555ac8ee6fb1a5101ba025a1",
+    "stored_sha256": "57fa299328fb271cabab10a55d09bc89605faa9797d63c59b4a516807562fef8"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/strings-text-consumer-native-after.json",
+    "path": "asm198x-faraddr-producer__strings-text-consumer-native-after.json.gz",
+    "sha256": "d9011a591fea8f3d0e8137667808b4b65d6e1bfc7a3b4316df404f52692035e3",
+    "stored_sha256": "e584f706be0dec2845c16078a62570137e1422369e733adfef88de62448ecf24"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/text-assertion-native-after.json",
+    "path": "asm198x-faraddr-producer__text-assertion-native-after.json.gz",
+    "sha256": "cf92ad5e05d89a3d14d82bdc7f6c1cac95652e7076d6915780bf5d01e34d03f4",
+    "stored_sha256": "fadfbae602e3d254fe6cd383039f1f2c726f3477bc2ad58381825ab6a9184eea"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/text-native-after.json",
+    "path": "asm198x-faraddr-producer__text-native-after.json.gz",
+    "sha256": "1ef50c4851c0afe7013d7373b6d8d4bf42d65cbbd9ae6f4374507ccb86e1ec14",
+    "stored_sha256": "bd02fc59a49d3ef24e150ffffcd84bdbce02f6d22660c5e8ac1b5e36e23a4103"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/tokens-after.json",
+    "path": "asm198x-faraddr-producer__tokens-after.json.gz",
+    "sha256": "84f9cb6865ab5eb1e5b69b2b1edb2aad39cd56b9a598185c21f520c732f93d18",
+    "stored_sha256": "a4286fc3462185bbe71dee4eadca283cbe03b6358b11fc13be6d9af49da98326"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/visibility-after.json",
+    "path": "asm198x-faraddr-producer__visibility-after.json.gz",
+    "sha256": "3e3b8529c8e370b0a62c8dd11b840c550d3f163c1f96a19f14fd847aad7760a7",
+    "stored_sha256": "5fe6072780aa54b2b72faac18a5e3b4ed4494c65c0ffa3373a36d202e7f5d9f5"
   },
   {
     "source": "/private/tmp/asm198x-faraddr-release-final.log",
@@ -444,10 +1068,40 @@
     "stored_sha256": "71df4873fdef16067efa62d2f5ccfa03cc2b8976e622bb39935813b645ea1e60"
   },
   {
+    "source": "/private/tmp/asm198x-faraddr-release-replay.log",
+    "path": "asm198x-faraddr-release-replay.log.gz",
+    "sha256": "0871a252096198060c4e5b24517800e0ff501a1f0e1c2f52dfa28b2da4cb1db7",
+    "stored_sha256": "212530a377f299da4c81f2f1c9b8d4e478b91e8d9ab431eca026f46f9fdd7d2b"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-release-replay.py",
+    "path": "asm198x-faraddr-release-replay.py.gz",
+    "sha256": "86381b6eb65502b893fd19bfe1e1754b0adc0c26443b0a4c5e5ecb14a0d20cb9",
+    "stored_sha256": "8d92912f16430421e5730bb13e4defd59575c22222b0da6087fa7a430549de26"
+  },
+  {
     "source": "/private/tmp/asm198x-faraddr-release.log",
     "path": "asm198x-faraddr-release.log.gz",
     "sha256": "1f2fe4ce181d2a1c437bcefa8c1c312045856c43dba4b08bf50e8edbb1099500",
     "stored_sha256": "085d9673ec4a31f2c7e9400f80766fdf13790810ce63abb3e1ea0fab8d3cb94f"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-replay-v2.log",
+    "path": "asm198x-faraddr-replay-v2.log.gz",
+    "sha256": "0871a252096198060c4e5b24517800e0ff501a1f0e1c2f52dfa28b2da4cb1db7",
+    "stored_sha256": "212530a377f299da4c81f2f1c9b8d4e478b91e8d9ab431eca026f46f9fdd7d2b"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-replay.log",
+    "path": "asm198x-faraddr-replay.log.gz",
+    "sha256": "65fcb3dd06932964f69d24e3b3dd458086cacdfb420bd37093654d5578799df6",
+    "stored_sha256": "5ce303b278711b850f6b5b6683426c2e15663b7bb0c554f0e36d32fe44d17b94"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-replay.py",
+    "path": "asm198x-faraddr-replay.py.gz",
+    "sha256": "0368254b3bd2f9c6d55ff38616d3795eb2051cbee2099d5f67ed824d120c18d9",
+    "stored_sha256": "2bd7b5ead534cecbfb3866f8919c5d0bea360fee4a5391cf8dd20c8c2acd7ce8"
   },
   {
     "source": "/private/tmp/asm198x-faraddr-replay/alias-after.json",
@@ -630,28 +1284,16 @@
     "stored_sha256": "6391632cc8eba39b5678bab78d7c5ec7a438f9a1167db9429876750a72520664"
   },
   {
-    "source": "/private/tmp/asm198x-faraddr-replay-v2.log",
-    "path": "asm198x-faraddr-replay-v2.log.gz",
-    "sha256": "0871a252096198060c4e5b24517800e0ff501a1f0e1c2f52dfa28b2da4cb1db7",
-    "stored_sha256": "212530a377f299da4c81f2f1c9b8d4e478b91e8d9ab431eca026f46f9fdd7d2b"
-  },
-  {
-    "source": "/private/tmp/asm198x-faraddr-replay.log",
-    "path": "asm198x-faraddr-replay.log.gz",
-    "sha256": "65fcb3dd06932964f69d24e3b3dd458086cacdfb420bd37093654d5578799df6",
-    "stored_sha256": "5ce303b278711b850f6b5b6683426c2e15663b7bb0c554f0e36d32fe44d17b94"
-  },
-  {
-    "source": "/private/tmp/asm198x-faraddr-replay.py",
-    "path": "asm198x-faraddr-replay.py.gz",
-    "sha256": "0368254b3bd2f9c6d55ff38616d3795eb2051cbee2099d5f67ed824d120c18d9",
-    "stored_sha256": "2bd7b5ead534cecbfb3866f8919c5d0bea360fee4a5391cf8dd20c8c2acd7ce8"
-  },
-  {
     "source": "/private/tmp/asm198x-faraddr-retain.py",
     "path": "asm198x-faraddr-retain.py.gz",
     "sha256": "bf4eeef14e5fe664563a4cbc3dbd6d5ccf6874761a5846271f01279aed12f565",
     "stored_sha256": "3eff27f3821cd47ec9393a1e7bc430fb980c50678b522ab3b149c5e778a7e7e0"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-summary.json",
+    "path": "asm198x-faraddr-summary.json.gz",
+    "sha256": "430ed0a901aa8fce0a0f604f6945e9365446ef745ab4e93f29cfebd4ab678336",
+    "stored_sha256": "7edf9a4be613d0c53bba1a0fcc5cada271e4902516090a408e60ce5fb4db761f"
   },
   {
     "source": "/private/tmp/asm198x-faraddr-versions.log",

@@ -1,0 +1,68 @@
+{
+  "head": "1c7e89d6321ebcc394af15473f6894830aec8e02",
+  "checkout": "4fabd2a753281d6c751a19f783c536b5b0d44568",
+  "run_id": "39610420467",
+  "cargo_lock_sha256": "0ee4b612d610b2d581a5b32e1666f431bdfcf55b99cfaed65841aa48e369958a",
+  "reports": [
+    {
+      "target": "x86_64-apple-darwin",
+      "run_attempt": "1",
+      "report_sha256": "27fc5db02b891693af826fc1ec09bd95a86ace16bca55d437ecfbed909caba74",
+      "archive_sha256": "7b119b7c5b3f8dc785938d7ee15b18cd19ff592ccf18c9e16a41025a9de47e5f",
+      "executable_sha256": "a90825d2779844082e1bc85efe8c88f7dcccc7d7b7ca94445fbc759f8c9cc894",
+      "cases": 105,
+      "cohort": "ca65_linked_faraddr",
+      "cohort_cases": 190,
+      "cohort_runs": 598,
+      "negative_controls": 2
+    },
+    {
+      "target": "aarch64-apple-darwin",
+      "run_attempt": "1",
+      "report_sha256": "81d7d502cc7f0a5132d4a43da66a2bdb4b97fb6210cb1846d146ef1c4442581f",
+      "archive_sha256": "da73f296482764c58c2793d96be3f511bfc75b595093ef293152a73258b106d9",
+      "executable_sha256": "5c7b8eb4d94fc199cbc7b06b90facd59ead82f7e5b4e160b774c05705bda261f",
+      "cases": 105,
+      "cohort": "ca65_linked_faraddr",
+      "cohort_cases": 190,
+      "cohort_runs": 598,
+      "negative_controls": 2
+    },
+    {
+      "target": "x86_64-pc-windows-msvc",
+      "run_attempt": "1",
+      "report_sha256": "aa3af1d1f41e5afb8c451ae458cb060d80a584326d6f34afb85a6a8a13020a2e",
+      "archive_sha256": "339419935e624e3fd1414fe30a7eb45a43266e45cba1dbdfc97f0596810fbb68",
+      "executable_sha256": "0b13ecdcfc6ed5a706e6af0ac98d7be4c8e7fbe62e3be51b1177aac00a824d8c",
+      "cases": 105,
+      "cohort": "ca65_linked_faraddr",
+      "cohort_cases": 190,
+      "cohort_runs": 598,
+      "negative_controls": 2
+    },
+    {
+      "target": "x86_64-unknown-linux-gnu",
+      "run_attempt": "1",
+      "report_sha256": "ecf5b35235c78ce712e6d4bbfa2acc44e547060cf296b2db6f1dade88f956d43",
+      "archive_sha256": "26842ca4a3c23c79be11b60a5b5068c6361a97cda9dc58b24eb55577e164d2a0",
+      "executable_sha256": "4e487f40bcfdf5b91c8955bfbf0c6c6564da1073ebc9e1f4fbb401b251d260d0",
+      "cases": 105,
+      "cohort": "ca65_linked_faraddr",
+      "cohort_cases": 190,
+      "cohort_runs": 598,
+      "negative_controls": 2
+    },
+    {
+      "target": "aarch64-unknown-linux-gnu",
+      "run_attempt": "1",
+      "report_sha256": "92a7a0e6c37b6407759e3b535359024c16bdae5f90a8350f60c613a0875c1c6c",
+      "archive_sha256": "70e28b6bc58e45ca455e3bc11c31be80c5264113f7180a012d1e589490596339",
+      "executable_sha256": "f78a2d22f1642c9fafa3bb15aca73a70c7fbbcc3c161020f3c4a1cfe87b013ad",
+      "cases": 105,
+      "cohort": "ca65_linked_faraddr",
+      "cohort_cases": 190,
+      "cohort_runs": 598,
+      "negative_controls": 2
+    }
+  ]
+}
