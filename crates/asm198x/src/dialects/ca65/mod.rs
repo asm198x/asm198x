@@ -139,6 +139,8 @@ enum Kind {
     Unread,
     Bytes(Vec<Expr>),
     Words(Vec<Expr>),
+    /// Unsigned 24-bit addresses, checked before little-endian emission.
+    FarAddrs(Vec<Expr>),
     /// `.dbyt` — 16-bit values emitted **big-endian** (high byte first).
     DBytes(Vec<Expr>),
     /// `.dword` — 32-bit values emitted little-endian.
@@ -253,6 +255,7 @@ fn demanded_values(placed: &[Placed], values: &BTreeMap<String, i64>) -> BTreeSe
         match &at.item {
             Resolved::Bytes(exprs)
             | Resolved::Words(exprs)
+            | Resolved::FarAddrs(exprs)
             | Resolved::DBytes(exprs)
             | Resolved::DWords(exprs)
             | Resolved::Insn {
@@ -261,6 +264,7 @@ fn demanded_values(placed: &[Placed], values: &BTreeMap<String, i64>) -> BTreeSe
                 let width = match &at.item {
                     Resolved::Bytes(_) => 1,
                     Resolved::Words(_) | Resolved::DBytes(_) => 2,
+                    Resolved::FarAddrs(_) => 3,
                     Resolved::DWords(_) => 4,
                     _ => 0, // Instruction operands retain their statement PC.
                 };
@@ -3927,27 +3931,22 @@ fn parse_directive_source(
         "dword" => Ok(Kind::DWords(parse_value_list(
             anons, anchor, rest, line, source,
         )?)),
-        // Each extractor is its list of values with a byte selector wrapped
-        // round every one, so a forward label still resolves at layout time and
-        // the size is the item count (times three for `.faraddr`). ca65 answers
-        // a string with a syntax error, which `parse_value_list` does too.
-        // `Expr::Bank` is the engine's 65816 `^` node — bits 16-23 — which is
-        // byte 2 exactly.
-        "lobytes" | "hibytes" | "bankbytes" | "faraddr" => {
+        "faraddr" => Ok(Kind::FarAddrs(parse_value_list(
+            anons, anchor, rest, line, source,
+        )?)),
+        // Byte selectors deliberately discard the other bits. Far addresses
+        // retain the full expression so the linker checks its unsigned range
+        // and evaluates each address at one PC before advancing three bytes.
+        "lobytes" | "hibytes" | "bankbytes" => {
             let values = parse_value_list(anons, anchor, rest, line, source)?;
-            let mut out = Vec::with_capacity(values.len());
-            for value in values {
-                match entry.id {
-                    "lobytes" => out.push(Expr::Lo(Box::new(value))),
-                    "hibytes" => out.push(Expr::Hi(Box::new(value))),
-                    "bankbytes" => out.push(Expr::Bank(Box::new(value))),
-                    _ => {
-                        out.push(Expr::Lo(Box::new(value.clone())));
-                        out.push(Expr::Hi(Box::new(value.clone())));
-                        out.push(Expr::Bank(Box::new(value)));
-                    }
-                }
-            }
+            let out = values
+                .into_iter()
+                .map(|value| match entry.id {
+                    "lobytes" => Expr::Lo(Box::new(value)),
+                    "hibytes" => Expr::Hi(Box::new(value)),
+                    _ => Expr::Bank(Box::new(value)),
+                })
+                .collect();
             Ok(Kind::Bytes(out))
         }
         "asciiz" => Ok(Kind::Bytes(parse_asciiz(

@@ -109,6 +109,7 @@ pub(super) enum Resolved {
     Raw(Vec<u8>),
     Bytes(Vec<Expr>),
     Words(Vec<Expr>),
+    FarAddrs(Vec<Expr>),
     DBytes(Vec<Expr>),
     DWords(Vec<Expr>),
     Fill(usize, u8),
@@ -199,6 +200,10 @@ pub(super) fn resolve(
         Kind::Words(v) => {
             let n = v.len() * 2;
             (Resolved::Words(v), n)
+        }
+        Kind::FarAddrs(v) => {
+            let n = v.len() * 3;
+            (Resolved::FarAddrs(v), n)
         }
         Kind::DBytes(v) => {
             let n = v.len() * 2;
@@ -418,6 +423,14 @@ pub(super) fn emit(
                 pc += 2;
             }
         }
+        Resolved::FarAddrs(exprs) => {
+            for e in &exprs {
+                let v = e.eval(env, pc, line_for_errors)?;
+                let address = to_width(v, 0xFF_FFFF, line_for_errors)?;
+                out.extend_from_slice(&address.to_le_bytes()[..3]);
+                pc += 3;
+            }
+        }
         Resolved::DBytes(exprs) => {
             for e in &exprs {
                 let v = e.eval(env, pc, line_for_errors)?;
@@ -520,7 +533,7 @@ fn to_byte(v: i64, line: usize) -> Result<u8, AsmError> {
     to_width(v, 0xFF, line).map(|v| v as u8)
 }
 
-/// One width's range check, so `.byte`, `.word` and `.dword` cannot drift
+/// One width's range check, so `.byte`, `.word`, `.faraddr` and `.dword` cannot drift
 /// apart. Before this the word and dword paths simply masked, which accepted
 /// `.word -1` and `.word 65536` in silence where ca65 refuses both
 /// (asm198x#290).

@@ -35,8 +35,8 @@ Reuse the active task worktree and build caches. No extra worktree is needed.
    edit, wait for new metadata workflows to complete before merging.
 7. Retain evidence and recovery refs, inspect/remove obsolete trial artifacts,
    and verify exited processes. Keep checked #920's producer/archive until a
-   checked replacement is retained. Await #924 design agreement before resuming
-   source-token reader work.
+   checked replacement is retained. The user selected the full ca65 reader redesign for #924; resume
+   that work after the independent range fix is checked.
 
 Correct AGENTS.md's stale descriptive protection sentence using the current main
 rules snapshot; preserve its stricter full-check/native/rebase convention.
