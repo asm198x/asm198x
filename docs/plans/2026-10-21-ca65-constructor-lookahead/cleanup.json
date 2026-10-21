@@ -1,0 +1,17 @@
+{
+  "retained_remote_commit": "936c163f287c0a7dca8a896023ea54b2e4eb5a5a",
+  "removed_roots": [
+    "/private/tmp/asm198x-reader-timing-build.log",
+    "/private/tmp/asm198x-reader-timing-clippy.log",
+    "/private/tmp/asm198x-reader-timing-compare.log",
+    "/private/tmp/asm198x-reader-timing-contract.log",
+    "/private/tmp/asm198x-reader-timing-fmt.log",
+    "/private/tmp/asm198x-reader-timing-replay",
+    "/private/tmp/asm198x-reader-timing-replay.log",
+    "/private/tmp/asm198x-reader-timing-workspace.log"
+  ],
+  "removed_files": 86,
+  "process_check": "no task-owned timing/check processes remain",
+  "worktree": "/Users/stevehill/Projects/198x/Asm198x/asm198x-ca65-text-consumers",
+  "removal_condition": "full #924 reader qualified and merged; active work/evidence retained"
+}
