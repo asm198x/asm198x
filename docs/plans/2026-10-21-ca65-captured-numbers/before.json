@@ -1,0 +1,5506 @@
+{
+  "binary": "/private/tmp/asm198x-empty-producer/asm198x",
+  "sha256": "e851007448fb971890c98258fe7b5429ed890a7e3f19e3715dd1dbe788b0006e",
+  "results": [
+    {
+      "name": "ca65_const_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_const_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_const_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_const_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_const_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_const_missing_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_const_missing_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_const_missing_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_const_missing_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_const_missing_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_match_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "0a",
+      "matches_native": false
+    },
+    {
+      "name": "ca65_match_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "0a",
+      "matches_native": false
+    },
+    {
+      "name": "ca65_match_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "0a",
+      "matches_native": false
+    },
+    {
+      "name": "ca65_match_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_match_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_xmatch_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "0a",
+      "matches_native": false
+    },
+    {
+      "name": "ca65_xmatch_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "0a",
+      "matches_native": false
+    },
+    {
+      "name": "ca65_xmatch_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "0a",
+      "matches_native": false
+    },
+    {
+      "name": "ca65_xmatch_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_xmatch_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_ismnem_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_ismnem_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_ismnem_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_ismnem_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_ismnem_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_ismnemonic_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_ismnemonic_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_ismnemonic_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_ismnemonic_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_ismnemonic_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_ismnem_missing_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_ismnem_missing_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_ismnem_missing_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_ismnem_missing_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_ismnem_missing_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_blank_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "03",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_blank_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "03",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_blank_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "03",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_blank_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_blank_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_tcount_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "03",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_tcount_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "03",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_tcount_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "03",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_tcount_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_tcount_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_strlen_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_strlen_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_strlen_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_strlen_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_strlen_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_strat_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "06",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_strat_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "06",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_strat_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "06",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_strat_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_strat_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_sizeof_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_sizeof_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_sizeof_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_sizeof_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_sizeof_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_max_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "06",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_max_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "06",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_max_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "06",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_max_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_max_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_min_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "06",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_min_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "06",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_min_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "06",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_min_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_min_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_lobyte_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_lobyte_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_lobyte_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_lobyte_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_lobyte_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_hibyte_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_hibyte_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_hibyte_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_hibyte_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_hibyte_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_bankbyte_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_bankbyte_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_bankbyte_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_bankbyte_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_bankbyte_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_constructor_concat_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_constructor_concat_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_constructor_concat_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_constructor_concat_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_constructor_concat_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_constructor_string_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_constructor_string_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_constructor_string_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_constructor_string_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_constructor_string_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_constructor_ident_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_constructor_ident_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_constructor_ident_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_constructor_ident_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_constructor_ident_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_constructor_sprintf_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_constructor_sprintf_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_constructor_sprintf_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_constructor_sprintf_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_constructor_sprintf_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_constructor_left_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_constructor_left_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_constructor_left_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_constructor_left_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_constructor_left_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "65816_const_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": false
+    },
+    {
+      "name": "65816_const_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": false
+    },
+    {
+      "name": "65816_const_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": false
+    },
+    {
+      "name": "65816_const_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_const_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "65816_const_missing_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `MISSING` is not defined anywhere in this source\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_const_missing_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-empty-call-compare-ag8aohbo/65816_const_missing_included.inc:2: error: `MISSING` is not defined anywhere in this source\nincluded from input.s:2\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_const_missing_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: `MISSING` is not defined anywhere in this source\nin expansion of macro `run` defined at input.s:2, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_const_missing_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: `MISSING` is not defined anywhere in this source\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_const_missing_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "65816_match_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": false
+    },
+    {
+      "name": "65816_match_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": false
+    },
+    {
+      "name": "65816_match_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": false
+    },
+    {
+      "name": "65816_match_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_match_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "65816_xmatch_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": false
+    },
+    {
+      "name": "65816_xmatch_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": false
+    },
+    {
+      "name": "65816_xmatch_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": false
+    },
+    {
+      "name": "65816_xmatch_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_xmatch_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "65816_ismnem_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": false
+    },
+    {
+      "name": "65816_ismnem_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": false
+    },
+    {
+      "name": "65816_ismnem_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": false
+    },
+    {
+      "name": "65816_ismnem_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_ismnem_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "65816_ismnemonic_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": false
+    },
+    {
+      "name": "65816_ismnemonic_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": false
+    },
+    {
+      "name": "65816_ismnemonic_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": false
+    },
+    {
+      "name": "65816_ismnemonic_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_ismnemonic_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "65816_ismnem_missing_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": false
+    },
+    {
+      "name": "65816_ismnem_missing_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": false
+    },
+    {
+      "name": "65816_ismnem_missing_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": false
+    },
+    {
+      "name": "65816_ismnem_missing_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_ismnem_missing_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "65816_blank_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "03",
+      "matches_native": true
+    },
+    {
+      "name": "65816_blank_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "03",
+      "matches_native": true
+    },
+    {
+      "name": "65816_blank_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "03",
+      "matches_native": true
+    },
+    {
+      "name": "65816_blank_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_blank_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "65816_tcount_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "03",
+      "matches_native": true
+    },
+    {
+      "name": "65816_tcount_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "03",
+      "matches_native": true
+    },
+    {
+      "name": "65816_tcount_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "03",
+      "matches_native": true
+    },
+    {
+      "name": "65816_tcount_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_tcount_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "65816_strlen_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "65816_strlen_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "65816_strlen_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "65816_strlen_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_strlen_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "65816_strat_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "06",
+      "matches_native": true
+    },
+    {
+      "name": "65816_strat_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "06",
+      "matches_native": true
+    },
+    {
+      "name": "65816_strat_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "06",
+      "matches_native": true
+    },
+    {
+      "name": "65816_strat_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_strat_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "65816_sizeof_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "65816_sizeof_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "65816_sizeof_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "65816_sizeof_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_sizeof_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "65816_max_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "06",
+      "matches_native": true
+    },
+    {
+      "name": "65816_max_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "06",
+      "matches_native": true
+    },
+    {
+      "name": "65816_max_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "06",
+      "matches_native": true
+    },
+    {
+      "name": "65816_max_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_max_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "65816_min_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "06",
+      "matches_native": true
+    },
+    {
+      "name": "65816_min_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "06",
+      "matches_native": true
+    },
+    {
+      "name": "65816_min_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "06",
+      "matches_native": true
+    },
+    {
+      "name": "65816_min_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_min_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "65816_lobyte_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "65816_lobyte_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "65816_lobyte_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "65816_lobyte_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_lobyte_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "65816_hibyte_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "65816_hibyte_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "65816_hibyte_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "65816_hibyte_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_hibyte_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "65816_bankbyte_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "65816_bankbyte_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "65816_bankbyte_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "65816_bankbyte_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_bankbyte_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "65816_constructor_concat_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "65816_constructor_concat_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "65816_constructor_concat_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "65816_constructor_concat_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_constructor_concat_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "65816_constructor_string_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "65816_constructor_string_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "65816_constructor_string_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "65816_constructor_string_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_constructor_string_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "65816_constructor_ident_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "65816_constructor_ident_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "65816_constructor_ident_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "65816_constructor_ident_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_constructor_ident_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "65816_constructor_sprintf_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "65816_constructor_sprintf_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "65816_constructor_sprintf_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "65816_constructor_sprintf_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_constructor_sprintf_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "65816_constructor_left_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "65816_constructor_left_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "65816_constructor_left_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "65816_constructor_left_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_constructor_left_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_const_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_const_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_const_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_const_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_const_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_const_missing_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: `MISSING` is not defined anywhere in this source\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_const_missing_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-empty-call-compare-ag8aohbo/huc6280_const_missing_included.inc:2: error: `MISSING` is not defined anywhere in this source\nincluded from input.s:2\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_const_missing_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: `MISSING` is not defined anywhere in this source\nin expansion of macro `run` defined at input.s:2, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_const_missing_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4: error: `MISSING` is not defined anywhere in this source\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_const_missing_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_match_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_match_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_match_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_match_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_match_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_xmatch_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_xmatch_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_xmatch_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_xmatch_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_xmatch_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_ismnem_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_ismnem_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_ismnem_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_ismnem_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_ismnem_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_ismnemonic_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_ismnemonic_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_ismnemonic_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_ismnemonic_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_ismnemonic_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_ismnem_missing_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_ismnem_missing_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_ismnem_missing_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_ismnem_missing_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_ismnem_missing_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_blank_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "03",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_blank_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "03",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_blank_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "03",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_blank_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_blank_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_tcount_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "03",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_tcount_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "03",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_tcount_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "03",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_tcount_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_tcount_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_strlen_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_strlen_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_strlen_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_strlen_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_strlen_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_strat_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "06",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_strat_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "06",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_strat_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "06",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_strat_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_strat_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_sizeof_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_sizeof_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_sizeof_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_sizeof_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_sizeof_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_max_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "06",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_max_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "06",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_max_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "06",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_max_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_max_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_min_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "06",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_min_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "06",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_min_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "06",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_min_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_min_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_lobyte_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_lobyte_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_lobyte_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_lobyte_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_lobyte_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_hibyte_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_hibyte_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_hibyte_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_hibyte_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_hibyte_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_bankbyte_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_bankbyte_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_bankbyte_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "04",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_bankbyte_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_bankbyte_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_constructor_concat_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_constructor_concat_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_constructor_concat_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_constructor_concat_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_constructor_concat_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_constructor_string_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_constructor_string_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_constructor_string_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_constructor_string_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_constructor_string_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_constructor_ident_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_constructor_ident_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_constructor_ident_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_constructor_ident_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_constructor_ident_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_constructor_sprintf_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_constructor_sprintf_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_constructor_sprintf_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_constructor_sprintf_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_constructor_sprintf_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_constructor_left_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_constructor_left_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_constructor_left_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "01",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_constructor_left_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_constructor_left_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    }
+  ]
+}
