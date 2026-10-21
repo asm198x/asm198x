@@ -1,0 +1,446 @@
+[
+  {
+    "source": "/private/tmp/asm198x-data-context-focused.log",
+    "retained": "asm198x-data-context-focused.log.gz",
+    "bytes": 1226,
+    "sha256": "6cd85e2d3189966520062674707dbe60886bbf79f183c6f354a49b30db67335b"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-full.log",
+    "retained": "asm198x-data-context-full.log.gz",
+    "bytes": 59729,
+    "sha256": "986f82b5a1829c044584cd90b83e49eb6653c8017d56a53bc6450cbff933963d"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-focused.log",
+    "retained": "asm198x-data-context-final-focused.log.gz",
+    "bytes": 59132,
+    "sha256": "3fdc6c23f19fbeb7e568dfab0140f18edde8eb6da0f29dea40fdcf470682e749"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-clippy.log",
+    "retained": "asm198x-data-context-clippy.log.gz",
+    "bytes": 288,
+    "sha256": "97edf1a5b84db0e3488948d99b500f44064c89c83b79640210d78751350e4b4a"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay.log",
+    "retained": "asm198x-data-context-final-replay.log.gz",
+    "bytes": 790,
+    "sha256": "6e7bcbc4646b66d47d461cde9862a962e838818254e40afffed17bf337385d55"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-replay/alias-after.json",
+    "retained": "asm198x-data-context-replay--alias-after.json.gz",
+    "bytes": 4456,
+    "sha256": "f989c221a30462bf829cc87ac53c4269174f81a664cd5ef953dc6f2f60bfdbfe"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-replay/query-admission-after.json",
+    "retained": "asm198x-data-context-replay--query-admission-after.json.gz",
+    "bytes": 27729,
+    "sha256": "91678b138de26270fd3ca5708184f05aa542fb6bd555d1a8ccebcf30b9e24269"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-replay/query-extended-after.json",
+    "retained": "asm198x-data-context-replay--query-extended-after.json.gz",
+    "bytes": 64878,
+    "sha256": "c6256879896636ba96ce42d7d02aa32b03b1769d29673f4f58aeff2a3c96cdc5"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-replay/query-original-after.json",
+    "retained": "asm198x-data-context-replay--query-original-after.json.gz",
+    "bytes": 27384,
+    "sha256": "0408541b94eb190ab512a501c549aacdb4830b6b556f0fc58b447c7e4efbc141"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-replay/query-short-circuit-after.json",
+    "retained": "asm198x-data-context-replay--query-short-circuit-after.json.gz",
+    "bytes": 9616,
+    "sha256": "12b3f61408600f3e87279af657f21fbaa6ef3d89d359798c8ee69836f1896270"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-replay/scope-deferred-followups-native-after.json",
+    "retained": "asm198x-data-context-replay--scope-deferred-followups-native-after.json.gz",
+    "bytes": 10895,
+    "sha256": "8691462a5693ae48d2c8a4bb38c92fcad49cb714d15873167fe1c5ae0d8fe09b"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-replay/scope-native-completed-phase-probes-after.json",
+    "retained": "asm198x-data-context-replay--scope-native-completed-phase-probes-after.json.gz",
+    "bytes": 53221,
+    "sha256": "703be6947c039a6e93581ae84accf6e322a5458d1053b5c8ca12e910623312e2"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-replay/scope-native-negative-memory-probes-after.json",
+    "retained": "asm198x-data-context-replay--scope-native-negative-memory-probes-after.json.gz",
+    "bytes": 14237,
+    "sha256": "455acea383f36223e1238d123428f550316957732d287961f020a2ef82657d26"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-replay/scope-native-phase-probes-after.json",
+    "retained": "asm198x-data-context-replay--scope-native-phase-probes-after.json.gz",
+    "bytes": 53730,
+    "sha256": "a0c5cf73f8bfbde5a04f718ecdc767c5907b22e6c7aed83166c28e414d64f8c2"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-replay/scope-native-query-probes-after.json",
+    "retained": "asm198x-data-context-replay--scope-native-query-probes-after.json.gz",
+    "bytes": 17159,
+    "sha256": "37f84308e9c5622d97824adc9fcc4aafbc481b65d325b4938d46dd5c33f32803"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-replay/scope-native-stream-probes-after.json",
+    "retained": "asm198x-data-context-replay--scope-native-stream-probes-after.json.gz",
+    "bytes": 3218,
+    "sha256": "d35a143a1469ea18dfc8c56f5b30af0eca24b9c569c9dec5a6cbadfc184870b4"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-replay/scope-native-width-probes-after.json",
+    "retained": "asm198x-data-context-replay--scope-native-width-probes-after.json.gz",
+    "bytes": 71921,
+    "sha256": "7f7cee1e18ecae71b45b82a314cad9ee99754cfb930c2d4a6e22e429a6ae2d85"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-replay/source-constancy-after.json",
+    "retained": "asm198x-data-context-replay--source-constancy-after.json.gz",
+    "bytes": 156283,
+    "sha256": "c9e4a44b8ff068d15e7fc2bd068253039bda84cb651f5e3f70a1f8edd60155e5"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-replay/strings-consumer-native-after.json",
+    "retained": "asm198x-data-context-replay--strings-consumer-native-after.json.gz",
+    "bytes": 33478,
+    "sha256": "3dd87b5f4a9812b064638af2ade2cd64804cff7fb0723c88052f682d2ea46122"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-replay/strings-flat-native-after.json",
+    "retained": "asm198x-data-context-replay--strings-flat-native-after.json.gz",
+    "bytes": 337097,
+    "sha256": "475870b40b17122dc76cf8b6abbb624cde507379c0ecc72033d9ea703f8c8b02"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-replay/strings-guard-native-after.json",
+    "retained": "asm198x-data-context-replay--strings-guard-native-after.json.gz",
+    "bytes": 3332,
+    "sha256": "7090f0fb0618cc97b95ff84607d6442d69f9c70cfafe2a01d7a57a04f31fc83a"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-replay/strings-index-scope-native-after.json",
+    "retained": "asm198x-data-context-replay--strings-index-scope-native-after.json.gz",
+    "bytes": 2151,
+    "sha256": "ef18a013da40811d5f4e500927c8f233dcd0cead5a38f6594a0a035ca5166d6e"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-replay/strings-lifetime-native-after.json",
+    "retained": "asm198x-data-context-replay--strings-lifetime-native-after.json.gz",
+    "bytes": 17534,
+    "sha256": "86e85a48a6af37cb7a64c0d19dab1f1c486427d2b04723337620ed37e39f1271"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-replay/strings-numeric-string-arity-native-after.json",
+    "retained": "asm198x-data-context-replay--strings-numeric-string-arity-native-after.json.gz",
+    "bytes": 12825,
+    "sha256": "938a8eaa658d72373ca95ec41fa0ef8c37f0846c5ec3a17d99d4ac645efe1342"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-replay/strings-text-consumer-native-after.json",
+    "retained": "asm198x-data-context-replay--strings-text-consumer-native-after.json.gz",
+    "bytes": 3064,
+    "sha256": "69799b83964b1e1e1d368b9e20653b23b04331f785849b373e18f822f528daa8"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-replay/text-assertion-native-after.json",
+    "retained": "asm198x-data-context-replay--text-assertion-native-after.json.gz",
+    "bytes": 60773,
+    "sha256": "54b05b5c2a89df78626bdbd172e9cbfec35ae9f40a12e54c2d925ac6ba97f06f"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-replay/text-native-after.json",
+    "retained": "asm198x-data-context-replay--text-native-after.json.gz",
+    "bytes": 198006,
+    "sha256": "be3010fe9a36299db837d897ca5c60f68e6a1d0c83f13952730583920ae1a35e"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/alias-after.json",
+    "retained": "asm198x-data-context-final-replay--alias-after.json.gz",
+    "bytes": 4456,
+    "sha256": "73f837aa032613333af6d1f644780d4562029bc998adea76708bb20b1673e0f3"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/alias.log",
+    "retained": "asm198x-data-context-final-replay--alias.log.gz",
+    "bytes": 22,
+    "sha256": "873a2f696ecdba8a1b95ca39106cac5141cab37ebda54726c474947ecbf7cd99"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/conditional-context-after.json",
+    "retained": "asm198x-data-context-final-replay--conditional-context-after.json.gz",
+    "bytes": 98917,
+    "sha256": "8a91db48a8ce0a53ba032352ecc79dee975251f08bbe98fb57956a2a885eeed6"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/conditional-context.log",
+    "retained": "asm198x-data-context-final-replay--conditional-context.log.gz",
+    "bytes": 24,
+    "sha256": "b7952288f8bde63cd5eb84897660ec0a2d67571c9ff994e4d2f742054244d7e2"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/query-admission-after.json",
+    "retained": "asm198x-data-context-final-replay--query-admission-after.json.gz",
+    "bytes": 27729,
+    "sha256": "a98bd556c9bf7e9e3b8a260432c1fd51d957d31ac155d1d524235cd81772dff6"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/query-admission.log",
+    "retained": "asm198x-data-context-final-replay--query-admission.log.gz",
+    "bytes": 23,
+    "sha256": "fb03ee0f8f1c6448f3c83160edf85c87e3f8b1b7e60bbec3d8f2fad3f12f044c"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/query-extended-after.json",
+    "retained": "asm198x-data-context-final-replay--query-extended-after.json.gz",
+    "bytes": 64878,
+    "sha256": "bc576fb7bc027521ec508632658e531832aba11c105d8fec5e4d7d81cde2c50a"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/query-extended.log",
+    "retained": "asm198x-data-context-final-replay--query-extended.log.gz",
+    "bytes": 24,
+    "sha256": "63c51be25330a4781593bec487b6e435284db88a419efad6b89b69c704e41980"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/query-original-after.json",
+    "retained": "asm198x-data-context-final-replay--query-original-after.json.gz",
+    "bytes": 27384,
+    "sha256": "6504022c8ed81dea8a5cea5e11311c1099bb6e49791f558251e38e342a239975"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/query-original.log",
+    "retained": "asm198x-data-context-final-replay--query-original.log.gz",
+    "bytes": 23,
+    "sha256": "459e48b6132fac70b7c8695a15fadb1e0034801b8e1dad30bce9483e216cf01c"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/query-short-circuit-after.json",
+    "retained": "asm198x-data-context-final-replay--query-short-circuit-after.json.gz",
+    "bytes": 9616,
+    "sha256": "86609c085e421158fea4b98a2d40d52479ce7af65c2c0026ad3514ca1f6eba25"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/query-short-circuit.log",
+    "retained": "asm198x-data-context-final-replay--query-short-circuit.log.gz",
+    "bytes": 23,
+    "sha256": "df3c5df809bd341e3b0242f2d16312e6689f8fffb915c938c57cb1caf766eed3"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/scope-deferred-followups-native-after.json",
+    "retained": "asm198x-data-context-final-replay--scope-deferred-followups-native-after.json.gz",
+    "bytes": 10895,
+    "sha256": "03e19f66aeae4a26b943e2706ee1261920609a6803f37c8831e650d16c8f5575"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/scope-deferred-followups-native.log",
+    "retained": "asm198x-data-context-final-replay--scope-deferred-followups-native.log.gz",
+    "bytes": 23,
+    "sha256": "15a4c2c0ffd0e369791d3b3898410aa6eb729532d1679381cbc1f438ff114f4a"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/scope-native-completed-phase-probes-after.json",
+    "retained": "asm198x-data-context-final-replay--scope-native-completed-phase-probes-after.json.gz",
+    "bytes": 53221,
+    "sha256": "8036ec0771102488c706fe49bda4964464279c9683da2bdec6ef162ebcdf427f"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/scope-native-completed-phase-probes.log",
+    "retained": "asm198x-data-context-final-replay--scope-native-completed-phase-probes.log.gz",
+    "bytes": 24,
+    "sha256": "752c3f6d703b9396789fb57502d17d1804e1b30875d94645c4a21fc862200a86"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/scope-native-negative-memory-probes-after.json",
+    "retained": "asm198x-data-context-final-replay--scope-native-negative-memory-probes-after.json.gz",
+    "bytes": 14237,
+    "sha256": "8e9642b98c676310f360895cf68872345445390c29113a31faf46dd6e033cb50"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/scope-native-negative-memory-probes.log",
+    "retained": "asm198x-data-context-final-replay--scope-native-negative-memory-probes.log.gz",
+    "bytes": 23,
+    "sha256": "88985c4139e147cd3696557611e14b098eaa2d8d363f898617b8e631be9ab471"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/scope-native-phase-probes-after.json",
+    "retained": "asm198x-data-context-final-replay--scope-native-phase-probes-after.json.gz",
+    "bytes": 53730,
+    "sha256": "3bfd1464ae9573711bb319746fd33cccccc2468bf3cf3325725b6a38b6464598"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/scope-native-phase-probes.log",
+    "retained": "asm198x-data-context-final-replay--scope-native-phase-probes.log.gz",
+    "bytes": 24,
+    "sha256": "4e051755fb66484ea1403cb8323776a552de607644a2e742e084120710d4ea5e"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/scope-native-query-probes-after.json",
+    "retained": "asm198x-data-context-final-replay--scope-native-query-probes-after.json.gz",
+    "bytes": 17159,
+    "sha256": "25d0b319eb1f63606974c13e92f8b7603fcc88319ca958be7608d2028cdc06da"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/scope-native-query-probes.log",
+    "retained": "asm198x-data-context-final-replay--scope-native-query-probes.log.gz",
+    "bytes": 23,
+    "sha256": "d72f1324e00d9bcc1b86a56bb6e6404f9659123a7e9cc29f58f935b0aa891f99"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/scope-native-stream-probes-after.json",
+    "retained": "asm198x-data-context-final-replay--scope-native-stream-probes-after.json.gz",
+    "bytes": 3218,
+    "sha256": "ee7eed18d56e94cae0b59c9e407d19664ed541f7343941594725b69840b898a8"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/scope-native-stream-probes.log",
+    "retained": "asm198x-data-context-final-replay--scope-native-stream-probes.log.gz",
+    "bytes": 22,
+    "sha256": "6af141c5fba928809b9e610249fb427969205179087def4ee79b9be28fdc5538"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/scope-native-width-probes-after.json",
+    "retained": "asm198x-data-context-final-replay--scope-native-width-probes-after.json.gz",
+    "bytes": 71921,
+    "sha256": "511824f95f33c70e5fc5366b14adddc0918cc8458574792f4a07d65fb879665f"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/scope-native-width-probes.log",
+    "retained": "asm198x-data-context-final-replay--scope-native-width-probes.log.gz",
+    "bytes": 24,
+    "sha256": "a78433b7bb8e7fc755fdbcdfe2f93725202a1570266f47dc02ba24822e7d87da"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/source-constancy-after.json",
+    "retained": "asm198x-data-context-final-replay--source-constancy-after.json.gz",
+    "bytes": 156283,
+    "sha256": "cedeb4c416e0e8689c7135d8e5da71d838f8b752a95c6d8572df05d70267e24a"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/source-constancy.log",
+    "retained": "asm198x-data-context-final-replay--source-constancy.log.gz",
+    "bytes": 24,
+    "sha256": "ccfd86e5ef921d8586f46b7109fc8aa3648ac8b954b51d8c853a10bcf87fe1d1"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/strings-consumer-native-after.json",
+    "retained": "asm198x-data-context-final-replay--strings-consumer-native-after.json.gz",
+    "bytes": 33470,
+    "sha256": "6ed998aee80e907b7d63189d36ea0397504a65aecded92d482c8ced4f1f302b1"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/strings-consumer-native.log",
+    "retained": "asm198x-data-context-final-replay--strings-consumer-native.log.gz",
+    "bytes": 23,
+    "sha256": "b9e8e26b46459becc2381c9da2488704c28b7a822cbe2688f55460c6aa675f2d"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/strings-flat-native-after.json",
+    "retained": "asm198x-data-context-final-replay--strings-flat-native-after.json.gz",
+    "bytes": 260843,
+    "sha256": "487344ffb59aad93d8e562a8af103627829c13e75d4c9aaeb30c2bfa82ef89c7"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/strings-flat-native.log",
+    "retained": "asm198x-data-context-final-replay--strings-flat-native.log.gz",
+    "bytes": 24,
+    "sha256": "7d6bc0dcdd5efde6441d0924a32d08fbae1cf7ea0708df2495fec24b51863df0"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/strings-guard-native-after.json",
+    "retained": "asm198x-data-context-final-replay--strings-guard-native-after.json.gz",
+    "bytes": 3332,
+    "sha256": "67e6626a40dbc76c13c11621ae70bb513dea774232afb9bb2697e025c9010301"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/strings-guard-native.log",
+    "retained": "asm198x-data-context-final-replay--strings-guard-native.log.gz",
+    "bytes": 22,
+    "sha256": "716196d4a1acfae4d76a740b22629afa94eb33ddbed1f67f87e8a719e7b92128"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/strings-index-scope-native-after.json",
+    "retained": "asm198x-data-context-final-replay--strings-index-scope-native-after.json.gz",
+    "bytes": 2151,
+    "sha256": "246b5ea8fbb3400a18c70d654cabf9e649a42d05b57eec14c20f90d760112e13"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/strings-index-scope-native.log",
+    "retained": "asm198x-data-context-final-replay--strings-index-scope-native.log.gz",
+    "bytes": 22,
+    "sha256": "2f2e77c26435b73ea9c8a56029baa7ba1397ac741a54e66287d433d3ea1ef920"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/strings-lifetime-native-after.json",
+    "retained": "asm198x-data-context-final-replay--strings-lifetime-native-after.json.gz",
+    "bytes": 17534,
+    "sha256": "72e8e24b8dff00ba5e4988b2ad1166d8467848b1a114589d51eb7d5d38aa055a"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/strings-lifetime-native.log",
+    "retained": "asm198x-data-context-final-replay--strings-lifetime-native.log.gz",
+    "bytes": 23,
+    "sha256": "514fc3dfcaee4516e51552b0cdd34ead3f86b1886d1b14c0916bf6a27eddfa1e"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/strings-numeric-string-arity-native-after.json",
+    "retained": "asm198x-data-context-final-replay--strings-numeric-string-arity-native-after.json.gz",
+    "bytes": 12825,
+    "sha256": "43ed1fa61513c923606f39a3b5446536b1231a42683397f6cf9f1f6b96213ad3"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/strings-numeric-string-arity-native.log",
+    "retained": "asm198x-data-context-final-replay--strings-numeric-string-arity-native.log.gz",
+    "bytes": 23,
+    "sha256": "240b59ba1cd8b9c841326f70f70ac0d7aea2c9aa21522ca4a39788ae32a769bc"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/strings-text-consumer-native-after.json",
+    "retained": "asm198x-data-context-final-replay--strings-text-consumer-native-after.json.gz",
+    "bytes": 3064,
+    "sha256": "0025d031172cb252617cf6c6c4a867434115847aa856f3bfa02abd5d3b167fbf"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/strings-text-consumer-native.log",
+    "retained": "asm198x-data-context-final-replay--strings-text-consumer-native.log.gz",
+    "bytes": 22,
+    "sha256": "6af141c5fba928809b9e610249fb427969205179087def4ee79b9be28fdc5538"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/summary.json",
+    "retained": "asm198x-data-context-final-replay--summary.json.gz",
+    "bytes": 7736,
+    "sha256": "46fe065c0022f041bd0f125f0efb682ff62e80af41f2cc23d9849cd897c5db94"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/text-assertion-native-after.json",
+    "retained": "asm198x-data-context-final-replay--text-assertion-native-after.json.gz",
+    "bytes": 60773,
+    "sha256": "8c08dbac93a947f324e1bd1444da3fa00577e83c6349b5c134ef3486ddb12188"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/text-assertion-native.log",
+    "retained": "asm198x-data-context-final-replay--text-assertion-native.log.gz",
+    "bytes": 24,
+    "sha256": "2a5186129ffc93cc656e327ec558825a4e98d9e64a7640983bfaee47449159e3"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/text-native-after.json",
+    "retained": "asm198x-data-context-final-replay--text-native-after.json.gz",
+    "bytes": 198006,
+    "sha256": "9fbf074b465fda25e70c5fab75066e6e84543240a839195b0bf98172f85df1f5"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-replay/text-native.log",
+    "retained": "asm198x-data-context-final-replay--text-native.log.gz",
+    "bytes": 24,
+    "sha256": "57eeca1637267a9f1871fea999e250c5264f5da1fc8f10e1611b906f5f1a85ea"
+  }
+]

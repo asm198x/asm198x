@@ -1667,12 +1667,8 @@ pub(crate) struct LiveText<'a> {
     pub context: &'a dyn LiveNumbers,
 }
 
-pub(crate) fn expand_ca65_live(
-    source: &str,
-    line: usize,
-    live: LiveText<'_>,
-) -> Result<String, AsmError> {
-    let syntax = Ca65Text {
+fn live_syntax<'a>(line: usize, live: &LiveText<'a>) -> Ca65Text<'a> {
+    Ca65Text {
         source_line: Some(line),
         target: live.target,
         token_target: live.token_target,
@@ -1681,7 +1677,29 @@ pub(crate) fn expand_ca65_live(
         defined: Cow::Borrowed(live.defined),
         strings: Cow::Borrowed(live.strings),
         live: Some(live.context),
-    };
+    }
+}
+
+/// Token selectors return source to the numeric reader, which must consume
+/// that source before any later query or list operand is evaluated.
+pub(crate) fn select_ca65_live(
+    name: &str,
+    arguments: &str,
+    line: usize,
+    live: LiveText<'_>,
+) -> Result<String, AsmError> {
+    match text::call(&live_syntax(line, &live), name, arguments, line)? {
+        Some(text::Folded::Bare(source)) => Ok(source),
+        _ => unreachable!("token selector returns source"),
+    }
+}
+
+pub(crate) fn expand_ca65_live(
+    source: &str,
+    line: usize,
+    live: LiveText<'_>,
+) -> Result<String, AsmError> {
+    let syntax = live_syntax(line, &live);
     text::expand(&syntax, source)
         .map(|text| text.trim_end_matches('\n').to_string())
         .map_err(|mut error| {
@@ -1853,6 +1871,18 @@ pub(crate) fn defined_names(source: &str) -> std::collections::BTreeSet<String> 
 }
 
 impl Ca65Text<'_> {
+    fn token_source(&self, arg: &text::Arg, name: &str, line: usize) -> Result<String, AsmError> {
+        let list = token_list(arg, name, line)?;
+        if self.live.is_none() {
+            return Ok(list.to_string());
+        }
+        // Admit native string constructors while retaining numeric queries as
+        // tokens, even when the caller omitted the optional braces.
+        let admitted = text::expand(self, &format!("{{{list}}}"))?;
+        let admitted = text::Arg::Bare(admitted.trim_end().to_string());
+        Ok(token_list(&admitted, name, line)?.to_string())
+    }
+
     fn bytes(&self, arg: &text::Arg, name: &str, line: usize) -> Result<Vec<u8>, AsmError> {
         if self.live.is_some()
             && let text::Arg::Bare(raw) = arg
@@ -1935,12 +1965,27 @@ impl text::TextSyntax for Ca65Text<'_> {
         self.live.is_some()
             && matches!(
                 name.to_ascii_lowercase().as_str(),
-                ".const" | ".sprintf" | ".concat" | ".strlen" | ".strat" | ".ident"
+                ".const"
+                    | ".sprintf"
+                    | ".concat"
+                    | ".strlen"
+                    | ".strat"
+                    | ".ident"
+                    | ".left"
+                    | ".right"
+                    | ".mid"
             )
     }
 
     fn folds_in_braces(&self, name: &str) -> bool {
-        self.live.is_none() && !matches!(name.to_ascii_lowercase().as_str(), ".strlen" | ".strat")
+        if self.live.is_some() {
+            matches!(
+                name.to_ascii_lowercase().as_str(),
+                ".sprintf" | ".concat" | ".string" | ".ident" | ".left" | ".right" | ".mid"
+            )
+        } else {
+            !matches!(name.to_ascii_lowercase().as_str(), ".strlen" | ".strat")
+        }
     }
 
     fn permits_function_space(&self) -> bool {
@@ -2221,7 +2266,8 @@ impl text::TextSyntax for Ca65Text<'_> {
             ".left" | ".right" => {
                 arity(args, 2, name, line)?;
                 let count = selector_bound(&args[0], scope, name, line)?.max(0) as usize;
-                let list = token_list(&args[1], name, line)?;
+                let list = self.token_source(&args[1], name, line)?;
+                let list = list.as_str();
                 let all = tokens(list, self.token_target.unwrap_or(self.target));
                 let (from, to) = if lower == ".left" {
                     (0, count)
@@ -2261,7 +2307,8 @@ impl text::TextSyntax for Ca65Text<'_> {
                 arity(args, 3, name, line)?;
                 let start = selector_bound(&args[0], scope, name, line)?.max(0) as usize;
                 let count = selector_bound(&args[1], scope, name, line)?.max(0) as usize;
-                let list = token_list(&args[2], name, line)?;
+                let list = self.token_source(&args[2], name, line)?;
+                let list = list.as_str();
                 let all = tokens(list, self.token_target.unwrap_or(self.target));
                 Folded::Bare(
                     token_slice(list, &all, start, start.saturating_add(count)).to_string(),

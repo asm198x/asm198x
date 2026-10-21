@@ -1,0 +1,32 @@
+[
+  {
+    "source": "/private/tmp/asm198x-data-context-qualified-focused.log",
+    "retained": "qualified-focused.log.gz",
+    "bytes": 59666,
+    "sha256": "a5fc9a327f267c8826e3485be11e23d278f9b18c9b895b0cfed545bc2a84243d"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-clippy.log",
+    "retained": "final-clippy.log.gz",
+    "bytes": 288,
+    "sha256": "0c9f6c9c09fc44f3d64b5df80bf5d681bd706a338f0abbf3f735cadf4bedc2ee"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-final-node.log",
+    "retained": "final-node.log.gz",
+    "bytes": 9360,
+    "sha256": "0588f697b5a6612c5bdbf3c3562b600d6b85d074c4fc5e17a4571c57ee6ed542"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-docs.log",
+    "retained": "docs.log.gz",
+    "bytes": 118,
+    "sha256": "850fb02c80b3af4d7c04ac1360de437f687bcf6b9a2f733160e4bd10ce98a165"
+  },
+  {
+    "source": "/private/tmp/asm198x-data-context-versions.log",
+    "retained": "versions.log.gz",
+    "bytes": 66,
+    "sha256": "86573d0aa21805a5bc8f1f7d113a12d243521d1907836723f37df91a52d66bd6"
+  }
+]
