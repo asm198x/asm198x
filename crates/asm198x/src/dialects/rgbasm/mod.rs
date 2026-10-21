@@ -1625,6 +1625,7 @@ fn value(raw: &str, line: usize) -> Result<Expr, AsmError> {
         number,
         ExprOpts {
             logical: true,
+            unary_plus: false,
             logical_not_tight: true,
             scoped_names: false,
             fixed_point: true,

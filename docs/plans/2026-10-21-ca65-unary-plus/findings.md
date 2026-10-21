@@ -16,3 +16,17 @@ refusals independently of the allocation ordering fix.
 A follow-up must add the native operator in the existing shared grammar, gated
 to ca65, retain inert captured operators and preserve every predecessor match.
 No second arithmetic parser, public API or dependency is required.
+
+The implemented fix adds an explicit private unary_plus option, enabled only for
+the three ca65 readers. Inspection found RGBDS also uses the logical switch, so
+that switch could not provide the initially proposed ca65-only guard. Every
+other dialect explicitly retains false. A regression test proves logical
+operators alone do not admit unary plus and binary addition is unchanged.
+
+All 117 qualified native cases now pass full CLI contracts; the only remaining
+18 observations are the existing inactive flat gap #895. The full workspace
+passes 1,653 Rust/Lua/doc tests with 38 existing ignored; Clippy -D warnings and
+formatting pass. The 39-matrix / 7,309-row unchanged-executable replay retains
+all 6,790 predecessor matches and reaches 6,793, including 100/100 canonical
+fields. The 35 constructor-boundary contract controls also pass in this suite.
+Hashed lossless receipts are in checks/. #931 stays open until #924 is merged.

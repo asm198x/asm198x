@@ -2,11 +2,12 @@
 
 After the constructor-timing checkpoint is checked and pushed:
 
-1. Add unary plus to mos6502::ExprParser::unary under the existing ca65 logical
-   grammar switch. Its only production callers with that switch enabled are
-   ca65, ca65-816 and ca65-huc6280; preserve the other dialects' flags and behavior.
-   Consume the plus and recurse through the same unary grammar, retaining
-   precedence instead of inserting an arithmetic expression or a second parser.
+1. Add an explicit private unary_plus option to the existing ExprOpts pattern,
+   enabling it only for ca65, ca65-816 and ca65-huc6280. Inspection of all callers
+   corrects the initial plan: RGBDS also uses the logical switch, so it cannot
+   serve as a ca65-only guard. Keep the other dialects' new option false.
+   Consume the plus in ExprParser::unary and recurse through that same grammar,
+   retaining precedence without inserting arithmetic or a second parser.
 2. Qualify all 117 native cases outside the 18 already tracked inactive flat
    cases (#895). Keep complete 135-case input/name inventory and explicit gap
    ownership. Cover malformed plus, captured plus tokens, all three CPUs,

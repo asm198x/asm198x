@@ -453,6 +453,9 @@ pub(crate) struct ExprOpts {
     /// bare `.and` is an ordinary symbol in a dialect that does not know the
     /// word.
     pub logical: bool,
+    /// Whether a leading `+` is a no-op unary operator (native ca65).
+    /// Kept separate from logical operators, which RGBDS also enables.
+    pub unary_plus: bool,
     /// Whether logical `!` is an ordinary tight unary operator (RGBDS).
     /// ca65 deliberately leaves this false because its `.not`/`!` layer binds
     /// looser than the whole logical expression.
@@ -665,6 +668,7 @@ pub(crate) fn parse_expr_tokens(
         function: opts.function,
         compare_opts: opts.compare,
         logical: opts.logical,
+        unary_plus: opts.unary_plus,
         logical_not_tight: opts.logical_not_tight,
     }
     .expr()
@@ -1155,6 +1159,7 @@ struct ExprParser<'a> {
     compare_opts: Compare,
     /// ca65's logical layer — see [`ExprOpts::logical`].
     logical: bool,
+    unary_plus: bool,
     logical_not_tight: bool,
 }
 
@@ -1419,6 +1424,10 @@ impl ExprParser<'_> {
     }
 
     fn unary(&mut self) -> Result<Expr, AsmError> {
+        if self.unary_plus && matches!(self.tokens.peek()?, Some(Tok::Plus)) {
+            self.tokens.advance();
+            return self.unary();
+        }
         if self.logical_not_tight && matches!(self.tokens.peek()?, Some(Tok::LogNot)) {
             self.tokens.advance();
             return Ok(Expr::LogNot(Box::new(self.unary()?)));
@@ -1692,6 +1701,7 @@ mod tests {
     fn options(prec: BytePrec) -> ExprOpts {
         ExprOpts {
             logical: false,
+            unary_plus: false,
             logical_not_tight: false,
             scoped_names: false,
             fixed_point: false,
@@ -1713,6 +1723,22 @@ mod tests {
             1,
         )
         .expect("fold")
+    }
+
+    #[test]
+    fn unary_plus_is_explicit_without_changing_binary_plus() {
+        let mut disabled = options(BytePrec::Tight);
+        disabled.logical = true; // RGBDS also enables logical operators.
+        assert!(parse_expr("+1", 1, num, disabled).is_err());
+        let mut enabled = disabled;
+        enabled.unary_plus = true;
+        let env = BTreeMap::new();
+        let fold = |source, opts| {
+            fold_const(&parse_expr(source, 1, num, opts).expect("parse"), &env, 1).expect("fold")
+        };
+        assert_eq!(fold("2*+3", enabled), fold("2*3", disabled));
+        assert_eq!(fold("1+2", enabled), fold("1+2", disabled));
+        assert!(parse_expr("+", 1, num, enabled).is_err());
     }
 
     #[test]

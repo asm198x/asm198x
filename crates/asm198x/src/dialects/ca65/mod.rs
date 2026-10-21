@@ -4354,6 +4354,7 @@ fn parse_value_source(
 fn expression_options() -> mos6502::ExprOpts {
     mos6502::ExprOpts {
         logical: true,
+        unary_plus: true,
         logical_not_tight: false,
         scoped_names: true,
         fixed_point: false,

@@ -259,6 +259,39 @@ fn constructor_lookahead_matches_native_name_and_caller_token_order() {
     verify_fixture(fixture, 35);
 }
 
+#[test]
+fn ca65_unary_plus_retains_native_precedence_and_captured_operators() {
+    let fixture = include_str!("fixtures/ca65-unary-plus.json");
+    let facts: serde_json::Value = serde_json::from_str(fixture).expect("native captures");
+    assert_eq!(facts["audit_case_count"], 135);
+    let mut names = std::collections::BTreeSet::new();
+    for case in facts["cases"].as_array().expect("native cases") {
+        assert!(names.insert(case["name"].as_str().expect("name")));
+    }
+    assert_eq!(names.len(), 117);
+    let excluded = facts["excluded_audit_cases"]
+        .as_object()
+        .expect("known inactive flat gap");
+    assert_eq!(excluded.len(), 18);
+    for (name, issues) in excluded {
+        assert_eq!(issues, &serde_json::json!([895]));
+        assert!(
+            name.ends_with("_inactive")
+                && (name.starts_with("65816_") || name.starts_with("huc6280_"))
+        );
+        assert!(names.insert(name));
+    }
+    let inventory: std::collections::BTreeSet<_> = facts["audit_names"]
+        .as_array()
+        .expect("complete inventory")
+        .iter()
+        .map(|name| name.as_str().expect("name"))
+        .collect();
+    assert_eq!(inventory.len(), 135);
+    assert_eq!(names, inventory);
+    verify_fixture(fixture, 117);
+}
+
 fn verify_fixture(fixture: &str, count: usize) {
     let facts: serde_json::Value = serde_json::from_str(fixture).expect("native captures");
     let cases = facts["cases"].as_array().expect("cases");
