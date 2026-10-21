@@ -1,0 +1,9 @@
+{
+  "retention_commit": "d48cf85a96892bf4bedfa057e48fa745b372e02e",
+  "removed_roots": 10,
+  "removed_files": 88,
+  "active_task_processes": [],
+  "verified_removed": true,
+  "preserved_workspace": "/Users/stevehill/Projects/198x/Asm198x/asm198x-ca65-text-consumers",
+  "reason": "Approved #924 reader migration remains active; remove after its checked merge and recovery verification."
+}
