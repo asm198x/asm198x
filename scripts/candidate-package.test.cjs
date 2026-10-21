@@ -505,6 +505,8 @@ test('native source constancy evidence cannot be omitted', () => {
   assert.equal(qualifies(complete.filter(row => row.name !== 'ca65_conditional_context')), false);
   assert(requiredCases.includes('ca65_scoped_externals'));
   assert.equal(qualifies(complete.filter(row => row.name !== 'ca65_scoped_externals')), false);
+  assert(requiredCases.includes('ca65_scalar_context'));
+  assert.equal(qualifies(complete.filter(row => row.name !== 'ca65_scalar_context')), false);
   assert(requiredCases.includes('ca65_data_context'));
   assert.equal(qualifies(complete.filter(row => row.name !== 'ca65_data_context')), false);
 });
