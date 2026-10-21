@@ -123,6 +123,15 @@ fn data_source_queries_follow_native_read_order() {
     verify_fixture(fixture, 515);
 }
 
+#[test]
+fn scalar_source_queries_follow_native_read_order() {
+    let fixture = include_str!("fixtures/ca65-scalar-context.json");
+    let facts: serde_json::Value = serde_json::from_str(fixture).expect("native captures");
+    assert_eq!(facts["audit_case_count"], 280);
+    assert_eq!(facts["excluded_audit_cases"], serde_json::json!({}));
+    verify_fixture(fixture, 280);
+}
+
 fn verify_fixture(fixture: &str, count: usize) {
     let facts: serde_json::Value = serde_json::from_str(fixture).expect("native captures");
     let cases = facts["cases"].as_array().expect("cases");
@@ -182,6 +191,16 @@ fn verify_fixture(fixture: &str, count: usize) {
             let errors: serde_json::Value =
                 serde_json::from_slice(&result.stdout).expect("diagnostics");
             assert!(!errors.as_array().expect("error list").is_empty(), "{name}");
+            if let Some(messages) = fact.get("expected_messages") {
+                let actual: Vec<_> = errors.as_array().expect("error list").iter()
+                    .map(|error| serde_json::json!({"message":error["message"],"kind":error["severity"]}))
+                    .collect();
+                assert_eq!(
+                    &serde_json::json!(actual),
+                    messages,
+                    "{name}: native messages"
+                );
+            }
             if let Some(expected) = fact.get("query_error") {
                 let span = &errors[0]["span"];
                 let path = span["path"].as_str().expect("source path");
@@ -222,6 +241,19 @@ fn verify_fixture(fixture: &str, count: usize) {
             serde_json::json!(&bytes),
             "{name}: JSON bytes"
         );
+        if let Some(messages) = fact.get("expected_messages") {
+            let actual: Vec<_> = payload["warnings"].as_array().expect("messages").iter()
+                .map(|message| serde_json::json!({
+                    "message": message["message"],
+                    "kind": message.get("kind").and_then(serde_json::Value::as_str).unwrap_or("Warning"),
+                }))
+                .collect();
+            assert_eq!(
+                &serde_json::json!(actual),
+                messages,
+                "{name}: native messages"
+            );
+        }
         let debug = shape(&root);
         let formatted = run(&root, &["fmt", "--dialect", dialect, "input.s"]);
         assert!(formatted.status.success(), "{name}: {formatted:?}");

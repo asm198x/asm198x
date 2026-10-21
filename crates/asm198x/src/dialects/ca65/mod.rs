@@ -3859,6 +3859,8 @@ fn parse_directive(
 }
 
 trait DataSource {
+    fn number(&self, text: &str, line: usize) -> Result<Option<i64>, AsmError>;
+    fn text(&self, text: &str, line: usize) -> Result<String, AsmError>;
     fn value(&self, text: &str, line: usize) -> Result<Expr, AsmError>;
     fn tokens(&self, text: &str, line: usize) -> Result<String, AsmError>;
 }
@@ -4012,14 +4014,20 @@ fn parse_directive_source(
             }
             Ok(Kind::Org(parse_value(anons, anchor, rest, line)?))
         }
-        "res" => parse_res(anons, anchor, consts, rest, line),
-        "align" => parse_align(anons, anchor, consts, rest, line),
+        "res" => parse_res(anons, anchor, consts, rest, line, source),
+        "align" => parse_align(anons, anchor, consts, rest, line, source),
         // `.out` is the strict one: ca65 answers a value list with
         // `Unexpected trailing garbage characters`. The other three read a
         // string and ignore whatever follows it on the line — probed, not
         // assumed, because the two shapes read alike in the manual.
         "out" => {
-            let source = rest.trim();
+            let expanded;
+            let source = if let Some(source) = source {
+                expanded = source.text(rest, line)?;
+                expanded.trim()
+            } else {
+                rest.trim()
+            };
             if !string_tokens::StringTokens::is_handle(source)
                 && (!source.starts_with('"') || !source[1..].contains('"'))
             {
@@ -4032,6 +4040,13 @@ fn parse_directive_source(
             Ok(Kind::Message(DiagSeverity::Note, text))
         }
         "message" => {
+            let expanded;
+            let rest = if let Some(source) = source {
+                expanded = source.text(rest, line)?;
+                &expanded
+            } else {
+                rest
+            };
             let severity = if name.eq_ignore_ascii_case("warning") {
                 DiagSeverity::Warning
             } else {
@@ -4042,7 +4057,7 @@ fn parse_directive_source(
                 leading_string(rest, &consts.0.strings, line)?,
             ))
         }
-        "assert" => parse_assert(anons, anchor, &consts.0.strings, rest, line),
+        "assert" => parse_assert(anons, anchor, &consts.0.strings, rest, line, source),
         "export" | "import" | "global" => parse_visible(
             match entry.id {
                 "export" => VisRule::MustBeDefined,
@@ -4074,18 +4089,29 @@ fn parse_res(
     consts: &SourceConstants<'_>,
     rest: &str,
     line: usize,
+    source: Option<&dyn DataSource>,
 ) -> Result<Kind, AsmError> {
-    let mut parts = rest.splitn(2, ',');
+    let parts = ca65_flat::split_fields(rest, 1);
+    let mut parts = parts.into_iter();
     let count_src = parts.next().unwrap_or("").trim();
-    let count = consts
-        .fold(&parse_value(anons, anchor, count_src, line)?, line)
-        .map_err(|_| AsmError::new(line, "`.res` count must be a constant"))?;
+    let count = match source {
+        Some(source) => source.number(count_src, line)?,
+        None => consts
+            .fold(&parse_value(anons, anchor, count_src, line)?, line)
+            .ok(),
+    }
+    .ok_or_else(|| AsmError::new(line, "`.res` count must be a constant"))?;
     let count = usize::try_from(count)
         .map_err(|_| AsmError::new(line, "`.res` count must be non-negative"))?;
     let fill = match parts.next() {
         None => None,
         Some(v) => {
-            let n = consts.fold(&parse_value(anons, anchor, v, line)?, line)?;
+            let n = match source {
+                Some(source) => source
+                    .number(v, line)?
+                    .ok_or_else(|| AsmError::new(line, "`.res` fill must be a constant"))?,
+                None => consts.fold(&parse_value(anons, anchor, v, line)?, line)?,
+            };
             Some(u8::try_from(n).map_err(|_| AsmError::new(line, "`.res` fill must be a byte"))?)
         }
     };
@@ -4174,9 +4200,14 @@ fn parse_assert(
     strings: &string_tokens::StringTokens,
     rest: &str,
     line: usize,
+    source: Option<&dyn DataSource>,
 ) -> Result<Kind, AsmError> {
     let parts = assertion_fields(rest);
-    let cond = parse_value(anons, anchor, parts.first().copied().unwrap_or(""), line)?;
+    let condition = parts.first().copied().unwrap_or("");
+    let cond = match source {
+        Some(source) => source.value(condition, line)?,
+        None => parse_value(anons, anchor, condition, line)?,
+    };
     let action = parts.get(1).map(|a| a.trim().to_ascii_lowercase());
     let fatal = match action.as_deref() {
         Some("error" | "lderror") => true,
@@ -4188,8 +4219,15 @@ fn parse_assert(
             ));
         }
     };
-    let message = if let Some(source) = parts.get(2) {
-        let (text, tail) = strings.text_prefix(source, line)?;
+    let message = if let Some(message) = parts.get(2) {
+        let expanded;
+        let message = if let Some(source) = source {
+            expanded = source.text(message, line)?;
+            expanded.as_str()
+        } else {
+            *message
+        };
+        let (text, tail) = strings.text_prefix(message, line)?;
         if !tail.trim().is_empty() {
             return Err(AsmError::new(
                 line,
@@ -4212,19 +4250,30 @@ fn parse_align(
     consts: &SourceConstants<'_>,
     rest: &str,
     line: usize,
+    source: Option<&dyn DataSource>,
 ) -> Result<Kind, AsmError> {
-    let mut parts = rest.splitn(2, ',');
+    let parts = ca65_flat::split_fields(rest, 1);
+    let mut parts = parts.into_iter();
     let boundary_src = parts.next().unwrap_or("").trim();
-    let boundary = consts
-        .fold(&parse_value(anons, anchor, boundary_src, line)?, line)
-        .map_err(|_| AsmError::new(line, "`.align` boundary must be a constant"))?;
+    let boundary = match source {
+        Some(source) => source.number(boundary_src, line)?,
+        None => consts
+            .fold(&parse_value(anons, anchor, boundary_src, line)?, line)
+            .ok(),
+    }
+    .ok_or_else(|| AsmError::new(line, "`.align` boundary must be a constant"))?;
     if boundary < 1 {
         return Err(AsmError::new(line, "`.align` boundary must be positive"));
     }
     let fill = match parts.next() {
         None => None,
         Some(v) => {
-            let n = consts.fold(&parse_value(anons, anchor, v, line)?, line)?;
+            let n = match source {
+                Some(source) => source
+                    .number(v, line)?
+                    .ok_or_else(|| AsmError::new(line, "`.align` fill must be a constant"))?,
+                None => consts.fold(&parse_value(anons, anchor, v, line)?, line)?,
+            };
             Some(u8::try_from(n).map_err(|_| AsmError::new(line, "`.align` fill must be a byte"))?)
         }
     };
