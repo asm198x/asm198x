@@ -1,0 +1,9 @@
+{
+  "cases": 90,
+  "native_accepts": 51,
+  "native_refusals": 39,
+  "false_acceptances": 33,
+  "portable_capture_matches": true,
+  "original_capture_sha256": "fe52d69d4790b4d3836d300ea8494d9b15cfddaa45868760999462e772d344d0",
+  "portable_capture_sha256": "343401f24bcda770392699c8538d2ba479fe29806a37a314bfd2568d87e2f9b8"
+}
