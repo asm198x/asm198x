@@ -1,0 +1,11 @@
+{
+  "http_status": 405,
+  "message": "Repository rule violations found\n\n2 of 15 required status checks are queued.\n\n",
+  "action": "PUT /repos/asm198x/asm198x/pulls/920/merge",
+  "authoritative_state_before_retry": "OPEN",
+  "new_metadata_workflows": [
+    "39589997501 PR title: success",
+    "39589997868 Release PR: skipped"
+  ],
+  "response": "Re-read all required checks and workflow runs, then retried successfully. No rule or check bypassed."
+}

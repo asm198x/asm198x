@@ -23,3 +23,5 @@ before.json identifies the frozen qualified #919 source 9e448f2c (merged as
 75dad590), executable SHA 6481805788612c6da60b2db2bd38c6e5693d44ebf35a6f6be1696460f27c0ea0.
 after.json identifies the debug data candidate built from the source now
 committed as 14295cef. No range implementation change is included in this audit.
+
+Tracked in https://github.com/asm198x/asm198x/issues/921 with immutable evidence.
