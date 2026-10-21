@@ -1,0 +1,19 @@
+{
+  "retained_remote_commit": "4a69aab5c49055c0c2d57a617202f9c4a650823d",
+  "removed_roots": [
+    "/private/tmp/asm198x-reader-repeat-build.log",
+    "/private/tmp/asm198x-reader-repeat-clippy.log",
+    "/private/tmp/asm198x-reader-repeat-contract.log",
+    "/private/tmp/asm198x-reader-repeat-contracts.log",
+    "/private/tmp/asm198x-reader-repeat-fmt.log",
+    "/private/tmp/asm198x-reader-repeat-library.log",
+    "/private/tmp/asm198x-reader-repeat-replay",
+    "/private/tmp/asm198x-reader-repeat-replay.log",
+    "/private/tmp/asm198x-reader-repeat-scalar.json",
+    "/private/tmp/asm198x-reader-repeat-scalar.log"
+  ],
+  "removed_files": 88,
+  "process_check": "no task-owned repeat/check processes remain",
+  "worktree": "/Users/stevehill/Projects/198x/Asm198x/asm198x-ca65-text-consumers",
+  "removal_condition": "full #924 reader qualified and merged; active work/evidence retained"
+}
