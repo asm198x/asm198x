@@ -1120,5 +1120,101 @@
     "retained": "asm198x-external-bindings-coverage-workflow.yml.gz",
     "bytes": 9754,
     "sha256": "573b3b49c3aa7f0a002e90d337dca5783e43074aa64ff9c598db2f3c89377a5c"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-candidates/candidate-qualification-x86_64-apple-darwin-1/acquisition.json",
+    "retained": "asm198x-external-bindings-candidates--candidate-qualification-x86_64-apple-darwin-1--acquisition.json.gz",
+    "bytes": 126,
+    "sha256": "6dad8626d8a6e227b702722c1b6e7d7c6c059c1dd6dd4a516cbac33c131a49d8"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-candidates/candidate-qualification-x86_64-apple-darwin-1/corrupt-archive.json",
+    "retained": "asm198x-external-bindings-candidates--candidate-qualification-x86_64-apple-darwin-1--corrupt-archive.json.gz",
+    "bytes": 170,
+    "sha256": "2e5a8c2e13cf7c92b79606177bf5c326bf1dadd6f43bf7f4f7023897c4a8101c"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-candidates/candidate-qualification-x86_64-apple-darwin-1/plan.json",
+    "retained": "asm198x-external-bindings-candidates--candidate-qualification-x86_64-apple-darwin-1--plan.json.gz",
+    "bytes": 13916,
+    "sha256": "5e1969ffe55f895ec0babd29f44c06805f02fbd3666f68f904bbe8ee30876b3b"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-candidates/candidate-qualification-x86_64-apple-darwin-1/report.json",
+    "retained": "asm198x-external-bindings-candidates--candidate-qualification-x86_64-apple-darwin-1--report.json.gz",
+    "bytes": 31107128,
+    "sha256": "2d3a038c22c50b168b29726ca1159fd9f8e3380b21e1b64eac62c91a61df47cd"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-candidates/candidate-qualification-x86_64-apple-darwin-1/wrong-bytes.json",
+    "retained": "asm198x-external-bindings-candidates--candidate-qualification-x86_64-apple-darwin-1--wrong-bytes.json.gz",
+    "bytes": 31107923,
+    "sha256": "afe7a5da5179e7b35f87821d29c0e17717b90f7ef93add1ad1d2656874a8750d"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-coverage/coverage-summary.json",
+    "retained": "asm198x-external-bindings-coverage--coverage-summary.json.gz",
+    "bytes": 45363,
+    "sha256": "6e6a6d12a0020cfdae4f0e454d086f3d48ced93a5262f433d737e0218c5855f8"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-coverage/coverage-summary.txt",
+    "retained": "asm198x-external-bindings-coverage--coverage-summary.txt.gz",
+    "bytes": 20160,
+    "sha256": "514e7555f758b80709317634b0fc4f9efa75eb0ae2efab6d5b9a6a617c588833"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-coverage/lcov.info",
+    "retained": "asm198x-external-bindings-coverage--lcov.info.gz",
+    "bytes": 2875116,
+    "sha256": "e1c5eb4dbc65c0aad492874b890919eff4d3ba39bb2d560939a54af433dbcc4f"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-ci.json",
+    "retained": "asm198x-external-bindings-ci.json.gz",
+    "bytes": 240702,
+    "sha256": "0efb01e4189c2314cc4d0345b804e4f25067958f4591c3d3e19c9ecdd8c25836"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-summary.json",
+    "retained": "asm198x-external-bindings-summary.json.gz",
+    "bytes": 2772,
+    "sha256": "ed6f93f0b261ebd5327fc691a31f55347c50f51744871d20a6b34f78b9fa2594"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-merge.json",
+    "retained": "asm198x-external-bindings-merge.json.gz",
+    "bytes": 123,
+    "sha256": "a42c888956db1436fd73234dc32d4cc775a05d84e1d85eb1c2b9ad8f85258bbf"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-merged-tree.json",
+    "retained": "asm198x-external-bindings-merged-tree.json.gz",
+    "bytes": 196,
+    "sha256": "1e38cc62bb6f8d42696de0b0e851e8ff37f351a6babb0dfeedbcb400815ee8ec"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-artifacts.json",
+    "retained": "asm198x-external-bindings-artifacts.json.gz",
+    "bytes": 4539,
+    "sha256": "5719731d7a1e48c42625d2b3e694282d0e0275464437afd983bd22ea77288fc6"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-ci-monitor.log",
+    "retained": "asm198x-external-bindings-ci-monitor.log.gz",
+    "bytes": 9676,
+    "sha256": "854dcc94bf48ba5af01b1fb5c4c44013c4272fea0f7d6fca269dd02f8befc7cf"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-native-inspection.log",
+    "retained": "asm198x-external-bindings-native-inspection.log.gz",
+    "bytes": 2772,
+    "sha256": "ed6f93f0b261ebd5327fc691a31f55347c50f51744871d20a6b34f78b9fa2594"
+  },
+  {
+    "source": "/private/tmp/asm198x-external-bindings-download.log",
+    "retained": "asm198x-external-bindings-download.log.gz",
+    "bytes": 300,
+    "sha256": "1562628cc6b637395210f0ba361b0d1c37d4ac9ce7ecf6f04cbb205f4e321613"
   }
 ]
