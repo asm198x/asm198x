@@ -709,3 +709,61 @@ pub(super) fn data(
     }
     Ok(values)
 }
+
+/// Allocation operands share the data stream, but consume source-time numbers
+/// rather than deferred byte values. A fill is read even when no bytes are
+/// needed, because reading its expression can reference a source name.
+pub(super) fn allocation(
+    directive: &str,
+    source: &str,
+    line: usize,
+    live: ca65_flat::LiveText<'_>,
+) -> Result<super::Kind, AsmError> {
+    if !matches!(directive, "org" | "res" | "align") {
+        return Err(AsmError::new(line, "unknown allocation directive"));
+    }
+    let mut input = Input::new(source, &live, line);
+    let kind = if directive == "org" {
+        super::Kind::Org(live.context.expression_tokens(
+            &mut Numeric {
+                input: &mut input,
+                current: None,
+                after_value: false,
+            },
+            line,
+        )?)
+    } else {
+        let bound = input.number()?;
+        let count = if directive == "res" {
+            Some(
+                usize::try_from(bound)
+                    .map_err(|_| AsmError::new(line, "`.res` count must be non-negative"))?,
+            )
+        } else {
+            if bound < 1 {
+                return Err(AsmError::new(line, "`.align` boundary must be positive"));
+            }
+            None
+        };
+        let fill =
+            if input.peek()?.is_none() {
+                None
+            } else {
+                input.require(",")?;
+                Some(u8::try_from(input.number()?).map_err(|_| {
+                    AsmError::new(line, format!("`.{directive}` fill must be a byte"))
+                })?)
+            };
+        match count {
+            Some(count) => super::Kind::Res(count, fill),
+            None => super::Kind::Align(bound, fill),
+        }
+    };
+    if input.peek()?.is_some() {
+        return Err(AsmError::new(
+            line,
+            format!("unexpected tokens after `.{directive}` operands"),
+        ));
+    }
+    Ok(kind)
+}

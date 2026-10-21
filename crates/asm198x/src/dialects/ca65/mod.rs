@@ -3864,6 +3864,7 @@ fn parse_directive(
 }
 
 trait DataSource {
+    fn allocation(&self, directive: &str, text: &str, line: usize) -> Result<Kind, AsmError>;
     fn data(
         &self,
         text: &str,
@@ -4014,10 +4015,19 @@ fn parse_directive_source(
             if word.eq_ignore_ascii_case("reloc") {
                 return Ok(Kind::Reloc);
             }
-            Ok(Kind::Org(parse_value(anons, anchor, rest, line)?))
+            match source {
+                Some(source) => source.allocation("org", rest, line),
+                None => Ok(Kind::Org(parse_value(anons, anchor, rest, line)?)),
+            }
         }
-        "res" => parse_res(anons, anchor, consts, rest, line),
-        "align" => parse_align(anons, anchor, consts, rest, line),
+        "res" => match source {
+            Some(source) => source.allocation("res", rest, line),
+            None => parse_res(anons, anchor, consts, rest, line),
+        },
+        "align" => match source {
+            Some(source) => source.allocation("align", rest, line),
+            None => parse_align(anons, anchor, consts, rest, line),
+        },
         // `.out` is the strict one: ca65 answers a value list with
         // `Unexpected trailing garbage characters`. The other three read a
         // string and ignore whatever follows it on the line — probed, not

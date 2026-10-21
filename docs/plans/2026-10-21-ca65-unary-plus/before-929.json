@@ -1,0 +1,2256 @@
+{
+  "binary": "/private/tmp/asm198x-empty-producer/asm198x",
+  "sha256": "e851007448fb971890c98258fe7b5429ed890a7e3f19e3715dd1dbe788b0006e",
+  "results": [
+    {
+      "name": "ca65_positive_byte_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: expected a value\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "ca65_positive_byte_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-empty-call-compare-o62zv_ke/ca65_positive_byte_included.inc:2:1: error: expected a value\nincluded from input.s:1\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "ca65_positive_byte_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5:1: error: expected a value\nin expansion of macro `run` defined at input.s:1, invoked at input.s:5\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "ca65_positive_byte_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_positive_byte_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_positive_product_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: expected a value\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "ca65_positive_product_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-empty-call-compare-o62zv_ke/ca65_positive_product_included.inc:2:1: error: expected a value\nincluded from input.s:1\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "ca65_positive_product_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5:1: error: expected a value\nin expansion of macro `run` defined at input.s:1, invoked at input.s:5\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "ca65_positive_product_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_positive_product_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_positive_group_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: expected a value\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "ca65_positive_group_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-empty-call-compare-o62zv_ke/ca65_positive_group_included.inc:2:1: error: expected a value\nincluded from input.s:1\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "ca65_positive_group_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5:1: error: expected a value\nin expansion of macro `run` defined at input.s:1, invoked at input.s:5\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "ca65_positive_group_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_positive_group_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_positive_fill_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: expected a value\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "ca65_positive_fill_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-empty-call-compare-o62zv_ke/ca65_positive_fill_included.inc:2: error: expected a value\nincluded from input.s:1\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "ca65_positive_fill_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: expected a value\nin expansion of macro `run` defined at input.s:1, invoked at input.s:5\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "ca65_positive_fill_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_positive_fill_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_generated_fill_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: expected a value\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "ca65_generated_fill_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-empty-call-compare-o62zv_ke/ca65_generated_fill_included.inc:2: error: expected a value\nincluded from input.s:1\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "ca65_generated_fill_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5: error: expected a value\nin expansion of macro `run` defined at input.s:1, invoked at input.s:5\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "ca65_generated_fill_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_generated_fill_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_captured_plus_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0201",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_captured_plus_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0201",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_captured_plus_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0201",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_captured_plus_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_captured_plus_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_missing_value_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: expected a value\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_missing_value_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-empty-call-compare-o62zv_ke/ca65_missing_value_included.inc:2:1: error: expected a value\nincluded from input.s:1\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_missing_value_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5:1: error: expected a value\nin expansion of macro `run` defined at input.s:1, invoked at input.s:5\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_missing_value_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_missing_value_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_positive_character_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: expected a value\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "ca65_positive_character_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-empty-call-compare-o62zv_ke/ca65_positive_character_included.inc:2:1: error: expected a value\nincluded from input.s:1\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "ca65_positive_character_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5:1: error: expected a value\nin expansion of macro `run` defined at input.s:1, invoked at input.s:5\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "ca65_positive_character_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_positive_character_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_positive_query_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: expected a value\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "ca65_positive_query_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-empty-call-compare-o62zv_ke/ca65_positive_query_included.inc:2:1: error: expected a value\nincluded from input.s:1\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "ca65_positive_query_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5:1: error: expected a value\nin expansion of macro `run` defined at input.s:1, invoked at input.s:5\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "ca65_positive_query_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "ca65_positive_query_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "65816_positive_byte_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: expected a value\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_positive_byte_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-empty-call-compare-o62zv_ke/65816_positive_byte_included.inc:2: error: expected a value\nincluded from input.s:2\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_positive_byte_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: expected a value\nin expansion of macro `run` defined at input.s:2, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_positive_byte_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_positive_byte_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "65816_positive_product_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: expected a value\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_positive_product_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-empty-call-compare-o62zv_ke/65816_positive_product_included.inc:2: error: expected a value\nincluded from input.s:2\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_positive_product_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: expected a value\nin expansion of macro `run` defined at input.s:2, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_positive_product_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_positive_product_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "65816_positive_group_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: expected a value\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_positive_group_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-empty-call-compare-o62zv_ke/65816_positive_group_included.inc:2: error: expected a value\nincluded from input.s:2\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_positive_group_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: expected a value\nin expansion of macro `run` defined at input.s:2, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_positive_group_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_positive_group_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "65816_positive_fill_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: expected a value\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_positive_fill_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-empty-call-compare-o62zv_ke/65816_positive_fill_included.inc:2: error: expected a value\nincluded from input.s:2\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_positive_fill_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: expected a value\nin expansion of macro `run` defined at input.s:2, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_positive_fill_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_positive_fill_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "65816_generated_fill_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: expected a value\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_generated_fill_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-empty-call-compare-o62zv_ke/65816_generated_fill_included.inc:2: error: expected a value\nincluded from input.s:2\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_generated_fill_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: expected a value\nin expansion of macro `run` defined at input.s:2, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_generated_fill_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_generated_fill_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "65816_captured_plus_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $0000 -> out.bin\n",
+      "hex": "0201",
+      "matches_native": true
+    },
+    {
+      "name": "65816_captured_plus_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $0000 -> out.bin\n",
+      "hex": "0201",
+      "matches_native": true
+    },
+    {
+      "name": "65816_captured_plus_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $0000 -> out.bin\n",
+      "hex": "0201",
+      "matches_native": true
+    },
+    {
+      "name": "65816_captured_plus_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_captured_plus_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "65816_missing_value_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: expected a value\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "65816_missing_value_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-empty-call-compare-o62zv_ke/65816_missing_value_included.inc:2: error: expected a value\nincluded from input.s:2\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "65816_missing_value_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: expected a value\nin expansion of macro `run` defined at input.s:2, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "65816_missing_value_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_missing_value_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "65816_positive_character_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: expected a value\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_positive_character_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-empty-call-compare-o62zv_ke/65816_positive_character_included.inc:2: error: expected a value\nincluded from input.s:2\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_positive_character_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: expected a value\nin expansion of macro `run` defined at input.s:2, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_positive_character_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_positive_character_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "65816_positive_query_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: expected a value\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_positive_query_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-empty-call-compare-o62zv_ke/65816_positive_query_included.inc:2: error: expected a value\nincluded from input.s:2\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_positive_query_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: expected a value\nin expansion of macro `run` defined at input.s:2, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_positive_query_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "65816_positive_query_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "65816",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_positive_byte_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: expected a value\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_positive_byte_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-empty-call-compare-o62zv_ke/huc6280_positive_byte_included.inc:2: error: expected a value\nincluded from input.s:2\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_positive_byte_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: expected a value\nin expansion of macro `run` defined at input.s:2, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_positive_byte_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_positive_byte_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_positive_product_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: expected a value\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_positive_product_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-empty-call-compare-o62zv_ke/huc6280_positive_product_included.inc:2: error: expected a value\nincluded from input.s:2\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_positive_product_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: expected a value\nin expansion of macro `run` defined at input.s:2, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_positive_product_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_positive_product_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_positive_group_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: expected a value\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_positive_group_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-empty-call-compare-o62zv_ke/huc6280_positive_group_included.inc:2: error: expected a value\nincluded from input.s:2\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_positive_group_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: expected a value\nin expansion of macro `run` defined at input.s:2, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_positive_group_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_positive_group_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_positive_fill_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: expected a value\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_positive_fill_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-empty-call-compare-o62zv_ke/huc6280_positive_fill_included.inc:2: error: expected a value\nincluded from input.s:2\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_positive_fill_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: expected a value\nin expansion of macro `run` defined at input.s:2, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_positive_fill_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_positive_fill_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_generated_fill_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: expected a value\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_generated_fill_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-empty-call-compare-o62zv_ke/huc6280_generated_fill_included.inc:2: error: expected a value\nincluded from input.s:2\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_generated_fill_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: expected a value\nin expansion of macro `run` defined at input.s:2, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_generated_fill_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_generated_fill_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_captured_plus_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $0000 -> out.bin\n",
+      "hex": "0201",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_captured_plus_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $0000 -> out.bin\n",
+      "hex": "0201",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_captured_plus_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 2 byte(s) at $0000 -> out.bin\n",
+      "hex": "0201",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_captured_plus_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_captured_plus_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_missing_value_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: expected a value\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_missing_value_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-empty-call-compare-o62zv_ke/huc6280_missing_value_included.inc:2: error: expected a value\nincluded from input.s:2\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_missing_value_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: expected a value\nin expansion of macro `run` defined at input.s:2, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_missing_value_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_missing_value_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_positive_character_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: expected a value\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_positive_character_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-empty-call-compare-o62zv_ke/huc6280_positive_character_included.inc:2: error: expected a value\nincluded from input.s:2\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_positive_character_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: expected a value\nin expansion of macro `run` defined at input.s:2, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_positive_character_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_positive_character_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    },
+    {
+      "name": "huc6280_positive_query_direct",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:3: error: expected a value\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_positive_query_included",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-empty-call-compare-o62zv_ke/huc6280_positive_query_included.inc:2: error: expected a value\nincluded from input.s:2\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_positive_query_macro",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: expected a value\nin expansion of macro `run` defined at input.s:2, invoked at input.s:6\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_positive_query_inactive",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: unsupported directive `.if`\n",
+      "hex": "70726576696f757320696d616765",
+      "matches_native": false
+    },
+    {
+      "name": "huc6280_positive_query_unused",
+      "argv": [
+        "/private/tmp/asm198x-empty-producer/asm198x",
+        "--dialect",
+        "huc6280",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled 1 byte(s) at $0000 -> out.bin\n",
+      "hex": "09",
+      "matches_native": true
+    }
+  ]
+}

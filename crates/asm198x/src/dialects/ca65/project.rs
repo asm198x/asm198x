@@ -765,6 +765,9 @@ fn sweep_line(
                     | "bankbytes"
                     | "faraddr"
                     | "asciiz"
+                    | "res"
+                    | "align"
+                    | "placement"
             )
         });
     let processed = (if data {
@@ -1375,6 +1378,10 @@ impl ca65_flat::LiveNumbers for SourceContext<'_> {
 }
 
 impl super::DataSource for SourceContext<'_> {
+    fn allocation(&self, directive: &str, text: &str, line: usize) -> Result<Kind, AsmError> {
+        super::reader::allocation(directive, text, line, self.text_context())
+    }
+
     fn data(
         &self,
         text: &str,

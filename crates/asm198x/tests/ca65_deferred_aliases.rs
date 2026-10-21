@@ -197,6 +197,43 @@ fn canonical_source_stream_preserves_native_capture_and_token_kinds() {
     verify_fixture(fixture, 180);
 }
 
+#[test]
+fn allocation_fields_consume_source_effects_before_later_operands() {
+    let fixture = include_str!("fixtures/ca65-allocation-context.json");
+    let facts: serde_json::Value = serde_json::from_str(fixture).expect("native captures");
+    assert_eq!(facts["audit_case_count"], 320);
+    let allocation = |name: &str| {
+        ["res_", "align_", "zero_res_", "no_padding_align_"]
+            .iter()
+            .any(|prefix| name.starts_with(prefix))
+    };
+    let mut names = std::collections::BTreeSet::new();
+    for case in facts["cases"].as_array().expect("allocation cases") {
+        let name = case["name"].as_str().expect("name");
+        assert!(allocation(name));
+        assert!(names.insert(name));
+    }
+    assert_eq!(names.len(), 160);
+    let outside = facts["out_of_scope_audit_cases"]
+        .as_array()
+        .expect("other scalar grammars");
+    assert_eq!(outside.len(), 160);
+    for name in outside {
+        let name = name.as_str().expect("name");
+        assert!(!allocation(name));
+        assert!(names.insert(name));
+    }
+    let inventory: std::collections::BTreeSet<_> = facts["audit_names"]
+        .as_array()
+        .expect("complete inventory")
+        .iter()
+        .map(|name| name.as_str().expect("name"))
+        .collect();
+    assert_eq!(inventory.len(), 320);
+    assert_eq!(names, inventory);
+    verify_fixture(fixture, 160);
+}
+
 fn verify_fixture(fixture: &str, count: usize) {
     let facts: serde_json::Value = serde_json::from_str(fixture).expect("native captures");
     let cases = facts["cases"].as_array().expect("cases");
