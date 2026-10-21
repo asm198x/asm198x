@@ -39,3 +39,22 @@ Keep the single existing task worktree and reuse its caches. The frozen #925
 producer/archive replace #920 as baseline. Preserve evidence and remove task
 artifacts/processes before finishing. Public AST/API breaks and new dependencies
 require separate approval; this plan does not introduce either.
+
+## Next implementation baseline
+
+The classifier move, borrowed numeric grammar and owned token preparation are
+pushed through 172f9da8d42a30b699a25a42d125eba130bb9e35. They do not implement
+the full reader or close its compatibility issues. Before the next behavior
+change, move those preparations onto checked #929 after it merges, retaining
+its empty-vector syntax and diagnostic fixes rather than copying the old
+numeric parser wholesale. #929 source is 9b0daf2efaf8f413792a0c7cee24f2ec9717590d;
+its five-host qualification was still pending when this note was written.
+
+The frozen successor at /private/tmp/asm198x-empty-producer has 38 matrices,
+7,054 case rows and 6,509 native matches. These are regression controls with
+duplicate contexts and known gaps, not a completion percentage. Replay each
+matrix using its recorded comparator and explicit dialect handling; the three
+new mixed-reader matrices cannot use one global flat/configured switch. Keep
+all prior matches, and include #928/#930's valid and invalid counterparts in
+the full-reader migration's mandatory fixture inventory. Retain source/evidence
+before replacing the predecessor or deleting task diagnostics.

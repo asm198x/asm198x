@@ -37,3 +37,32 @@ syntax-only mode. Keep capture/include order, approved physical lexical checks,
 formatter idempotence and debug/source spans under their existing decisions.
 Do not claim a matching refusal when an earlier unrelated error masks the
 intended consumer. Add native accepted counterparts and first-error checks.
+
+## Capture rules measured after the preparation commits
+
+The 330-case numeric capture audit and 225-case brace boundary audit are retained
+at 8156fd54c08ec08300a61b6d75439b332f827fe7 on audit/ca65-captured-numbers-928.
+They add required failure modes under #928/#930, without authorizing a different
+architecture or changing the public contract.
+
+- Numeric calls inside captured token lists remain tokens. Flat readers fold
+  const and mnemonic queries early, changing token counts or looking up names
+  that native merely captures. Numeric arguments of constructors still evaluate:
+  sprintf's const argument is an accepted control, not an exception to ignore.
+- In the measured brace captures, an opening brace is a token. The first physical
+  closing brace ends the list; arbitrary balanced nesting is the wrong grammar.
+  Native accepts `.tcount({{1})` and refuses `.tcount({{1}})`. It accepts two
+  arguments in `.match({{VALUE},{{OTHER})`; the old balanced splitter hides the
+  comma. Quoted and constructed string braces stay string tokens. Generated
+  selector output containing brace tokens needs additional native controls before
+  extending the physical-token boundary rule to that output.
+- Keep this grammar in the ca65 reader. Changing the shared argument splitter's
+  brace treatment globally would alter independent dialect grammars.
+
+The empty-call interruption (#927/#929) also establishes that real no-argument
+calls differ from line-zero recognition probes. Native blank/tcount return 1/0;
+other captured empty functions are ordinary errors. The shared numeric syntax
+parser must accept an empty vector for a dialect builder to validate, so valid
+calls format without expansion. Preserve the flat text-pass macro-origin remap.
+Do not reintroduce the old first-argument requirement when moving the borrowed
+numeric parser preparation onto the checked successor.
