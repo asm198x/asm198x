@@ -1,0 +1,13 @@
+{
+  "binaries": 110,
+  "passed": 1643,
+  "failed": 0,
+  "ignored": 38,
+  "workspace_log_sha256": "a4cb88555a78ee0ad8785ece3501eecb5437184e056c99f744e8aa3ae8e0c6d5",
+  "node_tests": 115,
+  "data_cases": 515,
+  "data_differences": 0,
+  "retained_matrices": 26,
+  "retained_cases": 4136,
+  "lost_native_matches": 0
+}

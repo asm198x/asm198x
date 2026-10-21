@@ -2525,6 +2525,26 @@ impl FlatWalk for Walker {
         line: usize,
         file: FileId,
     ) -> Result<Option<DirectiveLine>, AsmError> {
+        self.read_line(raw, line, file, None)
+    }
+
+    fn push_node(&mut self, node: crate::ast::Node) {
+        self.nodes.push(node);
+    }
+}
+
+// The selected data parser borrows projection state only during this read.
+type DataParser<'a> =
+    dyn FnMut(&Walker, Option<&crate::ast::Symbol>, &str) -> Result<Kind, AsmError> + 'a;
+
+impl Walker {
+    fn read_line(
+        &mut self,
+        raw: &str,
+        line: usize,
+        file: FileId,
+        mut data_parser: Option<&mut DataParser<'_>>,
+    ) -> Result<Option<DirectiveLine>, AsmError> {
         use crate::ast::{Comment, Item, Node, Scope, Span, Symbol, Trivia};
         // Structure-only (#481): carry the line verbatim; the projection
         // sweep reads it under the environment in force when it is reached.
@@ -2542,7 +2562,7 @@ impl FlatWalk for Walker {
             return Ok(None);
         }
         let string_source;
-        let raw = if self.expand_text_defines {
+        let raw = if self.expand_text_defines && data_parser.is_none() {
             let code = split_comment(raw).0.trim();
             let operation = split_label_head(code).map_or(code, |(_, rest)| rest);
             let word = split_first_word(operation).0.to_ascii_lowercase();
@@ -2574,7 +2594,7 @@ impl FlatWalk for Walker {
         // A `{…}` token list is unevaluated source with no expression to
         // render it from, so the formatter hands the line back as written.
         // The text pass folded every one that reaches assembly.
-        if ca65_flat::holds_a_token_list(code) {
+        if data_parser.is_none() && ca65_flat::holds_a_token_list(code) {
             let leading = std::mem::take(&mut self.pending_leading);
             self.push_node(Node {
                 operand_span: None,
@@ -2835,7 +2855,9 @@ impl FlatWalk for Walker {
             });
             return Ok(None);
         }
-        let kind = if self.expand_text_defines && self.select_cpu(rest, line)? {
+        let kind = if let Some(parser) = data_parser.as_mut() {
+            parser(self, symbol.as_ref(), rest)?
+        } else if self.expand_text_defines && self.select_cpu(rest, line)? {
             Kind::Empty
         } else {
             match self.tag_statement(rest, line)? {
@@ -2916,10 +2938,6 @@ impl FlatWalk for Walker {
             }),
         }
         Ok(None)
-    }
-
-    fn push_node(&mut self, node: crate::ast::Node) {
-        self.nodes.push(node);
     }
 }
 
@@ -3837,6 +3855,22 @@ fn parse_directive(
     directive: &str,
     line: usize,
 ) -> Result<Kind, AsmError> {
+    parse_directive_source(anons, anchor, consts, directive, line, None)
+}
+
+trait DataSource {
+    fn value(&self, text: &str, line: usize) -> Result<Expr, AsmError>;
+    fn tokens(&self, text: &str, line: usize) -> Result<String, AsmError>;
+}
+
+fn parse_directive_source(
+    anons: &AnonCtx,
+    anchor: &str,
+    consts: &SourceConstants<'_>,
+    directive: &str,
+    line: usize,
+    source: Option<&dyn DataSource>,
+) -> Result<Kind, AsmError> {
     let (name, rest) = split_first_word(directive);
     // Dispatch through the declared surface. The name arrives with the `.`
     // already stripped, so it is put back for the lookup: matching the bare
@@ -3882,10 +3916,17 @@ fn parse_directive(
             &consts.0.strings,
             rest,
             line,
+            source,
         )?)),
-        "words" => Ok(Kind::Words(parse_value_list(anons, anchor, rest, line)?)),
-        "dbyt" => Ok(Kind::DBytes(parse_value_list(anons, anchor, rest, line)?)),
-        "dword" => Ok(Kind::DWords(parse_value_list(anons, anchor, rest, line)?)),
+        "words" => Ok(Kind::Words(parse_value_list(
+            anons, anchor, rest, line, source,
+        )?)),
+        "dbyt" => Ok(Kind::DBytes(parse_value_list(
+            anons, anchor, rest, line, source,
+        )?)),
+        "dword" => Ok(Kind::DWords(parse_value_list(
+            anons, anchor, rest, line, source,
+        )?)),
         // Each extractor is its list of values with a byte selector wrapped
         // round every one, so a forward label still resolves at layout time and
         // the size is the item count (times three for `.faraddr`). ca65 answers
@@ -3893,7 +3934,7 @@ fn parse_directive(
         // `Expr::Bank` is the engine's 65816 `^` node — bits 16-23 — which is
         // byte 2 exactly.
         "lobytes" | "hibytes" | "bankbytes" | "faraddr" => {
-            let values = parse_value_list(anons, anchor, rest, line)?;
+            let values = parse_value_list(anons, anchor, rest, line, source)?;
             let mut out = Vec::with_capacity(values.len());
             for value in values {
                 match entry.id {
@@ -3909,7 +3950,12 @@ fn parse_directive(
             }
             Ok(Kind::Bytes(out))
         }
-        "asciiz" => Ok(Kind::Bytes(parse_asciiz(&consts.0.strings, rest, line)?)),
+        "asciiz" => Ok(Kind::Bytes(parse_asciiz(
+            &consts.0.strings,
+            rest,
+            line,
+            source,
+        )?)),
         // The processor words. `.setcpu` takes a quoted name; the `.pNN`
         // shorthands are the name themselves.
         "cpu" => {
@@ -4192,6 +4238,7 @@ fn parse_data_list(
     strings: &string_tokens::StringTokens,
     rest: &str,
     line: usize,
+    source: Option<&dyn DataSource>,
 ) -> Result<Vec<Expr>, AsmError> {
     let rest = rest.trim();
     if rest.is_empty() {
@@ -4199,10 +4246,25 @@ fn parse_data_list(
     }
     let mut out = Vec::new();
     for piece in ca65_flat::split_fields(rest, usize::MAX) {
-        if let Some(bytes) = strings.data(piece, line)? {
-            out.extend(bytes.into_iter().map(|b| Expr::Num(i64::from(b))));
+        // Only string-valued operands are expanded as text. Numeric calls
+        // remain at their parser position, after any preceding name query.
+        let expanded;
+        let piece = if let Some(source) = source {
+            expanded = source.tokens(piece, line)?;
+            &expanded
         } else {
-            out.push(parse_value(anons, anchor, piece, line)?);
+            piece
+        };
+        // A token selector can expose additional comma-separated operands.
+        for piece in ca65_flat::split_fields(piece, usize::MAX) {
+            if let Some(bytes) = strings.data(piece, line)? {
+                out.extend(bytes.into_iter().map(|b| Expr::Num(i64::from(b))));
+            } else {
+                out.push(match source {
+                    Some(source) => source.value(piece, line)?,
+                    None => parse_value(anons, anchor, piece, line)?,
+                });
+            }
         }
     }
     Ok(out)
@@ -4213,9 +4275,21 @@ fn parse_asciiz(
     strings: &string_tokens::StringTokens,
     rest: &str,
     line: usize,
+    source: Option<&dyn DataSource>,
 ) -> Result<Vec<Expr>, AsmError> {
     Ok(strings
-        .asciiz(ca65_flat::split_fields(rest, usize::MAX), line)?
+        .asciiz(
+            ca65_flat::split_fields(rest, usize::MAX)
+                .into_iter()
+                .map(|piece| match source {
+                    Some(source) => source.tokens(piece, line),
+                    None => Ok(piece.to_string()),
+                })
+                .collect::<Result<Vec<_>, _>>()?
+                .iter()
+                .flat_map(|piece| ca65_flat::split_fields(piece, usize::MAX)),
+            line,
+        )?
         .into_iter()
         .map(|b| Expr::Num(i64::from(b)))
         .collect())
@@ -4226,15 +4300,29 @@ fn parse_value_list(
     anchor: &str,
     rest: &str,
     line: usize,
+    source: Option<&dyn DataSource>,
 ) -> Result<Vec<Expr>, AsmError> {
     let rest = rest.trim();
     if rest.is_empty() {
         return Err(AsmError::new(line, "directive needs a value"));
     }
-    ca65_flat::split_fields(rest, usize::MAX)
-        .iter()
-        .map(|p| parse_value(anons, anchor, p, line))
-        .collect()
+    let mut out = Vec::new();
+    for piece in ca65_flat::split_fields(rest, usize::MAX) {
+        let expanded;
+        let piece = if let Some(source) = source {
+            expanded = source.tokens(piece, line)?;
+            &expanded
+        } else {
+            piece
+        };
+        for piece in ca65_flat::split_fields(piece, usize::MAX) {
+            out.push(match source {
+                Some(source) => source.value(piece, line)?,
+                None => parse_value(anons, anchor, piece, line)?,
+            });
+        }
+    }
+    Ok(out)
 }
 
 // ---------------------------------------------------------------------------
@@ -4634,8 +4722,11 @@ mod tests {
         );
         assert_eq!(&code("L: .byte .const(L), .const(*)")[..2], &[0, 0]);
         assert_eq!(&code(".byte .const(N)\nN = 5")[..1], &[0]);
-        // A label declared but never given a value still counts as defined.
-        assert_eq!(&code(".import ext\n.byte .const(ext)")[..1], &[0]);
+        // A known scoped constant is read through the selected scope.
+        assert_eq!(
+            &code(".scope pa\nv=1\n.byte .const(v)\n.endscope")[..1],
+            &[1]
+        );
 
         // `.ismnem` follows the CPU. `bra` and `stz` are 65C02 additions that
         // plain 6502 ca65 does not know, and `nop` is in every one of them.
@@ -4661,14 +4752,14 @@ mod tests {
         // ca65 answers a name it has never seen with "Symbol is undefined"
         // rather than with 0, so a 0 here would be an invention.
         let e = refused(".byte .const(zzz)");
-        assert!(e.to_string().contains("not defined anywhere"), "{e}");
+        assert!(e.to_string().contains("undefined symbol `zzz`"), "{e}");
 
-        // The pass keeps no scope stack, so it says so rather than answering 0
-        // where ca65 answers 1.
-        let e = refused(".scope pa\nv = 1\n.byte .const(v)\n.endscope");
-        assert!(e.to_string().contains("no scope stack"), "{e}");
+        // Native ld65 rejects an imported name that the query actually reads.
+        let e = refused(".import ext\n.byte .const(ext)");
+        assert!(e.to_string().contains("undefined symbol `ext`"), "{e}");
+        // Explicit qualification cannot fall back to the root's N.
         let e = refused("N = 1\n.byte .const(pa::N)");
-        assert!(e.to_string().contains("no scope stack"), "{e}");
+        assert!(e.to_string().contains("no such scope `pa`"), "{e}");
 
         // ca65 takes a bare name for `.ismnem` and nothing else.
         refused(".byte .ismnem(\"lda\")");

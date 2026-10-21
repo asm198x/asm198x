@@ -49,7 +49,7 @@ names, preserving valid .ident-generated names.
   Remove with git worktree remove only after every unique change and commit
   is retained and the continuing audit is finished.
 - /private/tmp/asm198x-text-consumers-build: shared debug cache for continuing
-  tests. Its CLI is the checked #810 implementation. Do not rebuild while a
+  tests. Its CLI now contains the uncommitted ordered-data candidate under verification. Do not rebuild while a
   full suite runs; remove at the end of the continuing task.
 - /private/tmp/asm198x-external-bindings-final-producer: qualified #810 frozen
   release executable, identity and 26-matrix replay recipe. Executable SHA is
@@ -67,3 +67,42 @@ reports, coverage download, fresh audit directory, two debug replays, staging
 and temporary helpers/logs have been removed after remote retention checks.
 Shared native sources at /private/tmp/asm198x-address-size-sources and the
 pre-existing shared CI/rebase helpers remain; do not delete unknown siblings.
+
+
+## Active ordered-data implementation
+
+The plan/baseline commit 71d38b7e is pushed on
+fix/ca65-ordered-data-queries-v3. Only the implementation changes from ce3955b3
+and 48e2428d were reapplied on the checked merged base; the rejected receipts
+remain on their audit refs. The four mechanical overlaps retained both fixtures,
+both mandatory cohorts and the existing pure external admission guard. There
+are no unresolved Git conflicts. Source remains uncommitted pending full tests.
+
+All 515 data controls now match native, fixing 186 differences. All 4,136 old
+cases retain their previous native matches. Focused tests pass, including all
+1,646 external cases and the old import failure. Clippy and 115 Node/setup tests
+pass; the full workspace suite passes 1,643 tests (38 ignored). Shared CLI must remain frozen.
+
+Additional active task directories:
+
+- /private/tmp/asm198x-data-context-v3-replay: 26-matrix debug replay and summary;
+  retain with final evidence, then remove after remote retention checks.
+- /private/tmp/asm198x-data-context-v3-release-build: isolated release cache;
+  freeze its executable and verify against clean committed source before final
+  qualification; remove after a retained checked replacement.
+
+Files prefixed asm198x-data-context-v3- in /private/tmp belong to this slice:
+source patch, apply log, plan commit output, replay helper and verification logs.
+Inspect and retain them before cleanup. No new worktree was created.
+
+- /private/tmp/asm198x-data-context-v3-producer: frozen release executable and
+  native replay; verify its identity against clean committed source before
+  actual qualification, then retain until the next checked replacement.
+- /private/tmp/asm198x-data-context-v3-local-package: prepared local archive,
+  currently unqualified; keep for the imminent positive and negative controls.
+- /private/tmp/asm198x-ca65-linked-faraddr-audit: independent 90-case native
+  range audit, comparing both qualified #810 and the data candidate. Both have
+  the same 33 false acceptances; no matching open issue was found. Retain this
+  audit separately and file its evidence after the current source commit.
+- /private/tmp/asm198x-audit-data-context-v3-candidates.py: actual native report
+  inspector adapted for the required data cohort; retain before cleanup.

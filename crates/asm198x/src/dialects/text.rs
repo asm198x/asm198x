@@ -241,6 +241,23 @@ pub(crate) trait TextSyntax {
     }
 }
 
+/// Invoke one grammar call without eagerly folding its returned token stream.
+/// The live numeric callback and dialect grammar still own argument reading.
+pub(crate) fn call<S: TextSyntax>(
+    syntax: &S,
+    name: &str,
+    arguments: &str,
+    line: usize,
+) -> Result<Option<Folded>, AsmError> {
+    let numbers = BTreeMap::new();
+    let evaluate = |t: &str, n: &BTreeMap<String, i64>, l: usize| syntax.evaluate_checked(t, n, l);
+    let scope = Scope {
+        numbers: &numbers,
+        evaluate: &evaluate,
+    };
+    syntax.function(name, &split_args(arguments), &scope, line)
+}
+
 /// Run the pass over a whole source.
 ///
 /// # Errors
@@ -582,7 +599,7 @@ fn call_open<S: TextSyntax>(syntax: &S, text: &str, end: usize) -> Option<usize>
 }
 
 /// The index of the `)` closing the `(` at `open`.
-fn matching_paren(line: &str, open: usize) -> Option<usize> {
+pub(super) fn matching_paren(line: &str, open: usize) -> Option<usize> {
     let bytes = line.as_bytes();
     let mut depth = 0usize;
     let mut quote: Option<u8> = None;
