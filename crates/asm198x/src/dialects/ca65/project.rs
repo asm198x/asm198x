@@ -1140,13 +1140,7 @@ struct SourceContext<'a> {
 impl SourceContext<'_> {
     fn read(&self, text: &str, line: usize) -> Result<Expr, AsmError> {
         let result = (|| {
-            let value = super::parse_value_source(
-                &self.reader.anons,
-                self.reader.scope_env.anchor_str(),
-                text,
-                line,
-                Some(self),
-            )?;
+            let value = super::reader::value(text, line, self.text_context())?;
             self.retain_read(value, line)
         })();
         result.map_err(|mut error: AsmError| {

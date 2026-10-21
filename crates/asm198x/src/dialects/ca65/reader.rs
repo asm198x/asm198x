@@ -879,3 +879,25 @@ pub(super) fn repetition(
     }
     Ok((count, counter))
 }
+
+/// Read a complete numeric condition/value through the same owned stream.
+/// A generated separator remains visible and is invalid in this grammar.
+pub(super) fn value(
+    source: &str,
+    line: usize,
+    live: ca65_flat::LiveText<'_>,
+) -> Result<Expr, AsmError> {
+    let mut input = Input::new(source, &live, line);
+    let value = live.context.expression_tokens(
+        &mut Numeric {
+            input: &mut input,
+            current: None,
+            after_value: false,
+        },
+        line,
+    )?;
+    if input.peek()?.is_some() {
+        return Err(AsmError::new(line, "unexpected tokens after expression"));
+    }
+    Ok(value)
+}
