@@ -374,6 +374,75 @@ fn repeat_headers_retain_native_count_order_and_identifier_kinds() {
     verify_fixture(fixture, 98);
 }
 
+#[test]
+fn file_fields_retain_native_constructor_order_and_windows() {
+    verify_fixture(include_str!("fixtures/ca65-file-context.json"), 200);
+}
+
+#[test]
+fn native_file_field_audit_reaches_the_memory_loader() {
+    let facts: serde_json::Value =
+        serde_json::from_str(include_str!("fixtures/ca65-file-context.json"))
+            .expect("native captures");
+    let mut loader = asm198x::source::MemoryLoader::new();
+    for (name, text) in facts["files"].as_object().expect("inputs") {
+        let text = text.as_str().expect("text input");
+        loader = loader
+            .text(name, text)
+            .binary(name, text.as_bytes().to_vec());
+    }
+    let cases = facts["cases"].as_array().expect("native cases");
+    let names: std::collections::BTreeSet<_> = cases
+        .iter()
+        .map(|case| case["name"].as_str().expect("name"))
+        .collect();
+    assert_eq!(names.len(), 200);
+    for case in cases {
+        let name = case["name"].as_str().expect("name");
+        let source = case["source"].as_str().expect("source");
+        let config = case["config"].as_str().expect("config");
+        let accepted = case["native"]
+            .as_array()
+            .expect("stages")
+            .last()
+            .expect("native outcome")["exit"]
+            == 0;
+        let result =
+            asm198x::assemble_ca65_files_debug_with_config(source, "input.s", &loader, config);
+        if !accepted {
+            assert!(result.is_err(), "{name}: native refusal");
+            continue;
+        }
+        let (image, debug) = result.unwrap_or_else(|error| panic!("{name}: {error:?}"));
+        let hex: String = image.bytes.iter().map(|b| format!("{b:02x}")).collect();
+        assert_eq!(
+            hex,
+            case["native_hex"].as_str().expect("native image"),
+            "{name}"
+        );
+        let encoded = debug.to_ndjson();
+        assert!(
+            !encoded.contains("ca65-string:"),
+            "{name}: opaque token escaped"
+        );
+        assert_eq!(
+            debug198x::DebugInfo::read(&encoded).expect("official debug reader"),
+            debug
+        );
+        let formatted = asm198x::format_ca65(source).expect("format source");
+        assert_eq!(
+            asm198x::format_ca65(&formatted).expect("format again"),
+            formatted
+        );
+        let (again, again_debug) =
+            asm198x::assemble_ca65_files_debug_with_config(&formatted, "input.s", &loader, config)
+                .unwrap_or_else(|error| panic!("{name}: formatted {error:?}"));
+        assert_eq!(again.bytes, image.bytes, "{name}: formatted bytes");
+        assert_eq!(again_debug.sections, debug.sections, "{name}: sections");
+        assert_eq!(again_debug.symbols, debug.symbols, "{name}: symbols");
+    }
+}
+
 fn verify_fixture(fixture: &str, count: usize) {
     let facts: serde_json::Value = serde_json::from_str(fixture).expect("native captures");
     let cases = facts["cases"].as_array().expect("cases");

@@ -901,3 +901,43 @@ pub(super) fn value(
     }
     Ok(value)
 }
+
+/// Produce a walk request without opening it. The existing sweep owns path
+/// lookup, binary windows, pending-character priority and loader diagnostics.
+pub(super) fn file(
+    binary: bool,
+    source: &str,
+    line: usize,
+    live: ca65_flat::LiveText<'_>,
+) -> Result<ca65_flat::WalkDirective, AsmError> {
+    let mut input = Input::new(source, &live, line);
+    let request = input.text()?;
+    if request.is_empty() {
+        return Err(AsmError::new(line, "file name must not be empty"));
+    }
+    let (offset, size) = if binary && input.peek()?.is_some() {
+        input.require(",")?;
+        let offset = input.number()?;
+        let size = if input.peek()?.is_none() {
+            None
+        } else {
+            input.require(",")?;
+            Some(input.number()?)
+        };
+        (Some(offset), size)
+    } else {
+        (None, None)
+    };
+    if input.peek()?.is_some() {
+        return Err(AsmError::new(line, "unexpected tokens after file operands"));
+    }
+    Ok(if binary {
+        ca65_flat::WalkDirective::Incbin {
+            request,
+            offset,
+            size,
+        }
+    } else {
+        ca65_flat::WalkDirective::Include { request }
+    })
+}

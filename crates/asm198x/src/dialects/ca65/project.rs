@@ -770,6 +770,8 @@ fn sweep_line(
                     | "assert"
                     | "out"
                     | "message"
+                    | "include"
+                    | "incbin"
             )
         });
     let processed = (if data {
@@ -828,7 +830,7 @@ fn sweep_line(
             if let Some(label) = label {
                 st.label_seg.insert(label.qualified.clone(), st.seg.clone());
             }
-            read_data_source(rest, st, reader, &node.span)
+            read_source_line(rest, st, reader, &node.span)
         };
         sw.reader.read_line(selected, line, file, Some(&mut parse))
     } else {
@@ -1402,26 +1404,38 @@ impl super::DataSource for SourceContext<'_> {
     }
 }
 
-fn read_data_source(
+fn read_source_line(
     text: &str,
     st: &mut Projection,
     reader: &Walker,
     span: &crate::span::Span,
-) -> Result<Kind, AsmError> {
+) -> Result<super::SourceLine, AsmError> {
     let source = SourceContext {
         reader,
         projection: st,
         span,
         required: std::cell::RefCell::new(Vec::new()),
     };
-    let result = super::parse_directive_source(
-        &reader.anons,
-        reader.scope_env.anchor_str(),
-        &super::SourceConstants(reader),
-        text.trim_start().trim_start_matches('.'),
-        span.line as usize,
-        Some(&source),
-    );
+    let (word, args) = split_first_word(text.trim());
+    let result = if word.eq_ignore_ascii_case(".include") || word.eq_ignore_ascii_case(".incbin") {
+        super::reader::file(
+            word.eq_ignore_ascii_case(".incbin"),
+            args,
+            span.line as usize,
+            source.text_context(),
+        )
+        .map(super::SourceLine::File)
+    } else {
+        super::parse_directive_source(
+            &reader.anons,
+            reader.scope_env.anchor_str(),
+            &super::SourceConstants(reader),
+            text.trim_start().trim_start_matches('.'),
+            span.line as usize,
+            Some(&source),
+        )
+        .map(super::SourceLine::Statement)
+    };
     for value in source.required.into_inner() {
         st.deferred.require_source_names(&value, span);
     }

@@ -83,3 +83,27 @@ stream-controls plan and findings retain its native evidence and regression
 gates. The remaining linked scalar/header/file consumers and flat/syntax
 adapters still need migration. This partial implementation does not close #924
 and is not ready to merge independently of the approved full-reader design.
+
+## Checked linked consumer milestones
+
+The v2 branch now has checked owned-stream adapters for linked data, allocation,
+assertion/message fields, repeat count/counter headers, numeric conditions and
+include/incbin fields. The native name/selector lookahead correction (#932) and
+explicit ca65 unary-plus grammar option (#931) are checked and pushed. Issues
+remain open until the owning full reader is qualified and merged.
+
+The current replay preserves all predecessor matches and has 6,934 native
+matches across the retained 39 matrices / 7,309 rows. Scalar, file, numeric-
+consumer, canonical, generated-field and repeat-name audits are respectively
+320/320, 200/200, 50/50, 100/100, 40/40 and 18/18. These overlapping observations
+are acceptance evidence, not a completion percentage. Each slice's findings,
+source hashes, full receipts and verified cleanup are retained alongside this
+plan. The latest full workspace checkpoint has 1,653 passing Rust/Lua/doc tests
+and 38 existing ignored; later ca65 slices run the affected library/contracts
+and Clippy/fmt, and a full current run remains mandatory before merge.
+
+Remaining work includes other name/head/statement adapters, flat ca65-family
+readers and canonical syntax-only consumption. Preserve macro/repeat capture,
+input priority and all contract invariants; then add mandatory native package
+cohorts, run the complete current checks and five actual native archives, and
+use checked PR/rebase merge. The branch is not yet merge-qualified.

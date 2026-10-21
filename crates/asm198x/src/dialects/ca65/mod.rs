@@ -2538,9 +2538,15 @@ impl FlatWalk for Walker {
     }
 }
 
-// The selected data parser borrows projection state only during this read.
+// The selected parser borrows projection state only during this read. File
+// requests remain walk directives so parsing cannot open or consume a file.
+enum SourceLine {
+    Statement(Kind),
+    File(WalkDirective),
+}
+
 type DataParser<'a> =
-    dyn FnMut(&Walker, Option<&crate::ast::Symbol>, &str) -> Result<Kind, AsmError> + 'a;
+    dyn FnMut(&Walker, Option<&crate::ast::Symbol>, &str) -> Result<SourceLine, AsmError> + 'a;
 
 impl Walker {
     fn read_line(
@@ -2825,7 +2831,19 @@ impl Walker {
             });
             return Ok(None);
         }
-        if let Some(kind) = self.walk_directive(rest, line)? {
+        let mut parsed_kind = None;
+        let directive = if let Some(parser) = data_parser.as_mut() {
+            match parser(self, symbol.as_ref(), rest)? {
+                SourceLine::Statement(kind) => {
+                    parsed_kind = Some(kind);
+                    None
+                }
+                SourceLine::File(directive) => Some(directive),
+            }
+        } else {
+            self.walk_directive(rest, line)?
+        };
+        if let Some(kind) = directive {
             return Ok(Some(DirectiveLine {
                 kind,
                 label: symbol,
@@ -2860,8 +2878,8 @@ impl Walker {
             });
             return Ok(None);
         }
-        let kind = if let Some(parser) = data_parser.as_mut() {
-            parser(self, symbol.as_ref(), rest)?
+        let kind = if let Some(kind) = parsed_kind {
+            kind
         } else if self.expand_text_defines && self.select_cpu(rest, line)? {
             Kind::Empty
         } else {
