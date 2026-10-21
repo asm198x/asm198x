@@ -1860,6 +1860,7 @@ pub(super) fn map_kind_syms(k: &Kind, f: &dyn Fn(&str) -> Option<Expr>) -> Kind 
         Kind::Unread => Kind::Unread,
         Kind::Bytes(es) => Kind::Bytes(list(es)),
         Kind::Words(es) => Kind::Words(list(es)),
+        Kind::FarAddrs(es) => Kind::FarAddrs(list(es)),
         Kind::DBytes(es) => Kind::DBytes(list(es)),
         Kind::DWords(es) => Kind::DWords(list(es)),
         Kind::BitBranch {
@@ -1932,6 +1933,7 @@ fn project_selected(
             Kind::Bytes(v) => v.len(),
             Kind::Raw(v) => v.len(),
             Kind::Words(v) | Kind::DBytes(v) => v.len() * 2,
+            Kind::FarAddrs(v) => v.len() * 3,
             Kind::DWords(v) => v.len() * 4,
             Kind::Res(size, _) => *size,
             Kind::Align(boundary, _) => super::link::alignment_padding(*boundary, *off),

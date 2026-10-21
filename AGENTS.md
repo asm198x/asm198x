@@ -94,7 +94,8 @@ Keep assemblers featherweight: no GUI, audio, emulator, or graphics dependencies
   [`releasing-published-crates.md`](../../decisions/releasing-published-crates.md)
   supersedes the older local squash instructions in
   [`decisions/branch-and-merge-workflow.md`](decisions/branch-and-merge-workflow.md).
-  `main` is unprotected, so the convention is the only thing holding.
+  `main` requires pull requests and status checks; this convention also requires
+  the complete current checks and native candidate qualification before merging.
 - Read the relevant decision record before changing crate boundaries, ISA modelling, syntax compatibility, diagnostics, or external formats.
 - Do not copy facts from emulator implementations into `isa`; use primary references and cite upward.
 - Prefer existing dialect/encoding patterns over adding special cases.

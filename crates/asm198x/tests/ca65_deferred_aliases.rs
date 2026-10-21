@@ -123,6 +123,15 @@ fn data_source_queries_follow_native_read_order() {
     verify_fixture(fixture, 515);
 }
 
+#[test]
+fn configured_far_addresses_check_full_values_at_each_item_pc() {
+    let fixture = include_str!("fixtures/ca65-linked-faraddr.json");
+    let facts: serde_json::Value = serde_json::from_str(fixture).expect("native captures");
+    assert_eq!(facts["audit_case_count"], 190);
+    assert_eq!(facts["excluded_audit_cases"], serde_json::json!({}));
+    verify_fixture(fixture, 190);
+}
+
 fn verify_fixture(fixture: &str, count: usize) {
     let facts: serde_json::Value = serde_json::from_str(fixture).expect("native captures");
     let cases = facts["cases"].as_array().expect("cases");
