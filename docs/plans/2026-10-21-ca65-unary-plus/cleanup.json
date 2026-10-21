@@ -1,0 +1,18 @@
+{
+  "retained_remote_commit": "3d5a819e7acfc4fac117e54e19cc05b8565a81ae",
+  "removed_roots": [
+    "/private/tmp/asm198x-reader-unary-build.log",
+    "/private/tmp/asm198x-reader-unary-clippy.log",
+    "/private/tmp/asm198x-reader-unary-compare.log",
+    "/private/tmp/asm198x-reader-unary-contract.log",
+    "/private/tmp/asm198x-reader-unary-fmt.log",
+    "/private/tmp/asm198x-reader-unary-issue-edit.log",
+    "/private/tmp/asm198x-reader-unary-replay",
+    "/private/tmp/asm198x-reader-unary-replay.log",
+    "/private/tmp/asm198x-reader-unary-workspace.log"
+  ],
+  "removed_files": 87,
+  "process_check": "no task-owned unary/check processes remain",
+  "worktree": "/Users/stevehill/Projects/198x/Asm198x/asm198x-ca65-text-consumers",
+  "removal_condition": "full #924 reader qualified and merged; active work/evidence retained"
+}
