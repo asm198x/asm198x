@@ -1,0 +1,18 @@
+[
+  {
+    "audit_ref": "14faff80ef22abc7d32dde75a4899e1fe3d152d4",
+    "path": "docs/plans/2026-10-20-ca65-source-query-effects/data-context-native.json",
+    "facts_sha256": "01a80a48f1d49d7d51f77580cfc8c1f2d3c95a929f272d9edb5d999ecc0fbc1a",
+    "producer": "9e448f2c496c5c6641164ddb8097f34f28cf4bf9",
+    "cases": 515,
+    "differences": 186
+  },
+  {
+    "audit_ref": "14faff80ef22abc7d32dde75a4899e1fe3d152d4",
+    "path": "docs/plans/2026-10-20-ca65-source-query-effects/numeric-consumers-native.json",
+    "facts_sha256": "6b09d3d2cd8e47be5dfd8ec6870e6ca7cd4e7af8bf26d6f430f46392b756ea77",
+    "producer": "9e448f2c496c5c6641164ddb8097f34f28cf4bf9",
+    "cases": 50,
+    "differences": 30
+  }
+]
