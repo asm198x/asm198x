@@ -15,6 +15,9 @@
     "/private/tmp/asm198x-empty-929-candidates",
     "/private/tmp/asm198x-empty-929-ci.json",
     "/private/tmp/asm198x-empty-929-ci.log",
+    "/private/tmp/asm198x-empty-929-merge.json",
+    "/private/tmp/asm198x-empty-929-merged-verification.json",
+    "/private/tmp/asm198x-empty-929-post-edit-ci.json",
     "/private/tmp/asm198x-empty-929-summary.json",
     "/private/tmp/asm198x-empty-929-verification.log",
     "/private/tmp/asm198x-empty-930-original.json",
@@ -58,7 +61,10 @@
     "/private/tmp/asm198x-empty-node-focused.log",
     "/private/tmp/asm198x-empty-node-v2.log",
     "/private/tmp/asm198x-empty-node.log",
+    "/private/tmp/asm198x-empty-post-edit-title-runs.json",
+    "/private/tmp/asm198x-empty-pr-final.md",
     "/private/tmp/asm198x-empty-pr.md",
+    "/private/tmp/asm198x-empty-pre-edit-title-runs.json",
     "/private/tmp/asm198x-empty-predecessor",
     "/private/tmp/asm198x-empty-reader-plan-commit.log",
     "/private/tmp/asm198x-empty-reader-wording-commit.log",
@@ -595,6 +601,33 @@
       "mode": 420,
       "preserve_root": false,
       "blob": "blobs/5874217417e4d0cbdfda9cedb7be1f5de632d243a0908b5af6790fb39bbeeb87.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-empty-929-merge.json",
+      "root": "/private/tmp/asm198x-empty-929-merge.json",
+      "sha256": "ab67e29e25b69f6d51e3c7b8dcb5ac06320cd7f7ffa491a9379b4a4ad89784c4",
+      "size": 123,
+      "mode": 420,
+      "preserve_root": false,
+      "blob": "blobs/ab67e29e25b69f6d51e3c7b8dcb5ac06320cd7f7ffa491a9379b4a4ad89784c4.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-empty-929-merged-verification.json",
+      "root": "/private/tmp/asm198x-empty-929-merged-verification.json",
+      "sha256": "3ac7b99e54f7fbe3626d0c1a4d62e60239b81e5f1f90b57adb9f43289b4396cb",
+      "size": 570,
+      "mode": 420,
+      "preserve_root": false,
+      "blob": "blobs/3ac7b99e54f7fbe3626d0c1a4d62e60239b81e5f1f90b57adb9f43289b4396cb.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-empty-929-post-edit-ci.json",
+      "root": "/private/tmp/asm198x-empty-929-post-edit-ci.json",
+      "sha256": "1a037495bbf4ede48859504fff722b7c3a43a39b7f2f38eafdb0ce3c2ef23bf0",
+      "size": 250751,
+      "mode": 420,
+      "preserve_root": false,
+      "blob": "blobs/1a037495bbf4ede48859504fff722b7c3a43a39b7f2f38eafdb0ce3c2ef23bf0.gz"
     },
     {
       "path": "/private/tmp/asm198x-empty-929-summary.json",
@@ -2244,6 +2277,24 @@
       "blob": "blobs/b9d64e2964f907c6ce1884d2efbbe94e5b8a613a85de439660c9df91e3a7560a.gz"
     },
     {
+      "path": "/private/tmp/asm198x-empty-post-edit-title-runs.json",
+      "root": "/private/tmp/asm198x-empty-post-edit-title-runs.json",
+      "sha256": "8c91824cfd2ddc769370a6378e04e90c74c1d3f938655a11e4b770d2b9bfbe5a",
+      "size": 15032,
+      "mode": 420,
+      "preserve_root": false,
+      "blob": "blobs/8c91824cfd2ddc769370a6378e04e90c74c1d3f938655a11e4b770d2b9bfbe5a.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-empty-pr-final.md",
+      "root": "/private/tmp/asm198x-empty-pr-final.md",
+      "sha256": "80a1f44fb65bf69030605f5d9117d90146ee50d3fe3a71a625ff67897a633a7a",
+      "size": 2183,
+      "mode": 420,
+      "preserve_root": false,
+      "blob": "blobs/80a1f44fb65bf69030605f5d9117d90146ee50d3fe3a71a625ff67897a633a7a.gz"
+    },
+    {
       "path": "/private/tmp/asm198x-empty-pr.md",
       "root": "/private/tmp/asm198x-empty-pr.md",
       "sha256": "70aa0740169411905cf545bbca2d69385304082724fc239e89c9bb3c362265e3",
@@ -2251,6 +2302,15 @@
       "mode": 420,
       "preserve_root": false,
       "blob": "blobs/70aa0740169411905cf545bbca2d69385304082724fc239e89c9bb3c362265e3.gz"
+    },
+    {
+      "path": "/private/tmp/asm198x-empty-pre-edit-title-runs.json",
+      "root": "/private/tmp/asm198x-empty-pre-edit-title-runs.json",
+      "sha256": "32a20fab6a57ca6f7acb7caff206d9484fb78aba652b4227e8cf5166846956fe",
+      "size": 14,
+      "mode": 420,
+      "preserve_root": false,
+      "blob": "blobs/32a20fab6a57ca6f7acb7caff206d9484fb78aba652b4227e8cf5166846956fe.gz"
     },
     {
       "path": "/private/tmp/asm198x-empty-predecessor/report.json",

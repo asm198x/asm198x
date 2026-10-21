@@ -34,3 +34,9 @@ receipts are retained. Cleanup rechecks the pushed audit commit, every blob and
 current file, complete root inventory, remote recovery refs and process ownership
 before deletion. The reused build caches and sole linked reader worktree remain
 for #924; no worktree or unique source change is deleted here.
+
+Final metadata workflow 39634466435 passed after the PR became ready and its
+body was updated. The guarded rebase merge produced
+71ee7240a8518c2deadd4340d9e10d0dd6bd33d9, whose tree is exactly the qualified
+19bafc7ee1021f115df2c7ccdeaeaf38bc61710c. #927 is closed. The refreshed manifest
+retains the final metadata and merge verification before diagnostic deletion.
