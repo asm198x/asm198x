@@ -1,0 +1,16 @@
+{
+  "retained_remote_commit": "3250851e37fafad19e2555db48015146206dfe6f",
+  "removed_roots": [
+    "/private/tmp/asm198x-reader-condition-clippy.log",
+    "/private/tmp/asm198x-reader-condition-contract.log",
+    "/private/tmp/asm198x-reader-condition-contracts.log",
+    "/private/tmp/asm198x-reader-condition-fmt.log",
+    "/private/tmp/asm198x-reader-condition-library.log",
+    "/private/tmp/asm198x-reader-condition-replay",
+    "/private/tmp/asm198x-reader-condition-replay.log"
+  ],
+  "removed_files": 85,
+  "process_check": "no task-owned condition/check processes remain",
+  "worktree": "/Users/stevehill/Projects/198x/Asm198x/asm198x-ca65-text-consumers",
+  "removal_condition": "full #924 reader qualified and merged; active work/evidence retained"
+}
