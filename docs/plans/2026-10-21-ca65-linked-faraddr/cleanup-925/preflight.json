@@ -1,0 +1,6 @@
+{
+  "roots": 56,
+  "regular_files": 264,
+  "logical_bytes": 440707595,
+  "df_before": "Filesystem   1024-blocks      Used Available Capacity  iused     ifree %iused  Mounted on\n/dev/disk3s5   971350180 892273848  30308248    97% 11087051 303082480    4%   /System/Volumes/Data\n"
+}
