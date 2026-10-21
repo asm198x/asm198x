@@ -1,0 +1,766 @@
+{
+  "binary": "/private/tmp/asm198x-data-context-v3-producer/asm198x",
+  "sha256": "b95498886cb76841ff4831c9018eaefb1efc859b3e86bf3fb70f7722bc9f9f43",
+  "results": [
+    {
+      "name": "repeat_fields_direct",
+      "argv": [
+        "/private/tmp/asm198x-data-context-v3-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0001",
+      "native_hex": "0001",
+      "matches": true
+    },
+    {
+      "name": "repeat_fields_included",
+      "argv": [
+        "/private/tmp/asm198x-data-context-v3-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0001",
+      "native_hex": "0001",
+      "matches": true
+    },
+    {
+      "name": "repeat_fields_macro",
+      "argv": [
+        "/private/tmp/asm198x-data-context-v3-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0001",
+      "native_hex": "0001",
+      "matches": true
+    },
+    {
+      "name": "repeat_fields_inactive",
+      "argv": [
+        "/private/tmp/asm198x-data-context-v3-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "repeat_fields_unused",
+      "argv": [
+        "/private/tmp/asm198x-data-context-v3-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "res_fields_direct",
+      "argv": [
+        "/private/tmp/asm198x-data-context-v3-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "02",
+      "native_hex": "02",
+      "matches": true
+    },
+    {
+      "name": "res_fields_included",
+      "argv": [
+        "/private/tmp/asm198x-data-context-v3-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "02",
+      "native_hex": "02",
+      "matches": true
+    },
+    {
+      "name": "res_fields_macro",
+      "argv": [
+        "/private/tmp/asm198x-data-context-v3-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "02",
+      "native_hex": "02",
+      "matches": true
+    },
+    {
+      "name": "res_fields_inactive",
+      "argv": [
+        "/private/tmp/asm198x-data-context-v3-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "res_fields_unused",
+      "argv": [
+        "/private/tmp/asm198x-data-context-v3-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "align_fields_direct",
+      "argv": [
+        "/private/tmp/asm198x-data-context-v3-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0703",
+      "native_hex": "0703",
+      "matches": true
+    },
+    {
+      "name": "align_fields_included",
+      "argv": [
+        "/private/tmp/asm198x-data-context-v3-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0703",
+      "native_hex": "0703",
+      "matches": true
+    },
+    {
+      "name": "align_fields_macro",
+      "argv": [
+        "/private/tmp/asm198x-data-context-v3-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "0703",
+      "native_hex": "0703",
+      "matches": true
+    },
+    {
+      "name": "align_fields_inactive",
+      "argv": [
+        "/private/tmp/asm198x-data-context-v3-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "align_fields_unused",
+      "argv": [
+        "/private/tmp/asm198x-data-context-v3-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "assert_fields_direct",
+      "argv": [
+        "/private/tmp/asm198x-data-context-v3-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "assert_fields_included",
+      "argv": [
+        "/private/tmp/asm198x-data-context-v3-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "assert_fields_macro",
+      "argv": [
+        "/private/tmp/asm198x-data-context-v3-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "assert_fields_inactive",
+      "argv": [
+        "/private/tmp/asm198x-data-context-v3-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "assert_fields_unused",
+      "argv": [
+        "/private/tmp/asm198x-data-context-v3-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_fields_direct",
+      "argv": [
+        "/private/tmp/asm198x-data-context-v3-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "4243",
+      "native_hex": "4243",
+      "matches": true
+    },
+    {
+      "name": "incbin_fields_included",
+      "argv": [
+        "/private/tmp/asm198x-data-context-v3-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "4243",
+      "native_hex": "4243",
+      "matches": true
+    },
+    {
+      "name": "incbin_fields_macro",
+      "argv": [
+        "/private/tmp/asm198x-data-context-v3-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 2 byte(s) -> out.bin\n",
+      "hex": "4243",
+      "native_hex": "4243",
+      "matches": true
+    },
+    {
+      "name": "incbin_fields_inactive",
+      "argv": [
+        "/private/tmp/asm198x-data-context-v3-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_fields_unused",
+      "argv": [
+        "/private/tmp/asm198x-data-context-v3-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "res_suffix_direct",
+      "argv": [
+        "/private/tmp/asm198x-data-context-v3-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "03",
+      "native_hex": "03",
+      "matches": true
+    },
+    {
+      "name": "res_suffix_included",
+      "argv": [
+        "/private/tmp/asm198x-data-context-v3-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "03",
+      "native_hex": "03",
+      "matches": true
+    },
+    {
+      "name": "res_suffix_macro",
+      "argv": [
+        "/private/tmp/asm198x-data-context-v3-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "03",
+      "native_hex": "03",
+      "matches": true
+    },
+    {
+      "name": "res_suffix_inactive",
+      "argv": [
+        "/private/tmp/asm198x-data-context-v3-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "res_suffix_unused",
+      "argv": [
+        "/private/tmp/asm198x-data-context-v3-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "repeat_suffix_direct",
+      "argv": [
+        "/private/tmp/asm198x-data-context-v3-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "00",
+      "native_hex": "00",
+      "matches": true
+    },
+    {
+      "name": "repeat_suffix_included",
+      "argv": [
+        "/private/tmp/asm198x-data-context-v3-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "00",
+      "native_hex": "00",
+      "matches": true
+    },
+    {
+      "name": "repeat_suffix_macro",
+      "argv": [
+        "/private/tmp/asm198x-data-context-v3-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "00",
+      "native_hex": "00",
+      "matches": true
+    },
+    {
+      "name": "repeat_suffix_inactive",
+      "argv": [
+        "/private/tmp/asm198x-data-context-v3-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "repeat_suffix_unused",
+      "argv": [
+        "/private/tmp/asm198x-data-context-v3-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "res_read_order_direct",
+      "argv": [
+        "/private/tmp/asm198x-data-context-v3-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2: error: undefined symbol `.ref`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "res_read_order_included",
+      "argv": [
+        "/private/tmp/asm198x-data-context-v3-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-fy38nvvc/res_read_order_included.inc:2: error: undefined symbol `.ref`\nincluded from input.s:1\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "res_read_order_macro",
+      "argv": [
+        "/private/tmp/asm198x-data-context-v3-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6: error: undefined symbol `.ref`\nin expansion of macro `run` defined at input.s:1, invoked at input.s:6\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "res_read_order_inactive",
+      "argv": [
+        "/private/tmp/asm198x-data-context-v3-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "res_read_order_unused",
+      "argv": [
+        "/private/tmp/asm198x-data-context-v3-producer/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    }
+  ]
+}

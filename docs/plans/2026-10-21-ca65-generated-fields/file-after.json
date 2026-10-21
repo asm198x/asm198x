@@ -1,0 +1,766 @@
+{
+  "binary": "/private/tmp/asm198x-scalar-build/debug/asm198x",
+  "sha256": "ff4abd4c9e7bc4f5fcef7cfd3cd95d2975c0b9a50bcfd23d2ccfaddec69ad3f3",
+  "results": [
+    {
+      "name": "repeat_fields_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1:1: error: unexpected trailing tokens in `2,INDEX`\n",
+      "hex": null,
+      "native_hex": "0001",
+      "matches": false
+    },
+    {
+      "name": "repeat_fields_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-d7ckxk4e/repeat_fields_included.inc:1:1: error: unexpected trailing tokens in `2,INDEX`\nincluded from input.s:1\n",
+      "hex": null,
+      "native_hex": "0001",
+      "matches": false
+    },
+    {
+      "name": "repeat_fields_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6:1: error: unexpected trailing tokens in `2,INDEX`\nin expansion of macro `run` defined at input.s:1, invoked at input.s:6\n",
+      "hex": null,
+      "native_hex": "0001",
+      "matches": false
+    },
+    {
+      "name": "repeat_fields_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "repeat_fields_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "res_fields_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1:1: error: unexpected trailing tokens in `1,2`\n",
+      "hex": null,
+      "native_hex": "02",
+      "matches": false
+    },
+    {
+      "name": "res_fields_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-d7ckxk4e/res_fields_included.inc:1:1: error: unexpected trailing tokens in `1,2`\nincluded from input.s:1\n",
+      "hex": null,
+      "native_hex": "02",
+      "matches": false
+    },
+    {
+      "name": "res_fields_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: unexpected trailing tokens in `1,2`\nin expansion of macro `run` defined at input.s:1, invoked at input.s:4\n",
+      "hex": null,
+      "native_hex": "02",
+      "matches": false
+    },
+    {
+      "name": "res_fields_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "res_fields_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "align_fields_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: unexpected trailing tokens in `2,3`\n",
+      "hex": null,
+      "native_hex": "0703",
+      "matches": false
+    },
+    {
+      "name": "align_fields_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-d7ckxk4e/align_fields_included.inc:2:1: error: unexpected trailing tokens in `2,3`\nincluded from input.s:1\n",
+      "hex": null,
+      "native_hex": "0703",
+      "matches": false
+    },
+    {
+      "name": "align_fields_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5:1: error: unexpected trailing tokens in `2,3`\nin expansion of macro `run` defined at input.s:1, invoked at input.s:5\n",
+      "hex": null,
+      "native_hex": "0703",
+      "matches": false
+    },
+    {
+      "name": "align_fields_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "align_fields_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "assert_fields_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1:1: error: unexpected trailing tokens in `1,error`\n",
+      "hex": null,
+      "native_hex": "09",
+      "matches": false
+    },
+    {
+      "name": "assert_fields_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-d7ckxk4e/assert_fields_included.inc:1:1: error: unexpected trailing tokens in `1,error`\nincluded from input.s:1\n",
+      "hex": null,
+      "native_hex": "09",
+      "matches": false
+    },
+    {
+      "name": "assert_fields_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:5:1: error: unexpected trailing tokens in `1,error`\nin expansion of macro `run` defined at input.s:1, invoked at input.s:5\n",
+      "hex": null,
+      "native_hex": "09",
+      "matches": false
+    },
+    {
+      "name": "assert_fields_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "assert_fields_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_fields_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1:1: error: `.incbin` offset must be a constant expression: unexpected trailing tokens in `1,2`\n",
+      "hex": null,
+      "native_hex": "4243",
+      "matches": false
+    },
+    {
+      "name": "incbin_fields_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-d7ckxk4e/incbin_fields_included.inc:1:1: error: `.incbin` offset must be a constant expression: unexpected trailing tokens in `1,2`\nincluded from input.s:1\n",
+      "hex": null,
+      "native_hex": "4243",
+      "matches": false
+    },
+    {
+      "name": "incbin_fields_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: `.incbin` offset must be a constant expression: unexpected trailing tokens in `1,2`\nin expansion of macro `run` defined at input.s:1, invoked at input.s:4\n",
+      "hex": null,
+      "native_hex": "4243",
+      "matches": false
+    },
+    {
+      "name": "incbin_fields_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "incbin_fields_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "res_suffix_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1:1: error: unexpected trailing tokens in `1,2`\n",
+      "hex": null,
+      "native_hex": "03",
+      "matches": false
+    },
+    {
+      "name": "res_suffix_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-d7ckxk4e/res_suffix_included.inc:1:1: error: unexpected trailing tokens in `1,2`\nincluded from input.s:1\n",
+      "hex": null,
+      "native_hex": "03",
+      "matches": false
+    },
+    {
+      "name": "res_suffix_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:4:1: error: unexpected trailing tokens in `1,2`\nin expansion of macro `run` defined at input.s:1, invoked at input.s:4\n",
+      "hex": null,
+      "native_hex": "03",
+      "matches": false
+    },
+    {
+      "name": "res_suffix_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "res_suffix_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "repeat_suffix_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:1:1: error: unexpected trailing tokens in `1,INDEX`\n",
+      "hex": null,
+      "native_hex": "00",
+      "matches": false
+    },
+    {
+      "name": "repeat_suffix_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-d7ckxk4e/repeat_suffix_included.inc:1:1: error: unexpected trailing tokens in `1,INDEX`\nincluded from input.s:1\n",
+      "hex": null,
+      "native_hex": "00",
+      "matches": false
+    },
+    {
+      "name": "repeat_suffix_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6:1: error: unexpected trailing tokens in `1,INDEX`\nin expansion of macro `run` defined at input.s:1, invoked at input.s:6\n",
+      "hex": null,
+      "native_hex": "00",
+      "matches": false
+    },
+    {
+      "name": "repeat_suffix_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "repeat_suffix_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "res_read_order_direct",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:2:1: error: expected `)` in `.const(...)`\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "res_read_order_included",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: /private/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-alias-compare-d7ckxk4e/res_read_order_included.inc:2:1: error: expected `)` in `.const(...)`\nincluded from input.s:1\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "res_read_order_macro",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.s:6:1: error: expected `)` in `.const(...)`\nin expansion of macro `run` defined at input.s:1, invoked at input.s:6\n",
+      "hex": null,
+      "native_hex": null,
+      "matches": true
+    },
+    {
+      "name": "res_read_order_inactive",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    },
+    {
+      "name": "res_read_order_unused",
+      "argv": [
+        "/private/tmp/asm198x-scalar-build/debug/asm198x",
+        "--dialect",
+        "ca65",
+        "-C",
+        "input.cfg",
+        "input.s",
+        "-o",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "assembled + linked 1 byte(s) -> out.bin\n",
+      "hex": "09",
+      "native_hex": "09",
+      "matches": true
+    }
+  ]
+}

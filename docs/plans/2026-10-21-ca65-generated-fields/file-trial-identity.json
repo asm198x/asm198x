@@ -1,0 +1,9 @@
+{
+  "base_commit": "c98a56a405ddc5aa0fbce8577c6f411be6d309da",
+  "source_hashes": {
+    "crates/asm198x/src/dialects/ca65/mod.rs": "962ca56074ed1b5d027b6753a6549d5e1fa291ab21cc0568293709c117755f67",
+    "crates/asm198x/src/dialects/ca65/project.rs": "7cd94684af510ae899a120321fba7e1ef12a8971783b13008ccd6885b727179a"
+  },
+  "binary_sha256": "ff4abd4c9e7bc4f5fcef7cfd3cd95d2975c0b9a50bcfd23d2ccfaddec69ad3f3",
+  "trial_result": "200 file controls match, 21 generated-field regressions; rejected for merge"
+}

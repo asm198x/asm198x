@@ -67,9 +67,9 @@
   },
   {
     "path": "asm198x-scalar-final-monitor-retry.log.gz",
-    "bytes": 6040,
-    "sha256": "bdb3d360973be27db75baaa87a1c4a9a8f59df702ded1f751954a161aef9574b",
-    "stored_sha256": "9766796070e5faf60aacbc8c757075ee31afcaef6a210ea20c52d4e1c9ba4eac"
+    "bytes": 7069,
+    "sha256": "92c5103eb20856dbbc792617a0336987bec2f271bfd3b9edd45c06eb6240fab8",
+    "stored_sha256": "384011a83bd6bb4a955435db6c71a28dcab3ba0b6b588542117e15a41ea71a1b"
   },
   {
     "path": "local-package/corrupt-archive.json.gz",
@@ -1039,9 +1039,9 @@
   },
   {
     "path": "asm198x-scalar-final-artifacts.json.gz",
-    "bytes": 3636,
-    "sha256": "ba8df88d773162866856ca6e6ac149499af37e6d76ceacde108b4d8f0d711906",
-    "stored_sha256": "a1f6c5a3c82979fed137435fa8b9599967fb50de7180fb112dcdb4aeca7c8624"
+    "bytes": 4531,
+    "sha256": "3b39a69bb7a6b95c4ee76156e6416e0213ce266431155f90982c2e501354c463",
+    "stored_sha256": "e9417fa43afcf1cb84fa73ba22ec6c111b151fc8feefeeebcb57ee777def54aa"
   },
   {
     "path": "asm198x-scalar-obsolete-stop.json.gz",
@@ -1282,5 +1282,47 @@
     "bytes": 29942745,
     "sha256": "e4e4aa33b327be7e4b2819aac7a9148c98120ea7013ef24bc9e92ad5cb531157",
     "stored_sha256": "af5c341997b5403c2f4a1a933ee905919d40a2e4d6847eecb46064bb64651eaa"
+  },
+  {
+    "path": "native/candidate-qualification-x86_64-apple-darwin-1/acquisition.json.gz",
+    "bytes": 126,
+    "sha256": "b6050248c94c812e70378f67625d1fc2899e1183bf58c67b696bba49982099d0",
+    "stored_sha256": "ff90ee8d2d9894d10aa41dbd14b641d74ea8e9750700d61b6d070b2dd6a5605f"
+  },
+  {
+    "path": "native/candidate-qualification-x86_64-apple-darwin-1/corrupt-archive.json.gz",
+    "bytes": 170,
+    "sha256": "2e5a8c2e13cf7c92b79606177bf5c326bf1dadd6f43bf7f4f7023897c4a8101c",
+    "stored_sha256": "24d69db910355c438bc640c90684fc916fc4d17a5671bee79d66179577972a21"
+  },
+  {
+    "path": "native/candidate-qualification-x86_64-apple-darwin-1/plan.json.gz",
+    "bytes": 13916,
+    "sha256": "5e1969ffe55f895ec0babd29f44c06805f02fbd3666f68f904bbe8ee30876b3b",
+    "stored_sha256": "1510270d509a9d5bd99879592678923f521c9752ea088f0d8cbf7849be967455"
+  },
+  {
+    "path": "native/candidate-qualification-x86_64-apple-darwin-1/report.json.gz",
+    "bytes": 33806637,
+    "sha256": "5d5fb099034e81ca4ebb56ebb0cd08e93081518e91b1092e90f8334d3be9cafa",
+    "stored_sha256": "563ae5c14cb09cf7804382b29120be553cbc964e602dbba607f372db0d49f9af"
+  },
+  {
+    "path": "native/candidate-qualification-x86_64-apple-darwin-1/wrong-bytes.json.gz",
+    "bytes": 33807432,
+    "sha256": "249e743941659184e96df29a50eae7bf14df6278f8a8090d46ea9a848cb012b5",
+    "stored_sha256": "ae0e98c805c17f2f2e7259ba5c6b4965735f4d22205fa1a694f1a9d99e7effaa"
+  },
+  {
+    "path": "asm198x-scalar-final-summary.json.gz",
+    "bytes": 2757,
+    "sha256": "a6ba0b47a060d178909ec0a176a1e9c4ab263cd6e7ca964ae59c8aea67dc3253",
+    "stored_sha256": "93034d54890e5c5abe279e3ac23776fd529cf9bbc8b5e38eac01172e114b0983"
+  },
+  {
+    "path": "asm198x-scalar-final-native-inspection.log.gz",
+    "bytes": 2757,
+    "sha256": "a6ba0b47a060d178909ec0a176a1e9c4ab263cd6e7ca964ae59c8aea67dc3253",
+    "stored_sha256": "6c467fa4a9cf6b419e69c01c49bd4b7344ee4b1d6821baea08fb604f17821819"
   }
 ]
