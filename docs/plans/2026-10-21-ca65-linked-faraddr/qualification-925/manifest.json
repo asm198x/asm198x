@@ -1,0 +1,674 @@
+[
+  {
+    "source": "/private/tmp/asm198x-faraddr-4510/logs/assembler-version.stderr",
+    "path": "asm198x-faraddr-4510__logs__assembler-version.stderr.gz",
+    "sha256": "cd9267fb50974330b2596f8f7d386346ec0227b2e2b702cb761d363dfa13a8c2",
+    "stored_sha256": "4e8c5bda943c4be550f2466e33131d828a5a1bfad5e23037815b9fe1c79ea021"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-4510/logs/assembler-version.stdout",
+    "path": "asm198x-faraddr-4510__logs__assembler-version.stdout.gz",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stored_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-4510/logs/build-assembler.stderr",
+    "path": "asm198x-faraddr-4510__logs__build-assembler.stderr.gz",
+    "sha256": "2b6d79e3ea78cf533036014f9a75730b5b4b852affd4b71188cbe8c48a2d2466",
+    "stored_sha256": "b6039fab680ee7d034cd608f5c9591d34bd63d1e25c6029f813e2a3b8ae0fd59"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-4510/logs/build-assembler.stdout",
+    "path": "asm198x-faraddr-4510__logs__build-assembler.stdout.gz",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stored_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-4510/logs/cc65-4510-opcodes--opcode-space-assembler-0.stderr",
+    "path": "asm198x-faraddr-4510__logs__cc65-4510-opcodes--opcode-space-assembler-0.stderr.gz",
+    "sha256": "d0f2bb0a758878171f47aca2c415910cd2bb55a06fb1b89e28d6e8ced2d21477",
+    "stored_sha256": "ef938dec394581908ac629f1857be6cf81f52e540ea97d9cc7926f7e32ad36e5"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-4510/logs/cc65-4510-opcodes--opcode-space-assembler-0.stdout",
+    "path": "asm198x-faraddr-4510__logs__cc65-4510-opcodes--opcode-space-assembler-0.stdout.gz",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stored_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-4510/logs/cc65-4510-opcodes--opcode-space-reference-0.stderr",
+    "path": "asm198x-faraddr-4510__logs__cc65-4510-opcodes--opcode-space-reference-0.stderr.gz",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stored_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-4510/logs/cc65-4510-opcodes--opcode-space-reference-0.stdout",
+    "path": "asm198x-faraddr-4510__logs__cc65-4510-opcodes--opcode-space-reference-0.stdout.gz",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stored_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-4510/logs/cc65-4510-opcodes--opcode-space-reference-1.stderr",
+    "path": "asm198x-faraddr-4510__logs__cc65-4510-opcodes--opcode-space-reference-1.stderr.gz",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stored_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-4510/logs/cc65-4510-opcodes--opcode-space-reference-1.stdout",
+    "path": "asm198x-faraddr-4510__logs__cc65-4510-opcodes--opcode-space-reference-1.stdout.gz",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stored_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-4510/logs/cc65-4510-opcodes--opcode-space-version-ca65.stderr",
+    "path": "asm198x-faraddr-4510__logs__cc65-4510-opcodes--opcode-space-version-ca65.stderr.gz",
+    "sha256": "5c22de95322cb1d858e9690b5e3c6e83984c27c5120ff12c49f8dc9679ed2dbc",
+    "stored_sha256": "58667f2d859278bcc87b5dcc66b0feffbe9f7c9139e5932780b6c5f01d16b084"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-4510/logs/cc65-4510-opcodes--opcode-space-version-ca65.stdout",
+    "path": "asm198x-faraddr-4510__logs__cc65-4510-opcodes--opcode-space-version-ca65.stdout.gz",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stored_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-4510/logs/cc65-4510-opcodes--opcode-space-version-ld65.stderr",
+    "path": "asm198x-faraddr-4510__logs__cc65-4510-opcodes--opcode-space-version-ld65.stderr.gz",
+    "sha256": "acf0ea5dbac2ff34c3733f092c38a357dd02d80c0d1edf0e05e8a36b92b62445",
+    "stored_sha256": "cc06c35b61523ff8abc724bb27096bdc195cde4b36591a6c485c8ff3864041c6"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-4510/logs/cc65-4510-opcodes--opcode-space-version-ld65.stdout",
+    "path": "asm198x-faraddr-4510__logs__cc65-4510-opcodes--opcode-space-version-ld65.stdout.gz",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stored_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-4510/report.json",
+    "path": "asm198x-faraddr-4510__report.json.gz",
+    "sha256": "36b6fb945ffd86b45a64d23e733c59ab7274092192b51131b8ec2cf00c24cdbc",
+    "stored_sha256": "b5720a9eb05e2c077bc87a60a0677aaa94824f8c9e513aaa6a0cef8d88f4a581"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-4510-verify.log",
+    "path": "asm198x-faraddr-4510-verify.log.gz",
+    "sha256": "d2889a2be3c5872b246842f95569bd56093915332c0300cc44bf904612a0723f",
+    "stored_sha256": "869bbd4426a372658b8934d0fe9c70d09b1619de7ce16f179ed9f4bfd5237aa1"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-4510.log",
+    "path": "asm198x-faraddr-4510.log.gz",
+    "sha256": "f877f2b9696b4ee3c15ce1fcfd2cc0dee75078cf80212bd12adf6dd3000a0044",
+    "stored_sha256": "54d273aa797260a724487b50ef06854694db7da1e06a1d1e111c448264ddcd7c"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-acquire.py",
+    "path": "asm198x-faraddr-acquire.py.gz",
+    "sha256": "411ebcb4f710a581627128479970ba45aa54cb2c7df8213c934244b5babf6ca6",
+    "stored_sha256": "e5b0c1a0c673439d1078047434a9ac548f331098a5147e1c1a66e757a9a76b20"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-before.log",
+    "path": "asm198x-faraddr-before.log.gz",
+    "sha256": "a2f49528c94a49a85b35fcb942cd1198e549fd7f473e593b6822808fbfdd7fac",
+    "stored_sha256": "f8dd10d62cb5eded7077e18001015457b9d161b6203616715f5a912fe0fa1ecf"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-build.log",
+    "path": "asm198x-faraddr-build.log.gz",
+    "sha256": "6d59db2635dfcda435af56e6a2eabfda3ad819d549ea93988ba5ae8b514683cd",
+    "stored_sha256": "931906dd6f8d71f918ecbc92a8041582cf132608d7e361b45ad76d6884d49b4b"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-candidates/aarch64-apple-darwin/acquisition.json",
+    "path": "asm198x-faraddr-candidates__aarch64-apple-darwin__acquisition.json.gz",
+    "sha256": "a461ad973551f74867aae8794a0306ad9b8c26b814e93e6527c30acefc64b8ad",
+    "stored_sha256": "48a37b1d226a285f85c93730d468cc061c8352ab1c340763cae970ed3487edad"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-candidates/aarch64-apple-darwin/corrupt-archive.json",
+    "path": "asm198x-faraddr-candidates__aarch64-apple-darwin__corrupt-archive.json.gz",
+    "sha256": "d293f944fdd29a56aeb5c4e9e44a8acd99fbbb3d9552a90cc9eb8aad1dc1d6d1",
+    "stored_sha256": "2c928c43c37ce39348c3fbc6565a5657611c706d2f1e253156af5314706ae321"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-candidates/aarch64-apple-darwin/plan.json",
+    "path": "asm198x-faraddr-candidates__aarch64-apple-darwin__plan.json.gz",
+    "sha256": "aae56a69259430e0a5aa83bc036e953570dd25a286fad39cd2da6e485591ef3a",
+    "stored_sha256": "661b4f8b41102a8c6b5a9e47e3857e988a2d096b33152772d922bb94e2b43abd"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-candidates/aarch64-apple-darwin/report.json",
+    "path": "asm198x-faraddr-candidates__aarch64-apple-darwin__report.json.gz",
+    "sha256": "81d7d502cc7f0a5132d4a43da66a2bdb4b97fb6210cb1846d146ef1c4442581f",
+    "stored_sha256": "69235a9703d5caddcbc59ad3117a02efb2cf3145eaa5cd1c4c87dee8e7c2bf47"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-candidates/aarch64-apple-darwin/wrong-bytes.json",
+    "path": "asm198x-faraddr-candidates__aarch64-apple-darwin__wrong-bytes.json.gz",
+    "sha256": "f80061b4dd9a17aef423a0d5b49f9c23e6e54827e55fdbcefa3e4ec46b3e7248",
+    "stored_sha256": "f1cfeba1ac69568ab6ccda1bb4611b134ca3218896658dff23189b213d363eb6"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-candidates/aarch64-unknown-linux-gnu/acquisition.json",
+    "path": "asm198x-faraddr-candidates__aarch64-unknown-linux-gnu__acquisition.json.gz",
+    "sha256": "a461ad973551f74867aae8794a0306ad9b8c26b814e93e6527c30acefc64b8ad",
+    "stored_sha256": "48a37b1d226a285f85c93730d468cc061c8352ab1c340763cae970ed3487edad"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-candidates/aarch64-unknown-linux-gnu/corrupt-archive.json",
+    "path": "asm198x-faraddr-candidates__aarch64-unknown-linux-gnu__corrupt-archive.json.gz",
+    "sha256": "82cc3298ec0de54957a653ff1ad769a06adc7ecf95a36894ea9d1bf3b618952d",
+    "stored_sha256": "78f26c2b718ffe92392186d10da0b41a3e2b27688e1e73efabf757ee84f2ef45"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-candidates/aarch64-unknown-linux-gnu/plan.json",
+    "path": "asm198x-faraddr-candidates__aarch64-unknown-linux-gnu__plan.json.gz",
+    "sha256": "998be1811c772cee8ae18022d1a04b7f97288d243a80ccf40687856f72e44638",
+    "stored_sha256": "fdd18d90b7a4a77c5a294c79c9ca267d9e824584bd60d3cab2066889bf23a883"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-candidates/aarch64-unknown-linux-gnu/report.json",
+    "path": "asm198x-faraddr-candidates__aarch64-unknown-linux-gnu__report.json.gz",
+    "sha256": "92a7a0e6c37b6407759e3b535359024c16bdae5f90a8350f60c613a0875c1c6c",
+    "stored_sha256": "cc7e4c40db084e639146be4e1e378e84ad34cab60e8d9962e5160b6eac3d69fe"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-candidates/aarch64-unknown-linux-gnu/wrong-bytes.json",
+    "path": "asm198x-faraddr-candidates__aarch64-unknown-linux-gnu__wrong-bytes.json.gz",
+    "sha256": "90d43a868d333900a447c78ab5f6319cfbab43f23e0c763884dd0c6123146915",
+    "stored_sha256": "711200a1315ccac6404352625d0e9d1233d524ba4decf505d28238e4716c4a12"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-candidates/x86_64-unknown-linux-gnu/acquisition.json",
+    "path": "asm198x-faraddr-candidates__x86_64-unknown-linux-gnu__acquisition.json.gz",
+    "sha256": "a461ad973551f74867aae8794a0306ad9b8c26b814e93e6527c30acefc64b8ad",
+    "stored_sha256": "48a37b1d226a285f85c93730d468cc061c8352ab1c340763cae970ed3487edad"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-candidates/x86_64-unknown-linux-gnu/corrupt-archive.json",
+    "path": "asm198x-faraddr-candidates__x86_64-unknown-linux-gnu__corrupt-archive.json.gz",
+    "sha256": "0b4d2d082c9b8af180fc479d18fb2de3e8d2e64a19155e533d87f86ef97ccf07",
+    "stored_sha256": "aefa3bad527ce5fdaaeef06ca85457ba22e437d2feaa1a41032114d6b83e5582"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-candidates/x86_64-unknown-linux-gnu/plan.json",
+    "path": "asm198x-faraddr-candidates__x86_64-unknown-linux-gnu__plan.json.gz",
+    "sha256": "998be1811c772cee8ae18022d1a04b7f97288d243a80ccf40687856f72e44638",
+    "stored_sha256": "fdd18d90b7a4a77c5a294c79c9ca267d9e824584bd60d3cab2066889bf23a883"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-candidates/x86_64-unknown-linux-gnu/report.json",
+    "path": "asm198x-faraddr-candidates__x86_64-unknown-linux-gnu__report.json.gz",
+    "sha256": "ecf5b35235c78ce712e6d4bbfa2acc44e547060cf296b2db6f1dade88f956d43",
+    "stored_sha256": "f419fb92b67d65a522d9b79dae5240f7a93a62574e729b94b47ac768704f96cd"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-candidates/x86_64-unknown-linux-gnu/wrong-bytes.json",
+    "path": "asm198x-faraddr-candidates__x86_64-unknown-linux-gnu__wrong-bytes.json.gz",
+    "sha256": "ca3e4ab9025e6d765ab1ee1e9bb6d23bd52e2deeb762f9a6c254c15efe7eb30d",
+    "stored_sha256": "8682bc100d1acc184eef4045178b8b937d30859fe373d3072be798c39b7f8ec5"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-clippy.log",
+    "path": "asm198x-faraddr-clippy.log.gz",
+    "sha256": "12d1022ff4a0b5eb4d580ada609fcfa2513bb02c9218da418f15ba9eb316ccfc",
+    "stored_sha256": "653d26cd7ecf5ad28b1cecd71eae706da817f30f48586d9ca5a152f8f5ac54fb"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-compare.log",
+    "path": "asm198x-faraddr-compare.log.gz",
+    "sha256": "ceef89a7c621959dde8a19555b06fd3c9fd6671e4b9922934c280c54dc946b98",
+    "stored_sha256": "483cdb7625a3d9f37c4778f85b37f00f628e5946b0d046dc91194761594fa73f"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-docs.log",
+    "path": "asm198x-faraddr-docs.log.gz",
+    "sha256": "850fb02c80b3af4d7c04ac1360de437f687bcf6b9a2f733160e4bd10ce98a165",
+    "stored_sha256": "07db6cd17b1494d34306021558faa38db109b1fcdf8974ce016977cf096136f0"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-ecosystem.log",
+    "path": "asm198x-faraddr-ecosystem.log.gz",
+    "sha256": "754302d8322aefbaf318b8f463f515d4df234338e1ac6d8cccf55b16c8f3f504",
+    "stored_sha256": "c05ce9978d221760a0a4796ab4444fb3d3dd91bc255a84d32fefdb6ac7ef9689"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-extra/file-after.json",
+    "path": "asm198x-faraddr-extra__file-after.json.gz",
+    "sha256": "79ee194447c397cb018956e06bab7887e158bb9b5e741a936831eb8c0c4aacbb",
+    "stored_sha256": "523e80795ea3cbef87780b9b185758c9e02c62b8eb69d4f3170f8688de26a20a"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-extra/file-before.json",
+    "path": "asm198x-faraddr-extra__file-before.json.gz",
+    "sha256": "c94eea0f3bfa5e59687ba39bfda50c6567887c93ea184f2f651ee81107a7f64f",
+    "stored_sha256": "56c25c3fbfa55ca64bba27a7de99be16b61c5acc1e8f9d026e31d5309cbc786c"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-extra/file-native.json",
+    "path": "asm198x-faraddr-extra__file-native.json.gz",
+    "sha256": "98bf6837aff458ab5f7ac1d9eccc4eac144e74436f36bd8441c372f2f008fd9f",
+    "stored_sha256": "1950951ecd37cb4bdac70a151b2bef61ec23b1d68266edd61ae277e8a3fb10ca"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-extra/generated-after.json",
+    "path": "asm198x-faraddr-extra__generated-after.json.gz",
+    "sha256": "d181ed7f55d98c1c550e1d7d54621952bca5ba41da09bd2230738a80edbc1271",
+    "stored_sha256": "2d7776d35fb0c3301620377a00509b95f14b0195c6f09bb5484b49cbd3ab66b9"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-extra/generated-before.json",
+    "path": "asm198x-faraddr-extra__generated-before.json.gz",
+    "sha256": "ef802bf7178fe3ccdcd238364dc7f7ba6df0612e45e11fde90cfda8cf421bcdd",
+    "stored_sha256": "271f4a37575bd30ae44c63c9dba8883e75604c5696e8f0fab845d0737403d762"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-extra/generated-native.json",
+    "path": "asm198x-faraddr-extra__generated-native.json.gz",
+    "sha256": "747104b55e94a115957079155f22bbdab65d20942c7240604771ab58a2e2ed4b",
+    "stored_sha256": "bd113d2b5740859a28b68179ef8b2e120c685ca75da6a2fdab5732ea849743ac"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-extra/repeat-after.json",
+    "path": "asm198x-faraddr-extra__repeat-after.json.gz",
+    "sha256": "9accfafb0b5551c83c826a1e404ac3ebc633ac9eca994ea67d26d74780ec4b77",
+    "stored_sha256": "6b202fab36c570c925aa44d3d8dee634af704a572c30587dcb9dbacb3f62a7ec"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-extra/repeat-before.json",
+    "path": "asm198x-faraddr-extra__repeat-before.json.gz",
+    "sha256": "7a50ae55bd96f505dc13111684408662a28b4da2a8b25a3e3cbf6e30133b0d2a",
+    "stored_sha256": "a4a52dc3a2e9ddd0fedba0be0c5676bec7578b0efa4cb52caff55492be0c4b19"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-extra/repeat-native.json",
+    "path": "asm198x-faraddr-extra__repeat-native.json.gz",
+    "sha256": "7fc97f7c9677129f7496df3b3d163948c4f10f9650e5a95c6c449811d8aecc9c",
+    "stored_sha256": "223ccb692e8b8cebac850a9cb763d3e448353cb6e8e6be78a8dae31d974dd05f"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-extra/scalar-after.json",
+    "path": "asm198x-faraddr-extra__scalar-after.json.gz",
+    "sha256": "9b82946d078c53378dc7e8ac6a87ea4bbde52eb167cba6e0a17ba9e1eac02116",
+    "stored_sha256": "77c8cdb08aeed78dd102d3d96650911187007dbcd5cf0181b3f0f8d1ad0fb954"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-extra/scalar-before.json",
+    "path": "asm198x-faraddr-extra__scalar-before.json.gz",
+    "sha256": "06e4070ccd08e09b2bc2b4084044ff2640f749bee773203da48324618f47697a",
+    "stored_sha256": "43f76e0d6b39e6050858477b20ae8465606cc546633748327295bdb01159a12e"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-extra/scalar-native.json",
+    "path": "asm198x-faraddr-extra__scalar-native.json.gz",
+    "sha256": "4a3dbcf6338022a34c94961626b140f9c4ffbdbe4a04bf67601f75605cff927e",
+    "stored_sha256": "06d615564c04e61fe2f734b497190e48176a8e1197fbf5aa4736135b31e64728"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-extra/summary.json",
+    "path": "asm198x-faraddr-extra__summary.json.gz",
+    "sha256": "cbacf71d7cef146b12ef0d433ca2530b9c8338c615ba77c249876a88009161a3",
+    "stored_sha256": "b86d4fc12068c21991adb45e2741c3c1037818d2852b9505c5cc33b0b0899b13"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-extra.log",
+    "path": "asm198x-faraddr-extra.log.gz",
+    "sha256": "6bb71e8c58854f3812c1d19ae52807001919632036f9bb326518d7dfe5a689ca",
+    "stored_sha256": "db72291fc881794efc39d2aae6accac961e0395681ed7e8a96a50751419fd809"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-extra.py",
+    "path": "asm198x-faraddr-extra.py.gz",
+    "sha256": "050eba2ac1044100ce16ab990f2b75343aa73d5e0b6eb74103fb6e4654170d90",
+    "stored_sha256": "35eb464c630dd1ee7511b1fab7e69fcc3b6ca1d10e7f9bcedebb0030102f131f"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-fetch-main.log",
+    "path": "asm198x-faraddr-fetch-main.log.gz",
+    "sha256": "a1dd147c26073b34656474f99e059b6ddce8780e2d8d61b6cf0c552cabf57d27",
+    "stored_sha256": "c7dd43ceb64782e445c6522ce5adfaff9955a0c02c4ff05d7e9000acda1256b7"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-fmt.log",
+    "path": "asm198x-faraddr-fmt.log.gz",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stored_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-focused-final.log",
+    "path": "asm198x-faraddr-focused-final.log.gz",
+    "sha256": "bf9a2460804e8175c5782a1b5f275a1375ae90f6fd3742b1290b8687c2e3759a",
+    "stored_sha256": "788608afc8959685d654e51808c14120c9c40726509e3bd45deebf8b1ab6aeac"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-focused.log",
+    "path": "asm198x-faraddr-focused.log.gz",
+    "sha256": "8d8cb1712e81b2701af8d71eab5a6e3b58d09eafcaba0d6c987eb5e1bec736dc",
+    "stored_sha256": "192643ccf8bb56e53e8938ae5a841ec37f6f12ea603d9bd02d9b04b0943e63a9"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-ledger.log",
+    "path": "asm198x-faraddr-ledger.log.gz",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stored_sha256": "9ceffb7310338057cfe71a4ae1e2c98d2c485d81cdef906532a801f457a38d64"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-local-package/corrupt-archive.json",
+    "path": "asm198x-faraddr-local-package__corrupt-archive.json.gz",
+    "sha256": "d293f944fdd29a56aeb5c4e9e44a8acd99fbbb3d9552a90cc9eb8aad1dc1d6d1",
+    "stored_sha256": "2c928c43c37ce39348c3fbc6565a5657611c706d2f1e253156af5314706ae321"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-local-package/corrupt-archive.log",
+    "path": "asm198x-faraddr-local-package__corrupt-archive.log.gz",
+    "sha256": "c39f39cdd16e3e2d4efa9776c921a468ab9136f59cf6412765fe883cd424b224",
+    "stored_sha256": "53f834ce5a9f2c8da053d1c2549d96c6b365fb891873ee1ef6390deed9b8bebe"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-local-package/predecessor.json",
+    "path": "asm198x-faraddr-local-package__predecessor.json.gz",
+    "sha256": "295193bea97feb7831bc951573ed879bbc63b51c958bad5456fb4bff00022d54",
+    "stored_sha256": "fa05a0e0bf237be7ada4e9bcdcfa65cb34f736ebe70f594f4b9ba7561266fae2"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-local-package/predecessor.log",
+    "path": "asm198x-faraddr-local-package__predecessor.log.gz",
+    "sha256": "7d54fa60538106da4042dfa2bd74cfb9cea1434e1b0b1116935ea3c1650d2dc5",
+    "stored_sha256": "05393de1f73cfe42d57fbb4500347b1a96b4d20a63e46c618c045e749bdaaf52"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-local-package/report.json",
+    "path": "asm198x-faraddr-local-package__report.json.gz",
+    "sha256": "43952a6aa28cea576e569b1b18cd8759b9727cf097180f99b1be6c43b63651a8",
+    "stored_sha256": "dff7d5569b1f73b1412c45ef92999e1b378fad70ad81ed92b71175813c813325"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-local-package/report.log",
+    "path": "asm198x-faraddr-local-package__report.log.gz",
+    "sha256": "6c2046c5a849c305c482569e3544f59e7b60900f34ac2a8e285efd5dbcb6c893",
+    "stored_sha256": "ba29f995c756e77c51c7631bcc562630600c6c4145a413c4fe8c903dff339b7a"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-local-package/wrong-bytes.json",
+    "path": "asm198x-faraddr-local-package__wrong-bytes.json.gz",
+    "sha256": "3eb5599e65e58cf7e2762f34c72b772ed7c593f432c08af7c7bc63a10ad8804c",
+    "stored_sha256": "e76a22badbb2245350c45e83ba331ffafbd413a92a01d66526342899f1c0ae43"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-local-package/wrong-bytes.log",
+    "path": "asm198x-faraddr-local-package__wrong-bytes.log.gz",
+    "sha256": "08e4d260f049a2bd9db256b0d69dbe1444934dcdfae3cb5b21239fccbed3f419",
+    "stored_sha256": "f915fb0eb2c14e86b218c4e30593d73d07fb3c3c26da664eb16e554f1ffc72f0"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-node-focused.log",
+    "path": "asm198x-faraddr-node-focused.log.gz",
+    "sha256": "6eb1cefb81eb2ca4d3bf921d3fe9ebfcf809f465888d7fd7556641de5383e314",
+    "stored_sha256": "f569b88c46c9c3238691d9cdbe35b35541ac32de00bb6b46ea38663670e2ef4d"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-node.log",
+    "path": "asm198x-faraddr-node.log.gz",
+    "sha256": "3fdc8c480b3797d99d704f4af87e1c465020fb8c459dc599817a9a414bb98702",
+    "stored_sha256": "829ec14f08d9ecc90b3126ada39a60d2fc2e60d84b971d5fafff47b7aae9f90f"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-plan-commit.log",
+    "path": "asm198x-faraddr-plan-commit.log.gz",
+    "sha256": "cc33c8d819c99a534bb1141a00fe75962cd65b4d2fddf1b96eb8e9f314c0a5f5",
+    "stored_sha256": "8f5978b33776f1c12fd838670521840005c3abc99c4187752ce28b2cebcd47ca"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-plan-push.log",
+    "path": "asm198x-faraddr-plan-push.log.gz",
+    "sha256": "8bd92247e916a432afaa6cf0d848d95f3a3746317a9acd60c4111e8c2d7a300d",
+    "stored_sha256": "4c853ace3faee2637482cf63b3e32a5ac7a44456f312adc6ab9399a527a33f69"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-pr.md",
+    "path": "asm198x-faraddr-pr.md.gz",
+    "sha256": "3446168717ed1fcd9949cc6811cbab84f4f1713400f366735a4deec0e99a1754",
+    "stored_sha256": "eb0549659d21212baede6342d625b65059d48bc3e0493d83bf00088446000c14"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-producer/identity.json",
+    "path": "asm198x-faraddr-producer__identity.json.gz",
+    "sha256": "63ef66ba1e6d391c4b1cc85194e5d3ab48873246fe9bf769e4e2e753596c6cf7",
+    "stored_sha256": "71bf463ecf5480b737e893427c18718be5d4391da13dddd00ef5f54394c4cf3d"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-release-final.log",
+    "path": "asm198x-faraddr-release-final.log.gz",
+    "sha256": "0b5fe2277fd2b29cc111b76604c482f8ec516047dbc0954657203c5614f4e4db",
+    "stored_sha256": "71df4873fdef16067efa62d2f5ccfa03cc2b8976e622bb39935813b645ea1e60"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-release.log",
+    "path": "asm198x-faraddr-release.log.gz",
+    "sha256": "1f2fe4ce181d2a1c437bcefa8c1c312045856c43dba4b08bf50e8edbb1099500",
+    "stored_sha256": "085d9673ec4a31f2c7e9400f80766fdf13790810ce63abb3e1ea0fab8d3cb94f"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-replay/alias-after.json",
+    "path": "asm198x-faraddr-replay__alias-after.json.gz",
+    "sha256": "9041ff5a3af508e94f39757327d14a4ad89c58a4135a628ef9799db1e3240983",
+    "stored_sha256": "9d4312539e1ad8d9165866e1b343a1fc196e4d457b26f21ffe1b3e8f3c90c118"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-replay/conditional-context-after.json",
+    "path": "asm198x-faraddr-replay__conditional-context-after.json.gz",
+    "sha256": "a76422c74a8eaf532b80f546f3ede74d9346bb1666f44541a5c8b50839c8402d",
+    "stored_sha256": "aeb91a128ef44cdaf733ddc2a6978f36acc926416dcfc6578d9486c592cdd3c0"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-replay/data-context-after.json",
+    "path": "asm198x-faraddr-replay__data-context-after.json.gz",
+    "sha256": "94c0b45c0d907df1ce75c7838437fe7cc46e24a085299d11c51886961f239fe0",
+    "stored_sha256": "d529b6b3bd540bf1f3ee9a9be48c9aba48eedb45605ac951f5c62106f01d0401"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-replay/external-after.json",
+    "path": "asm198x-faraddr-replay__external-after.json.gz",
+    "sha256": "0d1be8ec80603864083cd2267765452baa0f9afc37098b87cc8cccf74f59a41c",
+    "stored_sha256": "5322c5a989d279aefc914f2f106e83d4c983529db779c61d5a2a7c651ffae65b"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-replay/linked-faraddr-after.json",
+    "path": "asm198x-faraddr-replay__linked-faraddr-after.json.gz",
+    "sha256": "18ff7f64604fc287904df127740d1787226f2e93916183679a83d53fa2f695fe",
+    "stored_sha256": "cbc41963812695d39ad752ad3e0af8356bde8bc4b942e4580e23fbeb1654c0ba"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-replay/numeric-consumers-after.json",
+    "path": "asm198x-faraddr-replay__numeric-consumers-after.json.gz",
+    "sha256": "6686bf6aa9d2965690f385bc455a6119fa8c0fe0f25240fb078f5748177f660e",
+    "stored_sha256": "c2960aa1ff89fe6907873b70beb2e0eadf87d0554919aa0a8e04ae7a502bcdbe"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-replay/query-admission-after.json",
+    "path": "asm198x-faraddr-replay__query-admission-after.json.gz",
+    "sha256": "33a517375a28482872637b3dd4608a722f8250f499f9a1da0c22c2b1ff82575c",
+    "stored_sha256": "6b4f195ba1ce74e53940926e02f30238355e6755b9fe4117286ccdd2010d2512"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-replay/query-extended-after.json",
+    "path": "asm198x-faraddr-replay__query-extended-after.json.gz",
+    "sha256": "7b7af1f864204d24872928bd94347ff82dce4061fb00af10c960d1ff6811c3ac",
+    "stored_sha256": "134370eea219f16b4f6b15d20f6e071c87e1085e3dcef2124ca222dfbd4cc8bf"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-replay/query-original-after.json",
+    "path": "asm198x-faraddr-replay__query-original-after.json.gz",
+    "sha256": "10f162b787806a456b99e087d44f684bbd9f9279475e67ff3361bb87c633a31c",
+    "stored_sha256": "8a8f38592d908f092f4b38eb61401d0b3ec544dedee00b1a0f99950dabd77e31"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-replay/query-short-circuit-after.json",
+    "path": "asm198x-faraddr-replay__query-short-circuit-after.json.gz",
+    "sha256": "8bc30790576a2fe0f7c08f9ab3d6cdf4da5363500bf90d17479e0e333e4a89a4",
+    "stored_sha256": "68d4925c9da67e8dc1ed8b8ec3f3c0931841d63e4e7c841beabeeecbcad0536c"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-replay/scope-deferred-followups-native-after.json",
+    "path": "asm198x-faraddr-replay__scope-deferred-followups-native-after.json.gz",
+    "sha256": "dd7cae75f04de5989d49516d2614e1489f32f5b3d9ffab8b28546eb283270d25",
+    "stored_sha256": "86c4a2c28c3b2c3b32a486d645e5fb5d7689ef17b6f91d52176175d843b0659e"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-replay/scope-native-completed-phase-probes-after.json",
+    "path": "asm198x-faraddr-replay__scope-native-completed-phase-probes-after.json.gz",
+    "sha256": "189a6f1b0fe4ec6b9e9972e5ea29b064a3ed2429e60420a2fe6445cf6b9d3026",
+    "stored_sha256": "94b6b4a37953d548ca2c92e99eb3a1e2b64826026aea56c7f0e4ae42b265e4d6"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-replay/scope-native-negative-memory-probes-after.json",
+    "path": "asm198x-faraddr-replay__scope-native-negative-memory-probes-after.json.gz",
+    "sha256": "bc58d97d493d66ca294a1822c0f71d2a07757cfde9c8968c361d0a91df46fd66",
+    "stored_sha256": "8eb2a7dc9065aee073e36f455d6c861a5825beccd7375e761bf37369c5005c09"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-replay/scope-native-phase-probes-after.json",
+    "path": "asm198x-faraddr-replay__scope-native-phase-probes-after.json.gz",
+    "sha256": "416d277cef491a15833434fe80d0b09081e297c358bc8ee5ecd1abdce3930703",
+    "stored_sha256": "82b4678fbb260bb5c77f8b9066998e3f1c5d5c2d306cd343a5081cbee1d42c35"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-replay/scope-native-query-probes-after.json",
+    "path": "asm198x-faraddr-replay__scope-native-query-probes-after.json.gz",
+    "sha256": "0f8c453f54774496d842ce4068217ea0cdc0f256eb5cde41112abd5ecda509f9",
+    "stored_sha256": "5b639a522e297095a2c9e6b2c0939b3d256228e3eb60e53a289c0fc6de61c412"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-replay/scope-native-stream-probes-after.json",
+    "path": "asm198x-faraddr-replay__scope-native-stream-probes-after.json.gz",
+    "sha256": "34fdf9d2ebcf7d96e4d08fb2e1e800efa65d2d8b571f9c8cdaffe907ccb21323",
+    "stored_sha256": "17f040d777068de37f2d08ff12ae145817b1f2fddb1cf46ed8703aacbe3df4b2"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-replay/scope-native-width-probes-after.json",
+    "path": "asm198x-faraddr-replay__scope-native-width-probes-after.json.gz",
+    "sha256": "6f26a0652ff3c6309f7fe5f0f765fe067dd57323756cd3f58bad061bcceb8418",
+    "stored_sha256": "3497b21ea81edf1efe46f4b5ee22b882d27298a814c1056d05dbd70864ae37da"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-replay/source-constancy-after.json",
+    "path": "asm198x-faraddr-replay__source-constancy-after.json.gz",
+    "sha256": "ade026f3e5813bfa30885fb669163310faf6699d423f86f6671877a7cfeac522",
+    "stored_sha256": "29df8a0edba64e3133fc563e7d985390f3da0494c80011df81f2a477d812ff1b"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-replay/strings-consumer-native-after.json",
+    "path": "asm198x-faraddr-replay__strings-consumer-native-after.json.gz",
+    "sha256": "bc4a7c6c01f00c364257bbad1a1ff515900f4a2b360d4e1c1ec61afd343de366",
+    "stored_sha256": "7ee842193b2b92c0ea89d2c9fd7938c9af5ff533751da7658244226ffd963e2f"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-replay/strings-flat-native-after.json",
+    "path": "asm198x-faraddr-replay__strings-flat-native-after.json.gz",
+    "sha256": "3d38e3a3e5c373351f46360e8d5c3e7b8d2fad8ed151460bfb3ab1d38a985280",
+    "stored_sha256": "f99969271629d2413451954c5e610a2146703c4222393284a4a9b4a7d2677ccc"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-replay/strings-guard-native-after.json",
+    "path": "asm198x-faraddr-replay__strings-guard-native-after.json.gz",
+    "sha256": "80c270ee4303eaea3ebcf68ac81834deb0117c42c014c1424ea416049fe30399",
+    "stored_sha256": "fe40b9d12aadf7f2c877af374f677671310dd5ad493ffb4da9713386414dce48"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-replay/strings-index-scope-native-after.json",
+    "path": "asm198x-faraddr-replay__strings-index-scope-native-after.json.gz",
+    "sha256": "c7ea662f91a94622e0e7bb3e38ae279984e81fcc84141ae3c67b6d68635f12e1",
+    "stored_sha256": "307863a5226e44a16cd0bd9be51809e89ba7bafb3a0449f78c31bd1a8c9e4dd4"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-replay/strings-lifetime-native-after.json",
+    "path": "asm198x-faraddr-replay__strings-lifetime-native-after.json.gz",
+    "sha256": "12a8cb00004c9c4617957ab5ead1becf223626fcea88a6f5c8ecdbab9707929c",
+    "stored_sha256": "9720e7df34c3f7d19e897566892c60953c2ea0051ceb3f34a94a3fd0d49a90e7"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-replay/strings-numeric-string-arity-native-after.json",
+    "path": "asm198x-faraddr-replay__strings-numeric-string-arity-native-after.json.gz",
+    "sha256": "450fadfc4df35a74ab7d84c7fc7d40333adcb8e572171fc28c93ba4082397675",
+    "stored_sha256": "baad37953f64877cbab3b6721ed2c4d5f8d54721577d4adf25090bbe2b11cc7c"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-replay/strings-text-consumer-native-after.json",
+    "path": "asm198x-faraddr-replay__strings-text-consumer-native-after.json.gz",
+    "sha256": "f507a59c9505d83e14d2374b0aaf4ba9d859c6b2dbf3eff018adf3d754b3c12a",
+    "stored_sha256": "6dfce821db49f56120915e390db5457d20dead5e6311a8c994fe80b900da4aff"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-replay/summary.json",
+    "path": "asm198x-faraddr-replay__summary.json.gz",
+    "sha256": "736b9f0deffadf335740ce6be36ed720fd3ee1ea6c2911e693fff570fd4ee43a",
+    "stored_sha256": "994eea87392dbf1d68f8e2fafdd47706e737da6da1efe242ad671f4bdbf7d07f"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-replay/text-assertion-native-after.json",
+    "path": "asm198x-faraddr-replay__text-assertion-native-after.json.gz",
+    "sha256": "1c408e3bdb8b580c4e7ba8e29f856982c20a8a6acb6bdeef242e0b8f1e83b676",
+    "stored_sha256": "4da5941dffa811726f0dc36ec041c328a14a8f35ad01a600098eb366a20fd677"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-replay/text-native-after.json",
+    "path": "asm198x-faraddr-replay__text-native-after.json.gz",
+    "sha256": "e7b28d7e1d5457b8c1dc6a75782f374610e92ff70fd9cddc5febdea72eb2a027",
+    "stored_sha256": "1d11162c91b468164dce05d77b363c37518402e9f2a7a0a0b6b80920159ff527"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-replay/tokens-after.json",
+    "path": "asm198x-faraddr-replay__tokens-after.json.gz",
+    "sha256": "92de8353257628bad06d62e9ed048258ab7bf614b77e978d77c5cd6748b3e5d7",
+    "stored_sha256": "1ed7f2264ef9e7062ba215f6f09e1562b6bc34e00f2a7d07208db53d3b506821"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-replay/visibility-after.json",
+    "path": "asm198x-faraddr-replay__visibility-after.json.gz",
+    "sha256": "60d1e0b06ab32b88d4f71c2d9dfd42f21f46b45e97bb44686ebf456626994fcf",
+    "stored_sha256": "6391632cc8eba39b5678bab78d7c5ec7a438f9a1167db9429876750a72520664"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-replay-v2.log",
+    "path": "asm198x-faraddr-replay-v2.log.gz",
+    "sha256": "0871a252096198060c4e5b24517800e0ff501a1f0e1c2f52dfa28b2da4cb1db7",
+    "stored_sha256": "212530a377f299da4c81f2f1c9b8d4e478b91e8d9ab431eca026f46f9fdd7d2b"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-replay.log",
+    "path": "asm198x-faraddr-replay.log.gz",
+    "sha256": "65fcb3dd06932964f69d24e3b3dd458086cacdfb420bd37093654d5578799df6",
+    "stored_sha256": "5ce303b278711b850f6b5b6683426c2e15663b7bb0c554f0e36d32fe44d17b94"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-replay.py",
+    "path": "asm198x-faraddr-replay.py.gz",
+    "sha256": "0368254b3bd2f9c6d55ff38616d3795eb2051cbee2099d5f67ed824d120c18d9",
+    "stored_sha256": "2bd7b5ead534cecbfb3866f8919c5d0bea360fee4a5391cf8dd20c8c2acd7ce8"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-retain.py",
+    "path": "asm198x-faraddr-retain.py.gz",
+    "sha256": "bf4eeef14e5fe664563a4cbc3dbd6d5ccf6874761a5846271f01279aed12f565",
+    "stored_sha256": "3eff27f3821cd47ec9393a1e7bc430fb980c50678b522ab3b149c5e778a7e7e0"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-versions.log",
+    "path": "asm198x-faraddr-versions.log.gz",
+    "sha256": "86573d0aa21805a5bc8f1f7d113a12d243521d1907836723f37df91a52d66bd6",
+    "stored_sha256": "25506c95e0d09432e4146d299737f88718715841ba451042ab91f1d6270ee492"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-workspace-diagnostic-expectation.log",
+    "path": "asm198x-faraddr-workspace-diagnostic-expectation.log.gz",
+    "sha256": "73b3459e51d91ed32a255dae9401b87e5b6293e22eda756f9b25ee2bb878d82e",
+    "stored_sha256": "b6352ed418b51c848e4c67259f1e5da8d73ee946f623aa83b00329a8d9d18e02"
+  },
+  {
+    "source": "/private/tmp/asm198x-faraddr-workspace.log",
+    "path": "asm198x-faraddr-workspace.log.gz",
+    "sha256": "95b755c54d29cedfbb9f4c92c5d7da91a75adaebc10e11ad5df86b8f003bf773",
+    "stored_sha256": "f79273ef25257a00b373a2e4d6e79ccbae7c95d514c32e55752696f5fc7b2c7c"
+  }
+]
