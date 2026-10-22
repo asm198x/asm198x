@@ -16,15 +16,21 @@ verdict per case, regenerated when a tool moves.**
 - **One current version per tool**, pinned in `ops/arbiter/Dockerfile` and
   listed in `ops/arbiter/identities`. That file is the only list of versions in
   use; the image verifies itself against it.
-- **One verdict per case.** A case is a suite, a case label, a tool and the
-  source text. Recording it again replaces its verdict.
+- **One verdict per case.** A case is a suite, a case label, a tool, a
+  dialect and the source text. Recording it again replaces its verdict.
 - **A version bump regenerates the corpus.** Bump the pin, publish the image,
-  run growth. Every case is re-recorded, and an unfiltered run prunes any
-  verdict a current tool did not re-record. The pull request's diff is the
-  review: each moved answer is either a bug of ours the old version hid, or the
-  reference changing behaviour.
+  run growth. Growth refuses to start unless every installed tool reports
+  exactly the line `ops/arbiter/identities` lists. Every case is re-recorded,
+  and each flush notes in a manifest what it recorded; an unfiltered run then
+  prunes only what that manifest shows was superseded (old-version verdicts in
+  a group the run re-recorded, and curriculum verdicts for a program's previous
+  digest). A suite the run did not reach loses nothing. The pull request's diff
+  is the review: each moved answer is either a bug of ours the old version hid,
+  or the reference changing behaviour.
 - **Files are canonical.** Sorted by case and written whole, so the same facts
   always produce the same bytes. `cargo xtask corpus --check` enforces it in CI.
+  Every rewrite takes a lock, because live tests run in parallel and several
+  flush the same file.
 - **History is git's.** Nothing in the file records what it used to say.
 
 Each verdict still carries its tool's version self-report, so a reader can see

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Does this image reproduce the identities the corpus is keyed on?
+# Does this image hold the versions ops/arbiter/identities says are in use?
 #
 # The probe per tool matches the harness's own table
 # (crates/asm198x/tests/support/tool_identity.rs): most take `--version`, a few
@@ -25,7 +25,10 @@ while IFS=$'\t' read -r tool want; do
     [ -n "${GITHUB_ACTIONS:-}" ] && printf '::error title=arbiter identity::%s is missing\n' "$tool"
     fail=1; continue
   fi
-  got="$(probe "$tool" | grep -F "$want" | head -1)"
+  # A whole line, trimmed, exactly equal: the same rule the live suites use
+  # when they record a verdict's version, and `cargo xtask grow` uses as its
+  # gate, so all three agree on what "this version" means.
+  got="$(probe "$tool" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//' | grep -Fx -- "$want" | head -1)"
   if [ -n "$got" ]; then
     printf '  ok        %s\n' "$tool"
   else
@@ -44,10 +47,10 @@ done < "$ids"
 
 if [ "$fail" -ne 0 ]; then
   echo
-  echo "This image does not reproduce the corpus's arbiter identities. Verdicts"
-  echo "recorded here would key separately from every verdict already held, so"
-  echo "growth must not run until the pins match."
+  echo "This image's tools are not the versions ops/arbiter/identities lists, so"
+  echo "growth must not run in it: it would record versions the repository does"
+  echo "not say it uses. Bump the pins and identities together."
   exit 1
 fi
 echo
-echo "every arbiter identity matches the corpus"
+echo "every tool reports the version ops/arbiter/identities lists"

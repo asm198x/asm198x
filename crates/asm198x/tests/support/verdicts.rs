@@ -123,10 +123,26 @@ impl Recorder {
 
     /// Write the recorded verdicts into the per-CPU corpus files, each replacing
     /// the corpus's answer for its case. Returns how many were new or changed.
+    ///
+    /// Under `cargo xtask grow` (which sets [`verdict_corpus::MANIFEST_ENV`]),
+    /// also notes what was recorded, so growth prunes only what this run
+    /// actually reached.
     pub fn flush(self) -> std::io::Result<usize> {
+        let manifest = std::env::var_os(verdict_corpus::MANIFEST_ENV).map(PathBuf::from);
         let mut changed = 0;
         for (cpu, verdicts) in self.pending {
-            changed += verdict_corpus::merge(&corpus_path(&cpu), verdicts)?;
+            let path = corpus_path(&cpu);
+            if let Some(manifest) = &manifest {
+                let file = path
+                    .file_name()
+                    .map(|n| n.to_string_lossy().into_owned())
+                    .unwrap_or_default();
+                verdict_corpus::append_manifest(
+                    manifest,
+                    &verdict_corpus::Recorded::of(&file, &verdicts),
+                )?;
+            }
+            changed += verdict_corpus::merge(&path, verdicts)?;
         }
         Ok(changed)
     }

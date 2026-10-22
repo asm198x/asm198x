@@ -21,6 +21,7 @@ on:
   pull_request:
     paths:
       - ops/arbiter/**
+      - rust-toolchain.toml
       - .github/workflows/arbiter-image.yml
   workflow_dispatch:
 
@@ -30,6 +31,9 @@ concurrency:
   group: arbiter-image-${{ github.event_name == 'pull_request' && github.ref || 'publish' }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
+# `packages: write` is for the publish steps, which are skipped on a pull
+# request. A pull request from a fork gets a read-only token regardless, and
+# one from this repository is opened by someone who already has write access.
 permissions:
   contents: read
   packages: write

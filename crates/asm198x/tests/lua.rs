@@ -259,6 +259,17 @@ fn lua_reference_probes() {
         };
         verdicts.push(verdict);
     }
+    if let Some(manifest) = std::env::var_os(verdict_corpus::MANIFEST_ENV) {
+        let file = corpus_path()
+            .file_name()
+            .map(|n| n.to_string_lossy().into_owned())
+            .unwrap_or_default();
+        verdict_corpus::append_manifest(
+            std::path::Path::new(&manifest),
+            &verdict_corpus::Recorded::of(&file, &verdicts),
+        )
+        .expect("note what growth recorded");
+    }
     verdict_corpus::merge(&corpus_path(), verdicts).expect("record observed reference bytes");
     fs::remove_dir_all(dir).expect("remove own probe directory");
 }

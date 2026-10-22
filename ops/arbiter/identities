@@ -1,14 +1,12 @@
-# The behavioural identity each arbiter must report, exactly as the verdict
-# corpus records it. A verdict is keyed on this string, so a container that
-# reports anything else forks the corpus rather than adding to it.
+# The version line each reference tool reports, for the pins in the Dockerfile.
+# This file is the list of versions in use: every verdict records the line of
+# the tool that answered it, and `cargo xtask grow` refuses to run with any
+# other (decisions/verdicts-track-current-tools.md). Change a pin and its line
+# here together; the image build checks they agree.
 #
-# Captured from the corpus, not typed from memory:
-#   jq -r '.arbiter | "\(.tool)\t\(.identity)"' verdicts/*.ndjson | sort -u
-#
-# `vasmm68k_mot` reads 2.0f, not the 2.0b the corpus was first built on:
-# upstream keeps no versioned archives and has moved on, so the version was
-# adopted deliberately rather than pinned to something nobody can fetch. The
-# 436 verdicts recorded under 2.0b are superseded and re-arbitrated separately.
+# Each line must equal a whole line of the tool's probe output, trimmed: the
+# rule verify.sh, the live suites and growth all apply. Capture it from the
+# tool rather than typing it from memory.
 #
 # tool	identity
 acme	This is ACME, release 0.97 ("Zem"), 28 June 2020

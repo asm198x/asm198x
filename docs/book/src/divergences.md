@@ -48,9 +48,9 @@ to the exact bytes it concerns.
 
 A difference that stops being one. Macros used to be here: twelve recorded
 cases across five dialects, where ACME, ca65, lwasm, vasm and sjasmplus all
-expanded macros in ways we did not reproduce. They were implemented, the
-verdicts were superseded with the reason, and the rows went. The corpus keeps
-the retired facts — nothing is deleted — but the list shows what is true now.
+expanded macros in ways we did not reproduce. They were implemented, their
+verdicts became ordinary ones (`cargo xtask close-divergence`), and the rows
+went. The corpus holds what is true now; git history holds what was.
 
 ## What is not here
 
