@@ -107,12 +107,10 @@ impl<S: Z80Syntax> SjasmEval<'_, S> {
                 })
             })
         {
-            self.lua_warnings.push(Warning {
-                line,
-                file,
-                message: "[luamc] Lua emitted machine code outside ALLPASS; use ALLPASS or acknowledge with luamc-ok".into(),
-                kind: crate::engine::WarningKind::Advisory,
-            });
+            const OUTSIDE_ALLPASS: &str = "[luamc] Lua emitted machine code outside ALLPASS; \
+                                           use ALLPASS or acknowledge with luamc-ok";
+            self.lua_warnings
+                .push(Warning::new(line, OUTSIDE_ALLPASS).in_file(file));
         }
         Ok(true)
     }
@@ -263,24 +261,26 @@ impl<S: Z80Syntax> SjasmEval<'_, S> {
                     .map(|v| stringify.call::<String>(v))
                     .collect::<mlua::Result<Vec<_>>>()?
                     .join("\t");
-                self.lua_warnings.push(Warning {
-                    line,
-                    file: self.current_file,
-                    message: text,
-                    kind: crate::engine::WarningKind::Note,
-                });
+                self.lua_warnings.push(
+                    Warning::new(line, text)
+                        .in_file(self.current_file)
+                        .with_kind(crate::engine::WarningKind::Note),
+                );
                 ().into_lua_multi(lua)
             }
             "warning" => {
                 let (message, value) = <(String, Option<String>)>::from_lua_multi(args, lua)?;
                 {
-                    self.lua_warnings.push(Warning {
-                        line,
-                        file: self.current_file,
-                        message: value
-                            .map_or_else(|| message.clone(), |value| format!("{message}: {value}")),
-                        kind: crate::engine::WarningKind::Advisory,
-                    });
+                    self.lua_warnings.push(
+                        Warning::new(
+                            line,
+                            value.map_or_else(
+                                || message.clone(),
+                                |value| format!("{message}: {value}"),
+                            ),
+                        )
+                        .in_file(self.current_file),
+                    );
                 }
                 ().into_lua_multi(lua)
             }

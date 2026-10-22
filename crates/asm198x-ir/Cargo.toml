@@ -1,0 +1,19 @@
+[package]
+name = "asm198x-ir"
+description = "The contract between Asm198x's dialect front ends and its assembler back end"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+# Published, because `asm198x` depends on it and a published crate cannot
+# depend on an unpublished one. It releases in lockstep with `asm198x` until it
+# moves to its own repository, where it restarts at 0.1.0 under the format
+# graduation rule (198x decisions/assembly-source-layer-moves-to-lang198x.md).
+
+[dependencies]
+isa = { package = "isa198x", version = "0.1.7" }
+serde = { workspace = true }
+
+[lints]
+workspace = true

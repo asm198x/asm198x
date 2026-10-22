@@ -14,6 +14,9 @@
 resolver = "2"
 members = [
     "crates/asm198x",
+    # The front-end/back-end boundary, extracted so a front end can be built
+    # against it alone (stage 1 of moving dialect front ends to Lang198x).
+    "crates/asm198x-ir",
     # Test infrastructure: the recorded reference-assembler verdicts CI replays
     # with no tools installed. Never a dependency of the shipped binary.
     "crates/verdict-corpus",

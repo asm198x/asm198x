@@ -26,6 +26,9 @@ lua = ["dep:mlua"]
 # until a second CPU makes the seam real — see the umbrella decision record.
 
 [dependencies]
+# The front-end/back-end boundary: AST, statement stream, spans, source
+# loading and diagnostics.
+asm198x-ir = { path = "../asm198x-ir", version = "0.0.71" }
 format198x-sinclair-zx-spectrum-tap = { workspace = true }
 format198x-tzx = { workspace = true }
 # version (lockstep with the workspace) is required so `cargo package` can

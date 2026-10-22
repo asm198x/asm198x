@@ -34,7 +34,7 @@ use crate::span::FileId;
 /// tracks its active stack), so this only fires on a genuinely pathological
 /// non-cyclic chain. Generous next to the reference's own cap (sjasmplus
 /// stops at 20 nested files).
-pub(crate) const MAX_INCLUDE_DEPTH: usize = 64;
+pub const MAX_INCLUDE_DEPTH: usize = 64;
 
 /// A failed load: the request as written in the directive, the requesting
 /// file (`None` for the root input / CLI), and the underlying reason. Carries
@@ -317,7 +317,7 @@ impl SourceMap {
 
     /// Register CLI definitions as source, not lines prepended to FileId(0).
     /// This virtual file is not an include and has no filesystem dedup key.
-    pub(crate) fn set_prelude(&mut self, contents: &str) {
+    pub fn set_prelude(&mut self, contents: &str) {
         if !contents.is_empty() {
             let id = FileId(self.files.len() as u32);
             self.files.push(SourceFile {
@@ -329,7 +329,7 @@ impl SourceMap {
         }
     }
 
-    pub(crate) fn prelude(&self) -> Option<(FileId, &str)> {
+    pub fn prelude(&self) -> Option<(FileId, &str)> {
         self.prelude.and_then(|id| Some((id, self.contents(id)?)))
     }
 

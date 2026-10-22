@@ -2955,11 +2955,11 @@ mod tests {
             }
         }
         let mut span = Span::in_file(FileId(3), 7, 4);
-        span.expansion_frames.push(ExpansionFrame {
-            macro_name: "definition".to_string(),
-            defined_at: Some(Box::new(Span::in_file(FileId(3), 2, 1))),
-            invoked_at: Box::new(Span::in_file(FileId(0), 11, 1)),
-        });
+        span.expansion_frames.push(ExpansionFrame::new(
+            "definition".to_string(),
+            Some(Span::in_file(FileId(3), 2, 1)),
+            Span::in_file(FileId(0), 11, 1),
+        ));
         let strings = super::StringTokens::default();
         let numbers = std::collections::BTreeMap::new();
         let defined = std::collections::BTreeSet::new();

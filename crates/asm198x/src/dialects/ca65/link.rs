@@ -343,16 +343,15 @@ pub(super) fn emit(
         Resolved::Nothing => {}
         Resolved::Message(severity, text) => match severity {
             DiagSeverity::Error => return Err(AsmError::new(line_for_errors, text)),
-            DiagSeverity::Warning | DiagSeverity::Note => warnings.push(Warning {
-                line: line_for_errors,
-                message: text,
-                kind: if severity == DiagSeverity::Note {
-                    WarningKind::Note
-                } else {
-                    WarningKind::Advisory
-                },
-                file,
-            }),
+            DiagSeverity::Warning | DiagSeverity::Note => {
+                warnings.push(Warning::new(line_for_errors, text).in_file(file).with_kind(
+                    if severity == DiagSeverity::Note {
+                        WarningKind::Note
+                    } else {
+                        WarningKind::Advisory
+                    },
+                ))
+            }
         },
         Resolved::Visible(rule, zero_page, names) => {
             for name in &names {
@@ -381,15 +380,16 @@ pub(super) fn emit(
                     && let Some(segment) = label_seg.get(name)
                     && segment != "ZEROPAGE"
                 {
-                    warnings.push(Warning {
-                        line: line_for_errors,
-                        message: format!(
-                            "symbol `{}` is absolute but exported zeropage",
-                            display_label(name)
-                        ),
-                        kind: WarningKind::Advisory,
-                        file,
-                    });
+                    warnings.push(
+                        Warning::new(
+                            line_for_errors,
+                            format!(
+                                "symbol `{}` is absolute but exported zeropage",
+                                display_label(name)
+                            ),
+                        )
+                        .in_file(file),
+                    );
                 }
             }
         }
@@ -398,12 +398,7 @@ pub(super) fn emit(
                 if fatal {
                     return Err(AsmError::new(line_for_errors, message));
                 }
-                warnings.push(Warning {
-                    line: line_for_errors,
-                    message,
-                    kind: WarningKind::Advisory,
-                    file,
-                });
+                warnings.push(Warning::new(line_for_errors, message).in_file(file));
             }
         }
         Resolved::Raw(bytes) => out.extend_from_slice(&bytes),

@@ -48,6 +48,20 @@ name = "asm198x"
 publish = true
 git_release_enable = false
 
+# The front-end/back-end boundary `asm198x` depends on, so it must publish too.
+# Lockstep with `asm198x` while it lives here. Untagged: its tag would be
+# `asm198x-ir-v…`, which the release workflow's `asm198x**` trigger and
+# cargo-dist's `asm198x` tag-namespace both match, starting a binary release
+# for a crate with no binaries. release-plz decides publication against the
+# registry, so it needs no tag; and with no tag to diff from, a changelog would
+# drift as the two below did, so it writes none.
+[[package]]
+name = "asm198x-ir"
+publish = true
+git_release_enable = false
+git_tag_enable = false
+changelog_update = false
+
 # changelog_update = false on the two crates below: a changelog is release
 # notes, and neither crate has a release to write notes for. Both are
 # git_tag_enable = false, so nothing tags them and the `compare/` links

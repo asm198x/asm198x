@@ -1033,12 +1033,13 @@ fn assemble_program(
                 }
             };
             if nonzero && warned_segments.insert(seg.clone()) {
-                warnings.push(Warning {
-                    file,
-                    line,
-                    message: format!("segment `{seg}` with type bss contains initialized data"),
-                    kind: WarningKind::Advisory,
-                });
+                warnings.push(
+                    Warning::new(
+                        line,
+                        format!("segment `{seg}` with type bss contains initialized data"),
+                    )
+                    .in_file(file),
+                );
             }
             continue;
         }

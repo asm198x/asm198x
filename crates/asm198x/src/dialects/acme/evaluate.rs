@@ -935,11 +935,8 @@ impl AcmeEval<'_> {
             .filter(|o| {
                 fold_const(&o.expr, &self.env, o.line).is_ok_and(|v| (0..=0xFF).contains(&v))
             })
-            .map(|o| Warning {
-                line: o.line,
-                message: "using oversized addressing mode".to_string(),
-                file: o.file,
-                kind: crate::engine::WarningKind::Advisory,
+            .map(|o| {
+                Warning::new(o.line, "using oversized addressing mode".to_string()).in_file(o.file)
             })
             .collect()
     }

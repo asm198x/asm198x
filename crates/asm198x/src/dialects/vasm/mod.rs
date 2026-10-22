@@ -626,12 +626,11 @@ fn assemble_core(
             | Stmt::Align(_)
             | Stmt::Cnop(..) => {}
             Stmt::Nothing => {}
-            Stmt::Echo(text) => warnings.push(crate::engine::Warning {
-                line: s.line,
-                file: s.file,
-                message: text.clone(),
-                kind: crate::engine::WarningKind::Note,
-            }),
+            Stmt::Echo(text) => warnings.push(
+                crate::engine::Warning::new(s.line, text.clone())
+                    .in_file(s.file)
+                    .with_kind(crate::engine::WarningKind::Note),
+            ),
             Stmt::Fail(message) => return Err(stamp(AsmError::new(s.line, message.clone()))),
             // Emits nothing. The name is read off the parsed program by
             // `requested_output`, before any of this runs.

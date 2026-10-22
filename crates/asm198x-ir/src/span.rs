@@ -2,11 +2,12 @@
 //!
 //! A [`Span`] locates something in source as `(file, line, column)` with reserved
 //! room for macro-expansion frames. It is the single span type used by the AST
-//! ([`crate::ast`]), the engine's [`AsmError`](crate::engine::AsmError), and the
-//! public [`Diagnostic`](crate::contract::Diagnostic) — deliberately *one* type,
+//! ([`crate::ast`]), the engine's `AsmError`, and the
+//! public `Diagnostic` — deliberately *one* type,
 //! not two that drift (see `decisions/roadmap-sequencing.md` § the span/source
-//! seam). It lives in this leaf module, below both `engine` and `ast`, so the
-//! engine's error type can carry a span without a circular dependency on the AST.
+//! seam). It lives in this leaf module, below both [`crate::diagnostic`] and
+//! [`crate::ast`], so the error type can carry a span without a circular
+//! dependency on the AST.
 //!
 //! **Multi-file ready now, before includes exist.** v1 is single-file
 //! (`FileId(0)`); idea 4's include chains allocate further ids and idea 4's macro
@@ -55,6 +56,19 @@ pub struct ExpansionFrame {
     pub invoked_at: Box<Span>,
 }
 
+impl ExpansionFrame {
+    /// A frame for an expansion of `macro_name`, invoked at `invoked_at` from a
+    /// definition at `defined_at` when that is known.
+    #[must_use]
+    pub fn new(macro_name: impl Into<String>, defined_at: Option<Span>, invoked_at: Span) -> Self {
+        Self {
+            macro_name: macro_name.into(),
+            defined_at: defined_at.map(Box::new),
+            invoked_at: Box::new(invoked_at),
+        }
+    }
+}
+
 /// Where something came from: `(file, line, column)` through the include chain,
 /// with reserved room for macro-expansion frames.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -95,7 +109,7 @@ impl Span {
 
     /// A span in a specific file — the include-chain constructor alongside
     /// [`Span::at`]. The path stays unresolved until stamped from a file table
-    /// ([`crate::contract::resolve_span_path`]).
+    /// (`asm198x`'s `contract::resolve_span_path`).
     #[must_use]
     pub fn in_file(file: FileId, line: u32, col: u32) -> Self {
         Span {

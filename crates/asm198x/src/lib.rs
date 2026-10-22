@@ -32,7 +32,11 @@
 
 // The source-preserving semantic AST (plan U2). A layer above the encoder;
 // dialects lower into it and it lowers to Statement/Operation (U3 wires that).
-mod ast;
+// The boundary types live in `asm198x-ir`; these keep `crate::ast`,
+// `crate::span` and `crate::source` resolving for the dialects and engine.
+pub(crate) use asm198x_ir::ast;
+#[cfg(test)]
+mod ast_seam_tests;
 mod contract;
 mod convert;
 mod cycles;
@@ -64,9 +68,9 @@ mod tape;
 // graph. Public as a module (not flattened into the crate root): consumers
 // reach `source::SourceMap` etc.; the include-capable assemble entry points
 // arrive in U2.
-pub mod source;
+pub use asm198x_ir::source;
 // The shared source-provenance model (one Span across ast/engine/contract).
-mod span;
+pub(crate) use asm198x_ir::span;
 
 // Disassembly lives in the dependency-free `isa-disasm` crate (only `isa` +
 // std) so Emu198x can consume it without the assembler; re-exported here so the
