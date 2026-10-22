@@ -2422,7 +2422,7 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
 /// `ENDS` turns the accumulation into a [`crate::scopes::StructDef`] plus the
 /// flat constants the engine resolves references against.
 struct StructBuild {
-    /// The name as written, for diagnostics and the post-`ENDS` re-anchor.
+    /// The name as written, for diagnostics.
     name: String,
     /// The name the environment defined — module-prefixed where one is open.
     qualified: String,
@@ -2470,8 +2470,8 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
             return Err(AsmError::new(line, format!("bad `STRUCT` name `{name}`")));
         }
         // Defined like any global — the module prefix applies — but without
-        // re-anchoring: the anchor moves to the structure's name at `ENDS`
-        // (probed: a `.local` after `ENDS` binds under the structure).
+        // re-anchoring, at `STRUCT` or at `ENDS` (probed against 1.24: a
+        // `.local` after `ENDS` binds under the label before the structure).
         let qualified = format!("{}{name}", self.scopes.prefix());
         self.building = Some(StructBuild {
             name: name.to_string(),
@@ -2659,9 +2659,10 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
                 leaves: b.leaves,
             },
         );
-        // The structure's name is the anchor now (probed: a `.local` after
-        // `ENDS` binds under it).
-        self.scopes.set_anchor(b.name);
+        // The anchor is left where `STRUCT` found it: a `.local` after `ENDS`
+        // binds under the last ordinary label, not the structure. sjasmplus
+        // 1.21.0 bound it under the structure; 1.21.1 changed that ("fix
+        // local-label struct name usage"), and the arbiter runs 1.24.
         Ok(())
     }
 

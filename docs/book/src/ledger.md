@@ -5,9 +5,9 @@ observation of a real reference assembler, not an expectation written
 by hand. Regenerate with `cargo xtask ledger`.
 
 - **Release:** `v0.0.71`
-- **Corpus hash:** `e1fc37063f86c0b402ab3e79b868c5b243d7eece2c1fe8b75d303df726fa27e5`
+- **Corpus hash:** `786e92d3e91ae3958781e10caaec1db097385ba2fcbadb5c02099c3e7c67e08a`
 - **Pinned curriculum:** `f11698d0b51b3a6c1209cec3d649229aa35af97f` (2026-08-27)
-- **CPUs:** 23, holding 8257 verdict(s)
+- **CPUs:** 23, holding 8261 verdict(s)
 
 ## 1802
 
@@ -162,7 +162,7 @@ No tracked divergences.
 | arbiter | version | verdicts |
 |---|---|---|
 | `rgbasm` | rgbasm v1.0.3 | probe 59 |
-| `rgbasm` | rgbasm v1.0.4 | probe 1 |
+| `rgbasm` | rgbasm v1.0.4 | probe 3 |
 
 No tracked divergences.
 
@@ -192,8 +192,9 @@ Form coverage: **796/796** (100.0%)
 
 | arbiter | version | verdicts |
 |---|---|---|
-| `pasmo` | PasmoNext v0.1.3 (PC) (C) 2004-2005 Julian Albo | curriculum 161, form 796, fuzz 200, probe 72 |
-| `sjasmplus` | SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus) | curriculum 161, probe 220 |
+| `pasmo` | PasmoNext v0.1.3 (PC) (C) 2004-2005 Julian Albo | curriculum 161, form 796, fuzz 200, probe 73 |
+| `sjasmplus` | SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus) | curriculum 161, probe 219 |
+| `sjasmplus` | SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus) | probe 2 |
 
 No tracked divergences.
 

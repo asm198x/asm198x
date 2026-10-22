@@ -110,14 +110,77 @@ fn tool(dialect: &str) -> &'static str {
     }
 }
 
-/// Assemble `body` with the reference tool at origin `$0000`; `None` if it
-/// rejects the source (out of scope).
-fn reference(tmp: &Path, dialect: &str, body: &str) -> Option<Vec<u8>> {
+/// What the reference tool did with a probe.
+enum RefResult {
+    /// It assembled the probe to these bytes.
+    Accepted(Vec<u8>),
+    /// It refused the probe and said why: a fact about the source, recorded
+    /// like any other answer so a tool update that starts rejecting a form
+    /// shows up as an answer that moved rather than one that vanished.
+    Rejected(String),
+    /// Nothing to record: a crash, a signal, a silent failure or an I/O error
+    /// says nothing about the source.
+    NoVerdict,
+}
+
+/// Assemble `body` with the reference tool at origin `$0000`.
+fn reference(tmp: &Path, dialect: &str, body: &str) -> RefResult {
+    let rejection = std::cell::RefCell::new(None);
+    match reference_bytes(tmp, dialect, body, &rejection) {
+        Some(bytes) => RefResult::Accepted(bytes),
+        None => match rejection.into_inner() {
+            Some(diagnostic) => RefResult::Rejected(diagnostic),
+            None => RefResult::NoVerdict,
+        },
+    }
+}
+
+/// The tool's own account of a refusal, the conformance suite's rule: a
+/// non-zero exit is a rejection only when the tool said something, and a
+/// signal never is. Only error lines are kept (stderr first, else stdout),
+/// with the scratch path replaced, so the recorded text is stable across runs
+/// and machines.
+fn rejection_of(tmp: &Path, finished: &std::process::Output) -> Option<String> {
+    finished.status.code()?;
+    let stderr = String::from_utf8_lossy(&finished.stderr);
+    let stdout = String::from_utf8_lossy(&finished.stdout);
+    let text = if stderr.trim().is_empty() {
+        stdout
+    } else {
+        stderr
+    };
+    let errors: Vec<&str> = text
+        .lines()
+        // An error line, not a summary: "Pass 1 complete (0 errors)" and a
+        // timing line would make the recorded text differ run to run.
+        .filter(|line| {
+            line.to_ascii_lowercase().contains("error:") || line.trim_start().starts_with("ERROR")
+        })
+        .collect();
+    let diagnostic = if errors.is_empty() {
+        text.trim().to_string()
+    } else {
+        errors.join("\n")
+    };
+    let diagnostic = diagnostic.replace(tmp.to_string_lossy().as_ref(), "<scratch>");
+    (!diagnostic.trim().is_empty()).then_some(diagnostic)
+}
+
+/// The reference's bytes, or `None` — with `rejection` set when the tool
+/// refused the source rather than failing to run.
+fn reference_bytes(
+    tmp: &Path,
+    dialect: &str,
+    body: &str,
+    rejection: &std::cell::RefCell<Option<String>>,
+) -> Option<Vec<u8>> {
     let out = tmp.join("ref.out");
     let _ = fs::remove_file(&out);
     let run = |cmds: Vec<Command>| -> Option<()> {
         for mut c in cmds {
-            if !c.current_dir(tmp).output().ok()?.status.success() {
+            let finished = c.current_dir(tmp).output().ok()?;
+            if !finished.status.success() {
+                *rejection.borrow_mut() = rejection_of(tmp, &finished);
                 return None;
             }
         }
@@ -511,7 +574,7 @@ const PROBES: &[Probe] = &[
     ok ("pasmo", "rept repeats a body",  " rept 3\n nop\n endm\n ret\n"),
     ok ("pasmo", "ix/iy displacement",   " ld a,(ix+5)\n ld b,(iy-3)\n"),
     ok ("pasmo", "ld (nn),hl",           " ld ($1234),hl\n"),
-    ok ("pasmo", "bit / set / im / rst", " bit 7,a\n set 0,(hl)\n im 1\n rst 38\n"),
+    ok ("pasmo", "bit / set / im / rst", " bit 7,a\n set 0,(hl)\n im 1\n rst 38h\n"),
     ok ("pasmo", "hex 0x prefix",        " ld a,0x10\n"),
     ok ("pasmo", "hex h suffix",         " ld a,10h\n"),
     ok ("pasmo", "binary b suffix",      " ld a,1010b\n"),
@@ -902,7 +965,12 @@ const PROBES: &[Probe] = &[
         " db Foo\n STRUCT Foo\nf BYTE 0\n ENDS\n"),
     ok ("sjasmplus", "STRUCT under a module takes its prefix",
         " MODULE m\n STRUCT S\nf BYTE 0\ng WORD 0\n ENDS\n db S, S.g\n ENDMODULE\n db m.S, m.S.g\n"),
-    ok ("sjasmplus", "STRUCT re-anchors the locals that follow it",
+    // sjasmplus 1.21.1 stopped anchoring locals to the structure: `.after`
+    // is `glob.after`, and `S.after` is "Label not found" — recorded as the
+    // reference's rejection, which we now share.
+    ok ("sjasmplus", "STRUCT leaves the locals that follow it under the last label",
+        "glob:\n STRUCT S\nf BYTE 0\n ENDS\n.after: db 2\n dw glob.after,.after\n"),
+    ok ("sjasmplus", "a local after ENDS is not the structure's",
         "glob:\n STRUCT S\nf BYTE 0\n ENDS\n.after: db 2\n dw S.after\n"),
     ok ("sjasmplus", "STRUCT instantiation emits defaults and binds addresses",
         " STRUCT Pt\nx BYTE 5\nw WORD $1234\n ENDS\n STRUCT Box\ntl Pt\nn BYTE 9\n ENDS\np1 Pt\nb1 Box\n dw p1, p1.x, p1.w, b1.tl.w, b1.n\n"),
@@ -1322,10 +1390,16 @@ const PROBES: &[Probe] = &[
         "SECTION \"f\",ROM0[$0]\n db $00\nSECTION \"p\",ROMX,BANK[2]\nhere:\n db $22\n dw here\n"),
     ok ("rgbasm-banked", "a higher bank sizes the ROM",
         "SECTION \"f\",ROM0[$0]\n db 1\nSECTION \"z\",ROMX,BANK[5]\n db 2\n"),
+    // Not `a`/`b`: rgbds 1.0.4 reserves register names, so those labels
+    // are a syntax error and the probe would stop testing banks.
     ok ("rgbasm-banked", "two banks, and labels in each",
-        "SECTION \"f\",ROM0[$0]\n dw a\n dw b\n\
-         SECTION \"p\",ROMX,BANK[1]\na: db $11\n\
-         SECTION \"q\",ROMX,BANK[3]\nb: db $33\n"),
+        "SECTION \"f\",ROM0[$0]\n dw inp\n dw inq\n\
+         SECTION \"p\",ROMX,BANK[1]\ninp: db $11\n\
+         SECTION \"q\",ROMX,BANK[3]\ninq: db $33\n"),
+    // rgbds 1.0.4 refuses a register name (any case) as a label: "syntax
+    // error, unexpected a". Recorded as that rejection; we still accept it.
+    ok ("rgbasm", "a register name is not a label",
+        "SECTION \"s\",ROM0[0]\na: db 1\n"),
     // Sections are placed by address, not by the order they were written.
     // Lowering a section to an `org` could only ever move forward, so this
     // failed with `cannot move origin backwards` until the engine grew a
@@ -1526,6 +1600,10 @@ fn source_matches_reference() {
     let mut fixed: Vec<String> = Vec::new();
     let mut checked = 0usize;
     let mut skipped_tools: Vec<&str> = Vec::new();
+    // Probes the reference now refuses while we still accept them: reported,
+    // not failed, so a tool update's behaviour change reaches review through
+    // the growth diff instead of stopping growth before it opens one.
+    let mut now_rejected: Vec<String> = Vec::new();
     let mut recorder = support::verdicts::Recorder::new();
 
     for p in PROBES {
@@ -1536,10 +1614,30 @@ fn source_matches_reference() {
             }
             continue;
         }
-        // Reference is the arbiter: if it won't accept the snippet, it's out of
-        // scope for a "we must accept it too" check.
-        let Some(reference) = reference(&tmp, p.dialect, p.body) else {
-            continue;
+        // Reference is the arbiter. A rejection is out of scope for the "we
+        // must accept it too" check, but it is still an answer: it is
+        // recorded, so growth shows a form moving from bytes to rejected
+        // instead of silently pruning the old verdict.
+        let reference = match reference(&tmp, p.dialect, p.body) {
+            RefResult::Accepted(bytes) => bytes,
+            RefResult::Rejected(diagnostic) => {
+                recorder.record(
+                    support::verdicts::CaseRef {
+                        suite: Suite::Probe,
+                        cpu: probe_cpu(p.dialect),
+                        tool: bin,
+                        dialect: p.dialect,
+                        case: p.note.to_string(),
+                        source: p.body,
+                    },
+                    verdict_corpus::Outcome::Rejected { diagnostic },
+                );
+                if ours(p.dialect, p.body).is_some() {
+                    now_rejected.push(format!("[{}] {}", p.dialect, p.note));
+                }
+                continue;
+            }
+            RefResult::NoVerdict => continue,
         };
         checked += 1;
         recorder.record(
@@ -1587,6 +1685,9 @@ fn source_matches_reference() {
         eprintln!("SKIP: `{bin}` not on PATH");
     }
     eprintln!("recorded {recorded} new verdict(s)");
+    for case in &now_rejected {
+        eprintln!("NOTE: the reference now rejects, and we still accept: {case}");
+    }
     eprintln!(
         "differential: {checked} reference-accepted snippets checked, \
          {} known gaps still open",
