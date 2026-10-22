@@ -1,13 +1,16 @@
 name: Arbiter image
 
-# The container that holds the eight reference assemblers, pinned to the
-# versions the verdict corpus is keyed on. Published so a growth run — and
-# anyone reproducing a verdict — does not need one particular laptop.
+# The container that holds the reference assemblers, one pinned version of
+# each. Published so a growth run, and anyone reproducing a verdict, does not
+# need one particular laptop.
 #
 # `verify-arbiters` runs as part of the build: an image whose tools report
-# anything other than the identities in `ops/arbiter/identities` must not be
-# published, because verdicts recorded with it would key separately from every
-# verdict already held rather than adding to them.
+# anything other than `ops/arbiter/identities` must not be published, because
+# growth would record verdicts from versions the corpus does not say it uses.
+#
+# A pull request that changes a pin builds and verifies the image without
+# publishing it, so a bump is checked before it merges; a mismatch shows on the
+# pull request as an annotation naming the version line the tool reported.
 on:
   push:
     branches: [main]
@@ -15,11 +18,17 @@ on:
       - ops/arbiter/**
       - rust-toolchain.toml
       - .github/workflows/arbiter-image.yml
+  pull_request:
+    paths:
+      - ops/arbiter/**
+      - .github/workflows/arbiter-image.yml
   workflow_dispatch:
 
+# Publishing runs one at a time; a pull request's check runs in its own group,
+# so it never queues behind (or holds up) a publish.
 concurrency:
-  group: arbiter-image
-  cancel-in-progress: false
+  group: arbiter-image-${{ github.event_name == 'pull_request' && github.ref || 'publish' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
@@ -49,11 +58,12 @@ jobs:
       # Before publishing, not after. An image that reports different
       # identities is not a worse arbiter, it is a different one.
       - name: Verify the arbiter identities
-        run: docker run --rm arbiter:candidate
+        run: docker run --rm -e GITHUB_ACTIONS arbiter:candidate
 
       # `docker login` directly rather than an action: one command, and one
       # fewer third-party dependency in the path that publishes an artefact.
       - name: Log in to the registry
+        if: github.event_name != 'pull_request'
         run: |
           echo '${{ secrets.GITHUB_TOKEN }}' \
             | docker login ghcr.io -u '${{ github.actor }}' --password-stdin
@@ -61,6 +71,7 @@ jobs:
       # Two tags: `latest` for the growth job to follow, and the commit for a
       # verdict to be traced back to the exact image that recorded it.
       - name: Push
+        if: github.event_name != 'pull_request'
         run: |
           image=ghcr.io/${{ github.repository_owner }}/arbiter
           docker tag arbiter:candidate "$image:latest"
