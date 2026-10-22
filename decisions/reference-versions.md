@@ -1,10 +1,11 @@
 # Decision: a version claim names what we ran, and the corpus says what that was
 
-**Status:** Active. Binding for Asm198x (accepted 2026-08-26). Gives
-[`spec-conformance-and-fuzzing.md`](spec-conformance-and-fuzzing.md)'s
-differential method a provenance rule, and
-[`reference-parity-goal.md`](reference-parity-goal.md) a stable way to name the
-tools it measures against.
+**Status:** Superseded on 2026-10-22 by
+[`verdicts-track-current-tools.md`](verdicts-track-current-tools.md). The corpus
+now holds one verdict per case from the tool versions in use, `cargo xtask
+versions` is gone, and the versions in use are listed in
+`ops/arbiter/identities`. Kept for the history of why version claims were once
+policed.
 
 **Date:** 2026-08-26.
 
