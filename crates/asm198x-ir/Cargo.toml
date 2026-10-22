@@ -15,5 +15,11 @@ homepage.workspace = true
 isa = { package = "isa198x", version = "0.1.7" }
 serde = { workspace = true }
 
+[dev-dependencies]
+# Property-based fuzzing of the evaluator, layout arithmetic and the
+# serialized contract. Dev-only: nothing shipped links it.
+proptest = "1"
+serde_json = { workspace = true }
+
 [lints]
 workspace = true

@@ -1,0 +1,11 @@
+# Seeds for failure cases proptest has generated in the past. It is
+# automatically read and these particular cases re-run before any
+# novel cases are generated.
+#
+# It is recommended to check this file in to source control so that
+# everyone who runs the test benefits from these saved cases.
+cc 55e5edccaf406ca1f09120279835dabf45d3860c236cffb2ac5f5c899cbbb19f # shrinks to op = FixDiv, a = -140737488355329, b = 1
+cc 231e26e8ce796eb81c7895da9e69e198b0c4198689bc4de84511468e24711d8b # shrinks to e = Lo(Hi(FixRound(Sym("big")))), pc = 0
+cc 8d2888e99506481caa32598f603f9356ca20004e1830c09d0da1e61b918df6c4 # shrinks to e = LogNot(Neg(FixRound(Sym("big")))), pc = None
+cc f91d9ef0e491a6bdd87df86049ae682bc0a7855aba6140c075723a99ca3f4c51 # shrinks to v = 9223372036854775807
+cc 4489cfea58e4e679f3b813518fc06849de18e2b70d0f52a0d77365b38ec0e7b2 # shrinks to v = 0
