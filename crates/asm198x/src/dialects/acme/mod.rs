@@ -105,6 +105,16 @@ impl Dialect for Acme {
         true
     }
 
+    /// ACME writes from the lowest *written* address to the highest, so a
+    /// `!skip` at either end is absent rather than filled. Upstream changed
+    /// this in SVN r419 (September 2024, "fixed bug where `!skip` areas at
+    /// start/end were included in output file"): a skip reserves, and only
+    /// one between written bytes takes the `!initmem` value. The 2020
+    /// release this dialect was first measured against filled both ends.
+    fn trims_trailing_gap(&self) -> bool {
+        true
+    }
+
     fn parse(&self, source: &str) -> Result<Vec<Statement>, AsmError> {
         // Idea 4: assemble by **evaluating the shared conditional AST** — the same
         // source-preserving tree the formatter parses — rather than a separate
@@ -3637,9 +3647,10 @@ mod tests {
             asm("!xor $ff {\n!fill 2\n}").expect("fill").bytes,
             vec![0xFF, 0xFF]
         );
+        // Between written bytes, so the skip is filled — and not masked.
         assert_eq!(
-            asm("!xor $ff {\n!skip 2\n}").expect("skip").bytes,
-            vec![0x00, 0x00]
+            asm("nop\n!xor $ff {\n!skip 2\n}\nnop").expect("skip").bytes,
+            vec![0xEA, 0x00, 0x00, 0xEA]
         );
         let gap = asm("*=$1000\n!xor $ff {\nnop\n*=$1003\nnop\n}").expect("gap");
         assert_eq!(gap.bytes, vec![0x15, 0x00, 0x00, 0x15]);
@@ -3777,12 +3788,20 @@ mod tests {
     /// implemented apart.
     #[test]
     fn skip_reserves_and_initmem_says_with_what() {
-        assert_eq!(asm("!skip 4").expect("skip").bytes, vec![0, 0, 0, 0]);
         assert_eq!(
-            asm("!initmem $ff\n!skip 3").expect("filled").bytes,
-            vec![0xFF; 3]
+            asm("nop\n!skip 4\nnop").expect("skip").bytes,
+            vec![0xEA, 0, 0, 0, 0, 0xEA]
         );
-        assert_eq!(asm("!skip 2+1").expect("expr").bytes, vec![0, 0, 0]);
+        assert_eq!(
+            asm("!initmem $ff\nnop\n!skip 3\nnop")
+                .expect("filled")
+                .bytes,
+            vec![0xEA, 0xFF, 0xFF, 0xFF, 0xEA]
+        );
+        assert_eq!(
+            asm("nop\n!skip 2+1\nnop").expect("expr").bytes,
+            vec![0xEA, 0, 0, 0, 0xEA]
+        );
         assert!(asm("!skip 0\nnop").expect("zero is legal").bytes == vec![0xEA]);
         asm("!skip -1").expect_err("negative size argument");
         asm("!skip 3,$aa").expect_err("`!skip` takes one operand");
@@ -3795,9 +3814,35 @@ mod tests {
     #[test]
     fn initmem_applies_to_the_whole_assembly_not_from_where_it_appears() {
         assert_eq!(
-            asm("!skip 3\n!initmem $ff").expect("earlier skip").bytes,
-            vec![0xFF; 3]
+            asm("nop\n!skip 3\nnop\n!initmem $ff")
+                .expect("earlier skip")
+                .bytes,
+            vec![0xEA, 0xFF, 0xFF, 0xFF, 0xEA]
         );
+    }
+
+    /// A `!skip` before the first written byte or after the last is absent:
+    /// ACME writes only the written range, and a leading skip moves the load
+    /// address instead of padding the file (upstream r419).
+    #[test]
+    fn skip_at_either_end_is_absent() {
+        assert!(asm("!skip 3").expect("only a skip").bytes.is_empty());
+        assert!(
+            asm("!initmem $ff\n!skip 3")
+                .expect("filled skip")
+                .bytes
+                .is_empty()
+        );
+        assert!(
+            asm("!skip 3\n!initmem $ff")
+                .expect("skip, then initmem")
+                .bytes
+                .is_empty()
+        );
+        let leading = asm("*=$c000\n!skip 4\nlda #1").expect("leading");
+        assert_eq!(leading.bytes, vec![0xA9, 0x01]);
+        assert_eq!(leading.origin, Some(0xC004));
+        assert_eq!(asm("nop\n!skip 2").expect("trailing").bytes, vec![0xEA]);
     }
 
     /// It fills an `org` gap as well as a reservation — the same unwritten
@@ -3852,15 +3897,18 @@ mod tests {
     /// "Memory already initialised" and keeps the first value.
     #[test]
     fn a_second_initmem_does_not_displace_the_first() {
-        let out = asm("!initmem $ff\n!skip 2\n!initmem $aa\n!skip 2").expect("twice");
-        assert_eq!(out.bytes, vec![0xFF; 4]);
+        let out = asm("!initmem $ff\nnop\n!skip 2\n!initmem $aa\n!skip 2\nnop").expect("twice");
+        assert_eq!(out.bytes, vec![0xEA, 0xFF, 0xFF, 0xFF, 0xFF, 0xEA]);
     }
 
     /// The fill byte spans signed and unsigned like every other ACME byte.
     #[test]
     fn an_initmem_byte_is_signed_or_unsigned() {
-        assert_eq!(asm("!initmem -1\n!skip 1").expect("neg").bytes, vec![0xFF]);
-        asm("!initmem 256\n!skip 1").expect_err("number out of range");
+        assert_eq!(
+            asm("!initmem -1\nnop\n!skip 1\nnop").expect("neg").bytes,
+            vec![0xEA, 0xFF, 0xEA]
+        );
+        asm("!initmem 256\nnop\n!skip 1\nnop").expect_err("number out of range");
     }
 
     /// Six spellings of one rule. The byte order is the directive's, not the
