@@ -157,9 +157,25 @@ fn cli_exports_in_human_and_json_modes_without_changing_the_image() {
     }
 }
 
+/// The configured path an emulator-consumer test drives, or `None` — after
+/// saying so — when it is unset. These tests prove an emulator reads what we
+/// export; they need a probe this machine may not have. Growth runs every
+/// ignored test and has no emulators, so an unset probe is a skip, as an
+/// absent reference assembler is, rather than a failure.
+fn probe(var: &str) -> Option<std::ffi::OsString> {
+    let value = std::env::var_os(var);
+    if value.is_none() {
+        eprintln!("SKIP: {var} not set");
+    }
+    value
+}
+
 #[test]
 #[ignore = "requires VICE_X64SC and optionally VICE_DATADIR"]
 fn vice_imports_and_roundtrips_generated_labels() {
+    let Some(x64sc) = probe("VICE_X64SC") else {
+        return;
+    };
     let dir = scratch::dir("vice-symbol-consumer");
     let result = asm198x::assemble_acme(C64).expect("assembly");
     let text = render(&result, SymbolFormat::Vice).expect("export");
@@ -169,7 +185,7 @@ fn vice_imports_and_roundtrips_generated_labels() {
         "ll \"labels.vs\"\nsl \"roundtrip.vs\"\nquit\n",
     )
     .expect("monitor script");
-    let mut command = Command::new(std::env::var_os("VICE_X64SC").expect("VICE_X64SC"));
+    let mut command = Command::new(x64sc);
     command
         .current_dir(&dir)
         .args(["-default", "+logcolorize", "+sound", "+logtofile"]);
@@ -196,6 +212,9 @@ fn vice_imports_and_roundtrips_generated_labels() {
 #[test]
 #[ignore = "requires SAMEBOY_SYMBOL_PROBE built from support/sameboy_symbols.c"]
 fn sameboy_resolves_generated_banked_symbol() {
+    let Some(sameboy) = probe("SAMEBOY_SYMBOL_PROBE") else {
+        return;
+    };
     let dir = scratch::dir("sameboy-symbol-consumer");
     let result = asm198x::assemble_rgbasm(GB).expect("assembly");
     let path = dir.join("game.sym");
@@ -204,11 +223,10 @@ fn sameboy_resolves_generated_banked_symbol() {
         render(&result, SymbolFormat::NoCash).expect("export"),
     )
     .expect("symbols");
-    let output =
-        Command::new(std::env::var_os("SAMEBOY_SYMBOL_PROBE").expect("SAMEBOY_SYMBOL_PROBE"))
-            .arg(path)
-            .output()
-            .expect("SameBoy probe");
+    let output = Command::new(sameboy)
+        .arg(path)
+        .output()
+        .expect("SameBoy probe");
     assert!(
         output.status.success(),
         "{}",

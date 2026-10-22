@@ -3248,7 +3248,7 @@ mod tests {
         assert_eq!(
             out("SECTION \"s\",ROM0[0]\n\
                  db DEF(__RGBDS_MAJOR__),__RGBDS_MAJOR__,__RGBDS_MINOR__,__RGBDS_PATCH__\n"),
-            vec![1, 1, 0, 3]
+            vec![1, 1, 0, 4]
         );
     }
 

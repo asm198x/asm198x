@@ -181,16 +181,33 @@ fn maps_match_native_for_pages_constants_structures_and_options() {
     }
 }
 
+/// The configured path an emulator-consumer test drives, or `None` — after
+/// saying so — when it is unset. These tests prove an emulator reads what we
+/// export; they need a probe this machine may not have. Growth runs every
+/// ignored test and has no emulators, so an unset probe is a skip, as an
+/// absent reference assembler is, rather than a failure.
+fn probe(var: &str) -> Option<std::ffi::OsString> {
+    let value = std::env::var_os(var);
+    if value.is_none() {
+        eprintln!("SKIP: {var} not set");
+    }
+    value
+}
+
 #[test]
 #[ignore = "requires CSPECT_SYMBOL_PROBE (see support/cspect)"]
 fn cspect_consumes_our_generated_map() {
+    let (Some(probe_dll), Some(cspect)) = (probe("CSPECT_SYMBOL_PROBE"), probe("CSPECT_EXE"))
+    else {
+        return;
+    };
     let dir = scratch::dir("cspect-symbols");
     let ours = assemble_sjasmplus(BANKED).expect("assembly");
     let map = dir.join("ours.map");
     std::fs::write(&map, &ours.artifacts[0].bytes).expect("map");
     let result = Command::new("dotnet")
-        .arg(std::env::var_os("CSPECT_SYMBOL_PROBE").expect("probe DLL"))
-        .arg(std::env::var_os("CSPECT_EXE").expect("CSPECT_EXE"))
+        .arg(probe_dll)
+        .arg(cspect)
         .arg(map)
         .output()
         .expect("consumer");
@@ -204,14 +221,14 @@ fn cspect_consumes_our_generated_map() {
 #[test]
 #[ignore = "requires UNREAL_SYMBOL_PROBE (see docs/sjasmplus-symbol-exports.md)"]
 fn unrealspeccy_consumes_our_generated_labels() {
+    let Some(unreal) = probe("UNREAL_SYMBOL_PROBE") else {
+        return;
+    };
     let dir = scratch::dir("unreal-symbols");
     let ours = assemble_sjasmplus(BANKED).expect("assembly");
     let path = dir.join("ours.lbl");
     std::fs::write(&path, &ours.artifacts[1].bytes).expect("labels");
-    let result = Command::new(std::env::var_os("UNREAL_SYMBOL_PROBE").expect("probe"))
-        .arg(path)
-        .output()
-        .expect("consumer");
+    let result = Command::new(unreal).arg(path).output().expect("consumer");
     assert!(
         result.status.success(),
         "{}",

@@ -38,7 +38,7 @@ pub(super) struct RgbasmEval {
 }
 
 /// Symbols RGBASM itself defines before reading the first source line. The
-/// compatibility surface is measured against RGBDS 1.0.3, the reference tool
+/// compatibility surface is measured against RGBDS 1.0.4, the reference tool
 /// recorded by the verdict corpus, so its version tuple is observable source
 /// input just as `_RS`'s initial zero is.
 pub(super) fn initial_symbols() -> (BTreeMap<String, i64>, BTreeSet<String>) {
@@ -46,7 +46,7 @@ pub(super) fn initial_symbols() -> (BTreeMap<String, i64>, BTreeSet<String>) {
         ("_RS".to_string(), 0),
         ("__RGBDS_MAJOR__".to_string(), 1),
         ("__RGBDS_MINOR__".to_string(), 0),
-        ("__RGBDS_PATCH__".to_string(), 3),
+        ("__RGBDS_PATCH__".to_string(), 4),
     ]);
     let defined = consts.keys().cloned().collect();
     (consts, defined)
