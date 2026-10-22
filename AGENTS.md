@@ -22,6 +22,7 @@ Hardware facts come from the umbrella primary library at [`../../reference/`](..
 | Crate | Role |
 |---|---|
 | [`isa198x`](https://github.com/isa198x/isa198x) | Neutral dependency supplying the executable instruction-set specs and spec-driven disassemblers used by Asm198x and Emu198x. |
+| [`crates/asm198x-ir`](crates/asm198x-ir) | The front-end/back-end boundary: the semantic AST, the statement stream dialects produce, spans, source loading and diagnostics. Published in lockstep with `asm198x`, which depends on it. |
 | [`crates/asm198x`](crates/asm198x) | Assembler library, dialect front-ends, shared engine, formatter, diagnostics contract, and `asm198x` CLI. |
 | [`crates/asm198x-web`](crates/asm198x-web) | `wasm-bindgen` shell over the library for the browser playground (#493). Excluded from the workspace; CI's `web` job builds and tests it. |
 
@@ -53,9 +54,9 @@ The engine ↔ dialect ↔ spec seam is documented in `crates/asm198x/src/lib.rs
 
 The assembler has three shared layers above per-CPU encoding. Check [`decisions/roadmap-sequencing.md`](decisions/roadmap-sequencing.md) before changing their responsibilities.
 
-- **Semantic AST** (`crates/asm198x/src/ast.rs`) — source-preserving tree between parsing and byte-lowering.
+- **Semantic AST** (`crates/asm198x-ir/src/ast.rs`) — source-preserving tree between parsing and byte-lowering.
 - **Formatter** (`--fmt`) — canonical layout via AST emit, with byte-identical/idempotent round trips expected.
-- **Core contract** (`crates/asm198x/src/contract.rs`, `crates/asm198x/src/span.rs`) — machine-readable results plus rustc-style diagnostics and JSON output.
+- **Core contract** (`crates/asm198x/src/contract.rs`, `crates/asm198x-ir/src/span.rs`, `crates/asm198x-ir/src/diagnostic.rs`) — machine-readable results plus rustc-style diagnostics and JSON output.
 
 Keep new dialects on these shared layers unless a documented native payload path is required for a multi-pass/CISC assembler path.
 

@@ -719,12 +719,9 @@ impl Forward {
     fn lookup(&self, name: &str, line: usize, file: FileId) -> Result<i64, AsmError> {
         let (value, reached) = self.resolve(name, line)?;
         if !reached {
-            self.warnings.borrow_mut().push(Warning {
-                line,
-                message: format!("forward reference of symbol `{name}`"),
-                file,
-                kind: crate::engine::WarningKind::Advisory,
-            });
+            self.warnings.borrow_mut().push(
+                Warning::new(line, format!("forward reference of symbol `{name}`")).in_file(file),
+            );
         }
         Ok(value)
     }
@@ -1824,12 +1821,9 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
         };
         if count < 0 {
             if let Some(fwd) = &self.forward {
-                fwd.warnings.borrow_mut().push(Warning {
-                    line,
-                    message: "Negative BLOCK?".to_string(),
-                    file: self.current_file,
-                    kind: crate::engine::WarningKind::Advisory,
-                });
+                fwd.warnings.borrow_mut().push(
+                    Warning::new(line, "Negative BLOCK?".to_string()).in_file(self.current_file),
+                );
             }
             let target = self
                 .pc
@@ -1856,12 +1850,7 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
     /// not one per open module.
     fn unclosed_module(&self) -> Option<Warning> {
         let (path, line, file) = self.scopes.unclosed()?;
-        Some(Warning {
-            line,
-            message: format!("`ENDMODULE` missing for module `{path}`"),
-            file,
-            kind: crate::engine::WarningKind::Advisory,
-        })
+        Some(Warning::new(line, format!("`ENDMODULE` missing for module `{path}`")).in_file(file))
     }
 
     /// Open or close a module scope. Nothing is emitted: a module is a naming
@@ -3335,15 +3324,16 @@ fn run_passes<'a, S: Z80Syntax>(
                         && before != now
                     {
                         let (line, file) = defined_at.get(name).copied().unwrap_or((0, FileId(0)));
-                        warnings.push(Warning {
-                            line,
-                            message: format!(
-                                "label `{name}` has a different value in pass {PASSES}: \
+                        warnings.push(
+                            Warning::new(
+                                line,
+                                format!(
+                                    "label `{name}` has a different value in pass {PASSES}: \
                                  previous value {before} not equal {now}"
-                            ),
-                            file,
-                            kind: crate::engine::WarningKind::Advisory,
-                        });
+                                ),
+                            )
+                            .in_file(file),
+                        );
                     }
                 }
             }

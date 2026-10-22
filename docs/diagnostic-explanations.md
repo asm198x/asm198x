@@ -1,8 +1,10 @@
 # Diagnostic explanations
 
-`Code` in `crates/asm198x/src/contract.rs` is the registry for diagnostic wire
-names, CLI lookup and documentation. Each entry names a Markdown file under
-`crates/asm198x/docs/diagnostics/`. Keeping that source inside the published
+`Code` in `crates/asm198x-ir/src/diagnostic.rs` is the registry for diagnostic
+wire names, CLI lookup and documentation. It lives in `asm198x-ir` because front
+ends and the back end both raise these codes; `asm198x` re-exports it as
+`asm198x::Code`. Each entry names a Markdown file under
+`crates/asm198x-ir/diagnostics/`. Keeping that source inside the published
 crate lets `include_str!` work both in a checkout and in a registry build.
 
 `cargo xtask docs` copies those embedded pages into the book and generates

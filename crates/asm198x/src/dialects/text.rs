@@ -730,11 +730,11 @@ mod tests {
         }
 
         let mut span = Span::in_file(FileId(3), 7, 4);
-        span.expansion_frames.push(ExpansionFrame {
-            macro_name: "read_number".to_string(),
-            defined_at: Some(Box::new(Span::in_file(FileId(3), 2, 1))),
-            invoked_at: Box::new(Span::in_file(FileId(0), 11, 1)),
-        });
+        span.expansion_frames.push(ExpansionFrame::new(
+            "read_number".to_string(),
+            Some(Span::in_file(FileId(3), 2, 1)),
+            Span::in_file(FileId(0), 11, 1),
+        ));
         let error = expand(&Checked(span.clone()), "number(missing::VALUE)")
             .expect_err("checked lookup must refuse");
         assert_eq!(error.span, Some(span));

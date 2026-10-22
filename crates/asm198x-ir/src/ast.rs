@@ -3,8 +3,8 @@
 //! `docs/plans/2026-07-04-005-feat-ir-ast-layer-plan.md`.
 //!
 //! A layer *above* the encoder: a dialect parses source into a [`Program`], and
-//! [`lower`] turns it into today's [`Statement`](crate::engine::Statement) /
-//! [`Operation`](crate::engine::Operation) stream, which the existing two-pass
+//! [`lower`] turns it into today's [`Statement`] /
+//! [`Operation`] stream, which the existing two-pass
 //! driver assembles unchanged (KTD1 — the `isa`/encoding layer is untouched,
 //! output bytes are identical). U3 routes the Z80 dialects through this and U6
 //! begins migrating the flat-engine CPUs (the Intel 8080 first — the first
@@ -25,7 +25,8 @@
 //! carries a scoped `allow(dead_code)`, so the rest of the module keeps normal
 //! dead-code detection (CI is `-D warnings`).
 
-use crate::engine::{AsmError, DataRange, Expr, Operation, Piece, Statement};
+use crate::diagnostic::AsmError;
+use crate::stream::{DataRange, Expr, Operation, Piece, Statement};
 
 // ---------------------------------------------------------------------------
 // Provenance (R3)
@@ -36,7 +37,7 @@ use crate::engine::{AsmError, DataRange, Expr, Operation, Piece, Statement};
 // (`decisions/roadmap-sequencing.md` § the span/source seam). Re-exported here so
 // the AST's long-standing `crate::ast::Span` / `Span::at` references keep
 // resolving unchanged.
-pub(crate) use crate::span::Span;
+pub use crate::span::Span;
 
 // ---------------------------------------------------------------------------
 // Trivia — comments carried, not stripped (R5, KTD5). Populated in U4.
@@ -44,25 +45,25 @@ pub(crate) use crate::span::Span;
 
 /// A source comment, kept as trivia so emit can reproduce it (R5).
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub(crate) struct Comment {
-    pub(crate) text: String,
-    pub(crate) span: Span,
+pub struct Comment {
+    pub text: String,
+    pub span: Span,
 }
 
 /// Comments attached to a node: own-line comments *before* it, and a same-line
 /// comment *after* it. Blank-line and mid-expression comments are out of the v1
 /// fidelity floor (KTD5). Empty until U4 stops the parser stripping comments.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
-pub(crate) struct Trivia {
-    pub(crate) leading: Vec<Comment>,
-    pub(crate) trailing: Option<Comment>,
+pub struct Trivia {
+    pub leading: Vec<Comment>,
+    pub trailing: Option<Comment>,
 }
 
 /// Comments on delimiters belong to the block, not to its last body node.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
-pub(crate) struct BlockTrivia {
-    pub(crate) branch: Option<Comment>,
-    pub(crate) closing: Option<Comment>,
+pub struct BlockTrivia {
+    pub branch: Option<Comment>,
+    pub closing: Option<Comment>,
 }
 
 // ---------------------------------------------------------------------------
@@ -73,7 +74,7 @@ pub(crate) struct BlockTrivia {
 /// under two globals becomes two distinct symbols — the pasmo-vs-sjasmplus
 /// divergence the U1 spike proved lives here.
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub(crate) enum Scope {
+pub enum Scope {
     /// A plain global label — and how pasmo treats a leading-`.` name.
     Global,
     /// A local label, qualified by its enclosing global — how sjasmplus (and
@@ -86,10 +87,10 @@ pub(crate) enum Scope {
 /// name for a global). Two same-named locals in different scopes are distinct
 /// symbols (R4); keeping the source name lets emit reproduce `.loop` (U5).
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub(crate) struct Symbol {
-    pub(crate) name: String,
-    pub(crate) scope: Scope,
-    pub(crate) qualified: String,
+pub struct Symbol {
+    pub name: String,
+    pub scope: Scope,
+    pub qualified: String,
 }
 
 // ---------------------------------------------------------------------------
@@ -99,7 +100,7 @@ pub(crate) struct Symbol {
 /// An auto-increment / -decrement marker on an index register (6809 and kin).
 #[allow(dead_code)] // reserved for U6's computed-operand CPUs
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub(crate) enum AutoIndex {
+pub enum AutoIndex {
     None,
     Inc1,
     Inc2,
@@ -110,21 +111,21 @@ pub(crate) enum AutoIndex {
 /// An abstract addressing-mode operand for the computed / field-packed CPUs
 /// (6809 indexed, PDP-11, …). It keeps the *source structure* — register, auto
 /// marker, indirection, offset — rather than pre-computed encoding bytes, so it
-/// round-trips to source and lowers to [`Piece`](crate::engine::Piece)s in U6.
+/// round-trips to source and lowers to [`Piece`]s in U6.
 /// The U1 spike proved this shape suffices for the 6809 with no escape hatch.
 #[allow(dead_code)] // reserved for U6's computed-operand CPUs
 #[derive(Clone, Debug)]
-pub(crate) struct StructuredOperand {
-    pub(crate) reg: String,
-    pub(crate) auto: AutoIndex,
-    pub(crate) indirect: bool,
-    pub(crate) offset: Option<Expr>,
+pub struct StructuredOperand {
+    pub reg: String,
+    pub auto: AutoIndex,
+    pub indirect: bool,
+    pub offset: Option<Expr>,
 }
 
 /// One instruction or directive operand.
 #[allow(dead_code)] // the `source` slot and `Structured` variant are reserved for U6
 #[derive(Clone, Debug)]
-pub(crate) enum Operand {
+pub enum Operand {
     /// A fixed-slot operand: the value plus a slot for its **source token text**
     /// (`$0A`, `10`, `%1010` all evaluate to 10 but re-emit distinctly — KTD5).
     /// U5's formatter round-trips spelling via the whole-line
@@ -173,13 +174,13 @@ impl Operand {
 /// encoding is *not* final at parse time — branch relaxation and the optimizer
 /// resize instructions across passes, so they hold un-lowered structured
 /// statements the shared `Item`s cannot express, and assemble with their own
-/// multi-pass driver rather than [`engine::assemble`](crate::engine). The AST is
+/// multi-pass driver rather than `engine::assemble`. The AST is
 /// the single front-end IR (`decisions/ast-native-payload-for-multipass-cisc.md`);
 /// the dialect stores its statement here and reads it back, downcasting the
 /// concrete type it owns. The shared layer never inspects the payload — only
 /// [`inline_label`](Self::inline_label) is consulted, so emit renders an
 /// `equ`-style binding on its label's line.
-pub(crate) trait NativeItem: std::any::Any {
+pub trait NativeItem: std::any::Any {
     /// The concrete statement, for the owning dialect to downcast.
     fn as_any(&self) -> &dyn std::any::Any;
     /// Whether emit keeps the label on the operation's line (an `equ`-style
@@ -190,13 +191,13 @@ pub(crate) trait NativeItem: std::any::Any {
 }
 
 /// One operation on a source line, before byte-lowering. The variants mirror the
-/// [`Operation`](crate::engine::Operation) kinds a dialect produces. Instructions
+/// [`Operation`] kinds a dialect produces. Instructions
 /// carry structured [`Operand`]s (source text + structured variants), though the
 /// fixed-slot dialects populate only the value.
 // No `Clone`/`Debug` derive: `Item::Encoded` carries `Vec<Piece>`, and `Piece`
 // (an engine encoding type) derives neither — keeping the encoder untouched
 // (KTD1). Nothing clones or debug-prints the tree, so the bounds aren't needed.
-pub(crate) enum Item {
+pub enum Item {
     Instruction {
         mnemonic: String,
         mode: &'static str,
@@ -209,35 +210,35 @@ pub(crate) enum Item {
     SourceAssignment,
     /// Several immutable constants defined by one source directive.
     DefineSymbols(Vec<(String, i64)>),
-    /// A redefinable binding — see [`Operation::Set`](crate::engine::Operation::Set).
+    /// A redefinable binding — see [`Operation::Set`].
     Set(Operand),
     /// A file the source asked for besides the machine code — see
-    /// [`Operation::SaveRaw`](crate::engine::Operation::SaveRaw).
+    /// [`Operation::SaveRaw`].
     SaveRaw {
         name: String,
         start: Operand,
         length: Option<Operand>,
     },
     /// A tape image the source asked for — see
-    /// [`Operation::SaveTape`](crate::engine::Operation::SaveTape).
+    /// [`Operation::SaveTape`].
     SaveTape {
         file: String,
-        kind: crate::engine::TapeKind,
+        kind: crate::stream::TapeKind,
         name: String,
         start: Operand,
         length: Operand,
     },
-    Device(Option<crate::engine::DeviceSpec>),
+    Device(Option<crate::stream::DeviceSpec>),
     DeviceSlot(Operand),
     DevicePage(Operand),
-    SaveNex(crate::engine::NexCommand),
+    SaveNex(crate::stream::NexCommand),
     SaveCpr {
         name: String,
         pages: Operand,
     },
     SymbolMap {
         name: String,
-        format: crate::engine::ArtifactFormat,
+        format: crate::stream::ArtifactFormat,
         virtual_labels: bool,
     },
     StructSymbol(String),
@@ -264,7 +265,7 @@ pub(crate) enum Item {
     /// ACME's `!to` — the source naming its own output file.
     RequestOutput {
         path: String,
-        format: crate::engine::OutputFormat,
+        format: crate::stream::OutputFormat,
         defaulted_format: bool,
     },
     /// ACME's `!symbollist`.
@@ -294,7 +295,7 @@ pub(crate) enum Item {
     /// An assertion (`ASSERT`/`.assert`). Like the diagnostics it has no emit
     /// arm: the formatter re-emits it from [`Node::source`](Node).
     Assert {
-        cond: crate::engine::Expr,
+        cond: crate::stream::Expr,
         fatal: bool,
         message: String,
     },
@@ -304,7 +305,7 @@ pub(crate) enum Item {
     Section {
         name: String,
         base: Option<i64>,
-        at: crate::engine::Place,
+        at: crate::stream::Place,
         bank: Option<u32>,
     },
     /// A reference-valid construct refused only when evaluation reaches it.
@@ -313,7 +314,7 @@ pub(crate) enum Item {
     /// rgbasm `FAIL`/`WARN`). Like the aligns it has no emit arm: the
     /// formatter re-emits it from [`Node::source`](Node).
     Diagnose {
-        severity: crate::engine::DiagSeverity,
+        severity: crate::stream::DiagSeverity,
         message: String,
     },
     /// The boundary-stating `align`/`.align` — a PC-dependent pad to the next
@@ -458,7 +459,7 @@ pub(crate) enum Item {
     /// node's span is the *directive's*, and that is where diagnostics point.
     Binary(Vec<u8>),
     /// Reserved space (`ds`/`rmb`/`res`/`block`) — a count of address units,
-    /// filled by the engine with [`Dialect::gap_fill`]. Distinct from `Bytes`
+    /// filled by the engine with `Dialect::gap_fill`. Distinct from `Bytes`
     /// so that lowering back out of the AST does not turn a reservation into
     /// literal zeros, which is what made the asl-family output diverge.
     Reserve(usize),
@@ -466,21 +467,21 @@ pub(crate) enum Item {
 
 /// A source line reduced to an optional (scoped) label and an optional
 /// operation, with provenance and attached comment trivia. Mirrors
-/// [`Statement`](crate::engine::Statement), enriched.
-pub(crate) struct Node {
-    pub(crate) label: Option<Symbol>,
-    pub(crate) item: Option<Item>,
+/// [`Statement`], enriched.
+pub struct Node {
+    pub label: Option<Symbol>,
+    pub item: Option<Item>,
     /// The operation's raw source text (comment-stripped, trimmed), kept
     /// verbatim so the formatter (U5) round-trips operand spelling and
     /// source-form local names. Empty for a label-only line.
-    pub(crate) source: String,
-    pub(crate) span: Span,
+    pub source: String,
+    pub span: Span,
     /// The operand field's position on the line, when the parse knew it (the
     /// dialects that call [`operand_span`]; contract U3). The engine's pass-2
     /// range errors point here, so a diagnostic's `col` lands on the operand
     /// token. `None` keeps the error line-granular (contract KTD1).
-    pub(crate) operand_span: Option<Span>,
-    pub(crate) trivia: Trivia,
+    pub operand_span: Option<Span>,
+    pub trivia: Trivia,
 }
 
 /// The span of the operand field on a source line: the first non-blank
@@ -495,7 +496,7 @@ pub(crate) struct Node {
 /// expansion, should pass `None` instead). A line with no operand field returns
 /// `None`. Columns are 1-based byte columns (assembly source is ASCII in
 /// practice).
-pub(crate) fn operand_span(raw: &str, rest: &str, line: u32) -> Option<Span> {
+pub fn operand_span(raw: &str, rest: &str, line: u32) -> Option<Span> {
     let base = (rest.as_ptr() as usize).checked_sub(raw.as_ptr() as usize)?;
     if base + rest.len() > raw.len() {
         return None;
@@ -512,7 +513,7 @@ pub(crate) fn operand_span(raw: &str, rest: &str, line: u32) -> Option<Span> {
 /// (the original line). For operand slices the parse has already isolated
 /// (ACME's `*= expr` / `name = expr` values), where [`operand_span`]'s
 /// mnemonic-skipping does not apply. The same borrows-from-`raw` contract.
-pub(crate) fn token_span(raw: &str, token: &str, line: u32) -> Option<Span> {
+pub fn token_span(raw: &str, token: &str, line: u32) -> Option<Span> {
     let base = (token.as_ptr() as usize).checked_sub(raw.as_ptr() as usize)?;
     if base + token.len() > raw.len() {
         return None;
@@ -523,8 +524,8 @@ pub(crate) fn token_span(raw: &str, token: &str, line: u32) -> Option<Span> {
 
 /// A parsed translation unit: the ordered nodes.
 #[derive(Default)]
-pub(crate) struct Program {
-    pub(crate) nodes: Vec<Node>,
+pub struct Program {
+    pub nodes: Vec<Node>,
 }
 
 /// How a conditional block is rendered back to source by [`emit`] — the one
@@ -532,7 +533,7 @@ pub(crate) struct Program {
 /// `decisions/conditional-assembly-framework.md`). Parsing and evaluation are
 /// style-agnostic; only the delimiters differ.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub(crate) enum CondStyle {
+pub enum CondStyle {
     /// ACME's brace form: `!if … {` / `} else {` / `}` at column 0.
     Brace,
     /// The keyword form (`IF …` / `ELSE` / `ENDIF` as indented directives) —
@@ -570,7 +571,7 @@ pub enum Iteration {
 /// A dialect gains conditionals by implementing this over an evaluator that owns
 /// its environment, then calling [`evaluate`]; the ACME (brace) and — when a
 /// keyword dialect adopts them — `IF … ENDIF` styles share this one walk.
-pub(crate) trait CondEval {
+pub trait CondEval {
     /// Whether a live directive has ended the whole assembly.
     ///
     /// Most dialects always continue. Dialects with an `END` directive use
@@ -672,7 +673,7 @@ fn in_expansion_of(mut e: AsmError, node: &Node) -> AsmError {
 /// skipped branch is walked with `emit = false` so it defines nothing — the rule
 /// ACME's old `process_block` used, now shared by any conditional dialect (idea
 /// 4). Blank/comment nodes (no label, no source) carry nothing and are skipped.
-pub(crate) fn evaluate<D: CondEval>(
+pub fn evaluate<D: CondEval>(
     dialect: &mut D,
     nodes: &[Node],
     emit: bool,
@@ -805,7 +806,7 @@ pub(crate) fn evaluate<D: CondEval>(
 /// **qualified** name (so scope resolves exactly as the old string-mangle did),
 /// operations lower to their [`Operation`], and the driver assembles the result
 /// unchanged — byte-identical to direct parsing (AE1).
-pub(crate) fn lower(program: Program) -> Result<Vec<Statement>, AsmError> {
+pub fn lower(program: Program) -> Result<Vec<Statement>, AsmError> {
     program
         .nodes
         .into_iter()
@@ -872,7 +873,7 @@ pub(crate) fn lower(program: Program) -> Result<Vec<Statement>, AsmError> {
 ///
 /// A native payload cannot come through here. It is dialect-owned and opaque to
 /// the shared layer, so the dialect that made it reads it back itself.
-pub(crate) fn lower_item_ref(item: &Item) -> Result<Operation, AsmError> {
+pub fn lower_item_ref(item: &Item) -> Result<Operation, AsmError> {
     Ok(match item {
         Item::Instruction {
             mnemonic,
@@ -1285,7 +1286,7 @@ fn lower_item(item: Item) -> Result<Operation, AsmError> {
 /// qualifying it with the current scope string `scope` — so `jr .loop` under
 /// scope `start` resolves to `start.loop`. A non-local symbol, or an
 /// already-qualified `global.local`, is left untouched.
-pub(crate) fn qualify_locals(op: Operation, scope: &str) -> Operation {
+pub fn qualify_locals(op: Operation, scope: &str) -> Operation {
     map_syms(op, &mut |s| {
         Expr::Sym(if s.starts_with('.') {
             format!("{scope}{s}")
@@ -1300,7 +1301,7 @@ pub(crate) fn qualify_locals(op: Operation, scope: &str) -> Operation {
 /// keeping two twelve-arm copies: [`qualify_locals`] passes the leading-`.`
 /// rule, and sjasmplus's module repair pass passes a lookup over its alias
 /// table. `f` sees each name once and returns the name to use.
-pub(crate) fn map_syms(op: Operation, f: &mut impl FnMut(String) -> Expr) -> Operation {
+pub fn map_syms(op: Operation, f: &mut impl FnMut(String) -> Expr) -> Operation {
     match op {
         Operation::Org(e) => Operation::Org(map_sym_expr(e, f)),
         Operation::Equ(e) => Operation::Equ(map_sym_expr(e, f)),
@@ -1431,7 +1432,7 @@ pub(crate) fn map_syms(op: Operation, f: &mut impl FnMut(String) -> Expr) -> Ope
 
 /// The expression half of [`map_syms`]: rewrite every symbol name through `f`,
 /// recursing through the expression tree.
-pub(crate) fn map_sym_expr(e: Expr, f: &mut impl FnMut(String) -> Expr) -> Expr {
+pub fn map_sym_expr(e: Expr, f: &mut impl FnMut(String) -> Expr) -> Expr {
     match e {
         Expr::Sym(s) => f(s),
         Expr::Num(_) | Expr::Pc => e,
@@ -1453,7 +1454,7 @@ pub(crate) fn map_sym_expr(e: Expr, f: &mut impl FnMut(String) -> Expr) -> Expr 
 
 /// The expression half of [`qualify_locals`]: prefix every leading-`.` symbol
 /// with `scope`, recursing through the expression tree.
-pub(crate) fn qualify_expr(e: Expr, scope: &str) -> Expr {
+pub fn qualify_expr(e: Expr, scope: &str) -> Expr {
     map_sym_expr(e, &mut |s| {
         Expr::Sym(if s.starts_with('.') {
             format!("{scope}{s}")
@@ -1466,7 +1467,7 @@ pub(crate) fn qualify_expr(e: Expr, scope: &str) -> Expr {
 /// Build an [`Item`] from any [`Operation`] a dialect produced — total over the
 /// operation set, so a computed-operand CPU (`Encoded`) or ACME (`Align`) routes
 /// through the AST without a special case.
-pub(crate) fn item_from_operation(op: Operation) -> Item {
+pub fn item_from_operation(op: Operation) -> Item {
     match op {
         Operation::Instruction {
             mnemonic,
@@ -1619,7 +1620,7 @@ pub(crate) fn item_from_operation(op: Operation) -> Item {
 /// re-parses as a label, but an Intel-8080 `equ` label takes **no** colon
 /// (`name equ …`) — its `equ` keyword already disambiguates, and a colon would
 /// fail to reassemble.
-pub(crate) fn emit(program: &Program, equ_label_colon: bool) -> String {
+pub fn emit(program: &Program, equ_label_colon: bool) -> String {
     let mut out = String::new();
     emit_nodes(&program.nodes, &mut out, equ_label_colon, "");
     out
@@ -2194,47 +2195,6 @@ mod tests {
         assert_eq!(s.reg, "x");
         assert_eq!(s.auto, AutoIndex::Inc1);
         assert!(!s.indirect);
-    }
-
-    /// AE6 — pasmo and sjasmplus lower an equivalent program to identical bytes
-    /// (they share the AST lowering; full structural equality is proven by the
-    /// reference differential in `tests/conformance.rs`).
-    #[test]
-    fn pasmo_and_sjasmplus_share_the_lowering() {
-        let src = "  ld a, 5\n  ld b, a\n  ret\n";
-        let p = crate::assemble_pasmo(src).expect("assembles");
-        let s = crate::assemble_sjasmplus(src).expect("assembles");
-        assert_eq!(p.bytes, s.bytes);
-    }
-
-    /// U3 regression — sjasmplus scoped locals still resolve through the AST
-    /// refactor (two `.loop`s in two scopes assemble), and pasmo still rejects a
-    /// reused `.loop` (its non-scoping meaning is preserved).
-    #[test]
-    fn scoped_locals_survive_the_ast_refactor() {
-        let src = "\
-first:
-  ld b, 2
-.loop:
-  djnz .loop
-second:
-  ld b, 3
-.loop:
-  djnz .loop
-";
-        assert!(crate::assemble_sjasmplus(src).is_ok(), "sjasmplus scopes");
-        assert!(
-            crate::assemble_pasmo(src).is_err(),
-            "pasmo still rejects reused `.loop`"
-        );
-    }
-
-    /// KTD6 seam — a non-migrated CPU (6502 via acme) still assembles through
-    /// the direct-lowering path; it never touches the AST.
-    #[test]
-    fn seam_leaves_other_cpus_on_direct_lowering() {
-        let src = "*=$c000\n  lda #$05\n  rts\n";
-        assert!(crate::assemble_acme(src).is_ok(), "6502 direct path intact");
     }
 
     /// Lowering round-trips an Operation through an Item byte-for-byte (the

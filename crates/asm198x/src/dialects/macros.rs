@@ -644,11 +644,11 @@ fn expand_at_inner<S: MacroSyntax>(
             // The new frame goes in front, so the innermost expansion is named
             // first — the order the `included from` notes already use.
             let mut frames = Vec::with_capacity(origin.frames.len() + 1);
-            frames.push(ExpansionFrame {
-                macro_name: name.clone(),
-                defined_at: def.defined_at.clone().map(Box::new),
-                invoked_at: Box::new(Span::in_file(file, origin.line as u32, 0)),
-            });
+            frames.push(ExpansionFrame::new(
+                name.clone(),
+                def.defined_at.clone(),
+                Span::in_file(file, origin.line as u32, 0),
+            ));
             frames.extend(origin.frames.iter().cloned());
             // A label in front of the invocation is the author's own text, so
             // it keeps their origin and gains no frame. Emitting it on its own

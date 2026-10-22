@@ -6,6 +6,7 @@ version = 4
 name = "asm198x"
 version = "0.0.71"
 dependencies = [
+ "asm198x-ir",
  "debug198x",
  "format198x-sinclair-zx-spectrum-tap",
  "format198x-tzx",
@@ -14,6 +15,14 @@ dependencies = [
  "same-file",
  "serde",
  "serde_json",
+]
+
+[[package]]
+name = "asm198x-ir"
+version = "0.0.71"
+dependencies = [
+ "isa198x",
+ "serde",
 ]
 
 [[package]]

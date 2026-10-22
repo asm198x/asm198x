@@ -30,6 +30,10 @@ use std::collections::BTreeMap;
 use crate::engine::{AsmError, Assembly, DebugData, Warning};
 use crate::span::Span;
 
+/// Stable diagnostic codes. Defined in `asm198x-ir`, where both sides of the
+/// front-end/back-end boundary can raise them.
+pub use asm198x_ir::Code;
+
 /// The contract schema version a serialized payload was produced under (R7).
 /// Bumped **only** for a breaking change to the shape — additive fields ride
 /// `#[non_exhaustive]` + `#[serde(default)]` with no bump, and an unknown field is
@@ -264,60 +268,6 @@ pub fn resolve_span_path(mut span: Span, files: &[String]) -> Span {
 pub enum Severity {
     Error,
     Warning,
-}
-
-// One registry defines the wire names, exhaustive list and embedded pages.
-// A new code cannot compile without its explanation; xtask publishes precisely
-// these pages into the book, and --check detects stale text or navigation.
-macro_rules! diagnostic_codes {
-    ($( $(#[$doc:meta])* $variant:ident => $page:literal ),+ $(,)?) => {
-        /// Stable diagnostic codes, classified at the error site rather than
-        /// inferred from wording. Unclassified errors retain `AssemblyError`.
-        #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-        #[non_exhaustive]
-        pub enum Code { $( $(#[$doc])* $variant ),+ }
-
-        impl Code {
-            /// Every code this binary can emit, in documentation order.
-            pub const ALL: &'static [Self] = &[$(Self::$variant),+];
-
-            /// The stable spelling used in JSON and by `--explain`.
-            #[must_use]
-            pub const fn as_str(self) -> &'static str {
-                match self { $(Self::$variant => stringify!($variant)),+ }
-            }
-
-            /// Look up an exact stable code name. Unknown names are not aliases
-            /// for an unrelated explanation.
-            #[must_use]
-            pub fn from_name(name: &str) -> Option<Self> {
-                match name { $(stringify!($variant) => Some(Self::$variant)),+, _ => None }
-            }
-
-            /// Markdown shared verbatim by the CLI and generated book page.
-            #[must_use]
-            pub const fn explanation(self) -> &'static str {
-                match self { $(Self::$variant => include_str!(concat!("../docs/diagnostics/", $page, ".md"))),+ }
-            }
-
-            /// Stable book filename, without directory or extension.
-            #[must_use]
-            pub const fn page_slug(self) -> &'static str {
-                match self { $(Self::$variant => $page),+ }
-            }
-        }
-    };
-}
-
-diagnostic_codes! {
-    /// An assembly error not yet assigned a more specific code.
-    AssemblyError => "assembly-error",
-    /// The encoded PC-relative displacement cannot reach the target.
-    BranchOutOfRange => "branch-out-of-range",
-    /// A statically counted routine exceeds the source's declared ceiling.
-    CycleBudgetExceeded => "cycle-budget-exceeded",
-    /// Valid reference syntax requests behaviour this build does not implement.
-    UnsupportedFeature => "unsupported-feature",
 }
 
 /// A machine-applicable suggested fix (rustc's model): a human description and,
