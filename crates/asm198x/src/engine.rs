@@ -1650,7 +1650,12 @@ fn assemble_statements(
                 .write(pc, &bytes[len_before..])
                 .map_err(|err| s.stamp(err))?;
         }
-        if !matches!(s.op, Some(Operation::Org(_)) | Some(Operation::Reserve(_))) {
+        // `!initmem` writes nothing either: a skip before it is still outside
+        // the written range (`!skip 3` then `!initmem $ff` is an empty file).
+        if !matches!(
+            s.op,
+            Some(Operation::Org(_)) | Some(Operation::Reserve(_)) | Some(Operation::InitMem(_))
+        ) {
             written_len = bytes.len();
             if bytes.len() > len_before {
                 written_start.get_or_insert(len_before);
@@ -1896,10 +1901,13 @@ fn assemble_statements(
     }
 
     if org_starts_address_run {
+        // Offsets are relative to the source's origin, not the image's: a
+        // trimmed leading reservation moves `origin` past statements whose
+        // addresses lie below it (see `Assembly::reserved_prefix`).
         let base = if wraps_address_space {
             address_debug_base(&debug, origin as u64)
         } else {
-            origin as u64
+            origin as u64 - u64::from(reserved_prefix)
         };
         if wraps_address_space {
             reserved_prefix = (origin as u64 - base) as u16;
