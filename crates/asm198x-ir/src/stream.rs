@@ -112,13 +112,13 @@ pub enum BinOp {
     Ge,
 }
 
+/// The fraction's width in rgbasm's fixed-point numbers: `1.0` is `$10000`.
+pub const FIX_BITS: i64 = 16;
+
 /// An expression in the shared engine IR. Each dialect parses its own operator
 /// syntax into this tree; the engine evaluates it. The tree stays dialect-
 /// agnostic: a `<`/`>` operator and a `low()`/`high()` function both lower to
 /// [`Expr::Lo`]/[`Expr::Hi`], and any dialect's `+`/`-`/`*`/`/` lower to
-/// The fraction's width in rgbasm's fixed-point numbers: `1.0` is `$10000`.
-pub const FIX_BITS: i64 = 16;
-
 /// [`Expr::Bin`].
 #[derive(Debug, Clone)]
 pub enum Expr {
