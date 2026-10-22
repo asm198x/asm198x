@@ -67,7 +67,7 @@ pub enum ArtifactFormat {
 
 /// A binary arithmetic operator. The dialect parser is responsible for
 /// precedence (it builds the tree); the engine only evaluates.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum BinOp {
     Add,
     Sub,
@@ -123,7 +123,7 @@ pub const FIX_BITS: i64 = 16;
 /// agnostic: a `<`/`>` operator and a `low()`/`high()` function both lower to
 /// [`Expr::Lo`]/[`Expr::Hi`], and any dialect's `+`/`-`/`*`/`/` lower to
 /// [`Expr::Bin`].
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Expr {
     Num(i64),
     Sym(String),
