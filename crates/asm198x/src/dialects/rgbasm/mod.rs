@@ -2583,8 +2583,40 @@ mod tests {
             vec![0x4_0000, -0x4_0000]
         );
 
-        // `TZCOUNT` answers a plain integer, not a fixed-point value.
+        // Away from zero means by magnitude: a negative that is not a half
+        // rounds *towards* zero, as C's `round()` does in RGBDS's `fix_Round`.
+        assert_eq!(longs("dl ROUND(-3.2)\ndl ROUND(-0.2)"), vec![-0x3_0000, 0]);
+
+        // MUL and DIV round to the nearest Q16.16 value rather than
+        // truncating, so these land one unit above the truncated answers
+        // ($7333, $AAAA and -$AAAA).
+        assert_eq!(longs("dl MUL(1.5, 0.3)"), vec![0x7334]);
+        assert_eq!(
+            longs("dl DIV(2.0, 3.0)\ndl DIV(-2.0, 3.0)"),
+            vec![0xAAAB, -0xAAAB]
+        );
+        // DIV by zero is not an error in RGBDS: it saturates by the
+        // dividend's sign, and 0/0 is 0 (v1.0.3 `test/asm/math.asm`).
+        assert_eq!(
+            longs("dl DIV(5.0, 0.0)\ndl DIV(-5.0, 0.0)\ndl DIV(0.0, 0.0)"),
+            vec![i64::from(i32::MAX), i64::from(i32::MIN), 0]
+        );
+        // RGBDS holds values as `int32_t`, so a hex constant with the top bit
+        // set is negative to these functions: `$80000000` is -32768.0 and
+        // `$FFFF0000` is -1.0. Neither saturates.
+        assert_eq!(
+            longs("dl ROUND($80000000)\ndl MUL($80000000, 1.0)"),
+            vec![i64::from(i32::MIN), i64::from(i32::MIN)]
+        );
+        assert_eq!(
+            longs("dl MUL($FFFF0000, 2.0)\ndl DIV($FFFF0000, 2.0)"),
+            vec![-0x2_0000, -0x8000]
+        );
+
+        // `TZCOUNT` answers a plain integer, not a fixed-point value, and
+        // counts over 32 bits, so zero has all 32 (RGBDS `op_tzcount`).
         assert_eq!(longs("dl TZCOUNT(8)\ndl TZCOUNT(1)"), vec![3, 0]);
+        assert_eq!(longs("dl TZCOUNT(0)"), vec![32]);
 
         let out = crate::assemble_rgbasm("SECTION \"a\", ROM0[0]\ndb HIGH($1234), LOW($1234)\n")
             .expect("byte extraction");
