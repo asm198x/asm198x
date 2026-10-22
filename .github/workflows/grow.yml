@@ -146,15 +146,29 @@ jobs:
     if: needs.grow.outputs.pushed == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    # A job-level block replaces the workflow's, so it restates what this job
+    # needs: pull-requests to open the PR, actions to dispatch CI on it.
+    permissions:
+      contents: read
+      pull-requests: write
+      actions: write
+    env:
+      # GITHUB_TOKEN cannot open this PR here (growth's PR step had never
+      # succeeded), and a PR it did open would trigger no workflows. The
+      # release token can, and its PR runs CI by itself, as the release
+      # workflows already rely on. GITHUB_TOKEN stays the fallback.
+      HAS_RELEASE_TOKEN: ${{ secrets.RELEASE_PLZ_TOKEN != '' }}
     steps:
       - name: Open or refresh the pull request
+        id: pr
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RELEASE_PLZ_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           repo="${{ github.repository }}"
           if gh pr view growth/scheduled --repo "$repo" --json state --jq .state 2>/dev/null | grep -q OPEN; then
             echo "a growth pull request is already open; the push refreshed it"
+            echo "opened=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           gh pr create --repo "$repo" --head growth/scheduled \
@@ -169,12 +183,14 @@ jobs:
           - did the coverage stamp move, and does \`coverage.accepted\` still explain
             every shortfall?
           - the ledger page is regenerated here, so its counts should match."
+          echo "opened=true" >> "$GITHUB_OUTPUT"
 
-      # Everything this job pushed or opened was token-caused, which GitHub
-      # deliberately does not let trigger workflows — so the PR would carry no
-      # checks, Replay included. workflow_dispatch is the documented
-      # exception; run CI on the branch explicitly.
+      # The branch was pushed with GITHUB_TOKEN, and token-caused events never
+      # trigger workflows — so unless the release token just opened the PR
+      # (which runs CI itself), the PR would carry no checks, Replay included.
+      # workflow_dispatch is the documented exception.
       - name: Run CI on the growth branch
+        if: steps.pr.outputs.opened != 'true' || env.HAS_RELEASE_TOKEN != 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh workflow run CI --repo "${{ github.repository }}" --ref growth/scheduled
