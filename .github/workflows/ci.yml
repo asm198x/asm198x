@@ -192,14 +192,13 @@ jobs:
       - name: Check the docs, their generated blocks and their nav
         run: cargo xtask docs --check
 
-      # A comment saying "measured against ca65 2.19" reads as evidence to every
-      # future reader, and nothing else in the build reads prose — so the claim
-      # rotted unnoticed until an audit found forty of them, two families of
-      # which named a version this project has never run. This measures every
-      # version claim against the `identity` the verdict corpus recorded when
-      # the tool actually answered. See `decisions/reference-versions.md`.
-      - name: Check every reference-version claim against what was recorded
-        run: cargo xtask versions --check
+      # One verdict per case, in canonical order, so a merge that doubles a
+      # line or a hand edit cannot land unnoticed. Verdicts from a tool version
+      # no longer in use are noted, not failed: between a bump and the growth
+      # run that follows, that is what the corpus looks like.
+      # See `decisions/verdicts-track-current-tools.md`.
+      - name: Check the verdict corpus is canonical
+        run: cargo xtask corpus --check
 
       # Whole upstream projects are the evidence for the source-compatibility
       # claim. CI does not fetch or execute them; it checks that every admitted

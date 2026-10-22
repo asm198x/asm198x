@@ -8,6 +8,7 @@
 
 mod changelog;
 mod compare;
+mod corpus;
 mod coverage;
 mod dialect_pages;
 mod divergences;
@@ -22,9 +23,7 @@ mod machines;
 mod nav;
 mod parity;
 mod search;
-mod supersede;
 mod surface;
-mod versions;
 
 use std::path::PathBuf;
 use std::process::ExitCode;
@@ -36,45 +35,39 @@ fn main() -> ExitCode {
         Some("parity") => run_parity(&args[1..]),
         Some("grow") => grow::run(&repo(), args.get(1).map(String::as_str)),
         Some("ecosystem") => ecosystem::run(&repo(), &args[1..]),
-        // The scope form: `--cpu <CPU> --suite <suite>... <reason>`. A listing
-        // change strands every verdict keyed on the text it used to emit, and
-        // those carry no divergence tag to select on (#214).
-        Some("supersede") if args.iter().any(|a| a == "--cpu") => run_supersede_scope(&args[1..]),
-        Some("supersede") => match (args.get(1), args.get(2)) {
-            (Some(tag), Some(reason)) => match supersede::run(&repo(), tag, reason, &args[3..]) {
-                Ok(retired) if retired.is_empty() => {
-                    eprintln!("xtask: no live verdict matches `{tag}`");
+        Some("corpus") => run_corpus(&args[1..]),
+        Some("close-divergence") => match args.get(1) {
+            Some(tag) => match corpus::close_divergence(&repo(), tag, &args[2..]) {
+                Ok(closed) if closed.is_empty() => {
+                    eprintln!("xtask: no verdict carries the divergence `{tag}`");
                     ExitCode::FAILURE
                 }
-                Ok(retired) => {
-                    println!("retired {} verdict(s) tagged `{tag}`:", retired.len());
-                    for case in &retired {
+                Ok(closed) => {
+                    println!("closed {} verdict(s) tagged `{tag}`:", closed.len());
+                    for case in &closed {
                         println!("  {case}");
                     }
                     ExitCode::SUCCESS
                 }
                 Err(e) => {
-                    eprintln!("xtask supersede: {e}");
+                    eprintln!("xtask close-divergence: {e}");
                     ExitCode::FAILURE
                 }
             },
-            _ => {
+            None => {
                 eprintln!(
-                    "usage: cargo xtask supersede <divergence-tag> <reason> [filter...]\n\
-                     \x20      cargo xtask supersede --cpu <CPU> --suite <suite>... <reason>\n\
+                    "usage: cargo xtask close-divergence <tag> [filter...]\n\
                      \n\
                      Each filter must match the verdict's dialect or case, so one\n\
-                     issue's divergences can be retired as they close rather than\n\
-                     all at once.\n\
-                     \n\
-                     The --cpu form retires by scope instead, for a change to the\n\
-                     text we hand the reference — a listing edit strands every\n\
-                     verdict keyed on the old text, and those carry no tag.\n\
-                     Suites: form, sweep-chunk, probe, fuzz, curriculum."
+                     issue's divergences can be closed as they close rather than\n\
+                     all at once."
                 );
                 ExitCode::FAILURE
             }
         },
+        // A listing change strands every verdict built from the text it used to
+        // emit, and those carry no divergence tag to select on (#214).
+        Some("drop") => run_drop(&args[1..]),
         Some("changelog") => match changelog::check(&repo()) {
             Ok(summary) => {
                 println!("{summary}");
@@ -119,37 +112,6 @@ fn main() -> ExitCode {
             print!("{}", ledger::render(&repo()));
             ExitCode::SUCCESS
         }
-        Some("versions") => {
-            let checking = args.iter().any(|a| a == "--check");
-            if !checking {
-                print!("{}", versions::report(&repo()));
-                return ExitCode::SUCCESS;
-            }
-            match versions::check(&repo()) {
-                Ok(unbacked) if unbacked.is_empty() => {
-                    println!("every reference-version claim names a version the corpus recorded");
-                    ExitCode::SUCCESS
-                }
-                Ok(unbacked) => {
-                    eprintln!(
-                        "{} version claim(s) name a version this project never recorded:\n",
-                        unbacked.len()
-                    );
-                    for u in &unbacked {
-                        eprintln!("  {u}");
-                    }
-                    eprintln!(
-                        "\nCorrect the claim, or — if the tool has moved on since it was true \
-                         — record it in decisions/reference-versions.md with the reason it stands."
-                    );
-                    ExitCode::FAILURE
-                }
-                Err(e) => {
-                    eprintln!("xtask versions: {e}");
-                    ExitCode::FAILURE
-                }
-            }
-        }
         Some(other) => {
             eprintln!("xtask: unknown command `{other}`\n\n{}", usage());
             ExitCode::FAILURE
@@ -172,14 +134,16 @@ fn usage() -> String {
      \x20 coverage --delta <f>  report movement against a base stamp (never fails)\n\
      \x20 coverage --write    refresh the stamp\n\
      \x20 ledger              print the conformance ledger for this revision\n\
-     \x20 versions            print the reference versions the corpus recorded\n\
-     \x20 versions --check    refuse a version claim nothing ever recorded\n\
-     \x20 grow [filter]       arbitrate what is not yet recorded (needs the tools)\n\
+     \x20 corpus --check      fail if a verdict file is not in canonical form\n\
+     \x20 corpus --write      rewrite every verdict file canonically\n\
+     \x20 corpus --prune      drop verdicts from tool versions no longer in use\n\
+     \x20 grow [filter]       arbitrate with the reference tools (needs them)\n\
      \x20 ecosystem check     validate the real-world source manifest\n\
      \x20 ecosystem list      list admitted projects and build targets\n\
      \x20 ecosystem fetch <dir> [id]  fetch and verify pinned source trees\n\
      \x20 ecosystem verify <dir> [id] verify existing pinned source trees\n\
-     \x20 supersede <tag> <why>  retire the verdicts carrying a divergence tag\n\
+     \x20 close-divergence <tag> [filter...]  a tracked divergence now matches\n\
+     \x20 drop --cpu <CPU> --suite <suite>...  remove verdicts a listing change stranded\n\
      \x20 changelog           fail if the newest release entry still reads like a draft\n\
      \x20 docs                regenerate the book's generated blocks\n\
      \x20 docs --check        fail if any generated block is stale\n\
@@ -329,55 +293,119 @@ fn run_docs(args: &[String]) -> ExitCode {
     ExitCode::SUCCESS
 }
 
-/// The repository root: this crate's manifest directory's parent.
-/// `supersede --cpu <CPU> --suite <suite>... <reason>`.
-fn run_supersede_scope(args: &[String]) -> ExitCode {
+/// `corpus --check | --write | --prune`.
+fn run_corpus(args: &[String]) -> ExitCode {
+    let repo = repo();
+    match args.first().map(String::as_str) {
+        Some("--check") => match (corpus::check(&repo), corpus::stale(&repo)) {
+            (Ok(problems), Ok(stale)) => {
+                for (tool, n) in &stale {
+                    println!(
+                        "note: {n} `{tool}` verdict(s) are from a version no longer in use; \
+                         the next growth run regenerates them"
+                    );
+                }
+                if problems.is_empty() {
+                    println!("every verdict file is canonical");
+                    return ExitCode::SUCCESS;
+                }
+                eprintln!("{} verdict file(s) are not canonical:\n", problems.len());
+                for p in &problems {
+                    eprintln!("  {p}");
+                }
+                eprintln!("\nRun `cargo xtask corpus --write` and commit the result.");
+                ExitCode::FAILURE
+            }
+            (Err(e), _) | (_, Err(e)) => {
+                eprintln!("xtask corpus: {e}");
+                ExitCode::FAILURE
+            }
+        },
+        Some("--write") => match corpus::write(&repo) {
+            Ok(changed) => {
+                println!("rewrote {} verdict file(s)", changed.len());
+                for path in &changed {
+                    println!("  {path}");
+                }
+                ExitCode::SUCCESS
+            }
+            Err(e) => {
+                eprintln!("xtask corpus: {e}");
+                ExitCode::FAILURE
+            }
+        },
+        Some("--prune") => {
+            let present = grow::present_tools();
+            match corpus::prune(&repo, &present) {
+                Ok(removed) => {
+                    let total: usize = removed.values().sum();
+                    println!("pruned {total} verdict(s) from tool versions no longer in use");
+                    for (tool, n) in &removed {
+                        println!("  {tool}: {n}");
+                    }
+                    ExitCode::SUCCESS
+                }
+                Err(e) => {
+                    eprintln!("xtask corpus: {e}");
+                    ExitCode::FAILURE
+                }
+            }
+        }
+        _ => {
+            eprintln!("usage: cargo xtask corpus --check | --write | --prune");
+            ExitCode::FAILURE
+        }
+    }
+}
+
+/// `drop --cpu <CPU> --suite <suite>...`.
+fn run_drop(args: &[String]) -> ExitCode {
     let mut cpu: Option<&str> = None;
     let mut suites: Vec<verdict_corpus::Suite> = Vec::new();
-    let mut reason: Option<&str> = None;
     let mut it = args.iter();
     while let Some(a) = it.next() {
         match a.as_str() {
             "--cpu" => cpu = it.next().map(String::as_str),
             "--suite" => match it.next().map(|s| parse_suite(s)) {
                 Some(Some(s)) => suites.push(s),
-                Some(None) => {
-                    eprintln!("xtask supersede: unknown suite");
+                _ => {
+                    eprintln!("xtask drop: unknown or missing suite");
                     return ExitCode::FAILURE;
                 }
-                None => break,
             },
-            other => reason = Some(other),
+            other => {
+                eprintln!("xtask drop: unexpected argument `{other}`");
+                return ExitCode::FAILURE;
+            }
         }
     }
-    let (Some(cpu), Some(reason)) = (cpu, reason) else {
-        eprintln!("usage: cargo xtask supersede --cpu <CPU> --suite <suite>... <reason>");
+    let Some(cpu) = cpu else {
+        eprintln!("usage: cargo xtask drop --cpu <CPU> --suite <suite>...");
         return ExitCode::FAILURE;
     };
     if suites.is_empty() {
         eprintln!(
-            "xtask supersede: --suite is required.\n\
+            "xtask drop: --suite is required.\n\
              \n\
-             Without it this would retire the CPU's curriculum and probe verdicts\n\
-             too, which no listing change touches — and retiring a true fact\n\
-             because it shares a file with a stale one is how a corpus shrinks."
+             Without it this would remove the CPU's curriculum and probe verdicts\n\
+             too, which no listing change touches."
         );
         return ExitCode::FAILURE;
     }
-    match supersede::run_by_scope(&repo(), cpu, &suites, reason) {
-        Ok(retired) if retired.is_empty() => {
-            eprintln!("xtask: no live verdict matches that scope");
+    match corpus::drop_scope(&repo(), cpu, &suites) {
+        Ok(dropped) if dropped.is_empty() => {
+            eprintln!("xtask: no verdict matches that scope");
             ExitCode::FAILURE
         }
-        Ok(retired) => {
-            println!("retired {} verdict(s) for {cpu}:", retired.len());
-            for case in &retired {
+        Ok(dropped) => {
+            println!("dropped {} verdict(s) for {cpu}:", dropped.len());
+            for case in &dropped {
                 println!("  {case}");
             }
             ExitCode::SUCCESS
         }
         Err(e) => {
-            eprintln!("xtask supersede: {e}");
+            eprintln!("xtask drop: {e}");
             ExitCode::FAILURE
         }
     }
@@ -395,6 +423,7 @@ fn parse_suite(s: &str) -> Option<verdict_corpus::Suite> {
     })
 }
 
+/// The repository root: this crate's manifest directory's parent.
 fn repo() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .parent()

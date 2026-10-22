@@ -65,7 +65,7 @@ fn seeded_attributes_follow_the_physical_bank_when_remapped() {
 }
 
 #[test]
-#[ignore = "requires SjASMPlus 1.21.0"]
+#[ignore = "requires an installed SjASMPlus reference"]
 fn defaults_and_seeded_memory_match_native_sjasmplus() {
     let dir = scratch::dir("device-defaults");
     for &(device, pages) in DEVICES {

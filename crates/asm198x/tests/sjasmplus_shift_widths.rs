@@ -45,10 +45,9 @@ mod tool_identity;
 
 /// Run explicitly under a bounded native-tool command; missing controls fail.
 #[test]
-#[ignore = "requires SjASMPlus 1.21.0; run with a 10-minute outer timeout"]
+#[ignore = "requires an installed SjASMPlus reference; run with a 10-minute outer timeout"]
 fn live_native_shift_fixture_is_corroborated() {
     let tool = tool_identity::identify("sjasmplus").expect("native SjASMPlus required");
-    assert!(tool.identity.contains("v1.21.0"), "{}", tool.identity);
     let facts: Value =
         serde_json::from_str(include_str!("fixtures/sjasmplus-shift-widths.json")).expect("facts");
     let cases = facts["cases"].as_array().expect("cases");

@@ -104,7 +104,7 @@ fn invalid_bank_attributes_are_rejected_before_image_allocation() {
 }
 
 #[test]
-#[ignore = "requires RGBDS 1.0.3"]
+#[ignore = "requires installed RGBDS references"]
 fn matches_rgblink_bytes_and_every_symbol_bank() {
     let dir = scratch::dir("rgbasm-banks");
     std::fs::write(dir.join("input.asm"), SOURCE).expect("write fixture");
@@ -116,7 +116,6 @@ fn matches_rgblink_bytes_and_every_symbol_bank() {
         ),
     ] {
         let identity = tool_identity::identify(tool).expect("reference identity");
-        assert!(identity.identity.contains("1.0.3"), "{identity:?}");
         eprintln!("{identity:?}");
         let output = std::process::Command::new(identity.path)
             .args(args)

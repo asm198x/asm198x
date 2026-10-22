@@ -34,11 +34,7 @@ pub fn markdown(repo: &Path) -> String {
         let Ok(corpus) = verdict_corpus::Corpus::read(&path) else {
             continue;
         };
-        let retired = corpus.retired();
         for verdict in corpus.verdicts() {
-            if retired.contains(&verdict.id().as_str()) {
-                continue;
-            }
             let entry = tools.entry(verdict.arbiter.tool.clone()).or_default();
             entry.identities.insert(verdict.arbiter.identity.clone());
             entry.cpus.insert(verdict.cpu.clone());

@@ -12,20 +12,19 @@
 //! Replay is the guarantee, restated without the tools: *given this exact
 //! source, the real assembler produced these exact bytes, and so do we.*
 //!
-//! # Why appending is idempotent
+//! # Why recording is idempotent
 //!
-//! Live mode records on every run, so a corpus that simply appended would
-//! double in size each time the suite ran locally. A verdict already present,
-//! byte for byte, is not written again — re-running a live suite that learned
-//! nothing new leaves the corpus untouched, and a diff therefore shows only
-//! facts that are genuinely new.
+//! Live mode records on every run. Each verdict replaces the corpus's answer
+//! for its case and the file is rewritten in canonical order, so re-running a
+//! live suite that learned nothing new leaves the corpus byte-identical, and a
+//! run against a new tool version shows exactly the answers that moved.
 
 #![allow(dead_code)]
 
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
-use verdict_corpus::{Arbiter, Corpus, Outcome, Record, Resolution, Suite, Verdict, encode_hex};
+use verdict_corpus::{Arbiter, Corpus, Outcome, Suite, Verdict, encode_hex};
 
 use super::tool_identity;
 
@@ -61,8 +60,8 @@ pub struct Recorder {
     pending: BTreeMap<String, Vec<Verdict>>,
 }
 
-/// Which case a verdict is about — the arbiter, the source, and enough labels
-/// for a diff to read.
+/// Which case a verdict is about: the arbiter, the source, and the labels
+/// that name it.
 ///
 /// Grouped rather than passed loose because `tool` and `dialect` are different
 /// things that happen to share a spelling today: the tool is the executable
@@ -78,9 +77,9 @@ pub struct CaseRef<'a> {
     pub tool: &'a str,
     /// The syntax the source is written in.
     pub dialect: &'a str,
-    /// A short human label, for reading diffs. Never part of the key.
+    /// The case's label. With the suite, tool and source, it names the case.
     pub case: String,
-    /// The exact text the arbiter was given. This *is* the key.
+    /// The exact text the arbiter was given.
     pub source: &'a str,
 }
 
@@ -92,9 +91,9 @@ impl Recorder {
 
     /// Record what the arbiter did with this case.
     ///
-    /// Silently does nothing if the tool cannot be identified — an unsigned
-    /// verdict is worth less than no verdict, and U3's identity test is what
-    /// makes an unidentifiable tool loud rather than silent.
+    /// Silently does nothing if the tool cannot be identified: a verdict that
+    /// cannot say which version answered could never be told apart from one
+    /// growth should prune. U3's identity test makes that case loud.
     pub fn record(&mut self, case: CaseRef<'_>, outcome: Outcome) {
         let Some(id) = tool_identity::identify(case.tool) else {
             return;
@@ -111,7 +110,6 @@ impl Recorder {
                 arbiter: Arbiter {
                     tool: id.tool,
                     identity: id.identity,
-                    digest: id.digest,
                 },
                 outcome,
             });
@@ -123,31 +121,14 @@ impl Recorder {
         self.record(case, Outcome::Bytes { hex });
     }
 
-    /// Write everything new to the per-CPU corpus files, skipping facts already
-    /// recorded identically. Returns how many lines were actually added.
+    /// Write the recorded verdicts into the per-CPU corpus files, each replacing
+    /// the corpus's answer for its case. Returns how many were new or changed.
     pub fn flush(self) -> std::io::Result<usize> {
-        let mut written = 0;
+        let mut changed = 0;
         for (cpu, verdicts) in self.pending {
-            let path = corpus_path(&cpu);
-            let existing = Corpus::read(&path).map_err(std::io::Error::other)?;
-            let known: std::collections::HashSet<String> =
-                existing.verdicts().map(Verdict::id).collect();
-
-            let mut fresh: Vec<Record> = Vec::new();
-            let mut seen_this_run = std::collections::HashSet::new();
-            for v in verdicts {
-                let id = v.id();
-                if known.contains(&id) || !seen_this_run.insert(id) {
-                    continue;
-                }
-                fresh.push(Record::Verdict(Box::new(v)));
-            }
-            if !fresh.is_empty() {
-                written += fresh.len();
-                verdict_corpus::append(&path, &fresh)?;
-            }
+            changed += verdict_corpus::merge(&corpus_path(&cpu), verdicts)?;
         }
-        Ok(written)
+        Ok(changed)
     }
 }
 
@@ -247,14 +228,15 @@ fn ours(result: Result<asm198x::AssemblyResult, asm198x::AsmError>) -> Result<Ve
         .map_err(|e| format!("we rejected the source: {e}"))
 }
 
-/// Lower-case hex, which is how every digest in the corpus is written.
+/// Lower-case hex, which is how every content digest in the corpus (curriculum
+/// keys and outcomes) is written.
 ///
 /// sha2 0.11 returns a `hybrid_array::Array` rather than a `GenericArray`, and
 /// that type implements no `LowerHex`, so `format!("{:x}", …)` no longer
 /// compiles. `verdict_corpus::encode_hex` is the wrong replacement: it emits
 /// **upper**-case, for the byte payloads a verdict carries. Swapping the case
-/// of a recorded digest would change every `Verdict::id` and leave the corpus
-/// mixed, so the case is part of the format rather than a detail.
+/// of a recorded digest would change every curriculum key, so the case is part
+/// of the format rather than a detail.
 fn hex_lower(bytes: &[u8]) -> String {
     use std::fmt::Write as _;
     bytes
@@ -411,8 +393,6 @@ pub struct ReplayReport {
     /// Cases where our bytes and the reference's disagree, or we rejected
     /// source the reference accepted.
     pub failures: Vec<String>,
-    /// Cases the corpus cannot settle without a human (R2).
-    pub alarms: Vec<String>,
 }
 
 /// Replay every committed verdict for `cpu`.
@@ -427,19 +407,11 @@ pub fn replay_cpu(cpu: &str, report: &mut ReplayReport) {
 /// Replay a corpus that is already in hand, so the rules can be tested against
 /// a constructed one rather than only against what happens to be committed.
 pub fn replay_corpus(cpu: &str, corpus: &Corpus, report: &mut ReplayReport) {
-    for (key, resolution) in corpus.resolved() {
-        match resolution {
-            Resolution::Alarm { conflicting } => {
-                report.alarms.push(format!(
-                    "{cpu}: {} verdicts disagree for `{}` under {}",
-                    conflicting.len(),
-                    conflicting.first().map_or("?", |v| v.case.as_str()),
-                    key.identity,
-                ));
-            }
-            Resolution::Fact {
-                outcome, verdict, ..
-            } => {
+    for verdict in corpus.verdicts() {
+        let outcome = &verdict.outcome;
+        let key = verdict.key();
+        {
+            {
                 // Curriculum first: its outcome is a digest, not bytes, so the
                 // byte guard below would skip every one of them.
                 if verdict.suite == Suite::Curriculum {
@@ -597,7 +569,7 @@ fn replay_curriculum(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use verdict_corpus::{Record, encode_hex};
+    use verdict_corpus::encode_hex;
 
     /// A corpus of exactly one fact about the 8080, whose source our own
     /// assembler can read.
@@ -611,12 +583,12 @@ mod tests {
             arbiter: Arbiter {
                 tool: "asl".to_string(),
                 identity: "test".to_string(),
-                digest: "test".to_string(),
             },
             outcome,
         };
-        let line = verdict_corpus::to_line(&Record::Verdict(Box::new(verdict))).expect("line");
-        Corpus::parse(&line).expect("parse")
+        let mut corpus = Corpus::default();
+        corpus.insert(verdict);
+        corpus
     }
 
     fn replay(outcome: Outcome) -> ReplayReport {
@@ -732,20 +704,13 @@ mod tests {
             hex: encode_hex(&[0x3E, 0x12]),
         });
         // Same corpus, but asked for under a CPU whose dialect pair is unknown.
-        let rewritten = corpus
-            .verdicts()
-            .map(|v| {
-                let mut v = v.clone();
-                v.dialect = "no-such-dialect".to_string();
-                Record::Verdict(Box::new(v))
-            })
-            .collect::<Vec<_>>();
-        let text = rewritten
-            .iter()
-            .map(|r| verdict_corpus::to_line(r).expect("line"))
-            .collect::<Vec<_>>()
-            .join("\n");
-        replay_corpus("8080", &Corpus::parse(&text).expect("parse"), &mut report);
+        let mut rewritten = Corpus::default();
+        for v in corpus.verdicts() {
+            let mut v = v.clone();
+            v.dialect = "no-such-dialect".to_string();
+            rewritten.insert(v);
+        }
+        replay_corpus("8080", &rewritten, &mut report);
         assert_eq!(report.checked, 0);
         assert_eq!(report.unreplayable, 1);
         assert!(report.failures.is_empty());

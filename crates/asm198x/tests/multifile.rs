@@ -1229,7 +1229,7 @@ fn acme_include_macro_error_preserves_definition_and_invocation() {
 /// Live differential control for #429. Kept ignored with the other external
 /// reference tests; the hermetic test above runs on every machine.
 #[test]
-#[ignore = "needs ACME 0.97; run with --ignored"]
+#[ignore = "needs an installed ACME reference; run with --ignored"]
 fn acme_include_macro_matches_reference_bytes() {
     let dir = temp_tree("acme-include-macro-reference");
     std::fs::write(
@@ -1243,7 +1243,7 @@ fn acme_include_macro_matches_reference_bytes() {
         .current_dir(&dir)
         .args(["-f", "plain", "-o", "native.bin", "main.a"])
         .output()
-        .expect("run ACME 0.97");
+        .expect("run the ACME reference");
     assert!(
         native.status.success(),
         "ACME failed: {}",

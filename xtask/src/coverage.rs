@@ -21,7 +21,7 @@
 //!
 //! # Why a committed stamp
 //!
-//! The base revision's coverage is not derivable from the append-only corpus:
+//! The base revision's coverage is not derivable from the corpus alone:
 //! the denominator is the base's spec, which needs the base's code. The
 //! alternative to a committed stamp is checking out the base ref and counting
 //! again — a second build on every PR.
@@ -619,15 +619,15 @@ mod tests {
         }
     }
 
-    /// A second arbiter over the same forms is corroboration, not coverage.
+    /// One form recorded under two tool versions is one verdict, and counts
+    /// once.
     ///
-    /// The regression this guards: `arbitrated` counted verdict *lines*, so
-    /// sweeping the 68000 under both installed vasm versions scored 1676 of
-    /// 838 forms and the ledger published "200.0%". The two identities here
-    /// are the two the 68000 corpus actually holds — an invented version would
-    /// be a version claim, and `versions --check` refuses those.
+    /// The regression this guards: `arbitrated` once counted verdict *lines*,
+    /// so sweeping the 68000 under two vasm versions scored 1676 of 838 forms
+    /// and the ledger published "200.0%". One verdict per case now makes that
+    /// impossible by construction; this keeps it so.
     #[test]
-    fn a_second_arbiter_does_not_inflate_coverage() {
+    fn a_second_tool_version_does_not_inflate_coverage() {
         let dir = std::env::temp_dir().join("asm198x-coverage-tally");
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).expect("temp dir");
@@ -656,9 +656,8 @@ mod tests {
             Some(2),
             "two forms were arbitrated, one of them twice"
         );
-        // The per-suite count is the other question, and still counts every
-        // observation: three verdicts were recorded.
-        assert_eq!(tally.per_suite["68000"]["form"], 3);
+        // The later line answers the case: two verdicts, one per form.
+        assert_eq!(tally.per_suite["68000"]["form"], 2);
         let _ = std::fs::remove_dir_all(&dir);
     }
 

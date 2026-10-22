@@ -3,49 +3,49 @@
 //!
 //! Asm198x's central claim is that its output is byte-identical to the real
 //! assembler for the dialect. That claim is arbitrated by shelling out to
-//! `acme`, `ca65`, `asl`, `pasmo`, `sjasmplus`, `vasm`, `lwasm` and `rgbasm` —
-//! so it can only be checked on a machine that has all of them, which today is
-//! one machine. Every such suite is `#[ignore]`d, CI installs no reference
-//! tool, and an outside contributor cannot prove anything in a pull request.
+//! `acme`, `ca65`, `asl`, `pasmo`, `sjasmplus`, `vasm`, `lwasm` and `rgbasm`,
+//! so it can only be checked where they are installed: the arbiter image. CI
+//! installs none of them, so an outside contributor could prove nothing in a
+//! pull request.
 //!
-//! A verdict is one recorded fact: *this arbiter, at this identity, given this
-//! source text, produced these bytes* (or rejected it, and why). Recorded once
-//! in **live mode** where the tools exist, committed, and **replayed** forever
-//! by tests that need no tools at all.
+//! A verdict is one recorded fact: *given this source text, the reference
+//! produced these bytes* (or rejected it, and why). Recorded in **live mode**
+//! where the tools exist, committed, and **replayed** by tests that need no
+//! tools at all.
 //!
 //! # What a verdict is not
 //!
-//! It is not an expectation someone wrote down. Nothing here is authored by
-//! hand: every record is the observed output of a real tool run, and the
-//! arbiter's identity travels with it so a fact can always be traced to what
-//! produced it. That is the difference between a corpus and a pile of goldens —
-//! a golden says what we think should happen, a verdict says what did.
+//! It is not an expectation someone wrote down. Every record is the observed
+//! output of a real tool run. That is the difference between a corpus and a
+//! pile of goldens: a golden says what we think should happen, a verdict says
+//! what did.
 //!
-//! # Identity, corroboration, and alarms
+//! # One verdict per case, from the current tools
 //!
-//! Verdicts are keyed on **behavioural identity** (the tool's own version
-//! self-report) plus the source text, because that is what determines
-//! behaviour. The **binary digest** rides along as provenance rather than as
-//! part of the key, which makes the useful distinction possible:
+//! The corpus answers one question: *what do the reference tools in use now
+//! do?* Each [`Key`] (suite, case, tool, source text) holds exactly one
+//! verdict. Recording a case again **replaces** its verdict, so moving to a new
+//! tool version and re-running growth regenerates the corpus, and the git diff
+//! is the review: each changed line is either a bug of ours the old version
+//! hid, or the reference changing behaviour.
 //!
-//! - the same identity and text producing the same bytes from two *different*
-//!   binaries is one fact **corroborated** twice — a rebuilt or repackaged
-//!   arbiter agreeing with itself;
-//! - the same identity and text producing *different* bytes is an
-//!   [`Resolution::Alarm`]. Something is wrong with the chain of trust, and it
-//!   must be adjudicated rather than silently resolved by recency.
+//! The tool's version self-report travels with each verdict as
+//! [`Arbiter::identity`], so a reader can see what answered and growth can
+//! prune verdicts no current tool re-recorded. It is not part of the key.
+//! History is git's job, not the file's.
 //!
-//! An alarm is settled by a [`Record::Supersede`], which names the record it
-//! retires and why. The retired record stays in the file — inert, still
-//! walkable — because the history of a corrected fact is worth as much as the
-//! correction.
+//! (Until October 2026 verdicts were keyed on the version string, carried a
+//! binary digest, and were append-only, with supersede records settling
+//! conflicts. `decisions/verdicts-track-current-tools.md` records why that
+//! went.)
 //!
 //! # On-disk shape
 //!
-//! One NDJSON file per CPU: one JSON object per line, appended, never rewritten.
-//! An unrecognised `t` is **skipped, not fatal**, so a corpus written by a newer
-//! producer still replays on an older checkout — the same additive-evolution
-//! posture Debug198x takes.
+//! One NDJSON file per CPU, one JSON object per line, in canonical order: sorted
+//! by key and written whole, so the same facts always produce the same file and
+//! a diff shows only what moved. A line whose `t` is not recognised is **kept,
+//! not fatal**, so a corpus written by a newer producer still replays on an
+//! older checkout.
 //!
 //! Reference bytes are stored as uppercase hex rather than a digest, so a
 //! divergence is legible in a diff without any tool: you can see which byte
@@ -53,14 +53,13 @@
 
 use std::collections::BTreeMap;
 use std::fmt;
-use std::io::Write;
 use std::path::Path;
 
 use serde::{Deserialize, Serialize};
 
 /// Which suite produced a verdict. Kept as a closed set so a typo cannot
 /// silently create a category nothing ever replays.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "kebab-case")]
 pub enum Suite {
     /// One `isa` form, synthesised and round-tripped through the reference.
@@ -75,24 +74,15 @@ pub enum Suite {
     Curriculum,
 }
 
-/// The tool that produced a verdict, and how confidently it can be identified.
-///
-/// `identity` is the tool's own version self-report — the thing that actually
-/// predicts behaviour, and so the thing verdicts are keyed on. `digest` is a
-/// hash of the binary that ran, carried as provenance: it never keys a lookup,
-/// but it is what lets two agreeing records be recognised as corroboration and
-/// two disagreeing ones be traced.
-///
-/// The digest is an opaque string here. Computing it belongs to the harness
-/// that has the binary in hand, not to the format that stores it.
-#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+/// The tool that produced a verdict.
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct Arbiter {
     /// The executable's name, as invoked (`"asl"`, `"ca65"`).
     pub tool: String,
-    /// The tool's behavioural self-report (`"1.42 Beta [Bld 250]"`).
+    /// The tool's own version self-report (`"rgbasm v1.0.3"`), recorded so a
+    /// reader can see what answered and growth can tell a verdict from a tool
+    /// version no longer in use. Not part of the key.
     pub identity: String,
-    /// A hash of the binary that ran. Provenance only — never part of the key.
-    pub digest: String,
 }
 
 /// What the arbiter did with the source text.
@@ -137,10 +127,11 @@ pub struct Verdict {
     /// The source dialect the text is written in (`"asl"`, `"acme"`).
     pub dialect: String,
     /// A short human label for the case (`"lda #imm"`, `"colon-inline IF"`).
-    /// Never part of the key — it is there so a diff reads.
+    /// Part of the key: two cases can share source text (an alias and its
+    /// mnemonic, a form and a one-instruction sweep chunk) and each is counted.
     pub case: String,
     /// The exact source text the arbiter was given. Stored verbatim rather than
-    /// hashed: it is the key, and a key you can read is a key you can debug.
+    /// hashed: a key you can read is a key you can debug.
     pub source: String,
     /// Who produced the fact.
     pub arbiter: Arbiter,
@@ -150,117 +141,53 @@ pub struct Verdict {
 }
 
 impl Verdict {
-    /// The lookup key: behavioural identity plus source text. Deliberately
-    /// excludes the binary digest, so that two builds of the same release
-    /// corroborate one fact instead of forking it.
+    /// The case this verdict answers. Recording the same case again replaces
+    /// the verdict rather than adding a second one.
     #[must_use]
     pub fn key(&self) -> Key {
         Key {
-            identity: self.arbiter.identity.clone(),
+            suite: self.suite,
+            case: self.case.clone(),
+            tool: self.arbiter.tool.clone(),
             source: self.source.clone(),
         }
     }
-
-    /// A stable content id, used to name this record in a supersede. Derived
-    /// from every field including the digest, so two genuinely distinct
-    /// observations never share one.
-    #[must_use]
-    pub fn id(&self) -> String {
-        // Not a cryptographic identity — a name for one line in one file. The
-        // digest is already carried separately for provenance.
-        let mut h: u64 = 0xcbf2_9ce4_8422_2325;
-        let mut mix = |s: &str| {
-            for b in s.as_bytes() {
-                h ^= u64::from(*b);
-                h = h.wrapping_mul(0x0000_0100_0000_01b3);
-            }
-        };
-        mix(&self.cpu);
-        mix(&self.dialect);
-        mix(&self.case);
-        mix(&self.source);
-        mix(&self.arbiter.tool);
-        mix(&self.arbiter.identity);
-        mix(&self.arbiter.digest);
-        mix(&serde_json::to_string(&self.outcome).unwrap_or_default());
-        format!("{h:016x}")
-    }
 }
 
-/// What a lookup is keyed on. See [`Verdict::key`].
-#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+/// What identifies a case. Field order is the corpus's canonical line order,
+/// so a file groups by suite and then reads in case order.
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Key {
-    /// The arbiter's behavioural self-report.
-    pub identity: String,
+    /// The suite that names the case.
+    pub suite: Suite,
+    /// The case's label.
+    pub case: String,
+    /// The reference tool that answers it.
+    pub tool: String,
     /// The source text it was given.
     pub source: String,
 }
 
-/// A line in a corpus file. Anything whose `t` is not recognised parses as
-/// [`Record::Unknown`] and is carried, not rejected.
-#[derive(Clone, Debug, PartialEq)]
-pub enum Record {
-    /// A recorded fact.
-    Verdict(Box<Verdict>),
-    /// An adjudication retiring an earlier record.
-    Supersede(Supersede),
-    /// A record kind this build does not know. Skipped by every lookup, kept so
-    /// a newer producer's corpus still replays here.
-    Unknown(serde_json::Value),
-}
-
-/// Retires one record in favour of the rest, settling an [`Resolution::Alarm`].
-///
-/// The retired record is not deleted. A corrected fact and the reason it needed
-/// correcting are both worth keeping, and a supersede chain that cannot be
-/// walked backwards explains nothing.
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
-pub struct Supersede {
-    /// The [`Verdict::id`] being retired.
-    pub retires: String,
-    /// Why — free text, for the human reading the diff.
-    pub reason: String,
-}
-
-/// How a set of verdicts sharing one [`Key`] resolves.
-#[derive(Clone, Debug, PartialEq)]
-pub enum Resolution<'a> {
-    /// One agreed outcome. `corroborations` lists every distinct binary digest
-    /// that produced it — more than one means independent confirmation.
-    Fact {
-        /// The outcome every live record agrees on.
-        outcome: &'a Outcome,
-        /// Distinct binary digests that produced it, sorted.
-        corroborations: Vec<&'a str>,
-        /// One of the agreeing records, for the fields the key does not carry —
-        /// which suite recorded it, which CPU and dialect. A replay needs those
-        /// to know how to re-run the case, and they are identical across the
-        /// records that agree.
-        verdict: &'a Verdict,
-    },
-    /// Live records disagree about what the arbiter did. Not resolvable by
-    /// recency: it needs a [`Supersede`].
-    Alarm {
-        /// The conflicting records, in file order.
-        conflicting: Vec<&'a Verdict>,
-    },
-}
-
-/// A parsed corpus: every record in file order, plus the resolved lookup.
-#[derive(Clone, Debug, Default)]
+/// A parsed corpus file: one verdict per [`Key`], plus any lines this build
+/// does not understand, kept so they survive a rewrite.
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct Corpus {
-    records: Vec<Record>,
+    verdicts: BTreeMap<Key, Verdict>,
+    unknown: Vec<serde_json::Value>,
 }
 
 impl Corpus {
     /// Parse NDJSON. A blank line is skipped; a line that is not JSON at all is
-    /// an error, because that is corruption rather than evolution.
+    /// an error, because that is corruption rather than evolution. When two
+    /// lines answer the same case (a merge artefact) the later one wins, and
+    /// [`Corpus::render`] no longer matches the file, which `xtask corpus
+    /// --check` reports.
     ///
     /// # Errors
     ///
     /// Returns the 1-based line number and message of the first unparseable line.
     pub fn parse(text: &str) -> Result<Self, ParseError> {
-        let mut records = Vec::new();
+        let mut corpus = Self::default();
         for (i, line) in text.lines().enumerate() {
             if line.trim().is_empty() {
                 continue;
@@ -269,9 +196,20 @@ impl Corpus {
                 line: i + 1,
                 message: e.to_string(),
             })?;
-            records.push(classify(value));
+            match value.get("t").and_then(serde_json::Value::as_str) {
+                // A recognised kind whose payload this build cannot read is
+                // kept as unknown too: refusing the whole file over one record
+                // is the failure this policy exists to avoid.
+                Some("verdict") => match serde_json::from_value::<Verdict>(value.clone()) {
+                    Ok(verdict) => {
+                        corpus.insert(verdict);
+                    }
+                    Err(_) => corpus.unknown.push(value),
+                },
+                _ => corpus.unknown.push(value),
+            }
         }
-        Ok(Self { records })
+        Ok(corpus)
     }
 
     /// Read a corpus file. A file that does not exist is an empty corpus, not an
@@ -291,163 +229,131 @@ impl Corpus {
         }
     }
 
-    /// Every record, in file order — including superseded and unknown ones, so
-    /// a chain stays walkable.
-    #[must_use]
-    pub fn records(&self) -> &[Record] {
-        &self.records
-    }
-
-    /// The verdicts this build understands, in file order, including retired
-    /// ones.
-    ///
-    /// **De-duplicated by content.** An append-only NDJSON file merged from two
-    /// branches can end up holding one verdict twice; git resolves that as two
-    /// lines, but it is still one observation. Counting it twice would inflate
-    /// the ledger and could look like corroboration that never happened, so an
-    /// exact repeat is dropped on read. Two verdicts that differ in any field —
-    /// including the binary that produced them — are distinct and both kept.
+    /// Every verdict, in canonical order.
     pub fn verdicts(&self) -> impl Iterator<Item = &Verdict> {
-        let mut seen = std::collections::HashSet::new();
-        self.records
-            .iter()
-            .filter_map(|r| match r {
-                Record::Verdict(v) => Some(&**v),
-                _ => None,
-            })
-            .filter(move |v| seen.insert(v.id()))
+        self.verdicts.values()
     }
 
-    /// Ids retired by a supersede.
+    /// How many cases the corpus answers.
     #[must_use]
-    pub fn retired(&self) -> Vec<&str> {
-        self.records
-            .iter()
-            .filter_map(|r| match r {
-                Record::Supersede(s) => Some(s.retires.as_str()),
-                _ => None,
-            })
-            .collect()
+    pub fn len(&self) -> usize {
+        self.verdicts.len()
     }
 
-    /// Resolve one case: what does the corpus say this arbiter did with this
-    /// text? `None` if nothing was ever recorded, or if everything recorded has
-    /// been retired.
+    /// Whether the corpus answers nothing.
     #[must_use]
-    pub fn resolve(&self, key: &Key) -> Option<Resolution<'_>> {
-        let retired = self.retired();
-        let live: Vec<&Verdict> = self
-            .verdicts()
-            .filter(|v| v.arbiter.identity == key.identity && v.source == key.source)
-            .filter(|v| !retired.contains(&v.id().as_str()))
-            .collect();
-        let first = live.first()?;
+    pub fn is_empty(&self) -> bool {
+        self.verdicts.is_empty()
+    }
 
-        if live.iter().all(|v| v.outcome == first.outcome) {
-            let mut corroborations: Vec<&str> =
-                live.iter().map(|v| v.arbiter.digest.as_str()).collect();
-            corroborations.sort_unstable();
-            corroborations.dedup();
-            return Some(Resolution::Fact {
-                outcome: &first.outcome,
-                corroborations,
-                verdict: first,
-            });
+    /// The verdict for one case, if it has been recorded.
+    #[must_use]
+    pub fn get(&self, key: &Key) -> Option<&Verdict> {
+        self.verdicts.get(key)
+    }
+
+    /// Lines this build does not understand, in the order they were read.
+    #[must_use]
+    pub fn unknown(&self) -> &[serde_json::Value] {
+        &self.unknown
+    }
+
+    /// Record a verdict, replacing any earlier verdict for the same case.
+    /// Returns the verdict it replaced.
+    pub fn insert(&mut self, verdict: Verdict) -> Option<Verdict> {
+        self.verdicts.insert(verdict.key(), verdict)
+    }
+
+    /// Keep only the verdicts `keep` accepts. Returns how many were removed.
+    pub fn retain(&mut self, mut keep: impl FnMut(&Verdict) -> bool) -> usize {
+        let before = self.verdicts.len();
+        self.verdicts.retain(|_, v| keep(v));
+        before - self.verdicts.len()
+    }
+
+    /// The canonical file text: one line per verdict in key order, then any
+    /// unknown lines in the order they were read. A pure function of content,
+    /// so recording unchanged facts rewrites an identical file.
+    ///
+    /// # Errors
+    ///
+    /// Returns a serialization failure.
+    pub fn render(&self) -> Result<String, serde_json::Error> {
+        let mut out = String::new();
+        for verdict in self.verdicts.values() {
+            out.push_str(&to_line(verdict)?);
+            out.push('\n');
         }
-        Some(Resolution::Alarm { conflicting: live })
+        for value in &self.unknown {
+            out.push_str(&serde_json::to_string(value)?);
+            out.push('\n');
+        }
+        Ok(out)
     }
 
-    /// Every distinct case in the corpus, resolved. Sorted, so a caller
-    /// iterating for a report gets a stable order.
-    #[must_use]
-    pub fn resolved(&self) -> BTreeMap<Key, Resolution<'_>> {
-        let mut keys: Vec<Key> = self.verdicts().map(Verdict::key).collect();
-        keys.sort();
-        keys.dedup();
-        keys.into_iter()
-            .filter_map(|k| self.resolve(&k).map(|r| (k, r)))
-            .collect()
+    /// Write the canonical file, creating its directory if needed. An empty
+    /// corpus with nothing unknown removes the file instead, so a CPU whose
+    /// last verdict was pruned leaves nothing behind.
+    ///
+    /// # Errors
+    ///
+    /// Returns any I/O or serialization failure.
+    pub fn write(&self, path: &Path) -> std::io::Result<()> {
+        if self.verdicts.is_empty() && self.unknown.is_empty() {
+            return match std::fs::remove_file(path) {
+                Err(e) if e.kind() != std::io::ErrorKind::NotFound => Err(e),
+                _ => Ok(()),
+            };
+        }
+        if let Some(parent) = path.parent() {
+            std::fs::create_dir_all(parent)?;
+        }
+        let text = self.render().map_err(std::io::Error::other)?;
+        // Written to a sibling and renamed, so an interrupted run leaves the old
+        // file or the new one, never half of either.
+        let tmp = path.with_extension("ndjson.tmp");
+        std::fs::write(&tmp, text)?;
+        std::fs::rename(&tmp, path)
     }
 }
 
-/// Classify one parsed line. An unrecognised `t` becomes [`Record::Unknown`]
-/// rather than an error — and so does a *recognised* `t` whose payload this
-/// build cannot deserialize, since refusing to load the whole file over one
-/// record we do not understand is the failure mode this policy exists to avoid.
-fn classify(value: serde_json::Value) -> Record {
-    match value.get("t").and_then(serde_json::Value::as_str) {
-        Some("verdict") => serde_json::from_value(value.clone())
-            .map_or(Record::Unknown(value), |v| Record::Verdict(Box::new(v))),
-        Some("supersede") => {
-            serde_json::from_value(value.clone()).map_or(Record::Unknown(value), Record::Supersede)
-        }
-        _ => Record::Unknown(value),
-    }
-}
-
-/// Append records to a CPU's corpus file, creating it if absent.
-///
-/// Appending is the only write. A corpus is never rewritten in place, because a
-/// fact that can be edited away is not evidence.
+/// Record verdicts into a CPU's corpus file: each replaces any earlier verdict
+/// for the same case, and the file is rewritten in canonical order. Returns how
+/// many verdicts were new or changed.
 ///
 /// # Errors
 ///
-/// Returns any I/O or serialization failure.
-pub fn append(path: &Path, records: &[Record]) -> std::io::Result<()> {
-    if let Some(parent) = path.parent() {
-        std::fs::create_dir_all(parent)?;
+/// Returns any read, parse, I/O or serialization failure.
+pub fn merge(path: &Path, verdicts: impl IntoIterator<Item = Verdict>) -> std::io::Result<usize> {
+    let mut corpus = Corpus::read(path).map_err(std::io::Error::other)?;
+    let mut changed = 0;
+    for verdict in verdicts {
+        let fresh = verdict.clone();
+        if corpus.insert(verdict).as_ref() != Some(&fresh) {
+            changed += 1;
+        }
     }
-    // Built whole, then written in one call. Appending line by line means an
-    // interrupted growth run can leave half a verdict on disk, which reads as a
-    // corrupt corpus rather than a shorter one. One write is not a guarantee,
-    // but it turns a likely failure into an unlikely one for the sizes involved.
-    let mut payload = String::new();
-    for record in records {
-        payload.push_str(&to_line(record)?);
-        payload.push('\n');
+    if changed > 0 {
+        corpus.write(path)?;
     }
-    let mut file = std::fs::OpenOptions::new()
-        .create(true)
-        .append(true)
-        .open(path)?;
-    file.write_all(payload.as_bytes())?;
-    file.flush()
+    Ok(changed)
 }
 
-/// Serialize one record to its NDJSON line. Field order follows the struct
-/// declarations, so output is byte-stable across runs and diffs stay readable.
+/// Serialize one verdict to its NDJSON line.
+///
+/// Key order is `serde_json`'s, which sorts, so `t` lands alphabetically rather
+/// than first. That is the order the corpus wants: a line's bytes depend only on
+/// its content, so re-recording an unchanged fact produces an identical line.
 ///
 /// # Errors
 ///
 /// Returns a serialization failure.
-pub fn to_line(record: &Record) -> std::io::Result<String> {
-    let value = match record {
-        Record::Verdict(v) => {
-            let mut m = serde_json::to_value(&**v).map_err(std::io::Error::other)?;
-            insert_tag(&mut m, "verdict");
-            m
-        }
-        Record::Supersede(s) => {
-            let mut m = serde_json::to_value(s).map_err(std::io::Error::other)?;
-            insert_tag(&mut m, "supersede");
-            m
-        }
-        Record::Unknown(v) => v.clone(),
-    };
-    serde_json::to_string(&value).map_err(std::io::Error::other)
-}
-
-/// Tag the object with its record kind.
-///
-/// Key order is `serde_json`'s, which sorts — so `t` lands alphabetically
-/// rather than first. That is the deterministic order the corpus wants: a
-/// record's bytes depend only on its content, never on the order a producer
-/// happened to build it in, so re-recording an unchanged fact produces an
-/// identical line and diffs show only what actually moved.
-fn insert_tag(value: &mut serde_json::Value, tag: &str) {
+pub fn to_line(verdict: &Verdict) -> Result<String, serde_json::Error> {
+    let mut value = serde_json::to_value(verdict)?;
     if let Some(map) = value.as_object_mut() {
-        map.insert("t".to_string(), serde_json::Value::String(tag.to_string()));
+        map.insert("t".to_string(), serde_json::Value::String("verdict".into()));
     }
+    serde_json::to_string(&value)
 }
 
 /// Uppercase hex, the storage form for reference bytes.
@@ -502,196 +408,188 @@ pub mod files;
 mod tests {
     use super::*;
 
-    fn arbiter(digest: &str) -> Arbiter {
-        Arbiter {
-            tool: "asl".to_string(),
-            identity: "1.42 Beta [Bld 250]".to_string(),
-            digest: digest.to_string(),
-        }
-    }
-
-    fn verdict(digest: &str, hex: &str) -> Verdict {
+    fn verdict(identity: &str, hex: &str) -> Verdict {
         Verdict {
             suite: Suite::Form,
             cpu: "8080".to_string(),
             dialect: "asl".to_string(),
             case: "mvi a,imm".to_string(),
             source: " mvi a,12h\n".to_string(),
-            arbiter: arbiter(digest),
+            arbiter: Arbiter {
+                tool: "asl".to_string(),
+                identity: identity.to_string(),
+            },
             outcome: Outcome::Bytes {
                 hex: hex.to_string(),
             },
         }
     }
 
-    fn key() -> Key {
-        Key {
-            identity: "1.42 Beta [Bld 250]".to_string(),
-            source: " mvi a,12h\n".to_string(),
-        }
+    fn line(v: &Verdict) -> String {
+        to_line(v).expect("serialize")
     }
 
-    /// Every field survives the write/read round trip. The corpus is evidence,
-    /// so a field that quietly fails to persist is a fact quietly lost.
+    fn temp_path(name: &str) -> std::path::PathBuf {
+        let dir =
+            std::env::temp_dir().join(format!("asm198x-verdicts-{name}-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        dir.join("8080.ndjson")
+    }
+
+    /// Every field survives the write/read round trip, and serialization is a
+    /// pure function of content.
     #[test]
     fn a_verdict_round_trips_every_field() {
-        let original = verdict("sha-a", "3E12");
-        let line = to_line(&Record::Verdict(Box::new(original.clone()))).expect("serialize");
-        let parsed = Corpus::parse(&line).expect("parse");
-        assert_eq!(parsed.verdicts().collect::<Vec<_>>(), vec![&original]);
-        assert!(
-            line.contains(r#""t":"verdict""#),
-            "kind is recorded: {line}"
-        );
-        // Serialization is a pure function of content: the same fact written
-        // twice is byte-identical, which is what keeps corpus diffs honest.
+        let original = verdict("1.42 Beta [Bld 309]", "3E12");
+        let corpus = Corpus::parse(&line(&original)).expect("parse");
+        assert_eq!(corpus.verdicts().collect::<Vec<_>>(), vec![&original]);
+        assert!(line(&original).contains(r#""t":"verdict""#));
+        assert_eq!(line(&original), line(&original.clone()));
+    }
+
+    /// Recording a case again replaces its verdict: one case, one answer, from
+    /// whichever tool answered last.
+    #[test]
+    fn recording_a_case_again_replaces_it() {
+        let mut corpus = Corpus::default();
+        assert_eq!(corpus.insert(verdict("old", "3E12")), None);
+        let replaced = corpus.insert(verdict("new", "3E99"));
         assert_eq!(
-            line,
-            to_line(&Record::Verdict(Box::new(original))).expect("serialize"),
+            replaced.map(|v| v.arbiter.identity),
+            Some("old".to_string())
+        );
+        assert_eq!(corpus.len(), 1);
+        let only = corpus.verdicts().next().expect("one verdict");
+        assert_eq!(only.arbiter.identity, "new");
+        assert_eq!(only.outcome.bytes(), Some(vec![0x3E, 0x99]));
+    }
+
+    /// Two cases sharing source text (an alias and its mnemonic) are two
+    /// verdicts, because coverage counts each.
+    #[test]
+    fn cases_sharing_source_are_counted_separately() {
+        let mut alias = verdict("v", "3E12");
+        alias.case = "alias of mvi".to_string();
+        let mut corpus = Corpus::default();
+        corpus.insert(verdict("v", "3E12"));
+        corpus.insert(alias);
+        assert_eq!(corpus.len(), 2);
+    }
+
+    /// When a merge leaves two lines for one case, the later wins, and the file
+    /// is visibly not canonical.
+    #[test]
+    fn a_doubled_case_keeps_the_later_line_and_is_not_canonical() {
+        let text = format!(
+            "{}\n{}\n",
+            line(&verdict("a", "3E12")),
+            line(&verdict("b", "3E99"))
+        );
+        let corpus = Corpus::parse(&text).expect("parse");
+        assert_eq!(corpus.len(), 1);
+        assert_eq!(
+            corpus
+                .verdicts()
+                .next()
+                .map(|v| v.arbiter.identity.as_str()),
+            Some("b")
+        );
+        assert_ne!(corpus.render().expect("render"), text);
+    }
+
+    /// The canonical file is sorted by key, whatever order verdicts arrived in,
+    /// so the same facts always produce the same bytes.
+    #[test]
+    fn rendering_is_canonical_whatever_the_insertion_order() {
+        let mut a = verdict("v", "00");
+        a.case = "a".to_string();
+        let mut b = verdict("v", "01");
+        b.case = "b".to_string();
+        let mut forward = Corpus::default();
+        forward.insert(a.clone());
+        forward.insert(b.clone());
+        let mut backward = Corpus::default();
+        backward.insert(b);
+        backward.insert(a);
+        let text = forward.render().expect("render");
+        assert_eq!(text, backward.render().expect("render"));
+        assert_eq!(
+            Corpus::parse(&text)
+                .expect("parse")
+                .render()
+                .expect("render"),
+            text
         );
     }
 
-    /// A record kind this build does not know is carried, not fatal — and the
-    /// records around it still resolve. This is the whole reason an older
-    /// checkout can replay a corpus a newer producer wrote.
+    /// A record kind this build does not know is kept through a rewrite, and the
+    /// verdicts beside it still read.
     #[test]
-    fn an_unknown_record_kind_is_skipped_not_fatal() {
-        let text = format!(
-            "{}\n{}\n",
-            r#"{"t":"provenance-note","note":"from a later build"}"#,
-            to_line(&Record::Verdict(Box::new(verdict("sha-a", "3E12")))).expect("serialize"),
-        );
+    fn an_unknown_record_kind_survives_a_rewrite() {
+        let note = r#"{"note":"from a later build","t":"provenance-note"}"#;
+        let text = format!("{note}\n{}\n", line(&verdict("v", "3E12")));
         let corpus = Corpus::parse(&text).expect("parse");
-        assert_eq!(corpus.records().len(), 2, "the unknown record is kept");
-        assert!(matches!(corpus.records()[0], Record::Unknown(_)));
+        assert_eq!(corpus.len(), 1);
+        assert_eq!(corpus.unknown().len(), 1);
         assert!(
-            matches!(corpus.resolve(&key()), Some(Resolution::Fact { .. })),
-            "the verdict beside it still resolves"
+            corpus
+                .render()
+                .expect("render")
+                .ends_with(&format!("{note}\n"))
         );
     }
 
-    /// Two different binaries reporting the same version and producing the same
-    /// bytes are one fact, confirmed twice — not a conflict. Keying on
-    /// behaviour rather than on the binary is what makes that distinction
-    /// available at all.
+    /// A verdict line from the old format, with a binary digest, still reads.
     #[test]
-    fn the_same_bytes_from_two_binaries_corroborate_one_fact() {
-        let text = format!(
-            "{}\n{}\n",
-            to_line(&Record::Verdict(Box::new(verdict("sha-a", "3E12")))).expect("ser"),
-            to_line(&Record::Verdict(Box::new(verdict("sha-b", "3E12")))).expect("ser"),
-        );
-        let corpus = Corpus::parse(&text).expect("parse");
-        match corpus.resolve(&key()) {
-            Some(Resolution::Fact {
-                outcome,
-                corroborations,
-                verdict,
-            }) => {
-                assert_eq!(outcome.bytes(), Some(vec![0x3E, 0x12]));
-                assert_eq!(corroborations, vec!["sha-a", "sha-b"]);
-                assert_eq!(verdict.cpu, "8080", "the fact carries a record to read");
-            }
-            other => panic!("expected one corroborated fact, got {other:?}"),
-        }
-    }
-
-    /// The same version producing *different* bytes is not resolvable by
-    /// recency. Something in the trust chain is wrong and a human has to say
-    /// which record is right.
-    #[test]
-    fn the_same_identity_disagreeing_raises_an_alarm() {
-        let text = format!(
-            "{}\n{}\n",
-            to_line(&Record::Verdict(Box::new(verdict("sha-a", "3E12")))).expect("ser"),
-            to_line(&Record::Verdict(Box::new(verdict("sha-b", "3E99")))).expect("ser"),
-        );
-        let corpus = Corpus::parse(&text).expect("parse");
-        match corpus.resolve(&key()) {
-            Some(Resolution::Alarm { conflicting }) => assert_eq!(conflicting.len(), 2),
-            other => panic!("expected an alarm, got {other:?}"),
-        }
-    }
-
-    /// A supersede settles the alarm: the retired record stops counting, the
-    /// survivor becomes the fact — and the retired one is still in the file,
-    /// still readable, because the correction's history is part of the record.
-    #[test]
-    fn a_supersede_retires_the_loser_and_leaves_it_walkable() {
-        let wrong = verdict("sha-a", "3E99");
-        let right = verdict("sha-b", "3E12");
-        let text = format!(
-            "{}\n{}\n{}\n",
-            to_line(&Record::Verdict(Box::new(wrong.clone()))).expect("ser"),
-            to_line(&Record::Verdict(Box::new(right.clone()))).expect("ser"),
-            to_line(&Record::Supersede(Supersede {
-                retires: wrong.id(),
-                reason: "recorded against a patched build; see #61".to_string(),
-            }))
-            .expect("ser"),
-        );
-        let corpus = Corpus::parse(&text).expect("parse");
-        match corpus.resolve(&key()) {
-            Some(Resolution::Fact { outcome, .. }) => {
-                assert_eq!(outcome.bytes(), Some(vec![0x3E, 0x12]));
-            }
-            other => panic!("expected the survivor to be the fact, got {other:?}"),
-        }
+    fn an_old_format_line_with_a_digest_still_reads() {
+        let old = r#"{"arbiter":{"digest":"d589","identity":"Macro Assembler 1.42 Beta [Bld 309]","tool":"asl"},"case":"LDN 1","cpu":"1802","dialect":"asl","hex":"01","outcome":"bytes","source":"\tldn 1\n","suite":"form","t":"verdict"}"#;
+        let corpus = Corpus::parse(old).expect("parse");
+        let v = corpus.verdicts().next().expect("reads as a verdict");
+        assert_eq!(v.arbiter.identity, "Macro Assembler 1.42 Beta [Bld 309]");
         assert!(
-            corpus.verdicts().any(|v| *v == wrong),
-            "the retired record stays in the file"
+            !corpus.render().expect("render").contains("digest"),
+            "the digest is not written back"
         );
-        assert_eq!(corpus.retired(), vec![wrong.id()]);
     }
 
-    /// A tracked divergence keeps its join id, so the in-repo half of the pair
-    /// can be found. Losing the tag would turn a known difference back into an
-    /// unexplained one.
+    /// A tracked divergence keeps its join id.
     #[test]
     fn a_divergence_keeps_its_join_id() {
-        let mut v = verdict("sha-a", "3E12");
+        let mut v = verdict("v", "3E12");
         v.outcome = Outcome::Divergence {
             divergence: "issue-36-truncation".to_string(),
             hex: "3EFF".to_string(),
         };
-        let line = to_line(&Record::Verdict(Box::new(v.clone()))).expect("ser");
-        let corpus = Corpus::parse(&line).expect("parse");
+        let corpus = Corpus::parse(&line(&v)).expect("parse");
         assert_eq!(corpus.verdicts().next(), Some(&v));
         assert_eq!(v.outcome.bytes(), Some(vec![0x3E, 0xFF]));
     }
 
-    /// A deliberate rejection is a verdict; it carries the diagnostic that makes
-    /// it attributable to the source rather than to the environment.
+    /// A deliberate rejection is a verdict and keeps its diagnostic.
     #[test]
     fn a_rejection_is_a_verdict_and_keeps_its_diagnostic() {
-        let mut v = verdict("sha-a", "");
+        let mut v = verdict("v", "");
         v.outcome = Outcome::Rejected {
             diagnostic: "value out of range".to_string(),
         };
-        let corpus =
-            Corpus::parse(&to_line(&Record::Verdict(Box::new(v))).expect("ser")).expect("parse");
-        match corpus.resolve(&key()) {
-            Some(Resolution::Fact { outcome, .. }) => assert!(matches!(
-                outcome,
-                Outcome::Rejected { diagnostic } if diagnostic == "value out of range"
-            )),
-            other => panic!("expected a rejection fact, got {other:?}"),
-        }
+        let corpus = Corpus::parse(&line(&v)).expect("parse");
+        assert!(matches!(
+            &corpus.get(&v.key()).expect("recorded").outcome,
+            Outcome::Rejected { diagnostic } if diagnostic == "value out of range"
+        ));
     }
 
-    /// An empty corpus is an ordinary state — a CPU nobody has recorded yet —
-    /// and so is a file that does not exist. Neither is an error.
+    /// Empty text and a missing file are both an empty corpus, not an error.
     #[test]
     fn an_empty_corpus_is_not_an_error() {
-        assert_eq!(Corpus::parse("").expect("parse").verdicts().count(), 0);
-        assert_eq!(Corpus::parse("\n\n").expect("parse").verdicts().count(), 0);
+        assert!(Corpus::parse("").expect("parse").is_empty());
+        assert!(Corpus::parse("\n\n").expect("parse").is_empty());
         let missing = Path::new("/nonexistent/verdicts/nothing-here.ndjson");
-        assert_eq!(Corpus::read(missing).expect("read").verdicts().count(), 0);
+        assert!(Corpus::read(missing).expect("read").is_empty());
     }
 
-    /// Corruption is not evolution. An unknown *kind* is skipped, but a line
-    /// that is not JSON means the file is damaged, and saying so with a line
-    /// number beats replaying a corpus that is missing facts.
+    /// Corruption is not evolution: a line that is not JSON is an error naming
+    /// its line.
     #[test]
     fn a_corrupt_line_reports_where() {
         let err = Corpus::parse("{\"t\":\"verdict\"}\nnot json at all\n").expect_err("corrupt");
@@ -699,23 +597,17 @@ mod tests {
         assert!(err.to_string().starts_with("corpus line 2:"), "{err}");
     }
 
-    /// Nothing recorded for a case means no verdict — distinct from a recorded
-    /// rejection, and the reason replay can tell "we never checked this" from
+    /// An unrecorded case resolves to nothing: "we never checked this" is not
     /// "the tool refused it".
     #[test]
     fn an_unrecorded_case_resolves_to_nothing() {
-        let corpus =
-            Corpus::parse(&to_line(&Record::Verdict(Box::new(verdict("a", "3E12")))).expect("ser"))
-                .expect("parse");
-        let unseen = Key {
-            identity: "1.42 Beta [Bld 250]".to_string(),
-            source: " nop\n".to_string(),
-        };
-        assert_eq!(corpus.resolve(&unseen), None);
+        let corpus = Corpus::parse(&line(&verdict("v", "3E12"))).expect("parse");
+        let mut unseen = verdict("v", "3E12").key();
+        unseen.source = " nop\n".to_string();
+        assert_eq!(corpus.get(&unseen), None);
     }
 
-    /// Hex is the storage form because a diff of it is readable. Round-tripping
-    /// it must be exact, including the empty case.
+    /// Hex round-trips exactly, including the empty case.
     #[test]
     fn hex_round_trips_including_empty() {
         for bytes in [vec![], vec![0x00], vec![0x3E, 0x12, 0xFF]] {
@@ -725,69 +617,40 @@ mod tests {
         assert_eq!(decode_hex("3EZZ"), None, "non-hex digits rejected");
     }
 
-    /// Appending is the only write, and it must not disturb what is already
-    /// there — the file is evidence, not a cache.
+    /// Merging counts only what is new or changed, and re-merging the same facts
+    /// changes nothing on disk.
     #[test]
-    fn appending_preserves_what_was_already_recorded() {
-        let dir = std::env::temp_dir().join("asm198x-verdict-append");
-        let _ = std::fs::remove_dir_all(&dir);
-        let path = dir.join("8080.ndjson");
-
-        append(&path, &[Record::Verdict(Box::new(verdict("a", "3E12")))]).expect("first");
-        append(&path, &[Record::Verdict(Box::new(verdict("b", "3E12")))]).expect("second");
-
-        let corpus = Corpus::read(&path).expect("read");
-        assert_eq!(corpus.verdicts().count(), 2);
-        match corpus.resolve(&key()) {
-            Some(Resolution::Fact { corroborations, .. }) => {
-                assert_eq!(corroborations, vec!["a", "b"]);
-            }
-            other => panic!("expected a corroborated fact, got {other:?}"),
-        }
-        let _ = std::fs::remove_dir_all(&dir);
-    }
-}
-
-#[cfg(test)]
-mod merge_tests {
-    use super::*;
-
-    fn line(digest: &str) -> String {
-        to_line(&Record::Verdict(Box::new(Verdict {
-            suite: Suite::Form,
-            cpu: "8080".to_string(),
-            dialect: "asl".to_string(),
-            case: "nop".to_string(),
-            source: " nop\n".to_string(),
-            arbiter: Arbiter {
-                tool: "asl".to_string(),
-                identity: "1.42".to_string(),
-                digest: digest.to_string(),
-            },
-            outcome: Outcome::Bytes {
-                hex: "00".to_string(),
-            },
-        })))
-        .expect("line")
-    }
-
-    /// A doubled line is a merge artefact, not a second observation. Counting it
-    /// twice would inflate the ledger and read as corroboration that never
-    /// happened.
-    #[test]
-    fn an_exactly_repeated_verdict_counts_once() {
-        let doubled = format!("{}\n{}\n", line("sha-a"), line("sha-a"));
+    fn merging_counts_changes_and_is_idempotent() {
+        let path = temp_path("merge");
+        assert_eq!(merge(&path, [verdict("v1", "3E12")]).expect("first"), 1);
+        let first = std::fs::read_to_string(&path).expect("written");
+        assert_eq!(merge(&path, [verdict("v1", "3E12")]).expect("again"), 0);
+        assert_eq!(std::fs::read_to_string(&path).expect("unchanged"), first);
         assert_eq!(
-            Corpus::parse(&doubled).expect("parse").verdicts().count(),
+            merge(&path, [verdict("v2", "3E12")]).expect("new version"),
             1
         );
+        let corpus = Corpus::read(&path).expect("read");
+        assert_eq!(corpus.len(), 1);
+        assert_eq!(
+            corpus
+                .verdicts()
+                .next()
+                .map(|v| v.arbiter.identity.as_str()),
+            Some("v2")
+        );
+        let _ = std::fs::remove_dir_all(path.parent().expect("dir"));
     }
 
-    /// Two binaries behind one version are genuinely two observations, and both
-    /// survive — that is what makes corroboration meaningful.
+    /// Pruning the last verdict removes the file rather than leaving it empty.
     #[test]
-    fn two_binaries_behind_one_version_both_survive() {
-        let pair = format!("{}\n{}\n", line("sha-a"), line("sha-b"));
-        assert_eq!(Corpus::parse(&pair).expect("parse").verdicts().count(), 2);
+    fn an_emptied_corpus_removes_its_file() {
+        let path = temp_path("prune");
+        merge(&path, [verdict("old", "3E12")]).expect("write");
+        let mut corpus = Corpus::read(&path).expect("read");
+        assert_eq!(corpus.retain(|v| v.arbiter.identity != "old"), 1);
+        corpus.write(&path).expect("write");
+        assert!(!path.exists());
+        let _ = std::fs::remove_dir_all(path.parent().expect("dir"));
     }
 }

@@ -21,7 +21,7 @@
 //!   command disagree. The ref is named; how old it is belongs to whoever is
 //!   reading, on the day they read it.
 
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeMap;
 use std::fmt::Write as _;
 use std::path::Path;
 
@@ -32,8 +32,6 @@ use crate::coverage;
 /// One arbiter, as the corpus knows it.
 #[derive(Default)]
 struct Arbiter {
-    /// Distinct binaries seen behind this version — provenance, not rows.
-    digests: BTreeSet<String>,
     /// Verdicts it produced, by suite.
     suites: BTreeMap<String, usize>,
 }
@@ -41,8 +39,8 @@ struct Arbiter {
 /// Everything the ledger reports about one CPU.
 #[derive(Default)]
 struct CpuEntry {
-    /// Keyed by (tool, behavioural identity). Two builds of one version are one
-    /// row, with the second digest recorded as corroboration.
+    /// Keyed by (tool, version self-report). Normally one version per tool; a
+    /// second row means growth has not yet re-recorded every case.
     arbiters: BTreeMap<(String, String), Arbiter>,
     /// Tracked differences, by tag.
     divergences: BTreeMap<String, usize>,
@@ -104,7 +102,6 @@ pub fn render(repo: &Path) -> String {
                         verdict.arbiter.identity.clone(),
                     ))
                     .or_default();
-                arbiter.digests.insert(verdict.arbiter.digest.clone());
                 *arbiter.suites.entry(suite_of(verdict)).or_default() += 1;
                 if let Outcome::Divergence { divergence, .. } = &verdict.outcome {
                     *entry.divergences.entry(divergence.clone()).or_default() += 1;
@@ -180,20 +177,15 @@ pub fn render(repo: &Path) -> String {
                 p % 10
             );
         }
-        out.push_str("| arbiter | version | binaries | verdicts |\n");
-        out.push_str("|---|---|---|---|\n");
+        out.push_str("| arbiter | version | verdicts |\n");
+        out.push_str("|---|---|---|\n");
         for ((tool, identity), arbiter) in &entry.arbiters {
             let counts: Vec<String> = arbiter
                 .suites
                 .iter()
                 .map(|(suite, n)| format!("{suite} {n}"))
                 .collect();
-            let _ = writeln!(
-                out,
-                "| `{tool}` | {identity} | {} | {} |",
-                arbiter.digests.len(),
-                counts.join(", ")
-            );
+            let _ = writeln!(out, "| `{tool}` | {identity} | {} |", counts.join(", "));
         }
         if entry.divergences.is_empty() {
             out.push_str("\nNo tracked divergences.\n\n");
@@ -221,14 +213,14 @@ fn suite_of(v: &Verdict) -> String {
     .to_string()
 }
 
-/// Lower-case hex, which is how every digest in the corpus is written.
+/// Lower-case hex, which is how every content digest in the corpus is written.
 ///
 /// sha2 0.11 returns a `hybrid_array::Array` rather than a `GenericArray`, and
 /// that type implements no `LowerHex`, so `format!("{:x}", …)` no longer
 /// compiles. `verdict_corpus::encode_hex` is the wrong replacement: it emits
 /// **upper**-case, for the byte payloads a verdict carries. Swapping the case
-/// of a recorded digest would change every `Verdict::id` and leave the corpus
-/// mixed, so the case is part of the format rather than a detail.
+/// of a recorded digest would change every curriculum key, so the case is part
+/// of the format rather than a detail.
 pub(crate) fn hex_lower(bytes: &[u8]) -> String {
     use std::fmt::Write as _;
     bytes

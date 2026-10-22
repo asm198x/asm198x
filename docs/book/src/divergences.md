@@ -13,14 +13,14 @@ instead. If you are deciding whether to move a project that already builds, what
 you need is not reassurance — it is to know what will change.
 
 <!-- generated: xtask divergences --markdown -->
-4 tracked differences across 13 recorded cases.
+4 tracked differences across 7 recorded cases.
 
 | Difference | CPU | Dialect | Reference tool | Cases |
 |---|---|---|---|---|
 | `canonicalisation-68000-0812FE97` | 68000 | vasm | vasmm68k_mot | 1 |
 | `canonicalisation-68000-08AC909FCDFA` | 68000 | vasm | vasmm68k_mot | 1 |
 | `canonicalisation-68000-08F7F12AF8BB` | 68000 | vasm | vasmm68k_mot | 1 |
-| [`issue-110`](https://github.com/asm198x/asm198x/issues/110) | 68000 | vasm | vasmm68k_mot | 10 |
+| [`issue-110`](https://github.com/asm198x/asm198x/issues/110) | 68000 | vasm | vasmm68k_mot | 4 |
 <!-- /generated -->
 
 ## What each one is
