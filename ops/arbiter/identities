@@ -9,14 +9,14 @@
 # tool rather than typing it from memory.
 #
 # tool	identity
-acme	This is ACME, release 0.97 ("Zem"), 28 June 2020
-asl	Macro Assembler 1.42 Beta [Bld 309]
-ca65	ca65 V2.18 - N/A
+acme	This is ACME, release 0.97 ("Zem"), 1 Aug 2025
+asl	Macro Assembler 1.42 Beta [Bld 311]
+ca65	ca65 V2.19 - Git 8d86ca7
 lwasm	lwasm from lwtools 4.25
 pasmo	PasmoNext v0.1.3 (PC) (C) 2004-2005 Julian Albo
-rgbasm	rgbasm v1.0.3
-# Not a verdict key: the Game Boy ROM differential shells to it, so its absence
-# fails a growth run (2026-09-01) — the gate holds it present at the pinned tag.
-rgbfix	rgbfix v1.0.3
-sjasmplus	SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)
+rgbasm	rgbasm v1.0.4
+# Records no verdicts, but the Game Boy ROM differential shells to it, so its
+# absence would fail a growth run; listed so the gate holds it present.
+rgbfix	rgbfix v1.0.4
+sjasmplus	SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus)
 vasmm68k_mot	vasm 2.0f (c) in 2002-2026 Volker Barthelmann

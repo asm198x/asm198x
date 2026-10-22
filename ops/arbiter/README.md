@@ -26,7 +26,7 @@ and its line in `identities` change together.
 |---|---|
 | `asl` and `p2bin` | the per-build tarball, `ASL_BUILD` |
 | `acme` | an SVN trunk revision, `ACME_REV`: ACME publishes no release tarballs or tags |
-| `ca65` and `ld65` | the cc65 `V2.19` release tarball |
+| `ca65` and `ld65` | a cc65 commit, `CC65_REV`, built from a git checkout: cc65 has tagged no release since 2.19 (2020) |
 | `lwasm` | the release tarball, from `https://www.lwtools.ca` (**https**: plain http looks like a dead host) |
 | `rgbasm`, `rgblink`, `rgbfix` | a release tag |
 | `sjasmplus` | a release tag |
@@ -36,7 +36,8 @@ and its line in `identities` change together.
 **How the source is obtained can change the version line.** cc65's tools put
 their build provenance in it: from a git checkout ca65 reports
 `V2.19 - Git <sha>`, and from a release tarball `- N/A` (the 2.19 tarball even
-reports `V2.18`).
+reports `V2.18`). The Dockerfile builds from a checkout and passes `BUILD_ID`
+explicitly, so the line names the pinned commit with a fixed-length hash.
 
 **vasm has no pin available**, so the image builds whatever upstream currently
 serves and `verify-arbiters` decides. When vasm releases again, the image stops
