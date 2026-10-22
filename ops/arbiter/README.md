@@ -55,9 +55,10 @@ architecture-specific ones do not build in an arm64 container.
    without publishing it.
 2. Merge. `.github/workflows/arbiter-image.yml` publishes the image to
    `ghcr.io/asm198x/arbiter`.
-3. Run growth (`.github/workflows/grow.yml`, weekly or by hand). It re-records
-   every case and prunes what the new version did not re-record, and opens a
-   pull request whose diff is every answer that moved.
+3. Run growth (`.github/workflows/grow.yml`, weekly or by hand). It checks the
+   image against the checkout's `identities`, re-records every case, prunes the
+   old version's verdicts in each group it re-recorded, and opens a pull
+   request whose diff is every answer that moved.
 4. Review that diff: each moved answer is a bug of ours the old version hid, or
    the reference changing behaviour, to fix or record as a divergence.
 

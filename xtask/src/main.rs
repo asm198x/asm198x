@@ -136,7 +136,6 @@ fn usage() -> String {
      \x20 ledger              print the conformance ledger for this revision\n\
      \x20 corpus --check      fail if a verdict file is not in canonical form\n\
      \x20 corpus --write      rewrite every verdict file canonically\n\
-     \x20 corpus --prune      drop verdicts from tool versions no longer in use\n\
      \x20 grow [filter]       arbitrate with the reference tools (needs them)\n\
      \x20 ecosystem check     validate the real-world source manifest\n\
      \x20 ecosystem list      list admitted projects and build targets\n\
@@ -293,7 +292,7 @@ fn run_docs(args: &[String]) -> ExitCode {
     ExitCode::SUCCESS
 }
 
-/// `corpus --check | --write | --prune`.
+/// `corpus --check | --write`.
 fn run_corpus(args: &[String]) -> ExitCode {
     let repo = repo();
     match args.first().map(String::as_str) {
@@ -334,25 +333,8 @@ fn run_corpus(args: &[String]) -> ExitCode {
                 ExitCode::FAILURE
             }
         },
-        Some("--prune") => {
-            let present = grow::present_tools();
-            match corpus::prune(&repo, &present) {
-                Ok(removed) => {
-                    let total: usize = removed.values().sum();
-                    println!("pruned {total} verdict(s) from tool versions no longer in use");
-                    for (tool, n) in &removed {
-                        println!("  {tool}: {n}");
-                    }
-                    ExitCode::SUCCESS
-                }
-                Err(e) => {
-                    eprintln!("xtask corpus: {e}");
-                    ExitCode::FAILURE
-                }
-            }
-        }
         _ => {
-            eprintln!("usage: cargo xtask corpus --check | --write | --prune");
+            eprintln!("usage: cargo xtask corpus --check | --write");
             ExitCode::FAILURE
         }
     }

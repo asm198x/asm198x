@@ -73,7 +73,9 @@ jobs:
       # it would record and prune against versions the corpus does not say it
       # uses.
       - name: Verify the arbiter identities
-        run: verify-arbiters
+        # Against the checkout's list, not the copy baked into the image: an
+        # image older than the pins must not be allowed to record.
+        run: verify-arbiters ops/arbiter/identities
 
       # The checkout is owned by a different uid than the container user, and
       # git refuses a repo it does not own. This must precede *every* step

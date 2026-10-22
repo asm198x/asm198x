@@ -9,16 +9,16 @@
 //!   that doubles a line, or a hand edit, cannot land unnoticed;
 //! - `corpus --write` rewrites every file canonically, migrating the old
 //!   append-only format on the way;
-//! - `corpus --prune` drops verdicts recorded by a tool version no longer in
-//!   use, which is how a growth run against new tools finishes regenerating;
+//! - [`prune`], run by growth, drops what a growth run superseded, judged only
+//!   from what that run recorded;
 //! - `close-divergence` turns a tracked divergence that now matches back into
 //!   an ordinary verdict;
 //! - `drop` removes the verdicts a listing change has stranded.
 
-use std::collections::{BTreeMap, HashSet};
+use std::collections::{BTreeMap, BTreeSet, HashSet};
 use std::path::{Path, PathBuf};
 
-use verdict_corpus::{Corpus, Key, Outcome, Suite, Verdict};
+use verdict_corpus::{Corpus, Key, Outcome, Recorded, Suite, Verdict};
 
 use crate::coverage;
 
@@ -138,28 +138,72 @@ pub fn write(repo: &Path) -> Result<Vec<String>, String> {
     Ok(changed)
 }
 
-/// Drop verdicts recorded by a version of a tool in `present` other than the
-/// one in use. Only tools a growth run actually had are pruned: a verdict from
-/// a tool that was absent was not given the chance to be re-recorded.
+/// Prune what a growth run superseded, using its manifest as the only evidence.
 ///
+/// Only a (file, suite, tool) group the run recorded into is touched, so a
+/// suite that was skipped (a missing helper tool, an absent curriculum
+/// checkout, a filtered run) loses nothing. Within such a group:
+///
+/// - a verdict from a version other than the one this run recorded is stale,
+///   and goes;
+/// - a curriculum verdict whose program this run re-recorded under a new
+///   content digest is about source that no longer exists, and goes.
+///
+/// A group the run recorded under two versions is ambiguous and left alone.
 /// Returns the count removed per tool.
 ///
 /// # Errors
 ///
 /// Returns a read, parse or write failure.
-pub fn prune(repo: &Path, present: &HashSet<String>) -> Result<BTreeMap<String, usize>, String> {
-    let current = current_identities(repo)?;
+pub fn prune(repo: &Path, manifest: &[Recorded]) -> Result<BTreeMap<String, usize>, String> {
+    // (file, suite, tool) -> the versions this run recorded under.
+    let mut versions: BTreeMap<(&str, Suite, &str), BTreeSet<&str>> = BTreeMap::new();
+    // (file, tool) -> curriculum keys this run recorded.
+    let mut programs: BTreeMap<(&str, &str), HashSet<&str>> = BTreeMap::new();
+    for r in manifest {
+        versions
+            .entry((&r.file, r.suite, &r.tool))
+            .or_default()
+            .insert(&r.identity);
+        if let Some(source) = &r.source {
+            programs
+                .entry((&r.file, &r.tool))
+                .or_default()
+                .insert(source);
+        }
+    }
+    // A curriculum key is `path#variant@digest`; the program is everything
+    // before the `@`.
+    let program = |key: &str| key.rsplit_once('@').map(|(p, _)| p.to_string());
+
     let mut removed: BTreeMap<String, usize> = BTreeMap::new();
     for path in corpus_files(repo)? {
-        let mut corpus = read(&path, &current)?;
+        let file = path
+            .file_name()
+            .map(|n| n.to_string_lossy().into_owned())
+            .unwrap_or_default();
+        let mut corpus = Corpus::read(&path).map_err(|e| format!("{}: {e}", path.display()))?;
         let mut dropped = Vec::new();
         corpus.retain(|v| {
-            let stale = present.contains(&v.arbiter.tool)
-                && current.get(&v.arbiter.tool) != Some(&v.arbiter.identity);
-            if stale {
+            let Some(seen) = versions.get(&(file.as_str(), v.suite, v.arbiter.tool.as_str()))
+            else {
+                return true;
+            };
+            let [current] = seen.iter().copied().collect::<Vec<_>>()[..] else {
+                return true;
+            };
+            let stale = v.arbiter.identity != current;
+            let orphaned = v.suite == Suite::Curriculum
+                && programs
+                    .get(&(file.as_str(), v.arbiter.tool.as_str()))
+                    .is_some_and(|keys| {
+                        !keys.contains(v.source.as_str())
+                            && keys.iter().any(|k| program(k) == program(&v.source))
+                    });
+            if stale || orphaned {
                 dropped.push(v.arbiter.tool.clone());
             }
-            !stale
+            !(stale || orphaned)
         });
         if !dropped.is_empty() {
             for tool in dropped {
@@ -442,35 +486,109 @@ mod tests {
         let _ = std::fs::remove_dir_all(dir);
     }
 
-    /// Pruning drops verdicts from a version no longer in use, but only for
-    /// tools the run had.
+    fn recorded(file: &str, suite: Suite, identity: &str, source: Option<&str>) -> Recorded {
+        Recorded {
+            file: file.to_string(),
+            suite,
+            tool: "asl".to_string(),
+            identity: identity.to_string(),
+            source: source.map(str::to_string),
+        }
+    }
+
+    fn cases(dir: &Path, cpu: &str) -> Vec<String> {
+        Corpus::read(&corpus_file(dir, cpu))
+            .expect("read")
+            .verdicts()
+            .map(|v| v.case.clone())
+            .collect()
+    }
+
+    /// Pruning drops old-version verdicts only in a group the run recorded
+    /// into: a suite it never reached, or another tool, loses nothing.
     #[test]
-    fn prune_drops_old_versions_of_present_tools_only() {
+    fn prune_touches_only_what_the_run_recorded() {
         let dir = repo("prune");
-        let mut old = verdict("8080", Suite::Form, "old", bytes());
-        old.arbiter.identity = "old".to_string();
-        let mut absent = verdict("8080", Suite::Form, "absent", bytes());
-        absent.arbiter.tool = "acme".to_string();
-        absent.arbiter.identity = "anything".to_string();
+        let aged = |suite, case: &str| {
+            let mut v = verdict("8080", suite, case, bytes());
+            v.arbiter.identity = "old".to_string();
+            v
+        };
+        let mut other_tool = aged(Suite::Form, "other tool");
+        other_tool.arbiter.tool = "acme".to_string();
         verdict_corpus::merge(
             &corpus_file(&dir, "8080"),
             [
-                old,
-                absent,
-                verdict("8080", Suite::Form, "current", bytes()),
+                aged(Suite::Form, "stale form"),
+                aged(Suite::SweepChunk, "unreached sweep"),
+                other_tool,
+                verdict("8080", Suite::Form, "fresh form", bytes()),
             ],
         )
         .expect("seed");
 
-        assert_eq!(stale(&dir).expect("stale").get("asl"), Some(&1));
-        let removed = prune(&dir, &HashSet::from(["asl".to_string()])).expect("prune");
+        let manifest = [recorded("8080.ndjson", Suite::Form, "new", None)];
+        let removed = prune(&dir, &manifest).expect("prune");
         assert_eq!(removed.get("asl"), Some(&1));
-        let left: Vec<String> = Corpus::read(&corpus_file(&dir, "8080"))
-            .expect("read")
-            .verdicts()
-            .map(|v| v.case.clone())
-            .collect();
-        assert_eq!(left, vec!["absent", "current"]);
+        assert_eq!(
+            cases(&dir, "8080"),
+            vec!["fresh form", "other tool", "unreached sweep"]
+        );
+        let _ = std::fs::remove_dir_all(dir);
+    }
+
+    /// A run that recorded one group under two versions has no single current
+    /// version, so nothing in that group is pruned.
+    #[test]
+    fn prune_leaves_an_ambiguous_group_alone() {
+        let dir = repo("ambiguous");
+        let mut old = verdict("8080", Suite::Form, "old", bytes());
+        old.arbiter.identity = "old".to_string();
+        verdict_corpus::merge(&corpus_file(&dir, "8080"), [old]).expect("seed");
+        let manifest = [
+            recorded("8080.ndjson", Suite::Form, "new", None),
+            recorded("8080.ndjson", Suite::Form, "newer", None),
+        ];
+        assert!(prune(&dir, &manifest).expect("prune").is_empty());
+        assert_eq!(cases(&dir, "8080"), vec!["old"]);
+        let _ = std::fs::remove_dir_all(dir);
+    }
+
+    /// A curriculum program re-recorded under a new content digest retires
+    /// the verdict for its old digest, and only that one.
+    #[test]
+    fn prune_retires_a_curriculum_program_s_old_digest() {
+        let dir = repo("curriculum");
+        let program = |case: &str, key: &str| {
+            let mut v = verdict(
+                "6502",
+                Suite::Curriculum,
+                case,
+                Outcome::Digest {
+                    digest: "00".to_string(),
+                },
+            );
+            v.source = key.to_string();
+            v
+        };
+        verdict_corpus::merge(
+            &corpus_file(&dir, "6502"),
+            [
+                program("a old", "a.s#acme@d1"),
+                program("a new", "a.s#acme@d2"),
+                program("b", "b.s#acme@d1"),
+            ],
+        )
+        .expect("seed");
+        let manifest = [recorded(
+            "6502.ndjson",
+            Suite::Curriculum,
+            "new",
+            Some("a.s#acme@d2"),
+        )];
+        let removed = prune(&dir, &manifest).expect("prune");
+        assert_eq!(removed.get("asl"), Some(&1));
+        assert_eq!(cases(&dir, "6502"), vec!["a new", "b"]);
         let _ = std::fs::remove_dir_all(dir);
     }
 

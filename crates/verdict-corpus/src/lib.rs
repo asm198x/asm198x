@@ -23,8 +23,8 @@
 //! # One verdict per case, from the current tools
 //!
 //! The corpus answers one question: *what do the reference tools in use now
-//! do?* Each [`Key`] (suite, case, tool, source text) holds exactly one
-//! verdict. Recording a case again **replaces** its verdict, so moving to a new
+//! do?* Each [`Key`] (suite, case, tool, dialect, source text) holds exactly
+//! one verdict. Recording a case again **replaces** its verdict, so moving to a new
 //! tool version and re-running growth regenerates the corpus, and the git diff
 //! is the review: each changed line is either a bug of ours the old version
 //! hid, or the reference changing behaviour.
@@ -53,7 +53,9 @@
 
 use std::collections::BTreeMap;
 use std::fmt;
-use std::path::Path;
+use std::path::{Path, PathBuf};
+use std::sync::Mutex;
+use std::sync::atomic::{AtomicU64, Ordering};
 
 use serde::{Deserialize, Serialize};
 
@@ -149,6 +151,7 @@ impl Verdict {
             suite: self.suite,
             case: self.case.clone(),
             tool: self.arbiter.tool.clone(),
+            dialect: self.dialect.clone(),
             source: self.source.clone(),
         }
     }
@@ -164,6 +167,10 @@ pub struct Key {
     pub case: String,
     /// The reference tool that answers it.
     pub tool: String,
+    /// The dialect the source is written in. One tool can serve two dialects
+    /// (`rgbasm` and `rgbasm-banked` probes), and the same text in each is a
+    /// different case.
+    pub dialect: String,
     /// The source text it was given.
     pub source: String,
 }
@@ -310,11 +317,54 @@ impl Corpus {
         }
         let text = self.render().map_err(std::io::Error::other)?;
         // Written to a sibling and renamed, so an interrupted run leaves the old
-        // file or the new one, never half of either.
-        let tmp = path.with_extension("ndjson.tmp");
+        // file or the new one, never half of either. The sibling's name is
+        // unique to this write, so two writers can never rename each other's
+        // half-written file into place.
+        static WRITES: AtomicU64 = AtomicU64::new(0);
+        let n = WRITES.fetch_add(1, Ordering::Relaxed);
+        let mut tmp = path.as_os_str().to_owned();
+        tmp.push(format!(".{}.{n}.tmp", std::process::id()));
+        let tmp = PathBuf::from(tmp);
         std::fs::write(&tmp, text)?;
-        std::fs::rename(&tmp, path)
+        std::fs::rename(&tmp, path).inspect_err(|_| {
+            let _ = std::fs::remove_file(&tmp);
+        })
     }
+}
+
+/// Run `f` holding the exclusive lock for `path`: a process-wide mutex, so
+/// threads in one test binary queue, and an OS file lock, so separate
+/// processes do. Every read-modify-write of a corpus file goes through here;
+/// without it, two live tests flushing the same CPU file at once would each
+/// rewrite it from the state before the other's verdicts.
+///
+/// The lock file lives in the temporary directory, named for the path, so it
+/// never appears beside the corpus to be committed.
+///
+/// # Errors
+///
+/// Returns a failure to take the lock, or whatever `f` returns.
+pub fn locked<T>(path: &Path, f: impl FnOnce() -> std::io::Result<T>) -> std::io::Result<T> {
+    static IN_PROCESS: Mutex<()> = Mutex::new(());
+    let _guard = IN_PROCESS
+        .lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner);
+    let absolute = std::path::absolute(path)?;
+    let mut h: u64 = 0xcbf2_9ce4_8422_2325;
+    for b in absolute.as_os_str().as_encoded_bytes() {
+        h ^= u64::from(*b);
+        h = h.wrapping_mul(0x0000_0100_0000_01b3);
+    }
+    let lock_path = std::env::temp_dir().join(format!("asm198x-verdicts-{h:016x}.lock"));
+    let lock = std::fs::OpenOptions::new()
+        .create(true)
+        .truncate(false)
+        .write(true)
+        .open(lock_path)?;
+    lock.lock()?;
+    let result = f();
+    let _ = lock.unlock();
+    result
 }
 
 /// Record verdicts into a CPU's corpus file: each replaces any earlier verdict
@@ -325,18 +375,111 @@ impl Corpus {
 ///
 /// Returns any read, parse, I/O or serialization failure.
 pub fn merge(path: &Path, verdicts: impl IntoIterator<Item = Verdict>) -> std::io::Result<usize> {
-    let mut corpus = Corpus::read(path).map_err(std::io::Error::other)?;
-    let mut changed = 0;
-    for verdict in verdicts {
-        let fresh = verdict.clone();
-        if corpus.insert(verdict).as_ref() != Some(&fresh) {
-            changed += 1;
+    locked(path, || {
+        let mut corpus = Corpus::read(path).map_err(std::io::Error::other)?;
+        let mut changed = 0;
+        for verdict in verdicts {
+            let fresh = verdict.clone();
+            if corpus.insert(verdict).as_ref() != Some(&fresh) {
+                changed += 1;
+            }
         }
+        if changed > 0 {
+            corpus.write(path)?;
+        }
+        Ok(changed)
+    })
+}
+
+/// The environment variable naming a growth run's manifest. When it is set,
+/// every recorder flush also notes what it recorded there.
+pub const MANIFEST_ENV: &str = "ASM198X_GROWTH_MANIFEST";
+
+/// What one growth run recorded into one corpus file, for one suite and tool.
+/// Growth prunes only what a run actually reached, so this is its evidence.
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+pub struct Recorded {
+    /// The corpus file's name (`"z80.ndjson"`).
+    pub file: String,
+    /// The suite that recorded.
+    pub suite: Suite,
+    /// The tool that answered.
+    pub tool: String,
+    /// The version line it reported.
+    pub identity: String,
+    /// For a curriculum verdict, its key (`path#variant@digest`), so a file
+    /// re-recorded under a new digest can retire the verdict for the old one.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub source: Option<String>,
+}
+
+impl Recorded {
+    /// The manifest entries for verdicts flushed into `file`: one per suite and
+    /// tool, plus one per curriculum verdict.
+    pub fn of<'a>(file: &str, verdicts: impl IntoIterator<Item = &'a Verdict>) -> Vec<Self> {
+        let mut out: Vec<Self> = verdicts
+            .into_iter()
+            .map(|v| Self {
+                file: file.to_string(),
+                suite: v.suite,
+                tool: v.arbiter.tool.clone(),
+                identity: v.arbiter.identity.clone(),
+                source: (v.suite == Suite::Curriculum).then(|| v.source.clone()),
+            })
+            .collect();
+        out.sort();
+        out.dedup();
+        out
     }
-    if changed > 0 {
-        corpus.write(path)?;
-    }
-    Ok(changed)
+}
+
+/// Append entries to a growth manifest, under its lock.
+///
+/// # Errors
+///
+/// Returns any I/O or serialization failure.
+pub fn append_manifest(path: &Path, entries: &[Recorded]) -> std::io::Result<()> {
+    use std::io::Write as _;
+    locked(path, || {
+        let mut text = String::new();
+        for entry in entries {
+            text.push_str(&serde_json::to_string(entry).map_err(std::io::Error::other)?);
+            text.push('\n');
+        }
+        std::fs::OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(path)?
+            .write_all(text.as_bytes())
+    })
+}
+
+/// Read a growth manifest. A missing file is an empty manifest.
+///
+/// # Errors
+///
+/// Returns a read failure or a line that does not parse.
+pub fn read_manifest(path: &Path) -> Result<Vec<Recorded>, ParseError> {
+    let text = match std::fs::read_to_string(path) {
+        Ok(text) => text,
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => return Ok(Vec::new()),
+        Err(e) => {
+            return Err(ParseError {
+                line: 0,
+                message: e.to_string(),
+            });
+        }
+    };
+    text.lines()
+        .enumerate()
+        .filter(|(_, line)| !line.trim().is_empty())
+        .map(|(i, line)| {
+            serde_json::from_str(line).map_err(|e| ParseError {
+                line: i + 1,
+                message: e.to_string(),
+            })
+        })
+        .collect()
 }
 
 /// Serialize one verdict to its NDJSON line.
@@ -639,6 +782,65 @@ mod tests {
                 .map(|v| v.arbiter.identity.as_str()),
             Some("v2")
         );
+        let _ = std::fs::remove_dir_all(path.parent().expect("dir"));
+    }
+
+    /// Concurrent merges into one file lose nothing. Live tests run in parallel
+    /// threads and several flush the same CPU file; this is the reason merges
+    /// take a lock.
+    #[test]
+    fn concurrent_merges_into_one_file_lose_nothing() {
+        let path = temp_path("concurrent");
+        let threads: Vec<_> = (0..4)
+            .map(|t| {
+                let path = path.clone();
+                std::thread::spawn(move || {
+                    for batch in 0..25 {
+                        let verdicts = (0..10).map(|i| {
+                            let mut v = verdict("v", "00");
+                            v.case = format!("t{t} b{batch} i{i}");
+                            v
+                        });
+                        merge(&path, verdicts).expect("merge");
+                    }
+                })
+            })
+            .collect();
+        for t in threads {
+            t.join().expect("thread");
+        }
+        assert_eq!(Corpus::read(&path).expect("read").len(), 4 * 25 * 10);
+        let dir = path.parent().expect("dir");
+        let leftovers: Vec<_> = std::fs::read_dir(dir)
+            .expect("dir")
+            .flatten()
+            .filter(|e| e.path() != path)
+            .collect();
+        assert!(leftovers.is_empty(), "no temporary files are left behind");
+        let _ = std::fs::remove_dir_all(dir);
+    }
+
+    /// The same text in two dialects of one tool is two cases.
+    #[test]
+    fn the_same_text_in_two_dialects_is_two_cases() {
+        let mut banked = verdict("v", "3E12");
+        banked.dialect = "asl-banked".to_string();
+        let mut corpus = Corpus::default();
+        corpus.insert(verdict("v", "3E12"));
+        corpus.insert(banked);
+        assert_eq!(corpus.len(), 2);
+    }
+
+    /// A manifest round-trips, and lists each suite and tool once.
+    #[test]
+    fn a_manifest_names_each_group_once() {
+        let path = temp_path("manifest");
+        std::fs::create_dir_all(path.parent().expect("dir")).expect("dir");
+        let entries = Recorded::of("8080.ndjson", &[verdict("v", "00"), verdict("v", "01")]);
+        assert_eq!(entries.len(), 1);
+        append_manifest(&path, &entries).expect("append");
+        append_manifest(&path, &entries).expect("append again");
+        assert_eq!(read_manifest(&path).expect("read").len(), 2);
         let _ = std::fs::remove_dir_all(path.parent().expect("dir"));
     }
 
