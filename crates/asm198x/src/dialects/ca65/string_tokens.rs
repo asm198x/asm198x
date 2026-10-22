@@ -40,7 +40,7 @@ impl StringTokens {
         line: usize,
     ) -> Result<String, AsmError> {
         let key = NEXT_TOKEN
-            .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |n| n.checked_add(1))
+            .try_update(Ordering::Relaxed, Ordering::Relaxed, |n| n.checked_add(1))
             .map_err(|_| AsmError::new(line, "too many computed string tokens"))?;
         self.values.borrow_mut().insert(
             key,
