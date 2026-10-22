@@ -5,9 +5,9 @@ observation of a real reference assembler, not an expectation written
 by hand. Regenerate with `cargo xtask ledger`.
 
 - **Release:** `v0.0.71`
-- **Corpus hash:** `e1fc37063f86c0b402ab3e79b868c5b243d7eece2c1fe8b75d303df726fa27e5`
+- **Corpus hash:** `a1b69f074138bdd2049a595627ecb1fbf7f19c67814b6ded1f4359d3828c2531`
 - **Pinned curriculum:** `f11698d0b51b3a6c1209cec3d649229aa35af97f` (2026-08-27)
-- **CPUs:** 23, holding 8257 verdict(s)
+- **CPUs:** 23, holding 8148 verdict(s)
 
 ## 1802
 
@@ -15,7 +15,7 @@ Form coverage: **255/255** (100.0%)
 
 | arbiter | version | verdicts |
 |---|---|---|
-| `asl` | Macro Assembler 1.42 Beta [Bld 309] | form 255 |
+| `asl` | Macro Assembler 1.42 Beta [Bld 311] | form 255 |
 
 No tracked divergences.
 
@@ -25,7 +25,7 @@ Form coverage: **245/245** (100.0%)
 
 | arbiter | version | verdicts |
 |---|---|---|
-| `asl` | Macro Assembler 1.42 Beta [Bld 309] | form 245 |
+| `asl` | Macro Assembler 1.42 Beta [Bld 311] | form 245 |
 
 No tracked divergences.
 
@@ -35,9 +35,8 @@ Form coverage: **151/151** (100.0%)
 
 | arbiter | version | verdicts |
 |---|---|---|
-| `acme` | This is ACME, release 0.97 ("Zem"), 1 Aug 2025 | probe 4 |
-| `acme` | This is ACME, release 0.97 ("Zem"), 28 June 2020 | curriculum 138, form 151, fuzz 100, probe 99 |
-| `ca65` | ca65 V2.18 - N/A | curriculum 51 |
+| `acme` | This is ACME, release 0.97 ("Zem"), 1 Aug 2025 | curriculum 138, form 151, fuzz 100, probe 103 |
+| `ca65` | ca65 V2.19 - Git 8d86ca7 | curriculum 51 |
 
 No tracked divergences.
 
@@ -47,7 +46,7 @@ Form coverage: **270/270** (100.0%)
 
 | arbiter | version | verdicts |
 |---|---|---|
-| `ca65` | ca65 V2.18 - N/A | form 270, probe 66 |
+| `ca65` | ca65 V2.19 - Git 8d86ca7 | form 270, probe 65 |
 
 No tracked divergences.
 
@@ -57,7 +56,7 @@ Form coverage: **197/197** (100.0%)
 
 | arbiter | version | verdicts |
 |---|---|---|
-| `asl` | Macro Assembler 1.42 Beta [Bld 309] | form 197 |
+| `asl` | Macro Assembler 1.42 Beta [Bld 311] | form 197 |
 
 No tracked divergences.
 
@@ -67,14 +66,10 @@ Form coverage: **838/838** (100.0%)
 
 | arbiter | version | verdicts |
 |---|---|---|
-| `vasmm68k_mot` | vasm 2.0b (c) in 2002-2025 Volker Barthelmann | fuzz 9, probe 1 |
 | `vasmm68k_mot` | vasm 2.0f (c) in 2002-2026 Volker Barthelmann | curriculum 106, form 838, fuzz 91, probe 77, sweep-chunk 160 |
 
 Tracked divergences — differences we know about and check:
 
-- `canonicalisation-68000-0812FE97` — 1 case(s)
-- `canonicalisation-68000-08AC909FCDFA` — 1 case(s)
-- `canonicalisation-68000-08F7F12AF8BB` — 1 case(s)
 - `issue-110` — 4 case(s)
 
 ## 6809
@@ -93,7 +88,7 @@ Form coverage: **210/214** (98.1%)
 
 | arbiter | version | verdicts |
 |---|---|---|
-| `asl` | Macro Assembler 1.42 Beta [Bld 309] | form 210 |
+| `asl` | Macro Assembler 1.42 Beta [Bld 311] | form 210 |
 
 No tracked divergences.
 
@@ -103,7 +98,7 @@ Form coverage: **214/214** (100.0%)
 
 | arbiter | version | verdicts |
 |---|---|---|
-| `asl` | Macro Assembler 1.42 Beta [Bld 309] | form 214 |
+| `asl` | Macro Assembler 1.42 Beta [Bld 311] | form 214 |
 
 No tracked divergences.
 
@@ -113,7 +108,7 @@ Form coverage: **244/244** (100.0%)
 
 | arbiter | version | verdicts |
 |---|---|---|
-| `asl` | Macro Assembler 1.42 Beta [Bld 309] | form 244 |
+| `asl` | Macro Assembler 1.42 Beta [Bld 311] | form 244 |
 
 No tracked divergences.
 
@@ -123,7 +118,7 @@ Form coverage: **30/30** (100.0%)
 
 | arbiter | version | verdicts |
 |---|---|---|
-| `asl` | Macro Assembler 1.42 Beta [Bld 309] | form 30, sweep-chunk 50 |
+| `asl` | Macro Assembler 1.42 Beta [Bld 311] | form 30, sweep-chunk 50 |
 
 No tracked divergences.
 
@@ -133,7 +128,7 @@ Form coverage: **253/253** (100.0%)
 
 | arbiter | version | verdicts |
 |---|---|---|
-| `asl` | Macro Assembler 1.42 Beta [Bld 309] | form 253 |
+| `asl` | Macro Assembler 1.42 Beta [Bld 311] | form 253 |
 
 No tracked divergences.
 
@@ -143,7 +138,7 @@ Form coverage: **96/96** (100.0%)
 
 | arbiter | version | verdicts |
 |---|---|---|
-| `asl` | Macro Assembler 1.42 Beta [Bld 309] | form 96, sweep-chunk 78 |
+| `asl` | Macro Assembler 1.42 Beta [Bld 311] | form 96, sweep-chunk 78 |
 
 No tracked divergences.
 
@@ -153,7 +148,7 @@ Form coverage: **121/121** (100.0%)
 
 | arbiter | version | verdicts |
 |---|---|---|
-| `asl` | Macro Assembler 1.42 Beta [Bld 309] | form 121 |
+| `asl` | Macro Assembler 1.42 Beta [Bld 311] | form 121 |
 
 No tracked divergences.
 
@@ -161,8 +156,7 @@ No tracked divergences.
 
 | arbiter | version | verdicts |
 |---|---|---|
-| `rgbasm` | rgbasm v1.0.3 | probe 59 |
-| `rgbasm` | rgbasm v1.0.4 | probe 1 |
+| `rgbasm` | rgbasm v1.0.4 | probe 57 |
 
 No tracked divergences.
 
@@ -172,7 +166,7 @@ Form coverage: **203/203** (100.0%)
 
 | arbiter | version | verdicts |
 |---|---|---|
-| `asl` | Macro Assembler 1.42 Beta [Bld 309] | form 203 |
+| `asl` | Macro Assembler 1.42 Beta [Bld 311] | form 203 |
 
 No tracked divergences.
 
@@ -182,7 +176,7 @@ Form coverage: **69/69** (100.0%)
 
 | arbiter | version | verdicts |
 |---|---|---|
-| `asl` | Macro Assembler 1.42 Beta [Bld 309] | form 69, sweep-chunk 56 |
+| `asl` | Macro Assembler 1.42 Beta [Bld 311] | form 69, sweep-chunk 56 |
 
 No tracked divergences.
 
@@ -193,7 +187,7 @@ Form coverage: **796/796** (100.0%)
 | arbiter | version | verdicts |
 |---|---|---|
 | `pasmo` | PasmoNext v0.1.3 (PC) (C) 2004-2005 Julian Albo | curriculum 161, form 796, fuzz 200, probe 72 |
-| `sjasmplus` | SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus) | curriculum 161, probe 220 |
+| `sjasmplus` | SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus) | curriculum 161, probe 127 |
 
 No tracked divergences.
 
@@ -203,7 +197,7 @@ Form coverage: **271/271** (100.0%)
 
 | arbiter | version | verdicts |
 |---|---|---|
-| `asl` | Macro Assembler 1.42 Beta [Bld 309] | form 271, sweep-chunk 97 |
+| `asl` | Macro Assembler 1.42 Beta [Bld 311] | form 271, sweep-chunk 96 |
 
 No tracked divergences.
 
@@ -213,7 +207,7 @@ Form coverage: **271/271** (100.0%)
 
 | arbiter | version | verdicts |
 |---|---|---|
-| `asl` | Macro Assembler 1.42 Beta [Bld 309] | form 271, sweep-chunk 97 |
+| `asl` | Macro Assembler 1.42 Beta [Bld 311] | form 271, sweep-chunk 96 |
 
 No tracked divergences.
 
@@ -221,7 +215,7 @@ No tracked divergences.
 
 | arbiter | version | verdicts |
 |---|---|---|
-| `sjasmplus` | SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus) | probe 9 |
+| `sjasmplus` | SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus) | probe 9 |
 
 No tracked divergences.
 
@@ -231,7 +225,7 @@ Form coverage: **234/234** (100.0%)
 
 | arbiter | version | verdicts |
 |---|---|---|
-| `ca65` | ca65 V2.18 - N/A | form 234 |
+| `ca65` | ca65 V2.19 - Git 8d86ca7 | form 234 |
 
 No tracked divergences.
 
@@ -241,7 +235,7 @@ Form coverage: **504/504** (100.0%)
 
 | arbiter | version | verdicts |
 |---|---|---|
-| `rgbasm` | rgbasm v1.0.3 | form 504 |
+| `rgbasm` | rgbasm v1.0.4 | form 504 |
 
 No tracked divergences.
 

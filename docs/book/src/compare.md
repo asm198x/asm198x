@@ -25,14 +25,14 @@ exactly which build of which assembler produced the bytes we compare with:
 <!-- generated: xtask compare --markdown -->
 | Reference tool | The version we measured against | Instruction sets | Verdicts |
 |---|---|---|---|
-| `acme` | This is ACME, release 0.97 ("Zem"), 1 Aug 2025<br>This is ACME, release 0.97 ("Zem"), 28 June 2020 | 1 | 492 |
-| `asl` | Macro Assembler 1.42 Beta [Bld 309] | 14 | 3057 |
-| `ca65` | ca65 V2.18 - N/A | 3 | 621 |
+| `acme` | This is ACME, release 0.97 ("Zem"), 1 Aug 2025 | 1 | 492 |
+| `asl` | Macro Assembler 1.42 Beta [Bld 311] | 14 | 3055 |
+| `ca65` | ca65 V2.19 - Git 8d86ca7 | 3 | 620 |
 | `lwasm` | lwasm from lwtools 4.25 | 1 | 622 |
 | `pasmo` | PasmoNext v0.1.3 (PC) (C) 2004-2005 Julian Albo | 1 | 1229 |
-| `rgbasm` | rgbasm v1.0.3<br>rgbasm v1.0.4 | 2 | 564 |
-| `sjasmplus` | SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus) | 2 | 390 |
-| `vasmm68k_mot` | vasm 2.0b (c) in 2002-2025 Volker Barthelmann<br>vasm 2.0f (c) in 2002-2026 Volker Barthelmann | 1 | 1282 |
+| `rgbasm` | rgbasm v1.0.4 | 2 | 561 |
+| `sjasmplus` | SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus) | 2 | 297 |
+| `vasmm68k_mot` | vasm 2.0f (c) in 2002-2026 Volker Barthelmann | 1 | 1272 |
 <!-- /generated -->
 
 The version column says **what we measured against**, not what is current. That
