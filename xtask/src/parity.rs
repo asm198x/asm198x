@@ -153,12 +153,8 @@ pub fn compute(repo: &Path) -> Report {
         let Ok(corpus) = Corpus::read(&path) else {
             continue;
         };
-        let retired = corpus.retired();
         for verdict in corpus.verdicts() {
             if verdict.suite != Suite::Curriculum {
-                continue;
-            }
-            if retired.contains(&verdict.id().as_str()) {
                 continue;
             }
             let Some((relpath, variant, digest)) = parse_key(&verdict.source) else {

@@ -2157,22 +2157,15 @@ fn vasm_visibility_words_need_a_defined_name() {
         })
     };
 
-    // The three refusers behave differently before 2.0f, so what the defined
-    // case must answer depends on which vasm is installed here.
-    let two_oh_b = support::tool_identity::identify("vasmm68k_mot")
-        .is_some_and(|id| id.identity.contains("vasm 2.0b"));
-
     let mut wrong: Vec<String> = Vec::new();
     for word in [
         "xdef", "public", "global", "export", "entry", "weak", "extrn", "xref", "import", "nref",
     ] {
-        let refuses_defined = two_oh_b && matches!(word, "xref" | "import" | "nref");
+        // vasm accepts every one of these with the name defined.
         let defined = format!("\tsection code,code\n\t{word} foo\nfoo:\tdc.b 1\n");
-        match (&run(&defined), refuses_defined) {
-            (RefOutcome::Bytes(b), false) if b == &[1] => {}
-            (RefOutcome::Rejected { diagnostic }, true)
-                if diagnostic.contains("must not be defined") => {}
-            (other, _) => wrong.push(format!("`{word}` with the name defined: {other:?}")),
+        match &run(&defined) {
+            RefOutcome::Bytes(b) if b == &[1] => {}
+            other => wrong.push(format!("`{word}` with the name defined: {other:?}")),
         }
         let undefined = format!("\tsection code,code\n\t{word} foo\n\tdc.b 1\n");
         match &run(&undefined) {

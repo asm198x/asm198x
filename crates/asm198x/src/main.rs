@@ -2515,7 +2515,7 @@ mod tests {
     }
 
     #[test]
-    #[ignore = "needs rgbfix 1.0.3; run with --ignored"]
+    #[ignore = "needs an installed rgbfix reference; run with --ignored"]
     fn game_boy_rom_is_byte_identical_to_rgbfix() {
         let mut image = vec![0u8; 0x4000];
         image[0x100..0x104].copy_from_slice(&[0xC3, 0x50, 0x01, 0x00]);

@@ -55,14 +55,10 @@ pub fn collect(repo: &Path) -> BTreeMap<String, Divergence> {
         let Ok(corpus) = Corpus::read(&path) else {
             continue;
         };
-        let retired = corpus.retired();
         for verdict in corpus.verdicts() {
             let Outcome::Divergence { divergence, .. } = &verdict.outcome else {
                 continue;
             };
-            if retired.contains(&verdict.id().as_str()) {
-                continue;
-            }
             let entry = out.entry(divergence.clone()).or_insert_with(|| Divergence {
                 cpus: BTreeSet::new(),
                 dialects: BTreeSet::new(),
@@ -156,11 +152,7 @@ pub fn corpus_summary(repo: &Path) -> CorpusSummary {
         let Ok(corpus) = Corpus::read(&path) else {
             continue;
         };
-        let retired = corpus.retired();
         for verdict in corpus.verdicts() {
-            if retired.contains(&verdict.id().as_str()) {
-                continue;
-            }
             verdicts += 1;
             tools.insert(verdict.arbiter.tool.clone());
             cpus.insert(verdict.cpu.clone());

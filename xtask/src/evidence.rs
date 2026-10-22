@@ -55,7 +55,7 @@ pub fn markdown(repo: &Path) -> String {
     let _ = writeln!(
         out,
         "**What they produced is recorded, not remembered.** {} verdicts, each \
-         keyed on the reference tool's own version string, committed to this \
+         naming the reference version that answered it, committed to this \
          repository. CI replays every one of them on machines with none of \
          those tools installed, so a change that alters our output fails \
          against what the real assembler did — not against a fixture somebody \

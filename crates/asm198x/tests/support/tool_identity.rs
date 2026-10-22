@@ -1,4 +1,4 @@
-//! Who arbitrated — the reference tool's behavioural identity and the binary
+//! Who arbitrated — the reference tool's version self-report, and the binary
 //! that produced it.
 //!
 //! Every reference-arbitrated suite has so far asked one question about its
@@ -6,15 +6,14 @@
 //! enough to record what the run proved, because a fact is only worth as much
 //! as the account of who established it (#61, R1).
 //!
-//! Two things are captured, and the difference between them is the design:
+//! Two things are captured:
 //!
-//! - **Behavioural identity** — the tool's own version self-report. This is
-//!   what predicts behaviour, so it is what verdicts are keyed on.
-//! - **Binary digest** — SHA-256 of the executable that actually ran. Carried
-//!   as provenance and never part of the key, so two builds of one release
-//!   *corroborate* a fact rather than forking it, while two binaries claiming
-//!   one version and producing different bytes raise an alarm that can be
-//!   traced to the specific binaries.
+//! - **Identity**, the tool's own version self-report. Every verdict records
+//!   it, so a reader can see which version answered and growth can prune
+//!   verdicts from a version no longer in use
+//!   (`decisions/verdicts-track-current-tools.md`).
+//! - **Binary digest**, the SHA-256 of the executable that ran. Not stored in
+//!   verdicts; live evidence reports that name an exact binary use it.
 //!
 //! # Why the self-report cannot be guessed
 //!
@@ -30,16 +29,16 @@
 //! successful exit cannot be required either. Rather than trust a line number,
 //! each tool names a marker its identity line must contain — a version printed
 //! one line further down is still found, and an unrecognisable response is
-//! reported as such instead of silently keying every verdict on an error
-//! message.
+//! reported as such instead of silently recording an error message as a
+//! version.
 //!
 //! # What probing already found
 //!
 //! The binary installed here as `pasmo` reports **`PasmoNext v0.1.3 … Modified
 //! by C Kirby`** — a fork, not stock pasmo. Presence-only gating could never
 //! have shown that, and every pasmo verdict recorded on this machine is a
-//! verdict about the fork. That is precisely the confusion behavioural identity
-//! exists to prevent.
+//! verdict about the fork. That is precisely the confusion recording the
+//! identity exists to prevent.
 
 #![allow(dead_code)]
 
@@ -271,7 +270,7 @@ mod tests {
     }
 
     /// The digest is of file *content*, so two paths holding the same bytes
-    /// agree — a repackaged arbiter corroborates rather than forks.
+    /// agree.
     #[test]
     fn identical_bytes_at_two_paths_digest_the_same() {
         let dir = std::env::temp_dir().join("asm198x-identity-digest");

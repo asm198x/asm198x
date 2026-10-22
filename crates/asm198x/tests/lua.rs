@@ -204,22 +204,14 @@ fn lua_formatting_preserves_foreign_syntax() {
 
 #[cfg(feature = "lua")]
 #[test]
-#[ignore = "requires installed SjASMPlus 1.21.0"]
+#[ignore = "requires an installed SjASMPlus reference"]
 fn lua_reference_probes() {
     use std::{fs, process::Command};
-    use verdict_corpus::{Arbiter, Corpus, Outcome, Record, Suite, Verdict, encode_hex};
+    use verdict_corpus::{Arbiter, Outcome, Suite, Verdict, encode_hex};
+    // Whichever version the arbiter image installs answers; the verdict records
+    // which one it was.
     let identity = tool_identity::identify("sjasmplus").expect("reference identity");
-    assert!(
-        identity.identity.contains("v1.21.0"),
-        "unexpected reference version"
-    );
-    let path = corpus_path();
-    let previous = if path.exists() {
-        Some(Corpus::read(&path).expect("existing corpus"))
-    } else {
-        None
-    };
-    let mut records = Vec::new();
+    let mut verdicts = Vec::new();
     let dir = std::env::temp_dir().join(format!("asm198x-lua-reference-{}", std::process::id()));
     fs::create_dir_all(&dir).expect("probe directory");
     let cases = CASES
@@ -260,20 +252,14 @@ fn lua_reference_probes() {
             arbiter: Arbiter {
                 tool: identity.tool.clone(),
                 identity: identity.identity.clone(),
-                digest: identity.digest.clone(),
             },
             outcome: Outcome::Bytes {
                 hex: encode_hex(&bytes),
             },
         };
-        if !previous
-            .as_ref()
-            .is_some_and(|c| c.verdicts().any(|v| v == &verdict))
-        {
-            records.push(Record::Verdict(Box::new(verdict)));
-        }
+        verdicts.push(verdict);
     }
-    verdict_corpus::append(&path, &records).expect("record observed reference bytes");
+    verdict_corpus::merge(&corpus_path(), verdicts).expect("record observed reference bytes");
     fs::remove_dir_all(dir).expect("remove own probe directory");
 }
 

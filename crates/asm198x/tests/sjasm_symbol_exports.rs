@@ -139,7 +139,7 @@ fn cli_writes_source_maps_under_outprefix_in_human_and_json_modes() {
 }
 
 #[test]
-#[ignore = "requires SjASMPlus 1.21.0"]
+#[ignore = "requires an installed SjASMPlus reference"]
 fn maps_match_native_for_pages_constants_structures_and_options() {
     let cases = [
         BANKED.to_string(),

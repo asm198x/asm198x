@@ -140,10 +140,9 @@ fn all_device_geometries_preserve_the_highest_page() {
 }
 
 #[test]
-#[ignore = "requires SjASMPlus 1.21.0"]
+#[ignore = "requires an installed SjASMPlus reference"]
 fn page_placements_match_native_cspectmap_addresses() {
     let identity = tool_identity::identify("sjasmplus").expect("SjASMPlus identity");
-    assert!(identity.identity.contains("1.21.0"), "{identity:?}");
     eprintln!("{identity:?}");
     let dir = scratch::dir("paged-symbols");
     // CSPECTMAP is requested before END so the native assembler sees it.
