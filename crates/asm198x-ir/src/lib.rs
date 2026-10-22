@@ -21,5 +21,5 @@ pub use span::{ExpansionFrame, FileId, Span};
 pub use stream::{
     ArtifactFormat, BinOp, DataRange, DeviceSpec, DiagSeverity, Expr, FIX_BITS, NexCommand,
     Operation, OutputFormat, Piece, Place, RequestedOutput, Statement, TapeKind, align_pad,
-    encoded_pieces, eval_binop, form, next_pc,
+    encoded_pieces, eval_binop, fix_div, fix_mul, fix_round, form, next_pc, trailing_zeros,
 };

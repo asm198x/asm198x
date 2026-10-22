@@ -92,8 +92,11 @@ pub enum BinOp {
     /// Exponentiation (ACME's `^`): `a` raised to the power `b`.
     Pow,
     /// Fixed-point multiply and divide in rgbasm's Q16.16: `MUL(1.5, 1.5)` is
-    /// `2.25`, so the product is shifted back down by the fraction's width and
-    /// the quotient shifted up before dividing.
+    /// `2.25`. Both follow RGBDS exactly: the operands become `f64`s, the
+    /// result rounds to the nearest Q16.16 value (halves away from zero) and
+    /// saturates to the 32-bit range. `DIV` by zero is not an error there: it
+    /// answers `INT32_MAX`, `INT32_MIN` or `0` by the dividend's sign. See
+    /// [`fix_mul`] and [`fix_div`].
     FixMul,
     FixDiv,
     /// The larger of the two (ca65 `.max`).
@@ -140,11 +143,12 @@ pub enum Expr {
     /// `$FF`.
     BitNot(Box<Expr>),
     /// rgbasm's `ROUND` over a Q16.16 value: to the nearest whole number, with
-    /// a half going *away from zero* — `ROUND(-3.5)` is `-4.0`, which is why
-    /// this is a node rather than an add-and-mask.
+    /// a half going *away from zero*. `ROUND(-3.2)` is `-3.0` and `ROUND(-3.5)`
+    /// is `-4.0`, which is why this is a node rather than an add-and-mask. See
+    /// [`fix_round`].
     FixRound(Box<Expr>),
-    /// rgbasm's `TZCOUNT`: how many low bits of the value are zero. Zero itself
-    /// has none by definition here rather than all of them.
+    /// rgbasm's `TZCOUNT`: how many low bits of the value are zero. RGBDS counts
+    /// over 32 bits, so `TZCOUNT(0)` is `32`. See [`trailing_zeros`].
     TrailingZeros(Box<Expr>),
     /// Logical negation — ca65's `!` and `.not`. Answers `1` or `0`, and binds
     /// *looser* than everything else in that dialect: `.not 1 .or 1` is `0`,
@@ -196,13 +200,8 @@ impl Expr {
             Expr::LogNot(e) => i64::from(e.eval_with(resolve, pc, line)? == 0),
             // Half goes away from zero, which is what rgbasm does: `ROUND(3.5)`
             // is `4.0` and `ROUND(-3.5)` is `-4.0`.
-            Expr::FixRound(e) => {
-                let v = e.eval_with(resolve, pc, line)?;
-                let half = 1 << (FIX_BITS - 1);
-                let away = if v < 0 { v - half } else { v + half };
-                away & !((1 << FIX_BITS) - 1)
-            }
-            Expr::TrailingZeros(e) => i64::from(e.eval_with(resolve, pc, line)?.trailing_zeros()),
+            Expr::FixRound(e) => fix_round(e.eval_with(resolve, pc, line)?),
+            Expr::TrailingZeros(e) => trailing_zeros(e.eval_with(resolve, pc, line)?),
             Expr::Bin(op, l, r) => {
                 let a = l.eval_with(resolve, pc, line)?;
                 // Logical operators short-circuit in the source languages
@@ -261,16 +260,117 @@ pub fn eval_binop(op: BinOp, a: i64, b: i64, line: usize) -> Result<i64, AsmErro
                 .map_err(|_| AsmError::new(line, "negative exponent in expression"))?;
             a.checked_pow(exp).ok_or_else(overflow)?
         }
-        // Q16.16: the product of two scaled values is scaled twice, so it comes
-        // back down; the quotient is scaled away entirely, so it goes up first.
-        BinOp::FixMul => a.checked_mul(b).ok_or_else(overflow)? >> FIX_BITS,
-        BinOp::FixDiv => {
-            if b == 0 {
-                return Err(AsmError::new(line, "division by zero in expression"));
-            }
-            a.checked_shl(FIX_BITS as u32).ok_or_else(overflow)? / b
-        }
+        BinOp::FixMul => fix_mul(a, b),
+        BinOp::FixDiv => fix_div(a, b),
     })
+}
+
+// ---------------------------------------------------------------------------
+// rgbasm's fixed-point arithmetic
+// ---------------------------------------------------------------------------
+//
+// Transcribed from RGBDS v1.0.3 `src/asm/fixpoint.cpp` (unchanged at v1.0.4),
+// the reference Asm198x's rgbasm dialect is measured against. RGBDS works in
+// `double`, so these do too: `f64` arithmetic and `f64::round` are the same
+// IEEE 754 operations as C's `*`, `/` and `round()`, which keeps every result
+// byte-identical rather than merely close. RGBDS's values are `int32_t`, so
+// an operand is read as its low 32 bits, signed — `$80000000` is -32768.0, as
+// it is to RGBDS, not a wide positive number — and results saturate to `i32`.
+
+/// One in Q16.16, as a `double`: `pow(2.0, q)` with RGBDS's default `q`.
+const FIX_ONE: f64 = (1u32 << FIX_BITS) as f64;
+
+/// A Q16.16 value as the number it represents (RGBDS `fix2double`), read as
+/// the `int32_t` RGBDS holds: the low 32 bits, signed.
+fn fix_to_f64(value: i64) -> f64 {
+    // Truncation is the point: it is RGBDS's argument conversion.
+    #[allow(clippy::cast_possible_truncation)]
+    let value = value as i32;
+    f64::from(value) / FIX_ONE
+}
+
+/// The nearest Q16.16 value to `d`, halves away from zero, saturated to the
+/// 32-bit range; NaN is `0` (RGBDS `double2fix`).
+fn f64_to_fix(d: f64) -> i64 {
+    if d.is_nan() {
+        return 0;
+    }
+    let scaled = (d * FIX_ONE).round();
+    // `as` from `f64` saturates, and the clamp bounds are exact in `f64`.
+    scaled.clamp(f64::from(i32::MIN), f64::from(i32::MAX)) as i64
+}
+
+/// rgbasm's `MUL(a, b)` on Q16.16 values (RGBDS `fix_Mul`).
+///
+/// ```
+/// use asm198x_ir::stream::fix_mul;
+/// assert_eq!(fix_mul(10 << 16, 1 << 15), 5 << 16); // MUL(10.0, 0.5) == 5.0
+/// // `$FFFF0000` is -1.0 to RGBDS, so doubling it is -2.0, not saturation.
+/// assert_eq!(fix_mul(0xFFFF_0000, 2 << 16), -2 << 16);
+/// ```
+#[must_use]
+pub fn fix_mul(a: i64, b: i64) -> i64 {
+    f64_to_fix(fix_to_f64(a) * fix_to_f64(b))
+}
+
+/// rgbasm's `DIV(a, b)` on Q16.16 values (RGBDS `fix_Div`). A zero divisor
+/// saturates by the dividend's sign rather than failing.
+///
+/// ```
+/// use asm198x_ir::stream::fix_div;
+/// assert_eq!(fix_div(5 << 16, 2 << 16), 5 << 15); // DIV(5.0, 2.0) == 2.5
+/// assert_eq!(fix_div(5 << 16, 0), i64::from(i32::MAX)); // +inf
+/// assert_eq!(fix_div(-5 << 16, 0), i64::from(i32::MIN)); // -inf
+/// assert_eq!(fix_div(0, 0), 0); // NaN
+/// ```
+#[must_use]
+pub fn fix_div(a: i64, b: i64) -> i64 {
+    let (dividend, divisor) = (fix_to_f64(a), fix_to_f64(b));
+    if divisor == 0.0 {
+        return match dividend.partial_cmp(&0.0) {
+            Some(std::cmp::Ordering::Less) => i64::from(i32::MIN),
+            Some(std::cmp::Ordering::Greater) => i64::from(i32::MAX),
+            _ => 0,
+        };
+    }
+    f64_to_fix(dividend / divisor)
+}
+
+/// rgbasm's `ROUND(v)` on a Q16.16 value (RGBDS `fix_Round`): the nearest whole
+/// number, halves away from zero.
+///
+/// ```
+/// use asm198x_ir::stream::fix_round;
+/// let fix = |v: f64| (v * 65536.0) as i64;
+/// assert_eq!(fix_round(fix(1.5)), fix(2.0));
+/// assert_eq!(fix_round(fix(-1.5)), fix(-2.0));
+/// assert_eq!(fix_round(fix(-3.2)), fix(-3.0));
+/// assert_eq!(fix_round(0x8000_0000), i64::from(i32::MIN)); // -32768.0
+/// ```
+#[must_use]
+pub fn fix_round(value: i64) -> i64 {
+    f64_to_fix(fix_to_f64(value).round())
+}
+
+/// rgbasm's `TZCOUNT(v)` (RGBDS `op_tzcount`): trailing zero bits of the low 32
+/// bits, so zero has all 32.
+///
+/// ```
+/// use asm198x_ir::stream::trailing_zeros;
+/// assert_eq!(trailing_zeros(0), 32);
+/// assert_eq!(trailing_zeros(42), 1);
+/// assert_eq!(trailing_zeros(-1), 0);
+/// assert_eq!(trailing_zeros(0x8000_0000), 31);
+/// ```
+#[must_use]
+pub fn trailing_zeros(value: i64) -> i64 {
+    // RGBDS's value is an `int32_t`, so only the low 32 bits exist to count.
+    let low = value as u32;
+    if low == 0 {
+        32
+    } else {
+        i64::from(low.trailing_zeros())
+    }
 }
 
 // ---------------------------------------------------------------------------
