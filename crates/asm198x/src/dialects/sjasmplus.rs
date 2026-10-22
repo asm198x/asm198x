@@ -1821,6 +1821,19 @@ mod tests {
         assert_eq!(result.bytes, vec![0x00, 0x00, 0x00, 0x18, 0xFD]);
     }
 
+    /// `ENDS` does not re-anchor either: a `.local` after a structure belongs
+    /// to the last ordinary label (sjasmplus 1.21.1 onwards; 1.21.0 put it
+    /// under the structure). `S.after` is then undefined, as the reference's
+    /// "Label not found" says.
+    #[test]
+    fn a_local_after_ends_stays_under_the_last_label() {
+        let src = "glob:\n STRUCT S\nf BYTE 0\n ENDS\n.after: db 2\n";
+        let result = asm(&format!("{src} dw glob.after,.after\n")).expect("glob.after");
+        assert_eq!(result.symbols.get("glob.after"), Some(&0));
+        assert_eq!(result.bytes, vec![0x02, 0x00, 0x00, 0x00, 0x00]);
+        asm(&format!("{src} dw S.after\n")).expect_err("S.after is not defined");
+    }
+
     /// Includes and live macro expansions are one textual label stream. Each
     /// expansion contributes a fresh definition, just as the reference does.
     #[test]
