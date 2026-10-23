@@ -12,6 +12,7 @@ dependencies = [
  "format198x-tzx",
  "isa198x",
  "isa198x-disasm",
+ "lang198x-z80-asm",
  "same-file",
  "serde",
  "serde_json",
@@ -163,6 +164,23 @@ dependencies = [
  "cfg-if",
  "futures-util",
  "wasm-bindgen",
+]
+
+[[package]]
+name = "lang198x-syntax"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9c225ca928528a659aeecde8a98b005d57e60cda1442c93dd4884880b6d92d3a"
+
+[[package]]
+name = "lang198x-z80-asm"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "98cdefdaf19e3cda48ec359002d44153bd128e2b78ebaeb449c130c06898b5d4"
+dependencies = [
+ "asm198x-ir",
+ "isa198x",
+ "lang198x-syntax",
 ]
 
 [[package]]

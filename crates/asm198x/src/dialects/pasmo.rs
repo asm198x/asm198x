@@ -14,9 +14,10 @@
 
 use crate::dialect::{Dialect, Oversize};
 use crate::dialects::macros::{self, Expand};
+use crate::dialects::pasmo_walk;
 use crate::dialects::z80::{self, Z80Syntax};
 use crate::directives::{Category, Directive, Pattern};
-use crate::engine::{AsmError, Statement};
+use crate::engine::{AsmError, Statement, Warning};
 use crate::source::{SourceLoader, SourceMap};
 
 /// The pasmo-family Z80 dialect. `z80n` selects the target: `false` for a plain
@@ -78,6 +79,10 @@ pub const DIRECTIVES: &[Directive] = &[
 
 pub(crate) struct Pasmo {
     pub(crate) z80n: bool,
+    /// Read the source with Lang198x's PasmoNext front end and the walk in
+    /// [`crate::dialects::pasmo_walk`], instead of the shared Z80 core. The
+    /// migration gate runs both until the new one matches every verdict.
+    pub(crate) lang198x: bool,
 }
 
 impl Dialect for Pasmo {
@@ -102,6 +107,9 @@ impl Dialect for Pasmo {
         self.z80n.then_some(&isa::z80::NEXT)
     }
     fn parse(&self, source: &str) -> Result<Vec<Statement>, AsmError> {
+        if self.lang198x {
+            return self.parse_warned(source).map(|(statements, _)| statements);
+        }
         z80::assemble_keyword(
             &PasmoSyntax,
             self.instruction_set(),
@@ -128,6 +136,11 @@ impl Dialect for Pasmo {
         map: &mut SourceMap,
         loader: &dyn SourceLoader,
     ) -> Result<Vec<Statement>, AsmError> {
+        if self.lang198x {
+            return self
+                .parse_multi_warned(map, loader)
+                .map(|(statements, _)| statements);
+        }
         z80::parse_program_multi_keyword(
             &PasmoSyntax,
             self.instruction_set(),
@@ -135,6 +148,24 @@ impl Dialect for Pasmo {
             map,
             loader,
         )
+    }
+    fn parse_warned(&self, source: &str) -> Result<(Vec<Statement>, Vec<Warning>), AsmError> {
+        if self.lang198x {
+            return pasmo_walk::statements(source, self.z80n);
+        }
+        self.parse(source)
+            .map(|statements| (statements, Vec::new()))
+    }
+    fn parse_multi_warned(
+        &self,
+        map: &mut SourceMap,
+        loader: &dyn SourceLoader,
+    ) -> Result<(Vec<Statement>, Vec<Warning>), AsmError> {
+        if self.lang198x {
+            return pasmo_walk::statements_multi(map, loader, self.z80n);
+        }
+        self.parse_multi(map, loader)
+            .map(|statements| (statements, Vec::new()))
     }
     /// pasmo silently truncates an over-range byte to its low 8 bits.
     fn oversized_byte_policy(&self) -> Oversize {
@@ -554,7 +585,10 @@ mod tests {
         use crate::dialects::z80;
 
         let src = "; header\nstart:\n  ld a, 5   ; load five\n  ret\n";
-        let d = Pasmo { z80n: false };
+        let d = Pasmo {
+            z80n: false,
+            lang198x: false,
+        };
         let prog = z80::parse_program_keyword(
             &PasmoSyntax,
             d.instruction_set(),

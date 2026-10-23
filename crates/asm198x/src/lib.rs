@@ -1229,7 +1229,14 @@ pub fn assemble_lwasm_files(
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
 pub fn assemble_pasmo(source: &str) -> Result<AssemblyResult, AsmError> {
-    engine::assemble(source, &dialects::Pasmo { z80n: false }).map(AssemblyResult::from)
+    engine::assemble(
+        source,
+        &dialects::Pasmo {
+            z80n: false,
+            lang198x: false,
+        },
+    )
+    .map(AssemblyResult::from)
 }
 
 /// Assemble pasmo-syntax Z80 source targeting the **ZX Spectrum Next (Z80N)** —
@@ -1240,7 +1247,60 @@ pub fn assemble_pasmo(source: &str) -> Result<AssemblyResult, AsmError> {
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
 pub fn assemble_pasmonext(source: &str) -> Result<AssemblyResult, AsmError> {
-    engine::assemble(source, &dialects::Pasmo { z80n: true }).map(AssemblyResult::from)
+    engine::assemble(
+        source,
+        &dialects::Pasmo {
+            z80n: true,
+            lang198x: false,
+        },
+    )
+    .map(AssemblyResult::from)
+}
+
+/// Assemble PasmoNext source through Lang198x's front end
+/// (`lang198x-z80-asm`) and the PasmoNext walk, rather than the shared Z80
+/// core: the second path the migration gate compares against every verdict.
+/// `z80n` selects the Spectrum Next's instructions, as `pasmonext` does.
+///
+/// Not a stable interface: it goes once the gate holds and the new path is
+/// the default.
+///
+/// # Errors
+/// Returns an [`AsmError`] on anything PasmoNext 0.1.3 rejects, or that the
+/// new front end does not lower yet.
+#[doc(hidden)]
+pub fn assemble_pasmo_lang198x(source: &str, z80n: bool) -> Result<AssemblyResult, AsmError> {
+    engine::assemble(
+        source,
+        &dialects::Pasmo {
+            z80n,
+            lang198x: true,
+        },
+    )
+    .map(AssemblyResult::from)
+}
+
+/// As [`assemble_pasmo_lang198x`], for a program that reads other files with
+/// `INCLUDE` or `INCBIN` through `loader`.
+///
+/// # Errors
+/// As [`assemble_pasmo_files`].
+#[doc(hidden)]
+pub fn assemble_pasmo_lang198x_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+    z80n: bool,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(
+        &dialects::Pasmo {
+            z80n,
+            lang198x: true,
+        },
+        source,
+        input_path,
+        loader,
+    )
 }
 
 /// Assemble sjasmplus-syntax Z80 source targeting a plain Z80. Single-source:
@@ -1367,7 +1427,15 @@ pub fn assemble_pasmo_files(
     input_path: &str,
     loader: &dyn source::SourceLoader,
 ) -> Result<AssemblyResult, MultiFileError> {
-    assemble_files(&dialects::Pasmo { z80n: false }, source, input_path, loader)
+    assemble_files(
+        &dialects::Pasmo {
+            z80n: false,
+            lang198x: false,
+        },
+        source,
+        input_path,
+        loader,
+    )
 }
 
 /// As [`assemble_pasmo_files`], targeting the ZX Spectrum Next (Z80N) — what
@@ -1380,7 +1448,15 @@ pub fn assemble_pasmonext_files(
     input_path: &str,
     loader: &dyn source::SourceLoader,
 ) -> Result<AssemblyResult, MultiFileError> {
-    assemble_files(&dialects::Pasmo { z80n: true }, source, input_path, loader)
+    assemble_files(
+        &dialects::Pasmo {
+            z80n: true,
+            lang198x: false,
+        },
+        source,
+        input_path,
+        loader,
+    )
 }
 
 /// As [`assemble_pasmo_files`], with command-line EQU definitions parsed as
@@ -1422,7 +1498,14 @@ fn assemble_pasmo_defined(
 ) -> Result<AssemblyResult, MultiFileError> {
     let mut map = new_source_map(input_path, source);
     map.set_prelude(definitions);
-    assemble_mapped_files(&dialects::Pasmo { z80n }, map, loader)
+    assemble_mapped_files(
+        &dialects::Pasmo {
+            z80n,
+            lang198x: false,
+        },
+        map,
+        loader,
+    )
 }
 
 /// Assemble sjasmplus-syntax Z80 source targeting the ZX Spectrum Next (Z80N).
@@ -1442,7 +1525,13 @@ pub fn assemble_sjasmplus_next(source: &str) -> Result<AssemblyResult, AsmError>
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse failure.
 pub fn format_pasmo(source: &str) -> Result<String, AsmError> {
-    format_ast(&dialects::Pasmo { z80n: false }, source)
+    format_ast(
+        &dialects::Pasmo {
+            z80n: false,
+            lang198x: false,
+        },
+        source,
+    )
 }
 
 /// Format pasmonext-syntax (Z80N) source — see [`format_pasmo`].
@@ -1450,7 +1539,13 @@ pub fn format_pasmo(source: &str) -> Result<String, AsmError> {
 /// # Errors
 /// Returns an [`AsmError`] on any parse failure.
 pub fn format_pasmonext(source: &str) -> Result<String, AsmError> {
-    format_ast(&dialects::Pasmo { z80n: true }, source)
+    format_ast(
+        &dialects::Pasmo {
+            z80n: true,
+            lang198x: false,
+        },
+        source,
+    )
 }
 
 /// Format sjasmplus-syntax Z80 source — see [`format_pasmo`].

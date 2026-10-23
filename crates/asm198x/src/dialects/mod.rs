@@ -21,6 +21,7 @@ pub(crate) mod m6800;
 pub(crate) mod macros;
 pub(crate) mod mos6502;
 pub(crate) mod pasmo;
+pub(crate) mod pasmo_walk;
 pub(crate) mod pdp11;
 pub(crate) mod rgbasm;
 pub(crate) mod s2650;
