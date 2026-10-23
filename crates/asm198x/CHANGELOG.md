@@ -9,89 +9,56 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.0.72](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.71...asm198x-v0.0.72) - 2026-10-23
 
+The boundary between the dialect front ends and the assembler back end now
+ships as its own crate, [`asm198x-ir`](https://crates.io/crates/asm198x-ir).
+`asm198x` still re-exports everything it moved, at the same paths, so existing
+imports keep working. ([#934](https://github.com/asm198x/asm198x/pull/934), [#935](https://github.com/asm198x/asm198x/pull/935))
+
 ### Added
 
-- *(sjasmplus)* emit native NEX V1.2 artifacts ([#743](https://github.com/asm198x/asm198x/pull/743))
+- SjASMPlus writes native NEX V1.2 files for the ZX Spectrum Next.
+  ([#743](https://github.com/asm198x/asm198x/pull/743))
 
 ### Fixed
 
-- *(sjasmplus)* keep locals after ENDS under the last label; record reference rejections
-- *(acme)* leave !skip at either end of the output unwritten
-- *(growth)* let the live suites pass without emulators or RGBDS 1.0.3
-- *(rgbasm)* match RGBDS for MUL, DIV, ROUND and TZCOUNT
-- *(corpus)* make recording and pruning safe under parallel, partial runs
-- *(ca65)* reject invalid empty calls without panicking
-- *(ca65)* check configured far addresses before emitting bytes
-- *(ca65)* evaluate data queries in source order
-- *(ca65)* preserve scoped external types through exported binding
-- *(ca65)* read conditional source queries in order
-- *(ca65)* reject undefined names discarded by conditional queries
-- *(ca65)* retain definition segments for source PC aliases
-- *(ca65)* classify source aliases before conditional selection
-- *(ca65)* advance the counter for each data element
-- *(ca65)* preserve 65816 address-word extraction
-- *(ca65)* reject unsigned wide-data overflow
-- *(ca65)* reject out-of-range flat far addresses
-- *(ca65)* retain macro context in flat backend diagnostics
-- *(huc6280)* keep macro templates through formatting
-- *(ca65)* preserve character tokens in data operand lists
-- *(ca65)* reject invalid quoted tokens when source is admitted
-- *(ca65)* preserve native text values and assertion arguments
-- *(ca65)* reject malformed literals and numeric asciiz operands
-- *(ca65)* preserve numeric string-query refusal boundaries
-- *(ca65)* emit computed strings as native byte values
-- *(ca65)* reject strings used as token-list selector bounds
-- *(ca65)* preserve captured register identifiers on macro calls
-- *(ca65)* bind generated labels on macro definitions and calls
-- *(ca65)* make bound generated labels visible to constancy queries
-- *(ca65)* validate cheap-local names and require global anchors
-- *(ca65)* reject invalid generated identifier strings
-- *(ca65)* preserve output from spaced text function calls
-- *(ca65)* bind explicit labels before scope openings
-- *(ca65)* bind generated opening heads with native token rules
-- *(ca65)* place generated label expressions on canonical label lines
-- *(ca65)* bind end labels before stopping the reader
-- *(ca65)* format complete source without executing directives
-- *(sjasmplus)* assemble packed single quotes in native contexts
-- *(pasmo)* reject malformed three-apostrophe literals
-- *(ca65)* reject native instruction-name label heads
-- *(ca65)* recognize end before token-delimited unread tails
-- *(ca65)* preserve file operands while formatting source
-- *(ca65)* stop repeat execution when source ends
-- *(ca65)* validate numeric tokens before discarding source
-- *(ca65)* reject numeric tokens beyond native limits ([#831](https://github.com/asm198x/asm198x/pull/831))
-- *(ca65)* preserve logical addresses in debug records ([#828](https://github.com/asm198x/asm198x/pull/828))
-- *(ca65)* preserve the absolute counter across segment changes ([#824](https://github.com/asm198x/asm198x/pull/824))
-- accept native ca65 hexadecimal literal suffixes ([#823](https://github.com/asm198x/asm198x/pull/823))
-- refuse ca65 origins outside the native 24-bit range ([#818](https://github.com/asm198x/asm198x/pull/818))
-- bind ca65 labels and data operands at their native counters ([#816](https://github.com/asm198x/asm198x/pull/816))
-- resolve ca65 exports inside their named scopes ([#811](https://github.com/asm198x/asm198x/pull/811))
-- report nonzero initialized data in ca65 BSS ([#809](https://github.com/asm198x/asm198x/pull/809))
-- omit ca65 BSS file bytes without skipping checks ([#808](https://github.com/asm198x/asm198x/pull/808))
-- retain ca65 enum expressions through binding ([#805](https://github.com/asm198x/asm198x/pull/805))
-- validate ca65 alias values at native phases ([#804](https://github.com/asm198x/asm198x/pull/804))
-- preserve ca65 lexical bindings and native address widths ([#799](https://github.com/asm198x/asm198x/pull/799))
-- retain deferred ca65 immutable aliases ([#793](https://github.com/asm198x/asm198x/pull/793))
-- reject invalid ca65 record field allocations ([#792](https://github.com/asm198x/asm198x/pull/792))
-- bind ca65 labels on macro definitions ([#790](https://github.com/asm198x/asm198x/pull/790))
-- read ca65 labels without trailing whitespace ([#789](https://github.com/asm198x/asm198x/pull/789))
-- honour ca65 CPU rules for reserved constant names ([#787](https://github.com/asm198x/asm198x/pull/787))
-- preserve ca65 cheap constants, scope anchors and source-time widths ([#783](https://github.com/asm198x/asm198x/pull/783))
-- reject dotted ca65 constant definitions ([#780](https://github.com/asm198x/asm198x/pull/780))
-- preserve ca65 macro introspection tokens and live alias order ([#777](https://github.com/asm198x/asm198x/pull/777))
-- capture ca65 text at native macro and repeat boundaries ([#772](https://github.com/asm198x/asm198x/pull/772))
-- *(ca65)* preserve native include order across macros and repeats ([#769](https://github.com/asm198x/asm198x/pull/769))
-- *(ca65)* match native repeat tokens and preserve UTF-8 macros ([#767](https://github.com/asm198x/asm198x/pull/767))
-- *(ca65)* preserve scoped constants and enforce native scope rules ([#763](https://github.com/asm198x/asm198x/pull/763))
-- *(ca65)* complete native address-size overrides without hanging ([#753](https://github.com/asm198x/asm198x/pull/753))
-- *(ca65)* match native 4510 word-push behavior ([#752](https://github.com/asm198x/asm198x/pull/752))
-- *(ca65)* assemble 4510 bit branches with native operand PCs ([#750](https://github.com/asm198x/asm198x/pull/750))
-- *(ca65)* retain 4510 selection through instruction resolution ([#746](https://github.com/asm198x/asm198x/pull/746))
-- *(sjasmplus)* resolve derived forward constants across native passes ([#744](https://github.com/asm198x/asm198x/pull/744))
-- *(sjasmplus)* honor DISPLAY formats and resolved expressions ([#740](https://github.com/asm198x/asm198x/pull/740))
-- *(sjasmplus)* expand DEFINE names inside numeric spellings ([#738](https://github.com/asm198x/asm198x/pull/738))
-- *(sjasmplus)* evaluate signed remainder expressions ([#736](https://github.com/asm198x/asm198x/pull/736))
-- *(sjasmplus)* accept numeric digit separators ([#732](https://github.com/asm198x/asm198x/pull/732))
+- ca65 macros, repeats and text functions now capture, bind and expand tokens
+  as ca65 does: generated and end labels, register names, character tokens,
+  include order and UTF-8 bodies survive expansion, and repeats stop when the
+  source ends. ([#767](https://github.com/asm198x/asm198x/pull/767), [#769](https://github.com/asm198x/asm198x/pull/769), [#772](https://github.com/asm198x/asm198x/pull/772),
+  [#777](https://github.com/asm198x/asm198x/pull/777), [#790](https://github.com/asm198x/asm198x/pull/790), [#894](https://github.com/asm198x/asm198x/pull/894))
+- ca65 scopes, labels and constants follow native rules, including cheap
+  locals, exports inside named scopes, aliases, enums and record fields.
+  ([#763](https://github.com/asm198x/asm198x/pull/763), [#780](https://github.com/asm198x/asm198x/pull/780), [#783](https://github.com/asm198x/asm198x/pull/783), [#787](https://github.com/asm198x/asm198x/pull/787),
+  [#789](https://github.com/asm198x/asm198x/pull/789), [#792](https://github.com/asm198x/asm198x/pull/792), [#793](https://github.com/asm198x/asm198x/pull/793), [#799](https://github.com/asm198x/asm198x/pull/799),
+  [#804](https://github.com/asm198x/asm198x/pull/804), [#805](https://github.com/asm198x/asm198x/pull/805), [#811](https://github.com/asm198x/asm198x/pull/811), [#816](https://github.com/asm198x/asm198x/pull/816))
+- ca65 numbers and strings accept native forms, such as hexadecimal suffixes,
+  and reject what ca65 rejects: oversized numbers, malformed literals, and
+  out-of-range origins and far addresses. Invalid empty calls are refused
+  instead of crashing. ([#818](https://github.com/asm198x/asm198x/pull/818), [#823](https://github.com/asm198x/asm198x/pull/823), [#831](https://github.com/asm198x/asm198x/pull/831),
+  [#929](https://github.com/asm198x/asm198x/pull/929))
+- ca65 4510 and 65816 code assembles as ca65 does, including 4510 bit branches
+  and word pushes, address-size overrides and 65816 address words.
+  ([#746](https://github.com/asm198x/asm198x/pull/746), [#750](https://github.com/asm198x/asm198x/pull/750), [#752](https://github.com/asm198x/asm198x/pull/752), [#753](https://github.com/asm198x/asm198x/pull/753))
+- ca65 segments keep their counters across segment changes, BSS writes no file
+  bytes and reports initialised data, and debug records keep logical
+  addresses. ([#808](https://github.com/asm198x/asm198x/pull/808), [#809](https://github.com/asm198x/asm198x/pull/809), [#824](https://github.com/asm198x/asm198x/pull/824), [#828](https://github.com/asm198x/asm198x/pull/828))
+- Formatting ca65 source keeps the whole file without running its directives,
+  and HuC6280 formatting keeps macro templates. ([#859](https://github.com/asm198x/asm198x/pull/859),
+  [#905](https://github.com/asm198x/asm198x/pull/905))
+- SjASMPlus keeps a local label after `ENDS` under the last ordinary label, as
+  SjASMPlus 1.24 does. ([#945](https://github.com/asm198x/asm198x/pull/945))
+- SjASMPlus resolves derived forward constants across passes, honours
+  `DISPLAY` formats, expands `DEFINE` names inside numbers, evaluates signed
+  remainders and accepts digit separators. ([#732](https://github.com/asm198x/asm198x/pull/732), [#736](https://github.com/asm198x/asm198x/pull/736),
+  [#738](https://github.com/asm198x/asm198x/pull/738), [#740](https://github.com/asm198x/asm198x/pull/740), [#744](https://github.com/asm198x/asm198x/pull/744))
+- SjASMPlus and Pasmo quoted literals keep their native boundaries: packed
+  single quotes assemble, and malformed triple apostrophes are rejected.
+  ([#858](https://github.com/asm198x/asm198x/pull/858))
+- ACME leaves `!skip` regions at either end of the output unwritten, as
+  current ACME does. Debug addresses stay correct after a trimmed leading gap,
+  and `!initmem` no longer lengthens the output. ([#943](https://github.com/asm198x/asm198x/pull/943))
+- RGBDS `MUL`, `DIV`, `ROUND` and `TZCOUNT` produce the same values as
+  RGBDS. ([#935](https://github.com/asm198x/asm198x/pull/935))
 
 ## [0.0.71](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.70...asm198x-v0.0.71) - 2026-10-16
 
