@@ -28,7 +28,7 @@ lua = ["dep:mlua"]
 [dependencies]
 # The front-end/back-end boundary: AST, statement stream, spans, source
 # loading and diagnostics.
-asm198x-ir = { path = "../asm198x-ir", version = "0.0.71" }
+asm198x-ir = { path = "../asm198x-ir", version = "0.0.72" }
 format198x-sinclair-zx-spectrum-tap = { workspace = true }
 format198x-tzx = { workspace = true }
 # version (lockstep with the workspace) is required so `cargo package` can
