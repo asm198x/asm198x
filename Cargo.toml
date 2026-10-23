@@ -44,6 +44,13 @@ format198x-sinclair-zx-spectrum-tap = "0.1"
 format198x-tzx = "0.1"
 mlua = { version = "0.12", features = ["lua54", "vendored"] }
 
+# lang198x-z80-asm lowers to `asm198x-ir` and asks for it from crates.io.
+# Patching it to the workspace crate makes that the same copy the engine uses,
+# so its statements are the engine's type and a release here needs nothing
+# from Lang198x first.
+[patch.crates-io]
+asm198x-ir = { path = "crates/asm198x-ir" }
+
 [workspace.package]
 edition = "2024"
 version = "0.0.72"

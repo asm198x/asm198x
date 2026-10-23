@@ -55,6 +55,12 @@ wasm-bindgen = "0.2"
 [dev-dependencies]
 wasm-bindgen-test = "0.3"
 
+# This crate is its own workspace root, so it repeats the main workspace's
+# patch: lang198x-z80-asm asks for `asm198x-ir` from crates.io, and this makes
+# it the same copy asm198x uses.
+[patch.crates-io]
+asm198x-ir = { path = "../asm198x-ir" }
+
 [lints.rust]
 unsafe_code = "forbid"
 unused_must_use = "deny"

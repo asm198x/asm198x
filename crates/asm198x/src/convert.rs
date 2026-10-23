@@ -58,10 +58,13 @@ fn pasmo_to_sjasmplus(source: &str, z80n: bool) -> Result<Conversion, AsmError> 
 
     // Parse under the source dialect: structure, labels, and verbatim
     // operation text, macros and repetitions unexpanded.
-    let mut program = crate::dialects::Pasmo { z80n }
-        .parse_ast(source)
-        .map_err(|e| context(e, "the input does not parse under pasmo"))?
-        .expect("pasmo builds an AST");
+    let mut program = crate::dialects::Pasmo {
+        z80n,
+        lang198x: false,
+    }
+    .parse_ast(source)
+    .map_err(|e| context(e, "the input does not parse under pasmo"))?
+    .expect("pasmo builds an AST");
     rewrite_nodes(&mut program.nodes);
 
     // Emit through the shared layout rules — the same emitter the sjasmplus
