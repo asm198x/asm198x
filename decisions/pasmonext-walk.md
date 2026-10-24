@@ -39,6 +39,10 @@ Read from its `asm.cpp` (`processfile`, `dopass`, `setequorlabel`, `setdefl`,
   over a label or `EQU`, nor they over it. A name pass 2 defines that pass 1 did
   not is an error. PasmoNext's own messages are used.
 - **A `REPT` counter** is a `DEFL` local to its repeat.
+- **Files are opened from the folder PasmoNext runs in,** not from the folder
+  of the file that includes them: the pattern library's `mistakes/` programs
+  include `caller.inc` from the pattern folder above. The walk asks the loader
+  as if for the root, so it resolves from its base.
 - **The engine gets the walk's values for `EQU`, `DEFL` and counters.** The
   engine reads a `DEFL` where it stands, so `n defl later` would fail there
   although PasmoNext accepts it. The walk has PasmoNext's value, so it says so.

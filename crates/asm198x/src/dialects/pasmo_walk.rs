@@ -17,7 +17,7 @@ use lang198x_z80_asm::lower::{self, Cpu, Known};
 use lang198x_z80_asm::syntax::{self, DiagnosticKind, TextId};
 
 use crate::engine::{AsmError, Expr, Operation, Piece, Statement, Warning, next_pc};
-use crate::source::{SourceLoader, SourceMap};
+use crate::source::{LoadError, SourceLoader, SourceMap};
 use crate::span::{ExpansionFrame, FileId, Span};
 
 const PROFILE: Profile = Profile::PASMONEXT_0_1_3;
@@ -35,15 +35,14 @@ pub(crate) fn statements(
 }
 
 /// Statements for a program whose root is `FileId(0)` in `map`, reading
-/// `INCLUDE` and `INCBIN` files through `loader`. PasmoNext opens a file by
-/// the name written, so every name is resolved from the root.
+/// `INCLUDE` and `INCBIN` files through `loader`.
 pub(crate) fn statements_multi(
     map: &mut SourceMap,
     loader: &dyn SourceLoader,
     z80n: bool,
 ) -> Result<(Vec<Statement>, Vec<Warning>), AsmError> {
+    let loader = &FromRunFolder(loader);
     let root = map.contents(FileId(0)).unwrap_or_default().to_owned();
-    let root_path = map.path(FileId(0)).map(str::to_owned);
     let mut files = vec![FileId(0)];
     let program = Program::load(ROOT, &root, PROFILE, |name| {
         let id = map.load(loader, name, FileId(0), 0).ok()?;
@@ -51,8 +50,37 @@ pub(crate) fn statements_multi(
         map.contents(id).map(str::to_owned)
     })
     .map_err(too_long)?;
-    let mut binaries = |name: &str| loader.load_binary(name, root_path.as_deref()).ok();
+    let mut binaries = |name: &str| loader.load_binary(name, None).ok();
     Walk::new(z80n, files).run(&program, &mut binaries)
+}
+
+/// PasmoNext opens a file by the name written, from the folder it runs in,
+/// not from the folder of the file that includes it. A loader is asked as if
+/// for the root, so it resolves from its base: `include "caller.inc"` in
+/// `mistakes/broken.asm`, run from the folder above, finds `caller.inc` there.
+struct FromRunFolder<'a>(&'a dyn SourceLoader);
+
+impl SourceLoader for FromRunFolder<'_> {
+    fn load_text(&self, request: &str, _: Option<&str>) -> Result<(String, String), LoadError> {
+        self.0.load_text(request, None)
+    }
+
+    fn load_text_at(
+        &self,
+        request: &str,
+        _: Option<&str>,
+        line: u32,
+    ) -> Result<(String, String), LoadError> {
+        self.0.load_text_at(request, None, line)
+    }
+
+    fn load_binary(&self, request: &str, _: Option<&str>) -> Result<Vec<u8>, LoadError> {
+        self.0.load_binary(request, None)
+    }
+
+    fn resolve_text(&self, request: &str, _: Option<&str>) -> Option<String> {
+        self.0.resolve_text(request, None)
+    }
 }
 
 fn too_long(_: syntax::ProvenanceError) -> AsmError {
