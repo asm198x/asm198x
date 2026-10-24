@@ -4,7 +4,7 @@ version = 4
 
 [[package]]
 name = "asm198x"
-version = "0.0.72"
+version = "0.0.73"
 dependencies = [
  "asm198x-ir",
  "debug198x",
@@ -20,7 +20,7 @@ dependencies = [
 
 [[package]]
 name = "asm198x-ir"
-version = "0.0.72"
+version = "0.0.73"
 dependencies = [
  "isa198x",
  "serde",
