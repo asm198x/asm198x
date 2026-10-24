@@ -4,7 +4,7 @@ version = 4
 
 [[package]]
 name = "asm198x"
-version = "0.0.72"
+version = "0.0.73"
 dependencies = [
  "asm198x-ir",
  "debug198x",
@@ -23,7 +23,7 @@ dependencies = [
 
 [[package]]
 name = "asm198x-ir"
-version = "0.0.72"
+version = "0.0.73"
 dependencies = [
  "isa198x",
  "proptest",
@@ -726,7 +726,7 @@ checksum = "e6e4313cd5fcd3dad5cafa179702e2b244f760991f45397d14d4ebf38247da75"
 
 [[package]]
 name = "verdict-corpus"
-version = "0.0.72"
+version = "0.0.73"
 dependencies = [
  "isa198x",
  "isa198x-disasm",
@@ -787,7 +787,7 @@ dependencies = [
 
 [[package]]
 name = "xtask"
-version = "0.0.72"
+version = "0.0.73"
 dependencies = [
  "asm198x",
  "isa198x",

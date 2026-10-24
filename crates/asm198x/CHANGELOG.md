@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.73](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.72...asm198x-v0.0.73) - 2026-10-24
+
+### Added
+
+- assemble PasmoNext through Lang198x's front end, as a second path
+
+### Fixed
+
+- check the curriculum's PasmoNext verdicts on the second path in CI
+
 ## [0.0.72](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.71...asm198x-v0.0.72) - 2026-10-23
 
 The boundary between the dialect front ends and the assembler back end now
