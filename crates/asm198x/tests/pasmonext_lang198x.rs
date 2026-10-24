@@ -33,6 +33,10 @@ fn assemble(source: &str, z80n: bool) -> Option<Vec<u8>> {
 fn every_pasmo_verdict_matches_through_lang198x() {
     let corpus = Corpus::read(&corpus_path("z80")).expect("the Z80 corpus reads");
     let mut checked = 0;
+    // Curriculum verdicts need the Code198x checkout at the recorded source,
+    // so they are counted apart: a run that reached none of them must say so.
+    let mut curriculum_checked = 0;
+    let mut curriculum_skipped = Vec::new();
     let mut failures = Vec::new();
     let mut passed_while_named = Vec::new();
     for verdict in corpus.verdicts() {
@@ -46,8 +50,10 @@ fn every_pasmo_verdict_matches_through_lang198x() {
             Outcome::Rejected { .. } => (None, assemble(&verdict.source, z80n)),
             Outcome::Digest { digest } => {
                 let Some(ours) = curriculum(&verdict.source, z80n) else {
+                    curriculum_skipped.push(verdict.case.clone());
                     continue;
                 };
+                curriculum_checked += 1;
                 (
                     Some(digest.clone().into_bytes()),
                     ours.map(|b| sha256_hex(&b).into_bytes()),
@@ -64,8 +70,22 @@ fn every_pasmo_verdict_matches_through_lang198x() {
             _ => {}
         }
     }
-    eprintln!("pasmo verdicts through Lang198x: {checked} checked");
+    eprintln!(
+        "pasmo verdicts through Lang198x: {checked} checked, {curriculum_checked} of them \
+         curriculum, {} curriculum not reached",
+        curriculum_skipped.len()
+    );
     assert!(checked > 1000, "only {checked} verdicts were checked");
+    // CI names the checkout, at the pin the verdicts were recorded from, so
+    // there every curriculum verdict must be reached. A developer's sibling
+    // checkout may have moved on, so there the count is only reported.
+    if std::env::var_os("ASM198X_CODE_SAMPLES").is_some() {
+        assert!(
+            curriculum_checked > 0 && curriculum_skipped.is_empty(),
+            "curriculum verdicts not reached with ASM198X_CODE_SAMPLES set: \
+             {curriculum_skipped:#?}"
+        );
+    }
     assert!(
         failures.is_empty(),
         "differ from PasmoNext through Lang198x: {failures:#?}"
@@ -195,4 +215,22 @@ fn measured_programs_match_or_say_they_need_three_passes() {
         }
     }
     assert!(failures.is_empty(), "{failures:#?}");
+}
+
+#[test]
+fn includes_resolve_from_the_folder_pasmonext_runs_in() {
+    // Laid out like the pattern library's `mistakes/` programs, which
+    // include `caller.inc` from the pattern folder they are run from.
+    // PasmoNext 0.1.3, run there on `mistakes/broken.asm`, writes 3E 07 00.
+    let dir = support::scratch::dir("pasmonext-run-folder");
+    std::fs::create_dir_all(dir.join("mistakes")).expect("mistakes folder");
+    std::fs::write(dir.join("caller.inc"), " ld a,7\n").expect("caller.inc");
+    std::fs::write(dir.join("data.bin"), [0]).expect("data.bin");
+    let source = " org 0\n include \"caller.inc\"\n incbin \"data.bin\"\n";
+    std::fs::write(dir.join("mistakes/broken.asm"), source).expect("broken.asm");
+    let loader = asm198x::source::FsLoader::new(&*dir, Vec::new());
+    let result =
+        asm198x::assemble_pasmo_lang198x_files(source, "mistakes/broken.asm", &loader, false)
+            .expect("assembles");
+    assert_eq!(result.bytes, [0x3E, 0x07, 0x00]);
 }
