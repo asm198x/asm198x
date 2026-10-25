@@ -33,9 +33,13 @@ the gate in Asm198x. The design is recorded in
 
 ## Next
 
-- Lang198x's 5c steps 2 to 8: scopes (`LOCAL` clears the two verdicts),
-  structures, messages, the Next's banks, reading options, three-pass mode,
-  `--86`.
+- Lang198x's 5c steps 2 to 8: scopes' options (`--alocal`, `--nocase`,
+  `--equ`), structures, messages, the Next's banks, reading options,
+  three-pass mode, `--86`.
+  - **Done, scopes' directives:** `LOCAL`, `PROC`, `ENDP` and `PUBLIC`,
+    through `lang198x-z80-asm`'s `Scope`. Both `LOCAL` verdicts now match,
+    so the named list is empty; 56 scope programs measured on PasmoNext join
+    the fixture, and all match.
 - Record the measured programs as verdicts (asm198x#963), so the old path's
   differences are tracked too.
 - Once the named lists are empty: make the walk the default for `pasmo` and

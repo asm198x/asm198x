@@ -621,3 +621,500 @@ later equ 5
 later 0005
 x 0005
 --- passes 3
+=== local_outside_any_level
+ LOCAL aa
+aa: nop
+--- rejected exit 1
+=== proc_local_shadows_global
+ org 0
+ PROC
+ LOCAL aa
+aa: nop
+ jp aa
+ ENDP
+aa: halt
+ jp aa
+--- bytes 00c3000076c30400
+--- symbols
+00000000 0000
+aa 0004
+=== proc_labels_without_local_are_global
+ PROC
+aa: nop
+ ENDP
+ jp aa
+--- bytes 00c30000
+--- symbols
+aa 0000
+=== proc_label_twice_without_local
+ PROC
+aa: nop
+ ENDP
+aa: nop
+--- rejected Invalid definition, previously defined as EQU or label
+=== local_before_declaration_is_the_outer_name
+xx equ 5
+ PROC
+ db xx
+ LOCAL xx
+xx equ 7
+ db xx
+ ENDP
+ db xx
+--- bytes 050705
+--- symbols
+00000000 0007
+xx 0005
+=== local_forward_reference
+ PROC
+ LOCAL ff
+ jp ff
+ff: nop
+ ENDP
+--- bytes c3030000
+--- symbols
+00000000 0003
+=== local_used_after_endp_is_undefined
+ PROC
+ LOCAL ff
+ff: nop
+ ENDP
+ jp ff
+--- rejected Symbol 'ff' is undefined
+=== endp_without_proc
+ ENDP
+--- rejected exit 1
+=== proc_without_endp
+ nop
+ PROC
+ nop
+--- rejected exit 1
+=== local_same_name_twice_on_a_line
+ PROC
+ LOCAL aa,aa
+aa: nop
+ ENDP
+--- bytes 00
+--- symbols
+00000000 0000
+=== local_same_name_on_two_lines
+ PROC
+ LOCAL aa
+ LOCAL aa
+aa: nop
+ ENDP
+--- bytes 00
+--- symbols
+00000000 0000
+=== local_list
+ PROC
+ LOCAL aa, bb
+aa: db 1
+bb: db 2
+ dw aa, bb
+ ENDP
+aa: db 3
+bb: db 4
+ dw aa, bb
+--- bytes 010200000100030406000700
+--- symbols
+00000000 0000
+00000001 0001
+aa 0006
+bb 0007
+=== local_without_names
+ PROC
+ LOCAL
+ ENDP
+--- rejected exit 1
+=== local_number
+ PROC
+ LOCAL 5
+ ENDP
+--- rejected Expected '
+=== local_register
+ PROC
+ LOCAL hl
+ ENDP
+--- rejected Expected '
+=== local_trailing_comma
+ PROC
+ LOCAL aa,
+ ENDP
+--- rejected exit 1
+=== local_junk_after_name
+ PROC
+ LOCAL aa bb
+ ENDP
+--- rejected Expected ',' but 'bb' found
+=== proc_with_operand
+ PROC 5
+ ENDP
+--- rejected End line expected but '0005'found
+=== endp_with_operand
+ PROC
+ ENDP 5
+--- rejected End line expected but '0005'found
+=== label_on_proc_line
+start PROC
+ nop
+ ENDP
+ dw start
+--- bytes 000000
+--- symbols
+start 0000
+=== label_on_endp_line
+ PROC
+ nop
+fin ENDP
+ dw fin
+--- bytes 000100
+--- symbols
+fin 0001
+=== label_on_local_line
+ PROC
+here LOCAL here
+ nop
+ ENDP
+ dw here
+--- bytes 000000
+--- symbols
+here 0000
+=== nested_proc_shadows_and_restores
+ PROC
+ LOCAL aa
+aa: db 1
+ PROC
+ LOCAL aa
+aa: db 2
+ dw aa
+ ENDP
+ dw aa
+ ENDP
+--- bytes 010201000000
+--- symbols
+00000000 0000
+00000001 0001
+=== inner_proc_sees_outer_local
+ PROC
+ LOCAL aa
+aa: db 1
+ PROC
+ dw aa
+ ENDP
+ ENDP
+--- bytes 010000
+--- symbols
+00000000 0000
+=== local_equ_in_proc
+ PROC
+ LOCAL kk
+kk equ 9
+ db kk
+ ENDP
+kk equ 3
+ db kk
+--- bytes 0903
+--- symbols
+00000000 0009
+kk 0003
+=== local_defl_in_proc
+ PROC
+ LOCAL kk
+kk defl 9
+kk defl kk+1
+ db kk
+ ENDP
+kk defl 3
+ db kk
+--- bytes 0a03
+--- symbols
+=== local_global_defined_before
+aa: db 1
+ PROC
+ LOCAL aa
+aa: db 2
+ dw aa
+ ENDP
+ dw aa
+--- bytes 010201000000
+--- symbols
+00000000 0001
+aa 0000
+=== local_defined_before_declaration_in_level
+ PROC
+aa: db 1
+ LOCAL aa
+aa: db 2
+ dw aa
+ ENDP
+ dw aa
+--- bytes 010201000000
+--- symbols
+00000000 0001
+aa 0000
+=== macro_local_two_calls
+mm MACRO
+ LOCAL ll
+ll: jr ll
+ ENDM
+ mm
+ mm
+--- bytes 18fe18fe
+--- symbols
+00000000 0000
+00000001 0002
+=== macro_local_with_parameter
+mm MACRO vv
+ LOCAL ll
+ll: db vv
+ dw ll
+ ENDM
+ mm 1
+ mm 2
+--- bytes 010000020300
+--- symbols
+00000000 0000
+00000001 0003
+=== macro_label_without_local_twice
+mm MACRO
+ll: nop
+ ENDM
+ mm
+ mm
+--- rejected expanding macro on line 5 of file t.asm
+=== macro_sees_proc_local
+mm MACRO
+ dw aa
+ ENDM
+ PROC
+ LOCAL aa
+aa: db 1
+ mm
+ ENDP
+aa: db 2
+ mm
+--- bytes 010000020300
+--- symbols
+00000000 0000
+aa 0003
+=== macro_local_shadows_proc_local
+mm MACRO
+ LOCAL aa
+aa: db 9
+ dw aa
+ ENDM
+ PROC
+ LOCAL aa
+aa: db 1
+ mm
+ dw aa
+ ENDP
+--- bytes 010901000000
+--- symbols
+00000000 0000
+00000001 0001
+=== proc_left_open_in_macro
+mm MACRO
+ PROC
+ LOCAL aa
+aa: nop
+ ENDM
+ mm
+ mm
+--- bytes 0000
+--- symbols
+00000000 0000
+00000001 0001
+=== endp_in_macro_closing_outer_proc
+mm MACRO
+ ENDP
+ ENDM
+ PROC
+ mm
+--- rejected expanding macro on line 5 of file t.asm
+=== local_in_rept
+ REPT 2
+ LOCAL aa
+aa: nop
+ ENDM
+--- rejected Invalid definition, previously defined as EQU or label
+=== local_in_rept_once
+ REPT 1
+ LOCAL aa
+aa: db 1
+ dw aa
+ ENDM
+aa: db 2
+--- bytes 01000002
+--- symbols
+00000000 0000
+aa 0003
+=== local_in_rept_used_by_value
+ REPT 3
+ LOCAL nn
+nn defl 5
+ db nn
+ ENDM
+nn equ 1
+ db nn
+--- bytes 05050501
+--- symbols
+nn 0001
+=== local_in_irp
+ IRP vv, 1, 2
+ LOCAL aa
+aa: db vv
+ ENDM
+--- rejected Invalid definition, previously defined as EQU or label
+=== local_in_irp_by_value
+ IRP vv, 1, 2
+ LOCAL kk
+kk defl vv
+ db kk
+ ENDM
+kk equ 7
+ db kk
+--- bytes 010207
+--- symbols
+kk 0007
+=== rept_counter_and_local
+ REPT 2, cc
+ LOCAL kk
+kk defl cc*2
+ db kk
+ ENDM
+--- bytes 0002
+--- symbols
+=== defined_local_before_its_definition
+ PROC
+ LOCAL aa
+ IF defined aa
+ db 1
+ ELSE
+ db 2
+ ENDIF
+aa: nop
+ ENDP
+--- bytes 0200
+--- symbols
+00000000 0001
+=== defined_local_after_its_definition
+ PROC
+ LOCAL aa
+aa: nop
+ IF defined aa
+ db 1
+ ELSE
+ db 2
+ ENDIF
+ ENDP
+--- bytes 0001
+--- symbols
+00000000 0000
+=== local_in_false_if
+ PROC
+ IF 0
+ LOCAL aa
+ ENDIF
+aa: db 1
+ ENDP
+ dw aa
+--- bytes 010000
+--- symbols
+aa 0000
+=== lowercase_scope_words
+ proc
+ local aa
+aa: db 1
+ endp
+aa: db 2
+--- bytes 0102
+--- symbols
+00000000 0000
+aa 0001
+=== public_label
+ PUBLIC qq
+qq: nop
+--- bytes 00
+--- symbols
+qq 0000
+=== public_undefined
+ PUBLIC qq
+ nop
+--- bytes 00
+--- symbols
+=== public_list
+ PUBLIC qq, ss
+qq: db 1
+ss: db 2
+--- bytes 0102
+--- symbols
+qq 0000
+ss 0001
+=== public_number
+ PUBLIC 5
+--- rejected Expected '
+=== public_without_names
+ PUBLIC
+--- rejected Expected '
+=== public_of_local
+ PROC
+ LOCAL qq
+ PUBLIC qq
+qq: nop
+ ENDP
+--- bytes 00
+--- symbols
+00000000 0000
+=== label_on_public_line
+here PUBLIC here
+ dw here
+--- rejected Unexpected 'PUBLIC' used as instruction
+=== org_label_in_proc
+ PROC
+ LOCAL aa
+aa: org 10h
+ dw aa
+ ENDP
+--- bytes 1000
+--- symbols
+00000000 0010
+=== local_in_include
++++ inc.asm 204c4f43414c2061610a61613a20646220310a2064772061610a
+ PROC
+ include "inc.asm"
+ ENDP
+aa: db 2
+ dw aa
+--- bytes 010000020300
+--- symbols
+00000000 0000
+aa 0003
+=== local_then_proc_end_reuse
+ PROC
+ LOCAL aa
+aa: db 1
+ ENDP
+ PROC
+ LOCAL aa
+aa: db 2
+ ENDP
+--- bytes 0102
+--- symbols
+00000000 0000
+00000001 0001
+=== local_moves_in_second_pass
+ PROC
+ LOCAL aa
+ jp aa
+ IF defined bb
+ nop
+ ENDIF
+aa: nop
+ ENDP
+bb: nop
+--- bytes c303000000
+--- symbols
+00000000 0003
+bb 0004

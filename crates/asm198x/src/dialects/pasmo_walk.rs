@@ -13,9 +13,10 @@ use std::collections::HashMap;
 use lang198x_z80_asm::Profile;
 use lang198x_z80_asm::ast::Expr as SourceExpr;
 use lang198x_z80_asm::expand::{ActiveLine, Block, Expander, Host, Program};
-use lang198x_z80_asm::lower::{self, Cpu, Known};
+use lang198x_z80_asm::lower::{self, Cpu, Known, Scope};
 use lang198x_z80_asm::syntax::{self, DiagnosticKind, TextId};
 
+use crate::ast::map_syms;
 use crate::engine::{AsmError, Expr, Operation, Piece, Statement, Warning, next_pc};
 use crate::source::{LoadError, SourceLoader, SourceMap};
 use crate::span::{ExpansionFrame, FileId, Span};
@@ -116,9 +117,20 @@ struct Walk {
     pending: Option<String>,
     /// `REPT` counters set since the last line, for the statements.
     counters: Vec<(String, i64)>,
-    /// For each block running, its counter's name and what the name meant
-    /// before. PasmoNext makes a counter local to its repeat.
-    blocks: Vec<Option<(String, Option<Symbol>)>>,
+    /// The scopes open, innermost last: PasmoNext's `localstack`.
+    levels: Vec<Level>,
+    /// How many local names this pass has made. PasmoNext's `localcount`,
+    /// which starts again each pass, so a pass gives each the same name.
+    locals: u32,
+}
+
+/// A scope names can be local to: PasmoNext's `LocalLevel`.
+struct Level {
+    /// Where a `PROC` was written, or `None` for a macro call, `REPT` or
+    /// `IRP`.
+    proc: Option<Span>,
+    /// Each name made local here, and the name it is assembled under.
+    names: HashMap<String, String>,
 }
 
 /// What stops a pass: a located error, or a program that needs PasmoNext's
@@ -137,7 +149,8 @@ impl Walk {
             pc: 0,
             pending: None,
             counters: Vec::new(),
-            blocks: Vec::new(),
+            levels: Vec::new(),
+            locals: 0,
         }
     }
 
@@ -163,6 +176,8 @@ impl Walk {
         mut out: Option<&mut (Vec<Statement>, Vec<Warning>)>,
     ) -> Result<(), Stop> {
         self.pc = 0;
+        self.locals = 0;
+        self.levels.clear();
         self.symbols.retain(|_, symbol| symbol.def != Def::Defl);
         let mut expander = Expander::new(program.clone(), PROFILE)
             .map_err(|_| AsmError::new(0, "the program is too long to parse"))?;
@@ -174,7 +189,7 @@ impl Walk {
             let line = expander.next_line(self);
             self.check(&expander)?;
             let Some(line) = line else {
-                return Ok(());
+                return self.finish();
             };
             let lowered =
                 lower::line(&line, &PROFILE, self.cpu, self, binaries).map_err(|diagnostic| {
@@ -199,7 +214,11 @@ impl Walk {
                     ));
                 }
             }
-            for item in lowered.items {
+            for mut item in lowered.items {
+                item.label = item.label.map(|name| self.local(name));
+                item.op = item
+                    .op
+                    .map(|op| map_syms(op, &mut |name| Expr::Sym(self.local(name))));
                 let value = self
                     .apply(item.label.as_deref(), item.op.as_ref())
                     .map_err(|message| AsmError::at(at.clone(), message))?;
@@ -220,6 +239,10 @@ impl Walk {
                     statements.push(statement(&at, item.label, op));
                 }
             }
+            if let Some(scope) = lowered.scope {
+                self.scope(scope, &at)
+                    .map_err(|message| AsmError::at(at.clone(), message))?;
+            }
             if let Some((_, warnings)) = out.as_deref_mut() {
                 for message in messages {
                     let mut warning = Warning::new(at.line as usize, message);
@@ -228,6 +251,76 @@ impl Walk {
                 }
             }
         }
+    }
+
+    /// The end of a pass: a `PROC` still open is an error where it was
+    /// written.
+    fn finish(&mut self) -> Result<(), Stop> {
+        match self.levels.pop() {
+            None => Ok(()),
+            Some(Level { proc: Some(at), .. }) => Err(AsmError::at(at, "Unbalanced PROC")),
+            Some(Level { proc: None, .. }) => {
+                Err(AsmError::new(0, "Unexpected local block encountered"))
+            }
+        }
+    }
+
+    /// The name `name` is assembled under: the one the innermost scope that
+    /// made it local gave it, or itself.
+    fn local(&self, name: String) -> String {
+        self.levels
+            .iter()
+            .rev()
+            .find_map(|level| level.names.get(&name).cloned())
+            .unwrap_or(name)
+    }
+
+    /// PasmoNext's `LocalLevel::add`: `name` is local to the innermost
+    /// scope from here on, under a name of its own. Naming it again in the
+    /// same scope changes nothing.
+    fn make_local(&mut self, name: &str) -> Result<(), String> {
+        let level = self
+            .levels
+            .last_mut()
+            .ok_or("Trying to use a non existent local level")?;
+        if !level.names.contains_key(name) {
+            // `genlocalname`: eight hex digits, which no source name can be.
+            level
+                .names
+                .insert(name.to_owned(), format!("{:08X}", self.locals));
+            self.locals += 1;
+        }
+        Ok(())
+    }
+
+    /// A line's change to the scopes, after its statements.
+    fn scope(&mut self, scope: Scope, at: &Span) -> Result<(), String> {
+        match scope {
+            Scope::Local(names) => {
+                for name in &names {
+                    self.make_local(name)?;
+                }
+            }
+            Scope::Proc => self.levels.push(Level {
+                proc: Some(at.clone()),
+                names: HashMap::new(),
+            }),
+            Scope::Endp => match self.levels.last() {
+                Some(Level { proc: Some(_), .. }) => {
+                    self.levels.pop();
+                }
+                _ => return Err("Unbalanced ENDP".into()),
+            },
+            // The names go in the public symbol file, which this path does
+            // not write yet; what they mean does not change.
+            Scope::Public(_) => {}
+            other => {
+                return Err(format!(
+                    "{other:?} is not assembled yet (Lang198x's PasmoNext front end)"
+                ));
+            }
+        }
+        Ok(())
     }
 
     /// Stops at the expander's first problem, or one found while it ran.
@@ -424,7 +517,11 @@ fn expressions(op: &Operation) -> Vec<&Expr> {
 impl Known for Walk {
     /// `isdefined`: undefined, or defined only in an earlier pass, is false.
     fn defined(&self, name: &str) -> bool {
-        match self.symbols.get(name).map(|symbol| symbol.def) {
+        match self
+            .symbols
+            .get(&self.local(name.to_owned()))
+            .map(|symbol| symbol.def)
+        {
             None => false,
             Some(Def::Pass1) => self.pass == 1,
             Some(_) => true,
@@ -433,7 +530,9 @@ impl Known for Walk {
 
     /// `getvalue` where a value is required: any definition will do.
     fn value(&self, name: &str) -> Option<i64> {
-        self.symbols.get(name).map(|symbol| symbol.value)
+        self.symbols
+            .get(&self.local(name.to_owned()))
+            .map(|symbol| symbol.value)
     }
 
     fn pc(&self) -> Option<i64> {
@@ -461,31 +560,36 @@ impl Host for Walk {
             })
     }
 
-    /// A `REPT` counter, which PasmoNext sets with `setdefl`.
+    /// A `REPT` counter, which PasmoNext makes local to its repeat and sets
+    /// with `setdefl`.
     fn set_counter(&mut self, name: &str, value: i64) {
         let value = value & 0xFFFF;
-        if let Some(block @ None) = self.blocks.last_mut() {
-            *block = Some((name.to_owned(), self.symbols.remove(name)));
-        }
-        match self.define_defl(name, value) {
-            Ok(()) => self.counters.push((name.to_owned(), value)),
+        let set = self.make_local(name).and_then(|()| {
+            let name = self.local(name.to_owned());
+            self.define_defl(&name, value).map(|()| name)
+        });
+        match set {
+            Ok(name) => self.counters.push((name, value)),
             Err(message) => {
                 self.pending.get_or_insert(message);
             }
         }
     }
 
+    /// A macro call, `REPT` or `IRP` is a scope: PasmoNext's `MacroLevel`.
     fn enter(&mut self, _: Block) {
-        self.blocks.push(None);
+        self.levels.push(Level {
+            proc: None,
+            names: HashMap::new(),
+        });
     }
 
-    /// The counter of the repeat that ended goes out of scope.
+    /// The block's scope ends, and with it any `PROC` left open inside it.
     fn leave(&mut self) {
-        if let Some(Some((name, before))) = self.blocks.pop() {
-            match before {
-                Some(symbol) => self.symbols.insert(name, symbol),
-                None => self.symbols.remove(&name),
-            };
+        while let Some(level) = self.levels.pop() {
+            if level.proc.is_none() {
+                break;
+            }
         }
     }
 }
