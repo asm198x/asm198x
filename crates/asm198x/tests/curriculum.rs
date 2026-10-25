@@ -798,11 +798,12 @@ fn pattern_reference(
             // A message naming the scratch folder would differ from run to
             // run, and so would the verdict.
             Some(_) => {
-                let message = support::patterns::last_line(&output)
-                    .replace(&*tmp.to_string_lossy(), "<scratch>");
-                if cannot_write_output(&message) {
+                let text =
+                    support::patterns::text(&output).replace(&*tmp.to_string_lossy(), "<scratch>");
+                let message = support::patterns::complaint(&text);
+                if support::patterns::cannot_use_scratch(&text) {
                     return Err(format!(
-                        "{:?} could not write to the scratch folder: {message}",
+                        "{:?} could not use its scratch files: {message}",
                         step.get_program()
                     ));
                 }
@@ -826,18 +827,6 @@ fn pattern_reference(
             .ok_or_else(|| "vasm wrote a hunk file this cannot read".to_string());
     }
     Ok(Ok(bytes))
-}
-
-/// Whether a reference tool's complaint is that it could not write its own
-/// output or object file. That is a fact about the scratch folder, not about
-/// the source, so it must never be recorded as a rejection. Each phrase is
-/// the tool's own: ACME, ca65 and rgbasm say "Cannot open output file",
-/// pasmo "Error creating object file", and ld65 or rgblink name the scratch
-/// file they could not open.
-fn cannot_write_output(message: &str) -> bool {
-    message.contains("Cannot open output file")
-        || message.contains("Error creating object file")
-        || message.contains("<scratch>/ref-pattern")
 }
 
 /// Representative 6809 programs validated byte-for-byte against `lwasm`. Stand in

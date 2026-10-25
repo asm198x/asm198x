@@ -198,25 +198,67 @@ impl Job {
         if output.status.success() {
             std::fs::read(&out).map_err(|e| format!("asm198x wrote no output: {e}"))
         } else {
-            Err(last_line(&output))
+            Err(complaint(&text(&output)))
         }
     }
 }
 
-/// The last non-blank line a process wrote, either stream: where the tools
-/// put the error that stopped them.
-pub fn last_line(output: &std::process::Output) -> String {
-    let text = format!(
+/// Everything a process wrote, stdout then stderr.
+pub fn text(output: &std::process::Output) -> String {
+    format!(
         "{}\n{}",
         String::from_utf8_lossy(&output.stdout),
         String::from_utf8_lossy(&output.stderr)
-    );
-    text.lines()
+    )
+}
+
+/// The last non-blank line a process wrote, either stream.
+pub fn last_line(output: &std::process::Output) -> String {
+    text(output)
+        .lines()
         .rev()
         .map(str::trim)
         .find(|l| !l.is_empty())
         .unwrap_or("(no message)")
         .to_string()
+}
+
+/// The line that says why a tool stopped: the first that reports an error,
+/// or failing that the last line it wrote. Not simply the last line, because
+/// some tools end with a trailer after the error: vasm's `aborting...`,
+/// RGBDS's `at demo.asm(86)` and `Assembly aborted with 1 error`.
+pub fn complaint(text: &str) -> String {
+    let lines: Vec<&str> = text
+        .lines()
+        .map(str::trim)
+        .filter(|l| !l.is_empty())
+        .collect();
+    lines
+        .iter()
+        .find(|l| {
+            let l = l.to_ascii_lowercase();
+            l.contains("error") || l.contains("fatal")
+        })
+        .or(lines.last())
+        .map_or_else(|| "(no message)".to_string(), |l| (*l).to_string())
+}
+
+/// Whether a tool failed because it could not write, or read back, one of
+/// the scratch files the build hands it. That is a fact about the scratch
+/// folder, not about the source, so it must never be recorded as a
+/// rejection. `text` is the tool's whole output with the scratch folder
+/// written as `<scratch>`, because some tools put the cause before a
+/// trailer. Most name the file: vasm, ca65, ld65, lwasm and RGBDS do. ACME
+/// ("Cannot open output file") and PasmoNext ("Error creating object file")
+/// do not, so their own phrases are matched. A genuine rejection that named
+/// a scratch file would be reported as an error too, which fails the run
+/// rather than recording anything.
+pub fn cannot_use_scratch(text: &str) -> bool {
+    text.lines().any(|l| {
+        l.contains("<scratch>/ref-pattern")
+            || l.contains("Cannot open output file")
+            || l.contains("Error creating object file")
+    })
 }
 
 /// Run a generated include's command, writing under `scratch`, and return
@@ -285,4 +327,69 @@ pub fn all_sources(root: &Path) -> Vec<PathBuf> {
         .iter()
         .flat_map(|m| patterns::sources(&samples.join(m)))
         .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{cannot_use_scratch, complaint};
+
+    // Each tool's own output, from a source error and from an unwritable
+    // output path.
+
+    #[test]
+    fn a_trailer_is_not_the_complaint() {
+        assert_eq!(
+            complaint(
+                "\nerror 2 in line 1 of \"bad.s\": unknown mnemonic <bogus_op>\n> bogus_op 1\n"
+            ),
+            "error 2 in line 1 of \"bad.s\": unknown mnemonic <bogus_op>"
+        );
+        assert_eq!(
+            complaint(
+                "error: Undefined macro `bogus`\n    at bad.rgb(2)\nAssembly aborted with 1 error\n"
+            ),
+            "error: Undefined macro `bogus`"
+        );
+        assert_eq!(
+            complaint(
+                "Warning - File a.asm, line 3 (Zone <untitled>): Using oversized addressing mode.\nError - File a.asm, line 9 (Zone <untitled>): Number out of range.\n"
+            ),
+            "Error - File a.asm, line 9 (Zone <untitled>): Number out of range."
+        );
+        assert_eq!(complaint("something odd\nlast words\n"), "last words");
+        assert_eq!(complaint("\n\n"), "(no message)");
+    }
+
+    #[test]
+    fn every_tool_failing_to_write_its_output_is_caught() {
+        for text in [
+            "\nfatal error 14: could not open <<scratch>/ref-pattern.bin> for output\naborting...",
+            "FATAL: Failed to open object file \"<scratch>/ref-pattern.o\": No such file or directory\n    at demo.asm(3)",
+            "FATAL: Failed to open output file \"<scratch>/ref-pattern.bin\": No such file or directory\nLinking aborted with 1 error",
+            "error: Failed to open \"<scratch>/ref-pattern.bin\" for reading+writing: No such file or directory",
+            "Cannot open '<scratch>/ref-pattern.bin' for outputNo such file or directory",
+            "Fatal error: Cannot open output file '<scratch>/ref-pattern.o': No such file or directory",
+            "ld65: Error: Cannot open \u{2018}<scratch>/ref-pattern.bin\u{2019}: No such file or directory",
+            "Error: Cannot open output file: No such file or directory",
+            "ERROR: Error creating object file",
+        ] {
+            assert!(cannot_use_scratch(text), "missed: {text}");
+        }
+    }
+
+    #[test]
+    fn a_source_error_is_a_rejection() {
+        for text in [
+            "\nerror 2 in line 1 of \"bad.s\": unknown mnemonic <bogus_op>\n> bogus_op 1",
+            "bad.asm(1) : ERROR : Bad opcode",
+            "Error - File ../6502.inc, line 274 (Zone <untitled>): Number out of range.",
+            "ERROR: Number out of range",
+            "demo.asm:656: Error: Expected a mnemonic but found \u{2018}.NOT\u{2019}",
+        ] {
+            assert!(
+                !cannot_use_scratch(text),
+                "taken for a write failure: {text}"
+            );
+        }
+    }
 }
