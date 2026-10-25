@@ -1551,3 +1551,639 @@ ab$c: nop
 --- bytes 00c30000
 --- symbols
 ac 0000
+=== struct_basic
+ STRUCT pt
+xx db 0
+yy dw 0
+ ENDS
+ db pt, pt.xx, pt.yy
+--- bytes 030001
+--- symbols
+pt 0003
+pt.xx 0000
+pt.yy 0001
+=== struct_ds_and_strings
+ STRUCT rec
+name db "abcd"
+pad ds 3
+tag defm 'x'
+w defw 0,0
+ ENDS
+ db rec, rec.name, rec.pad, rec.tag, rec.w
+--- bytes 0c00040708
+--- symbols
+rec 000c
+rec.name 0000
+rec.pad 0004
+rec.tag 0007
+rec.w 0008
+=== struct_db_list
+ STRUCT s
+fa db 1,2,3
+fb db 0
+ ENDS
+ db s, s.fa, s.fb
+--- bytes 040003
+--- symbols
+s 0004
+s.fa 0000
+s.fb 0003
+=== struct_ds_expression
+nn equ 4
+ STRUCT s
+fa ds nn*2
+fb db 0
+ ENDS
+ db s, s.fb
+--- bytes 0908
+--- symbols
+nn 0004
+s 0009
+s.fa 0000
+s.fb 0008
+=== struct_ds_forward
+ STRUCT s
+fa ds later
+fb db 0
+ ENDS
+later equ 3
+ db s.fb
+--- rejected exit 1
+=== struct_db_expression_item
+ STRUCT s
+fa db 1+1
+ ENDS
+--- rejected exit 1
+=== struct_field_without_name
+ STRUCT s
+ db 0
+ ENDS
+--- rejected Token 'DB' not allowed within a STRUCT
+=== struct_empty_line
+ STRUCT s
+
+fa db 0
+ ENDS
+ db s
+--- bytes 01
+--- symbols
+s 0001
+s.fa 0000
+=== struct_comment_line
+ STRUCT s
+; note
+fa db 0
+ ENDS
+ db s
+--- bytes 01
+--- symbols
+s 0001
+s.fa 0000
+=== struct_comment_after_field
+ STRUCT s
+fa db 0 ; note
+ ENDS
+ db s
+--- bytes 01
+--- symbols
+s 0001
+s.fa 0000
+=== struct_field_colon
+ STRUCT s
+fa: db 0
+ ENDS
+--- rejected Token ':' not allowed within a STRUCT
+=== struct_instruction_inside
+ STRUCT s
+fa nop
+ ENDS
+--- rejected exit 1
+=== struct_nested
+ STRUCT s
+ STRUCT t
+ ENDS
+ ENDS
+--- rejected Nested STRUCT is not supported yet
+=== struct_without_ends
+ STRUCT s
+fa db 0
+--- rejected exit 1
+=== ends_outside
+ ENDS
+--- rejected exit 1
+=== struct_no_name
+ STRUCT
+ ENDS
+--- rejected exit 1
+=== struct_label_before
+xx STRUCT s
+fa db 0
+ ENDS
+--- rejected exit 1
+=== struct_emits_nothing
+ org 0
+ db 7
+ STRUCT s
+fa db 1
+fb ds 5
+ ENDS
+ db 8
+--- bytes 0708
+--- symbols
+s 0006
+s.fa 0000
+s.fb 0001
+=== struct_name_reused
+ STRUCT s
+fa db 0
+ ENDS
+s equ 1
+--- rejected Invalid definition, previously defined as EQU or label
+=== struct_twice
+ STRUCT s
+fa db 0
+ ENDS
+ STRUCT s
+fa db 0
+ ENDS
+--- rejected Invalid definition, previously defined as EQU or label
+=== struct_field_used_as_offset
+ STRUCT pt
+xx db 0
+yy db 0
+ ENDS
+ ld a,(ix+pt.yy)
+--- bytes dd7e01
+--- symbols
+pt 0002
+pt.xx 0000
+pt.yy 0001
+=== struct_lowercase
+ struct s
+fa db 0
+ ends
+ db s
+--- bytes 01
+--- symbols
+s 0001
+s.fa 0000
+=== struct_dw_list
+ STRUCT s
+fa dw 1,2
+fb db 0
+ ENDS
+ db s.fb
+--- bytes 04
+--- symbols
+s 0005
+s.fa 0000
+s.fb 0004
+=== struct_field_dot_name
+ STRUCT s
+fa.b db 0
+ ENDS
+ db s
+--- bytes 01
+--- symbols
+s 0001
+s.fa.b 0000
+=== struct_db_string_one_char
+ STRUCT s
+fa db "x"
+fb db 0
+ ENDS
+ db s.fb
+--- bytes 01
+--- symbols
+s 0002
+s.fa 0000
+s.fb 0001
+=== struct_db_empty_string
+ STRUCT s
+fa db ""
+fb db 0
+ ENDS
+ db s.fb
+--- bytes 00
+--- symbols
+s 0001
+s.fa 0000
+s.fb 0000
+=== struct_in_macro
+mm MACRO
+ STRUCT s
+fa db 0
+ ENDS
+ ENDM
+ mm
+ db s
+--- bytes 01
+--- symbols
+s 0001
+s.fa 0000
+=== struct_in_false_if
+ IF 0
+ STRUCT s
+fa db 0
+ ENDS
+ ENDIF
+ db 1
+--- bytes 01
+--- symbols
+=== struct_db_name_item
+ STRUCT s
+fa db xx
+ ENDS
+ db s
+--- bytes 01
+--- symbols
+s 0001
+s.fa 0000
+=== struct_dw_name_item
+ STRUCT s
+fa dw xx
+ ENDS
+ db s
+--- bytes 02
+--- symbols
+s 0002
+s.fa 0000
+=== rb_rw_basic
+ RSSET 0
+aa RB 1
+bb RW 2
+cc RB 3
+ db aa, bb, cc
+--- bytes 000105
+--- symbols
+aa 0000
+bb 0001
+cc 0005
+=== rb_without_rsset
+aa RB 1
+bb RB 1
+ db aa, bb
+--- rejected exit 1
+--- passes 3
+=== rb_after_rsset_value
+ RSSET 10h
+aa RB 2
+bb RB 1
+ db aa, bb
+--- bytes 1012
+--- symbols
+aa 0010
+bb 0012
+=== rb_without_label
+ RB 1
+--- rejected exit 1
+=== rw_without_label
+ RW 1
+--- rejected exit 1
+=== rb_symbol_count
+nn equ 3
+ RSSET 0
+aa RB nn
+bb RB 1
+ db aa, bb
+--- rejected exit -6
+=== rb_expression_count
+ RSSET 0
+aa RB 1+1
+bb RB 1
+ db aa, bb
+--- rejected End line expected but '+'found
+=== rb_no_count
+ RSSET 0
+aa RB
+bb RB 1
+ db aa, bb
+--- rejected exit -6
+=== rb_hex_count
+ RSSET 0
+aa RB 10h
+bb RB 1
+ db bb
+--- bytes 10
+--- symbols
+aa 0000
+bb 0010
+=== rb_emits_nothing
+ org 0
+ db 7
+ RSSET 0
+aa RB 4
+ db 8
+--- bytes 0708
+--- symbols
+aa 0000
+=== rsset_symbol
+nn equ 5
+ RSSET nn
+aa RB 1
+ db aa
+--- bytes 00
+--- symbols
+aa 0000
+nn 0005
+=== rsset_expression
+ RSSET 2+3
+aa RB 1
+ db aa
+--- bytes 02
+--- symbols
+aa 0002
+=== rsset_nothing
+ RSSET
+aa RB 1
+ db aa
+--- bytes 00
+--- symbols
+aa 0000
+=== rsset_junk_after
+ RSSET 4 junk
+aa RB 1
+ db aa
+--- bytes 04
+--- symbols
+aa 0004
+=== rsset_label_before
+xx RSSET 4
+aa RB 1
+ db aa
+--- bytes 04
+--- symbols
+aa 0004
+xx 0000
+=== rb_label_twice
+ RSSET 0
+aa RB 1
+aa RB 1
+--- rejected exit 1
+=== rb_local
+ RSSET 0
+ PROC
+ LOCAL aa
+aa RB 2
+ db aa
+ ENDP
+bb RB 1
+ db bb
+--- bytes 0002
+--- symbols
+00000000 0000
+bb 0002
+=== stack_basic
+ STACK 8000h
+ db 1
+--- bytes 01
+--- symbols
+=== stack_label
+here STACK 8000h
+ dw here
+--- rejected exit 1
+=== stack_forward
+ STACK later
+later equ 100h
+ db 1
+--- rejected exit 1
+=== stack_no_value
+ STACK
+ db 1
+--- rejected Value expected but '(eol)'found
+=== stack_junk_after
+ STACK 1 junk
+ db 1
+--- bytes 01
+--- symbols
+=== struct_if_inside
+ STRUCT s
+ IF 1
+fa db 0
+ ENDIF
+ ENDS
+--- rejected Token 'IF' not allowed within a STRUCT
+=== struct_macro_call_inside
+mm MACRO
+ nop
+ ENDM
+ STRUCT s
+ mm
+ ENDS
+--- rejected exit 1
+=== struct_rept_inside
+ STRUCT s
+ REPT 2
+fa db 0
+ ENDM
+ ENDS
+--- rejected exit 1
+=== struct_label_on_ends
+ STRUCT s
+fa db 0
+xx ENDS
+ db s
+--- rejected exit 1
+=== struct_ends_junk
+ STRUCT s
+fa db 0
+ ENDS junk
+ db s
+--- bytes 01
+--- symbols
+s 0001
+s.fa 0000
+=== struct_name_junk
+ STRUCT s junk
+fa db 0
+ ENDS
+ db s
+--- bytes 01
+--- symbols
+s 0001
+s.fa 0000
+=== struct_ds_fill
+ STRUCT s
+fa ds 3,1
+fb db 0
+ ENDS
+ db s.fb
+--- bytes 03
+--- symbols
+s 0004
+s.fa 0000
+s.fb 0003
+=== struct_nocase
+!!! --nocase
+ STRUCT Pt
+Xx db 0
+Yy db 0
+ ENDS
+ db pt, PT.YY
+--- bytes 0201
+--- symbols
+PT 0002
+PT.XX 0000
+PT.YY 0001
+=== struct_field_name_register
+ STRUCT s
+hl db 0
+ ENDS
+--- rejected Token 'HL' not allowed within a STRUCT
+=== struct_db_trailing_comma
+ STRUCT s
+fa db 1,
+ ENDS
+--- bytes 
+--- symbols
+s 0002
+s.fa 0000
+=== struct_db_no_items
+ STRUCT s
+fa db
+fb db 0
+ ENDS
+ db s.fb
+--- bytes 01
+--- symbols
+s 0002
+s.fa 0000
+s.fb 0001
+=== struct_ds_no_count
+ STRUCT s
+fa ds
+ ENDS
+--- rejected Value expected but '(eol)'found
+=== struct_ds_sum
+ STRUCT s
+fa ds 1+2
+fb db 0
+ ENDS
+ db s.fb
+--- bytes 03
+--- symbols
+s 0004
+s.fa 0000
+s.fb 0003
+=== struct_field_used_before
+ db s.fb
+ STRUCT s
+fa db 0
+fb db 0
+ ENDS
+--- bytes 01
+--- symbols
+s 0002
+s.fa 0000
+s.fb 0001
+=== struct_alocal_name
+!!! --alocal
+ STRUCT _s
+fa db 0
+ ENDS
+--- rejected Invalid use of name in autolocal mode
+=== struct_local_field
+ PROC
+ LOCAL s
+ STRUCT s
+fa db 0
+ ENDS
+ db s
+ ENDP
+--- bytes 01
+--- symbols
+00000000 0001
+s.fa 0000
+=== struct_end_directive_inside
+ STRUCT s
+ END
+ ENDS
+--- rejected exit 1
+=== struct_field_is_struct_name
+ STRUCT s
+s db 0
+ ENDS
+ db s, s.s
+--- bytes 0100
+--- symbols
+s 0001
+s.s 0000
+=== rw_count
+ RSSET 0
+aa RW 3
+bb RB 1
+ db bb
+--- bytes 06
+--- symbols
+aa 0000
+bb 0006
+=== rb_zero
+ RSSET 5
+aa RB 0
+bb RB 1
+ db aa, bb
+--- bytes 0505
+--- symbols
+aa 0005
+bb 0005
+=== rsset_twice
+ RSSET 1
+aa RB 1
+ RSSET 9
+bb RB 1
+ db aa, bb
+--- bytes 0109
+--- symbols
+aa 0001
+bb 0009
+=== rb_rsset_in_pass_two
+ RSSET 0
+aa RB 1
+ db aa
+bb RB 1
+ db bb
+--- bytes 0001
+--- symbols
+aa 0000
+bb 0001
+=== rb_rsset_after_use
+ db aa
+ RSSET 0
+aa RB 1
+--- bytes 00
+--- symbols
+aa 0000
+=== rb_count_hex_suffix
+ RSSET 0
+aa RB 0Ah
+bb RB 1
+ db bb
+--- bytes 0a
+--- symbols
+aa 0000
+bb 000a
+=== rsset_hex
+ RSSET 0FFh
+aa RB 1
+ db aa
+--- bytes ff
+--- symbols
+aa 00ff
+=== rb_negative
+ RSSET 5
+aa RB -1
+bb RB 1
+ db bb
+--- rejected exit -6
+=== stack_expression
+base equ 100h
+ STACK base+2
+ db 1
+--- bytes 01
+--- symbols
+base 0100
+=== stack_lowercase
+ stack 8000h
+ db 1
+--- bytes 01
+--- symbols

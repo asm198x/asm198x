@@ -33,8 +33,12 @@ the gate in Asm198x. The design is recorded in
 
 ## Next
 
-- Lang198x's 5c steps 3 to 8: structures, messages, the Next's banks,
-  reading options, three-pass mode, `--86`.
+- Lang198x's 5c steps 4 to 8: messages, the Next's banks, reading options,
+  three-pass mode, `--86`.
+  - **Done, structures:** `STRUCT`/`ENDS`, `RB`, `RW`, `RSSET` and `STACK`,
+    through z80-asm's `Definition`. 80 programs measured on PasmoNext join
+    the fixture; all match but nine, each a named deviation where PasmoNext
+    has an obvious bug.
   - **Done, scopes' options:** `--nocase`, `--equ`/`-E` and `--alocal`,
     through `assemble_pasmo_lang198x_files_with`. The gate now runs the
     measured programs that use them, instead of skipping every program with
