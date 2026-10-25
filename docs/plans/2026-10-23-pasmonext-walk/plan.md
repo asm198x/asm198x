@@ -34,6 +34,11 @@ the gate in Asm198x. The design is recorded in
 ## Next
 
 - Lang198x's 5c steps 6 to 8: reading options, three-pass mode, `--86`.
+  - **Done, reading options:** `--bracket` and `--w8080`, as
+    `PasmoNextOptions::brackets_only` and `warns_8080`. Seven `--bracket`
+    programs measured on PasmoNext join the fixture, and all match. A test
+    checks that the 8080 warning is given once a line, where PasmoNext gives
+    it on both passes, and follows the rule for the two lines it gets wrong.
   - **Done, the Next's banks:** `??`, `SETBANK` and `SAVEBIN`, with a new
     IR operation, `SaveImage`, for a file of the flat image. 47 programs
     measured on PasmoNext join the fixture; all match but two `SAVEBIN`
