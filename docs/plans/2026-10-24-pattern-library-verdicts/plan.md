@@ -114,9 +114,12 @@ ways, so the suite now guards against both:
 - After the host deletes a file, a tool in the container can fail to create
   one at the same path: 29 of 30 rewrites of one output failed. Each source
   now builds in a fresh folder.
-- A tool that cannot write its output is not a rejection. Its complaint
-  ("Cannot open output file", "Error creating object file") is an error the
-  run reports, never a verdict.
+- A tool that cannot write its output is not a rejection. The whole output
+  is checked, not only the last line, because vasm and RGBDS end with a
+  trailer (`aborting...`, `at demo.asm(86)`) after the error. A line naming
+  a scratch file, or ACME's or PasmoNext's own phrase ("Cannot open output
+  file", "Error creating object file"), makes it an error the run reports,
+  never a verdict. A recorded rejection carries the tool's first error line.
 
 A tool can also hang in the container past `kill`, and only restarting
 Docker clears it. So locally recorded verdicts are a cross-check, and the
