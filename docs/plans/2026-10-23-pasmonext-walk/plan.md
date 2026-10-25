@@ -34,6 +34,11 @@ the gate in Asm198x. The design is recorded in
 ## Next
 
 - Lang198x's 5c steps 6 to 8: reading options, three-pass mode, `--86`.
+  - **Done, three passes:** a value that moves in pass 2, or `--pass3`,
+    runs a third, and a value that moves in it is a phase error. Every
+    three-pass program in the fixture now runs; six are named deviations,
+    where PasmoNext keeps an earlier pass's bytes or values. A test checks
+    the "Switching to 3 pass mode" warning against PasmoNext's.
   - **Done, reading options:** `--bracket` and `--w8080`, as
     `PasmoNextOptions::brackets_only` and `warns_8080`. Seven `--bracket`
     programs measured on PasmoNext join the fixture, and all match. A test

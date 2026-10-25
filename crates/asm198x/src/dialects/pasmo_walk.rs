@@ -44,6 +44,9 @@ pub struct Options {
     pub brackets_only: bool,
     /// `--w8080`: a warning for each instruction the 8080 lacks.
     pub warns_8080: bool,
+    /// `--pass3`: three passes from the start, rather than only once a value
+    /// moves in the second.
+    pub three_passes: bool,
 }
 
 impl Options {
@@ -144,6 +147,8 @@ struct Symbol {
     def: Def,
     /// The bank its value's 8K slot held when it was defined, for `??`.
     bank: i64,
+    /// The pass that last defined it, or 0 for `--equ`.
+    pass: u8,
 }
 
 /// The bank each 8K slot holds before any `SETBANK`, as PasmoNext sets them
@@ -164,6 +169,15 @@ struct Walk {
     /// Each front-end file's id here, in the order the front end read them.
     files: Vec<FileId>,
     pass: u8,
+    /// The pass whose statements are the program: 2, or 3 once a value moves
+    /// in pass 2 or with `--pass3` (PasmoNext's `lastpass`).
+    last_pass: u8,
+    /// PasmoNext's "Switching to 3 pass mode", where a value moved in pass 2.
+    switched: Option<Warning>,
+    /// Whether the line being read moved a value in pass 2.
+    switching: bool,
+    /// Each name the last pass's statements read, where it was first read.
+    read: HashMap<String, Span>,
     symbols: HashMap<String, Symbol>,
     /// The address, which PasmoNext keeps in 16 bits.
     pc: i64,
@@ -204,6 +218,7 @@ impl Walk {
                     value: *value,
                     def: Def::Predefined,
                     bank: DEFAULT_BANKS[slot(*value)],
+                    pass: 0,
                 };
                 (name.clone(), symbol)
             })
@@ -215,6 +230,10 @@ impl Walk {
             ext: z80n.then_some(&isa::z80::NEXT),
             files,
             pass: 1,
+            last_pass: if options.three_passes { 3 } else { 2 },
+            switched: None,
+            switching: false,
+            read: HashMap::new(),
             symbols,
             pc: 0,
             pending: None,
@@ -227,8 +246,9 @@ impl Walk {
         })
     }
 
-    /// PasmoNext's `processfile`: pass 1, then pass 2, whose statements are
-    /// the program.
+    /// PasmoNext's `processfile`: pass 1, then pass 2, and pass 3 if a value
+    /// moved in pass 2 or `--pass3` asked for it. The last pass's statements
+    /// are the program.
     fn run(
         mut self,
         program: &Program,
@@ -238,7 +258,40 @@ impl Walk {
         self.pass = 2;
         let mut out = (Vec::new(), Vec::new());
         self.pass(program, binaries, Some(&mut out))?;
+        if self.last_pass == 3 {
+            self.pass = 3;
+            out = (Vec::new(), self.switched.take().into_iter().collect());
+            self.pass(program, binaries, Some(&mut out))?;
+        }
+        self.stale()?;
         Ok(out)
+    }
+
+    /// After the last pass: a name its statements read that only an earlier
+    /// pass defined. PasmoNext uses the value that pass gave it, though no
+    /// line of the program defines it; that is one of its bugs, so the walk
+    /// refuses it.
+    fn stale(&self) -> Result<(), Stop> {
+        let mut stale: Vec<(&String, &Span)> = self
+            .read
+            .iter()
+            .filter(|(name, _)| {
+                self.symbols.get(*name).is_some_and(|symbol| {
+                    !matches!(symbol.def, Def::Predefined | Def::Defl) && symbol.pass < self.pass
+                })
+            })
+            .collect();
+        stale.sort_by_key(|(name, at)| (at.file.0, at.line, name.as_str()));
+        match stale.first() {
+            None => Ok(()),
+            Some((name, at)) => Err(AsmError::at(
+                (*at).clone(),
+                format!(
+                    "'{name}' is defined only in an earlier pass: PasmoNext 0.1.3 uses the value \
+                     that pass gave it, though the program never defines it"
+                ),
+            )),
+        }
     }
 
     /// PasmoNext's `dopass`. `out` collects the statements on the last pass.
@@ -250,6 +303,7 @@ impl Walk {
     ) -> Result<(), Stop> {
         self.pc = 0;
         self.scopes.reset();
+        self.read.clear();
         // PasmoNext never resets its reserve counter, so a pass starts where
         // the last left off and `RB` without `RSSET` ends in a phase error.
         // That is one of its bugs: each pass starts the counter at 0.
@@ -322,6 +376,16 @@ impl Walk {
                 let value = self
                     .apply(item.label.as_deref(), item.op.as_ref())
                     .map_err(|message| AsmError::at(at.clone(), message))?;
+                if out.is_some()
+                    && let Some(op) = &item.op
+                {
+                    for expr in expressions(op) {
+                        map_sym_expr(expr.clone(), &mut |name| {
+                            self.read.entry(name.clone()).or_insert_with(|| at.clone());
+                            Expr::Sym(name)
+                        });
+                    }
+                }
                 if let Some((statements, _)) = out.as_deref_mut() {
                     // The engine reads a `DEFL` value where it stands, so one
                     // defined from a name further on would fail there. The
@@ -375,6 +439,11 @@ impl Walk {
                 };
                 warning.file = at.file;
                 warnings.push(warning);
+            }
+            if std::mem::take(&mut self.switching) {
+                let mut warning = Warning::new(at.line as usize, "Switching to 3 pass mode");
+                warning.file = at.file;
+                self.switched = Some(warning);
             }
             if let Some((_, warnings)) = out.as_deref_mut() {
                 for message in messages {
@@ -466,7 +535,7 @@ impl Walk {
             // `parseSAVEBIN`, on the last pass only, where every name is
             // defined.
             Definition::SaveBinary { file, start, size } => {
-                if self.pass < 2 {
+                if self.pass < self.last_pass {
                     return Ok(Vec::new());
                 }
                 let start = self.read(&self.resolved(start))?;
@@ -649,21 +718,30 @@ impl Walk {
         } else {
             Def::Pass2
         };
-        // `setvar`: a value that moves in the last pass needs another.
+        // `setvar`: a value that moves in the last pass needs another, if
+        // that pass is the second, and is an error in the third.
         if def == Def::Pass2
+            && self.pass == self.last_pass
             && let Some(old) = old
             && old.value != value
         {
-            return Err(format!(
-                "PasmoNext 0.1.3 runs a third pass for this program, since '{name}' changed from \
-                 {:04X}H to {value:04X}H in the second; three-pass mode is not lowered yet \
-                 (Lang198x's PasmoNext front end)",
-                old.value
-            ));
+            if self.pass == 3 {
+                return Err(format!("Phase error in '{name}'"));
+            }
+            self.last_pass = 3;
+            self.switching = true;
         }
         let bank = self.banks[slot(value)];
-        self.symbols
-            .insert(name.to_owned(), Symbol { value, def, bank });
+        let pass = self.pass;
+        self.symbols.insert(
+            name.to_owned(),
+            Symbol {
+                value,
+                def,
+                bank,
+                pass,
+            },
+        );
         Ok(())
     }
 
@@ -681,6 +759,7 @@ impl Walk {
                 value,
                 def: Def::Defl,
                 bank: self.banks[slot(value)],
+                pass: self.pass,
             },
         );
         Ok(())
@@ -896,12 +975,28 @@ mod tests {
     }
 
     #[test]
-    fn a_value_that_moves_in_pass_two_needs_a_third() {
+    fn a_value_that_moves_in_pass_two_needs_a_third_and_in_pass_three_is_an_error() {
         let mut walk = walk(1);
         walk.define("x", 0).expect("pass 1");
         walk.pass = 2;
-        let moved = walk.define("x", 5).expect_err("moved");
-        assert!(moved.contains("third pass"), "{moved}");
+        walk.define("x", 5).expect("moved");
+        assert_eq!((walk.last_pass, walk.switching), (3, true));
+        walk.pass = 3;
+        walk.define("x", 5).expect("settled");
+        assert_eq!(walk.define("x", 6), Err("Phase error in 'x'".to_owned()));
+    }
+
+    #[test]
+    fn with_three_passes_from_the_start_pass_two_may_move_values() {
+        let options = Options {
+            three_passes: true,
+            ..Options::default()
+        };
+        let mut walk = Walk::new(false, Vec::new(), &options).expect("walk");
+        walk.define("x", 0).expect("pass 1");
+        walk.pass = 2;
+        walk.define("x", 5).expect("moved");
+        assert!(!walk.switching);
     }
 
     #[test]
