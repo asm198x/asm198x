@@ -2702,3 +2702,57 @@ Aa: nop
 --- bytes 000a
 --- symbols
 AA 4000
+=== bracket_memory_in_brackets
+!!! --bracket
+ org 8000h
+ ld a,[data]
+ ld hl,[data]
+ ld [data],a
+ jp [hl]
+data db 5
+--- bytes 3a0a802a0a80320a80e905
+--- symbols
+data 800a
+=== bracket_parens_group
+!!! --bracket
+ org 0
+vv equ 3
+ ld a,(vv)
+ ld hl,(vv+1)*2
+ ld b,(1)+1
+ jp (vv)
+--- bytes 3e032108000602c30300
+--- symbols
+vv 0003
+=== bracket_paren_register_rejected
+!!! --bracket
+ ld a,(hl)
+--- rejected Value expected but 'HL'found
+=== bracket_paren_store_rejected
+!!! --bracket
+ ld (1234h),a
+--- rejected Invalid operand
+=== bracket_index
+!!! --bracket
+ ld a,[ix+3]
+ ld [iy-2],b
+ ex [sp],hl
+--- bytes dd7e03fd70fee3
+--- symbols
+=== bracket_off_parens_indirect
+ org 0
+vv equ 3
+ ld a,(vv)
+ jp (hl)
+--- bytes 3a0300e9
+--- symbols
+vv 0003
+=== bracket_with_macro
+!!! --bracket
+mm MACRO aa
+ ld a,(aa)
+ ld [aa],a
+ ENDM
+ mm 5
+--- bytes 3e05320500
+--- symbols
