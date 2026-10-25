@@ -74,6 +74,10 @@ pub enum Suite {
     Fuzz,
     /// A curated curriculum program, recorded as a digest rather than bytes.
     Curriculum,
+    /// A pattern-library program, recorded as a digest and keyed on its whole
+    /// include closure, since its routines live in shared files (see
+    /// [`patterns`]).
+    Pattern,
 }
 
 /// The tool that produced a verdict.
@@ -407,15 +411,16 @@ pub struct Recorded {
     pub tool: String,
     /// The version line it reported.
     pub identity: String,
-    /// For a curriculum verdict, its key (`path#variant@digest`), so a file
-    /// re-recorded under a new digest can retire the verdict for the old one.
+    /// For a curriculum or pattern verdict, its key (`path#variant@digest`),
+    /// so a file re-recorded under a new digest can retire the verdict for the
+    /// old one.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub source: Option<String>,
 }
 
 impl Recorded {
     /// The manifest entries for verdicts flushed into `file`: one per suite and
-    /// tool, plus one per curriculum verdict.
+    /// tool, plus one per curriculum or pattern verdict.
     pub fn of<'a>(file: &str, verdicts: impl IntoIterator<Item = &'a Verdict>) -> Vec<Self> {
         let mut out: Vec<Self> = verdicts
             .into_iter()
@@ -424,7 +429,8 @@ impl Recorded {
                 suite: v.suite,
                 tool: v.arbiter.tool.clone(),
                 identity: v.arbiter.identity.clone(),
-                source: (v.suite == Suite::Curriculum).then(|| v.source.clone()),
+                source: matches!(v.suite, Suite::Curriculum | Suite::Pattern)
+                    .then(|| v.source.clone()),
             })
             .collect();
         out.sort();
@@ -546,6 +552,7 @@ impl std::error::Error for ParseError {}
 pub mod curriculum;
 pub mod derive;
 pub mod files;
+pub mod patterns;
 
 #[cfg(test)]
 mod tests {

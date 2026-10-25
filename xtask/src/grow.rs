@@ -159,6 +159,7 @@ const TOOLS: &[&str] = &[
     "lwasm",
     "rgbasm",
     "rgblink",
+    "rgbfix",
     "asl",
     "p2bin",
     "vasmm68k_mot",

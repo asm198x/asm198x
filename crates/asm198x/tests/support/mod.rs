@@ -2,6 +2,7 @@
 //! implementation between them rather than a copy each.
 
 pub mod linked;
+pub mod patterns;
 pub mod scratch;
 pub mod tool_identity;
 pub mod verdicts;
