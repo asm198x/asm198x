@@ -117,9 +117,15 @@ fn curriculum(key: &str, z80n: bool) -> Option<Option<Vec<u8>>> {
 /// Measured programs the new path does not match yet, each with what it
 /// waits for. Three-pass programs are not listed: they are found by the
 /// fixture's `--- passes 3` and must be reported as such.
-const PROGRAMS_NOT_YET: &[(&str, &str)] = &[(
+const PROGRAMS_NOT_YET: &[(&str, &str)] = &[];
+
+/// Measured programs where PasmoNext 0.1.3 has an obvious bug, which the new
+/// path rejects rather than copies, under 198x's
+/// `reference-bugs-are-fixed-not-copied.md`. Each must still be rejected;
+/// one that assembles fails the test.
+const PROGRAMS_DEVIATING: &[(&str, &str)] = &[(
     "org_ignores_rest",
-    "a parser rule: PasmoNext never reads past ORG's operand",
+    "PasmoNext never reads past ORG's operand, so `org 5 junk` drops `junk`",
 )];
 
 /// One measured program: its source, the files it reads, its options, and
@@ -194,6 +200,18 @@ fn measured_programs_match_or_say_they_need_three_passes() {
         let named = PROGRAMS_NOT_YET
             .iter()
             .any(|(name, _)| *name == program.name);
+        if let Some((_, why)) = PROGRAMS_DEVIATING
+            .iter()
+            .find(|(name, _)| *name == program.name)
+        {
+            if result.is_ok() {
+                failures.push(format!(
+                    "{}: assembles, but should deviate: {why}",
+                    program.name
+                ));
+            }
+            continue;
+        }
         let ok = if program.three_passes {
             matches!(&result, Err(e) if e.error.message.contains("third pass"))
         } else {

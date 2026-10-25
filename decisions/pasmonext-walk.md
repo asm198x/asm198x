@@ -38,6 +38,11 @@ Read from its `asm.cpp` (`processfile`, `dopass`, `setequorlabel`, `setdefl`,
 - **Symbols:** a label or `EQU` once per pass; `DEFL` again and again, but never
   over a label or `EQU`, nor they over it. A name pass 2 defines that pass 1 did
   not is an error. PasmoNext's own messages are used.
+- **PasmoNext's obvious bugs are fixed, not copied,** under the umbrella's
+  [`reference-bugs-are-fixed-not-copied.md`](../../../decisions/reference-bugs-are-fixed-not-copied.md).
+  z80-asm rejects the miscompiles and corrects the Next's `push nn`; the walk's
+  gate names each measured program that deviates, such as `org 5 junk`, and
+  fails if one stops deviating.
 - **A `REPT` counter** is a `DEFL` local to its repeat.
 - **Scopes, PasmoNext's `LocalLevel`s.** Every macro call, `REPT` and `IRP` is
   a scope, as is `PROC`…`ENDP`. z80-asm reports `LOCAL`, `PROC`, `ENDP` and

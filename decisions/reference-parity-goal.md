@@ -17,6 +17,17 @@ assemble unchanged and produce identical bytes. A word we do not take is source
 somebody already has that we refuse, and no amount of syntax we invented instead
 makes up for it.
 
+### Amended 2026-10-25: obvious bugs are fixed, not copied
+
+Byte identity holds for real source, except source that hits one of a
+reference's obvious bugs, such as a miscompile or a part of a line silently
+dropped. That source is rejected, or given the bytes the CPU expects. Each such
+case is named as a deviation where the gate runs, and the reference's own
+verdict stays in the corpus. The binding rule, with what counts as a bug, is
+the umbrella's
+[`reference-bugs-are-fixed-not-copied.md`](../../../decisions/reference-bugs-are-fixed-not-copied.md).
+It never widens what we accept: a reference's rejection stays a rejection.
+
 ## Why this needed writing down
 
 It did not exist. Six parity issues have cited
