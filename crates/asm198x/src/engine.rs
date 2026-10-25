@@ -879,6 +879,18 @@ fn assemble_statements(
     // same, so it retraces the same path.
     let mut pseudo: i64 = 0;
     let mut pseudo_stack: Vec<i64> = Vec::new();
+    // PasmoNext's `SAVEBIN` saves its flat memory as it stands at the line:
+    // what each address last held at or before it, else what it ends holding.
+    // Kept only for a program that asks.
+    let saves_image = statements
+        .iter()
+        .any(|s| matches!(s.op, Some(Operation::SaveImage { .. })));
+    let mut flat: Vec<Option<u8>> = if saves_image {
+        vec![None; 0x1_0000]
+    } else {
+        Vec::new()
+    };
+    let mut image_saves: Vec<(String, i64, Vec<Option<u8>>)> = Vec::new();
     for s in &statements {
         let (set, ext) = match s.instruction_set {
             Some(set) => (set, s.extension_set),
@@ -1117,6 +1129,26 @@ fn assemble_statements(
                     format: ArtifactFormat::Raw,
                     bytes: memory.read(at, len).map_err(|err| s.stamp(err))?,
                 });
+            }
+            Some(Operation::SaveImage {
+                name,
+                start,
+                length,
+            }) => {
+                let at = start
+                    .eval(&symbols, pc, s.line)
+                    .map_err(|err| s.stamp(err))?;
+                let len = length
+                    .eval(&symbols, pc, s.line)
+                    .map_err(|err| s.stamp(err))?;
+                if !(0..=0xFFFF).contains(&at) || len < 0 || at + len > 0x1_0000 {
+                    return Err(s.err("Error SAVEBIN out of range"));
+                }
+                let span = flat
+                    .get(at as usize..(at + len) as usize)
+                    .map(<[Option<u8>]>::to_vec)
+                    .unwrap_or_default();
+                image_saves.push((name.clone(), at, span));
             }
             Some(Operation::SaveTape {
                 file,
@@ -1642,6 +1674,16 @@ fn assemble_statements(
                 *b ^= s.xor_mask;
             }
         }
+        if saves_image
+            && bytes.len() > len_before
+            && !matches!(s.op, Some(Operation::Org(_)) | Some(Operation::Reserve(_)))
+        {
+            for (offset, byte) in bytes[len_before..].iter().enumerate() {
+                if let Some(slot) = flat.get_mut(((pc + offset as i64) & 0xFFFF) as usize) {
+                    *slot = Some(*byte);
+                }
+            }
+        }
         if bytes.len() > len_before
             && !matches!(s.op, Some(Operation::Org(_)) | Some(Operation::Reserve(_)))
             && let Some(memory) = &mut device_memory
@@ -1786,6 +1828,22 @@ fn assemble_statements(
         } else if origin + bytes.len().div_ceil(addr_unit as usize) as i64 > 0x1_0000 {
             return Err(s.err("program exceeds the 64K address space"));
         }
+    }
+
+    for (name, at, span) in image_saves {
+        let bytes = span
+            .iter()
+            .enumerate()
+            .map(|(offset, byte)| {
+                byte.or_else(|| flat.get(at as usize + offset).copied().flatten())
+                    .unwrap_or(0)
+            })
+            .collect();
+        artifacts.push(Artifact {
+            name,
+            format: ArtifactFormat::Raw,
+            bytes,
+        });
     }
 
     if let Some(session) = nex_session {

@@ -33,8 +33,11 @@ the gate in Asm198x. The design is recorded in
 
 ## Next
 
-- Lang198x's 5c steps 5 to 8: the Next's banks, reading options,
-  three-pass mode, `--86`.
+- Lang198x's 5c steps 6 to 8: reading options, three-pass mode, `--86`.
+  - **Done, the Next's banks:** `??`, `SETBANK` and `SAVEBIN`, with a new
+    IR operation, `SaveImage`, for a file of the flat image. 47 programs
+    measured on PasmoNext join the fixture; all match but two `SAVEBIN`
+    deviations, and a test checks each file saved against PasmoNext's.
   - **Done, messages:** `.ERROR`, `.WARNING`, `MESSAGE` and `HEX`. 46
     programs measured on PasmoNext join the fixture; all match but five
     `HEX` deviations, and a test checks what each message says.
