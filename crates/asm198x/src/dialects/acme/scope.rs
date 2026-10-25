@@ -131,6 +131,15 @@ pub(super) fn substitute_anon_refs(
             start: subst(start)?,
             length: length.map(subst).transpose()?,
         },
+        Operation::SaveImage {
+            name,
+            start,
+            length,
+        } => Operation::SaveImage {
+            name,
+            start: subst(start)?,
+            length: subst(length)?,
+        },
         Operation::SaveTape {
             file,
             kind,

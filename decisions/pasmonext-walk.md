@@ -59,6 +59,15 @@ Read from its `asm.cpp` (`processfile`, `dopass`, `setequorlabel`, `setdefl`,
   PasmoNext gives a `.WARNING` on every pass. A `MESSAGE`'s values are read
   there, so a name nobody defines is an error and one defined further on is
   not.
+- **The Next's banks.** Each 8K slot holds a bank, PasmoNext's defaults
+  from the start of every pass (the ROM, then 10, 11, 4, 5, 0 and 1), which
+  `SETBANK` changes; it also sets the `DEFL`s `CURRENTBANK` and
+  `CURRENTBANKxxxx`. Each name records the bank of its value's slot when it
+  is defined, and `?? name` reads it through `Known::bank`: 0 for a name not
+  yet defined in pass 1, an error after. `SAVEBIN` is evaluated on the last
+  pass and reaches the engine as `Operation::SaveImage`, which saves memory
+  as PasmoNext's stands at the line: what each address last held at or
+  before it, or else what it ends holding, or else 0.
 - **PasmoNext's obvious bugs are fixed, not copied,** under the umbrella's
   [`reference-bugs-are-fixed-not-copied.md`](../../../decisions/reference-bugs-are-fixed-not-copied.md).
   z80-asm rejects the miscompiles and corrects the Next's `push nn`; the walk's

@@ -219,6 +219,13 @@ pub enum Item {
         start: Operand,
         length: Option<Operand>,
     },
+    /// A file of the flat image the source asked for — see
+    /// [`Operation::SaveImage`].
+    SaveImage {
+        name: String,
+        start: Operand,
+        length: Operand,
+    },
     /// A tape image the source asked for — see
     /// [`Operation::SaveTape`].
     SaveTape {
@@ -901,6 +908,15 @@ pub fn lower_item_ref(item: &Item) -> Result<Operation, AsmError> {
             start: start.clone().into_value()?,
             length: length.clone().map(Operand::into_value).transpose()?,
         },
+        Item::SaveImage {
+            name,
+            start,
+            length,
+        } => Operation::SaveImage {
+            name: name.clone(),
+            start: start.clone().into_value()?,
+            length: length.clone().into_value()?,
+        },
         Item::SaveTape {
             file,
             kind,
@@ -1061,6 +1077,15 @@ fn lower_item(item: Item) -> Result<Operation, AsmError> {
             name: name.clone(),
             start: start.into_value()?,
             length: length.map(Operand::into_value).transpose()?,
+        },
+        Item::SaveImage {
+            name,
+            start,
+            length,
+        } => Operation::SaveImage {
+            name: name.clone(),
+            start: start.into_value()?,
+            length: length.into_value()?,
         },
         Item::SaveTape {
             file,
@@ -1316,6 +1341,15 @@ pub fn map_syms(op: Operation, f: &mut impl FnMut(String) -> Expr) -> Operation 
             start: map_sym_expr(start, f),
             length: length.map(|e| map_sym_expr(e, f)),
         },
+        Operation::SaveImage {
+            name,
+            start,
+            length,
+        } => Operation::SaveImage {
+            name,
+            start: map_sym_expr(start, f),
+            length: map_sym_expr(length, f),
+        },
         Operation::SaveTape {
             file,
             kind,
@@ -1490,6 +1524,15 @@ pub fn item_from_operation(op: Operation) -> Item {
             name,
             start: Operand::expr(start),
             length: length.map(Operand::expr),
+        },
+        Operation::SaveImage {
+            name,
+            start,
+            length,
+        } => Item::SaveImage {
+            name,
+            start: Operand::expr(start),
+            length: Operand::expr(length),
         },
         Operation::SaveTape {
             file,
