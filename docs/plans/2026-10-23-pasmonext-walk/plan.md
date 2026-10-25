@@ -33,9 +33,13 @@ the gate in Asm198x. The design is recorded in
 
 ## Next
 
-- Lang198x's 5c steps 2 to 8: scopes' options (`--alocal`, `--nocase`,
-  `--equ`), structures, messages, the Next's banks, reading options,
-  three-pass mode, `--86`.
+- Lang198x's 5c steps 3 to 8: structures, messages, the Next's banks,
+  reading options, three-pass mode, `--86`.
+  - **Done, scopes' options:** `--nocase`, `--equ`/`-E` and `--alocal`,
+    through `assemble_pasmo_lang198x_files_with`. The gate now runs the
+    measured programs that use them, instead of skipping every program with
+    options; 56 join the fixture, and all match. Four `$`-in-name programs
+    join too, three of them named deviations.
   - **Done, scopes' directives:** `LOCAL`, `PROC`, `ENDP` and `PUBLIC`,
     through `lang198x-z80-asm`'s `Scope`. Both `LOCAL` verdicts now match,
     so the named list is empty; 56 scope programs measured on PasmoNext join

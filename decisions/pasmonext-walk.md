@@ -38,6 +38,15 @@ Read from its `asm.cpp` (`processfile`, `dopass`, `setequorlabel`, `setdefl`,
 - **Symbols:** a label or `EQU` once per pass; `DEFL` again and again, but never
   over a label or `EQU`, nor they over it. A name pass 2 defines that pass 1 did
   not is an error. PasmoNext's own messages are used.
+- **Options.** `--nocase` is z80-asm's reading option; the walk takes the
+  profile it gives. `--equ` names, read by z80-asm's `predefine`, are defined
+  before pass 1, can be neither redefined nor made `DEFL`, and reach the
+  engine as `EQU`s before any line. Under `--alocal`, a name starting `_` or
+  `@` is local to an automatic scope: reading or defining one opens it, and
+  defining any other name ends it, as do `LOCAL`, `PROC`, `ENDP` and a macro
+  definition. A line's label is defined before the rest is read, except on
+  `ORG`, `EQU` and `DEFL` lines, which read their value first; that order
+  decides which scope a name on the line belongs to.
 - **PasmoNext's obvious bugs are fixed, not copied,** under the umbrella's
   [`reference-bugs-are-fixed-not-copied.md`](../../../decisions/reference-bugs-are-fixed-not-copied.md).
   z80-asm rejects the miscompiles and corrects the Next's `push nn`; the walk's

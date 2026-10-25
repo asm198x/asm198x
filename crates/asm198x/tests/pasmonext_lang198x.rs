@@ -120,13 +120,34 @@ fn curriculum(key: &str, z80n: bool) -> Option<Option<Vec<u8>>> {
 const PROGRAMS_NOT_YET: &[(&str, &str)] = &[];
 
 /// Measured programs where PasmoNext 0.1.3 has an obvious bug, which the new
-/// path rejects rather than copies, under 198x's
-/// `reference-bugs-are-fixed-not-copied.md`. Each must still be rejected;
-/// one that assembles fails the test.
-const PROGRAMS_DEVIATING: &[(&str, &str)] = &[(
-    "org_ignores_rest",
-    "PasmoNext never reads past ORG's operand, so `org 5 junk` drops `junk`",
-)];
+/// path fixes rather than copies, under 198x's
+/// `reference-bugs-are-fixed-not-copied.md`: each name, why, and what the new
+/// path must do instead, its bytes or `None` for a rejection. One that stops
+/// deviating fails the test.
+const PROGRAMS_DEVIATING: &[(&str, &str, Option<&str>)] = &[
+    (
+        "org_ignores_rest",
+        "PasmoNext never reads past ORG's operand, so `org 5 junk` drops `junk`",
+        None,
+    ),
+    // The manual: the `$` in a name "are ignored". PasmoNext's `stripdollar`
+    // removes the wrong characters, so it reads `ab$c` as `ac`, `ab$` as `a`.
+    (
+        "name_dollar_trailing",
+        "PasmoNext reads `ab$` as `a`, so `jp ab` finds nothing",
+        Some("00C30000"),
+    ),
+    (
+        "name_dollar_inside_read_as_manual",
+        "PasmoNext reads `ab$c` as `ac`, so `jp abc` finds nothing",
+        Some("00C30000"),
+    ),
+    (
+        "name_dollar_inside_pasmonext_reading",
+        "PasmoNext reads `ab$c` as `ac`, so `jp ac` reaches it",
+        None,
+    ),
+];
 
 /// One measured program: its source, the files it reads, its options, and
 /// what PasmoNext did with it.
@@ -184,29 +205,56 @@ fn programs() -> Vec<Program> {
         .collect()
 }
 
+/// PasmoNext's command-line `options` as the new path takes them, or `None`
+/// if one is not taken yet.
+fn options(options: &[String]) -> Option<asm198x::PasmoNextOptions> {
+    let mut taken = asm198x::PasmoNextOptions::default();
+    let mut options = options.iter();
+    while let Some(option) = options.next() {
+        match option.as_str() {
+            "--nocase" => taken.names_in_any_case = true,
+            "--alocal" => taken.automatic_locals = true,
+            "--equ" | "-E" => taken.predefined.push(options.next()?.clone()),
+            _ => return None,
+        }
+    }
+    Some(taken)
+}
+
 #[test]
 fn measured_programs_match_or_say_they_need_three_passes() {
     let programs = programs();
     assert!(programs.len() >= 88, "the fixture has {}", programs.len());
     let mut failures = Vec::new();
     for program in &programs {
-        // Programs run with PasmoNext's options, such as `--pass3`, wait for
-        // the step that takes those options.
-        if !program.options.is_empty() {
+        // Programs run with options the new path does not take yet, such as
+        // `--pass3`, wait for the step that takes them.
+        let Some(options) = options(&program.options) else {
             continue;
-        }
-        let result =
-            asm198x::assemble_pasmo_lang198x_files(&program.source, "t.asm", &program.files, true);
+        };
+        let result = asm198x::assemble_pasmo_lang198x_files_with(
+            &program.source,
+            "t.asm",
+            &program.files,
+            true,
+            &options,
+        );
         let named = PROGRAMS_NOT_YET
             .iter()
             .any(|(name, _)| *name == program.name);
-        if let Some((_, why)) = PROGRAMS_DEVIATING
+        if let Some((_, why, expected)) = PROGRAMS_DEVIATING
             .iter()
-            .find(|(name, _)| *name == program.name)
+            .find(|(name, _, _)| *name == program.name)
         {
-            if result.is_ok() {
+            let ours = result.as_ref().ok().map(|r| {
+                r.bytes
+                    .iter()
+                    .map(|b| format!("{b:02X}"))
+                    .collect::<String>()
+            });
+            if ours.as_deref() != *expected {
                 failures.push(format!(
-                    "{}: assembles, but should deviate: {why}",
+                    "{}: gives {ours:?}, but should deviate to {expected:?}: {why}",
                     program.name
                 ));
             }
