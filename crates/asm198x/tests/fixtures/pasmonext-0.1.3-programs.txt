@@ -2187,3 +2187,221 @@ base 0100
  db 1
 --- bytes 01
 --- symbols
+=== error_basic
+ nop
+ .ERROR something went wrong
+ nop
+--- rejected exit 1
+=== error_empty
+ .ERROR
+--- rejected exit 1
+=== error_with_comment
+ .ERROR bad ; here
+--- rejected exit 1
+=== error_in_false_if
+ IF 0
+ .ERROR no
+ ENDIF
+ db 1
+--- bytes 01
+--- symbols
+=== error_lowercase
+ .error low
+--- rejected exit 1
+=== error_label
+here .ERROR x
+--- rejected exit 1
+=== error_in_macro
+mm MACRO vv
+ .ERROR value vv
+ ENDM
+ mm 5
+--- rejected exit 1
+=== warning_basic
+ .WARNING careful now
+ db 1
+--- bytes 01
+--- symbols
+=== warning_empty
+ .WARNING
+ db 1
+--- bytes 01
+--- symbols
+=== warning_label
+here .WARNING x
+ dw here
+--- bytes 0000
+--- symbols
+here 0000
+=== message_text
+ MESSAGE "hello"
+ db 1
+--- bytes 01
+--- symbols
+=== message_value
+vv equ 1234h
+ MESSAGE "v=",vv
+ db 1
+--- bytes 01
+--- symbols
+vv 1234
+=== message_decimal
+vv equ 100
+ MESSAGE %d,vv
+ db 1
+--- rejected exit 1
+=== message_dollar
+ org 8000h
+ nop
+ MESSAGE $
+ db 1
+--- bytes 0001
+--- symbols
+=== message_pc
+ org 10h
+ MESSAGE PC
+--- bytes 
+--- symbols
+=== message_number
+ MESSAGE 10
+ db 1
+--- bytes 01
+--- symbols
+=== message_expression
+vv equ 1
+ MESSAGE vv+1
+ db 1
+--- rejected Error in Message format
+=== message_undefined
+ MESSAGE nope
+ db 1
+--- rejected exit 1
+=== message_forward
+ MESSAGE later
+later equ 7
+ db 1
+--- bytes 01
+--- symbols
+later 0007
+=== message_no_comma
+ MESSAGE "a" "b"
+ db 1
+--- rejected exit 1
+=== message_empty
+ MESSAGE
+ db 1
+--- bytes 01
+--- symbols
+=== message_label
+here MESSAGE "x"
+ dw here
+--- bytes 0000
+--- symbols
+here 0000
+=== message_decimal_then_hex
+aa equ 10
+bb equ 20
+ MESSAGE %d,aa,bb
+--- rejected exit 1
+=== message_decimal_dollar
+ org 100
+ MESSAGE %d,$
+--- rejected Error in Message format
+=== message_mod_other
+aa equ 10
+ MESSAGE %x,aa
+--- rejected exit 1
+=== message_register
+ MESSAGE a
+--- bytes 
+--- symbols
+=== message_single_quote
+ MESSAGE 'q'
+--- bytes 
+--- symbols
+=== message_trailing_comma
+ MESSAGE "a",
+--- bytes 
+--- symbols
+=== hex_letters
+ HEX ABCD
+--- bytes abcd
+--- symbols
+=== hex_digits
+ HEX 0A0B
+--- bytes 0a0b
+--- symbols
+=== hex_mixed
+ HEX AB12
+--- bytes ab12
+--- symbols
+=== hex_odd
+ HEX ABC
+--- rejected Error SAVEBIN faled to write file
+=== hex_non_hex
+ HEX ZZ
+--- bytes 00
+--- symbols
+=== hex_lowercase
+ HEX abcd
+--- bytes abcd
+--- symbols
+=== hex_empty
+ HEX
+--- bytes 
+--- symbols
+=== hex_label
+here HEX AB
+ dw here
+--- bytes ab0000
+--- symbols
+here 0000
+=== hex_with_h
+ HEX 0ABh
+--- bytes 0a0b
+--- symbols
+=== hex_two_items
+ HEX AB,CD
+--- bytes ab
+--- symbols
+=== hex_junk
+ HEX AB junk
+--- bytes ab
+--- symbols
+=== hex_string
+ HEX "AB"
+--- bytes 
+--- symbols
+=== hex_dollar_digits
+ HEX A$B
+--- bytes ab
+--- symbols
+=== message_decimal_no_comma
+vv equ 100
+ MESSAGE %d vv
+--- bytes 
+--- symbols
+vv 0064
+=== message_decimal_then_more
+vv equ 100
+ww equ 255
+ MESSAGE %d vv,ww
+--- bytes 
+--- symbols
+vv 0064
+ww 00ff
+=== message_decimal_text
+ MESSAGE %d "x"
+--- bytes 
+--- symbols
+=== message_in_macro
+mm MACRO vv
+ MESSAGE "v",vv
+ ENDM
+ mm 3
+--- bytes 
+--- symbols
+=== message_twice_passes
+ MESSAGE "once"
+--- bytes 
+--- symbols

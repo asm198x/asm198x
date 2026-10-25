@@ -195,6 +195,32 @@ const PROGRAMS_DEVIATING: &[(&str, &str, Option<&str>)] = &[
         "PasmoNext counts `fa db`, with no item, as a byte",
         None,
     ),
+    // HEX.
+    (
+        "hex_non_hex",
+        "PasmoNext writes a garbage byte for `ZZ`",
+        None,
+    ),
+    (
+        "hex_with_h",
+        "PasmoNext reads `0ABh` as the pairs `0A` and `Bh`",
+        None,
+    ),
+    (
+        "hex_two_items",
+        "PasmoNext drops everything after HEX's first word",
+        None,
+    ),
+    (
+        "hex_junk",
+        "PasmoNext drops everything after HEX's first word",
+        None,
+    ),
+    (
+        "hex_string",
+        "PasmoNext writes nothing for a string and says nothing",
+        None,
+    ),
 ];
 
 /// One measured program: its source, the files it reads, its options, and
@@ -350,4 +376,56 @@ fn includes_resolve_from_the_folder_pasmonext_runs_in() {
         asm198x::assemble_pasmo_lang198x_files(source, "mistakes/broken.asm", &loader, false)
             .expect("assembles");
     assert_eq!(result.bytes, [0x3E, 0x07, 0x00]);
+}
+
+#[test]
+fn messages_and_warnings_say_what_pasmonext_printed() {
+    // Measured on PasmoNext 0.1.3: what each program printed. PasmoNext
+    // gives a `.WARNING` on both passes; the new path gives it once.
+    let said = |source: &str| -> Vec<(String, bool)> {
+        let result = asm198x::assemble_pasmo_lang198x(source, true).expect("assembles");
+        result
+            .warnings
+            .iter()
+            .map(|w| (w.message.clone(), !w.kind.is_advisory()))
+            .collect()
+    };
+    let note = |text: &str| vec![(text.to_owned(), true)];
+    assert_eq!(said(" MESSAGE \"hello\"\n db 1\n"), note("hello"));
+    assert_eq!(said("vv equ 1234h\n MESSAGE \"v=\",vv\n"), note("v=1234"));
+    assert_eq!(said(" org 8000h\n nop\n MESSAGE $\n"), note("8001"));
+    assert_eq!(said(" org 10h\n MESSAGE PC\n"), note("0010"));
+    assert_eq!(said(" MESSAGE 10\n"), note("000A"));
+    assert_eq!(said(" MESSAGE later\nlater equ 7\n"), note("0007"));
+    assert_eq!(said("vv equ 100\n MESSAGE %d vv\n"), note("100"));
+    assert_eq!(
+        said("vv equ 100\nww equ 255\n MESSAGE %d vv,ww\n"),
+        note("10000FF")
+    );
+    assert_eq!(said(" MESSAGE a\n"), note("A"));
+    assert_eq!(said(" MESSAGE 'q'\n"), note("q"));
+    assert_eq!(said(" MESSAGE\n"), note(""));
+    assert_eq!(
+        said("mm MACRO vv\n MESSAGE \"v\",vv\n ENDM\n mm 3\n"),
+        note("v0003")
+    );
+    assert_eq!(
+        said(" .WARNING careful now\n db 1\n"),
+        vec![("careful now".to_owned(), false)]
+    );
+    let error = |source: &str| {
+        asm198x::assemble_pasmo_lang198x(source, true)
+            .expect_err("rejected")
+            .message
+    };
+    assert_eq!(
+        error(" nop\n .ERROR something went wrong\n"),
+        ".ERROR directive: something went wrong"
+    );
+    assert_eq!(
+        error(" .ERROR bad ; here\n"),
+        ".ERROR directive: bad ; here"
+    );
+    assert_eq!(error(" MESSAGE nope\n"), "Symbol 'nope' is undefined");
+    assert_eq!(error(" MESSAGE \"a\" \"b\"\n"), "Error in Message format");
 }
