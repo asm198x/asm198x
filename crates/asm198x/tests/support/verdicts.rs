@@ -409,6 +409,12 @@ pub struct ReplayReport {
     /// Cases where our bytes and the reference's disagree, or we rejected
     /// source the reference accepted.
     pub failures: Vec<String>,
+    /// Pattern sources replayed, by path in the Code198x checkout.
+    pub patterns_reached: std::collections::BTreeSet<String>,
+    /// Pattern verdicts that could not be replayed, and why: no checkout, a
+    /// source that has gone, or an include closure that has changed since
+    /// recording.
+    pub patterns_unreached: Vec<String>,
 }
 
 /// Replay every committed verdict for `cpu`.
@@ -434,6 +440,10 @@ pub fn replay_corpus(cpu: &str, corpus: &Corpus, report: &mut ReplayReport) {
                     replay_curriculum(cpu, verdict, &key.source, outcome, report);
                     continue;
                 }
+                if verdict.suite == Suite::Pattern {
+                    replay_pattern(cpu, &key.source, outcome, report);
+                    continue;
+                }
                 let Some(reference) = outcome.bytes() else {
                     // A recorded rejection says the reference refused source we
                     // never claim to accept. Pairing that against our own
@@ -451,8 +461,8 @@ pub fn replay_corpus(cpu: &str, corpus: &Corpus, report: &mut ReplayReport) {
                         assemble_form(&verdict.cpu, &verdict.dialect, &key.source)
                     }
                     Suite::Probe => assemble_probe(&verdict.dialect, &key.source),
-                    // Handled above — its outcome is a digest, not bytes.
-                    Suite::Curriculum => None,
+                    // Handled above — their outcomes are digests, not bytes.
+                    Suite::Curriculum | Suite::Pattern => None,
                 };
                 let Some(ours) = ours else {
                     report.unreplayable += 1;
@@ -579,6 +589,107 @@ fn replay_curriculum(
         Err(e) => report
             .failures
             .push(format!("{cpu} [{variant}] {relpath}: {e}")),
+    }
+}
+
+/// Replay one pattern verdict: rebuild the program with the Asm198x CLI, as
+/// the curriculum's Makefile does, and compare with what the reference did.
+///
+/// Like a curriculum verdict, it needs the checkout but no reference tool.
+/// A verdict whose source has gone, or whose include closure no longer
+/// digests to its key, answers for text that is not there, so it is counted
+/// as not reached rather than checked.
+fn replay_pattern(cpu: &str, key: &str, outcome: &Outcome, report: &mut ReplayReport) {
+    let (Some(root), Some((relpath, variant, closure))) =
+        (code_samples_root(), parse_curriculum_key(key))
+    else {
+        report.unreplayable += 1;
+        report
+            .patterns_unreached
+            .push(format!("{key}: no curriculum checkout"));
+        return;
+    };
+    let scratch = super::scratch::dir("pattern-replay");
+    let source = root.join(relpath);
+    let job = match super::patterns::Job::new(&root, &source, &scratch) {
+        Ok(job) if source.is_file() => job,
+        Ok(_) => {
+            report.unreplayable += 1;
+            report
+                .patterns_unreached
+                .push(format!("{relpath}: not in the checkout"));
+            return;
+        }
+        Err(e) => {
+            report
+                .failures
+                .push(format!("{cpu} [{variant}] {relpath}: {e}"));
+            return;
+        }
+    };
+    match job.closure_digest(&root) {
+        Ok(now) if now == closure => {}
+        Ok(_) => {
+            report.unreplayable += 1;
+            report
+                .patterns_unreached
+                .push(format!("{relpath}: its includes changed since recording"));
+            return;
+        }
+        Err(e) => {
+            report
+                .failures
+                .push(format!("{cpu} [{variant}] {relpath}: {e}"));
+            return;
+        }
+    }
+    let ours = job.assemble(&scratch);
+    report.checked += 1;
+    *report.by_suite.entry("Pattern".to_string()).or_default() += 1;
+    report.patterns_reached.insert(relpath.to_string());
+    if let Some(failure) = judge_pattern(relpath, outcome, &ours) {
+        report.failures.push(format!("{cpu} [{variant}] {failure}"));
+    }
+}
+
+/// Whether Asm198x's result for a pattern source is acceptable against the
+/// reference's: the same bytes, or both rejecting, unless the source is in
+/// `verdict_corpus::patterns::KNOWN`, where it must still differ. `None` when
+/// acceptable; otherwise what is wrong. Recording and replay both judge
+/// through this.
+pub fn judge_pattern(
+    relpath: &str,
+    reference: &Outcome,
+    ours: &Result<Vec<u8>, String>,
+) -> Option<String> {
+    let agree = match (reference, ours) {
+        (Outcome::Digest { digest }, Ok(bytes)) => &sha256_hex(bytes) == digest,
+        (Outcome::Rejected { .. }, Err(_)) => true,
+        _ => false,
+    };
+    let in_samples = relpath.strip_prefix("code-samples/").unwrap_or(relpath);
+    match (agree, verdict_corpus::patterns::known(in_samples)) {
+        (true, None) | (false, Some(_)) => None,
+        (true, Some(issue)) => Some(format!(
+            "{relpath}: matches the reference now, so take it off \
+             verdict_corpus::patterns::KNOWN ({issue})"
+        )),
+        (false, None) => {
+            let theirs = match reference {
+                Outcome::Digest { digest } => format!("assembled it (digest {digest})"),
+                Outcome::Rejected { diagnostic } => format!("rejected it: {diagnostic}"),
+                other => format!("recorded {other:?}"),
+            };
+            let ours = match ours {
+                Ok(bytes) => format!(
+                    "assembled {} byte(s), digest {}",
+                    bytes.len(),
+                    sha256_hex(bytes)
+                ),
+                Err(e) => format!("rejected it: {e}"),
+            };
+            Some(format!("{relpath}: the reference {theirs}; Asm198x {ours}"))
+        }
     }
 }
 
