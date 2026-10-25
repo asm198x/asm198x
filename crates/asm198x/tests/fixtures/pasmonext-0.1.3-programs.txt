@@ -2756,3 +2756,79 @@ mm MACRO aa
  mm 5
 --- bytes 3e05320500
 --- symbols
+=== else_taken_junk
+ if 1
+ db 1
+ else junk
+ db 2
+ endif
+--- rejected exit 1
+=== else_skipped_junk
+ if 0
+ db 1
+ else junk
+ db 2
+ endif
+--- bytes 02
+--- symbols
+=== else_skipped_instruction
+ if 0
+ db 1
+ else db 9
+ endif
+--- bytes 
+--- symbols
+=== endif_taken_junk
+ if 1
+ db 1
+ endif junk
+--- rejected End line expected but 'junk'found
+=== endif_skipped_junk
+ if 0
+ db 1
+ endif junk
+ db 3
+--- bytes 03
+--- symbols
+=== endif_nested_skipped_junk
+ if 0
+ if 1
+ endif junk
+ endif
+ db 3
+--- bytes 03
+--- symbols
+=== endm_rept_junk
+ rept 2
+ db 1
+ endm junk
+--- bytes 0101
+--- symbols
+=== endm_rept_zero_junk
+ rept 0
+ db 1
+ endm junk
+ db 3
+--- bytes 03
+--- symbols
+=== endm_irp_junk
+ irp x,1,2
+ db x
+ endm junk
+--- bytes 0102
+--- symbols
+=== endm_macro_junk
+mm macro
+ db 1
+ endm junk
+ mm
+--- bytes 01
+--- symbols
+=== else_comment
+ if 0
+ db 1
+ else ; c
+ db 2
+ endif
+--- bytes 02
+--- symbols
