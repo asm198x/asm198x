@@ -24,6 +24,24 @@
 //! arbitrated by two independent tools, and 37 of the Amiga's 69 are built both
 //! as a hunk executable and as a flat binary. 419 sources, 617 comparisons.
 //!
+//! # The pattern library
+//!
+//! Code198x's pattern library is counted apart from the game curriculum, in
+//! its own section, because it is a different claim: not every pattern source
+//! matches its reference, and the ones that do not are tracked in
+//! `verdict_corpus::patterns::KNOWN`. A pattern source counts as verified here
+//! when a verdict exists for its path. Whether that verdict still describes
+//! the source's text is the replay's question: a pattern verdict is keyed on
+//! its whole include closure, which only assembling the source can find, and
+//! the Replay job fails when any pattern source in the pinned checkout has no
+//! verdict that replays.
+//!
+//! # Which machines
+//!
+//! Machines come from the checkout as well as the corpus, so a machine with
+//! curriculum or pattern sources and no verdicts at all is listed, as
+//! unverified, rather than left out of a list that only knew the recorded.
+//!
 //! # What is not counted
 //!
 //! The 6809 and 65816 sections compare hand-written stand-in programs, because
@@ -75,10 +93,26 @@ pub struct MachineParity {
     arbiters: Vec<ArbiterCount>,
 }
 
+/// What one machine's pattern library has recorded against it.
+pub struct PatternParity {
+    slug: String,
+    cpu: String,
+    /// Distinct pattern sources with a verdict.
+    sources: usize,
+    /// Verdicts over them.
+    comparisons: usize,
+    /// Pattern sources in the checkout, when one is present.
+    in_checkout: Option<usize>,
+    /// Pattern sources in the checkout with no verdict under their path.
+    unverified: Vec<String>,
+    arbiters: Vec<ArbiterCount>,
+}
+
 /// The whole picture.
 pub struct Report {
     pin: Option<String>,
     machines: Vec<MachineParity>,
+    patterns: Vec<PatternParity>,
     /// Whether a Code198x checkout was readable when this was generated. Without
     /// one the file still describes the corpus, but cannot say what is missing.
     checkout_seen: bool,
@@ -98,6 +132,21 @@ impl Report {
     /// Every source the checkout holds that has no verdict.
     fn unverified(&self) -> usize {
         self.machines.iter().map(|m| m.unverified.len()).sum()
+    }
+
+    /// Distinct pattern sources with a verdict, across every machine.
+    fn pattern_sources(&self) -> usize {
+        self.patterns.iter().map(|m| m.sources).sum()
+    }
+
+    /// Pattern verdicts across every machine.
+    fn pattern_comparisons(&self) -> usize {
+        self.patterns.iter().map(|m| m.comparisons).sum()
+    }
+
+    /// Every pattern source the checkout holds with no verdict.
+    fn pattern_unverified(&self) -> usize {
+        self.patterns.iter().map(|m| m.unverified.len()).sum()
     }
 }
 
@@ -129,6 +178,14 @@ fn machine_of(relpath: &str) -> Option<&str> {
     tail.starts_with("assembly/").then_some(slug)
 }
 
+/// The machine slug in a pattern relpath:
+/// `code-samples/<slug>/patterns/assembly/…`.
+fn pattern_machine_of(relpath: &str) -> Option<&str> {
+    let rest = relpath.strip_prefix("code-samples/")?;
+    let (slug, tail) = rest.split_once('/')?;
+    tail.starts_with("patterns/assembly/").then_some(slug)
+}
+
 /// Read every corpus file and build the report.
 #[must_use]
 pub fn compute(repo: &Path) -> Report {
@@ -139,6 +196,7 @@ pub fn compute(repo: &Path) -> Report {
         return Report {
             pin: None,
             machines: Vec::new(),
+            patterns: Vec::new(),
             checkout_seen: false,
         };
     };
@@ -149,11 +207,34 @@ pub fn compute(repo: &Path) -> Report {
         .collect();
     files.sort();
 
+    let mut by_pattern_machine: BTreeMap<String, Machine> = BTreeMap::new();
     for path in files {
         let Ok(corpus) = Corpus::read(&path) else {
             continue;
         };
         for verdict in corpus.verdicts() {
+            if verdict.suite == Suite::Pattern {
+                let Some((relpath, variant, _)) = parse_key(&verdict.source) else {
+                    continue;
+                };
+                let Some(slug) = pattern_machine_of(relpath) else {
+                    continue;
+                };
+                let m = by_pattern_machine.entry(slug.to_string()).or_default();
+                m.cpu = verdict.cpu.clone();
+                m.sources.insert(relpath.to_string());
+                m.comparisons += 1;
+                let a = m
+                    .arbiters
+                    .entry((
+                        verdict.arbiter.tool.clone(),
+                        verdict.arbiter.identity.clone(),
+                    ))
+                    .or_default();
+                a.0 += 1;
+                a.1.insert(variant.to_string());
+                continue;
+            }
             if verdict.suite != Suite::Curriculum {
                 continue;
             }
@@ -185,6 +266,61 @@ pub fn compute(repo: &Path) -> Report {
     }
 
     let root = verdict_corpus::curriculum::root();
+    // A machine in the checkout with curriculum or pattern sources is listed
+    // even when the corpus has nothing for it, so its sources show as
+    // unverified rather than not at all.
+    if let Some(root) = &root {
+        let samples = root.join("code-samples");
+        if let Ok(entries) = std::fs::read_dir(&samples) {
+            for entry in entries.flatten() {
+                let Some(slug) = entry.file_name().to_str().map(str::to_string) else {
+                    continue;
+                };
+                let dir = entry.path();
+                if !verdict_corpus::curriculum::machine_sources(&dir.join("assembly")).is_empty() {
+                    by_machine.entry(slug.clone()).or_default();
+                }
+                if !verdict_corpus::patterns::sources(&dir).is_empty() {
+                    let m = by_pattern_machine.entry(slug.clone()).or_default();
+                    if m.cpu.is_empty()
+                        && let Some(tool) = verdict_corpus::patterns::tool(&slug)
+                    {
+                        m.cpu = tool.cpu().to_string();
+                    }
+                }
+            }
+        }
+    }
+    let patterns = by_pattern_machine
+        .into_iter()
+        .map(|(slug, m)| {
+            let (in_checkout, unverified) = match &root {
+                Some(root) => {
+                    let found =
+                        verdict_corpus::patterns::sources(&root.join("code-samples").join(&slug));
+                    let missing = found
+                        .iter()
+                        .filter_map(|p| {
+                            let rel = p.strip_prefix(root).ok()?;
+                            let rel = rel.to_string_lossy().replace('\\', "/");
+                            (!m.sources.contains(&rel)).then_some(rel)
+                        })
+                        .collect();
+                    (Some(found.len()), missing)
+                }
+                None => (None, Vec::new()),
+            };
+            PatternParity {
+                slug,
+                cpu: m.cpu,
+                sources: m.sources.len(),
+                comparisons: m.comparisons,
+                in_checkout,
+                unverified,
+                arbiters: arbiter_counts(m.arbiters),
+            }
+        })
+        .collect();
     let machines = by_machine
         .into_iter()
         .map(|(slug, m)| {
@@ -211,17 +347,7 @@ pub fn compute(repo: &Path) -> Report {
                 }
                 None => (None, Vec::new()),
             };
-            let mut arbiters: Vec<ArbiterCount> = m
-                .arbiters
-                .into_iter()
-                .map(|((tool, identity), (comparisons, variants))| ArbiterCount {
-                    tool,
-                    identity,
-                    variants,
-                    comparisons,
-                })
-                .collect();
-            arbiters.sort_by(|a, b| a.tool.cmp(&b.tool).then(a.identity.cmp(&b.identity)));
+            let arbiters = arbiter_counts(m.arbiters);
             MachineParity {
                 slug,
                 cpu: m.cpu,
@@ -239,8 +365,41 @@ pub fn compute(repo: &Path) -> Report {
             .ok()
             .map(|s| s.trim().to_string()),
         machines,
+        patterns,
         checkout_seen: root.is_some(),
     }
+}
+
+/// The per-tool counts, in a stable order.
+fn arbiter_counts(
+    arbiters: BTreeMap<(String, String), (usize, BTreeSet<String>)>,
+) -> Vec<ArbiterCount> {
+    let mut out: Vec<ArbiterCount> = arbiters
+        .into_iter()
+        .map(|((tool, identity), (comparisons, variants))| ArbiterCount {
+            tool,
+            identity,
+            variants,
+            comparisons,
+        })
+        .collect();
+    out.sort_by(|a, b| a.tool.cmp(&b.tool).then(a.identity.cmp(&b.identity)));
+    out
+}
+
+/// One tool's counts as the committed JSON spells them.
+fn arbiters_json(arbiters: &[ArbiterCount]) -> Vec<serde_json::Value> {
+    arbiters
+        .iter()
+        .map(|a| {
+            serde_json::json!({
+                "tool": a.tool,
+                "identity": a.identity,
+                "variants": a.variants.iter().collect::<Vec<_>>(),
+                "comparisons": a.comparisons,
+            })
+        })
+        .collect()
 }
 
 /// Accumulator while reading the corpus.
@@ -261,24 +420,34 @@ pub fn render(report: &Report) -> String {
         .machines
         .iter()
         .map(|m| {
-            let arbiters: Vec<serde_json::Value> = m
-                .arbiters
-                .iter()
-                .map(|a| {
-                    serde_json::json!({
-                        "tool": a.tool,
-                        "identity": a.identity,
-                        "variants": a.variants.iter().collect::<Vec<_>>(),
-                        "comparisons": a.comparisons,
-                    })
-                })
-                .collect();
+            let arbiters = arbiters_json(&m.arbiters);
             let mut obj = serde_json::json!({
                 "slug": m.slug,
                 "cpu": m.cpu,
                 "sources": m.sources,
                 "comparisons": m.comparisons,
                 "arbiters": arbiters,
+            });
+            if let Some(n) = m.in_checkout {
+                obj["in_checkout"] = n.into();
+            }
+            if !m.unverified.is_empty() {
+                obj["unverified"] = m.unverified.clone().into();
+            }
+            obj
+        })
+        .collect();
+
+    let patterns: Vec<serde_json::Value> = report
+        .patterns
+        .iter()
+        .map(|m| {
+            let mut obj = serde_json::json!({
+                "slug": m.slug,
+                "cpu": m.cpu,
+                "sources": m.sources,
+                "comparisons": m.comparisons,
+                "arbiters": arbiters_json(&m.arbiters),
             });
             if let Some(n) = m.in_checkout {
                 obj["in_checkout"] = n.into();
@@ -298,6 +467,14 @@ pub fn render(report: &Report) -> String {
         "totals": {
             "sources": report.sources(),
             "comparisons": report.comparisons(),
+        },
+        "patterns": {
+            "note": "The pattern library, counted apart. Not every source matches its reference; the known differences are listed in verdict_corpus::patterns::KNOWN.",
+            "machines": patterns,
+            "totals": {
+                "sources": report.pattern_sources(),
+                "comparisons": report.pattern_comparisons(),
+            },
         },
     });
     let mut out = serde_json::to_string_pretty(&doc).unwrap_or_default();
@@ -337,6 +514,28 @@ pub fn render_summary(report: &Report) -> String {
         report.sources(),
         report.comparisons()
     );
+    let _ = writeln!(out, "\npattern library");
+    for m in &report.patterns {
+        let tools: Vec<&str> = m.arbiters.iter().map(|a| a.tool.as_str()).collect();
+        let _ = writeln!(
+            out,
+            "{:<32} {:>4} sources  {:>4} comparisons  {}",
+            m.slug,
+            m.sources,
+            m.comparisons,
+            tools.join(" + ")
+        );
+        for rel in &m.unverified {
+            let _ = writeln!(out, "{:<32}   no verdict: {rel}", "");
+        }
+    }
+    let _ = writeln!(
+        out,
+        "{:<32} {:>4} sources  {:>4} comparisons",
+        "total",
+        report.pattern_sources(),
+        report.pattern_comparisons()
+    );
     if !report.checkout_seen {
         let _ = writeln!(
             out,
@@ -357,9 +556,8 @@ pub fn regressions(report: &Report, committed: &str) -> Vec<String> {
         return vec!["the committed parity.json is not valid JSON".to_string()];
     };
     let mut out = Vec::new();
-    let Some(machines) = old["machines"].as_array() else {
-        return out;
-    };
+    let empty = Vec::new();
+    let machines = old["machines"].as_array().unwrap_or(&empty);
     for was in machines {
         let slug = was["slug"].as_str().unwrap_or_default();
         let before = was["sources"].as_u64().unwrap_or_default() as usize;
@@ -372,10 +570,29 @@ pub fn regressions(report: &Report, committed: &str) -> Vec<String> {
             out.push(format!("{slug}: {before} sources -> {now}"));
         }
     }
+    let patterns = old["patterns"]["machines"].as_array().unwrap_or(&empty);
+    for was in patterns {
+        let slug = was["slug"].as_str().unwrap_or_default();
+        let before = was["sources"].as_u64().unwrap_or_default() as usize;
+        let now = report
+            .patterns
+            .iter()
+            .find(|m| m.slug == slug)
+            .map_or(0, |m| m.sources);
+        if now < before {
+            out.push(format!("{slug}: {before} pattern sources -> {now}"));
+        }
+    }
     if report.unverified() > 0 {
         out.push(format!(
             "{} curriculum source(s) in the checkout have no verdict",
             report.unverified()
+        ));
+    }
+    if report.pattern_unverified() > 0 {
+        out.push(format!(
+            "{} pattern source(s) in the checkout have no verdict",
+            report.pattern_unverified()
         ));
     }
     out
@@ -475,7 +692,19 @@ fn compare_pin(pin: &str, date: &str, head: &str, head_date: &str) -> Vec<String
 
 #[cfg(test)]
 mod tests {
-    use super::{PinVerdict, compare_pin, parse_key, verify_pin};
+    use super::{PinVerdict, compare_pin, machine_of, parse_key, pattern_machine_of, verify_pin};
+
+    /// A pattern path and a curriculum path name their machine, and each is
+    /// only the kind it is: a pattern source never counts as curriculum.
+    #[test]
+    fn a_path_is_curriculum_or_pattern_never_both() {
+        let unit = "code-samples/commodore-64/assembly/game/unit-01/main.asm";
+        let pattern = "code-samples/msx/patterns/assembly/input/keys/demo.asm";
+        assert_eq!(machine_of(unit), Some("commodore-64"));
+        assert_eq!(pattern_machine_of(unit), None);
+        assert_eq!(pattern_machine_of(pattern), Some("msx"));
+        assert_eq!(machine_of(pattern), None);
+    }
 
     /// A checkout that agrees with both sidecars produces no complaint.
     #[test]

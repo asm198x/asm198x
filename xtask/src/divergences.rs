@@ -26,7 +26,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 
-use verdict_corpus::{Corpus, Outcome};
+use verdict_corpus::{Corpus, Outcome, Suite};
 
 /// One tracked difference, aggregated across every verdict that names it.
 pub struct Divergence {
@@ -56,10 +56,24 @@ pub fn collect(repo: &Path) -> BTreeMap<String, Divergence> {
             continue;
         };
         for verdict in corpus.verdicts() {
-            let Outcome::Divergence { divergence, .. } = &verdict.outcome else {
-                continue;
+            // A pattern verdict records only what the reference did; that
+            // Asm198x knowingly differs is in `verdict_corpus::patterns::KNOWN`.
+            let divergence = match &verdict.outcome {
+                Outcome::Divergence { divergence, .. } => divergence.clone(),
+                _ if verdict.suite == Suite::Pattern => {
+                    let Some(issue) = verdict
+                        .source
+                        .split_once('#')
+                        .and_then(|(path, _)| path.strip_prefix("code-samples/"))
+                        .and_then(verdict_corpus::patterns::known)
+                    else {
+                        continue;
+                    };
+                    issue.to_string()
+                }
+                _ => continue,
             };
-            let entry = out.entry(divergence.clone()).or_insert_with(|| Divergence {
+            let entry = out.entry(divergence).or_insert_with(|| Divergence {
                 cpus: BTreeSet::new(),
                 dialects: BTreeSet::new(),
                 tools: BTreeSet::new(),
