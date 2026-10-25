@@ -264,6 +264,48 @@ const PROGRAMS_DEVIATING: &[(&str, &str, Option<&str>)] = &[
         "PasmoNext reads `lab`, which only pass 1 defined, as the value pass 1 gave it",
         None,
     ),
+    // PasmoNext reads nothing after an `ELSE` or `ENDIF` it reaches while
+    // skipping lines, nor after any `ENDM`, so it drops the text there.
+    (
+        "else_skipped_junk",
+        "PasmoNext drops the text after `ELSE`",
+        None,
+    ),
+    (
+        "else_skipped_instruction",
+        "PasmoNext drops the text after `ELSE`",
+        None,
+    ),
+    (
+        "endif_skipped_junk",
+        "PasmoNext drops the text after `ENDIF`",
+        None,
+    ),
+    (
+        "endif_nested_skipped_junk",
+        "PasmoNext drops the text after `ENDIF`",
+        None,
+    ),
+    (
+        "endm_rept_junk",
+        "PasmoNext drops the text after `ENDM`",
+        None,
+    ),
+    (
+        "endm_rept_zero_junk",
+        "PasmoNext drops the text after `ENDM`",
+        None,
+    ),
+    (
+        "endm_irp_junk",
+        "PasmoNext drops the text after `ENDM`",
+        None,
+    ),
+    (
+        "endm_macro_junk",
+        "PasmoNext drops the text after `ENDM`",
+        None,
+    ),
 ];
 
 /// One measured program: its source, the files it reads, its options, and
@@ -476,6 +518,12 @@ fn messages_and_warnings_say_what_pasmonext_printed() {
     assert_eq!(
         said(" .WARNING careful now\n db 1\n"),
         vec![("careful now".to_owned(), false)]
+    );
+    // PasmoNext reads `ld b,(12h)` as `ld b,12h`, as its manual says, and
+    // warns about it, in its second pass only.
+    assert_eq!(
+        said(" ld b,(12h)\n ld b,(1)+1\n"),
+        vec![("looks like a non existent instruction".to_owned(), false)]
     );
     let error = |source: &str| {
         asm198x::assemble_pasmo_lang198x(source, true)
