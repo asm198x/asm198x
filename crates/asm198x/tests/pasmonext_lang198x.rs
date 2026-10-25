@@ -16,10 +16,7 @@ use support::verdicts::{code_samples_root, corpus_path, parse_curriculum_key, sh
 use verdict_corpus::{Corpus, Outcome};
 
 /// Verdicts the new path does not match yet, each with what it waits for.
-const NOT_YET: &[(&str, &str)] = &[
-    ("LOCAL label with a parameter", "LOCAL, in step 2 (scopes)"),
-    ("LOCAL label, invoked twice", "LOCAL, in step 2 (scopes)"),
-];
+const NOT_YET: &[(&str, &str)] = &[];
 
 /// What the new path made of `source`: its bytes, or `None` if it rejected
 /// it.
@@ -155,7 +152,13 @@ fn programs() -> Vec<Program> {
                 if let Some(file) = line.strip_prefix("+++ ") {
                     let (name, hex) = file.split_once(' ').unwrap_or((file, ""));
                     let bytes = verdict_corpus::decode_hex(hex).expect("hex");
-                    program.files = std::mem::take(&mut program.files).binary(name, bytes);
+                    // A file may be read by INCBIN or INCLUDE, so it is
+                    // offered both ways.
+                    let mut files = std::mem::take(&mut program.files);
+                    if let Ok(text) = String::from_utf8(bytes.clone()) {
+                        files = files.text(name, text);
+                    }
+                    program.files = files.binary(name, bytes);
                 } else if let Some(options) = line.strip_prefix("!!! ") {
                     program.options = options.split(' ').map(str::to_owned).collect();
                 } else if let Some(hex) = line.strip_prefix("--- bytes ") {

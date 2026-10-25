@@ -174,9 +174,9 @@ checksum = "9c225ca928528a659aeecde8a98b005d57e60cda1442c93dd4884880b6d92d3a"
 
 [[package]]
 name = "lang198x-z80-asm"
-version = "0.1.0"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "98cdefdaf19e3cda48ec359002d44153bd128e2b78ebaeb449c130c06898b5d4"
+checksum = "412e1d4b3d3bc0f0058e48e1fc094303e6006b90c75e574f08f1c832b3634e12"
 dependencies = [
  "asm198x-ir",
  "isa198x",

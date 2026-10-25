@@ -39,6 +39,22 @@ Read from its `asm.cpp` (`processfile`, `dopass`, `setequorlabel`, `setdefl`,
   over a label or `EQU`, nor they over it. A name pass 2 defines that pass 1 did
   not is an error. PasmoNext's own messages are used.
 - **A `REPT` counter** is a `DEFL` local to its repeat.
+- **Scopes, PasmoNext's `LocalLevel`s.** Every macro call, `REPT` and `IRP` is
+  a scope, as is `PROC`…`ENDP`. z80-asm reports `LOCAL`, `PROC`, `ENDP` and
+  `PUBLIC` as a scope change on the line and leaves names as written; the walk
+  keeps the scopes. From the line after a `LOCAL`, the name means a name of
+  its own, made by `genlocalname`: a counter in eight hex digits, starting
+  again each pass, so each pass gives each local the same name and no source
+  name can clash with one. The walk renames labels and every name in the
+  line's statements, and answers `DEFINED` and values through the same
+  renaming, so the engine sees the names PasmoNext's symbol file lists.
+  - A `REPT` or `IRP` is one scope for all its passes, so a local label in
+    one is defined twice. Its counter is a local of that scope too.
+  - A `PROC` left open in a macro closes with it; an `ENDP` there cannot
+    close one outside. `LOCAL` outside any scope, an unmatched `ENDP`, and a
+    `PROC` still open at the end, reported where it was written, are errors.
+  - `PUBLIC` changes no meaning. Its names are for the public symbol file,
+    which this path does not write yet.
 - **Files are opened from the folder PasmoNext runs in,** not from the folder
   of the file that includes them: the pattern library's `mistakes/` programs
   include `caller.inc` from the pattern folder above. The walk asks the loader
@@ -62,6 +78,9 @@ it does, for every program PasmoNext ran in three passes.
 - *"Move the pass loop into z80-asm, it knows the lines."* → That made z80-asm
   do layout and Asm198x do it again, and every complication of the first design
   came from the duplicate. Lang198x owns reading the source; this owns layout.
+- *"Rename `LOCAL` names in z80-asm, its expander knows the macro calls."* →
+  PasmoNext's local names hang on its symbols and its passes, which are this
+  walk's. z80-asm reports the scope change; this keeps the scopes.
 - *"Let the engine compute `EQU` and `DEFL`, it can."* → Not as PasmoNext does
   for `DEFL`, and the walk already has the answer. Fold what the walk knows.
 - *"Converge further than PasmoNext, or fill in three-pass mode by
