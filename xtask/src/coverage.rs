@@ -243,6 +243,7 @@ fn suite_name(v: &Verdict) -> &'static str {
         Suite::Probe => "probe",
         Suite::Fuzz => "fuzz",
         Suite::Curriculum => "curriculum",
+        Suite::Pattern => "pattern",
     }
 }
 

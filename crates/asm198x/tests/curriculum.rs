@@ -598,6 +598,248 @@ fn curriculum_is_byte_identical() {
     );
 }
 
+/// The pattern library, against each machine's own reference tool.
+///
+/// Every pattern source is built by the tool its machine's table entry
+/// names, from the source's own folder with its pattern folder on the include
+/// path, as the curriculum builds it with Asm198x. What the tool did is
+/// recorded, keyed on the source's whole include closure, and Asm198x's CLI
+/// is held to it. A rejection is recorded too: the reference refusing a
+/// source is a fact about it, and Asm198x must refuse it as well unless the
+/// difference is known.
+#[test]
+#[ignore = "needs the reference assemblers and the Code198x checkout; run with --ignored"]
+fn pattern_library_matches_its_reference_tools() {
+    use support::patterns::Job;
+    use verdict_corpus::patterns::{self, Tool};
+
+    let Some(root) = code198x() else {
+        eprintln!("SKIP: Code198x checkout not found next to Asm198x");
+        return;
+    };
+    let problems = patterns::table_problems(&root.join("code-samples"));
+    assert!(
+        problems.is_empty(),
+        "the pattern table disagrees with the checkout:\n  {}",
+        problems.join("\n  ")
+    );
+    let tmp = support::scratch::dir("patterns");
+    let mut recorder = support::verdicts::Recorder::new();
+    let mut fails = Vec::new();
+    let mut skipped = std::collections::BTreeSet::new();
+    let mut checked = 0usize;
+
+    for (n, source) in support::patterns::all_sources(&root).iter().enumerate() {
+        // A fresh folder for each source's outputs, so no tool is asked to
+        // create a file at a path an earlier build's file was deleted from.
+        // A folder shared into a container (Docker Desktop) can go on
+        // reporting such a path as missing, and the write fails.
+        let work = tmp.join(n.to_string());
+        if let Err(e) = fs::create_dir_all(&work) {
+            fails.push(format!("{}: {e}", work.display()));
+            continue;
+        }
+        let job = match Job::new(&root, source, &work) {
+            Ok(job) => job,
+            Err(e) => {
+                fails.push(e);
+                continue;
+            }
+        };
+        let needs: &[&str] = match job.tool {
+            Tool::Pasmo => &["pasmo"],
+            Tool::Acme => &["acme"],
+            Tool::Ca65 => &["ca65", "ld65"],
+            Tool::Lwasm => &["lwasm"],
+            Tool::Vasm => &["vasmm68k_mot"],
+            Tool::Rgbasm => &["rgbasm", "rgblink", "rgbfix"],
+        };
+        if !needs.iter().all(|t| have(t)) {
+            skipped.insert(needs.join("/"));
+            continue;
+        }
+        let outcome = match pattern_reference(&job, &root, &work) {
+            Ok(Ok(bytes)) => verdict_corpus::Outcome::Digest {
+                digest: support::verdicts::sha256_hex(&bytes),
+            },
+            Ok(Err(diagnostic)) => verdict_corpus::Outcome::Rejected { diagnostic },
+            Err(e) => {
+                fails.push(format!("{}: {e}", job.relpath));
+                continue;
+            }
+        };
+        let key = match job.key(&root) {
+            Ok(key) => key,
+            Err(e) => {
+                fails.push(e);
+                continue;
+            }
+        };
+        checked += 1;
+        let ours = job.assemble(&work);
+        if let Some(failure) = support::verdicts::judge_pattern(&job.relpath, &outcome, &ours) {
+            fails.push(failure);
+        }
+        recorder.record(
+            support::verdicts::CaseRef {
+                suite: Suite::Pattern,
+                cpu: job.tool.cpu(),
+                tool: job.tool.executable(),
+                dialect: job.tool.variant(),
+                case: job
+                    .relpath
+                    .strip_prefix("code-samples/")
+                    .unwrap_or(&job.relpath)
+                    .to_string(),
+                source: &key,
+            },
+            outcome,
+        );
+    }
+
+    let recorded = recorder.flush().expect("write the verdict corpus");
+    for tools in &skipped {
+        eprintln!("SKIP: `{tools}` not on PATH");
+    }
+    eprintln!("recorded {recorded} new pattern verdict(s); checked {checked} pattern source(s)");
+    assert!(
+        fails.is_empty(),
+        "{} pattern mismatch(es):\n  {}",
+        fails.len(),
+        fails.join("\n  ")
+    );
+    assert!(
+        checked > 0 || !skipped.is_empty(),
+        "no pattern sources found"
+    );
+}
+
+/// Build a pattern source with its reference tool, in its own folder.
+///
+/// `Ok(Ok(bytes))` is the output, `Ok(Err(message))` a deliberate rejection
+/// with the tool's last line of complaint. `Err` is not a verdict: a tool
+/// that could not start or was killed, which must never be recorded.
+fn pattern_reference(
+    job: &support::patterns::Job,
+    root: &Path,
+    tmp: &Path,
+) -> Result<Result<Vec<u8>, String>, String> {
+    use verdict_corpus::patterns::{NES_LINKER_CONFIG, Tool};
+
+    let out = tmp.join("ref-pattern.bin");
+    let obj = tmp.join("ref-pattern.o");
+    let _ = fs::remove_file(&out);
+    let _ = fs::remove_file(&obj);
+    let includes = job.include_dirs();
+    let with_includes = |cmd: &mut Command| {
+        for dir in &includes {
+            cmd.arg("-I").arg(dir);
+        }
+    };
+    let mut steps: Vec<Command> = Vec::new();
+    match job.tool {
+        Tool::Pasmo => {
+            let mut cmd = Command::new("pasmo");
+            with_includes(&mut cmd);
+            cmd.arg(&job.name).arg(&out);
+            steps.push(cmd);
+        }
+        Tool::Acme => {
+            let mut cmd = Command::new("acme");
+            cmd.args(["-f", "plain"]);
+            with_includes(&mut cmd);
+            cmd.arg("-o").arg(&out).arg(&job.name);
+            steps.push(cmd);
+        }
+        Tool::Ca65 => {
+            let mut ca = Command::new("ca65");
+            with_includes(&mut ca);
+            ca.arg(&job.name).arg("-o").arg(&obj);
+            let mut ld = Command::new("ld65");
+            ld.arg("-C")
+                .arg(root.join("code-samples").join(NES_LINKER_CONFIG))
+                .arg(&obj)
+                .arg("-o")
+                .arg(&out);
+            steps.extend([ca, ld]);
+        }
+        Tool::Lwasm => {
+            let mut cmd = Command::new("lwasm");
+            cmd.args(["--6809", "--raw"]);
+            with_includes(&mut cmd);
+            cmd.arg("-o").arg(&out).arg(&job.name);
+            steps.push(cmd);
+        }
+        Tool::Vasm => {
+            let mut cmd = Command::new("vasmm68k_mot");
+            cmd.args(["-Fhunkexe", "-kick1hunks", "-quiet"]);
+            with_includes(&mut cmd);
+            cmd.arg("-o").arg(&out).arg(&job.name);
+            steps.push(cmd);
+        }
+        Tool::Rgbasm => {
+            let mut asm = Command::new("rgbasm");
+            with_includes(&mut asm);
+            asm.arg("-o").arg(&obj).arg(&job.name);
+            let mut link = Command::new("rgblink");
+            link.arg("-t").arg("-o").arg(&out).arg(&obj);
+            let mut fix = Command::new("rgbfix");
+            fix.args(["-v", "-p", "0xFF"]).arg(&out);
+            steps.extend([asm, link, fix]);
+        }
+    }
+    for mut step in steps {
+        let output = step
+            .current_dir(&job.dir)
+            .output()
+            .map_err(|e| format!("cannot run {:?}: {e}", step.get_program()))?;
+        match output.status.code() {
+            Some(0) => {}
+            // A message naming the scratch folder would differ from run to
+            // run, and so would the verdict.
+            Some(_) => {
+                let message = support::patterns::last_line(&output)
+                    .replace(&*tmp.to_string_lossy(), "<scratch>");
+                if cannot_write_output(&message) {
+                    return Err(format!(
+                        "{:?} could not write to the scratch folder: {message}",
+                        step.get_program()
+                    ));
+                }
+                return Ok(Err(message));
+            }
+            None => {
+                return Err(format!(
+                    "{:?} was killed: {}",
+                    step.get_program(),
+                    output.status
+                ));
+            }
+        }
+    }
+    let bytes = fs::read(&out).map_err(|e| format!("the reference wrote no output: {e}"))?;
+    if job.tool == Tool::Vasm {
+        // As for the Amiga units: the loadable image, without vasm's debug
+        // symbol table, which Asm198x deliberately omits.
+        return strip_hunk_symbols(&bytes)
+            .map(Ok)
+            .ok_or_else(|| "vasm wrote a hunk file this cannot read".to_string());
+    }
+    Ok(Ok(bytes))
+}
+
+/// Whether a reference tool's complaint is that it could not write its own
+/// output or object file. That is a fact about the scratch folder, not about
+/// the source, so it must never be recorded as a rejection. Each phrase is
+/// the tool's own: ACME, ca65 and rgbasm say "Cannot open output file",
+/// pasmo "Error creating object file", and ld65 or rgblink name the scratch
+/// file they could not open.
+fn cannot_write_output(message: &str) -> bool {
+    message.contains("Cannot open output file")
+        || message.contains("Error creating object file")
+        || message.contains("<scratch>/ref-pattern")
+}
+
 /// Representative 6809 programs validated byte-for-byte against `lwasm`. Stand in
 /// for a curriculum corpus the 6809 does not yet have.
 const LWASM_PROGRAMS: &[(&str, &str)] = &[

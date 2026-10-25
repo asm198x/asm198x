@@ -209,6 +209,7 @@ fn suite_of(v: &Verdict) -> String {
         Suite::Probe => "probe",
         Suite::Fuzz => "fuzz",
         Suite::Curriculum => "curriculum",
+        Suite::Pattern => "pattern",
     }
     .to_string()
 }
