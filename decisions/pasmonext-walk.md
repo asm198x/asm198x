@@ -47,6 +47,13 @@ Read from its `asm.cpp` (`processfile`, `dopass`, `setequorlabel`, `setdefl`,
   definition. A line's label is defined before the rest is read, except on
   `ORG`, `EQU` and `DEFL` lines, which read their value first; that order
   decides which scope a name on the line belongs to.
+- **Structures and reserved names.** z80-asm reports each as a
+  `Definition`; the walk gives the values. Inside `STRUCT name`, each field
+  `name.field` is its offset, and at `ENDS`, `name` is the structure's size;
+  each `RB` or `RW` name is the reserve counter, which `RSSET` sets. Each is
+  defined as `setequorlabel` defines it and reaches the engine as an `EQU`.
+  The counter starts at 0 each pass: PasmoNext's carries over, so `RB`
+  without `RSSET` ends in a phase error, which is one of its bugs.
 - **PasmoNext's obvious bugs are fixed, not copied,** under the umbrella's
   [`reference-bugs-are-fixed-not-copied.md`](../../../decisions/reference-bugs-are-fixed-not-copied.md).
   z80-asm rejects the miscompiles and corrects the Next's `push nn`; the walk's
