@@ -112,6 +112,14 @@ RUN curl -fsSL https://sh.rustup.rs -o /tmp/rustup.sh \
     && rm /tmp/rustup.sh
 ENV PATH=/root/.cargo/bin:$PATH
 
+# --- Python -------------------------------------------------------------------
+# Some curriculum programs include a file their Makefile generates with a
+# Python script, such as the Spectrum two-word parser's vocabulary. Growth
+# runs the curriculum's own generator before arbitrating, so the image needs
+# the interpreter.
+RUN apt-get update && apt-get install -y --no-install-recommends python3 \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN mkdir -p /usr/local/share/asm198x
 COPY identities /usr/local/share/asm198x/identities
 COPY verify.sh /usr/local/bin/verify-arbiters
