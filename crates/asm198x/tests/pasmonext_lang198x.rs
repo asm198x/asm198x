@@ -221,6 +221,17 @@ const PROGRAMS_DEVIATING: &[(&str, &str, Option<&str>)] = &[
         "PasmoNext writes nothing for a string and says nothing",
         None,
     ),
+    // SAVEBIN.
+    (
+        "savebin_paren_size",
+        "PasmoNext saves nothing when the size does not start with a number or a name",
+        None,
+    ),
+    (
+        "savebin_junk",
+        "PasmoNext drops whatever follows SAVEBIN's size",
+        None,
+    ),
 ];
 
 /// One measured program: its source, the files it reads, its options, and
@@ -428,4 +439,56 @@ fn messages_and_warnings_say_what_pasmonext_printed() {
     );
     assert_eq!(error(" MESSAGE nope\n"), "Symbol 'nope' is undefined");
     assert_eq!(error(" MESSAGE \"a\" \"b\"\n"), "Error in Message format");
+}
+
+#[test]
+fn savebin_writes_what_pasmonext_wrote() {
+    // Measured on PasmoNext 0.1.3: the file each program saved. Memory
+    // stands as it is when the last pass reaches the line, over what the
+    // first pass left: bytes written further on are there, but a later
+    // overwrite is not.
+    for (source, saved) in [
+        (
+            " org 8000h\n db 1,2,3,4\n SAVEBIN \"out.bin\",8001h,2\n",
+            "0203",
+        ),
+        (
+            " SAVEBIN \"out.bin\",8000h,2\n org 8000h\n db 7,8\n",
+            "0708",
+        ),
+        (
+            " org 8000h\n db 1\n SAVEBIN \"out.bin\",8000h,3\n",
+            "010000",
+        ),
+        (" org 0\n db 5\n SAVEBIN \"out.bin\",0,0\n", ""),
+        (
+            " SAVEBIN \"out.bin\",start,2\nstart equ 0\n db 9,9\n",
+            "0909",
+        ),
+        (
+            " org 0\n db 1,2\n SAVEBIN \"out.bin\",0,2\n org 0\n db 3,4\n",
+            "0102",
+        ),
+        ("here SAVEBIN \"out.bin\",0,1\n", "00"),
+    ] {
+        let result = asm198x::assemble_pasmo_lang198x(source, true).expect("assembles");
+        let files: Vec<(String, String)> = result
+            .artifacts
+            .iter()
+            .map(|a| {
+                (
+                    a.name.clone(),
+                    a.bytes.iter().map(|b| format!("{b:02x}")).collect(),
+                )
+            })
+            .collect();
+        assert_eq!(
+            files,
+            [("out.bin".to_owned(), saved.to_owned())],
+            "{source}"
+        );
+    }
+    let range = asm198x::assemble_pasmo_lang198x(" SAVEBIN \"out.bin\",0FFFFh,2\n", true)
+        .expect_err("out of range");
+    assert_eq!(range.message, "Error SAVEBIN out of range");
 }

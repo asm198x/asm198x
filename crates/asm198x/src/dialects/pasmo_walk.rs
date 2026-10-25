@@ -131,6 +131,18 @@ enum Def {
 struct Symbol {
     value: i64,
     def: Def,
+    /// The bank its value's 8K slot held when it was defined, for `??`.
+    bank: i64,
+}
+
+/// The bank each 8K slot holds before any `SETBANK`, as PasmoNext sets them
+/// at the start of every pass: the Spectrum Next's ROM, then banks 10, 11, 4,
+/// 5, 0 and 1. PasmoNext writes 256 for the ROM.
+const DEFAULT_BANKS: [i64; 8] = [256, 256, 10, 11, 4, 5, 0, 1];
+
+/// The 8K slot `address` is in (`GetBank`).
+fn slot(address: i64) -> usize {
+    ((address >> 13) & 7) as usize
 }
 
 struct Walk {
@@ -156,6 +168,8 @@ struct Walk {
     structure: Option<(String, i64)>,
     /// The counter `RB` and `RW` reserve from, which `RSSET` sets.
     reserve: i64,
+    /// The bank each 8K slot holds, which `SETBANK` sets.
+    banks: [i64; 8],
 }
 
 /// What stops a pass: a located error, or a program that needs PasmoNext's
@@ -178,6 +192,7 @@ impl Walk {
                 let symbol = Symbol {
                     value: *value,
                     def: Def::Predefined,
+                    bank: DEFAULT_BANKS[slot(*value)],
                 };
                 (name.clone(), symbol)
             })
@@ -197,6 +212,7 @@ impl Walk {
             predefined,
             structure: None,
             reserve: 0,
+            banks: DEFAULT_BANKS,
         })
     }
 
@@ -228,6 +244,7 @@ impl Walk {
         // That is one of its bugs: each pass starts the counter at 0.
         self.reserve = 0;
         self.structure = None;
+        self.banks = DEFAULT_BANKS;
         self.symbols.retain(|_, symbol| symbol.def != Def::Defl);
         let mut expander = Expander::new(program.clone(), self.profile)
             .map_err(|_| AsmError::new(0, "the program is too long to parse"))?;
@@ -320,9 +337,8 @@ impl Walk {
                     .definition(definition)
                     .map_err(|message| AsmError::at(at.clone(), message))?;
                 if let Some((statements, _)) = out.as_deref_mut() {
-                    for (name, value) in defined {
-                        let op = Some(Operation::Equ(Expr::Num(value)));
-                        statements.push(statement(&at, Some(name), op));
+                    for (name, op) in defined {
+                        statements.push(statement(&at, name, Some(op)));
                     }
                 }
             }
@@ -386,10 +402,13 @@ impl Walk {
         }
     }
 
-    /// A structure, `RB`, `RW` or `RSSET` line (`parseSTRUCT`, `parseRB`,
-    /// `parseRW`, `parseRSSET`). Returns the names it defines, each as
-    /// `setequorlabel` defines it, with their values.
-    fn definition(&mut self, definition: Definition) -> Result<Vec<(String, i64)>, String> {
+    /// A structure, `RB`, `RW`, `RSSET`, `SETBANK` or `SAVEBIN` line. Returns
+    /// what the engine is told: each name defined, as `setequorlabel` or
+    /// `setdefl` defines it, with its value, or a file to save.
+    fn definition(
+        &mut self,
+        definition: Definition,
+    ) -> Result<Vec<(Option<String>, Operation)>, String> {
         let (name, value) = match definition {
             Definition::Struct(name) => {
                 self.scopes.macro_defined(&name)?;
@@ -415,6 +434,42 @@ impl Walk {
             }
             // Where a snapshot's stack starts; this path writes no snapshot.
             Definition::Stack(_) => return Ok(Vec::new()),
+            // `parseBANK`: the slot holds the bank from here, and PasmoNext
+            // records it in two `DEFL` names the source may read.
+            Definition::Bank { address, bank } => {
+                let address = self.read(&self.resolved(address))? & 0xFFFF;
+                let bank = self.read(&self.resolved(bank))? & 0xFFFF;
+                self.banks[slot(address)] = bank;
+                let mut set = Vec::new();
+                for name in [
+                    format!("CURRENTBANK{address:04X}"),
+                    "CURRENTBANK".to_owned(),
+                ] {
+                    self.scopes.defining(&name);
+                    let name = self.scopes.resolve(name);
+                    self.define_defl(&name, bank)?;
+                    set.push((Some(name), Operation::Set(Expr::Num(bank))));
+                }
+                return Ok(set);
+            }
+            // `parseSAVEBIN`, on the last pass only, where every name is
+            // defined.
+            Definition::SaveBinary { file, start, size } => {
+                if self.pass < 2 {
+                    return Ok(Vec::new());
+                }
+                let start = self.read(&self.resolved(start))?;
+                let size = self.read(&self.resolved(size))?;
+                if !(0..=0xFFFF).contains(&start) || start + size > 0x1_0000 {
+                    return Err("Error SAVEBIN out of range".into());
+                }
+                let save = Operation::SaveImage {
+                    name: file,
+                    start: Expr::Num(start),
+                    length: Expr::Num(size),
+                };
+                return Ok(vec![(None, save)]);
+            }
             other => {
                 return Err(format!(
                     "{other:?} is not assembled yet (Lang198x's PasmoNext front end)"
@@ -425,7 +480,12 @@ impl Walk {
         let name = self.scopes.resolve(name);
         let value = value & 0xFFFF;
         self.define(&name, value)?;
-        Ok(vec![(name, value)])
+        Ok(vec![(Some(name), Operation::Equ(Expr::Num(value)))])
+    }
+
+    /// `expr` with each name the one it is assembled under.
+    fn resolved(&self, expr: Expr) -> Expr {
+        map_sym_expr(expr, &mut |name| Expr::Sym(self.scopes.resolve(name)))
     }
 
     /// A `MESSAGE` line's text (`parseMESSAGE`): each value in four hex
@@ -590,7 +650,9 @@ impl Walk {
                 old.value
             ));
         }
-        self.symbols.insert(name.to_owned(), Symbol { value, def });
+        let bank = self.banks[slot(value)];
+        self.symbols
+            .insert(name.to_owned(), Symbol { value, def, bank });
         Ok(())
     }
 
@@ -607,6 +669,7 @@ impl Walk {
             Symbol {
                 value,
                 def: Def::Defl,
+                bank: self.banks[slot(value)],
             },
         );
         Ok(())
@@ -670,6 +733,16 @@ impl Known for Walk {
 
     fn pc(&self) -> Option<i64> {
         Some(self.pc)
+    }
+
+    /// `getvaluebank`: the bank recorded for the name, or 0 for one not yet
+    /// defined in pass 1, and an error after.
+    fn bank(&self, name: &str) -> Option<i64> {
+        match self.symbols.get(&self.scopes.resolve(name.to_owned())) {
+            Some(symbol) => Some(symbol.bank),
+            None if self.pass == 1 => Some(0),
+            None => None,
+        }
     }
 }
 

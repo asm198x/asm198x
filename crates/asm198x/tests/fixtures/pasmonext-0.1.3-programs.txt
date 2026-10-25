@@ -2405,3 +2405,300 @@ mm MACRO vv
  MESSAGE "once"
 --- bytes 
 --- symbols
+=== getbank_default_slots
+aa equ 0
+bb equ 4000h
+cc equ 8000h
+dd equ 0C000h
+ee equ 0E000h
+ff equ 2000h
+ db ?? aa, ?? bb, ?? cc, ?? dd, ?? ee, ?? ff
+--- bytes 000a04000100
+--- symbols
+aa 0000
+bb 4000
+cc 8000
+dd c000
+ee e000
+ff 2000
+=== setbank_changes_slot
+ SETBANK 0C000h,20
+ org 0C000h
+aa: nop
+ db ?? aa
+--- bytes 0014
+--- symbols
+aa c000
+=== setbank_after_definition
+ org 0C000h
+aa: nop
+ SETBANK 0C000h,20
+bb: nop
+ db ?? aa, ?? bb
+--- bytes 00000014
+--- symbols
+aa c000
+bb c001
+=== setbank_any_address_in_slot
+ SETBANK 0D234h,7
+ org 0C000h
+aa: nop
+ db ?? aa
+--- bytes 0007
+--- symbols
+aa c000
+=== getbank_of_equ
+ SETBANK 0C000h,33
+vv equ 0C123h
+ db ?? vv
+--- bytes 21
+--- symbols
+vv c123
+=== getbank_forward
+ db ?? later
+later equ 8000h
+--- bytes 04
+--- symbols
+later 8000
+=== getbank_undefined
+ db ?? nope
+--- rejected Symbol 'nope' is undefined
+=== getbank_number
+ db ?? 5
+--- rejected exit 1
+=== getbank_space
+ org 4000h
+aa: nop
+ db ?? aa
+--- bytes 000a
+--- symbols
+aa 4000
+=== getbank_in_expression
+ org 4000h
+aa: nop
+ db ?? aa+1
+--- rejected Expected ',' but '+' found
+=== currentbank_symbols
+ SETBANK 0C000h,20
+ db CURRENTBANK, CURRENTBANKC000
+--- bytes 1414
+--- symbols
+=== currentbank_lowercase_address
+ SETBANK 0c000h,21
+ db CURRENTBANKC000
+--- bytes 15
+--- symbols
+=== currentbank_before_setbank
+ db CURRENTBANK
+--- rejected Symbol 'CURRENTBANK' is undefined
+=== setbank_forward_value
+ SETBANK 0C000h,later
+later equ 9
+ org 0C000h
+aa: nop
+ db ?? aa
+--- bytes 0009
+--- symbols
+aa c000
+later 0009
+=== setbank_expression
+ SETBANK 0C000h+0,5
+ org 0C000h
+aa: nop
+ db ?? aa
+--- bytes 0005
+--- symbols
+aa c000
+=== setbank_paren
+ SETBANK (0C000h),5
+--- rejected exit 1
+=== setbank_one_operand
+ SETBANK 0C000h
+--- rejected exit 1
+=== setbank_junk
+ SETBANK 0C000h,5 junk
+--- rejected exit 1
+=== setbank_label
+here SETBANK 0C000h,5
+ dw here
+--- bytes 0000
+--- symbols
+here 0000
+=== setbank_resets_each_pass
+ org 0C000h
+aa: nop
+ db ?? aa
+ SETBANK 0C000h,40
+--- bytes 0000
+--- symbols
+aa c000
+=== savebin_basic
+ org 8000h
+ db 1,2,3,4
+ SAVEBIN "out.bin",8001h,2
+--- bytes 01020304
+--- symbols
+=== savebin_forward_bytes
+ SAVEBIN "out.bin",8000h,2
+ org 8000h
+ db 7,8
+--- bytes 0708
+--- symbols
+=== savebin_unwritten
+ org 8000h
+ db 1
+ SAVEBIN "out.bin",8000h,3
+--- bytes 01
+--- symbols
+=== savebin_unquoted
+ org 0
+ db 5
+ SAVEBIN out.bin,0,1
+--- rejected Missing filename
+=== savebin_zero_size
+ org 0
+ db 5
+ SAVEBIN "out.bin",0,0
+--- bytes 05
+--- symbols
+=== savebin_range
+ SAVEBIN "out.bin",0FFFFh,2
+--- rejected exit 1
+=== savebin_no_size
+ SAVEBIN "out.bin",0
+--- rejected exit 1
+=== savebin_paren_size
+ org 0
+ db 1,2
+ SAVEBIN "out.bin",0,(2)
+--- bytes 0102
+--- symbols
+=== savebin_forward_symbol
+ SAVEBIN "out.bin",start,2
+start equ 0
+ db 9,9
+--- bytes 0909
+--- symbols
+start 0000
+=== savebin_overwritten_later
+ org 0
+ db 1,2
+ SAVEBIN "out.bin",0,2
+ org 0
+ db 3,4
+--- bytes 0304
+--- symbols
+=== savebin_label
+here SAVEBIN "out.bin",0,1
+--- bytes 
+--- symbols
+here 0000
+=== savebin_junk
+ org 0
+ db 1
+ SAVEBIN "out.bin",0,1 junk
+--- bytes 01
+--- symbols
+=== getbank_name_with_question_marks
+??aa equ 3
+ db ??aa
+--- bytes 03
+--- symbols
+??aa 0003
+=== getbank_paren
+ org 4000h
+aa: nop
+ db ?? (aa)
+--- rejected Bank Value expected but '('found
+=== getbank_dollar
+ org 4000h
+ db ?? $
+--- rejected Bank Value expected but '$'found
+=== getbank_slot_by_value_not_pc
+ org 0
+vv equ 4000h
+ db ?? vv
+--- bytes 0a
+--- symbols
+vv 4000
+=== getbank_local
+ org 4000h
+ PROC
+ LOCAL ll
+ll: nop
+ db ?? ll
+ ENDP
+--- bytes 000a
+--- symbols
+00000000 4000
+=== getbank_defl
+ SETBANK 0C000h,9
+dd defl 0C000h
+ db ?? dd
+
+--- bytes 09
+--- symbols
+=== getbank_in_parens
+ org 4000h
+aa: nop
+ db (?? aa)+1
+--- bytes 000b
+--- symbols
+aa 4000
+=== getbank_in_ld
+ org 4000h
+aa: nop
+ ld a,?? aa
+--- bytes 003e0a
+--- symbols
+aa 4000
+=== getbank_in_nextreg
+ org 4000h
+aa: nop
+ nextreg 50h,?? aa
+--- bytes 00ed91500a
+--- symbols
+aa 4000
+=== getbank_in_nextreg_undefined
+ nextreg 50h,?? later
+later equ 4000h
+--- bytes ed91500a
+--- symbols
+later 4000
+=== getbank_in_dw
+ org 4000h
+aa: nop
+ dw ?? aa
+--- bytes 000a00
+--- symbols
+aa 4000
+=== getbank_in_if
+ org 4000h
+aa: nop
+ IF ?? aa
+ db 1
+ ENDIF
+--- bytes 0001
+--- symbols
+aa 4000
+=== getbank_in_org
+aa equ 4000h
+ org ?? aa
+ db 1
+--- bytes 01
+--- symbols
+aa 4000
+=== getbank_negated
+ org 4000h
+aa: nop
+ db -?? aa
+--- rejected exit 1
+=== getbank_nocase
+!!! --nocase
+ org 4000h
+Aa: nop
+ db ?? aa
+
+--- bytes 000a
+--- symbols
+AA 4000

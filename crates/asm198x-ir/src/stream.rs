@@ -427,6 +427,17 @@ pub enum Operation {
         start: Expr,
         length: Option<Expr>,
     },
+    /// Write a span of the flat image to a named file — PasmoNext's
+    /// `SAVEBIN`. Each address holds the last byte written there at or before
+    /// this statement, or else the last byte written there anywhere, or else
+    /// zero: PasmoNext's memory as it stands when its last pass reaches the
+    /// line, over what its first pass left. `length` bytes are written, none
+    /// for zero.
+    SaveImage {
+        name: String,
+        start: Expr,
+        length: Expr,
+    },
     /// Write a span of the address space as a tape image — sjasmplus's
     /// `SAVETAP`. Resolved with [`Operation::SaveRaw`] and under the same
     /// rule: the span has to be one this source assembled.
@@ -806,6 +817,7 @@ pub fn next_pc(
         | Operation::Set(_)
         | Operation::DefineSymbols(_)
         | Operation::SaveRaw { .. }
+        | Operation::SaveImage { .. }
         | Operation::SaveNex(_)
         | Operation::SaveTape { .. }
         | Operation::Device(_)
