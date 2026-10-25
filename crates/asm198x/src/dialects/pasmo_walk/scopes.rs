@@ -174,7 +174,8 @@ impl Scopes {
         Ok(())
     }
 
-    /// A macro named `name` is being defined (`parseMACRO`).
+    /// A macro or a structure named `name` is being defined (`parseMACRO`,
+    /// `parseSTRUCT`).
     pub(super) fn macro_defined(&self, name: &str) -> Result<(), String> {
         self.end_automatic();
         if self.is_automatic(name) {

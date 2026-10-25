@@ -12,7 +12,7 @@ use std::collections::HashMap;
 
 use lang198x_z80_asm::ast::{Expr as SourceExpr, Statement as SourceStatement};
 use lang198x_z80_asm::expand::{ActiveLine, Block, Expander, Host, Program};
-use lang198x_z80_asm::lower::{self, Cpu, Known, Scope};
+use lang198x_z80_asm::lower::{self, Cpu, Definition, Known, Scope};
 use lang198x_z80_asm::syntax::{self, DiagnosticKind, TextId};
 use lang198x_z80_asm::{Profile, predefine};
 
@@ -150,6 +150,10 @@ struct Walk {
     scopes: Scopes,
     /// The names `--equ` defines, with their values, in order.
     predefined: Vec<(String, i64)>,
+    /// The open `STRUCT`'s name and the offset its next field takes.
+    structure: Option<(String, i64)>,
+    /// The counter `RB` and `RW` reserve from, which `RSSET` sets.
+    reserve: i64,
 }
 
 /// What stops a pass: a located error, or a program that needs PasmoNext's
@@ -189,6 +193,8 @@ impl Walk {
             counters: Vec::new(),
             scopes: Scopes::new(options.automatic_locals),
             predefined,
+            structure: None,
+            reserve: 0,
         })
     }
 
@@ -215,6 +221,11 @@ impl Walk {
     ) -> Result<(), Stop> {
         self.pc = 0;
         self.scopes.reset();
+        // PasmoNext never resets its reserve counter, so a pass starts where
+        // the last left off and `RB` without `RSSET` ends in a phase error.
+        // That is one of its bugs: each pass starts the counter at 0.
+        self.reserve = 0;
+        self.structure = None;
         self.symbols.retain(|_, symbol| symbol.def != Def::Defl);
         let mut expander = Expander::new(program.clone(), self.profile)
             .map_err(|_| AsmError::new(0, "the program is too long to parse"))?;
@@ -302,6 +313,17 @@ impl Walk {
                 self.scope(scope, &at)
                     .map_err(|message| AsmError::at(at.clone(), message))?;
             }
+            if let Some(definition) = lowered.definition {
+                let defined = self
+                    .definition(definition)
+                    .map_err(|message| AsmError::at(at.clone(), message))?;
+                if let Some((statements, _)) = out.as_deref_mut() {
+                    for (name, value) in defined {
+                        let op = Some(Operation::Equ(Expr::Num(value)));
+                        statements.push(statement(&at, Some(name), op));
+                    }
+                }
+            }
             if let Some((_, warnings)) = out.as_deref_mut() {
                 for message in messages {
                     let mut warning = Warning::new(at.line as usize, message);
@@ -337,6 +359,48 @@ impl Walk {
                 "{other:?} is not assembled yet (Lang198x's PasmoNext front end)"
             )),
         }
+    }
+
+    /// A structure, `RB`, `RW` or `RSSET` line (`parseSTRUCT`, `parseRB`,
+    /// `parseRW`, `parseRSSET`). Returns the names it defines, each as
+    /// `setequorlabel` defines it, with their values.
+    fn definition(&mut self, definition: Definition) -> Result<Vec<(String, i64)>, String> {
+        let (name, value) = match definition {
+            Definition::Struct(name) => {
+                self.scopes.macro_defined(&name)?;
+                self.structure = Some((name, 0));
+                return Ok(Vec::new());
+            }
+            Definition::Field { name, size } => {
+                let (structure, offset) =
+                    self.structure.as_mut().ok_or("a field outside of STRUCT")?;
+                let field = (format!("{structure}.{name}"), *offset);
+                *offset += size;
+                field
+            }
+            Definition::EndStruct => self.structure.take().ok_or("ENDS outside of STRUCT")?,
+            Definition::Reserve { name, size } => {
+                let value = self.reserve;
+                self.reserve += size;
+                (name, value)
+            }
+            Definition::ReserveFrom(value) => {
+                self.reserve = value;
+                return Ok(Vec::new());
+            }
+            // Where a snapshot's stack starts; this path writes no snapshot.
+            Definition::Stack(_) => return Ok(Vec::new()),
+            other => {
+                return Err(format!(
+                    "{other:?} is not assembled yet (Lang198x's PasmoNext front end)"
+                ));
+            }
+        };
+        self.scopes.defining(&name);
+        let name = self.scopes.resolve(name);
+        let value = value & 0xFFFF;
+        self.define(&name, value)?;
+        Ok(vec![(name, value)])
     }
 
     /// Stops at the expander's first problem, or one found while it ran.

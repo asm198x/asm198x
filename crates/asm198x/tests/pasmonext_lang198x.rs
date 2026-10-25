@@ -147,6 +147,54 @@ const PROGRAMS_DEVIATING: &[(&str, &str, Option<&str>)] = &[
         "PasmoNext reads `ab$c` as `ac`, so `jp ac` reaches it",
         None,
     ),
+    // The reserve counter `RB` and `RW` take from.
+    (
+        "rb_without_rsset",
+        "PasmoNext never resets the counter between passes, so pass 2 gives \
+         `aa` a new value and ends in a phase error",
+        Some("0001"),
+    ),
+    (
+        "rsset_symbol",
+        "PasmoNext reads a name after RSSET as 0",
+        None,
+    ),
+    (
+        "rsset_expression",
+        "PasmoNext reads `2+3` after RSSET as 2",
+        None,
+    ),
+    (
+        "rsset_junk_after",
+        "PasmoNext drops whatever follows RSSET's number",
+        None,
+    ),
+    (
+        "stack_junk_after",
+        "PasmoNext drops whatever follows STACK's value",
+        None,
+    ),
+    // Structures.
+    (
+        "struct_ends_junk",
+        "PasmoNext drops whatever follows ENDS",
+        None,
+    ),
+    (
+        "struct_name_junk",
+        "PasmoNext drops whatever follows STRUCT's name",
+        None,
+    ),
+    (
+        "struct_db_trailing_comma",
+        "PasmoNext counts the missing item after `db 1,` as a byte",
+        None,
+    ),
+    (
+        "struct_db_no_items",
+        "PasmoNext counts `fa db`, with no item, as a byte",
+        None,
+    ),
 ];
 
 /// One measured program: its source, the files it reads, its options, and
