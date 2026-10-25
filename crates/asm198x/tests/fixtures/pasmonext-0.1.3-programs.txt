@@ -1118,3 +1118,436 @@ bb: nop
 --- symbols
 00000000 0003
 bb 0004
+=== nocase_label_any_case
+!!! --nocase
+Start: nop
+ jp start
+ jp START
+--- bytes 00c30000c30000
+--- symbols
+START 0000
+=== nocase_off_label_case_matters
+Start: nop
+ jp start
+--- rejected exit 1
+=== nocase_twice_defined
+!!! --nocase
+abc: nop
+ABC: nop
+--- rejected Invalid definition, previously defined as EQU or label
+=== nocase_macro_name
+!!! --nocase
+Mac MACRO
+ nop
+ ENDM
+ mac
+ MAC
+--- bytes 0000
+--- symbols
+=== nocase_macro_param
+!!! --nocase
+mm MACRO Val
+ db val
+ db VAL
+ ENDM
+ mm 7
+--- bytes 0707
+--- symbols
+=== nocase_off_macro_param_case
+mm MACRO Val
+ db val
+ ENDM
+ mm 7
+--- rejected expanding macro on line 4 of file t.asm
+=== nocase_local
+!!! --nocase
+ PROC
+ LOCAL Aa
+aa: db 1
+ dw AA
+ ENDP
+--- bytes 010000
+--- symbols
+00000000 0000
+=== nocase_defined
+!!! --nocase
+xx equ 1
+ IF defined XX
+ db 1
+ ENDIF
+--- bytes 01
+--- symbols
+XX 0001
+=== nocase_string_kept
+!!! --nocase
+ db "aB"
+--- bytes 6142
+--- symbols
+=== nocase_rept_counter
+!!! --nocase
+ REPT 2, Cc
+ db cc
+ ENDM
+--- bytes 0001
+--- symbols
+=== nocase_irp_param
+!!! --nocase
+ IRP Pp, 1, 2
+ db pp
+ ENDM
+--- bytes 0102
+--- symbols
+=== nocase_dollar_in_name
+!!! --nocase
+a$b: nop
+ jp AB
+--- bytes 00c30000
+--- symbols
+AB 0000
+=== equ_default_value
+!!! --equ flag
+ dw flag
+--- bytes ffff
+--- symbols
+=== equ_value
+!!! --equ size=10
+ db size
+--- bytes 0a
+--- symbols
+=== equ_hex_value
+!!! --equ size=0FFh
+ db size
+--- bytes ff
+--- symbols
+=== equ_two
+!!! --equ aa=1 --equ bb=2
+ db aa, bb
+--- bytes 0102
+--- symbols
+=== equ_redefined_by_source
+!!! --equ aa=1
+aa equ 2
+ db aa
+--- rejected Can't redefine, is predefined
+=== equ_redefined_by_defl
+!!! --equ aa=1
+aa defl 2
+ db aa
+--- rejected Invalid definition, previously defined as EQU or label
+=== equ_defined_test
+!!! --equ dbg
+ IF defined dbg
+ db 1
+ ELSE
+ db 2
+ ENDIF
+--- bytes 01
+--- symbols
+=== equ_not_given_defined_test
+ IF defined dbg
+ db 1
+ ELSE
+ db 2
+ ENDIF
+--- bytes 02
+--- symbols
+=== equ_expression_rejected
+!!! --equ aa=1+1
+ db aa
+--- rejected Invalid value for predefined symbol
+=== equ_bad_name
+!!! --equ 5=1
+ nop
+--- rejected Can't predefine invalid identifier
+=== equ_bad_syntax
+!!! --equ aa:1
+ nop
+--- rejected Syntax error in predefined symbol
+=== equ_short_option
+!!! -E aa=3
+ db aa
+--- bytes 03
+--- symbols
+=== equ_with_nocase
+!!! --nocase --equ Aa=3
+ db aa
+--- bytes 03
+--- symbols
+=== equ_nocase_after
+!!! --equ Aa=3 --nocase
+ db aa
+--- bytes 03
+--- symbols
+=== equ_used_in_org
+!!! --equ base=100h
+ org base
+ db 1
+--- bytes 01
+--- symbols
+=== equ_local_shadows
+!!! --equ aa=1
+ PROC
+ LOCAL aa
+aa equ 5
+ db aa
+ ENDP
+ db aa
+--- bytes 0501
+--- symbols
+00000000 0005
+=== alocal_two_routines
+!!! --alocal
+first: ld b,2
+_loop: djnz _loop
+ ret
+second: ld b,3
+_loop: djnz _loop
+ ret
+--- bytes 060210fec9060310fec9
+--- symbols
+00000000 0002
+00000001 0007
+first 0000
+second 0005
+=== alocal_off_duplicate
+first: nop
+_loop: nop
+second: nop
+_loop: nop
+--- rejected Invalid definition, previously defined as EQU or label
+=== alocal_forward_reference
+!!! --alocal
+start: jr _done
+ nop
+_done: ret
+--- bytes 180100c9
+--- symbols
+00000000 0003
+start 0000
+=== alocal_reference_before_any_label
+!!! --alocal
+ jr _x
+_x: nop
+--- bytes 180000
+--- symbols
+00000000 0002
+=== alocal_at_sign
+!!! --alocal
+aa: nop
+@x: jp @x
+bb: nop
+@x: jp @x
+--- bytes 00c3010000c30500
+--- symbols
+00000000 0001
+00000001 0005
+aa 0000
+bb 0004
+=== alocal_used_after_next_label
+!!! --alocal
+aa: nop
+_x: nop
+bb: jp _x
+--- rejected exit 1
+=== alocal_equ_name_ends_level
+!!! --alocal
+aa: nop
+_x: nop
+kk equ 5
+ jp _x
+--- rejected Symbol '_x' is undefined
+=== alocal_equ_value_then_label
+!!! --alocal
+aa: nop
+_x: nop
+kk equ _x
+ db kk
+--- bytes 000001
+--- symbols
+00000000 0001
+aa 0000
+kk 0001
+=== alocal_defl_ends_level
+!!! --alocal
+aa: nop
+_x: nop
+kk defl 1
+ jp _x
+--- rejected exit 1
+=== alocal_auto_equ
+!!! --alocal
+aa: nop
+_k equ 7
+ db _k
+bb: nop
+_k equ 8
+ db _k
+--- bytes 00070008
+--- symbols
+00000000 0007
+00000001 0008
+aa 0000
+bb 0002
+=== alocal_label_then_operand
+!!! --alocal
+aa: nop
+_n equ 2
+bb: ds _n
+--- rejected Symbol '_n' is undefined
+=== alocal_local_directive_ends
+!!! --alocal
+ PROC
+_x: nop
+ LOCAL yy
+ jp _x
+ ENDP
+--- rejected exit 1
+=== alocal_local_of_auto_name
+!!! --alocal
+ PROC
+ LOCAL _x
+ ENDP
+--- rejected exit 1
+=== alocal_public_of_auto_name
+!!! --alocal
+ PUBLIC _x
+_x: nop
+--- rejected Invalid use of name in autolocal mode
+=== alocal_proc_ends
+!!! --alocal
+aa: nop
+_x: nop
+ PROC
+ jp _x
+ ENDP
+--- rejected exit 1
+=== alocal_endp_ends
+!!! --alocal
+ PROC
+_x: nop
+ ENDP
+ jp _x
+--- rejected Symbol '_x' is undefined
+=== alocal_macro_definition_ends
+!!! --alocal
+aa: nop
+_x: nop
+mm MACRO
+ nop
+ ENDM
+ jp _x
+--- rejected exit 1
+=== alocal_macro_named_auto
+!!! --alocal
+_mm MACRO
+ nop
+ ENDM
+--- rejected Invalid use of name in autolocal mode
+=== alocal_in_macro_body
+!!! --alocal
+mm MACRO
+_l: djnz _l
+ ENDM
+ mm
+ mm
+--- bytes 10fe10fe
+--- symbols
+00000000 0000
+00000001 0002
+=== alocal_macro_call_keeps_outer
+!!! --alocal
+mm MACRO
+ nop
+ ENDM
+aa: nop
+_x: nop
+ mm
+ jp _x
+--- bytes 000000c30100
+--- symbols
+00000000 0001
+aa 0000
+=== alocal_defined_test
+!!! --alocal
+aa: nop
+_x: nop
+ IF defined _x
+ db 1
+ ENDIF
+bb: nop
+ IF defined _x
+ db 2
+ ENDIF
+--- bytes 00000100
+--- symbols
+00000000 0001
+aa 0000
+bb 0003
+=== alocal_rept_counter_auto
+!!! --alocal
+ REPT 2, _c
+ db _c
+ ENDM
+--- rejected exit 1
+=== alocal_end_of_program
+!!! --alocal
+aa: nop
+_x: nop
+--- bytes 0000
+--- symbols
+00000000 0001
+aa 0000
+=== alocal_auto_and_local_mix
+!!! --alocal
+ PROC
+ LOCAL kk
+kk: nop
+_x: jp kk
+ ENDP
+--- bytes 00c30000
+--- symbols
+00000000 0000
+00000001 0001
+=== alocal_label_only_line
+!!! --alocal
+aa:
+_x: nop
+bb:
+ jp _x
+--- rejected exit 1
+=== alocal_org_label
+!!! --alocal
+aa: nop
+_x: nop
+bb org 10h
+ jp _x
+--- rejected exit 1
+=== alocal_with_nocase
+!!! --alocal --nocase
+aa: nop
+_X: nop
+ jp _x
+--- bytes 0000c30100
+--- symbols
+00000000 0001
+AA 0000
+=== name_dollar_ignored
+a$b: nop
+ jp ab
+--- bytes 00c30000
+--- symbols
+ab 0000
+=== name_dollar_trailing
+ab$: nop
+ jp ab
+--- rejected Symbol 'ab' is undefined
+=== name_dollar_inside_read_as_manual
+ab$c: nop
+ jp abc
+--- rejected exit 1
+=== name_dollar_inside_pasmonext_reading
+ab$c: nop
+ jp ac
+--- bytes 00c30000
+--- symbols
+ac 0000

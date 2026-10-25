@@ -1233,7 +1233,7 @@ pub fn assemble_pasmo(source: &str) -> Result<AssemblyResult, AsmError> {
         source,
         &dialects::Pasmo {
             z80n: false,
-            lang198x: false,
+            lang198x: None,
         },
     )
     .map(AssemblyResult::from)
@@ -1251,7 +1251,7 @@ pub fn assemble_pasmonext(source: &str) -> Result<AssemblyResult, AsmError> {
         source,
         &dialects::Pasmo {
             z80n: true,
-            lang198x: false,
+            lang198x: None,
         },
     )
     .map(AssemblyResult::from)
@@ -1274,7 +1274,7 @@ pub fn assemble_pasmo_lang198x(source: &str, z80n: bool) -> Result<AssemblyResul
         source,
         &dialects::Pasmo {
             z80n,
-            lang198x: true,
+            lang198x: Some(dialects::pasmo_walk::Options::default()),
         },
     )
     .map(AssemblyResult::from)
@@ -1292,10 +1292,39 @@ pub fn assemble_pasmo_lang198x_files(
     loader: &dyn source::SourceLoader,
     z80n: bool,
 ) -> Result<AssemblyResult, MultiFileError> {
+    assemble_pasmo_lang198x_files_with(
+        source,
+        input_path,
+        loader,
+        z80n,
+        &PasmoNextOptions::default(),
+    )
+}
+
+/// PasmoNext 0.1.3's options that change what its source means, for
+/// [`assemble_pasmo_lang198x_files_with`]: `--nocase`, `--alocal` and
+/// `--equ`.
+///
+/// Not a stable interface, as [`assemble_pasmo_lang198x`].
+#[doc(hidden)]
+pub use dialects::pasmo_walk::Options as PasmoNextOptions;
+
+/// As [`assemble_pasmo_lang198x_files`], with PasmoNext's `options`.
+///
+/// # Errors
+/// As [`assemble_pasmo_files`], including an `--equ` text PasmoNext refuses.
+#[doc(hidden)]
+pub fn assemble_pasmo_lang198x_files_with(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+    z80n: bool,
+    options: &PasmoNextOptions,
+) -> Result<AssemblyResult, MultiFileError> {
     assemble_files(
         &dialects::Pasmo {
             z80n,
-            lang198x: true,
+            lang198x: Some(options.clone()),
         },
         source,
         input_path,
@@ -1430,7 +1459,7 @@ pub fn assemble_pasmo_files(
     assemble_files(
         &dialects::Pasmo {
             z80n: false,
-            lang198x: false,
+            lang198x: None,
         },
         source,
         input_path,
@@ -1451,7 +1480,7 @@ pub fn assemble_pasmonext_files(
     assemble_files(
         &dialects::Pasmo {
             z80n: true,
-            lang198x: false,
+            lang198x: None,
         },
         source,
         input_path,
@@ -1501,7 +1530,7 @@ fn assemble_pasmo_defined(
     assemble_mapped_files(
         &dialects::Pasmo {
             z80n,
-            lang198x: false,
+            lang198x: None,
         },
         map,
         loader,
@@ -1528,7 +1557,7 @@ pub fn format_pasmo(source: &str) -> Result<String, AsmError> {
     format_ast(
         &dialects::Pasmo {
             z80n: false,
-            lang198x: false,
+            lang198x: None,
         },
         source,
     )
@@ -1542,7 +1571,7 @@ pub fn format_pasmonext(source: &str) -> Result<String, AsmError> {
     format_ast(
         &dialects::Pasmo {
             z80n: true,
-            lang198x: false,
+            lang198x: None,
         },
         source,
     )

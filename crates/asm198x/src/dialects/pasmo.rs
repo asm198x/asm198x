@@ -80,9 +80,10 @@ pub const DIRECTIVES: &[Directive] = &[
 pub(crate) struct Pasmo {
     pub(crate) z80n: bool,
     /// Read the source with Lang198x's PasmoNext front end and the walk in
-    /// [`crate::dialects::pasmo_walk`], instead of the shared Z80 core. The
-    /// migration gate runs both until the new one matches every verdict.
-    pub(crate) lang198x: bool,
+    /// [`crate::dialects::pasmo_walk`], with these PasmoNext options, instead
+    /// of the shared Z80 core. The migration gate runs both until the new one
+    /// matches every verdict.
+    pub(crate) lang198x: Option<pasmo_walk::Options>,
 }
 
 impl Dialect for Pasmo {
@@ -107,7 +108,7 @@ impl Dialect for Pasmo {
         self.z80n.then_some(&isa::z80::NEXT)
     }
     fn parse(&self, source: &str) -> Result<Vec<Statement>, AsmError> {
-        if self.lang198x {
+        if self.lang198x.is_some() {
             return self.parse_warned(source).map(|(statements, _)| statements);
         }
         z80::assemble_keyword(
@@ -136,7 +137,7 @@ impl Dialect for Pasmo {
         map: &mut SourceMap,
         loader: &dyn SourceLoader,
     ) -> Result<Vec<Statement>, AsmError> {
-        if self.lang198x {
+        if self.lang198x.is_some() {
             return self
                 .parse_multi_warned(map, loader)
                 .map(|(statements, _)| statements);
@@ -150,8 +151,8 @@ impl Dialect for Pasmo {
         )
     }
     fn parse_warned(&self, source: &str) -> Result<(Vec<Statement>, Vec<Warning>), AsmError> {
-        if self.lang198x {
-            return pasmo_walk::statements(source, self.z80n);
+        if let Some(options) = &self.lang198x {
+            return pasmo_walk::statements(source, self.z80n, options);
         }
         self.parse(source)
             .map(|statements| (statements, Vec::new()))
@@ -161,8 +162,8 @@ impl Dialect for Pasmo {
         map: &mut SourceMap,
         loader: &dyn SourceLoader,
     ) -> Result<(Vec<Statement>, Vec<Warning>), AsmError> {
-        if self.lang198x {
-            return pasmo_walk::statements_multi(map, loader, self.z80n);
+        if let Some(options) = &self.lang198x {
+            return pasmo_walk::statements_multi(map, loader, self.z80n, options);
         }
         self.parse_multi(map, loader)
             .map(|statements| (statements, Vec::new()))
@@ -587,7 +588,7 @@ mod tests {
         let src = "; header\nstart:\n  ld a, 5   ; load five\n  ret\n";
         let d = Pasmo {
             z80n: false,
-            lang198x: false,
+            lang198x: None,
         };
         let prog = z80::parse_program_keyword(
             &PasmoSyntax,

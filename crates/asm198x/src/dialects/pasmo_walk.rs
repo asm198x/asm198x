@@ -10,29 +10,54 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
 
-use lang198x_z80_asm::Profile;
-use lang198x_z80_asm::ast::Expr as SourceExpr;
+use lang198x_z80_asm::ast::{Expr as SourceExpr, Statement as SourceStatement};
 use lang198x_z80_asm::expand::{ActiveLine, Block, Expander, Host, Program};
 use lang198x_z80_asm::lower::{self, Cpu, Known, Scope};
 use lang198x_z80_asm::syntax::{self, DiagnosticKind, TextId};
+use lang198x_z80_asm::{Profile, predefine};
 
 use crate::ast::map_syms;
 use crate::engine::{AsmError, Expr, Operation, Piece, Statement, Warning, next_pc};
 use crate::source::{LoadError, SourceLoader, SourceMap};
 use crate::span::{ExpansionFrame, FileId, Span};
 
-const PROFILE: Profile = Profile::PASMONEXT_0_1_3;
+mod scopes;
+
+use scopes::Scopes;
 
 /// The name the root file has in the front end's own table.
 const ROOT: &str = "<source>";
+
+/// PasmoNext 0.1.3's options that change what source means.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct Options {
+    /// `--nocase`: names match whatever their case.
+    pub names_in_any_case: bool,
+    /// `--alocal`: names starting `_` or `@` are automatic locals.
+    pub automatic_locals: bool,
+    /// Each `--equ` (or `-E`) text, such as `size=10` or `debug`, in order.
+    pub predefined: Vec<String>,
+}
+
+impl Options {
+    fn profile(&self) -> Profile {
+        if self.names_in_any_case {
+            Profile::PASMONEXT_0_1_3.with_names_in_any_case()
+        } else {
+            Profile::PASMONEXT_0_1_3
+        }
+    }
+}
 
 /// Statements for a single source, with no includes.
 pub(crate) fn statements(
     source: &str,
     z80n: bool,
+    options: &Options,
 ) -> Result<(Vec<Statement>, Vec<Warning>), AsmError> {
-    let program = Program::load(ROOT, source, PROFILE, |_| None).map_err(too_long)?;
-    Walk::new(z80n, vec![FileId(0)]).run(&program, &mut |_| None)
+    let profile = options.profile();
+    let program = Program::load(ROOT, source, profile, |_| None).map_err(too_long)?;
+    Walk::new(z80n, vec![FileId(0)], options)?.run(&program, &mut |_| None)
 }
 
 /// Statements for a program whose root is `FileId(0)` in `map`, reading
@@ -41,18 +66,19 @@ pub(crate) fn statements_multi(
     map: &mut SourceMap,
     loader: &dyn SourceLoader,
     z80n: bool,
+    options: &Options,
 ) -> Result<(Vec<Statement>, Vec<Warning>), AsmError> {
     let loader = &FromRunFolder(loader);
     let root = map.contents(FileId(0)).unwrap_or_default().to_owned();
     let mut files = vec![FileId(0)];
-    let program = Program::load(ROOT, &root, PROFILE, |name| {
+    let program = Program::load(ROOT, &root, options.profile(), |name| {
         let id = map.load(loader, name, FileId(0), 0).ok()?;
         files.push(id);
         map.contents(id).map(str::to_owned)
     })
     .map_err(too_long)?;
     let mut binaries = |name: &str| loader.load_binary(name, None).ok();
-    Walk::new(z80n, files).run(&program, &mut binaries)
+    Walk::new(z80n, files, options)?.run(&program, &mut binaries)
 }
 
 /// PasmoNext opens a file by the name written, from the folder it runs in,
@@ -92,6 +118,8 @@ fn too_long(_: syntax::ProvenanceError) -> AsmError {
 /// `asm.cpp`). A name with no entry is undefined.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 enum Def {
+    /// By `--equ`, before pass 1.
+    Predefined,
     Pass1,
     Pass2,
     Defl,
@@ -104,6 +132,7 @@ struct Symbol {
 }
 
 struct Walk {
+    profile: Profile,
     cpu: Cpu,
     set: &'static isa::InstructionSet,
     ext: Option<&'static isa::InstructionSet>,
@@ -117,20 +146,10 @@ struct Walk {
     pending: Option<String>,
     /// `REPT` counters set since the last line, for the statements.
     counters: Vec<(String, i64)>,
-    /// The scopes open, innermost last: PasmoNext's `localstack`.
-    levels: Vec<Level>,
-    /// How many local names this pass has made. PasmoNext's `localcount`,
-    /// which starts again each pass, so a pass gives each the same name.
-    locals: u32,
-}
-
-/// A scope names can be local to: PasmoNext's `LocalLevel`.
-struct Level {
-    /// Where a `PROC` was written, or `None` for a macro call, `REPT` or
-    /// `IRP`.
-    proc: Option<Span>,
-    /// Each name made local here, and the name it is assembled under.
-    names: HashMap<String, String>,
+    /// The scopes open: PasmoNext's `localstack`.
+    scopes: Scopes,
+    /// The names `--equ` defines, with their values, in order.
+    predefined: Vec<(String, i64)>,
 }
 
 /// What stops a pass: a located error, or a program that needs PasmoNext's
@@ -138,20 +157,39 @@ struct Level {
 type Stop = AsmError;
 
 impl Walk {
-    fn new(z80n: bool, files: Vec<FileId>) -> Self {
-        Self {
+    /// A walk with PasmoNext's `options`. Names given by `--equ` are defined
+    /// now, before pass 1, as `addpredef` defines them.
+    fn new(z80n: bool, files: Vec<FileId>, options: &Options) -> Result<Self, AsmError> {
+        let profile = options.profile();
+        let predefined = options
+            .predefined
+            .iter()
+            .map(|text| predefine(text, profile).map_err(|message| AsmError::new(0, message)))
+            .collect::<Result<Vec<_>, _>>()?;
+        let symbols = predefined
+            .iter()
+            .map(|(name, value)| {
+                let symbol = Symbol {
+                    value: *value,
+                    def: Def::Predefined,
+                };
+                (name.clone(), symbol)
+            })
+            .collect();
+        Ok(Self {
+            profile,
             cpu: if z80n { Cpu::Z80N } else { Cpu::Z80 },
             set: &isa::z80::SET,
             ext: z80n.then_some(&isa::z80::NEXT),
             files,
             pass: 1,
-            symbols: HashMap::new(),
+            symbols,
             pc: 0,
             pending: None,
             counters: Vec::new(),
-            levels: Vec::new(),
-            locals: 0,
-        }
+            scopes: Scopes::new(options.automatic_locals),
+            predefined,
+        })
     }
 
     /// PasmoNext's `processfile`: pass 1, then pass 2, whose statements are
@@ -176,14 +214,21 @@ impl Walk {
         mut out: Option<&mut (Vec<Statement>, Vec<Warning>)>,
     ) -> Result<(), Stop> {
         self.pc = 0;
-        self.locals = 0;
-        self.levels.clear();
+        self.scopes.reset();
         self.symbols.retain(|_, symbol| symbol.def != Def::Defl);
-        let mut expander = Expander::new(program.clone(), PROFILE)
+        let mut expander = Expander::new(program.clone(), self.profile)
             .map_err(|_| AsmError::new(0, "the program is too long to parse"))?;
         if let Some((file, diagnostic)) = program.diagnostics().first() {
             let span = syntax::Span::new(TextId::File(*file), diagnostic.range());
             return Err(self.error_at(&expander, span, diagnostic.message()));
+        }
+        // The engine is told the names `--equ` defines before any line.
+        if let Some((statements, _)) = out.as_deref_mut() {
+            let before = Span::in_file(FileId(0), 0, 0);
+            for (name, value) in &self.predefined {
+                let op = Some(Operation::Equ(Expr::Num(*value)));
+                statements.push(statement(&before, Some(name.clone()), op));
+            }
         }
         loop {
             let line = expander.next_line(self);
@@ -191,8 +236,16 @@ impl Walk {
             let Some(line) = line else {
                 return self.finish();
             };
-            let lowered =
-                lower::line(&line, &PROFILE, self.cpu, self, binaries).map_err(|diagnostic| {
+            // PasmoNext defines a line's label before it reads the rest,
+            // except on `ORG`, `EQU` and `DEFL` lines (`parselabel`). Under
+            // `--alocal`, that order decides which scope a name read on the
+            // line belongs to.
+            let label_first = label_first(&line, self.profile);
+            if let Some(name) = &label_first {
+                self.scopes.defining(name);
+            }
+            let lowered = lower::line(&line, &self.profile, self.cpu, self, binaries).map_err(
+                |diagnostic| {
                     let span = syntax::Span::new(line.text(), diagnostic.range());
                     let message = match diagnostic.kind() {
                         DiagnosticKind::Unsupported => {
@@ -201,7 +254,8 @@ impl Walk {
                         _ => diagnostic.message().to_owned(),
                     };
                     self.error_at(&expander, span, &message)
-                })?;
+                },
+            )?;
             let at = self.place(&expander, &line);
             let messages: Vec<String> = lowered.warnings().collect();
             let counters = std::mem::take(&mut self.counters);
@@ -215,10 +269,15 @@ impl Walk {
                 }
             }
             for mut item in lowered.items {
-                item.label = item.label.map(|name| self.local(name));
                 item.op = item
                     .op
-                    .map(|op| map_syms(op, &mut |name| Expr::Sym(self.local(name))));
+                    .map(|op| map_syms(op, &mut |name| Expr::Sym(self.scopes.resolve(name))));
+                if let Some(name) = &item.label
+                    && label_first.is_none()
+                {
+                    self.scopes.defining(name);
+                }
+                item.label = item.label.map(|name| self.scopes.resolve(name));
                 let value = self
                     .apply(item.label.as_deref(), item.op.as_ref())
                     .map_err(|message| AsmError::at(at.clone(), message))?;
@@ -256,71 +315,28 @@ impl Walk {
     /// The end of a pass: a `PROC` still open is an error where it was
     /// written.
     fn finish(&mut self) -> Result<(), Stop> {
-        match self.levels.pop() {
-            None => Ok(()),
-            Some(Level { proc: Some(at), .. }) => Err(AsmError::at(at, "Unbalanced PROC")),
-            Some(Level { proc: None, .. }) => {
-                Err(AsmError::new(0, "Unexpected local block encountered"))
-            }
-        }
-    }
-
-    /// The name `name` is assembled under: the one the innermost scope that
-    /// made it local gave it, or itself.
-    fn local(&self, name: String) -> String {
-        self.levels
-            .iter()
-            .rev()
-            .find_map(|level| level.names.get(&name).cloned())
-            .unwrap_or(name)
-    }
-
-    /// PasmoNext's `LocalLevel::add`: `name` is local to the innermost
-    /// scope from here on, under a name of its own. Naming it again in the
-    /// same scope changes nothing.
-    fn make_local(&mut self, name: &str) -> Result<(), String> {
-        let level = self
-            .levels
-            .last_mut()
-            .ok_or("Trying to use a non existent local level")?;
-        if !level.names.contains_key(name) {
-            // `genlocalname`: eight hex digits, which no source name can be.
-            level
-                .names
-                .insert(name.to_owned(), format!("{:08X}", self.locals));
-            self.locals += 1;
-        }
-        Ok(())
+        self.scopes.finish().map_err(|(at, message)| match at {
+            Some(at) => AsmError::at(at, message),
+            None => AsmError::new(0, message),
+        })
     }
 
     /// A line's change to the scopes, after its statements.
     fn scope(&mut self, scope: Scope, at: &Span) -> Result<(), String> {
         match scope {
-            Scope::Local(names) => {
-                for name in &names {
-                    self.make_local(name)?;
-                }
+            Scope::Local(names) => self.scopes.local(&names),
+            Scope::Proc => {
+                self.scopes.proc(at.clone());
+                Ok(())
             }
-            Scope::Proc => self.levels.push(Level {
-                proc: Some(at.clone()),
-                names: HashMap::new(),
-            }),
-            Scope::Endp => match self.levels.last() {
-                Some(Level { proc: Some(_), .. }) => {
-                    self.levels.pop();
-                }
-                _ => return Err("Unbalanced ENDP".into()),
-            },
+            Scope::Endp => self.scopes.endp(),
             // The names go in the public symbol file, which this path does
             // not write yet; what they mean does not change.
-            Scope::Public(_) => {}
-            other => {
-                return Err(format!(
-                    "{other:?} is not assembled yet (Lang198x's PasmoNext front end)"
-                ));
-            }
+            Scope::Public(names) => self.scopes.public(&names),
+            other => Err(format!(
+                "{other:?} is not assembled yet (Lang198x's PasmoNext front end)"
+            )),
         }
-        Ok(())
     }
 
     /// Stops at the expander's first problem, or one found while it ran.
@@ -432,6 +448,7 @@ impl Walk {
     fn define(&mut self, name: &str, value: i64) -> Result<(), String> {
         let old = self.symbols.get(name).copied();
         match old.map(|symbol| symbol.def) {
+            Some(Def::Predefined) => return Err("Can't redefine, is predefined".into()),
             Some(Def::Defl) => return Err("Invalid definition, previously defined as DEFL".into()),
             Some(Def::Pass1) if self.pass == 1 => return Err(redefined()),
             Some(Def::Pass2) if self.pass == 2 => return Err(redefined()),
@@ -465,7 +482,7 @@ impl Walk {
     fn define_defl(&mut self, name: &str, value: i64) -> Result<(), String> {
         if matches!(
             self.symbols.get(name).map(|symbol| symbol.def),
-            Some(Def::Pass1 | Def::Pass2)
+            Some(Def::Predefined | Def::Pass1 | Def::Pass2)
         ) {
             return Err(redefined());
         }
@@ -519,7 +536,7 @@ impl Known for Walk {
     fn defined(&self, name: &str) -> bool {
         match self
             .symbols
-            .get(&self.local(name.to_owned()))
+            .get(&self.scopes.resolve(name.to_owned()))
             .map(|symbol| symbol.def)
         {
             None => false,
@@ -531,7 +548,7 @@ impl Known for Walk {
     /// `getvalue` where a value is required: any definition will do.
     fn value(&self, name: &str) -> Option<i64> {
         self.symbols
-            .get(&self.local(name.to_owned()))
+            .get(&self.scopes.resolve(name.to_owned()))
             .map(|symbol| symbol.value)
     }
 
@@ -543,7 +560,7 @@ impl Known for Walk {
 impl Host for Walk {
     /// An `IF` condition or `REPT` count, which PasmoNext needs now.
     fn evaluate(&mut self, expr: &SourceExpr) -> Result<i64, String> {
-        let ir = lower::expression(expr, &PROFILE, self)
+        let ir = lower::expression(expr, &self.profile, self)
             .map_err(|diagnostic| diagnostic.message().to_owned())?;
         let missing = RefCell::new(None);
         let resolve = |name: &str| {
@@ -564,10 +581,10 @@ impl Host for Walk {
     /// with `setdefl`.
     fn set_counter(&mut self, name: &str, value: i64) {
         let value = value & 0xFFFF;
-        let set = self.make_local(name).and_then(|()| {
-            let name = self.local(name.to_owned());
-            self.define_defl(&name, value).map(|()| name)
-        });
+        let set = self
+            .scopes
+            .counter(name)
+            .and_then(|name| self.define_defl(&name, value).map(|()| name));
         match set {
             Ok(name) => self.counters.push((name, value)),
             Err(message) => {
@@ -578,20 +595,37 @@ impl Host for Walk {
 
     /// A macro call, `REPT` or `IRP` is a scope: PasmoNext's `MacroLevel`.
     fn enter(&mut self, _: Block) {
-        self.levels.push(Level {
-            proc: None,
-            names: HashMap::new(),
-        });
+        self.scopes.enter_block();
     }
 
     /// The block's scope ends, and with it any `PROC` left open inside it.
     fn leave(&mut self) {
-        while let Some(level) = self.levels.pop() {
-            if level.proc.is_none() {
-                break;
-            }
+        self.scopes.leave_block();
+    }
+
+    /// Under `--alocal`, defining a macro ends the automatic scope.
+    fn macro_defined(&mut self, name: &str) {
+        if let Err(message) = self.scopes.macro_defined(name) {
+            self.pending.get_or_insert(message);
         }
     }
+}
+
+/// The name a line's label defines, if PasmoNext defines it before reading
+/// the rest of the line: on every line but `ORG`, `EQU` and `DEFL`, which
+/// read their value first.
+fn label_first(line: &ActiveLine, profile: Profile) -> Option<String> {
+    let syntax = line.line();
+    let label = syntax.label()?.name()?;
+    let value_first = match syntax.statement() {
+        Some(SourceStatement::Directive(directive)) => directive.keyword().is_some_and(|k| {
+            ["ORG", "EQU", "DEFL"]
+                .iter()
+                .any(|word| k.text().eq_ignore_ascii_case(word))
+        }),
+        _ => false,
+    };
+    (!value_first).then(|| profile.name(label.text()))
 }
 
 #[cfg(test)]
@@ -599,7 +633,7 @@ mod tests {
     use super::*;
 
     fn walk(pass: u8) -> Walk {
-        let mut walk = Walk::new(false, vec![FileId(0)]);
+        let mut walk = Walk::new(false, vec![FileId(0)], &Options::default()).expect("no options");
         walk.pass = pass;
         walk
     }
@@ -626,6 +660,30 @@ mod tests {
         walk.define_defl("n", 1).expect("first");
         walk.define_defl("n", 2).expect("again");
         assert_eq!(walk.define("n", 3), Err(DEFL.to_owned()));
+    }
+
+    #[test]
+    fn a_name_given_by_equ_is_defined_before_pass_one_and_never_again() {
+        // equ_redefined_by_source and equ_redefined_by_defl, measured on
+        // PasmoNext 0.1.3.
+        let options = Options {
+            predefined: vec!["aa=1".into(), "flag".into()],
+            ..Options::default()
+        };
+        let mut walk = Walk::new(false, vec![FileId(0)], &options).expect("predefines");
+        assert_eq!(walk.value("aa"), Some(1));
+        assert_eq!(walk.value("flag"), Some(0xFFFF));
+        assert!(walk.defined("aa"));
+        assert_eq!(
+            walk.define("aa", 2),
+            Err("Can't redefine, is predefined".to_owned())
+        );
+        assert_eq!(walk.define_defl("aa", 2), Err(LABEL.to_owned()));
+        let refused = Options {
+            predefined: vec!["aa=1+1".into()],
+            ..Options::default()
+        };
+        assert!(Walk::new(false, vec![FileId(0)], &refused).is_err());
     }
 
     #[test]
