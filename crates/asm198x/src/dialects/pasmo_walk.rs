@@ -39,15 +39,26 @@ pub struct Options {
     pub automatic_locals: bool,
     /// Each `--equ` (or `-E`) text, such as `size=10` or `debug`, in order.
     pub predefined: Vec<String>,
+    /// `--bracket`: only brackets mark an indirection, and parentheses only
+    /// group a value.
+    pub brackets_only: bool,
+    /// `--w8080`: a warning for each instruction the 8080 lacks.
+    pub warns_8080: bool,
 }
 
 impl Options {
     fn profile(&self) -> Profile {
+        let mut profile = Profile::PASMONEXT_0_1_3;
         if self.names_in_any_case {
-            Profile::PASMONEXT_0_1_3.with_names_in_any_case()
-        } else {
-            Profile::PASMONEXT_0_1_3
+            profile = profile.with_names_in_any_case();
         }
+        if self.brackets_only {
+            profile = profile.with_brackets_only();
+        }
+        if self.warns_8080 {
+            profile = profile.with_8080_warnings();
+        }
+        profile
     }
 }
 

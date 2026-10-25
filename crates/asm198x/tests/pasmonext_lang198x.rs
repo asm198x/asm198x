@@ -299,6 +299,8 @@ fn options(options: &[String]) -> Option<asm198x::PasmoNextOptions> {
         match option.as_str() {
             "--nocase" => taken.names_in_any_case = true,
             "--alocal" => taken.automatic_locals = true,
+            "--bracket" => taken.brackets_only = true,
+            "--w8080" => taken.warns_8080 = true,
             "--equ" | "-E" => taken.predefined.push(options.next()?.clone()),
             _ => return None,
         }
@@ -491,4 +493,35 @@ fn savebin_writes_what_pasmonext_wrote() {
     let range = asm198x::assemble_pasmo_lang198x(" SAVEBIN \"out.bin\",0FFFFh,2\n", true)
         .expect_err("out of range");
     assert_eq!(range.message, "Error SAVEBIN out of range");
+}
+
+#[test]
+fn w8080_warns_once_about_each_z80_instruction() {
+    // Measured on PasmoNext 0.1.3 with `--w8080`: it warned on lines 3, 4
+    // and 5, on both passes. Line 5, `out (12h),a`, is the 8080's own `OUT`,
+    // and line 6, the Next's `jp (c)`, is not an 8080 instruction; the new
+    // path follows the rule for both, under 198x's decision to fix
+    // reference assemblers' bugs rather than copy them.
+    let source = " org 0\n ld a,b\n djnz $\n exx\n out (12h),a\n jp (c)\n db 1\n";
+    let options = asm198x::PasmoNextOptions {
+        warns_8080: true,
+        ..Default::default()
+    };
+    let result = asm198x::assemble_pasmo_lang198x_files_with(
+        source,
+        "t.asm",
+        &asm198x::source::MemoryLoader::new(),
+        true,
+        &options,
+    )
+    .expect("assembles");
+    let warned: Vec<(usize, &str)> = result
+        .warnings
+        .iter()
+        .map(|w| (w.line, w.message.as_str()))
+        .collect();
+    let not_8080 = "not a 8080 instruction";
+    assert_eq!(warned, [(3, not_8080), (4, not_8080), (6, not_8080)]);
+    let quiet = asm198x::assemble_pasmo_lang198x(source, true).expect("assembles");
+    assert!(quiet.warnings.is_empty());
 }
