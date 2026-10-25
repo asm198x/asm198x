@@ -232,6 +232,38 @@ const PROGRAMS_DEVIATING: &[(&str, &str, Option<&str>)] = &[
         "PasmoNext drops whatever follows SAVEBIN's size",
         None,
     ),
+    // PasmoNext keeps one memory image across its passes, so bytes an earlier
+    // pass wrote where the last writes nothing stay in the file.
+    (
+        "equ_forward_then_org",
+        "PasmoNext keeps the byte pass 1 wrote at 0, before `org x` moved to 5",
+        Some("01"),
+    ),
+    (
+        "three_passes_settle",
+        "PasmoNext keeps the byte pass 1 wrote at 0, before `org x` moved to 5",
+        Some("01"),
+    ),
+    (
+        "pass3_settles",
+        "PasmoNext keeps the byte pass 1 wrote at 0, before `org x` moved to 5",
+        Some("01"),
+    ),
+    (
+        "stale_label_defined_check",
+        "PasmoNext keeps the byte pass 1 wrote at 1, where the last pass, skipping the IF, writes nothing",
+        Some("00"),
+    ),
+    (
+        "pass_three_defined_forward",
+        "PasmoNext keeps the byte pass 1 wrote at 0, before `org x` moved to 5",
+        Some("FF"),
+    ),
+    (
+        "stale_label_from_pass_one",
+        "PasmoNext reads `lab`, which only pass 1 defined, as the value pass 1 gave it",
+        None,
+    ),
 ];
 
 /// One measured program: its source, the files it reads, its options, and
@@ -301,6 +333,7 @@ fn options(options: &[String]) -> Option<asm198x::PasmoNextOptions> {
             "--alocal" => taken.automatic_locals = true,
             "--bracket" => taken.brackets_only = true,
             "--w8080" => taken.warns_8080 = true,
+            "--pass3" => taken.three_passes = true,
             "--equ" | "-E" => taken.predefined.push(options.next()?.clone()),
             _ => return None,
         }
@@ -309,7 +342,7 @@ fn options(options: &[String]) -> Option<asm198x::PasmoNextOptions> {
 }
 
 #[test]
-fn measured_programs_match_or_say_they_need_three_passes() {
+fn measured_programs_match() {
     let programs = programs();
     assert!(programs.len() >= 88, "the fixture has {}", programs.len());
     let mut failures = Vec::new();
@@ -347,25 +380,43 @@ fn measured_programs_match_or_say_they_need_three_passes() {
             }
             continue;
         }
-        let ok = if program.three_passes {
-            matches!(&result, Err(e) if e.error.message.contains("third pass"))
-        } else {
+        let ok = {
             let ours = result.as_ref().ok().map(|r| {
                 r.bytes
                     .iter()
                     .map(|b| format!("{b:02X}"))
                     .collect::<String>()
             });
-            ours == program.bytes
+            // PasmoNext says when a value moving in pass 2 makes it run a
+            // third; the walk says so too.
+            let switched = result.as_ref().is_ok_and(|r| {
+                r.warnings
+                    .iter()
+                    .any(|w| w.message == "Switching to 3 pass mode")
+            });
+            ours == program.bytes && (result.is_err() || switched == program.three_passes)
         };
         if ok == named {
             failures.push(format!(
                 "{}: {}",
                 program.name,
                 if named {
-                    "matches; take it off PROGRAMS_NOT_YET"
+                    "matches; take it off PROGRAMS_NOT_YET".to_owned()
                 } else {
-                    "differs"
+                    match &result {
+                        Ok(r) => format!(
+                            "differs: gives {}, PasmoNext {:?}",
+                            r.bytes
+                                .iter()
+                                .map(|b| format!("{b:02X}"))
+                                .collect::<String>(),
+                            program.bytes
+                        ),
+                        Err(e) => format!(
+                            "differs: rejects it ({}), PasmoNext {:?}",
+                            e.error.message, program.bytes
+                        ),
+                    }
                 }
             ));
         }
@@ -524,4 +575,33 @@ fn w8080_warns_once_about_each_z80_instruction() {
     assert_eq!(warned, [(3, not_8080), (4, not_8080), (6, not_8080)]);
     let quiet = asm198x::assemble_pasmo_lang198x(source, true).expect("assembles");
     assert!(quiet.warnings.is_empty());
+}
+
+#[test]
+fn three_passes_say_why_and_refuse_what_only_an_earlier_pass_defined() {
+    // Measured on PasmoNext 0.1.3: `x` moves from 0 to 5 in pass 2, so it
+    // says "Switching to 3 pass mode" there, on the line that moved it, and
+    // runs a third pass.
+    let result =
+        asm198x::assemble_pasmo_lang198x("x equ later\n org x\n db 1\nlater equ 5\n", true)
+            .expect("assembles");
+    let said: Vec<(usize, &str)> = result
+        .warnings
+        .iter()
+        .map(|w| (w.line, w.message.as_str()))
+        .collect();
+    assert_eq!(said, [(1, "Switching to 3 pass mode")]);
+    assert_eq!(result.bytes, [0x01]);
+    // Only pass 1, where `x` was 0, defines `lab`; PasmoNext writes `dw lab`
+    // with the value pass 1 gave it.
+    let source = " org 0\nx equ later\n if x = 0\nlab: db 1\n endif\n dw lab\nlater equ 5\n";
+    let error = asm198x::assemble_pasmo_lang198x(source, true).expect_err("refused");
+    assert_eq!(error.line, 6);
+    assert!(
+        error
+            .message
+            .contains("'lab' is defined only in an earlier pass"),
+        "{}",
+        error.message
+    );
 }

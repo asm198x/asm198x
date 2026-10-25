@@ -27,9 +27,9 @@ Read from its `asm.cpp` (`processfile`, `dopass`, `setequorlabel`, `setdefl`,
 `crates/asm198x/tests/fixtures/pasmonext-0.1.3-programs.txt`, made by
 `scripts/measure-pasmonext-programs.py`.
 
-- **Two passes.** Each starts at address 0 with the last pass's symbols, its
-  `DEFL` names cleared, and a fresh expander. The second pass's statements are
-  the program.
+- **Two passes, or three** (below). Each starts at address 0 with the last
+  pass's symbols, its `DEFL` names cleared, and a fresh expander. The last
+  pass's statements are the program.
 - **A name nobody has defined reads as 0 in pass 1, and is an error after.**
   Where PasmoNext needs a value as soon as it reads the line (`ORG`, `IF`,
   `REPT`, the `DS` count, `RST` and the others z80-asm lists), any definition
@@ -98,15 +98,29 @@ Read from its `asm.cpp` (`processfile`, `dopass`, `setequorlabel`, `setdefl`,
   engine reads a `DEFL` where it stands, so `n defl later` would fail there
   although PasmoNext accepts it. The walk has PasmoNext's value, so it says so.
 
-## Three-pass mode is reported, not guessed
+## Three passes, as PasmoNext runs them
 
-PasmoNext adds a third pass when a symbol's value changes in the second
-("Switching to 3 pass mode"), and stops with "Phase error" if one changes
-again. Only then can an earlier pass's bytes survive in the output, or the last
-pass read a value no pass set. No curriculum program (0 of 391) and no verdict
-source (0 of 1,230) does this. Until it is built, the walk stops such a program
-with an error that names three-pass mode, and the measured programs check that
-it does, for every program PasmoNext ran in three passes.
+PasmoNext runs a third pass when a label's or `EQU`'s value changes in the
+second, saying "Switching to 3 pass mode" on that line, and `--pass3` asks for
+three from the start. On the last pass, a value that changes again is "Phase
+error in 'name'". The walk follows `setvar` and `processfile`: the last pass's
+statements are the program, and a pass 2 that switched is thrown away. A
+`MESSAGE` or `SAVEBIN` is read on the last pass only.
+
+Two of PasmoNext's bugs only show here, and the walk fixes both rather than
+copying them:
+
+- PasmoNext keeps one memory image across its passes. Bytes an earlier pass
+  wrote where the last writes nothing stay in the file: `org x` with `x` still
+  0 in pass 1 leaves that pass's byte at 0. The walk writes the last pass's
+  bytes only.
+- A name that only an earlier pass defined, such as a label inside an `IF`
+  the last pass skips, is read with that pass's value. The walk refuses it,
+  saying so.
+
+No curriculum program (0 of 391) and no verdict source (0 of 1,230) runs three
+passes. The measured programs that do are named in the gate, with the
+deviation each shows.
 
 ## Drift triggers
 
@@ -118,6 +132,6 @@ it does, for every program PasmoNext ran in three passes.
   walk's. z80-asm reports the scope change; this keeps the scopes.
 - *"Let the engine compute `EQU` and `DEFL`, it can."* → Not as PasmoNext does
   for `DEFL`, and the walk already has the answer. Fold what the walk knows.
-- *"Converge further than PasmoNext, or fill in three-pass mode by
-  reasoning."* → Match the reference: measure its third pass first, then build
-  it, as its own item.
+- *"Converge further than PasmoNext, or run passes until values settle."* →
+  Match the reference: two passes, a third only where PasmoNext runs one, and
+  its phase error after that.
