@@ -54,6 +54,11 @@ Read from its `asm.cpp` (`processfile`, `dopass`, `setequorlabel`, `setdefl`,
   defined as `setequorlabel` defines it and reaches the engine as an `EQU`.
   The counter starts at 0 each pass: PasmoNext's carries over, so `RB`
   without `RSSET` ends in a phase error, which is one of its bugs.
+- **Messages.** `.ERROR` stops the assembly, in z80-asm. A `.WARNING` is
+  a warning and a `MESSAGE` a note, each given on the last pass, so once:
+  PasmoNext gives a `.WARNING` on every pass. A `MESSAGE`'s values are read
+  there, so a name nobody defines is an error and one defined further on is
+  not.
 - **PasmoNext's obvious bugs are fixed, not copied,** under the umbrella's
   [`reference-bugs-are-fixed-not-copied.md`](../../../decisions/reference-bugs-are-fixed-not-copied.md).
   z80-asm rejects the miscompiles and corrects the Next's `push nn`; the walk's

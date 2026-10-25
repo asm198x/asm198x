@@ -33,8 +33,11 @@ the gate in Asm198x. The design is recorded in
 
 ## Next
 
-- Lang198x's 5c steps 4 to 8: messages, the Next's banks, reading options,
+- Lang198x's 5c steps 5 to 8: the Next's banks, reading options,
   three-pass mode, `--86`.
+  - **Done, messages:** `.ERROR`, `.WARNING`, `MESSAGE` and `HEX`. 46
+    programs measured on PasmoNext join the fixture; all match but five
+    `HEX` deviations, and a test checks what each message says.
   - **Done, structures:** `STRUCT`/`ENDS`, `RB`, `RW`, `RSSET` and `STACK`,
     through z80-asm's `Definition`. 80 programs measured on PasmoNext join
     the fixture; all match but nine, each a named deviation where PasmoNext

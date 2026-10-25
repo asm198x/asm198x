@@ -12,11 +12,13 @@ use std::collections::HashMap;
 
 use lang198x_z80_asm::ast::{Expr as SourceExpr, Statement as SourceStatement};
 use lang198x_z80_asm::expand::{ActiveLine, Block, Expander, Host, Program};
-use lang198x_z80_asm::lower::{self, Cpu, Definition, Known, Scope};
+use lang198x_z80_asm::lower::{
+    self, Cpu, Definition, Known, Message, Piece as MessagePiece, Scope,
+};
 use lang198x_z80_asm::syntax::{self, DiagnosticKind, TextId};
 use lang198x_z80_asm::{Profile, predefine};
 
-use crate::ast::map_syms;
+use crate::ast::{map_sym_expr, map_syms};
 use crate::engine::{AsmError, Expr, Operation, Piece, Statement, Warning, next_pc};
 use crate::source::{LoadError, SourceLoader, SourceMap};
 use crate::span::{ExpansionFrame, FileId, Span};
@@ -324,6 +326,29 @@ impl Walk {
                     }
                 }
             }
+            // PasmoNext prints a `MESSAGE` on the last pass only, and gives a
+            // `.WARNING` on every pass, so twice; the walk gives each once.
+            if let (Some(message), Some((_, warnings))) = (lowered.message, out.as_deref_mut()) {
+                let mut warning = match message {
+                    Message::Warning(text) => Warning::new(at.line as usize, text),
+                    Message::Print(pieces) => {
+                        let text = self
+                            .message(pieces)
+                            .map_err(|message| AsmError::at(at.clone(), message))?;
+                        Warning::note(at.line as usize, text)
+                    }
+                    other => {
+                        return Err(AsmError::at(
+                            at.clone(),
+                            format!(
+                                "{other:?} is not assembled yet (Lang198x's PasmoNext front end)"
+                            ),
+                        ));
+                    }
+                };
+                warning.file = at.file;
+                warnings.push(warning);
+            }
             if let Some((_, warnings)) = out.as_deref_mut() {
                 for message in messages {
                     let mut warning = Warning::new(at.line as usize, message);
@@ -401,6 +426,33 @@ impl Walk {
         let value = value & 0xFFFF;
         self.define(&name, value)?;
         Ok(vec![(name, value)])
+    }
+
+    /// A `MESSAGE` line's text (`parseMESSAGE`): each value in four hex
+    /// digits, or in decimal after `%d`, and every name defined.
+    fn message(&self, pieces: Vec<MessagePiece>) -> Result<String, String> {
+        let mut text = String::new();
+        for piece in pieces {
+            match piece {
+                MessagePiece::Text(words) => text.push_str(&words),
+                MessagePiece::Value { value, decimal } => {
+                    let value =
+                        map_sym_expr(value, &mut |name| Expr::Sym(self.scopes.resolve(name)));
+                    let value = self.read(&value)? & 0xFFFF;
+                    if decimal {
+                        text.push_str(&value.to_string());
+                    } else {
+                        text.push_str(&format!("{value:04X}"));
+                    }
+                }
+                other => {
+                    return Err(format!(
+                        "{other:?} is not printed yet (Lang198x's PasmoNext front end)"
+                    ));
+                }
+            }
+        }
+        Ok(text)
     }
 
     /// Stops at the expander's first problem, or one found while it ran.
