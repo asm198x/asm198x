@@ -1516,35 +1516,28 @@ pub fn assemble_sjasmplus_next(source: &str) -> Result<AssemblyResult, AsmError>
     engine::assemble(source, &dialects::Sjasmplus { z80n: true }).map(AssemblyResult::from)
 }
 
-/// Format pasmo-syntax Z80 source (`asm198x fmt`): parse into the semantic AST
-/// and emit canonical same-dialect source — labels at column 0, operations
-/// indented, comments preserved in position, operand spelling untouched. The
-/// result assembles byte-identical to the input and is idempotent (U5, AE7).
+/// Format PasmoNext 0.1.3 source (`asm198x fmt`), with Lang198x's
+/// formatter, `lang198x_z80_asm::format`. It never adds, removes or reorders
+/// lines: a label moves to column 1, a statement to column 9 and a trailing
+/// comment to column 33, each kept as written, and comment-only lines,
+/// unreadable lines and macro bodies are kept as written. PasmoNext
+/// assembles the result to the same bytes and symbols, and formatting it
+/// again changes nothing.
 ///
 /// # Errors
-/// Returns an [`AsmError`] (with source line) on any parse failure.
+/// Returns an [`AsmError`] only for source too long to parse.
 pub fn format_pasmo(source: &str) -> Result<String, AsmError> {
-    format_ast(
-        &dialects::Pasmo {
-            z80n: false,
-            lang198x: None,
-        },
-        source,
-    )
+    lang198x_z80_asm::format(source, lang198x_z80_asm::Profile::PASMONEXT_0_1_3)
+        .map_err(|_| AsmError::new(0, "the source is too long to format"))
 }
 
-/// Format pasmonext-syntax (Z80N) source — see [`format_pasmo`].
+/// Format source for the `pasmonext` dialect, as [`format_pasmo`]: the
+/// Z80N's instructions do not change how a line is laid out.
 ///
 /// # Errors
-/// Returns an [`AsmError`] on any parse failure.
+/// As [`format_pasmo`].
 pub fn format_pasmonext(source: &str) -> Result<String, AsmError> {
-    format_ast(
-        &dialects::Pasmo {
-            z80n: true,
-            lang198x: None,
-        },
-        source,
-    )
+    format_pasmo(source)
 }
 
 /// Format sjasmplus-syntax Z80 source — see [`format_pasmo`].

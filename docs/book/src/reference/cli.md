@@ -137,14 +137,14 @@ start:  ld a,1
 <!-- output: border.asm, fmt -->
 ```asm
 ; Set the border colour.
-start:
-        ld a,1
+start:  ld a,1
         out ($fe),a
         ret
 ```
 
-The label takes its own line, the operations line up, and the comment is
-untouched — including its wording and its position above the code.
+The operations line up at column 9 and the label stays on its line. A
+PasmoNext formatter never adds, removes or reorders lines, and leaves the
+comment untouched, including its wording and its position above the code.
 
 ### `dialects` — list what `--dialect` accepts
 
