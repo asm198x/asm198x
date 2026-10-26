@@ -208,6 +208,19 @@ pub(crate) trait Z80Syntax {
         false
     }
 
+    /// Whether `[x]` spells the memory operand `(x)`. SjASMPlus reads a whole
+    /// operand in square brackets as memory, never as grouping, and refuses
+    /// `[c]` for the port (probed, #986).
+    fn square_brackets(&self) -> bool {
+        false
+    }
+
+    /// Whether a mnemonic must be spelt all lower or all upper case, as
+    /// SjASMPlus requires: its ` Ld a,2` is `Unrecognized instruction` (#986).
+    fn single_case_mnemonics(&self) -> bool {
+        false
+    }
+
     /// Whether a lone operand on `ADD`/`ADC`/`SBC` means `A,<operand>` (#533).
     /// sjasmplus reads `add (hl)` as `add a,(hl)`, with or without
     /// `--syntax=abfw`; pasmo rejects the spelling, so it defaults off.
@@ -3702,9 +3715,10 @@ impl CondParser<'_> {
     fn shift(&mut self) -> Result<i64, AsmError> {
         let mut v = self.add_sub()?;
         loop {
-            let left = match self.tokens.get(self.pos) {
-                Some(Tok::Shl) => true,
-                Some(Tok::Shr) => false,
+            let (left, logical) = match self.tokens.get(self.pos) {
+                Some(Tok::Shl) => (true, false),
+                Some(Tok::Shr) => (false, false),
+                Some(Tok::UShr) => (false, true),
                 _ => return Ok(v),
             };
             self.pos += 1;
@@ -3715,7 +3729,13 @@ impl CondParser<'_> {
                     "shift amount out of range in condition",
                 ));
             }
-            v = if left { v << by } else { v >> by };
+            v = if left {
+                v << by
+            } else if logical {
+                (v & 0xFFFF_FFFF) >> (by & 31)
+            } else {
+                v >> by
+            };
         }
     }
 
@@ -3770,6 +3790,14 @@ impl CondParser<'_> {
             Some(Tok::WordNot) => {
                 self.pos += 1;
                 Ok(-i64::from(self.unary()? == 0))
+            }
+            Some(Tok::High) => {
+                self.pos += 1;
+                Ok((self.unary()? >> 8) & 0xFF)
+            }
+            Some(Tok::Low) => {
+                self.pos += 1;
+                Ok(self.unary()? & 0xFF)
             }
             _ => self.atom(),
         }
@@ -3936,6 +3964,13 @@ fn parse_op<S: Z80Syntax>(
         ));
     }
     let mnemonic = word.to_ascii_uppercase();
+    let one_case = word == mnemonic || word == word.to_ascii_lowercase();
+    if syntax.single_case_mnemonics() && !one_case && has_mnemonic(set, ext, &mnemonic) {
+        return Err(AsmError::new(
+            line,
+            format!("unknown instruction `{word}`: instructions are all lower or all upper case"),
+        ));
+    }
     if !has_mnemonic(set, ext, &mnemonic) {
         return Err(AsmError::new(
             line,
@@ -4116,7 +4151,8 @@ fn resolve<S: Z80Syntax>(
     let pieces = split_operands(args);
     let mut per_operand: Vec<Vec<Alternative>> = Vec::new();
     for (idx, piece) in pieces.iter().enumerate() {
-        per_operand.push(alternatives(syntax, mnemonic, idx, piece, consts, line)?);
+        let piece = square_memory(syntax, piece);
+        per_operand.push(alternatives(syntax, mnemonic, idx, &piece, consts, line)?);
     }
 
     for combo in product(&per_operand) {
@@ -4463,8 +4499,8 @@ fn split_operands(args: &str) -> Vec<&str> {
     let mut start = 0;
     for (i, ch) in args.char_indices() {
         match ch {
-            '(' => depth += 1,
-            ')' => depth -= 1,
+            '(' | '[' => depth += 1,
+            ')' | ']' => depth -= 1,
             ',' if depth == 0 => {
                 out.push(args[start..i].trim());
                 start = i + 1;
@@ -4474,6 +4510,18 @@ fn split_operands(args: &str) -> Vec<&str> {
     }
     out.push(args[start..].trim());
     out
+}
+
+/// `[x]` as the memory operand `(x)` where the dialect spells it so; any other
+/// operand, `[c]` included, is left for the parse to read or refuse.
+fn square_memory<'a, S: Z80Syntax>(syntax: &S, piece: &'a str) -> std::borrow::Cow<'a, str> {
+    let t = piece.trim();
+    match t.strip_prefix('[').and_then(|t| t.strip_suffix(']')) {
+        Some(inner) if syntax.square_brackets() && !inner.trim().eq_ignore_ascii_case("c") => {
+            std::borrow::Cow::Owned(format!("({inner})"))
+        }
+        _ => std::borrow::Cow::Borrowed(piece),
+    }
 }
 
 fn strip_parens(t: &str) -> Option<&str> {
@@ -4593,6 +4641,12 @@ enum Tok {
     BitNot,
     /// SjASMPlus word-form NOT: logical true is -1, rather than bitwise NOT.
     WordNot,
+    /// SjASMPlus `>>>`: a logical shift of the 32-bit value (#986).
+    UShr,
+    /// SjASMPlus unary `high`: bits 8 to 15 (#986).
+    High,
+    /// SjASMPlus unary `low`: bits 0 to 7 (#986).
+    Low,
 }
 
 impl Tok {
@@ -4772,6 +4826,13 @@ fn tokenize_impl<S: Z80Syntax>(
                     i += 1;
                 }
             }
+            '>' if syntax.sjasmplus_expressions()
+                && chars.get(i + 1) == Some(&'>')
+                && chars.get(i + 2) == Some(&'>') =>
+            {
+                tokens.push(Tok::UShr);
+                i += 3;
+            }
             '>' if chars.get(i + 1) == Some(&'>') => {
                 tokens.push(Tok::Shr);
                 i += 2;
@@ -4792,6 +4853,28 @@ fn tokenize_impl<S: Z80Syntax>(
             ')' => {
                 tokens.push(Tok::RParen);
                 i += 1;
+            }
+            // A double-quoted string is a packed value in SjASMPlus, with
+            // backslash escapes (#986).
+            '"' if syntax.sjasmplus_expressions() => {
+                let start = i;
+                i += 1;
+                let mut closed = false;
+                while i < chars.len() {
+                    let ch = chars[i];
+                    i += 1;
+                    if ch == '\\' {
+                        i += 1;
+                    } else if ch == '"' {
+                        closed = true;
+                        break;
+                    }
+                }
+                if !closed {
+                    return Err(AsmError::new(line, "unterminated double-quoted literal"));
+                }
+                let token: String = chars[start..i].iter().collect();
+                tokens.push(Tok::Num(syntax.parse_number(&token, line)?));
             }
             '\'' if syntax.sjasmplus_expressions() => {
                 let start = i;
@@ -4895,6 +4978,10 @@ fn tokenize_impl<S: Z80Syntax>(
                         "SHL" | "shl" => Tok::Shl,
                         "SHR" | "shr" => Tok::Shr,
                         "MOD" | "mod" if tokens.last().is_some_and(Tok::ends_value) => Tok::Mod,
+                        // Unary, so only where a value is wanted; all one
+                        // case, as `High` is a label (probed, #986).
+                        "HIGH" | "high" if !tokens.last().is_some_and(Tok::ends_value) => Tok::High,
+                        "LOW" | "low" if !tokens.last().is_some_and(Tok::ends_value) => Tok::Low,
                         _ => Tok::Sym(word),
                     }
                 } else {
@@ -5133,9 +5220,10 @@ impl ExprParser {
     fn shift(&mut self) -> Result<Expr, AsmError> {
         let mut left = self.add_sub()?;
         loop {
-            let op = match self.tokens.get(self.pos) {
-                Some(Tok::Shl) => BinOp::Shl,
-                Some(Tok::Shr) => BinOp::Shr,
+            let (op, logical) = match self.tokens.get(self.pos) {
+                Some(Tok::Shl) => (BinOp::Shl, false),
+                Some(Tok::Shr) => (BinOp::Shr, false),
+                Some(Tok::UShr) => (BinOp::Shr, true),
                 _ => break,
             };
             self.pos += 1;
@@ -5144,6 +5232,11 @@ impl ExprParser {
                 Box::new(self.add_sub()?),
                 Box::new(Expr::Num(31)),
             );
+            if logical {
+                // `>>>` shifts the 32-bit value with zeros: -16>>>2 is
+                // $3FFFFFFC where -16>>2 is -4 (probed, #986).
+                left = Expr::Bin(BinOp::And, Box::new(left), Box::new(Expr::Num(0xFFFF_FFFF)));
+            }
             left = Self::sjasmplus_word(Expr::Bin(op, Box::new(left), Box::new(right)));
         }
         Ok(left)
@@ -5196,6 +5289,23 @@ impl ExprParser {
         if matches!(self.tokens.get(self.pos), Some(Tok::WordNot | Tok::Not)) {
             self.pos += 1;
             return Ok(Expr::Neg(Box::new(Expr::LogNot(Box::new(self.unary()?)))));
+        }
+        // `high` and `low` bind tighter than `*`: `high 300h*2` is 6
+        // (probed, #986).
+        if let Some(Tok::High | Tok::Low) = self.tokens.get(self.pos) {
+            let high = matches!(self.tokens.get(self.pos), Some(Tok::High));
+            self.pos += 1;
+            let value = self.unary()?;
+            let value = if high {
+                Expr::Bin(BinOp::Shr, Box::new(value), Box::new(Expr::Num(8)))
+            } else {
+                value
+            };
+            return Ok(Expr::Bin(
+                BinOp::And,
+                Box::new(value),
+                Box::new(Expr::Num(0xFF)),
+            ));
         }
         self.atom()
     }

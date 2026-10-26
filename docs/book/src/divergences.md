@@ -13,13 +13,13 @@ instead. If you are deciding whether to move a project that already builds, what
 you need is not reassurance — it is to know what will change.
 
 <!-- generated: xtask divergences --markdown -->
-3 tracked differences across 12 recorded cases.
+3 tracked differences across 6 recorded cases.
 
 | Difference | CPU | Dialect | Reference tool | Cases |
 |---|---|---|---|---|
 | [`issue-110`](https://github.com/asm198x/asm198x/issues/110) | 68000 | vasm | vasmm68k_mot | 4 |
 | [`issue-984`](https://github.com/asm198x/asm198x/issues/984) | Z80N | pasmonext | pasmo | 1 |
-| [`issue-986`](https://github.com/asm198x/asm198x/issues/986) | Z80 | sjasmplus | sjasmplus | 7 |
+| [`issue-986`](https://github.com/asm198x/asm198x/issues/986) | Z80 | sjasmplus | sjasmplus | 1 |
 <!-- /generated -->
 
 ## What each one is
@@ -44,11 +44,9 @@ documentation and sjasmplus agree. PasmoNext 0.1.3 writes it low byte first, so
 its `push $1234` pushes `$3412` on real hardware. Our `pasmonext` emits the
 correct bytes rather than copying the bug.
 
-**`issue-986` — sjasmplus source we do not read yet.** sjasmplus 1.24.0
-accepts seven things our `sjasmplus` dialect refuses: block comments inside and
-across lines, `>>>`, `high` and `low`, `[ ]` around memory operands, fake
-instructions such as `ld hl,de`, and a one-character double-quoted string as a
-value. Each is a probe that fails once we accept it.
+**`issue-986` — sjasmplus's fake instructions.** sjasmplus 1.24.0 expands
+pseudo-instructions such as `ld hl,de` into real ones (`ld h,d : ld l,e`). Our
+`sjasmplus` dialect does not have them yet. The probe fails once it does.
 
 **`canonicalisation-68000-*` — three encodings with more than one spelling.**
 The 68000 encodes some operations more than one way, so assembling, then

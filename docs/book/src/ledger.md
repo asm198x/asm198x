@@ -5,9 +5,9 @@ observation of a real reference assembler, not an expectation written
 by hand. Regenerate with `cargo xtask ledger`.
 
 - **Release:** `v0.0.72`
-- **Corpus hash:** `113f87499e6e911df7d67b9716192ee3ea5e8c2e0b5cfa5f577c0f819dd416e9`
+- **Corpus hash:** `fe96612c33cf7b6dcc08363e4e4413ca1e6fe6522d7316beaf24cb96a28e9fc5`
 - **Pinned curriculum:** `f11698d0b51b3a6c1209cec3d649229aa35af97f` (2026-08-27)
-- **CPUs:** 23, holding 9231 verdict(s)
+- **CPUs:** 23, holding 9252 verdict(s)
 
 ## 1802
 
@@ -187,11 +187,11 @@ Form coverage: **796/796** (100.0%)
 | arbiter | version | verdicts |
 |---|---|---|
 | `pasmo` | PasmoNext v0.1.3 (PC) (C) 2004-2005 Julian Albo | curriculum 161, form 796, fuzz 200, probe 73 |
-| `sjasmplus` | SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus) | curriculum 161, form 796, fuzz 100, probe 148 |
+| `sjasmplus` | SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus) | curriculum 161, form 796, fuzz 100, probe 169 |
 
 Tracked divergences — differences we know about and check:
 
-- `issue-986` — 7 case(s)
+- `issue-986` — 1 case(s)
 
 ## Z8000
 
