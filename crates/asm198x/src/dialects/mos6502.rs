@@ -1133,11 +1133,53 @@ impl ExprParser<'_> {
         // 6502-family dialects: its bitwise/shift operators bind *looser* than
         // arithmetic, and `^` is exponentiation (tightest). Use ACME's ladder
         // when `^` means power; otherwise the shared one.
-        if self.caret == Caret::Power {
-            self.acme_or()
-        } else {
-            self.add_sub()
+        match self.caret {
+            Caret::Power => self.acme_or(),
+            Caret::BankOrXor => self.ca65_add(),
+            Caret::Xor => self.add_sub(),
         }
+    }
+
+    // ---- ca65's arithmetic ladder: two levels, as in its `SimpleExpr` and
+    // `Term`. `|` adds with `+` and `-`; `&`, `^`, `<<` and `>>` multiply with
+    // `*`, `/` and `.mod`. Each level is left-associative, so `1-1|2` is 2 and
+    // `2*3&1` is 0, measured on V2.19. The shared vasm-style ladder gave each
+    // bitwise operator its own tighter level, and so different bytes.
+
+    fn ca65_add(&mut self) -> Result<Expr, AsmError> {
+        let mut left = self.ca65_mul()?;
+        loop {
+            let op = match self.tokens.get(self.pos) {
+                Some(Tok::Plus) => BinOp::Add,
+                Some(Tok::Minus) => BinOp::Sub,
+                Some(Tok::Or) => BinOp::Or,
+                _ => break,
+            };
+            self.pos += 1;
+            let right = self.ca65_mul()?;
+            left = Expr::Bin(op, Box::new(left), Box::new(right));
+        }
+        Ok(left)
+    }
+
+    fn ca65_mul(&mut self) -> Result<Expr, AsmError> {
+        let mut left = self.unary()?;
+        loop {
+            let op = match self.tokens.get(self.pos) {
+                Some(Tok::Star) => BinOp::Mul,
+                Some(Tok::Slash) => BinOp::Div,
+                Some(Tok::Mod) => BinOp::Mod,
+                Some(Tok::And) => BinOp::And,
+                Some(Tok::Xor) => BinOp::Xor,
+                Some(Tok::Shl) => BinOp::Shl,
+                Some(Tok::Shr) => BinOp::Shr,
+                _ => break,
+            };
+            self.pos += 1;
+            let right = self.unary()?;
+            left = Expr::Bin(op, Box::new(left), Box::new(right));
+        }
+        Ok(left)
     }
 
     /// Comparisons, loosest of all — `a+1 = b*2` compares the sums. Non-
@@ -1377,7 +1419,7 @@ impl ExprParser<'_> {
                     return Ok(Expr::Hi(Box::new(self.unary()?)));
                 }
                 // In a ca65 dialect a leading `^` is the bank-byte prefix (as a
-                // binary operator it is XOR, handled at `bit_xor`).
+                // binary operator it is XOR, handled at `ca65_mul`).
                 Some(Tok::Xor) if self.caret == Caret::BankOrXor => {
                     self.pos += 1;
                     return Ok(Expr::Bank(Box::new(self.unary()?)));
