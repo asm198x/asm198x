@@ -428,7 +428,7 @@
       "slug": "ledger"
     },
     {
-      "context": "No tracked divergences.",
+      "context": "Tracked divergences — differences we know about and check:",
       "heading": "Z80N",
       "page": "Conformance ledger",
       "slug": "ledger"

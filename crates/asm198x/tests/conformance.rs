@@ -157,6 +157,92 @@ fn ref_assemble(
     ref_outcome(tmp, text, ext, build).bytes()
 }
 
+/// Who arbitrates a form sweep: the corpus file, the executable that signs
+/// the verdict, and the dialect the replay assembles it with.
+struct Arbiter {
+    cpu: &'static str,
+    tool: &'static str,
+    dialect: &'static str,
+    /// Forms where the reference has a bug Asm198x fixes rather than copies,
+    /// by case label, each with its issue. They record a tracked divergence;
+    /// one that stops differing fails.
+    divergences: &'static [(&'static str, u32)],
+}
+
+/// Sweep every form of a Z80-family `set` through a reference, recording
+/// what it did with each. A refusal is recorded too: it is a fact about the
+/// listing, and Asm198x must refuse the same source. What fails is Asm198x
+/// disagreeing with the reference — different bytes, or accepting what it
+/// refused, or refusing what it took.
+#[allow(clippy::too_many_arguments)]
+fn z80_forms(
+    tmp: &Path,
+    recorder: &mut support::verdicts::Recorder,
+    fails: &mut Vec<String>,
+    checked: &mut usize,
+    set: &'static isa::InstructionSet,
+    z80n: bool,
+    arbiter: &Arbiter,
+    build: impl Fn(&Path, &Path) -> Vec<Command>,
+) {
+    for insn in set.instructions {
+        for form in insn.forms {
+            let bytes: Vec<u8> = form.exemplar().collect();
+            let text = asm198x::listing_z80(&bytes, 0x8000, z80n);
+            let case = || support::verdicts::CaseRef {
+                suite: Suite::Form,
+                cpu: arbiter.cpu,
+                tool: arbiter.tool,
+                dialect: arbiter.dialect,
+                case: format!("{} {}", insn.mnemonic, form.mode),
+                source: &text,
+            };
+            let ours = support::verdicts::assemble_form(arbiter.cpu, arbiter.dialect, &text)
+                .expect("the replay drives this dialect");
+            let label = format!(
+                "{} {} {} {}",
+                arbiter.cpu, arbiter.tool, insn.mnemonic, form.mode
+            );
+            match ref_outcome(tmp, &text, "asm", &build) {
+                RefOutcome::Bytes(theirs) => {
+                    *checked += 1;
+                    let named = arbiter
+                        .divergences
+                        .iter()
+                        .find(|(name, _)| *name == format!("{} {}", insn.mnemonic, form.mode));
+                    let agrees = ours.as_ref().ok() == Some(&theirs);
+                    match named {
+                        Some((_, issue)) if !agrees => recorder.record(
+                            case(),
+                            Outcome::Divergence {
+                                divergence: format!("issue-{issue}"),
+                                hex: encode_hex(&theirs),
+                            },
+                        ),
+                        Some((_, issue)) => {
+                            fails.push(format!("{label}: matches now, so issue {issue} is closed"));
+                        }
+                        None => {
+                            recorder.record_bytes(case(), &theirs);
+                            if !agrees {
+                                fails.push(format!("{label}: ours {ours:02X?} vs {theirs:02X?}"));
+                            }
+                        }
+                    }
+                }
+                RefOutcome::Rejected { diagnostic } => {
+                    *checked += 1;
+                    if ours.is_ok() {
+                        fails.push(format!("{label}: the reference refused it ({diagnostic})"));
+                    }
+                    recorder.record(case(), Outcome::Rejected { diagnostic });
+                }
+                RefOutcome::NonVerdict { reason } => fails.push(format!("{label}: {reason}")),
+            }
+        }
+    }
+}
+
 #[test]
 #[ignore = "needs the reference assemblers; run with --ignored"]
 fn spec_opcodes_match_reference() {
@@ -257,6 +343,81 @@ fn spec_opcodes_match_reference() {
         }
     } else {
         eprintln!("SKIP: `pasmo` not on PATH");
+    }
+
+    // --- Z80 and Z80N / sjasmplus, Z80N / PasmoNext --------------------------
+    // A second arbiter for the Z80 forms, and the only ones for the Next's.
+    // sjasmplus takes the Z80N instructions under `--zxnext`, as Asm198x's
+    // `sjasmplus` dialect does when it targets the Next.
+    if have("sjasmplus") {
+        let sjasmplus = |z80n: bool| {
+            move |src: &Path, out: &Path| {
+                let mut c = Command::new("sjasmplus");
+                c.arg("--nologo");
+                if z80n {
+                    c.arg("--zxnext");
+                }
+                c.arg(format!("--raw={}", out.display())).arg(src);
+                vec![c]
+            }
+        };
+        let z80 = Arbiter {
+            cpu: "Z80",
+            tool: "sjasmplus",
+            dialect: "sjasmplus",
+            divergences: &[],
+        };
+        z80_forms(
+            &tmp,
+            &mut recorder,
+            &mut fails,
+            &mut checked,
+            &isa::z80::SET,
+            false,
+            &z80,
+            sjasmplus(false),
+        );
+        let next = Arbiter {
+            cpu: "Z80N",
+            tool: "sjasmplus",
+            dialect: "sjasmplus",
+            divergences: &[],
+        };
+        z80_forms(
+            &tmp,
+            &mut recorder,
+            &mut fails,
+            &mut checked,
+            &isa::z80::NEXT,
+            true,
+            &next,
+            sjasmplus(true),
+        );
+    } else {
+        eprintln!("SKIP: `sjasmplus` not on PATH");
+    }
+    if have("pasmo") {
+        // PasmoNext writes PUSH nn's immediate low byte first (#984).
+        let next = Arbiter {
+            cpu: "Z80N",
+            tool: "pasmo",
+            dialect: "pasmonext",
+            divergences: &[("PUSH nn", 984)],
+        };
+        z80_forms(
+            &tmp,
+            &mut recorder,
+            &mut fails,
+            &mut checked,
+            &isa::z80::NEXT,
+            true,
+            &next,
+            |src: &Path, out: &Path| {
+                let mut c = Command::new("pasmo");
+                c.arg(src).arg(out);
+                vec![c]
+            },
+        );
     }
 
     // --- 65816 / ca65 (6502 base + the extension) --------------------------
