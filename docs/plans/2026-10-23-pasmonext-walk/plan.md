@@ -34,6 +34,9 @@ the gate in Asm198x. The design is recorded in
 ## Next
 
 - Lang198x's 5c steps 6 to 8: reading options, three-pass mode, `--86`.
+  - **Deferred, `--86`** (2026-10-26): it waits for 8086 support in Isa198x
+    and Asm198x, which is the CPU roadmap's new-encoding-model tier. Neither
+    has it yet.
   - **Done, three passes:** a value that moves in pass 2, or `--pass3`,
     runs a third, and a value that moves in it is a phase error. Every
     three-pass program in the fixture now runs; six are named deviations,
