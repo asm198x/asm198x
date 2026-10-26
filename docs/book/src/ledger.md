@@ -5,9 +5,9 @@ observation of a real reference assembler, not an expectation written
 by hand. Regenerate with `cargo xtask ledger`.
 
 - **Release:** `v0.0.72`
-- **Corpus hash:** `0de7cb969860113a473c25dfa2ae9b5a6379fe0d66c3f493da630362127bd235`
+- **Corpus hash:** `0acee2deda91d3682bd120af2265237e9c2e80128645c614756f2ba6ab0e0edd`
 - **Pinned curriculum:** `f11698d0b51b3a6c1209cec3d649229aa35af97f` (2026-08-27)
-- **CPUs:** 23, holding 9567 verdict(s)
+- **CPUs:** 23, holding 9568 verdict(s)
 
 ## 1802
 
@@ -41,10 +41,8 @@ Form coverage: **151/151** (100.0%)
 Tracked divergences — differences we know about and check:
 
 - `issue-761` — 1 case(s)
-- `issue-762` — 1 case(s)
 - `issue-798` — 1 case(s)
 - `issue-844` — 1 case(s)
-- `issue-848` — 2 case(s)
 - `issue-850` — 1 case(s)
 - `issue-866` — 2 case(s)
 - `issue-868` — 1 case(s)
@@ -52,7 +50,6 @@ Tracked divergences — differences we know about and check:
 - `issue-876` — 1 case(s)
 - `issue-891` — 1 case(s)
 - `issue-918` — 1 case(s)
-- `issue-931` — 2 case(s)
 
 ## 65816
 
@@ -60,7 +57,7 @@ Form coverage: **270/270** (100.0%)
 
 | arbiter | version | verdicts |
 |---|---|---|
-| `ca65` | ca65 V2.19 - Git 8d86ca7 | form 270, probe 69 |
+| `ca65` | ca65 V2.19 - Git 8d86ca7 | form 270, probe 70 |
 
 Tracked divergences — differences we know about and check:
 

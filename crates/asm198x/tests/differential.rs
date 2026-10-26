@@ -1234,11 +1234,11 @@ const PROBES: &[Probe] = &[
     // asm198x#940: each open ca65 issue's case, measured on V2.19 under the
     // flat link. A refusal by ca65 that we accept is recorded and noted; a
     // gap names the issue the new front end (lang198x/ca65) closes.
-    gap("ca65", "unary plus", ".byte +1\n.byte 2*+3\n", 931),
-    gap("ca65", "unary plus after a function", ".res .left(2,{1,2})+1\n", 931),
-    gap("ca65", "a space before a label's colon", "finish : .byte 7\n.word finish\n", 848),
+    ok ("ca65", "unary plus", ".byte +1\n.byte 2*+3\n"),
+    ok ("ca65", "unary plus after a function", ".res .left(2,{1,2})+1\n"),
+    ok ("ca65", "a space before a label's colon", "finish : .byte 7\n.word finish\n"),
     ok ("ca65", "a space before a colon after a mnemonic is refused", "lda : .byte 7\n"),
-    gap("ca65", ":= defines a constant", "VALUE :=7\n.byte VALUE\n", 762),
+    ok ("ca65", ":= defines a constant", "VALUE :=7\n.byte VALUE\n"),
     gap("ca65", ".set rebinds a symbol", "VALUE .set 7\nVALUE .set 8\n.byte VALUE\n", 761),
     ok ("ca65", "a lookahead past a constructor is refused", "VALUE=2\n.byte VALUE .left(.ref(VALUE)+1,{+1})\n"),
     ok ("ca65", "a constructor before its constant is defined", ".byte .left(3,{VALUE,0}) .left(.ref(VALUE),{+1})\n"),
@@ -1261,7 +1261,7 @@ const PROBES: &[Probe] = &[
     gap("ca65", "a label on .endrepeat", ".repeat 1\n.byte 7\ntail:.endrepeat\n.word tail\n", 866),
     ok ("ca65", "a label on an untaken .else is undefined", ".if 0\n.byte 1\ntail:.else\n.byte 7\n.endif\n.word tail\n"),
     ok ("ca65", "a label spelt like a register is refused", "A: .byte 7\n"),
-    gap("ca65", "Z is not a register in 6502 mode", "Z : .byte 7\n", 848),
+    ok ("ca65", "Z is not a register in 6502 mode", "Z : .byte 7\n"),
     ok ("ca65", "a generated register-spelt label", ".ident(\"A\"): .byte 7\n"),
     gap("ca65", "a qualified label defines into a closed scope", ".scope outer\n.endscope\n.word outer::finish\nouter::finish:.byte 7\n", 850),
     gap("ca65", "source after .end is not read", ".byte 7\n.end\n.if 0\n", 844),
@@ -1276,6 +1276,7 @@ const PROBES: &[Probe] = &[
     // asm198x#940's cases in the flat readers, carried to stage 4.
     gap("ca65-816", ".const inside a captured list stays a token", "VALUE=7\n.byte .tcount({.const(VALUE)})\n", 928),
     ok ("ca65-816", ".sprintf inside a captured list is one token", "VALUE=7\n.byte .tcount({.sprintf(\"%d\",.const(VALUE))})\n"),
+    ok ("ca65-816", "unary plus in the flat reader", " .byte +1\n .byte 2*+3\n"),
     gap("ca65-816", ".if in the flat reader", ".byte 6\n.if 1\n.byte \"a\"\n.endif\n.byte 7\n", 895),
     gap("ca65-816", ".define in the flat reader", ".define VALUE $FF\n.byte VALUE\n", 820),
     ok ("ca65-816", "comparisons answer 1",

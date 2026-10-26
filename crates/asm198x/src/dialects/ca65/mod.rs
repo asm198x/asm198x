@@ -2716,7 +2716,7 @@ impl Walker {
 
         // `NAME = expr` defines a constant — the shared `Item::Equ`, folded in
         // source order (later statements' size decisions see it).
-        if let Some(eq) = assignment_split(trimmed) {
+        if let Some((eq, value)) = assignment(trimmed) {
             let name = trimmed[..eq].trim();
             let qualified = self.constant_key(name, line)?;
             if self.expand_text_defines {
@@ -2727,7 +2727,7 @@ impl Walker {
             let expr = parse_value(
                 &self.anons,
                 self.scope_env.anchor_str(),
-                &trimmed[eq + 1..],
+                &trimmed[value..],
                 line,
             )?;
             let expr = match self.scope_syms(&Kind::Bytes(vec![expr]), line)? {
@@ -3045,16 +3045,53 @@ fn end_token_len(text: &str) -> Option<usize> {
     Some(text.len() - head.len() + 4)
 }
 
+/// A symbol assignment: where its name ends and where its value starts.
+/// ca65 spells one `NAME = value` and `NAME := value`; the second makes the
+/// symbol a label, with the same value (measured on V2.19, #762).
+pub(crate) fn assignment(trimmed: &str) -> Option<(usize, usize)> {
+    if let Some(at) = trimmed.find(":=") {
+        let left = trimmed[..at].trim();
+        if !left.is_empty()
+            && left
+                .chars()
+                .all(|c| c.is_ascii_alphanumeric() || matches!(c, '_' | '@' | ':'))
+        {
+            return Some((at, at + 2));
+        }
+    }
+    assignment_split(trimmed).map(|eq| (eq, eq + 1))
+}
+
 /// Split the initial label token at a single colon. A scope's `::` pair
 /// stays inside the token; quoted/operand colons never become label heads.
+/// The colon may follow the name after spaces, as in `finish : .byte 7`
+/// (measured on ca65 V2.19, #848), so the head can hold them: take the name
+/// with `trim_end_matches(':').trim_end()`. `:=` is an assignment, and a
+/// colon before `+`, `-`, `<` or `>` is an unnamed-label reference such as
+/// `beq :+`, so neither is a label head.
 fn split_label_head(text: &str) -> Option<(&str, &str)> {
     let bytes = text.as_bytes();
+    let colon = |at: usize| -> Option<(&str, &str)> {
+        match bytes.get(at + 1) {
+            Some(b'=') => None,
+            _ => Some((&text[..at + 1], text[at + 1..].trim_start())),
+        }
+    };
     let mut at = 0;
     while at < bytes.len() {
         match bytes[at] {
             b':' if bytes.get(at + 1) == Some(&b':') => at += 2,
-            b':' => return Some((&text[..at + 1], text[at + 1..].trim_start())),
+            b':' => return colon(at),
             c if c.is_ascii_alphanumeric() || matches!(c, b'_' | b'@' | b'.') => at += 1,
+            // A control command such as `.byte` is never a label.
+            b' ' | b'\t' if at > 0 && bytes[0] != b'.' => {
+                let next = at + text[at..].len() - text[at..].trim_start_matches([' ', '\t']).len();
+                return match (bytes.get(next), bytes.get(next + 1)) {
+                    (Some(b':'), Some(b':' | b'+' | b'-' | b'<' | b'>')) => None,
+                    (Some(b':'), _) => colon(next),
+                    _ => None,
+                };
+            }
             _ => return None,
         }
     }
@@ -3129,7 +3166,7 @@ fn split_label_symbol<'a>(
             remainder,
         ));
     }
-    let Some(name) = word.strip_suffix(':') else {
+    let Some(name) = word.strip_suffix(':').map(str::trim_end) else {
         return Ok((None, trimmed));
     };
     // `@cheap:` — a cheap local. The `@cheap` source form round-trips; assembly
