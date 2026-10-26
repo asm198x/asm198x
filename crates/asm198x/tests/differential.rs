@@ -1273,6 +1273,55 @@ const PROBES: &[Probe] = &[
     ok ("ca65", ".left takes a constant count in a scope", ".scope inner\nVALUE=2\n.byte .left(VALUE,{\"abcd\"})\n.endscope\n"),
     ok ("ca65", "an unknown control command in an untaken branch", ".if 0\n.bogus=7\n.endif\n.byte 7\n"),
 
+    // ca65's lexical axes in its default mode, measured on V2.19 before the
+    // new front end's lexer is written (lang198x/ca65 step 3). Every
+    // `.feature` is off, `.case` is on and `.linecont` is off.
+    // Numbers.
+    ok ("ca65", "hex, binary and decimal numbers", ".byte $ff,$Fe,%1010,255,0\n.word $ABCD,00012\n"),
+    ok ("ca65", "a 0x prefix is not hex", ".byte 0x10\n"),
+    ok ("ca65", "an h suffix after a leading digit is hex", ".byte 10h,0ffh,0FFH\n"),
+    ok ("ca65", "underscores in a number need a feature", ".word 1_000\n"),
+    ok ("ca65", "a lone $ is not the address", ".word $\n"),
+    ok ("ca65", "* is the address", ".org $1000\n.word *,*+2\n"),
+    // Characters and strings.
+    ok ("ca65", "character constants", ".byte 'a','A',' ','\"'\n"),
+    ok ("ca65", "an unterminated character constant", ".byte 'ab'\n"),
+    ok ("ca65", "an empty character constant", ".byte ''\n"),
+    ok ("ca65", "strings and numbers in one list", ".byte \"ab\",1,\"c\"\n"),
+    ok ("ca65", "a backslash in a string is plain text", ".byte \"a\\n\"\n"),
+    ok ("ca65", "a single quote inside a string", ".byte \"it's\"\n"),
+    ok ("ca65", "an empty string", ".byte \"\"\n"),
+    ok ("ca65", "an unterminated string", ".byte \"ab\n"),
+    // Names.
+    ok ("ca65", "names are case-sensitive", "Foo=1\nfoo=2\n.byte Foo,foo\n"),
+    ok ("ca65", "control commands ignore case", ".BYTE 1\n.Byte 2\n.byte 3\n"),
+    ok ("ca65", "mnemonics ignore case", "LDA #1\nlda #2\nLdA #3\n"),
+    ok ("ca65", "underscores and digits in names", "_a1=3\nb_2=4\n.byte _a1,b_2\n"),
+    ok ("ca65", "@ inside a name needs a feature", "a@b=1\n.byte a@b\n"),
+    ok ("ca65", "$ inside a name needs a feature", "a$b=1\n.byte a$b\n"),
+    ok ("ca65", "a leading dot is not a name", ".foo=1\n.byte 1\n"),
+    ok ("ca65", "cheap locals reset at each global label",
+        "g1: .byte 1\n@l: .byte 2\n.word @l\ng2: .byte 3\n@l: .byte 4\n.word @l\n"),
+    ok ("ca65", "unnamed labels and their references",
+        ":\n.word :-,:+,:++\n: .byte 1\n: .byte 2\n"),
+    ok ("ca65", "the scope operator", ".scope s\nv=3\n.endscope\nv=4\n.byte s::v,::v\n"),
+    // Comments and line ends.
+    ok ("ca65", "comments after a semicolon", "; whole line\n.byte 1 ; trailing\n;\n"),
+    ok ("ca65", "C comments need a feature", ".byte 1 /* x */\n"),
+    ok ("ca65", "a double slash is not a comment", ".byte 1 // x\n"),
+    ok ("ca65", "CRLF line endings", ".byte 1\r\n.byte 2\r\n"),
+    ok ("ca65", "a backslash does not continue a line", ".byte 1, \\\n2\n"),
+    ok ("ca65", "tabs between fields", "\tlda\t#1\t; c\n\t.byte\t2\n"),
+    // Address sizes, which depend on a colon being adjacent.
+    ok ("ca65", "z: forces zero page and a: absolute", "lda z:$12\nlda a:$12\nlda $12\n"),
+    ok ("ca65", "f: is not a 6502 address size", "lda f:$12\n"),
+    // Operators, spelt as symbols and as words.
+    ok ("ca65", "symbol operators",
+        ".byte 6&3,6|1,6^3,~0&$ff,!0,1&&2,0||1,1<>2,2>=1,7/2,7 .mod 4\n"),
+    ok ("ca65", "word operators",
+        ".byte 6 .and 3,6 .or 1,6 .xor 3,.not 0,1 .shl 2,8 .shr 1,6 .bitand 3,6 .bitor 1,6 .bitxor 3,.bitnot 0 & $ff\n"),
+    ok ("ca65", "byte selection prefixes", ".byte <$1234,>$1234,^$123456\n"),
+
     // asm198x#940's cases in the flat readers, carried to stage 4.
     gap("ca65-816", ".const inside a captured list stays a token", "VALUE=7\n.byte .tcount({.const(VALUE)})\n", 928),
     ok ("ca65-816", ".sprintf inside a captured list is one token", "VALUE=7\n.byte .tcount({.sprintf(\"%d\",.const(VALUE))})\n"),
