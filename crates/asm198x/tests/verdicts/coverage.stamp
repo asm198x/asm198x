@@ -31,8 +31,8 @@ Z8001	271/271	100.0%
 # suites have no denominator that ought to exist).
 # 1802	form=255
 # 2650	form=245
-# 6502	curriculum=189 form=302 fuzz=200 probe=104
-# 65816	form=270 probe=65
+# 6502	curriculum=189 form=302 fuzz=200 probe=142
+# 65816	form=270 probe=69
 # 6800	form=197
 # 68000	curriculum=106 form=838 fuzz=91 probe=79 sweep-chunk=160
 # 6809	form=277 fuzz=198 probe=50 sweep-chunk=98
