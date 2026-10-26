@@ -27,6 +27,14 @@ use crate::source::{SourceLoader, SourceMap};
 /// File inclusion, macros, repetition and conditional assembly beyond the
 /// shared Z80 base.
 pub const DIRECTIVES: &[Directive] = &[
+    // PasmoNext 0.1.3 has no `DM`, measured on 2026-10-26: `dm 1` is a label
+    // `dm` followed by `1` as an instruction, which it rejects. So pasmo's
+    // byte data is the shared list without that spelling.
+    Directive {
+        id: "bytes",
+        pattern: Pattern::Exact(&["defb", "db", "defm"]),
+        category: Category::Operation,
+    },
     Directive {
         id: "incbin",
         pattern: Pattern::Exact(&["incbin"]),
@@ -729,10 +737,13 @@ mod tests {
             asm("ld hl, $5800 + 23*32").expect("precedence").bytes,
             vec![0x21, 0xE0, 0x5A]
         );
+        // PasmoNext 0.1.3 reads a `(` that starts an operand as an address,
+        // so `ld hl,(1+2)*3` is rejected; a group later in the value is fine.
         assert_eq!(
-            asm("ld hl, (1+2)*3").expect("parens").bytes,
+            asm("ld hl, 3*(1+2)").expect("parens").bytes,
             vec![0x21, 0x09, 0x00]
         );
+        assert!(asm("ld hl, (1+2)*3").is_err());
         let a = asm("ROW equ 64\n        ld a, ROW / 8\n").expect("div");
         assert_eq!(a.bytes, vec![0x3E, 0x08]);
     }
@@ -956,7 +967,7 @@ mod tests {
             vec![0xED, 0x23]
         );
         let err = crate::assemble_pasmo("        swapnib\n").expect_err("z80n off");
-        assert!(err.message.contains("SWAPNIB"), "unexpected: {err}");
+        assert!(err.message.contains("swapnib"), "unexpected: {err}");
     }
 
     // ----- Macros (#93) -------------------------------------------------
@@ -1120,12 +1131,19 @@ mod tests {
     }
 
     /// A diagnostic must name a line the author wrote. An error inside a body
-    /// reports the **invocation**, which is where a reader looks first.
+    /// reports the body's line, as PasmoNext 0.1.3 does ("ERROR on line 3"),
+    /// with the invocation as its expansion frame ("expanding macro on line
+    /// 6"). A bare word such as `frobnicate` is a label in PasmoNext, so the
+    /// body here holds an expression it cannot finish.
     #[test]
     fn an_error_inside_an_expansion_names_the_invocation() {
-        let err = asm(" nop\n MACRO bad\n frobnicate\n ENDM\n nop\n bad\n")
-            .expect_err("frobnicate is not an instruction");
-        assert_eq!(err.line, 6, "the invocation is on line 6: {err:?}");
+        let err = asm(" nop\n MACRO bad\n ld a,(\n ENDM\n nop\n bad\n")
+            .expect_err("the body cannot be read");
+        assert_eq!(err.line, 3, "the body's line: {err:?}");
+        let frames = err.span.expect("span").expansion_frames;
+        assert_eq!(frames.len(), 1);
+        assert_eq!(frames[0].invoked_at.line, 6);
+        assert_eq!(frames[0].defined_at.as_ref().map(|d| d.line), Some(2));
     }
 
     /// A self-recursive macro **segfaults** pasmo (exit 139), exactly as it
@@ -1365,7 +1383,8 @@ mod tests {
     #[test]
     fn a_diagnostic_never_names_a_directive_pasmo_lacks() {
         let err = asm(" org 0\n IF nope\n nop\n ENDIF\n").expect_err("undefined");
-        assert!(err.message.contains("equ"), "{err:?}");
+        // PasmoNext 0.1.3's own message.
+        assert_eq!(err.message, "Symbol 'nope' is undefined", "{err:?}");
         assert!(!err.message.contains("DEFINE"), "{err:?}");
     }
 

@@ -10,7 +10,7 @@
 use std::cell::RefCell;
 use std::collections::HashMap;
 
-use lang198x_z80_asm::ast::{Expr as SourceExpr, Statement as SourceStatement};
+use lang198x_z80_asm::ast::{Expr as SourceExpr, Statement as SourceStatement, View};
 use lang198x_z80_asm::expand::{ActiveLine, Block, Expander, Host, Program};
 use lang198x_z80_asm::lower::{
     self, Cpu, Definition, Known, Message, Piece as MessagePiece, Scope,
@@ -72,8 +72,44 @@ pub(crate) fn statements(
     options: &Options,
 ) -> Result<(Vec<Statement>, Vec<Warning>), AsmError> {
     let profile = options.profile();
-    let program = Program::load(ROOT, source, profile, |_| None).map_err(too_long)?;
-    Walk::new(z80n, vec![FileId(0)], options)?.run(&program, &mut |_| None)
+    let included = RefCell::new(Vec::new());
+    let program = Program::load(ROOT, source, profile, |name| {
+        included.borrow_mut().push(name.to_owned());
+        None
+    })
+    .map_err(too_long)?;
+    let binary = RefCell::new(Vec::new());
+    let mut binaries = |name: &str| {
+        binary.borrow_mut().push(name.to_owned());
+        None
+    };
+    // This entry assembles one file, so a file the source reads points at
+    // the multi-file entry, as every dialect's single-source entry does.
+    Walk::new(z80n, vec![FileId(0)], options)?
+        .run(&program, &mut binaries)
+        .map_err(|mut error| {
+            let single = |directive: &str, name: &str, what: &str| {
+                format!(
+                    "cannot resolve `{directive} \"{name}\"` here — the single-source API \
+                     assembles one file; use the multi-file entry point (the CLI resolves \
+                     {what} automatically)"
+                )
+            };
+            if let Some(name) = included
+                .borrow()
+                .iter()
+                .find(|name| error.message == format!("`{name}` was not found"))
+            {
+                error.message = single("include", name, "includes");
+            } else if let Some(name) = binary
+                .borrow()
+                .iter()
+                .find(|name| error.message == format!("File '{name}' not found"))
+            {
+                error.message = single("incbin", name, "binary inclusions");
+            }
+            error
+        })
 }
 
 /// Statements for a program whose root is `FileId(0)` in `map`, reading
@@ -93,8 +129,41 @@ pub(crate) fn statements_multi(
         map.contents(id).map(str::to_owned)
     })
     .map_err(too_long)?;
+    // The front end reads every include before the walk runs, so each file
+    // is recorded first as included from line 0; this gives the real line.
+    for (index, loaded) in program.files().iter().enumerate().skip(1) {
+        let Some(site) = loaded.included_at() else {
+            continue;
+        };
+        let TextId::File(parent) = site.text() else {
+            continue;
+        };
+        let parent_text = program.file(parent).map_or("", |file| file.text());
+        let before = parent_text
+            .get(..site.range().start().get() as usize)
+            .unwrap_or_default();
+        let line = u32::try_from(before.matches('\n').count() + 1).unwrap_or(u32::MAX);
+        if let (Some(&id), Some(&from)) = (files.get(index), files.get(parent.get() as usize)) {
+            map.set_included_from(id, from, line);
+        }
+    }
     let mut binaries = |name: &str| loader.load_binary(name, None).ok();
-    Walk::new(z80n, files, options)?.run(&program, &mut binaries)
+    // A refused `--equ` text is reported on its line of the command line.
+    let walk = Walk::new(z80n, files, options).map_err(|error| {
+        let prelude = map.prelude().map(|(id, _)| id);
+        let refused = options
+            .predefined
+            .iter()
+            .position(|text| predefine(text, options.profile()).is_err());
+        match (prelude, refused) {
+            (Some(id), Some(index)) => AsmError::at(
+                Span::in_file(id, u32::try_from(index + 1).unwrap_or(u32::MAX), 1),
+                error.message,
+            ),
+            _ => error,
+        }
+    })?;
+    walk.run(&program, &mut binaries)
 }
 
 /// PasmoNext opens a file by the name written, from the folder it runs in,
@@ -348,10 +417,17 @@ impl Walk {
                         }
                         _ => diagnostic.message().to_owned(),
                     };
-                    self.error_at(&expander, span, &message)
+                    let mut error = self.error_at(&expander, span, &message);
+                    if let Some(span) = error.span.as_mut() {
+                        span.expansion_frames = self.frames(&expander, &line);
+                    }
+                    error
                 },
             )?;
             let at = self.place(&expander, &line);
+            let operand = self
+                .operand_place(&expander, &line)
+                .unwrap_or_else(|| at.clone());
             let messages: Vec<String> = lowered.warnings().collect();
             let counters = std::mem::take(&mut self.counters);
             if let Some((statements, _)) = out.as_deref_mut() {
@@ -400,7 +476,9 @@ impl Walk {
                         }
                         (op, _) => op,
                     };
-                    statements.push(statement(&at, item.label, op));
+                    let mut made = statement(&at, item.label, op);
+                    made.operand_span = Some(operand.clone());
+                    statements.push(made);
                 }
             }
             if let Some(scope) = lowered.scope {
@@ -599,7 +677,11 @@ impl Walk {
     fn check(&mut self, expander: &Expander) -> Result<(), Stop> {
         if let Some((text, diagnostic)) = expander.diagnostics().first() {
             let span = syntax::Span::new(*text, diagnostic.range());
-            return Err(self.error_at(expander, span, diagnostic.message()));
+            let mut error = self.error_at(expander, span, diagnostic.message());
+            if let Some(span) = error.span.as_mut() {
+                span.expansion_frames = self.frames_of(expander.diagnostic_calls(0));
+            }
+            return Err(error);
         }
         if let Some(message) = self.pending.take() {
             return Err(AsmError::new(0, message));
@@ -610,15 +692,38 @@ impl Walk {
     /// Where `line` was written, with the calls that ran it.
     fn place(&self, expander: &Expander, line: &ActiveLine) -> Span {
         let mut span = self.span_of(expander, line.span());
-        span.expansion_frames = expander
-            .calls(line)
-            .into_iter()
-            .map(|call| {
-                let at = Span::in_file(self.file(call.at.file), call.at.line, call.at.column);
-                ExpansionFrame::new(call.name, None, at)
-            })
-            .collect();
+        span.expansion_frames = self.frames(expander, line);
         span
+    }
+
+    /// Where `line`'s first operand starts, for a diagnostic about it, with
+    /// the calls that ran the line.
+    fn operand_place(&self, expander: &Expander, line: &ActiveLine) -> Option<Span> {
+        let Some(SourceStatement::Instruction(instruction)) = line.line().statement() else {
+            return None;
+        };
+        let start = instruction.operands().next()?.syntax().text_range().start();
+        let start = start.checked_add(line.offset())?;
+        let span = syntax::Span::new(line.text(), syntax::TextRange::empty(start));
+        let mut place = self.span_of(expander, span);
+        place.expansion_frames = self.frames(expander, line);
+        Some(place)
+    }
+
+    /// The macro calls, `REPT`s and `IRP`s running `line`, innermost first.
+    fn frames(&self, expander: &Expander, line: &ActiveLine) -> Vec<ExpansionFrame> {
+        self.frames_of(expander.calls(line))
+    }
+
+    /// `calls` as frames, with each place in the source map's files.
+    fn frames_of(&self, calls: Vec<lang198x_z80_asm::expand::Call>) -> Vec<ExpansionFrame> {
+        let at = |location: lang198x_z80_asm::expand::Location| {
+            Span::in_file(self.file(location.file), location.line, location.column)
+        };
+        calls
+            .into_iter()
+            .map(|call| ExpansionFrame::new(call.name, call.defined.map(at), at(call.at)))
+            .collect()
     }
 
     fn span_of(&self, expander: &Expander, span: syntax::Span) -> Span {

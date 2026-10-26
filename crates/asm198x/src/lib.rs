@@ -1233,7 +1233,7 @@ pub fn assemble_pasmo(source: &str) -> Result<AssemblyResult, AsmError> {
         source,
         &dialects::Pasmo {
             z80n: false,
-            lang198x: None,
+            lang198x: Some(dialects::pasmo_walk::Options::default()),
         },
     )
     .map(AssemblyResult::from)
@@ -1251,7 +1251,7 @@ pub fn assemble_pasmonext(source: &str) -> Result<AssemblyResult, AsmError> {
         source,
         &dialects::Pasmo {
             z80n: true,
-            lang198x: None,
+            lang198x: Some(dialects::pasmo_walk::Options::default()),
         },
     )
     .map(AssemblyResult::from)
@@ -1321,13 +1321,32 @@ pub fn assemble_pasmo_lang198x_files_with(
     z80n: bool,
     options: &PasmoNextOptions,
 ) -> Result<AssemblyResult, MultiFileError> {
-    assemble_files(
+    assemble_pasmo_files_with(source, input_path, loader, z80n, options)
+}
+
+/// Assemble a multi-file PasmoNext 0.1.3 program, as
+/// [`assemble_pasmo_files`] or, with `z80n`, [`assemble_pasmonext_files`],
+/// under PasmoNext's command-line `options`. Each `--equ` text is recorded
+/// in the source map as a line of `<command-line --equ>`, so an error in one
+/// is reported there rather than in the program.
+///
+/// # Errors
+/// As [`assemble_pasmo_files`], including an `--equ` text PasmoNext refuses.
+pub fn assemble_pasmo_files_with(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+    z80n: bool,
+    options: &PasmoNextOptions,
+) -> Result<AssemblyResult, MultiFileError> {
+    let mut map = new_source_map(input_path, source);
+    map.set_prelude(&options.predefined.join("\n"));
+    assemble_mapped_files(
         &dialects::Pasmo {
             z80n,
             lang198x: Some(options.clone()),
         },
-        source,
-        input_path,
+        map,
         loader,
     )
 }
@@ -1459,7 +1478,7 @@ pub fn assemble_pasmo_files(
     assemble_files(
         &dialects::Pasmo {
             z80n: false,
-            lang198x: None,
+            lang198x: Some(dialects::pasmo_walk::Options::default()),
         },
         source,
         input_path,
@@ -1480,59 +1499,10 @@ pub fn assemble_pasmonext_files(
     assemble_files(
         &dialects::Pasmo {
             z80n: true,
-            lang198x: None,
+            lang198x: Some(dialects::pasmo_walk::Options::default()),
         },
         source,
         input_path,
-        loader,
-    )
-}
-
-/// As [`assemble_pasmo_files`], with command-line EQU definitions parsed as
-/// a separate virtual source before the root. `definitions` is EQU source text
-/// (one binding per line), preserving Pasmo's expression grammar. The root
-/// remains file 0 with its original line numbers; definition failures name
-/// `<command-line --equ>` in the ordinary source table.
-///
-/// # Errors
-/// As [`assemble_pasmo_files`], including errors in the definitions.
-pub fn assemble_pasmo_files_with_definitions(
-    source: &str,
-    input_path: &str,
-    loader: &dyn source::SourceLoader,
-    definitions: &str,
-) -> Result<AssemblyResult, MultiFileError> {
-    assemble_pasmo_defined(source, input_path, loader, definitions, false)
-}
-
-/// As [`assemble_pasmo_files_with_definitions`], targeting Z80N.
-///
-/// # Errors
-/// As [`assemble_pasmo_files_with_definitions`].
-pub fn assemble_pasmonext_files_with_definitions(
-    source: &str,
-    input_path: &str,
-    loader: &dyn source::SourceLoader,
-    definitions: &str,
-) -> Result<AssemblyResult, MultiFileError> {
-    assemble_pasmo_defined(source, input_path, loader, definitions, true)
-}
-
-fn assemble_pasmo_defined(
-    source: &str,
-    input_path: &str,
-    loader: &dyn source::SourceLoader,
-    definitions: &str,
-    z80n: bool,
-) -> Result<AssemblyResult, MultiFileError> {
-    let mut map = new_source_map(input_path, source);
-    map.set_prelude(definitions);
-    assemble_mapped_files(
-        &dialects::Pasmo {
-            z80n,
-            lang198x: None,
-        },
-        map,
         loader,
     )
 }

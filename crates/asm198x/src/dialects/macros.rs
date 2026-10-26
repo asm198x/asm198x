@@ -977,10 +977,12 @@ mod frame_tests {
                 crate::assemble_sjasmplus,
                 " MACRO bad\n frobnicate\n ENDM\n bad\n",
             ),
+            // A bare word is a label in PasmoNext 0.1.3, so its body holds an
+            // expression it cannot finish instead.
             (
                 "pasmo",
                 crate::assemble_pasmo,
-                " MACRO bad\n frobnicate\n ENDM\n bad\n",
+                " MACRO bad\n ld a,(\n ENDM\n bad\n",
             ),
             (
                 "lwasm",

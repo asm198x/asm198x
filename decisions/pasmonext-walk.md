@@ -1,9 +1,11 @@
 # Decision: PasmoNext's passes run in Asm198x's walk, over Lang198x's front end
 
-**Status:** Active. Binding for the `pasmo` and `pasmonext` dialects' second
-path, and for the path that replaces the shared Z80 core once the gate holds.
+**Status:** Active. Binding for the `pasmo` and `pasmonext` dialects, whose
+default path the walk has been since 2026-10-26. The old PasmoNext layer
+still formats source until the formatter moves onto Lang198x's tree, and is
+then deleted.
 
-**Date:** 2026-10-23.
+**Date:** 2026-10-23; the walk became the default on 2026-10-26.
 
 ## The decision
 

@@ -129,8 +129,14 @@ fn unknown_cpu_fails_with_every_dialect_and_mode() {
 #[test]
 fn z80n_opcodes_follow_the_requested_cpu() {
     // Captured SjASMPlus reference verdict: tests/verdicts/z80n.ndjson.
-    let scratch = Scratch::new(" mul d,e\n");
-    for dialect in ["pasmo", "pasmonext", "sjasmplus"] {
+    // PasmoNext 0.1.3 writes the Next's `MUL` with no operands, and rejects
+    // `mul d,e`.
+    for (dialect, source) in [
+        ("pasmo", " mul\n"),
+        ("pasmonext", " mul\n"),
+        ("sjasmplus", " mul d,e\n"),
+    ] {
+        let scratch = Scratch::new(source);
         for cpu in ["z80n", "NeXt", "pasmonext"] {
             let out = scratch.run(&[
                 "--dialect",

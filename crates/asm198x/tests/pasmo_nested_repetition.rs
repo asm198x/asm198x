@@ -129,7 +129,8 @@ fn errors_inside_nested_repetitions_keep_macro_provenance() {
         .expect("error fixture");
     let error = asm198x::assemble_pasmo(case["source"].as_str().expect("source"))
         .expect_err("invalid body");
-    assert_eq!(error.line, 7, "{error:?}");
+    // PasmoNext 0.1.3 names the body's line, 4, and the call on line 7.
+    assert_eq!(error.line, 4, "{error:?}");
     let span = error.span.expect("source span");
     assert!(
         span.expansion_frames
@@ -178,9 +179,13 @@ fn cli_nested_errors_keep_provenance_and_previous_images() {
             if mode == "json" {
                 assert!(result.stderr.is_empty(), "{result:?}");
                 let errors: Value = serde_json::from_slice(&result.stdout).expect("diagnostics");
-                assert_eq!(errors[0]["span"]["line"], 7, "{errors}");
+                assert_eq!(errors[0]["span"]["line"], 4, "{errors}");
                 assert_eq!(errors[0]["span"]["path"], "input.asm", "{errors}");
-                let frame = &errors[0]["span"]["expansion_frames"][0];
+                // Innermost first: the `REPT` inside `setv`, then `setv`.
+                let frames = &errors[0]["span"]["expansion_frames"];
+                assert_eq!(frames[0]["macro_name"], "REPT", "{errors}");
+                assert_eq!(frames[0]["invoked_at"]["line"], 3, "{errors}");
+                let frame = &frames[1];
                 assert_eq!(frame["macro_name"], "setv", "{errors}");
                 assert_eq!(frame["defined_at"]["line"], 2, "{errors}");
                 assert_eq!(frame["invoked_at"]["line"], 7, "{errors}");
@@ -188,7 +193,7 @@ fn cli_nested_errors_keep_provenance_and_previous_images() {
                 assert!(result.stdout.is_empty(), "{result:?}");
                 let error = String::from_utf8_lossy(&result.stderr);
                 assert!(
-                    error.contains("input.asm:7:")
+                    error.contains("input.asm:4:")
                         && error.contains("defined at input.asm:2")
                         && error.contains("invoked at input.asm:7"),
                     "{error}"
