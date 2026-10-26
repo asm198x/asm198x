@@ -208,11 +208,23 @@ pub(crate) trait Z80Syntax {
         false
     }
 
-    /// Whether `[x]` spells the memory operand `(x)`. SjASMPlus reads a whole
-    /// operand in square brackets as memory, never as grouping, and refuses
-    /// `[c]` for the port (probed, #986).
-    fn square_brackets(&self) -> bool {
-        false
+    /// An instruction operand in the spelling the shared tables read: a
+    /// dialect's other names for a register or for memory become the
+    /// canonical ones. The default reads every operand as written.
+    fn normalise_operand<'a>(&self, piece: &'a str) -> std::borrow::Cow<'a, str> {
+        std::borrow::Cow::Borrowed(piece)
+    }
+
+    /// Another name the dialect has for a mnemonic, as the canonical one.
+    fn mnemonic_alias(&self, _mnemonic: &str) -> Option<&'static str> {
+        None
+    }
+
+    /// The real instructions a dialect's fake instruction stands for, such as
+    /// sjasmplus's `ld hl,de` for `ld h,d` and `ld l,e`, or `None` for a real
+    /// one.
+    fn fake_instruction(&self, _mnemonic: &str, _args: &str) -> Option<Vec<String>> {
+        None
     }
 
     /// Whether a mnemonic must be spelt all lower or all upper case, as
@@ -2082,6 +2094,28 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
         if self.syntax.is_incbin(word) {
             return self.lower_incbin(node, args, out);
         }
+        // A fake instruction is lowered as the real ones it stands for, on
+        // this line, with its label binding to the first of them (#986).
+        if !matches!(node.item, Some(crate::ast::Item::Verbatim))
+            && let Some(lines) = self.syntax.fake_instruction(word, args)
+        {
+            let label = node.label.as_ref().map_or("", |sym| sym.name.as_str());
+            let text: String = lines
+                .iter()
+                .enumerate()
+                .map(|(i, real)| format!("{} {real}\n", if i == 0 { label } else { "" }))
+                .collect();
+            let origins: Vec<LineOrigin> = lines
+                .iter()
+                .map(|_| LineOrigin {
+                    line,
+                    frames: node.span.expansion_frames.clone(),
+                })
+                .collect();
+            let program =
+                parse_text_keyword(self.syntax, self.set, self.ext, file, &text, Some(&origins))?;
+            return crate::ast::evaluate(self, &program.nodes, true, out);
+        }
         // Under syntax `a`, the comma is no longer the legacy
         // multi-instruction delimiter. SjASMPlus consequently accepts the
         // explicit accumulator on the one-operand ALU family and lowers it to
@@ -3945,8 +3979,9 @@ fn parse_op<S: Z80Syntax>(
             ),
         ));
     }
-    let mnemonic = word.to_ascii_uppercase();
-    let one_case = word == mnemonic || word == word.to_ascii_lowercase();
+    let upper = word.to_ascii_uppercase();
+    let one_case = word == upper || word == word.to_ascii_lowercase();
+    let mnemonic = syntax.mnemonic_alias(&upper).map_or(upper, str::to_string);
     if syntax.single_case_mnemonics() && !one_case && has_mnemonic(set, ext, &mnemonic) {
         return Err(AsmError::new(
             line,
@@ -4133,7 +4168,7 @@ fn resolve<S: Z80Syntax>(
     let pieces = split_operands(args);
     let mut per_operand: Vec<Vec<Alternative>> = Vec::new();
     for (idx, piece) in pieces.iter().enumerate() {
-        let piece = square_memory(syntax, piece);
+        let piece = syntax.normalise_operand(piece);
         per_operand.push(alternatives(syntax, mnemonic, idx, &piece, consts, line)?);
     }
 
@@ -4492,18 +4527,6 @@ fn split_operands(args: &str) -> Vec<&str> {
     }
     out.push(args[start..].trim());
     out
-}
-
-/// `[x]` as the memory operand `(x)` where the dialect spells it so; any other
-/// operand, `[c]` included, is left for the parse to read or refuse.
-fn square_memory<'a, S: Z80Syntax>(syntax: &S, piece: &'a str) -> std::borrow::Cow<'a, str> {
-    let t = piece.trim();
-    match t.strip_prefix('[').and_then(|t| t.strip_suffix(']')) {
-        Some(inner) if syntax.square_brackets() && !inner.trim().eq_ignore_ascii_case("c") => {
-            std::borrow::Cow::Owned(format!("({inner})"))
-        }
-        _ => std::borrow::Cow::Borrowed(piece),
-    }
 }
 
 fn strip_parens(t: &str) -> Option<&str> {
