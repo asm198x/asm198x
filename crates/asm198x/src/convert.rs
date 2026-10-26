@@ -60,7 +60,7 @@ fn pasmo_to_sjasmplus(source: &str, z80n: bool) -> Result<Conversion, AsmError> 
     // operation text, macros and repetitions unexpanded.
     let mut program = crate::dialects::Pasmo {
         z80n,
-        lang198x: None,
+        options: crate::dialects::pasmo_walk::Options::default(),
     }
     .parse_ast(source)
     .map_err(|e| context(e, "the input does not parse under pasmo"))?

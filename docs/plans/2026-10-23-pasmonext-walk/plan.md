@@ -94,5 +94,13 @@ the gate in Asm198x. The design is recorded in
   files changed) to the same bytes and symbol files for all 614 it
   assembles, and gave the same verdict on all 1,230 verdict sources.
   `tests/fmt_pasmonext_gate.rs` keeps the check, through the walk.
-- Next: delete the old PasmoNext layer. The shared Z80 core stays until
-  SjASMPlus moves too.
+- Done, one path (2026-10-26). The pasmo dialect has no choice of front end
+  left: assembly always reads Lang198x's tree and runs the walk. The hidden
+  `assemble_pasmo_lang198x*` entry points are gone, and `PasmoNextOptions`
+  is public beside `assemble_pasmo_files_with`. The gate's verdict replay
+  duplicated `verdict_replay.rs`, which now runs the same path, so it went
+  too; the measured programs stay, as `tests/pasmonext_measured.rs`.
+- Still on the shared Z80 core: `convert`'s pasmo-to-sjasmplus AST, through
+  `PasmoSyntax`. It goes when the converter reads Lang198x's tree, which
+  waits for SjASMPlus's profile, since the converter writes SjASMPlus. The
+  shared Z80 core itself stays until SjASMPlus moves.

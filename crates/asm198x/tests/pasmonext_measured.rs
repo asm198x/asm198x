@@ -1,120 +1,12 @@
-//! The migration gate's second path: PasmoNext source read by Lang198x's
-//! front end (`lang198x-z80-asm`) and laid out by the PasmoNext walk.
+//! PasmoNext 0.1.3 measured on whole programs: the curriculum's programs with
+//! the files they read and the options they were run with, and the behaviour
+//! a verdict cannot record (messages, warnings, SAVEBIN, three passes).
 //!
-//! Every committed `pasmo` and `pasmonext` verdict is replayed through it, as
-//! `verdict_replay.rs` replays them through the shared Z80 core. A verdict may
-//! differ only if it is named in [`NOT_YET`] with the plan step that covers
-//! it, and a named verdict that passes fails the test, so the list only
-//! shrinks. The new path becomes the default once the list is empty (step 6
-//! of Lang198x's PasmoNext plan).
+//! The verdicts themselves replay in `verdict_replay.rs`.
 
 mod support;
 
-use std::path::Path;
-
-use support::verdicts::{code_samples_root, corpus_path, parse_curriculum_key, sha256_hex};
-use verdict_corpus::{Corpus, Outcome};
-
-/// Verdicts the new path does not match yet, each with what it waits for.
-const NOT_YET: &[(&str, &str)] = &[];
-
-/// What the new path made of `source`: its bytes, or `None` if it rejected
-/// it.
-fn assemble(source: &str, z80n: bool) -> Option<Vec<u8>> {
-    asm198x::assemble_pasmo_lang198x(source, z80n)
-        .ok()
-        .map(|result| result.bytes)
-}
-
-#[test]
-fn every_pasmo_verdict_matches_through_lang198x() {
-    let corpus = Corpus::read(&corpus_path("z80")).expect("the Z80 corpus reads");
-    let mut checked = 0;
-    // Curriculum verdicts need the Code198x checkout at the recorded source,
-    // so they are counted apart: a run that reached none of them must say so.
-    let mut curriculum_checked = 0;
-    let mut curriculum_skipped = Vec::new();
-    let mut failures = Vec::new();
-    let mut passed_while_named = Vec::new();
-    for verdict in corpus.verdicts() {
-        let z80n = match verdict.dialect.as_str() {
-            "pasmo" => false,
-            "pasmonext" => true,
-            _ => continue,
-        };
-        let (expected, ours) = match &verdict.outcome {
-            Outcome::Bytes { .. } => (verdict.outcome.bytes(), assemble(&verdict.source, z80n)),
-            Outcome::Rejected { .. } => (None, assemble(&verdict.source, z80n)),
-            Outcome::Digest { digest } => {
-                let Some(ours) = curriculum(&verdict.source, z80n) else {
-                    curriculum_skipped.push(verdict.case.clone());
-                    continue;
-                };
-                curriculum_checked += 1;
-                (
-                    Some(digest.clone().into_bytes()),
-                    ours.map(|b| sha256_hex(&b).into_bytes()),
-                )
-            }
-            Outcome::Divergence { .. } => continue,
-        };
-        checked += 1;
-        let matches = expected == ours;
-        let named = NOT_YET.iter().any(|(case, _)| *case == verdict.case);
-        match (matches, named) {
-            (false, false) => failures.push(verdict.case.clone()),
-            (true, true) => passed_while_named.push(verdict.case.clone()),
-            _ => {}
-        }
-    }
-    eprintln!(
-        "pasmo verdicts through Lang198x: {checked} checked, {curriculum_checked} of them \
-         curriculum, {} curriculum not reached",
-        curriculum_skipped.len()
-    );
-    assert!(checked > 1000, "only {checked} verdicts were checked");
-    // CI names the checkout, at the pin the verdicts were recorded from, so
-    // there every curriculum verdict must be reached. A developer's sibling
-    // checkout may have moved on, so there the count is only reported.
-    if std::env::var_os("ASM198X_CODE_SAMPLES").is_some() {
-        assert!(
-            curriculum_checked > 0 && curriculum_skipped.is_empty(),
-            "curriculum verdicts not reached with ASM198X_CODE_SAMPLES set: \
-             {curriculum_skipped:#?}"
-        );
-    }
-    assert!(
-        failures.is_empty(),
-        "differ from PasmoNext through Lang198x: {failures:#?}"
-    );
-    assert!(
-        passed_while_named.is_empty(),
-        "now match, so take them off NOT_YET: {passed_while_named:#?}"
-    );
-}
-
-/// A curriculum verdict's program, assembled by the new path, if the
-/// curriculum is checked out at the recorded source. `Some(None)` is a
-/// rejection.
-fn curriculum(key: &str, z80n: bool) -> Option<Option<Vec<u8>>> {
-    let root = code_samples_root()?;
-    let (relpath, _, source_digest) = parse_curriculum_key(key)?;
-    let path = root.join(relpath);
-    let source = std::fs::read_to_string(&path).ok()?;
-    if sha256_hex(source.as_bytes()) != source_digest {
-        return None;
-    }
-    let dir = path.parent().unwrap_or(Path::new("."));
-    let name = path.file_name()?.to_str()?;
-    let loader = asm198x::source::FsLoader::new(dir, Vec::new());
-    Some(
-        asm198x::assemble_pasmo_lang198x_files(&source, name, &loader, z80n)
-            .ok()
-            .map(|result| result.bytes),
-    )
-}
-
-/// Measured programs the new path does not match yet, each with what it
+/// Measured programs Asm198x does not match yet, each with what it
 /// waits for. Three-pass programs are not listed: they are found by the
 /// fixture's `--- passes 3` and must be reported as such.
 const PROGRAMS_NOT_YET: &[(&str, &str)] = &[];
@@ -364,7 +256,7 @@ fn programs() -> Vec<Program> {
         .collect()
 }
 
-/// PasmoNext's command-line `options` as the new path takes them, or `None`
+/// PasmoNext's command-line `options` as Asm198x takes them, or `None`
 /// if one is not taken yet.
 fn options(options: &[String]) -> Option<asm198x::PasmoNextOptions> {
     let mut taken = asm198x::PasmoNextOptions::default();
@@ -389,12 +281,12 @@ fn measured_programs_match() {
     assert!(programs.len() >= 88, "the fixture has {}", programs.len());
     let mut failures = Vec::new();
     for program in &programs {
-        // Programs run with options the new path does not take yet, such as
+        // Programs run with options Asm198x does not take yet, such as
         // `--pass3`, wait for the step that takes them.
         let Some(options) = options(&program.options) else {
             continue;
         };
-        let result = asm198x::assemble_pasmo_lang198x_files_with(
+        let result = asm198x::assemble_pasmo_files_with(
             &program.source,
             "t.asm",
             &program.files,
@@ -479,17 +371,16 @@ fn includes_resolve_from_the_folder_pasmonext_runs_in() {
     std::fs::write(dir.join("mistakes/broken.asm"), source).expect("broken.asm");
     let loader = asm198x::source::FsLoader::new(&*dir, Vec::new());
     let result =
-        asm198x::assemble_pasmo_lang198x_files(source, "mistakes/broken.asm", &loader, false)
-            .expect("assembles");
+        asm198x::assemble_pasmo_files(source, "mistakes/broken.asm", &loader).expect("assembles");
     assert_eq!(result.bytes, [0x3E, 0x07, 0x00]);
 }
 
 #[test]
 fn messages_and_warnings_say_what_pasmonext_printed() {
     // Measured on PasmoNext 0.1.3: what each program printed. PasmoNext
-    // gives a `.WARNING` on both passes; the new path gives it once.
+    // gives a `.WARNING` on both passes; Asm198x gives it once.
     let said = |source: &str| -> Vec<(String, bool)> {
-        let result = asm198x::assemble_pasmo_lang198x(source, true).expect("assembles");
+        let result = asm198x::assemble_pasmonext(source).expect("assembles");
         result
             .warnings
             .iter()
@@ -526,7 +417,7 @@ fn messages_and_warnings_say_what_pasmonext_printed() {
         vec![("looks like a non existent instruction".to_owned(), false)]
     );
     let error = |source: &str| {
-        asm198x::assemble_pasmo_lang198x(source, true)
+        asm198x::assemble_pasmonext(source)
             .expect_err("rejected")
             .message
     };
@@ -572,7 +463,7 @@ fn savebin_writes_what_pasmonext_wrote() {
         ),
         ("here SAVEBIN \"out.bin\",0,1\n", "00"),
     ] {
-        let result = asm198x::assemble_pasmo_lang198x(source, true).expect("assembles");
+        let result = asm198x::assemble_pasmonext(source).expect("assembles");
         let files: Vec<(String, String)> = result
             .artifacts
             .iter()
@@ -589,8 +480,8 @@ fn savebin_writes_what_pasmonext_wrote() {
             "{source}"
         );
     }
-    let range = asm198x::assemble_pasmo_lang198x(" SAVEBIN \"out.bin\",0FFFFh,2\n", true)
-        .expect_err("out of range");
+    let range =
+        asm198x::assemble_pasmonext(" SAVEBIN \"out.bin\",0FFFFh,2\n").expect_err("out of range");
     assert_eq!(range.message, "Error SAVEBIN out of range");
 }
 
@@ -606,7 +497,7 @@ fn w8080_warns_once_about_each_z80_instruction() {
         warns_8080: true,
         ..Default::default()
     };
-    let result = asm198x::assemble_pasmo_lang198x_files_with(
+    let result = asm198x::assemble_pasmo_files_with(
         source,
         "t.asm",
         &asm198x::source::MemoryLoader::new(),
@@ -621,7 +512,7 @@ fn w8080_warns_once_about_each_z80_instruction() {
         .collect();
     let not_8080 = "not a 8080 instruction";
     assert_eq!(warned, [(3, not_8080), (4, not_8080), (6, not_8080)]);
-    let quiet = asm198x::assemble_pasmo_lang198x(source, true).expect("assembles");
+    let quiet = asm198x::assemble_pasmonext(source).expect("assembles");
     assert!(quiet.warnings.is_empty());
 }
 
@@ -630,9 +521,8 @@ fn three_passes_say_why_and_refuse_what_only_an_earlier_pass_defined() {
     // Measured on PasmoNext 0.1.3: `x` moves from 0 to 5 in pass 2, so it
     // says "Switching to 3 pass mode" there, on the line that moved it, and
     // runs a third pass.
-    let result =
-        asm198x::assemble_pasmo_lang198x("x equ later\n org x\n db 1\nlater equ 5\n", true)
-            .expect("assembles");
+    let result = asm198x::assemble_pasmonext("x equ later\n org x\n db 1\nlater equ 5\n")
+        .expect("assembles");
     let said: Vec<(usize, &str)> = result
         .warnings
         .iter()
@@ -643,7 +533,7 @@ fn three_passes_say_why_and_refuse_what_only_an_earlier_pass_defined() {
     // Only pass 1, where `x` was 0, defines `lab`; PasmoNext writes `dw lab`
     // with the value pass 1 gave it.
     let source = " org 0\nx equ later\n if x = 0\nlab: db 1\n endif\n dw lab\nlater equ 5\n";
-    let error = asm198x::assemble_pasmo_lang198x(source, true).expect_err("refused");
+    let error = asm198x::assemble_pasmonext(source).expect_err("refused");
     assert_eq!(error.line, 6);
     assert!(
         error

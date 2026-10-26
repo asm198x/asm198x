@@ -1,16 +1,16 @@
 //! The pasmo-family Z80 dialect (vanilla pasmo and PasmoNext).
 //!
-//! A thin surface over the shared Z80 core in [`crate::dialects::z80`]: pasmo's
-//! comment style (`;`) and number formats (`$hex`, `%binary`, decimal, `'c'`)
-//! are all that differ from the shared operand resolution, expression parser,
-//! and directives. The `z80n` flag selects the **target** instruction set —
-//! plain Z80 (vanilla pasmo) or the Spectrum Next's Z80N (pasmonext) — which is
-//! a target property, not a syntax one (see `decisions/syntax-stance.md`).
+//! Assembly reads the source with Lang198x's PasmoNext 0.1.3 front end
+//! (`lang198x-z80-asm`) and lays it out with the walk in
+//! [`crate::dialects::pasmo_walk`]; this module supplies the target, the
+//! directive surface and the engine's policies. The `z80n` flag selects the
+//! **target** instruction set — plain Z80 (vanilla pasmo) or the Spectrum
+//! Next's Z80N (pasmonext) — which is a target property, not a syntax one (see
+//! `decisions/syntax-stance.md`).
 //!
-//! **Macros** (#93): `MACRO`/`ENDM` in both spellings, with `LOCAL`-declared
-//! per-expansion labels, over the shared expander in
-//! [`crate::dialects::macros`] — this module supplies only the grammar,
-//! governed by `decisions/macro-expansion-framework.md`.
+//! [`PasmoSyntax`] is pasmo's surface over the shared Z80 core in
+//! [`crate::dialects::z80`]. Only `convert` still reads source through it, for
+//! the AST it rewrites into sjasmplus.
 
 use crate::dialect::{Dialect, Oversize};
 use crate::dialects::macros::{self, Expand};
@@ -87,11 +87,10 @@ pub const DIRECTIVES: &[Directive] = &[
 
 pub(crate) struct Pasmo {
     pub(crate) z80n: bool,
-    /// Read the source with Lang198x's PasmoNext front end and the walk in
-    /// [`crate::dialects::pasmo_walk`], with these PasmoNext options, instead
-    /// of the shared Z80 core. The migration gate runs both until the new one
-    /// matches every verdict.
-    pub(crate) lang198x: Option<pasmo_walk::Options>,
+    /// PasmoNext's command-line options. The source is read by Lang198x's
+    /// PasmoNext front end and laid out by the walk in
+    /// [`crate::dialects::pasmo_walk`].
+    pub(crate) options: pasmo_walk::Options,
 }
 
 impl Dialect for Pasmo {
@@ -116,16 +115,10 @@ impl Dialect for Pasmo {
         self.z80n.then_some(&isa::z80::NEXT)
     }
     fn parse(&self, source: &str) -> Result<Vec<Statement>, AsmError> {
-        if self.lang198x.is_some() {
-            return self.parse_warned(source).map(|(statements, _)| statements);
-        }
-        z80::assemble_keyword(
-            &PasmoSyntax,
-            self.instruction_set(),
-            self.extension_set(),
-            source,
-        )
+        self.parse_warned(source).map(|(statements, _)| statements)
     }
+    /// The shared Z80 core's AST, which only `convert` still reads; the
+    /// formatter and the assembler read Lang198x's tree.
     fn parse_ast(&self, source: &str) -> Result<Option<crate::ast::Program>, AsmError> {
         Ok(Some(z80::parse_program_keyword(
             &PasmoSyntax,
@@ -133,48 +126,30 @@ impl Dialect for Pasmo {
             self.extension_set(),
             crate::span::FileId(0),
             source,
-            // The formatter must not expand: it lays source out, and would
+            // The converter must not expand: it rewrites source, and would
             // otherwise write the expansions back in place of the macro.
             Expand::No,
         )?))
     }
-    /// The multi-file parse: the same environment-threaded walk as
-    /// sjasmplus's, resolving `include` and `incbin` lazily through the loader.
+    /// The multi-file parse, resolving `include` and `incbin` through the
+    /// loader as PasmoNext does.
     fn parse_multi(
         &self,
         map: &mut SourceMap,
         loader: &dyn SourceLoader,
     ) -> Result<Vec<Statement>, AsmError> {
-        if self.lang198x.is_some() {
-            return self
-                .parse_multi_warned(map, loader)
-                .map(|(statements, _)| statements);
-        }
-        z80::parse_program_multi_keyword(
-            &PasmoSyntax,
-            self.instruction_set(),
-            self.extension_set(),
-            map,
-            loader,
-        )
+        self.parse_multi_warned(map, loader)
+            .map(|(statements, _)| statements)
     }
     fn parse_warned(&self, source: &str) -> Result<(Vec<Statement>, Vec<Warning>), AsmError> {
-        if let Some(options) = &self.lang198x {
-            return pasmo_walk::statements(source, self.z80n, options);
-        }
-        self.parse(source)
-            .map(|statements| (statements, Vec::new()))
+        pasmo_walk::statements(source, self.z80n, &self.options)
     }
     fn parse_multi_warned(
         &self,
         map: &mut SourceMap,
         loader: &dyn SourceLoader,
     ) -> Result<(Vec<Statement>, Vec<Warning>), AsmError> {
-        if let Some(options) = &self.lang198x {
-            return pasmo_walk::statements_multi(map, loader, self.z80n, options);
-        }
-        self.parse_multi(map, loader)
-            .map(|statements| (statements, Vec::new()))
+        pasmo_walk::statements_multi(map, loader, self.z80n, &self.options)
     }
     /// pasmo silently truncates an over-range byte to its low 8 bits.
     fn oversized_byte_policy(&self) -> Oversize {
@@ -596,7 +571,7 @@ mod tests {
         let src = "; header\nstart:\n  ld a, 5   ; load five\n  ret\n";
         let d = Pasmo {
             z80n: false,
-            lang198x: None,
+            options: super::pasmo_walk::Options::default(),
         };
         let prog = z80::parse_program_keyword(
             &PasmoSyntax,

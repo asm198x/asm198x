@@ -1233,7 +1233,7 @@ pub fn assemble_pasmo(source: &str) -> Result<AssemblyResult, AsmError> {
         source,
         &dialects::Pasmo {
             z80n: false,
-            lang198x: Some(dialects::pasmo_walk::Options::default()),
+            options: dialects::pasmo_walk::Options::default(),
         },
     )
     .map(AssemblyResult::from)
@@ -1251,78 +1251,16 @@ pub fn assemble_pasmonext(source: &str) -> Result<AssemblyResult, AsmError> {
         source,
         &dialects::Pasmo {
             z80n: true,
-            lang198x: Some(dialects::pasmo_walk::Options::default()),
+            options: dialects::pasmo_walk::Options::default(),
         },
     )
     .map(AssemblyResult::from)
-}
-
-/// Assemble PasmoNext source through Lang198x's front end
-/// (`lang198x-z80-asm`) and the PasmoNext walk, rather than the shared Z80
-/// core: the second path the migration gate compares against every verdict.
-/// `z80n` selects the Spectrum Next's instructions, as `pasmonext` does.
-///
-/// Not a stable interface: it goes once the gate holds and the new path is
-/// the default.
-///
-/// # Errors
-/// Returns an [`AsmError`] on anything PasmoNext 0.1.3 rejects, or that the
-/// new front end does not lower yet.
-#[doc(hidden)]
-pub fn assemble_pasmo_lang198x(source: &str, z80n: bool) -> Result<AssemblyResult, AsmError> {
-    engine::assemble(
-        source,
-        &dialects::Pasmo {
-            z80n,
-            lang198x: Some(dialects::pasmo_walk::Options::default()),
-        },
-    )
-    .map(AssemblyResult::from)
-}
-
-/// As [`assemble_pasmo_lang198x`], for a program that reads other files with
-/// `INCLUDE` or `INCBIN` through `loader`.
-///
-/// # Errors
-/// As [`assemble_pasmo_files`].
-#[doc(hidden)]
-pub fn assemble_pasmo_lang198x_files(
-    source: &str,
-    input_path: &str,
-    loader: &dyn source::SourceLoader,
-    z80n: bool,
-) -> Result<AssemblyResult, MultiFileError> {
-    assemble_pasmo_lang198x_files_with(
-        source,
-        input_path,
-        loader,
-        z80n,
-        &PasmoNextOptions::default(),
-    )
 }
 
 /// PasmoNext 0.1.3's options that change what its source means, for
-/// [`assemble_pasmo_lang198x_files_with`]: `--nocase`, `--alocal` and
-/// `--equ`.
-///
-/// Not a stable interface, as [`assemble_pasmo_lang198x`].
-#[doc(hidden)]
+/// [`assemble_pasmo_files_with`]: `--equ`, `--nocase`, `--alocal`,
+/// `--bracket`, `--w8080` and `--pass3`.
 pub use dialects::pasmo_walk::Options as PasmoNextOptions;
-
-/// As [`assemble_pasmo_lang198x_files`], with PasmoNext's `options`.
-///
-/// # Errors
-/// As [`assemble_pasmo_files`], including an `--equ` text PasmoNext refuses.
-#[doc(hidden)]
-pub fn assemble_pasmo_lang198x_files_with(
-    source: &str,
-    input_path: &str,
-    loader: &dyn source::SourceLoader,
-    z80n: bool,
-    options: &PasmoNextOptions,
-) -> Result<AssemblyResult, MultiFileError> {
-    assemble_pasmo_files_with(source, input_path, loader, z80n, options)
-}
 
 /// Assemble a multi-file PasmoNext 0.1.3 program, as
 /// [`assemble_pasmo_files`] or, with `z80n`, [`assemble_pasmonext_files`],
@@ -1344,7 +1282,7 @@ pub fn assemble_pasmo_files_with(
     assemble_mapped_files(
         &dialects::Pasmo {
             z80n,
-            lang198x: Some(options.clone()),
+            options: options.clone(),
         },
         map,
         loader,
@@ -1478,7 +1416,7 @@ pub fn assemble_pasmo_files(
     assemble_files(
         &dialects::Pasmo {
             z80n: false,
-            lang198x: Some(dialects::pasmo_walk::Options::default()),
+            options: dialects::pasmo_walk::Options::default(),
         },
         source,
         input_path,
@@ -1499,7 +1437,7 @@ pub fn assemble_pasmonext_files(
     assemble_files(
         &dialects::Pasmo {
             z80n: true,
-            lang198x: Some(dialects::pasmo_walk::Options::default()),
+            options: dialects::pasmo_walk::Options::default(),
         },
         source,
         input_path,
