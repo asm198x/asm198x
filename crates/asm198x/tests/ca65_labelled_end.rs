@@ -151,7 +151,7 @@ fn native_end_labels_bind_before_termination() {
         );
         assert_eq!(shape(&root), before, "{name}: symbols and sections");
     }
-    assert_eq!(gaps, 13);
+    assert_eq!(gaps, 6);
 }
 
 #[test]

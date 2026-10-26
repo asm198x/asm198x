@@ -552,9 +552,6 @@
         }
       ],
       "native_hex": "0210",
-      "assembly_gaps": [
-        848
-      ],
       "dialect": "ca65"
     },
     {
@@ -704,9 +701,6 @@
         }
       ],
       "native_hex": "0210",
-      "assembly_gaps": [
-        848
-      ],
       "dialect": "ca65"
     },
     {
@@ -1330,9 +1324,6 @@
         }
       ],
       "native_hex": "070010",
-      "assembly_gaps": [
-        848
-      ],
       "dialect": "ca65"
     },
     {
@@ -1773,10 +1764,10 @@
         }
       ],
       "native_hex": "07",
+      "dialect": "ca65",
       "assembly_gaps": [
         848
-      ],
-      "dialect": "ca65"
+      ]
     },
     {
       "name": "6502_Z_ident",
@@ -1867,10 +1858,10 @@
         }
       ],
       "native_hex": "07",
+      "dialect": "ca65",
       "assembly_gaps": [
         848
-      ],
-      "dialect": "ca65"
+      ]
     },
     {
       "name": "6502_F_ident",
@@ -1975,9 +1966,6 @@
         }
       ],
       "native_hex": "07",
-      "assembly_gaps": [
-        848
-      ],
       "dialect": "ca65"
     },
     {
@@ -2083,9 +2071,6 @@
         }
       ],
       "native_hex": "07",
-      "assembly_gaps": [
-        848
-      ],
       "dialect": "ca65"
     },
     {
@@ -2317,9 +2302,6 @@
         }
       ],
       "native_hex": "07",
-      "assembly_gaps": [
-        848
-      ],
       "dialect": "ca65"
     },
     {
@@ -2719,10 +2701,10 @@
         }
       ],
       "native_hex": "07",
+      "dialect": "ca65",
       "assembly_gaps": [
         848
-      ],
-      "dialect": "ca65"
+      ]
     },
     {
       "name": "4510_F_ident",
@@ -3107,9 +3089,6 @@
         }
       ],
       "native_hex": "07",
-      "assembly_gaps": [
-        848
-      ],
       "dialect": "ca65"
     },
     {

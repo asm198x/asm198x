@@ -1343,6 +1343,13 @@ impl ExprParser<'_> {
             self.pos += 1;
             return Ok(Expr::Neg(Box::new(self.unary()?)));
         }
+        // ca65 takes a unary plus: `.byte +1` and `2*+3` (measured on V2.19,
+        // #931). Elsewhere a leading `+` can be ACME's anonymous label, so
+        // only the ca65 readers, which have the logical layer, read it so.
+        if self.logical && matches!(self.tokens.get(self.pos), Some(Tok::Plus)) {
+            self.pos += 1;
+            return self.unary();
+        }
         // Loose byte prefixes also occur after a binary operator (2 * >value).
         // They still wrap the whole expression to their right.
         if matches!(self.prec, BytePrec::Loose) {

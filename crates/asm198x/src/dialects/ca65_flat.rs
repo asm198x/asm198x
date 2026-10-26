@@ -1880,7 +1880,7 @@ pub(crate) fn defined_names(source: &str) -> std::collections::BTreeSet<String> 
             _ => {}
         }
         // `NAME = expr` and `NAME .set expr`.
-        if let Some(eq) = super::mos6502::assignment_split(code) {
+        if let Some((eq, _)) = super::ca65::assignment(code) {
             let name = code[..eq].trim();
             if super::mos6502::is_ident(name) {
                 out.insert(name.to_string());
@@ -2048,12 +2048,12 @@ impl text::TextSyntax for Ca65Text<'_> {
         if self.depth.get() > 0 {
             return None;
         }
-        let eq = super::mos6502::assignment_split(code)?;
+        let (eq, value) = super::ca65::assignment(code)?;
         let name = code[..eq].trim();
         if !super::mos6502::is_ident(name) {
             return None;
         }
-        let expr = super::ca65::constant_value(&code[eq + 1..], 0).ok()?;
+        let expr = super::ca65::constant_value(&code[value..], 0).ok()?;
         let value = super::mos6502::fold_const(&expr, numbers, 0).ok()?;
         Some((name.to_string(), value))
     }

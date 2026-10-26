@@ -151,7 +151,6 @@
       "generated_heads": [
         ".ident( \"A\" )"
       ],
-      "original_assembly_gap": 848,
       "symbol_values": {
         "A": 4096
       },
@@ -275,7 +274,6 @@
       "generated_heads": [
         ".ident( \"X\" )"
       ],
-      "original_assembly_gap": 848,
       "symbol_values": {
         "X": 4096
       },
@@ -399,7 +397,6 @@
       "generated_heads": [
         ".ident( \"Y\" )"
       ],
-      "original_assembly_gap": 848,
       "symbol_values": {
         "Y": 4096
       },
@@ -523,7 +520,6 @@
       "generated_heads": [
         ".ident( \"Z\" )"
       ],
-      "original_assembly_gap": 848,
       "symbol_values": {
         "Z": 4096
       },
@@ -647,7 +643,6 @@
       "generated_heads": [
         ".ident( \"F\" )"
       ],
-      "original_assembly_gap": 848,
       "symbol_values": {
         "F": 4096
       },
@@ -730,7 +725,6 @@
       "generated_heads": [
         ".ident( .sprintf(\"mark%d\", 2) )"
       ],
-      "original_assembly_gap": 848,
       "symbol_values": {
         "mark2": 4096
       },
@@ -1674,8 +1668,6 @@
         }
       ],
       "native_hex": "07",
-      "original_assembly_gap": 762,
-      "formatted_assembly_gap": 762,
       "generated_heads": [],
       "symbol_values": {},
       "dialect": "ca65"
@@ -1750,8 +1742,6 @@
         }
       ],
       "native_hex": "07",
-      "original_assembly_gap": 762,
-      "formatted_assembly_gap": 762,
       "generated_heads": [],
       "symbol_values": {},
       "dialect": "ca65"

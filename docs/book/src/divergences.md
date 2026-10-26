@@ -13,17 +13,15 @@ instead. If you are deciding whether to move a project that already builds, what
 you need is not reassurance — it is to know what will change.
 
 <!-- generated: xtask divergences --markdown -->
-18 tracked differences across 24 recorded cases.
+15 tracked differences across 19 recorded cases.
 
 | Difference | CPU | Dialect | Reference tool | Cases |
 |---|---|---|---|---|
 | [`issue-110`](https://github.com/asm198x/asm198x/issues/110) | 68000 | vasm | vasmm68k_mot | 4 |
 | [`issue-761`](https://github.com/asm198x/asm198x/issues/761) | 6502 | ca65 | ca65 | 1 |
-| [`issue-762`](https://github.com/asm198x/asm198x/issues/762) | 6502 | ca65 | ca65 | 1 |
 | [`issue-798`](https://github.com/asm198x/asm198x/issues/798) | 6502 | ca65 | ca65 | 1 |
 | [`issue-820`](https://github.com/asm198x/asm198x/issues/820) | 65816 | ca65-816 | ca65 | 1 |
 | [`issue-844`](https://github.com/asm198x/asm198x/issues/844) | 6502 | ca65 | ca65 | 1 |
-| [`issue-848`](https://github.com/asm198x/asm198x/issues/848) | 6502 | ca65 | ca65 | 2 |
 | [`issue-850`](https://github.com/asm198x/asm198x/issues/850) | 6502 | ca65 | ca65 | 1 |
 | [`issue-866`](https://github.com/asm198x/asm198x/issues/866) | 6502 | ca65 | ca65 | 2 |
 | [`issue-868`](https://github.com/asm198x/asm198x/issues/868) | 6502 | ca65 | ca65 | 1 |
@@ -33,7 +31,6 @@ you need is not reassurance — it is to know what will change.
 | [`issue-895`](https://github.com/asm198x/asm198x/issues/895) | 65816 | ca65-816 | ca65 | 1 |
 | [`issue-918`](https://github.com/asm198x/asm198x/issues/918) | 6502 | ca65 | ca65 | 1 |
 | [`issue-928`](https://github.com/asm198x/asm198x/issues/928) | 65816 | ca65-816 | ca65 | 1 |
-| [`issue-931`](https://github.com/asm198x/asm198x/issues/931) | 6502 | ca65 | ca65 | 2 |
 | [`issue-984`](https://github.com/asm198x/asm198x/issues/984) | Z80N | pasmonext | pasmo | 1 |
 <!-- /generated -->
 
@@ -55,8 +52,8 @@ closed as completed — it records the decision rather than tracking a fix.
 
 **`issue-761` to `issue-931` (ca65) — source ca65 V2.19 accepts and our ca65
 readers refuse or assemble differently.** Each is one of the open ca65 issues,
-recorded as a probe with ca65's own answer under a flat ld65 link: `.set`, `:=`,
-unary `+`, a space before a label's colon, labels on closing directives,
+recorded as a probe with ca65's own answer under a flat ld65 link: `.set`,
+labels on closing directives,
 `.sizeof`, qualified label definitions, generated register-spelt names,
 `.left` on a quoted list, macro arguments holding a function's comma, and source
 after `.end`; and, in the 65816 reader, `.if`, `.define` and `.const` inside a

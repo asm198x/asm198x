@@ -605,7 +605,7 @@ fn read_block_head(
             .map_err(|e| super::statement_error(e, file, &node.span.expansion_frames))?
     };
     if let Some((label, _)) = super::split_label_head(processed.trim()) {
-        let name = label.trim_end_matches(':');
+        let name = label.trim_end_matches(':').trim_end();
         if sw.reader.reserved_head_label(name, generated_label) {
             return Err(AsmError::at(
                 node.span.clone(),
@@ -782,7 +782,7 @@ fn sweep_line(
         .filter(|(_, rest)| super::end_token_len(rest).is_some())
         .map(|(label, _)| label);
     if let Some(label) = end_label {
-        let name = label.trim_end_matches(':');
+        let name = label.trim_end_matches(':').trim_end();
         if sw.reader.reserved_head_label(name, generated_label) {
             return Err(AsmError::at(
                 node.span.clone(),
@@ -802,7 +802,7 @@ fn sweep_line(
             })
     });
     let selected = if let Some((label, _)) = scope_head {
-        let name = label.trim_end_matches(':');
+        let name = label.trim_end_matches(':').trim_end();
         if sw.reader.reserved_head_label(name, generated_label) {
             return Err(AsmError::at(
                 node.span.clone(),
@@ -1011,7 +1011,7 @@ fn read_macro_label(
         source.to_string()
     };
     if let Some((label, _)) = super::split_label_head(source.trim()) {
-        let name = label.trim_end_matches(':');
+        let name = label.trim_end_matches(':').trim_end();
         if sw.reader.instruction_name(&name.to_ascii_uppercase()) {
             return Err(AsmError::at(
                 node.span.clone(),
