@@ -930,8 +930,8 @@ struct KwCx<'a, S: Z80Syntax> {
 /// Parse one file of a keyword-conditional program into the source-preserving
 /// tree: conditional blocks as [`Item::Conditional`](crate::ast::Item) (the
 /// `Keyword` style), every other line a verbatim node. Used for `--fmt`
-/// (`parse_ast`) and as the front half of [`assemble_keyword`] /
-/// [`parse_program_multi_keyword`].
+/// (`parse_ast`) and as the front half of [`assemble_keyword_warned`] /
+/// [`parse_program_multi_keyword_warned`].
 pub(crate) fn parse_program_keyword<S: Z80Syntax>(
     syntax: &S,
     set: &'static isa::InstructionSet,
@@ -3359,16 +3359,8 @@ fn run_passes<'a, S: Z80Syntax>(
     Ok((result, warnings))
 }
 
-pub(crate) fn assemble_keyword<S: Z80Syntax>(
-    syntax: &S,
-    set: &'static isa::InstructionSet,
-    ext: Option<&'static isa::InstructionSet>,
-    source: &str,
-) -> Result<Vec<Statement>, AsmError> {
-    Ok(assemble_keyword_warned(syntax, set, ext, source)?.0)
-}
-
-/// [`assemble_keyword`], keeping the advisories the passes raised (#99).
+/// Assemble a single-source keyword-conditional program to the engine's
+/// statement stream, keeping the advisories the passes raised (#99).
 pub(crate) fn assemble_keyword_warned<S: Z80Syntax>(
     syntax: &S,
     set: &'static isa::InstructionSet,
@@ -3380,19 +3372,9 @@ pub(crate) fn assemble_keyword_warned<S: Z80Syntax>(
 }
 
 /// Parse a multi-file keyword-conditional program to the engine's statement
-/// stream: the structure parse per file, includes resolving lazily *inside*
-/// the conditional walk (an untaken include never loads — KTD1).
-pub(crate) fn parse_program_multi_keyword<S: Z80Syntax>(
-    syntax: &S,
-    set: &'static isa::InstructionSet,
-    ext: Option<&'static isa::InstructionSet>,
-    map: &mut SourceMap,
-    loader: &dyn SourceLoader,
-) -> Result<Vec<Statement>, AsmError> {
-    Ok(parse_program_multi_keyword_warned(syntax, set, ext, map, loader)?.0)
-}
-
-/// [`parse_program_multi_keyword`], keeping the advisories the passes raised.
+/// stream, keeping the advisories the passes raised: the structure parse per
+/// file, includes resolving lazily *inside* the conditional walk (an untaken
+/// include never loads — KTD1).
 ///
 /// Re-walking is safe across an include boundary because [`SourceMap`] dedups
 /// by canonical path: a later pass resolves the same request to the same
