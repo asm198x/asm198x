@@ -161,6 +161,9 @@ pub fn assemble_form(cpu: &str, dialect: &str, source: &str) -> Option<Result<Ve
     let result = match (dialect, cpu) {
         ("acme", _) => asm198x::assemble_acme(source),
         ("pasmo", _) => asm198x::assemble_pasmo(source),
+        ("pasmonext", _) => asm198x::assemble_pasmonext(source),
+        ("sjasmplus", "Z80") => asm198x::assemble_sjasmplus(source),
+        ("sjasmplus", "Z80N") => asm198x::assemble_sjasmplus_next(source),
         ("ca65", "65816") => asm198x::assemble_ca65_816(source),
         ("ca65", "huc6280") => asm198x::assemble_ca65_huc6280(source),
         ("rgbasm", _) => asm198x::assemble_rgbasm(source),
