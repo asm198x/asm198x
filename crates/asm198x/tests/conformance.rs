@@ -1663,19 +1663,39 @@ fn differential_fuzz() {
     const PROGRAMS: usize = 100;
     const INSNS: usize = 6;
 
-    // (label, forms, our-assemble, disassemble, reference-build)
+    // The corpus file, the executable that signs each verdict, the dialect
+    // the replay assembles it with, and whether the Next's instructions are
+    // in the mix.
     struct Cpu {
         name: &'static str,
         tool: &'static str,
+        dialect: &'static str,
+        z80n: bool,
     }
     let cpus = [
         Cpu {
             name: "6502",
             tool: "acme",
+            dialect: "acme",
+            z80n: false,
         },
         Cpu {
             name: "Z80",
             tool: "pasmo",
+            dialect: "pasmo",
+            z80n: false,
+        },
+        Cpu {
+            name: "Z80",
+            tool: "sjasmplus",
+            dialect: "sjasmplus",
+            z80n: false,
+        },
+        Cpu {
+            name: "Z80N",
+            tool: "sjasmplus",
+            dialect: "sjasmplus",
+            z80n: true,
         },
     ];
 
@@ -1693,6 +1713,11 @@ fn differential_fuzz() {
             _ => isa::z80::SET
                 .instructions
                 .iter()
+                .chain(if cpu.z80n {
+                    isa::z80::NEXT.instructions
+                } else {
+                    &[]
+                })
                 .flat_map(|i| i.forms)
                 .collect(),
         };
@@ -1708,12 +1733,15 @@ fn differential_fuzz() {
             let (text, ours) = match cpu.name {
                 "6502" => {
                     let t = asm198x::listing_6502(&bytes, 0x0800);
-                    let o = asm198x::assemble_acme(&t).map(|a| a.bytes);
+                    let o = asm198x::assemble_acme(&t)
+                        .map(|a| a.bytes)
+                        .map_err(|e| e.to_string());
                     (t, o)
                 }
                 _ => {
-                    let t = asm198x::listing_z80(&bytes, 0x8000, false);
-                    let o = asm198x::assemble_pasmo(&t).map(|a| a.bytes);
+                    let t = asm198x::listing_z80(&bytes, 0x8000, cpu.z80n);
+                    let o = support::verdicts::assemble_form(cpu.name, cpu.dialect, &t)
+                        .expect("the replay drives this dialect");
                     (t, o)
                 }
             };
@@ -1733,9 +1761,18 @@ fn differential_fuzz() {
                     c.args(["-f", "cbm", "-o"]).arg(out).arg(src);
                     vec![c]
                 }
-                _ => {
+                "Z80" if cpu.tool == "pasmo" => {
                     let mut c = Command::new("pasmo");
                     c.arg(src).arg(out);
+                    vec![c]
+                }
+                _ => {
+                    let mut c = Command::new("sjasmplus");
+                    c.arg("--nologo");
+                    if cpu.z80n {
+                        c.arg("--zxnext");
+                    }
+                    c.arg(format!("--raw={}", out.display())).arg(src);
                     vec![c]
                 }
             });
@@ -1755,7 +1792,7 @@ fn differential_fuzz() {
                             suite: Suite::Fuzz,
                             cpu: cpu.name,
                             tool: cpu.tool,
-                            dialect: cpu.tool,
+                            dialect: cpu.dialect,
                             case: format!("fuzz program {p}"),
                             source: &text,
                         },

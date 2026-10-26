@@ -602,6 +602,28 @@ const PROBES: &[Probe] = &[
     ok ("sjasmplus", "operator <<",      " ld a,1<<2\n"),
     ok ("sjasmplus", "operator &",       " ld a,5 & 3\n"),
     ok ("sjasmplus", "operator ^",       " ld a,6 ^ 3\n"),
+    // The lexical and operator axes the SjASMPlus profile plan lists
+    // (lang198x/z80-asm docs/plans/2026-10-26-sjasmplus-profile.md). Each is
+    // a fact about 1.24.0, refusals included, before a front end claims it.
+    gap("sjasmplus", "block comment inside a line", " ld a,/* x */ 5\n", 986),
+    gap("sjasmplus", "block comment across lines", " nop /* x\n still */ ld a,2\n", 986),
+    ok ("sjasmplus", "block comments do not nest", " nop /* a /* b */ c */ nop\n"),
+    ok ("sjasmplus", "mnemonics are all one case", " LD A,1\n ld a,2\n"),
+    ok ("sjasmplus", "a mixed-case mnemonic is refused", " Ld a,2\n"),
+    ok ("sjasmplus", "labels are case-sensitive", "Foo equ 1\n ld a,foo\n"),
+    ok ("sjasmplus", "an unknown instruction is refused", " frobnicate\n"),
+    ok ("sjasmplus", "digit separator", " dw 0x1'000, 1'000\n"),
+    ok ("sjasmplus", "escapes in double quotes only", " db \"a\\nb\", 'a\\nb'\n"),
+    ok ("sjasmplus", "+ binds tighter than <<", " db 1<<2+1, 2<<1+1\n"),
+    gap("sjasmplus", "unsigned shift and bitwise mix", " db 16>>>2, 7&3|8\n", 986),
+    ok ("sjasmplus", "division, % and mod", " db 7/2, 7%2, 7 mod 2\n"),
+    ok ("sjasmplus", "C comparisons and logicals", " db 1+1==2, 3>2, 1<2, 2!=2, 1&&0, 1||0, !0, ~0&255\n"),
+    gap("sjasmplus", "high and low", " db high 1234h, low 1234h, high(1234h)\n", 986),
+    gap("sjasmplus", "square brackets address memory", " ld a,[hl]\n ld a,(hl)\n", 986),
+    ok ("sjasmplus", "a parenthesised expression operand", " ld a,(1+2)*3\n ld hl,(5)\n"),
+    gap("sjasmplus", "fake instruction ld hl,de", " ld hl,de\n", 986),
+    ok ("sjasmplus", "dot locals and qualified references", "g1:\n.l nop\n jr .l\ng2:\n.l nop\n jr g1.l\n"),
+    gap("sjasmplus", "character arithmetic", " ld a,'a'+1\n ld b,\"a\"\n", 986),
     ok ("sjasmplus", "temporary numeric labels",
         " jr nc,1F\n nop\n1 nop\n jr 1B\n1: nop\n djnz 1b\n jp 12F\n call 12f\n12 nop\n"),
     // Native 1.21.0 gives 7f 7f ff f8 ff fb ff ff ff 01 00 ff ff: `~` is
