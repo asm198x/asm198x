@@ -69,5 +69,22 @@ the gate in Asm198x. The design is recorded in
     the fixture, and all match.
 - Record the measured programs as verdicts (asm198x#963), so the old path's
   differences are tracked too.
-- Once the named lists are empty: make the walk the default for `pasmo` and
-  `pasmonext`, and delete the old PasmoNext layer.
+- **Done, the walk is the default** (2026-10-26) for `pasmo`, `pasmonext`,
+  `z80` and `z80n`, through the library, the CLI and the web shell. Steve
+  agreed to switch once the named lists were empty.
+  - The CLI takes PasmoNext's own `--equ` (and `-E`), `--nocase`,
+    `--alocal`, `--bracket`, `--w8080` and `--pass3`. `--equ` is read as
+    PasmoNext reads it, and a refused text is reported on its line of
+    `<command-line --equ>`.
+  - Diagnostics keep the frozen contract: expansion frames with the
+    `MACRO` line, the line each include was written on, the operand's
+    column, and the single-source entry's pointer to the multi-file one.
+  - Over the 618 Spectrum curriculum sources, the old and new paths give
+    the same bytes, symbols, debug lines and cycles for every program that
+    assembles. Twelve file tables differ, because the walk, like PasmoNext,
+    reads an `INCLUDE` in an untaken branch.
+  - Tests the old path held that PasmoNext contradicts were measured and
+    corrected, among them `ld hl,(1+2)*3`, `mul d,e`, `5 MOD 2`, an untaken
+    `INCLUDE`, `DM`, and the line an error in a macro body names.
+- Next: move `fmt` for `pasmo` onto Lang198x's tree, then delete the old
+  PasmoNext layer. The shared Z80 core stays until SjASMPlus moves too.

@@ -137,14 +137,18 @@ fn remainder_refusals_keep_include_diagnostics_and_previous_artifacts() {
 
 #[test]
 fn pasmo_keeps_its_expression_and_binary_literal_rules() {
+    // Measured on PasmoNext 0.1.3: `%` and `MOD` are its remainder, in either
+    // case, so `MOD` is no name, and `%101` alone is binary.
     for source in [" db 5%2\n", " db 5 MOD 2\n", " db 5 mod 2\n"] {
-        assert!(asm198x::assemble_pasmo(source).is_err());
-        assert!(asm198x::assemble_pasmonext(source).is_err());
+        assert_eq!(asm198x::assemble_pasmo(source).expect(source).bytes, [1]);
+        assert_eq!(
+            asm198x::assemble_pasmonext(source).expect(source).bytes,
+            [1]
+        );
     }
+    assert!(asm198x::assemble_pasmo("MOD equ 3\n db MOD\n").is_err());
     assert_eq!(
-        asm198x::assemble_pasmo("MOD equ 3\n db MOD,%101\n")
-            .expect("Pasmo symbols and binary")
-            .bytes,
-        [3, 5]
+        asm198x::assemble_pasmo(" db %101\n").expect("binary").bytes,
+        [5]
     );
 }

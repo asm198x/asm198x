@@ -380,6 +380,18 @@ impl SourceMap {
         Ok(id)
     }
 
+    /// Records that `id` was included by `from` at 1-based `line`, for a
+    /// front end that reads every include before it knows where each one
+    /// was written. The first record wins, as it does for [`load`](Self::load).
+    pub fn set_included_from(&mut self, id: FileId, from: FileId, line: u32) {
+        if let Some(file) = self.files.get_mut(id.0 as usize)
+            && id != FileId(0)
+            && file.included_from.is_none_or(|(_, at)| at == 0)
+        {
+            file.included_from = Some((from, line));
+        }
+    }
+
     /// The path of `id`, if allocated (canonical for includes; the root's is
     /// the spelling it was created with).
     #[must_use]

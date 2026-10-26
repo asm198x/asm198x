@@ -222,20 +222,18 @@ impl Assembler {
     }
 }
 
-/// Keep CLI definitions separate from the original root for both reporters.
+/// PasmoNext's options go to its own entry; every other flat dialect has one
+/// shape of entry.
 fn assemble_flat(
     assembler: &Assembler,
     source: &str,
     input: &str,
     loader: &dyn asm198x::source::SourceLoader,
-    definitions: &str,
+    options: &asm198x::PasmoNextOptions,
 ) -> Result<asm198x::AssemblyResult, asm198x::MultiFileError> {
     match assembler {
-        Assembler::Pasmo { z80n: false } if !definitions.is_empty() => {
-            asm198x::assemble_pasmo_files_with_definitions(source, input, loader, definitions)
-        }
-        Assembler::Pasmo { z80n: true } if !definitions.is_empty() => {
-            asm198x::assemble_pasmonext_files_with_definitions(source, input, loader, definitions)
+        Assembler::Pasmo { z80n } => {
+            asm198x::assemble_pasmo_files_with(source, input, loader, *z80n, options)
         }
         other => {
             let entry = other
@@ -608,10 +606,12 @@ fn run(args: &[String]) -> Result<String, String> {
     // the order is the search order (language-surface U1/KTD8). The
     // include-capable entry points (U2) feed them to the filesystem loader.
     let mut include_dirs: Vec<PathBuf> = Vec::new();
-    // Pasmo-compatible command-line constants. They are written as an
-    // assembly prelude before parsing, so conditional assembly sees them just
-    // as it sees an `equ` at the top of the source.
-    let mut equ_definitions: Vec<&str> = Vec::new();
+    // PasmoNext 0.1.3's own options that change what source means: each
+    // `--equ` text (PasmoNext also spells it `-E`), `--nocase`, `--alocal`,
+    // `--bracket`, `--w8080` and `--pass3`. The first one given names them
+    // all in the dialect check below.
+    let mut pasmo_options = asm198x::PasmoNextOptions::default();
+    let mut pasmo_option: Option<&str> = None;
     // sjasmplus's own flag: "Prefix for save/output/.. filenames in
     // directives". It is the reference conceding the host gets a say over
     // source-named writes without changing the language.
@@ -690,12 +690,37 @@ fn run(args: &[String]) -> Result<String, String> {
                 let dir = args.get(i).ok_or("`-I` needs a directory")?;
                 include_dirs.push(PathBuf::from(dir));
             }
-            "--equ" => {
+            "--equ" | "-E" => {
                 i += 1;
-                equ_definitions.push(args.get(i).ok_or("`--equ` needs NAME=VALUE")?);
+                let text = args.get(i).ok_or("`--equ` needs NAME=VALUE")?;
+                pasmo_options.predefined.push(text.clone());
+                pasmo_option.get_or_insert("--equ");
             }
             f if f.starts_with("--equ=") => {
-                equ_definitions.push(&f["--equ=".len()..]);
+                pasmo_options
+                    .predefined
+                    .push(f["--equ=".len()..].to_owned());
+                pasmo_option.get_or_insert("--equ");
+            }
+            "--nocase" => {
+                pasmo_options.names_in_any_case = true;
+                pasmo_option.get_or_insert("--nocase");
+            }
+            "--alocal" => {
+                pasmo_options.automatic_locals = true;
+                pasmo_option.get_or_insert("--alocal");
+            }
+            "--bracket" => {
+                pasmo_options.brackets_only = true;
+                pasmo_option.get_or_insert("--bracket");
+            }
+            "--w8080" => {
+                pasmo_options.warns_8080 = true;
+                pasmo_option.get_or_insert("--w8080");
+            }
+            "--pass3" => {
+                pasmo_options.three_passes = true;
+                pasmo_option.get_or_insert("--pass3");
             }
             "--disasm" | "--disassemble" => {
                 return Err("`--disasm` is now a subcommand: `asm198x disasm <input.bin>`".into());
@@ -748,7 +773,7 @@ fn run(args: &[String]) -> Result<String, String> {
             (linker_config.is_some(), "-C"),
             (outprefix.is_some(), "--outprefix"),
             (!include_dirs.is_empty(), "-I"),
-            (!equ_definitions.is_empty(), "--equ"),
+            (pasmo_option.is_some(), pasmo_option.unwrap_or("--equ")),
             (message_format_explicit, "--message-format"),
             (sym_format_explicit, "--sym-format"),
         ] {
@@ -887,12 +912,14 @@ fn run(args: &[String]) -> Result<String, String> {
             MessageFormat::Json => emit_json_failure(message),
             MessageFormat::Human => Err(message),
         })?;
-    if !equ_definitions.is_empty()
+    if let Some(option) = pasmo_option
         && (!matches!(mode, Mode::Assemble) || !matches!(assembler, Assembler::Pasmo { .. }))
     {
-        return Err("`--equ` is an assembly option for the pasmo/pasmonext dialects".into());
+        return Err(format!(
+            "`{option}` is an assembly option for the pasmo/pasmonext dialects"
+        ));
     }
-    let definitions = equ_source(&equ_definitions)?;
+    let definitions = &pasmo_options;
     if gb_rom && !matches!(assembler, Assembler::Rgbasm) {
         return Err("`--gb-rom` is only for the Game Boy dialect (rgbasm)".into());
     }
@@ -1002,7 +1029,7 @@ fn run(args: &[String]) -> Result<String, String> {
             (&debug, &sym, &listing, &listing_json, &map_report),
             sym_format,
             linker_config.as_deref(),
-            &definitions,
+            definitions,
         )
         .or_else(emit_json_failure);
     }
@@ -1198,7 +1225,7 @@ fn run(args: &[String]) -> Result<String, String> {
     // `--listing` on a multi-file program can splice the files (U9); the
     // resolution behaviour is the wrapped filesystem loader's, unchanged.
     let recorder = RecordingLoader::new(&loader);
-    let assembly = assemble_flat(&assembler, &source, input, &recorder, &definitions)
+    let assembly = assemble_flat(&assembler, &source, input, &recorder, definitions)
         .map_err(|e| render_multi_error(input, &e))?;
     for w in &assembly.warnings {
         // A warning inside an included file names that file (the multi-file
@@ -1933,33 +1960,6 @@ fn parse_u16(value: &str) -> Result<u16, String> {
     parsed.map_err(|_| format!("invalid address `{value}`"))
 }
 
-/// Turn Pasmo's repeatable `--equ NAME=VALUE` arguments into a source prelude.
-/// Keeping the value as source text deliberately gives it Pasmo's own numeric
-/// and expression grammar rather than inventing a second CLI-only parser.
-fn equ_source(definitions: &[&str]) -> Result<String, String> {
-    let mut prelude = String::new();
-    for definition in definitions {
-        let (name, value) = definition.split_once('=').ok_or_else(|| {
-            format!("invalid `--equ` definition `{definition}`; expected NAME=VALUE")
-        })?;
-        if name.is_empty()
-            || !name.chars().enumerate().all(|(i, c)| {
-                c == '_' || c.is_ascii_alphanumeric() && (i > 0 || !c.is_ascii_digit())
-            })
-            || value.trim().is_empty()
-        {
-            return Err(format!(
-                "invalid `--equ` definition `{definition}`; expected NAME=VALUE"
-            ));
-        }
-        prelude.push_str(name);
-        prelude.push_str(" equ ");
-        prelude.push_str(value);
-        prelude.push('\n');
-    }
-    Ok(prelude)
-}
-
 /// `asm198x convert --from <dialect> --to <dialect> <input> [-o <out>]`
 /// (#502): parse-and-re-emit conversion between dialects of one CPU,
 /// self-verified — output is written only when both sides assemble to
@@ -2043,8 +2043,9 @@ fn usage() -> String {
      \x20            (add --message-format=json for a machine-readable result +\n\
      \x20             diagnostics on stdout; --message-format=human is the default;\n\
      \x20             -I adds an include-search directory, repeatable, in order)\n\
-     \x20            (--equ NAME=VALUE defines a repeatable pasmo/pasmonext constant\n\
-     \x20             before conditional assembly, matching Pasmo's spelling)\n\
+     \x20            (--equ NAME=VALUE, or -E, defines a repeatable pasmo/pasmonext\n\
+     \x20             constant before conditional assembly, as PasmoNext does; its\n\
+     \x20             --nocase, --alocal, --bracket, --w8080 and --pass3 work too)\n\
      snapshot:    asm198x --dialect pasmonext --sna <input> [-o <out.sna>]\n\
      \x20            (Spectrum Z80 only; needs `end <addr>` for the entry point)\n\
      tape:        asm198x --dialect pasmonext --tap|--tzx <input> [-o <out.tap>]\n\
@@ -2201,7 +2202,7 @@ fn emit_json(
     ),
     sym_format: asm198x::SymbolFormat,
     linker_config: Option<&Path>,
-    definitions: &str,
+    definitions: &asm198x::PasmoNextOptions,
 ) -> Result<String, String> {
     let debug_requested =
         debug.is_some() || sym.is_some() || listing.is_some() || listing_json.is_some();
@@ -2441,38 +2442,23 @@ mod tests {
     fn pasmo_equ_definitions_are_visible_to_conditionals() {
         let source =
             "        if NEXT\n        defb 1\n        else\n        defb 2\n        endif\n";
-        let next = equ_source(&["NEXT=1", "SPECTRANET=0"]).expect("valid definitions");
-        let spectranet = equ_source(&["NEXT=0", "SPECTRANET=1"]).expect("valid definitions");
-
-        assert_eq!(
-            asm198x::assemble_pasmo_files_with_definitions(
+        let build = |definitions: &[&str]| {
+            let options = asm198x::PasmoNextOptions {
+                predefined: definitions.iter().map(|d| (*d).to_owned()).collect(),
+                ..Default::default()
+            };
+            asm198x::assemble_pasmo_files_with(
                 source,
                 "input.s",
                 &MemoryLoader::new(),
-                &next
+                false,
+                &options,
             )
-            .expect("NEXT build")
-            .bytes,
-            [1]
-        );
-        assert_eq!(
-            asm198x::assemble_pasmo_files_with_definitions(
-                source,
-                "input.s",
-                &MemoryLoader::new(),
-                &spectranet
-            )
-            .expect("Spectranet build")
-            .bytes,
-            [2]
-        );
-    }
-
-    #[test]
-    fn equ_definitions_require_a_symbol_and_value() {
-        for bad in ["NEXT", "=1", "1NEXT=1", "NEXT="] {
-            assert!(equ_source(&[bad]).is_err(), "`{bad}` must be rejected");
-        }
+            .expect("builds")
+            .bytes
+        };
+        assert_eq!(build(&["NEXT=1", "SPECTRANET=0"]), [1]);
+        assert_eq!(build(&["NEXT=0", "SPECTRANET=1"]), [2]);
     }
 
     #[test]

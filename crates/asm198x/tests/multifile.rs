@@ -870,15 +870,19 @@ fn pasmo_include_nests_and_shares_state() {
     assert_eq!(r.files, vec!["main.asm", "defs.inc", "body.inc"]);
 }
 
-/// Includes are resolved only when their branch is taken, as Pasmo's other
-/// conditional contents are.
+/// PasmoNext 0.1.3 reads every include as it loads the source, before any
+/// condition is decided, so one in an untaken branch must exist too.
+/// Measured: `ERROR on line 3` for this source.
 #[test]
-fn pasmo_untaken_include_is_not_loaded() {
+fn pasmo_untaken_include_is_still_loaded() {
     let loader = MemoryLoader::new();
     let src = "        org $8000\n        if 0\n        include \"missing.inc\"\n        endif\n        nop\n";
+    let e = assemble_pasmo_files(src, "main.asm", &loader).expect_err("the file is read");
+    assert_eq!(e.error.line, 3, "{e:?}");
+    let loader = MemoryLoader::new().text("missing.inc", " db 1\n");
     let r = assemble_pasmo_files(src, "main.asm", &loader).expect("assembles");
     assert_eq!(r.bytes, vec![0x00]);
-    assert_eq!(r.files, vec!["main.asm"]);
+    assert_eq!(r.files, vec!["main.asm", "missing.inc"]);
 }
 
 /// Pasmo spells its directives case-insensitively, so `INCLUDE` resolves the

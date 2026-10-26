@@ -70,7 +70,9 @@ fn the_listing_shows_address_bytes_and_source() {
     assert!(text.contains("0100"), "address column: {text}");
     assert!(text.contains("00"), "bytes column: {text}");
     assert!(text.contains("nop"), "source column: {text}");
-    assert!(asm198x_web::listing("pasmo", " bogus\n").is_none());
+    // A bare word is a label in PasmoNext 0.1.3, so a line it rejects is an
+    // expression it cannot finish.
+    assert!(asm198x_web::listing("pasmo", " ld a,(\n").is_none());
 }
 
 /// The picker list is the dialect table, first row first.

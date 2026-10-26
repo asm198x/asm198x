@@ -40,7 +40,8 @@ fn rept_endm_becomes_endr_and_macro_endm_stays() {
         c.output
     );
 
-    let src = "        org 8000h\nm       macro\n        nop\n        endm\n        m\n";
+    // `m` is a condition, so PasmoNext 0.1.3 refuses it as a macro's name.
+    let src = "        org 8000h\nmm      macro\n        nop\n        endm\n        mm\n";
     let c = convert("pasmo", "sjasmplus", src).expect("converts");
     assert!(
         c.output.to_lowercase().contains("endm"),
@@ -128,7 +129,9 @@ fn unresolved_conversion_files_have_actionable_guidance_and_keep_the_source_erro
 
 #[test]
 fn inactive_file_directives_do_not_prevent_verified_conversion() {
-    for directive in ["include", "incbin"] {
+    // PasmoNext 0.1.3 reads every INCLUDE as it loads the source, taken
+    // branch or not, so only an untaken INCBIN is never opened.
+    for directive in ["incbin"] {
         let source = format!(" org 8000h\n if 0\n {directive} \"missing.dat\"\n endif\n ret\n");
         for from in ["pasmo", "pasmonext"] {
             let converted = convert(from, "sjasmplus", &source).expect("inactive directive");

@@ -100,13 +100,15 @@ fn fmt_equ_label_colliding_with_mnemonic_round_trips() {
     // `in` is a Z80 mnemonic; used as an equ label it must keep its colon on
     // emit, or the reformatted `in equ $fe` re-parses `in` as an instruction and
     // fails to reassemble. (Regression for the review's confirmed defect.)
+    // PasmoNext 0.1.3 itself refuses `in` as a name, so the formatter is
+    // held only to keeping the colon and to idempotence.
     let src = "in: equ $fe\n        ld a, in\n";
-    let original = assemble_pasmo(src).expect("assembles").bytes;
+    assert!(
+        assemble_pasmo(src).is_err(),
+        "PasmoNext refuses `in` as a name"
+    );
     let formatted = format_pasmo(src).expect("formats");
-    let reassembled = assemble_pasmo(&formatted)
-        .unwrap_or_else(|e| panic!("colliding equ label must round-trip: {e:?}\n---\n{formatted}"))
-        .bytes;
-    assert_eq!(original, reassembled);
+    assert!(formatted.contains("in:"), "the colon stays:\n{formatted}");
     assert_eq!(
         formatted,
         format_pasmo(&formatted).expect("formats"),

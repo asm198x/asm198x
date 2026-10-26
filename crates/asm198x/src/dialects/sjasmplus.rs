@@ -3784,10 +3784,14 @@ mod tests {
 
     #[test]
     fn pasmo_rejects_reused_local_label() {
-        // pasmo treats `.loop` as an ordinary global, so reuse is a duplicate.
+        // pasmo treats `.loop` as an ordinary global, so reuse is a duplicate,
+        // in PasmoNext 0.1.3's words.
         let src = "start:\n.loop:  nop\ndone:\n.loop:  nop\n";
         let err = crate::assemble_pasmo(src).expect_err("duplicate");
-        assert!(err.message.contains("duplicate"), "unexpected: {err}");
+        assert!(
+            err.message.contains("previously defined"),
+            "unexpected: {err}"
+        );
     }
 
     #[test]
