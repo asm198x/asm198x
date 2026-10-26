@@ -160,6 +160,7 @@ impl Recorder {
 pub fn assemble_form(cpu: &str, dialect: &str, source: &str) -> Option<Result<Vec<u8>, String>> {
     let result = match (dialect, cpu) {
         ("acme", _) => asm198x::assemble_acme(source),
+        ("ca65", "6502") => ca65_flat(source),
         ("pasmo", _) => asm198x::assemble_pasmo(source),
         ("pasmonext", _) => asm198x::assemble_pasmonext(source),
         ("sjasmplus", "Z80") => asm198x::assemble_sjasmplus(source),
@@ -187,6 +188,22 @@ pub fn assemble_form(cpu: &str, dialect: &str, source: &str) -> Option<Result<Ve
         _ => return None,
     };
     Some(ours(result))
+}
+
+/// The flat ld65 layout a 6502 form or fuzz case links under: one `CODE`
+/// segment from address 0, unpadded, as the live suite gives `ld65`.
+pub const CA65_FLAT_CFG: &str = "MEMORY { MAIN: start=$0000, size=$10000, fill=no, file=%O; }\n\
+                                 SEGMENTS { CODE: load=MAIN, type=ro; }\n";
+
+/// A ca65 listing through the main ca65 reader under [`CA65_FLAT_CFG`].
+fn ca65_flat(source: &str) -> Result<asm198x::AssemblyResult, asm198x::AsmError> {
+    asm198x::assemble_ca65_files_with_config(
+        source,
+        "form.s",
+        &asm198x::source::MemoryLoader::new(),
+        CA65_FLAT_CFG,
+    )
+    .map_err(|failure| failure.error)
 }
 
 /// Assemble a **differential probe** with our own assembler.
