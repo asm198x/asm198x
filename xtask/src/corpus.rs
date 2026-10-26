@@ -147,7 +147,10 @@ pub fn write(repo: &Path) -> Result<Vec<String>, String> {
 /// - a verdict from a version other than the one this run recorded is stale,
 ///   and goes;
 /// - a curriculum verdict whose program this run re-recorded under a new
-///   content digest is about source that no longer exists, and goes.
+///   content digest is about source that no longer exists, and goes;
+/// - a pattern verdict this run did not record is about a source or include
+///   closure the checkout no longer has, and goes, since the pattern suite
+///   records every source for each tool it runs.
 ///
 /// A group the run recorded under two versions is ambiguous and left alone.
 /// Returns the count removed per tool.
@@ -193,13 +196,20 @@ pub fn prune(repo: &Path, manifest: &[Recorded]) -> Result<BTreeMap<String, usiz
                 return true;
             };
             let stale = v.arbiter.identity != current;
-            let orphaned = v.suite == Suite::Curriculum
-                && programs
-                    .get(&(file.as_str(), v.arbiter.tool.as_str()))
-                    .is_some_and(|keys| {
-                        !keys.contains(v.source.as_str())
-                            && keys.iter().any(|k| program(k) == program(&v.source))
-                    });
+            let recorded = programs.get(&(file.as_str(), v.arbiter.tool.as_str()));
+            let same_program =
+                |keys: &HashSet<&str>| keys.iter().any(|k| program(k) == program(&v.source));
+            // A program re-recorded under a new digest retires its old one.
+            // A pattern source the run walked past without recording has
+            // left the checkout: the live suite records every pattern source
+            // for each tool it can run, so the group being recorded at all is
+            // the positive signal, and a run that failed prunes nothing.
+            let orphaned = match v.suite {
+                Suite::Curriculum => recorded
+                    .is_some_and(|keys| !keys.contains(v.source.as_str()) && same_program(keys)),
+                Suite::Pattern => !recorded.is_some_and(|keys| keys.contains(v.source.as_str())),
+                _ => false,
+            };
             if stale || orphaned {
                 dropped.push(v.arbiter.tool.clone());
             }
@@ -589,6 +599,49 @@ mod tests {
         let removed = prune(&dir, &manifest).expect("prune");
         assert_eq!(removed.get("asl"), Some(&1));
         assert_eq!(cases(&dir, "6502"), vec!["a new", "b"]);
+        let _ = std::fs::remove_dir_all(dir);
+    }
+
+    /// A pattern verdict the run did not record goes, whether its include
+    /// closure changed or its source left; one the run recorded stays. A
+    /// pattern group the run never recorded is left alone.
+    #[test]
+    fn prune_retires_pattern_verdicts_the_run_did_not_record() {
+        let dir = repo("patterns");
+        let program = |case: &str, key: &str| {
+            let mut v = verdict(
+                "6502",
+                Suite::Pattern,
+                case,
+                Outcome::Digest {
+                    digest: "00".to_string(),
+                },
+            );
+            v.source = key.to_string();
+            v
+        };
+        verdict_corpus::merge(
+            &corpus_file(&dir, "6502"),
+            [
+                program("a old", "a.asm#acme@d1"),
+                program("a new", "a.asm#acme@d2"),
+                program("gone", "gone.asm#acme@d1"),
+            ],
+        )
+        .expect("seed");
+        let mut z80 = program("untouched", "z.asm#pasmonext@d1");
+        z80.cpu = "Z80".to_string();
+        verdict_corpus::merge(&corpus_file(&dir, "z80"), [z80]).expect("seed");
+        let manifest = [recorded(
+            "6502.ndjson",
+            Suite::Pattern,
+            "new",
+            Some("a.asm#acme@d2"),
+        )];
+        let removed = prune(&dir, &manifest).expect("prune");
+        assert_eq!(removed.get("asl"), Some(&2));
+        assert_eq!(cases(&dir, "6502"), vec!["a new"]);
+        assert_eq!(cases(&dir, "z80"), vec!["untouched"]);
         let _ = std::fs::remove_dir_all(dir);
     }
 

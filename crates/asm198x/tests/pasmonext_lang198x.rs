@@ -13,7 +13,7 @@ mod support;
 use std::path::Path;
 
 use support::verdicts::{code_samples_root, corpus_path, parse_curriculum_key, sha256_hex};
-use verdict_corpus::{Corpus, Outcome};
+use verdict_corpus::{Corpus, Outcome, Suite};
 
 /// Verdicts the new path does not match yet, each with what it waits for.
 const NOT_YET: &[(&str, &str)] = &[];
@@ -34,6 +34,8 @@ fn every_pasmo_verdict_matches_through_lang198x() {
     // so they are counted apart: a run that reached none of them must say so.
     let mut curriculum_checked = 0;
     let mut curriculum_skipped = Vec::new();
+    let mut patterns_checked = 0;
+    let mut patterns_skipped = Vec::new();
     let mut failures = Vec::new();
     let mut passed_while_named = Vec::new();
     for verdict in corpus.verdicts() {
@@ -43,6 +45,20 @@ fn every_pasmo_verdict_matches_through_lang198x() {
             _ => continue,
         };
         let (expected, ours) = match &verdict.outcome {
+            // A pattern verdict's key digests its include closure, so it is
+            // rebuilt from its folder like the curriculum's builds.
+            _ if verdict.suite == Suite::Pattern => {
+                let Some(ours) = pattern(&verdict.source, z80n) else {
+                    patterns_skipped.push(verdict.case.clone());
+                    continue;
+                };
+                patterns_checked += 1;
+                let expected = match &verdict.outcome {
+                    Outcome::Digest { digest } => Some(digest.clone().into_bytes()),
+                    _ => None,
+                };
+                (expected, ours.map(|b| sha256_hex(&b).into_bytes()))
+            }
             Outcome::Bytes { .. } => (verdict.outcome.bytes(), assemble(&verdict.source, z80n)),
             Outcome::Rejected { .. } => (None, assemble(&verdict.source, z80n)),
             Outcome::Digest { digest } => {
@@ -69,8 +85,10 @@ fn every_pasmo_verdict_matches_through_lang198x() {
     }
     eprintln!(
         "pasmo verdicts through Lang198x: {checked} checked, {curriculum_checked} of them \
-         curriculum, {} curriculum not reached",
-        curriculum_skipped.len()
+         curriculum, {} curriculum not reached, {patterns_checked} pattern, {} pattern not \
+         reached",
+        curriculum_skipped.len(),
+        patterns_skipped.len()
     );
     assert!(checked > 1000, "only {checked} verdicts were checked");
     // CI names the checkout, at the pin the verdicts were recorded from, so
@@ -81,6 +99,11 @@ fn every_pasmo_verdict_matches_through_lang198x() {
             curriculum_checked > 0 && curriculum_skipped.is_empty(),
             "curriculum verdicts not reached with ASM198X_CODE_SAMPLES set: \
              {curriculum_skipped:#?}"
+        );
+        assert!(
+            patterns_checked > 0 && patterns_skipped.is_empty(),
+            "pattern verdicts not reached with ASM198X_CODE_SAMPLES set: \
+             {patterns_skipped:#?}"
         );
     }
     assert!(
@@ -109,6 +132,27 @@ fn curriculum(key: &str, z80n: bool) -> Option<Option<Vec<u8>>> {
     let loader = asm198x::source::FsLoader::new(dir, Vec::new());
     Some(
         asm198x::assemble_pasmo_lang198x_files(&source, name, &loader, z80n)
+            .ok()
+            .map(|result| result.bytes),
+    )
+}
+
+/// A pattern verdict's program, assembled by the new path from its folder
+/// with the include path the reference had, if the checkout holds the
+/// recorded include closure. `Some(None)` is a rejection.
+fn pattern(key: &str, z80n: bool) -> Option<Option<Vec<u8>>> {
+    let root = code_samples_root()?;
+    let (relpath, _, closure) = parse_curriculum_key(key)?;
+    let scratch = support::scratch::dir("pattern-gate");
+    let job = support::patterns::Job::new(&root, &root.join(relpath), &scratch).ok()?;
+    if job.closure_digest(&root).ok()? != closure {
+        return None;
+    }
+    let source = std::fs::read_to_string(&job.source).ok()?;
+    let search = job.include_dirs().iter().map(|d| job.dir.join(d)).collect();
+    let loader = asm198x::source::FsLoader::new(&job.dir, search);
+    Some(
+        asm198x::assemble_pasmo_lang198x_files(&source, &job.name, &loader, z80n)
             .ok()
             .map(|result| result.bytes),
     )

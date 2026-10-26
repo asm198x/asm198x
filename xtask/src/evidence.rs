@@ -73,6 +73,23 @@ pub fn markdown(repo: &Path) -> String {
             list(&parity.machines),
             parity.comparisons
         );
+        if parity.pattern_sources > 0 {
+            let known = verdict_corpus::patterns::KNOWN.len();
+            let _ = writeln!(
+                out,
+                "**So is the pattern library.** {} pattern-library sources across {} \
+                 machines, each built by its own machine's reference tool. {}\n",
+                parity.pattern_sources,
+                parity.pattern_machines,
+                match known {
+                    0 => "Every one matches.".to_string(),
+                    n => format!(
+                        "{} match; the other {n} differ, and each difference is tracked.",
+                        parity.pattern_sources.saturating_sub(n as u64)
+                    ),
+                },
+            );
+        }
     }
 
     let _ = writeln!(
@@ -136,6 +153,10 @@ struct Parity {
     sources: u64,
     comparisons: u64,
     machines: Vec<String>,
+    /// Pattern-library sources with a verdict, and how many machines have
+    /// any; zero for data written before the pattern library was recorded.
+    pattern_sources: u64,
+    pattern_machines: usize,
 }
 
 fn parity(repo: &Path) -> Option<Parity> {
@@ -145,12 +166,26 @@ fn parity(repo: &Path) -> Option<Parity> {
         .get("machines")?
         .as_array()?
         .iter()
+        .filter(|m| m["sources"].as_u64().unwrap_or(0) > 0)
         .filter_map(|m| m.get("slug")?.as_str().map(machine_name))
         .collect();
+    let pattern_machines = doc
+        .pointer("/patterns/machines")
+        .and_then(serde_json::Value::as_array)
+        .map_or(0, |m| {
+            m.iter()
+                .filter(|m| m["sources"].as_u64().unwrap_or(0) > 0)
+                .count()
+        });
     Some(Parity {
         sources: doc.pointer("/totals/sources")?.as_u64()?,
         comparisons: doc.pointer("/totals/comparisons")?.as_u64()?,
         machines,
+        pattern_sources: doc
+            .pointer("/patterns/totals/sources")
+            .and_then(serde_json::Value::as_u64)
+            .unwrap_or(0),
+        pattern_machines,
     })
 }
 
