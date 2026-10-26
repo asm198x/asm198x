@@ -157,6 +157,33 @@ fn ref_assemble(
     ref_outcome(tmp, text, ext, build).bytes()
 }
 
+/// A 6502 listing in ca65's spelling: the disassembler's instruction lines
+/// under ca65's `.org`, where ACME's listing opens with `*=`. The
+/// disassembler writes an absolute address below `$100` with four digits,
+/// which ACME reads as absolute and ca65 as zero page, so it gains ca65's
+/// `a:` to keep its width.
+fn ca65_6502_listing(bytes: &[u8]) -> String {
+    let acme = asm198x::listing_6502(bytes, 0x0800);
+    let body = acme.split_once('\n').map_or("", |(_, rest)| rest);
+    let body: String = body
+        .lines()
+        .map(|line| {
+            let forced = match line.split_once(" $00") {
+                Some((head, tail))
+                    if tail.len() >= 2
+                        && tail[..2].chars().all(|c| c.is_ascii_hexdigit())
+                        && tail[2..].chars().next().is_none_or(|c| c == ',') =>
+                {
+                    format!("{head} a:$00{tail}")
+                }
+                _ => line.to_string(),
+            };
+            forced + "\n"
+        })
+        .collect();
+    format!("        .org $0800\n{body}")
+}
+
 /// Who arbitrates a form sweep: the corpus file, the executable that signs
 /// the verdict, and the dialect the replay assembles it with.
 struct Arbiter {
@@ -169,26 +196,26 @@ struct Arbiter {
     divergences: &'static [(&'static str, u32)],
 }
 
-/// Sweep every form of a Z80-family `set` through a reference, recording
-/// what it did with each. A refusal is recorded too: it is a fact about the
+/// Sweep every form of `set` through a reference, recording what it did with
+/// each, the listing written by `listing`. A refusal is recorded too: it is a fact about the
 /// listing, and Asm198x must refuse the same source. What fails is Asm198x
 /// disagreeing with the reference — different bytes, or accepting what it
 /// refused, or refusing what it took.
 #[allow(clippy::too_many_arguments)]
-fn z80_forms(
+fn sweep_forms(
     tmp: &Path,
     recorder: &mut support::verdicts::Recorder,
     fails: &mut Vec<String>,
     checked: &mut usize,
     set: &'static isa::InstructionSet,
-    z80n: bool,
+    listing: impl Fn(&[u8]) -> String,
     arbiter: &Arbiter,
     build: impl Fn(&Path, &Path) -> Vec<Command>,
 ) {
     for insn in set.instructions {
         for form in insn.forms {
             let bytes: Vec<u8> = form.exemplar().collect();
-            let text = asm198x::listing_z80(&bytes, 0x8000, z80n);
+            let text = listing(&bytes);
             let case = || support::verdicts::CaseRef {
                 suite: Suite::Form,
                 cpu: arbiter.cpu,
@@ -367,13 +394,13 @@ fn spec_opcodes_match_reference() {
             dialect: "sjasmplus",
             divergences: &[],
         };
-        z80_forms(
+        sweep_forms(
             &tmp,
             &mut recorder,
             &mut fails,
             &mut checked,
             &isa::z80::SET,
-            false,
+            |b| asm198x::listing_z80(b, 0x8000, false),
             &z80,
             sjasmplus(false),
         );
@@ -383,13 +410,13 @@ fn spec_opcodes_match_reference() {
             dialect: "sjasmplus",
             divergences: &[],
         };
-        z80_forms(
+        sweep_forms(
             &tmp,
             &mut recorder,
             &mut fails,
             &mut checked,
             &isa::z80::NEXT,
-            true,
+            |b| asm198x::listing_z80(b, 0x8000, true),
             &next,
             sjasmplus(true),
         );
@@ -404,13 +431,13 @@ fn spec_opcodes_match_reference() {
             dialect: "pasmonext",
             divergences: &[("PUSH nn", 984)],
         };
-        z80_forms(
+        sweep_forms(
             &tmp,
             &mut recorder,
             &mut fails,
             &mut checked,
             &isa::z80::NEXT,
-            true,
+            |b| asm198x::listing_z80(b, 0x8000, true),
             &next,
             |src: &Path, out: &Path| {
                 let mut c = Command::new("pasmo");
@@ -418,6 +445,40 @@ fn spec_opcodes_match_reference() {
                 vec![c]
             },
         );
+    }
+
+    // --- 6502 / ca65 ---------------------------------------------------------
+    // The main ca65 reader's first arbiter beyond the NES curriculum: every
+    // 6502 form, linked flat by ld65 as the replay links it (lang198x
+    // docs/plans/ca65-front-end.md, step 1).
+    if have("ca65") && have("ld65") {
+        let cfg = tmp.join("flat6502.cfg");
+        fs::write(&cfg, support::verdicts::CA65_FLAT_CFG).expect("config");
+        let arbiter = Arbiter {
+            cpu: "6502",
+            tool: "ca65",
+            dialect: "ca65",
+            divergences: &[],
+        };
+        sweep_forms(
+            &tmp,
+            &mut recorder,
+            &mut fails,
+            &mut checked,
+            &isa::mos6502::SET,
+            ca65_6502_listing,
+            &arbiter,
+            |src: &Path, out: &Path| {
+                let obj = src.with_extension("o");
+                let mut a = Command::new("ca65");
+                a.arg(src).arg("-o").arg(&obj);
+                let mut l = Command::new("ld65");
+                l.arg("-C").arg(&cfg).arg(&obj).arg("-o").arg(out);
+                vec![a, l]
+            },
+        );
+    } else {
+        eprintln!("SKIP: `ca65`/`ld65` not on PATH (6502)");
     }
 
     // --- 65816 / ca65 (6502 base + the extension) --------------------------
@@ -1680,6 +1741,12 @@ fn differential_fuzz() {
             z80n: false,
         },
         Cpu {
+            name: "6502",
+            tool: "ca65",
+            dialect: "ca65",
+            z80n: false,
+        },
+        Cpu {
             name: "Z80",
             tool: "pasmo",
             dialect: "pasmo",
@@ -1700,7 +1767,7 @@ fn differential_fuzz() {
     ];
 
     for cpu in cpus {
-        if !have(cpu.tool) {
+        if !have(cpu.tool) || (cpu.tool == "ca65" && !have("ld65")) {
             eprintln!("SKIP fuzz: `{}` not on PATH", cpu.tool);
             continue;
         }
@@ -1731,11 +1798,17 @@ fn differential_fuzz() {
             }
             // Disassemble, then require both assemblers to reproduce the bytes.
             let (text, ours) = match cpu.name {
-                "6502" => {
+                "6502" if cpu.tool == "acme" => {
                     let t = asm198x::listing_6502(&bytes, 0x0800);
                     let o = asm198x::assemble_acme(&t)
                         .map(|a| a.bytes)
                         .map_err(|e| e.to_string());
+                    (t, o)
+                }
+                "6502" => {
+                    let t = ca65_6502_listing(&bytes);
+                    let o = support::verdicts::assemble_form(cpu.name, cpu.dialect, &t)
+                        .expect("the replay drives this dialect");
                     (t, o)
                 }
                 _ => {
@@ -1756,6 +1829,16 @@ fn differential_fuzz() {
                 Err(e) => fails.push(format!("{} prog {p}: our reasm error: {e}", cpu.name)),
             }
             let reference = ref_assemble(&tmp, &text, "src", |src, out| match cpu.name {
+                "6502" if cpu.tool == "ca65" => {
+                    let cfg = src.with_extension("cfg");
+                    fs::write(&cfg, support::verdicts::CA65_FLAT_CFG).expect("config");
+                    let obj = src.with_extension("o");
+                    let mut a = Command::new("ca65");
+                    a.arg(src).arg("-o").arg(&obj);
+                    let mut l = Command::new("ld65");
+                    l.arg("-C").arg(&cfg).arg(&obj).arg("-o").arg(out);
+                    vec![a, l]
+                }
                 "6502" => {
                     let mut c = Command::new("acme");
                     c.args(["-f", "cbm", "-o"]).arg(out).arg(src);
@@ -1778,7 +1861,7 @@ fn differential_fuzz() {
             });
             // acme prepends a 2-byte load address.
             let reference = reference.map(|r| {
-                if cpu.name == "6502" && r.len() >= 2 {
+                if cpu.tool == "acme" && r.len() >= 2 {
                     r[2..].to_vec()
                 } else {
                     r
