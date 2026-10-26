@@ -619,6 +619,14 @@ impl Z80Syntax for SjasmplusSyntax {
         true
     }
 
+    fn square_brackets(&self) -> bool {
+        true
+    }
+
+    fn single_case_mnemonics(&self) -> bool {
+        true
+    }
+
     fn has_lua(&self) -> bool {
         true
     }
@@ -779,6 +787,9 @@ impl Z80Syntax for SjasmplusSyntax {
     /// directive parsing.
     fn is_directive(&self, word: &str) -> bool {
         let word = undot(word);
+        if !one_case(word) {
+            return false;
+        }
         word.eq_ignore_ascii_case("byte")
             || word.eq_ignore_ascii_case("align")
             || word.eq_ignore_ascii_case("device")
@@ -803,18 +814,18 @@ impl Z80Syntax for SjasmplusSyntax {
     }
 
     fn is_end_word(&self, word: &str) -> bool {
-        undot(word).eq_ignore_ascii_case("end")
+        one_case(word) && undot(word).eq_ignore_ascii_case("end")
     }
 
     /// sjasmplus's include directive (language-surface U2), walk-handled.
     fn is_include(&self, word: &str) -> bool {
-        undot(word).eq_ignore_ascii_case("include")
+        one_case(word) && undot(word).eq_ignore_ascii_case("include")
     }
 
     /// sjasmplus's binary-inclusion directive (language-surface U3),
     /// walk-handled like `include`.
     fn is_incbin(&self, word: &str) -> bool {
-        undot(word).eq_ignore_ascii_case("incbin")
+        one_case(word) && undot(word).eq_ignore_ascii_case("incbin")
     }
 
     fn own_directives(&self) -> &'static [crate::directives::Directive] {
@@ -1046,14 +1057,24 @@ impl Z80Syntax for SjasmplusSyntax {
         z80::common_directive(self, word, args, line, consts)
     }
 
-    /// Nothing is rewritten before the parse: macros and device state are live
-    /// in the shared textual walk below.
+    /// Only block comments are rewritten before the parse: macros and device
+    /// state are live in the shared textual walk below. A `/* */` comment
+    /// becomes spaces, keeping its newlines, so every line and column stays
+    /// where the author wrote it (#986).
     fn expand_source(
         &self,
         source: &str,
     ) -> Result<Option<(String, Vec<macros::LineOrigin>)>, AsmError> {
-        let _ = source;
-        Ok(None)
+        let Some(text) = blank_block_comments(source) else {
+            return Ok(None);
+        };
+        let origins = (1..=text.lines().count().max(1))
+            .map(|line| macros::LineOrigin {
+                line,
+                frames: Vec::new(),
+            })
+            .collect();
+        Ok(Some((text, origins)))
     }
 
     /// Macros are live (#557): a definition enters the namespace when the
@@ -1100,6 +1121,11 @@ impl Z80Syntax for SjasmplusSyntax {
                 return Err(bad());
             }
             return Ok(i64::from(pack_bytes(bytes) as i32));
+        }
+        // A double-quoted string is a value too, packed the same way, with
+        // its escapes decoded: `ld b,"a"` is 06 61 (probed, #986).
+        if t.starts_with('"') {
+            return Ok(i64::from(pack_bytes(decoded_string(t, line)?) as i32));
         }
         // Validate separators in the actual digit body, after selecting its
         // radix. Removing quotes first would wrongly accept `0'xff` or `10'h`.
@@ -1215,7 +1241,21 @@ fn data_items(rest: &str, line: usize, byte_context: bool) -> Result<Vec<DataIte
         .into_iter()
         .map(|piece| {
             if piece.starts_with('"') {
-                Ok(DataItem::String(decoded_string(piece, line)?))
+                // A string followed by an operator is a value where the
+                // directive takes one: `db "a"+1` is $62 and `dw "a"+1` is
+                // $0062, but `db "ab"+1` is refused (probed, #986).
+                let (bytes, end) = double_quoted(piece, line)?;
+                if piece[end..].trim().is_empty() {
+                    Ok(DataItem::String(bytes))
+                } else if !byte_context || bytes.len() == 1 {
+                    Ok(DataItem::Value(z80::parse_value(
+                        &SjasmplusSyntax,
+                        piece,
+                        line,
+                    )?))
+                } else {
+                    Err(AsmError::new(line, "unexpected tokens after quoted data"))
+                }
             } else if byte_context && piece.starts_with('\'') {
                 let (bytes, end) = single_quoted(piece, line)?;
                 if bytes.len() != 1 {
@@ -1434,19 +1474,27 @@ pub(crate) fn display(
     }))
 }
 
-/// Native SjASMPlus decodes these pairs only in double quotes. Unknown pairs
-/// keep both bytes; source UTF-8 remains bytes rather than Unicode code points.
+/// A double-quoted string that must be the whole of `piece`.
 fn decoded_string(piece: &str, line: usize) -> Result<Vec<u8>, AsmError> {
+    let (bytes, end) = double_quoted(piece, line)?;
+    if end == piece.len() {
+        Ok(bytes)
+    } else {
+        Err(AsmError::new(line, "unexpected tokens after quoted data"))
+    }
+}
+
+/// The double-quoted string `piece` starts with, and the byte offset just
+/// past its closing quote. Native SjASMPlus decodes these pairs only in
+/// double quotes. Unknown pairs keep both bytes; source UTF-8 remains bytes
+/// rather than Unicode code points.
+fn double_quoted(piece: &str, line: usize) -> Result<(Vec<u8>, usize), AsmError> {
     let source = piece.as_bytes();
     let mut bytes = Vec::new();
     let mut i = 1;
     while let Some(&byte) = source.get(i) {
         if byte == b'"' {
-            return if i + 1 == source.len() {
-                Ok(bytes)
-            } else {
-                Err(AsmError::new(line, "unexpected tokens after quoted data"))
-            };
+            return Ok((bytes, i + 1));
         }
         if byte == b'\\'
             && let Some(&next) = source.get(i + 1)
@@ -1623,6 +1671,13 @@ fn wide(values: Vec<Expr>, width: u8) -> Operation {
 /// Stripping before the case test is deliberate, and copies what the
 /// conditionals do: `.Db` stays as unacceptable as `Db` where a spelling is
 /// case-sensitive.
+/// Whether a keyword is spelt all lower or all upper case, the only two
+/// spellings sjasmplus 1.24.0 reads: ` Ld`, ` Db` and ` Include` are each
+/// `Unrecognized instruction` (probed, #986).
+fn one_case(word: &str) -> bool {
+    word == word.to_ascii_lowercase() || word == word.to_ascii_uppercase()
+}
+
 fn undot(word: &str) -> &str {
     word.strip_prefix('.').unwrap_or(word)
 }
@@ -1753,6 +1808,66 @@ impl macros::MacroSyntax for SjasmplusSyntax {
         }
         names
     }
+}
+
+/// `source` with each `/* */` comment replaced by spaces, keeping its
+/// newlines, or `None` if it has none. sjasmplus 1.24.0 reads one inside a
+/// line and across lines, and does not nest them (probed, #986). An opener
+/// inside a string, a character literal or a `;` or `//` comment opens
+/// nothing; the apostrophe in `af'` opens no literal.
+fn blank_block_comments(source: &str) -> Option<String> {
+    if !source.contains("/*") {
+        return None;
+    }
+    let mut out = String::with_capacity(source.len());
+    let mut chars = source.chars().peekable();
+    let mut quote = None;
+    let mut escaped = false;
+    let mut line_comment = false;
+    let mut previous = None;
+    let mut found = false;
+    while let Some(ch) = chars.next() {
+        if ch == '\n' {
+            quote = None;
+            line_comment = false;
+            escaped = false;
+        } else if line_comment {
+        } else if let Some(q) = quote {
+            if escaped {
+                escaped = false;
+            } else if q == '"' && ch == '\\' {
+                escaped = true;
+            } else if ch == q {
+                quote = None;
+            }
+        } else if ch == ';' || (ch == '/' && chars.peek() == Some(&'/')) {
+            line_comment = true;
+        } else if ch == '/' && chars.peek() == Some(&'*') {
+            found = true;
+            chars.next();
+            out.push_str("  ");
+            let mut star = false;
+            for inner in chars.by_ref() {
+                if star && inner == '/' {
+                    out.push(' ');
+                    break;
+                }
+                star = inner == '*';
+                out.push(if inner == '\n' { '\n' } else { ' ' });
+            }
+            previous = Some(' ');
+            continue;
+        } else if ch == '"'
+            || (ch == '\''
+                && !previous
+                    .is_some_and(|c: char| c.is_ascii_alphanumeric() || c == '_' || c == '.'))
+        {
+            quote = Some(ch);
+        }
+        out.push(ch);
+        previous = Some(ch);
+    }
+    found.then_some(out)
 }
 
 #[cfg(test)]
