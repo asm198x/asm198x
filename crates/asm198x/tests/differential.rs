@@ -97,6 +97,8 @@ fn tool(dialect: &str) -> &'static str {
         // The 68000 multipass path (U6): the flat (-Fbin) and hunk-exe legs.
         "vasm-exe" => "vasmm68k_mot",
         "ca65-816" => "ca65",
+        // The main ca65 reader, linked flat (lang198x docs/plans/ca65-front-end.md).
+        "ca65" => "ca65",
         "ca65-huc6280" => "ca65",
         // The NES assemble+link path (U5): ca65 + ld65 with the fixed nes.cfg.
         "ca65-nes" => "ca65",
@@ -260,6 +262,22 @@ fn reference_bytes(
             run(vec![a, l])?;
             fs::read(&out).ok()
         }
+        // The probe is the whole file, linked under the flat layout replay
+        // uses, so the two cannot frame it differently.
+        "ca65" => {
+            let src = tmp.join("ref.s");
+            let obj = tmp.join("ref.o");
+            let cfg = tmp.join("flat6502.cfg");
+            fs::write(&cfg, support::verdicts::CA65_FLAT_CFG).ok()?;
+            fs::write(&src, body).ok()?;
+            let _ = fs::remove_file(&obj);
+            let mut a = Command::new("ca65");
+            a.arg(&src).arg("-o").arg(&obj);
+            let mut l = Command::new("ld65");
+            l.arg("-C").arg(&cfg).arg(&obj).arg("-o").arg(&out);
+            run(vec![a, l])?;
+            fs::read(&out).ok()
+        }
         "ca65-816" => {
             let src = tmp.join("ref.s");
             let obj = tmp.join("ref.o");
@@ -303,6 +321,7 @@ fn probe_cpu(dialect: &str) -> &'static str {
         "lwasm" => "6809",
         "vasm" => "68000",
         "ca65-816" => "65816",
+        "ca65" => "6502",
         "rgbasm" | "rgbasm-banked" => "SM83",
         other => panic!("no corpus CPU for dialect `{other}`"),
     }
@@ -1210,6 +1229,9 @@ const PROBES: &[Probe] = &[
     // Expression functions: the three byte extractions, which pick from a
     // 24-bit value the way the `<`/`>`/`^` prefixes do.
     // `<` is the low-byte prefix *and* less-than, told apart by position.
+    // ---- ca65 / 6502, the main reader linked flat ---------------------------
+    ok ("ca65", "plain 6502 code",   " lda #1\n sta $0200\n rts\n"),
+
     ok ("ca65-816", "comparisons answer 1",
         " .byte 2=2,2=3,2<>3,2<3,2>3,2<=3,2>=3\n"),
     ok ("ca65-816", "a prefix < and an infix < in one list",

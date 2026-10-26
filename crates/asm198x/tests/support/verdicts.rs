@@ -224,6 +224,7 @@ pub fn assemble_probe(dialect: &str, body: &str) -> Option<Result<Vec<u8>, Strin
         "z80n" => asm198x::assemble_sjasmplus_next(body),
         "lwasm" => asm198x::assemble_lwasm(body),
         "vasm" => asm198x::assemble_vasm(body),
+        "ca65" => ca65_flat(body),
         "ca65-816" => asm198x::assemble_ca65_816(body),
         "rgbasm" | "rgbasm-banked" => asm198x::assemble_rgbasm(body),
         _ => return None,
