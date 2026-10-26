@@ -86,5 +86,13 @@ the gate in Asm198x. The design is recorded in
   - Tests the old path held that PasmoNext contradicts were measured and
     corrected, among them `ld hl,(1+2)*3`, `mul d,e`, `5 MOD 2`, an untaken
     `INCLUDE`, `DM`, and the line an error in a macro body names.
-- Next: move `fmt` for `pasmo` onto Lang198x's tree, then delete the old
-  PasmoNext layer. The shared Z80 core stays until SjASMPlus moves too.
+- **Done, `fmt`** (2026-10-26): `pasmo` and `pasmonext` format with
+  Lang198x's `format`, which never adds, removes or reorders lines. The old
+  formatter put a label on a line of its own and added colons; this one moves
+  only the label, statement and comment columns. PasmoNext 0.1.3 assembled
+  the 618 Spectrum curriculum sources before and after formatting (1,018
+  files changed) to the same bytes and symbol files for all 614 it
+  assembles, and gave the same verdict on all 1,230 verdict sources.
+  `tests/fmt_pasmonext_gate.rs` keeps the check, through the walk.
+- Next: delete the old PasmoNext layer. The shared Z80 core stays until
+  SjASMPlus moves too.
