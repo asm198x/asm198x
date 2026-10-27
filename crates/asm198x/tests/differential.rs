@@ -1338,6 +1338,26 @@ const PROBES: &[Probe] = &[
     ok ("ca65", "an unused circle of equates in a scope", "p=9\n.scope s\nq=r\nr=q\n.endscope\nnop\n"),
     ok ("ca65", "an equate that reads itself behind a false &&", "red=2\n.scope inner\nred=red-red\n.org $20\n.byte 0,(*=$20)&&red\n.endscope\n"),
     ok ("ca65", "an equate that reads itself behind a true &&", "red=2\n.scope inner\nred=red-red\n.org $20\n.byte 0,(*=$21)&&red\n.endscope\n"),
+    // Labels in one segment are a known distance apart (step 6e).
+    gap("ca65", "two labels in one segment are a known distance apart", "l: nop\nr: nop\n.res r-l\n.byte r-l\n", 940),
+    gap("ca65", "a distance may be added, taken away and multiplied", "l: nop\nr: nop\n.res r-l+l-l+r-l\n.res (r-l)*2\n.res r*2-l*2\n.res r+r-l-l\n.res -l+r\n", 940),
+    gap("ca65", "a distance in any other operation", "l: nop\nr: nop\n.res (r-l)/1\n.res (r-l)&3\n.res (r-l)<<1\n.res (r-l)*(r-l)\n", 940),
+    gap("ca65", "a distance from the address", "l: nop\nnop\n.res *-l\n", 940),
+    ok ("ca65", "a distance below zero", "l: nop\n.res l-*\n"),
+    ok ("ca65", "a distance to a label further on", "l: nop\n.res r-l\nr: nop\n"),
+    gap("ca65", "a distance in .if and .ifconst", "l: nop\nr: nop\n.if r-l\n.byte 1\n.endif\n.ifconst r-l\n.byte 2\n.endif\n.ifconst r+l\n.byte 3\n.else\n.byte 4\n.endif\n", 940),
+    gap("ca65", "an equate of a distance is absolute", "l: nop\nr: nop\nk = r-l\n.res k\nlda #k\nlda k\nlda r-l\nlda <(r-l)\n", 940),
+    gap("ca65", "a distance across .align", "l: nop\nr: nop\n.align 4\nc: nop\n.res c-r\n", 940),
+    gap("ca65", "a distance across another segment", "l: nop\n.segment \"RODATA\"\n.segment \"CODE\"\nr: nop\n.res r-l\n", 940),
+    ok ("ca65", "labels in two segments", "l: nop\n.segment \"RODATA\"\no:\n.segment \"CODE\"\nr: nop\n.res o-l\n"),
+    gap("ca65", "a distance across .org and .reloc", "l: nop\n.org $2000\nnop\n.reloc\nr: nop\n.res r-l\n", 940),
+    ok ("ca65", "a label under .org and one after .reloc", ".org $1000\nl: nop\n.reloc\nr: nop\n.res r-l\n"),
+    ok ("ca65", "a label before .org and one under it", "l: nop\n.org $2000\nr: nop\n.res r-l\n"),
+    gap("ca65", "a distance in a scope of its own", ".scope\nl: nop\nr: nop\n.res r-l\n.endscope\n", 940),
+    ok ("ca65", "a distance from a scope, by plain names", "l: nop\nr: nop\n.scope\n.res r-l\n.endscope\n"),
+    gap("ca65", "a distance from a scope, by full names", "l: nop\nr: nop\n.scope\n.res ::r-::l\n.endscope\n", 940),
+    gap("ca65", "a distance into a proc", ".proc p\nin: nop\n.endproc\nr: nop\n.res r-p::in\n", 940),
+    ok ("ca65", "a masked distance", "l: nop\nr: nop\n.res r&$FF-l&$FF\n"),
     // Settings that make no bytes, checked as ca65 checks them (step 6e).
     ok ("ca65", ".setcpu of the 6502", ".setcpu \"6502\"\n.p02\nnop\n"),
     ok ("ca65", ".setcpu of a CPU ca65 does not know", ".setcpu \"nope\"\n"),
@@ -3293,8 +3313,6 @@ const MULTI_PROBES: &[MultiProbe] = &[
 /// The `ca65-nes` probes the walk does not link as ld65 does yet, by how
 /// each note starts, with what each needs (the walk's plan, step 6e).
 const WALK_NOT_YET: &[&str] = &[
-    // A difference of two labels in one segment is a constant.
-    "the nine conditional heads",
     // `.struct`, `.union`, `.enum` and `.tag`.
     "records:",
 ];

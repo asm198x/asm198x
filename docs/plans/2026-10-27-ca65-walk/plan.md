@@ -336,6 +336,20 @@ name, with the type and priority checked; the tables ld65 builds from them
 are stage 5. 18 probes; the old reader gets `.condes` wrong, a gap against
 #940.
 
+**Distances between labels.** ca65 V2.19 keeps a label as an offset into
+its segment, so two labels in one segment are a known distance apart once
+both are defined. That holds with another segment's lines between them,
+across `.align`, and across `.org` and `.reloc`, whose bytes the segment
+still counts. `.res r-l`, `.if r-l` and `.ifconst r-l` then read a
+constant, and so do `r*2-l*2` and `r+r-l-l`; any other operation, such as
+`r&$FF-l&$FF`, waits for the link. The distance keeps its labels' address
+size, so `lda r-l` is absolute. Labels in two segments are not a known
+distance apart, nor is a label under `.org` from one outside it, nor plain
+names read from inside a scope, which stay the scope's own until it
+closes. `lang198x-ca65` 0.0.13 adds `Value::Placed` and `Value::Measured`
+for this, and the walk numbers each segment and says how far into it each
+label is. 19 probes; the old reader gets 12 wrong, gaps against #940.
+
 ## After this step
 
 Step 7, the switch: the walk becomes the default for the main reader, `fmt`
