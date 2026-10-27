@@ -260,6 +260,8 @@ struct Ran {
 
 /// A segment the program has used.
 struct Seg {
+    /// Its number, in the order the program first used it.
+    number: u32,
     /// The address size its labels take.
     size: Size,
     /// How many bytes it holds so far.
@@ -707,8 +709,15 @@ impl Walk<'_> {
                     (Some(fixed), _) => fixed,
                     (None, size) => size.unwrap_or(Size::Absolute),
                 };
-                self.segments
-                    .insert(name.to_owned(), Seg { size, length: 0 });
+                let number = u32::try_from(self.segments.len()).unwrap_or(u32::MAX);
+                self.segments.insert(
+                    name.to_owned(),
+                    Seg {
+                        number,
+                        size,
+                        length: 0,
+                    },
+                );
             }
         }
         if self.segment == name {
@@ -1108,7 +1117,7 @@ impl Walk<'_> {
         let op = match op {
             Some(Operation::Org(address)) => {
                 let value = match lower::value(&address, self) {
-                    Value::Constant(value) => value,
+                    Value::Constant(value) | Value::Measured { value, .. } => value,
                     _ => return Err(refuse("Constant expression expected".to_owned())),
                 };
                 // ca65 keeps addresses in 24 bits.
@@ -1244,7 +1253,9 @@ impl Walk<'_> {
         let size = match self.names.get(full) {
             None => return,
             Some(Value::Constant(value)) => Size::of(*value),
-            Some(Value::Address(size)) => *size,
+            Some(
+                Value::Address(size) | Value::Placed { size, .. } | Value::Measured { size, .. },
+            ) => *size,
             Some(_) => Size::Absolute,
         };
         if size != Size::Zero {
@@ -1430,6 +1441,9 @@ impl Known for Walk<'_> {
                 Some(full) if full == qualify(self.path(), &name) => self.known(&full),
                 Some(full) => match self.known(&full) {
                     Value::Constant(value) => Value::Address(Size::of(value)),
+                    Value::Placed { size, .. } | Value::Measured { size, .. } => {
+                        Value::Address(size)
+                    }
                     other => other,
                 },
                 None => Value::Unknown,
@@ -1437,11 +1451,18 @@ impl Known for Walk<'_> {
         }
     }
 
-    /// The address under `.org`, and otherwise its segment's address size.
+    /// The address under `.org`, and otherwise how far into its segment
+    /// it is. ca65 counts the bytes `.org` made, so labels on either side
+    /// of `.org` and `.reloc` are still a known distance apart.
     fn pc(&self) -> Value {
-        match self.org {
-            Some(pc) => Value::Constant(pc),
-            None => Value::Address(self.segment_size()),
+        match (self.org, self.segments.get(&self.segment)) {
+            (Some(pc), _) => Value::Constant(pc),
+            (None, Some(seg)) => Value::Placed {
+                segment: seg.number,
+                offset: seg.length,
+                size: seg.size,
+            },
+            (None, None) => Value::Address(self.segment_size()),
         }
     }
 
@@ -1506,7 +1527,7 @@ impl Host for Walk<'_> {
         self.record_reads();
         let lowered = lowered.map_err(|d| d.message().to_owned())?;
         match lower::value(&lowered, &*self) {
-            Value::Constant(value) => Ok(value),
+            Value::Constant(value) | Value::Measured { value, .. } => Ok(value),
             _ => Err("Constant expression expected".to_owned()),
         }
     }
