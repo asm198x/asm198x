@@ -282,6 +282,13 @@ pub(crate) trait Dialect {
         None
     }
 
+    /// Whether an equate may read a name defined further on, getting its
+    /// value once that name has one. Off by default, where such an equate is
+    /// refused as reading an undefined name.
+    fn defers_equates(&self) -> bool {
+        false
+    }
+
     /// Whether the engine checks the source's `asm198x:` budgets as it
     /// finishes. A dialect whose program is linked afterwards says no and
     /// checks them against the link, which is where the memory areas and

@@ -59,7 +59,7 @@ use lang198x_ca65::syntax::{self, DiagnosticKind};
 
 use super::ca65_flat::{Resolution, load_binary, load_include, slice_incbin};
 use super::ca65_layout::{Layout, ResolvedLayout};
-use crate::ast::map_syms;
+use crate::ast::{map_sym_expr, map_syms};
 use crate::dialect::Dialect;
 use crate::engine::{AsmError, Expr, Operation, Place, Statement, Warning, align_pad, next_pc};
 use crate::source::{SourceLoader, SourceMap};
@@ -201,6 +201,12 @@ impl Dialect for Ca65Walk {
             .map(|linked| linked.resolved.image_size)
     }
 
+    /// ca65 works out an equate of a name defined further on once that name
+    /// is known.
+    fn defers_equates(&self) -> bool {
+        true
+    }
+
     /// A linked program's budgets are checked against its link.
     fn engine_checks_budgets(&self) -> bool {
         self.layout.is_none()
@@ -309,6 +315,11 @@ struct Walk<'f> {
     variables: HashSet<String>,
     /// What is known of each name defined so far, by its full name.
     names: HashMap<String, Value>,
+    /// Each equate whose value was not known when it was defined, by its
+    /// full name, with the names it reads bound.
+    equates: HashMap<String, Expr>,
+    /// The equates being worked out, so one that reads itself stops.
+    evaluating: RefCell<HashSet<String>>,
     /// The bytes each label's line made, by its full name, for `.sizeof`.
     sizes: HashMap<String, i64>,
     /// Every scope opened so far, by its full name, with its size once it
@@ -455,10 +466,11 @@ impl Walk<'_> {
                 // What a label is known as comes from the line as written,
                 // before its names are bound.
                 let value = item.op.as_ref().map(|op| self.value_of(op));
+                let waits = item.op.as_ref().is_some_and(|op| self.reads_unknown(op));
                 let label = item.label.map(|name| self.define_label(&name));
                 let op = item.op.map(|op| self.names_in(op));
                 let sized = !matches!(op, Some(Operation::Equ(_) | Operation::Set(_)));
-                let op = self.apply(label.as_deref(), value, op, &at)?;
+                let op = self.apply(label.as_deref(), value, waits, op, &at)?;
                 if let (Some(label), true) = (&label, sized) {
                     labels.push(label.clone());
                 }
@@ -472,7 +484,7 @@ impl Walk<'_> {
             }
             if let Some(binary) = &lowered.binary {
                 let op = self.binary(expander, &line, binary, &at)?;
-                let op = self.apply(None, None, Some(op), &at)?;
+                let op = self.apply(None, None, false, Some(op), &at)?;
                 statements.push(statement(&made_at, None, op));
             }
             let line_size = self.made - made;
@@ -954,13 +966,28 @@ impl Walk<'_> {
         }
     }
 
+    /// Whether `op` is an equate that reads a name nothing is known of yet.
+    fn reads_unknown(&self, op: &Operation) -> bool {
+        let Operation::Equ(value) = op else {
+            return false;
+        };
+        let mut unknown = false;
+        map_sym_expr(value.clone(), &mut |name| {
+            unknown |= matches!(self.name(&name), Value::Unknown);
+            Expr::Sym(name)
+        });
+        unknown
+    }
+
     /// Records what a statement tells the walk: its label's value, and the
     /// address. `.org` opens a section in a linked program, and moves the
-    /// engine's `PseudoPc` in a flat one.
+    /// engine's `PseudoPc` in a flat one. `waits` says the label is an
+    /// equate that read a name nothing was known of yet.
     fn apply(
         &mut self,
         label: Option<&str>,
         value: Option<Value>,
+        waits: bool,
         op: Option<Operation>,
         at: &Span,
     ) -> Result<Option<Operation>, AsmError> {
@@ -987,6 +1014,16 @@ impl Walk<'_> {
                 self.variables.insert(label.to_owned());
             }
             self.names.insert(label.to_owned(), value);
+            // ca65 works out what an equate is when it is used, so one of a
+            // name defined further on is known once that name is.
+            match &op {
+                Some(Operation::Equ(e)) if waits => {
+                    self.equates.insert(label.to_owned(), e.clone());
+                }
+                _ => {
+                    self.equates.remove(label);
+                }
+            }
             self.check_zero_page(label, at);
         }
         let op = match op {
@@ -1240,15 +1277,69 @@ fn unnamed(index: usize) -> String {
     format!(":{index}")
 }
 
+impl Walk<'_> {
+    /// What is known of the name whose full name is `full`. An equate whose
+    /// value was not known when it was defined is worked out again, from
+    /// the names it read.
+    fn known(&self, full: &str) -> Value {
+        let Some(&value) = self.names.get(full) else {
+            return Value::Unknown;
+        };
+        let Some(expr) = self.equates.get(full) else {
+            return value;
+        };
+        if !self.evaluating.borrow_mut().insert(full.to_owned()) {
+            return value;
+        }
+        let now = lower::value(expr, &FullNames(self));
+        self.evaluating.borrow_mut().remove(full);
+        now
+    }
+}
+
+/// The walk, asked about names that are already full names, as the names
+/// an equate read are once they are bound.
+struct FullNames<'w, 'f>(&'w Walk<'f>);
+
+impl Known for FullNames<'_, '_> {
+    fn name(&self, name: &str) -> Value {
+        self.0.known(name)
+    }
+
+    fn pc(&self) -> Value {
+        self.0.pc()
+    }
+
+    fn size_of(&self, name: &str) -> Option<i64> {
+        self.0
+            .scopes
+            .get(name)
+            .copied()
+            .flatten()
+            .or_else(|| self.0.sizes.get(name).copied())
+    }
+
+    fn is_defined(&self, name: &str) -> bool {
+        self.0.names.contains_key(name)
+    }
+
+    fn is_referenced(&self, name: &str) -> bool {
+        self.0.referenced.contains(name)
+    }
+
+    /// The names were read when the equate was.
+    fn read(&self, _: &str) {}
+}
+
 impl Known for Walk<'_> {
     /// A plain name this scope has not defined is known by its address size
     /// only, from the innermost scope further out that has.
     fn name(&self, name: &str) -> Value {
         match self.lookup(name) {
-            Lookup::Full(full) => self.names.get(&full).copied().unwrap_or(Value::Unknown),
+            Lookup::Full(full) => self.known(&full),
             Lookup::Plain(name) => match self.defined(&name) {
-                Some(full) if full == qualify(self.path(), &name) => self.names[&full],
-                Some(full) => match self.names[&full] {
+                Some(full) if full == qualify(self.path(), &name) => self.known(&full),
+                Some(full) => match self.known(&full) {
                     Value::Constant(value) => Value::Address(Size::of(value)),
                     other => other,
                 },
