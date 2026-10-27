@@ -8,9 +8,9 @@
 //! keeps ca65's scopes, cheap locals and unnamed labels. The engine then
 //! assembles the statements in two passes.
 //!
-//! This is step 6c of `docs/plans/2026-10-27-ca65-walk/plan.md`: flat
-//! programs with scopes, in one segment. Segments and visibility come next.
-//! The old reader in `dialects/ca65` stays the default until then.
+//! This is step 6c of `docs/plans/2026-10-27-ca65-walk/plan.md`: scopes and
+//! segments. Visibility comes next. The old reader in `dialects/ca65` stays
+//! the default until then.
 //!
 //! # Scopes
 //!
@@ -21,24 +21,65 @@
 //! around the reference that defines it. Until then, what it knows of the
 //! name is what it knows of the innermost one defined so far, with a
 //! constant from further out known only by its address size.
+//!
+//! # Segments
+//!
+//! A program starts in `CODE`, and each segment holds its own bytes, which
+//! continue where they left off when the program comes back to it. A label
+//! takes its segment's address size: the zero page in `ZEROPAGE`, absolute
+//! elsewhere unless `.segment` says otherwise. The engine gets a section
+//! each time the segment changes. Where each section goes is only known
+//! once every segment's length is, so the walk places them at the end, from
+//! the linker's layout (`ca65_layout`): the address the CPU sees it at, and
+//! where its bytes go in the image, or nowhere for RAM. A flat link has one
+//! segment, `CODE`, at 0, as Asm198x's recorded verdicts were linked.
 
-use std::collections::{HashMap, HashSet};
+use std::cell::Cell;
+use std::collections::{BTreeMap, HashMap, HashSet};
 
 use lang198x_ca65::Profile;
 use lang198x_ca65::ast::{Expr as SourceExpr, NameRef};
 use lang198x_ca65::expand::{Expander, Host};
-use lang198x_ca65::lower::{self, Known, Scope, Size, Value};
+use lang198x_ca65::lower::{self, Known, Scope, Segment, Size, Value};
 use lang198x_ca65::syntax::{self, DiagnosticKind};
 
+use super::ca65_layout::Layout;
 use crate::ast::{map_sym_expr, map_syms};
 use crate::dialect::Dialect;
-use crate::engine::{AsmError, Expr, Operation, Statement, Warning, next_pc};
+use crate::engine::{AsmError, Expr, Operation, Place, Statement, Warning, next_pc};
 use crate::span::{FileId, Span};
 
 const PROFILE: Profile = Profile::CA65_2_19_6502;
 
 /// The ca65 dialect through Lang198x's front end, for the 6502.
-pub(crate) struct Ca65Walk;
+pub(crate) struct Ca65Walk {
+    /// Where the linker puts each segment, or `None` for a flat link, which
+    /// has only `CODE`, at 0.
+    layout: Option<Layout>,
+    /// The size of the image the layout makes, once the walk has placed the
+    /// segments.
+    image: Cell<Option<usize>>,
+}
+
+impl Ca65Walk {
+    /// A flat link: `CODE` at 0, written as it is, as Asm198x's recorded
+    /// verdicts were linked.
+    pub(crate) fn flat() -> Self {
+        Self {
+            layout: None,
+            image: Cell::new(None),
+        }
+    }
+
+    /// The NES curriculum's link: the iNES header, 32K of PRG and 8K of CHR,
+    /// with the RAM segments in their areas.
+    pub(crate) fn nes() -> Self {
+        Self {
+            layout: Some(Layout::nes_default()),
+            image: Cell::new(None),
+        }
+    }
+}
 
 impl Dialect for Ca65Walk {
     fn cycle_coverage(&self) -> crate::dialect::CycleCoverage {
@@ -60,11 +101,45 @@ impl Dialect for Ca65Walk {
     }
 
     fn parse_warned(&self, source: &str) -> Result<(Vec<Statement>, Vec<Warning>), AsmError> {
-        Walk::default().run(source)
+        let (statements, image) = Walk::default().run(source, self.layout.as_ref())?;
+        self.image.set(image);
+        Ok((statements, Vec::new()))
     }
 
     fn equ_label_colon(&self) -> bool {
         false
+    }
+
+    /// A layout's image starts at the start of the file.
+    fn image_base(&self) -> Option<i64> {
+        self.layout.as_ref().map(|_| 0)
+    }
+
+    /// A layout's image is its file areas, filled to their size.
+    fn image_size(&self, _: &[u8]) -> Option<usize> {
+        self.image.get()
+    }
+
+    fn gap_fill(&self) -> u8 {
+        self.layout.as_ref().map_or(0, |layout| layout.fill)
+    }
+}
+
+/// A segment the program has used.
+struct Seg {
+    /// The address size its labels take.
+    size: Size,
+    /// How many bytes it holds so far.
+    length: i64,
+}
+
+/// The address size ca65 gives one of its own segments, which a program
+/// cannot change.
+fn built_in_size(name: &str) -> Option<Size> {
+    match name {
+        "ZEROPAGE" => Some(Size::Zero),
+        "CODE" | "RODATA" | "DATA" | "BSS" => Some(Size::Absolute),
+        _ => None,
     }
 }
 
@@ -123,6 +198,15 @@ struct Walk {
     cheap: String,
     /// How many unnamed labels have been defined.
     unnamed: usize,
+    /// The segment lines go into.
+    segment: String,
+    /// Each segment used so far.
+    segments: HashMap<String, Seg>,
+    /// The segments `.pushseg` saved, last on top.
+    saved: Vec<String>,
+    /// Each statement that opens a section, with its segment and how far
+    /// into the segment it starts, for placing at the end.
+    sections: Vec<(usize, String, i64)>,
 }
 
 /// `name` in the scope whose full name is `path`.
@@ -158,10 +242,19 @@ enum Lookup {
 }
 
 impl Walk {
-    fn run(mut self, source: &str) -> Result<(Vec<Statement>, Vec<Warning>), AsmError> {
+    /// The program's statements, and the size of the image `layout` makes
+    /// of them, if there is a layout.
+    fn run(
+        mut self,
+        source: &str,
+        layout: Option<&Layout>,
+    ) -> Result<(Vec<Statement>, Option<usize>), AsmError> {
         let mut expander = Expander::new(source, PROFILE)
             .map_err(|_| AsmError::new(0, "the program is too long to parse"))?;
         let mut statements = Vec::new();
+        let sectioned = layout.is_some();
+        let start = Span::in_file(FileId(0), 1, 1);
+        self.use_segment("CODE", None, sectioned, &mut statements, &start)?;
         loop {
             let line = expander.next_line(&mut self);
             check(&expander)?;
@@ -200,6 +293,9 @@ impl Walk {
             if let Some(change) = lowered.scope {
                 self.change_scope(change, &at)?;
             }
+            if let Some(change) = lowered.segment {
+                self.change_segment(change, sectioned, &mut statements, &at)?;
+            }
         }
         if let Some(frame) = self.open.last() {
             let name = frame.name.as_deref().unwrap_or("");
@@ -229,7 +325,152 @@ impl Walk {
                 format!("Symbol `{name}` is undefined"),
             ));
         }
-        Ok((statements, Vec::new()))
+        let image = self.place(layout, &mut statements)?;
+        Ok((statements, image))
+    }
+
+    /// Places each section from `layout`, now that every segment's length
+    /// is known, and gives the image's size. With no layout, the link is
+    /// flat: `CODE` alone, at 0.
+    fn place(
+        &self,
+        layout: Option<&Layout>,
+        statements: &mut [Statement],
+    ) -> Result<Option<usize>, AsmError> {
+        let unplaced = |name: &str| {
+            AsmError::new(
+                0,
+                format!("Missing memory area assignment for segment `{name}`"),
+            )
+        };
+        // ld65 places only the segments that hold bytes: an empty one it has
+        // no area for is not an error.
+        let placed = |name: &str| layout.is_some_and(|l| l.segments.iter().any(|d| d.name == name));
+        if let Some((name, _)) = self.segments.iter().find(|(name, seg)| {
+            seg.length > 0 && !placed(name) && (layout.is_some() || *name != "CODE")
+        }) {
+            return Err(unplaced(name));
+        }
+        let Some(layout) = layout else {
+            return Ok(None);
+        };
+        let mut lengths = BTreeMap::new();
+        for (name, seg) in &self.segments {
+            if placed(name) {
+                let length = u32::try_from(seg.length).map_err(|_| unplaced(name))?;
+                lengths.insert(name.clone(), length);
+            }
+        }
+        let resolved = layout.resolve(&lengths)?;
+        layout.validate_extents(&resolved, &lengths)?;
+        for (index, name, offset) in &self.sections {
+            let Some(seg) = resolved.seg(name) else {
+                // An empty segment with no area: nothing to place.
+                if let Some(statement) = statements.get_mut(*index) {
+                    statement.op = None;
+                }
+                continue;
+            };
+            let at = match seg.file_at {
+                Some(file_at) => Place::At(file_at as i64 + offset),
+                None => Place::Discard,
+            };
+            if let Some(statement) = statements.get_mut(*index) {
+                statement.op = Some(Operation::Section {
+                    name: name.clone(),
+                    base: Some(i64::from(seg.base) + offset),
+                    at,
+                    bank: None,
+                });
+            }
+        }
+        Ok(Some(resolved.image_size))
+    }
+
+    /// How far into the current segment the next byte goes.
+    fn offset(&self) -> i64 {
+        self.segments.get(&self.segment).map_or(0, |seg| seg.length)
+    }
+
+    /// The address size of a label in the current segment.
+    fn segment_size(&self) -> Size {
+        self.segments
+            .get(&self.segment)
+            .map_or(Size::Absolute, |seg| seg.size)
+    }
+
+    /// Makes `name` the segment later lines go into. With a layout, a new
+    /// section opens where the segment left off, placed at the end.
+    fn use_segment(
+        &mut self,
+        name: &str,
+        size: Option<Size>,
+        sectioned: bool,
+        statements: &mut Vec<Statement>,
+        at: &Span,
+    ) -> Result<(), AsmError> {
+        let mismatch = || AsmError::at(at.clone(), "Segment attribute mismatch");
+        match (self.segments.get(name), size) {
+            (Some(seg), Some(size)) if seg.size != size => return Err(mismatch()),
+            (Some(_), _) => {}
+            (None, size) => {
+                let size = match (built_in_size(name), size) {
+                    (Some(fixed), Some(size)) if fixed != size => return Err(mismatch()),
+                    (Some(fixed), _) => fixed,
+                    (None, size) => size.unwrap_or(Size::Absolute),
+                };
+                self.segments
+                    .insert(name.to_owned(), Seg { size, length: 0 });
+            }
+        }
+        if self.segment == name {
+            return Ok(());
+        }
+        self.segment = name.to_owned();
+        self.org = None;
+        if sectioned {
+            statements.push(statement(
+                at,
+                None,
+                Some(Operation::Section {
+                    name: name.to_owned(),
+                    base: None,
+                    at: Place::ByAddress,
+                    bank: None,
+                }),
+            ));
+            self.sections
+                .push((statements.len() - 1, name.to_owned(), self.offset()));
+        }
+        Ok(())
+    }
+
+    /// `.segment`, its short forms, `.pushseg` or `.popseg`.
+    fn change_segment(
+        &mut self,
+        change: Segment,
+        sectioned: bool,
+        statements: &mut Vec<Statement>,
+        at: &Span,
+    ) -> Result<(), AsmError> {
+        match change {
+            Segment::Use { name, size } => self.use_segment(&name, size, sectioned, statements, at),
+            Segment::Push => {
+                self.saved.push(self.segment.clone());
+                Ok(())
+            }
+            Segment::Pop => {
+                let name = self
+                    .saved
+                    .pop()
+                    .ok_or_else(|| AsmError::at(at.clone(), "Segment stack is empty"))?;
+                self.use_segment(&name, None, sectioned, statements, at)
+            }
+            _ => Err(AsmError::at(
+                at.clone(),
+                "this change of segment is not supported",
+            )),
+        }
     }
 
     /// The full name of the innermost open scope: empty at the top.
@@ -374,10 +615,13 @@ impl Walk {
         if let Some(op) = &op
             && !matches!(op, Operation::Equ(_) | Operation::Set(_))
         {
-            let pc = self.org.unwrap_or(self.made);
+            let pc = self.org.unwrap_or_else(|| self.offset());
             let next = next_pc(op, pc, &isa::mos6502::SET, None, 1, at.line as usize)
                 .map_err(|error| refuse(error.message))?;
             self.made += next - pc;
+            if let Some(seg) = self.segments.get_mut(&self.segment) {
+                seg.length += next - pc;
+            }
             if self.org.is_some() {
                 self.org = Some(next);
             }
@@ -469,10 +713,11 @@ impl Known for Walk {
         }
     }
 
+    /// The address under `.org`, and otherwise its segment's address size.
     fn pc(&self) -> Value {
         match self.org {
             Some(pc) => Value::Constant(pc),
-            None => Value::Address(Size::Absolute),
+            None => Value::Address(self.segment_size()),
         }
     }
 
