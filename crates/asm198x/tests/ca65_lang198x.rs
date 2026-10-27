@@ -153,3 +153,30 @@ fn the_walk_builds_the_nes_curriculum_as_ca65_did() {
         "these now match ca65, so take them off the list: {stale:?}"
     );
 }
+
+/// The verdicts compare bytes, so the walk's messages are checked here: a
+/// warning or a failed `warning` assertion carries on and says so, as the
+/// old reader does, and an error stops with its text.
+#[test]
+fn the_walk_says_what_messages_say() {
+    let warned = |source: &str| {
+        let result = asm198x::assemble_ca65_lang198x(source).expect(source);
+        result
+            .warnings
+            .iter()
+            .map(|w| w.message.clone())
+            .collect::<Vec<_>>()
+    };
+    assert_eq!(warned(".warning \"soft\"\nnop\n"), ["soft"]);
+    assert_eq!(warned(".assert 0, warning\nnop\n"), ["Assertion failed"]);
+    assert_eq!(warned(".assert 0, ldwarning, \"x\"\nnop\n"), ["x"]);
+    assert!(warned(".assert 1, warning, \"x\"\nnop\n").is_empty());
+    for (source, text) in [
+        (".error \"hard\"\nnop\n", "hard"),
+        (".fatal \"stop\"\nnop\n", "stop"),
+        (".assert 0, error, \"boom\"\nnop\n", "boom"),
+    ] {
+        let error = asm198x::assemble_ca65_lang198x(source).expect_err(source);
+        assert!(error.to_string().contains(text), "{source:?}: {error}");
+    }
+}
