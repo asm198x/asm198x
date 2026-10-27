@@ -81,6 +81,14 @@ impl Ca65Walk {
             image: Cell::new(None),
         }
     }
+
+    /// AUDIT ONLY: a link from a given layout.
+    pub(crate) fn with_layout(layout: Layout) -> Self {
+        Self {
+            layout: Some(layout),
+            image: Cell::new(None),
+        }
+    }
 }
 
 impl Dialect for Ca65Walk {

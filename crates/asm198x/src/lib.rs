@@ -159,11 +159,20 @@ pub fn assemble_acme_files(
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
 pub fn assemble_ca65(source: &str) -> Result<AssemblyResult, AsmError> {
+    if audit_walk() {
+        return assemble_ca65_nes_lang198x(source);
+    }
     let (rom, warnings, capture, areas) = dialects::ca65::assemble_with_debug(source)?;
     let mut result = AssemblyResult::image_warned(rom, warnings);
     result.section_debug = capture.section_debug;
     result.areas = areas;
     Ok(result)
+}
+
+
+/// AUDIT ONLY: whether the old ca65 entry points go through the walk.
+fn audit_walk() -> bool {
+    std::env::var_os("ASM198X_AUDIT_WALK").is_some()
 }
 
 /// The source map every multi-file entry point starts from: the root at
@@ -204,6 +213,9 @@ pub fn assemble_ca65_files(
     input_path: &str,
     loader: &dyn source::SourceLoader,
 ) -> Result<AssemblyResult, MultiFileError> {
+    if audit_walk() {
+        return assemble_ca65_nes_lang198x_files(source, input_path, loader);
+    }
     let mut map = new_source_map(input_path, source);
     match dialects::ca65::assemble_multi(&mut map, loader) {
         Ok((rom, warnings, capture, areas)) => {
@@ -234,6 +246,23 @@ pub fn assemble_ca65_files_with_config(
     loader: &dyn source::SourceLoader,
     cfg: &str,
 ) -> Result<AssemblyResult, MultiFileError> {
+    if audit_walk() {
+        let layout = match dialects::ca65_layout::from_cfg(cfg) {
+            Ok(layout) => layout,
+            Err(error) => {
+                return Err(MultiFileError {
+                    error,
+                    source_map: Box::new(new_source_map(input_path, source)),
+                });
+            }
+        };
+        return assemble_files(
+            &dialects::ca65_walk::Ca65Walk::with_layout(layout),
+            source,
+            input_path,
+            loader,
+        );
+    }
     let mut map = new_source_map(input_path, source);
     let layout = match dialects::ca65_layout::from_cfg(cfg) {
         Ok(layout) => layout,
@@ -275,6 +304,12 @@ pub fn assemble_ca65_files_debug(
     input_path: &str,
     loader: &dyn source::SourceLoader,
 ) -> Result<(AssemblyResult, debug198x::DebugInfo), MultiFileError> {
+    if audit_walk() {
+        return Err(MultiFileError {
+            error: AsmError::new(0, "AUDIT: the walk has no debug capture yet (6d.5)"),
+            source_map: Box::new(new_source_map(input_path, source)),
+        });
+    }
     let mut map = new_source_map(input_path, source);
     match dialects::ca65::assemble_multi(&mut map, loader) {
         Ok((rom, warnings, capture, areas)) => {
@@ -305,6 +340,12 @@ pub fn assemble_ca65_files_debug_with_config(
     loader: &dyn source::SourceLoader,
     cfg: &str,
 ) -> Result<(AssemblyResult, debug198x::DebugInfo), MultiFileError> {
+    if audit_walk() {
+        return Err(MultiFileError {
+            error: AsmError::new(0, "AUDIT: the walk has no debug capture yet (6d.5)"),
+            source_map: Box::new(new_source_map(input_path, source)),
+        });
+    }
     let mut map = new_source_map(input_path, source);
     let layout = match dialects::ca65_layout::from_cfg(cfg) {
         Ok(layout) => layout,
@@ -346,6 +387,9 @@ pub fn assemble_ca65_debug(
     source: &str,
     source_path: &str,
 ) -> Result<(AssemblyResult, debug198x::DebugInfo), AsmError> {
+    if audit_walk() {
+        return Err(AsmError::new(0, "AUDIT: the walk has no debug capture yet (6d.5)"));
+    }
     let (rom, warnings, capture, areas) = dialects::ca65::assemble_with_debug(source)?;
     let mut result = AssemblyResult::image_warned(rom, warnings);
     result.section_debug = capture.section_debug.clone();
