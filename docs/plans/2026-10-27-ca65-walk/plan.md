@@ -77,11 +77,21 @@ walk stands, with every difference named.
 `.popseg` as sections placed by the layout, so the NES curriculum digests
 can pass.
 
-### 6d. Visibility and the rest
+### 6d. Functions, visibility and the rest
 
-`.import`, `.export`, `.global` and their zero-page forms, `.incbin`,
-messages and assertions, and the debug capture the CLI's `--debug` writes.
-The named list should be empty here.
+In five parts, each measured first:
+
+1. ca65's functions of tokens and symbols, the set the old reader supports:
+   `.defined`, `.referenced`, `.const`, `.strlen`, `.strat`, `.tcount`,
+   `.blank`, `.match`, `.xmatch`, `.definedmacro` and `.ismnemonic`.
+2. `.import`, `.export`, `.global`, their zero-page forms and
+   `.forceimport`.
+3. Messages and assertions: `.out`, `.warning`, `.error`, `.fatal` and
+   `.assert`.
+4. `.incbin`.
+5. The debug capture the CLI's `--debug` writes.
+
+The named list should be empty at the end.
 
 ## Where Lang198x follows the manual over ca65 V2.19
 
@@ -111,6 +121,7 @@ These are refused or reported as unsupported, where ca65 accepts them:
 | 6b, the walk | `dialects/ca65_walk.rs`, behind the hidden `assemble_ca65_lang198x`. It reads the program once, keeps what ca65 knows of each name, names cheap locals and unnamed labels, and makes `.org` the engine's `PseudoPc`. |
 | 6c, scopes | `lang198x-ca65` 0.0.4 reports `.scope`, `.proc` and their ends, and lowers `.sizeof` through `Known::size_of`. The walk keeps the scopes, their sizes and each label's size. |
 | 6c, segments | `lang198x-ca65` 0.0.6 reports `.segment`, its short forms, `.pushseg` and `.popseg`. The walk keeps each segment's length and address size, and opens an engine `Section` at each change, placed at the end from `ca65_layout`. A hidden `assemble_ca65_nes_lang198x` links as the curriculum does. |
+| 6d.1, functions | `lang198x-ca65` 0.0.7 makes the functions of tokens in its expander and lowers `.defined`, `.referenced` and `.const` through `Known`. The walk answers them, and counts each name lowering reads as a use. |
 
 The scope rules, measured on ca65 V2.19 and recorded as 57 probes in
 `tests/differential.rs`:
@@ -130,11 +141,9 @@ The scope rules, measured on ca65 V2.19 and recorded as 57 probes in
 The old reader is frozen (#940). Twelve of the new probes are ones it gets
 wrong, so they are recorded as gaps against that issue.
 
-`tests/ca65_lang198x.rs` replays the 423 `ca65` verdicts. 418 match. The
-5 others need step 6d and are named in the test:
-
-- 3 need `.defined`, `.ref`, `.const` and `.tcount` as functions;
-- 2 need `.import` and `.export`, of a name `.ident` made.
+`tests/ca65_lang198x.rs` replays the 466 `ca65` verdicts. 464 match. The
+2 others need `.import` and `.export`, of a name `.ident` made, and are
+named in the test.
 
 It also builds the 51 NES curriculum programs, and all 51 ROMs match the
 ones ca65 V2.19 and ld65 built. That half runs where the curriculum is
@@ -152,6 +161,17 @@ plan `docs/plans/2026-10-27-made-tokens.md`): a name `.ident` makes stays a
 name even when it is spelt like a register, and a made string keeps a byte
 above 127. It also joins a mid-line `.endrepeat`'s line to the next line,
 as ca65 does.
+
+The functions follow ca65 V2.19, recorded as 43 probes. `.defined` and
+`.referenced` do not count as a use of the name they ask about, but `.const`
+and a plain name do, in the order ca65 reads the line, so
+`.byte .ref(v), v, .ref(v)` gives `00 01 01`. The functions of tokens stay
+tokens inside another function's token list, since ca65 does not run them
+there. `.match` and `.xmatch` compare tokens as ca65's `TokCmp` does: each
+register is a token of its own, so `.match(a,b)` is 0. A line's label is
+known on its own line, so `l: lda l` under `.org $10` is zero page, which
+the walk got wrong before. The old reader gets 12 of the probes wrong, and
+they are gaps against #940.
 
 Replaying the verdicts in 6b also found three places where `lang198x-ca65`
 gave a line a different meaning from ca65, fixed there: `*` in a data list,

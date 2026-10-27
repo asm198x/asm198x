@@ -34,7 +34,7 @@
 //! where its bytes go in the image, or nowhere for RAM. A flat link has one
 //! segment, `CODE`, at 0, as Asm198x's recorded verdicts were linked.
 
-use std::cell::Cell;
+use std::cell::{Cell, RefCell};
 use std::collections::{BTreeMap, HashMap, HashSet};
 
 use lang198x_ca65::Profile;
@@ -44,7 +44,7 @@ use lang198x_ca65::lower::{self, Known, Scope, Segment, Size, Value};
 use lang198x_ca65::syntax::{self, DiagnosticKind};
 
 use super::ca65_layout::Layout;
-use crate::ast::{map_sym_expr, map_syms};
+use crate::ast::map_syms;
 use crate::dialect::Dialect;
 use crate::engine::{AsmError, Expr, Operation, Place, Statement, Warning, next_pc};
 use crate::span::{FileId, Span};
@@ -182,9 +182,11 @@ struct Walk {
     unnamed_scopes: usize,
     /// Names read so far, for `.ifref`.
     referenced: HashSet<String>,
-    /// Names `.ifconst` asked about, with where. ca65 counts the question
-    /// as a use, so each must be defined by the end.
+    /// Names `.ifconst` asked about, or lowering read, with where. ca65
+    /// counts each as a use, so each must be defined by the end.
     asked: Vec<(String, Span)>,
+    /// Names lowering has read, as written, since they were last recorded.
+    reads: RefCell<Vec<String>>,
     /// Names bound at the end of the program.
     pending: Vec<Pending>,
     /// Where the line being read is, for what the host is asked about it.
@@ -261,7 +263,9 @@ impl Walk {
             let Some(line) = line else { break };
             let at = place(&expander, line.span());
             self.here = Some(at.clone());
-            let lowered = lower::line(&line, PROFILE, &self).map_err(|diagnostic| {
+            let lowered = lower::line(&line, PROFILE, &self);
+            self.record_reads();
+            let lowered = lowered.map_err(|diagnostic| {
                 let span = syntax::Span::new(line.text(), diagnostic.range());
                 let message = match diagnostic.kind() {
                     DiagnosticKind::Unsupported => {
@@ -547,6 +551,49 @@ impl Walk {
         full
     }
 
+    /// Records the names lowering read as uses, each of which must be
+    /// defined by the end. A name only `.const` read is in no statement, so
+    /// this is the only record of it.
+    fn record_reads(&mut self) {
+        let here = self
+            .here
+            .clone()
+            .unwrap_or_else(|| Span::in_file(FileId(0), 0, 0));
+        for name in self.reads.take() {
+            let full = self.reference(&name);
+            self.asked.push((full, here.clone()));
+        }
+    }
+
+    /// The full name a read of `name` is recorded under, as `reference`
+    /// records it.
+    fn read_as(&self, name: &str) -> String {
+        match self.lookup(name) {
+            Lookup::Full(full) => full,
+            Lookup::Plain(name) => qualify(self.path(), &name),
+        }
+    }
+
+    /// Whether `name` has been read: before this line, or on it so far.
+    fn was_read(&self, name: &str) -> bool {
+        let read = |full: &str| {
+            self.referenced.contains(full)
+                || self.reads.borrow().iter().any(|r| self.read_as(r) == full)
+        };
+        match self.lookup(name) {
+            Lookup::Full(full) => read(&full),
+            Lookup::Plain(name) => outwards(self.path()).any(|path| read(&qualify(path, &name))),
+        }
+    }
+
+    /// Whether `name` is defined so far.
+    fn has(&self, name: &str) -> bool {
+        match self.lookup(name) {
+            Lookup::Full(full) => self.names.contains_key(&full),
+            Lookup::Plain(name) => self.defined(&name).is_some(),
+        }
+    }
+
     /// `op` with each name it reads bound, and recorded as read.
     fn names_in(&mut self, op: Operation) -> Operation {
         map_syms(op, &mut |name| Expr::Sym(self.reference(&name)))
@@ -741,12 +788,26 @@ impl Known for Walk {
             None => self.sizes.get(&full).copied(),
         }
     }
+
+    fn is_defined(&self, name: &str) -> bool {
+        self.has(name)
+    }
+
+    fn is_referenced(&self, name: &str) -> bool {
+        self.was_read(name)
+    }
+
+    fn read(&self, name: &str) {
+        self.reads.borrow_mut().push(name.to_owned());
+    }
 }
 
 impl Host for Walk {
     /// A condition or count, which ca65 needs now: a constant expression.
     fn evaluate(&mut self, expr: &SourceExpr) -> Result<i64, String> {
-        let lowered = lower::expression(expr, &*self).map_err(|d| d.message().to_owned())?;
+        let lowered = lower::expression(expr, &*self);
+        self.record_reads();
+        let lowered = lowered.map_err(|d| d.message().to_owned())?;
         match lower::value(&lowered, &*self) {
             Value::Constant(value) => Ok(value),
             _ => Err("Constant expression expected".to_owned()),
@@ -754,35 +815,15 @@ impl Host for Walk {
     }
 
     fn is_defined(&mut self, name: &NameRef) -> bool {
-        match self.lookup(&name.text()) {
-            Lookup::Full(full) => self.names.contains_key(&full),
-            Lookup::Plain(name) => self.defined(&name).is_some(),
-        }
+        self.has(&name.text())
     }
 
     fn is_referenced(&mut self, name: &NameRef) -> bool {
-        match self.lookup(&name.text()) {
-            Lookup::Full(full) => self.referenced.contains(&full),
-            Lookup::Plain(name) => {
-                outwards(self.path()).any(|path| self.referenced.contains(&qualify(path, &name)))
-            }
-        }
+        self.was_read(&name.text())
     }
 
     /// `.ifconst`, which ca65 counts as a use of each name it reads.
     fn is_constant(&mut self, expr: &SourceExpr) -> bool {
-        if let Ok(lowered) = lower::expression(expr, &*self) {
-            let here = self
-                .here
-                .clone()
-                .unwrap_or_else(|| Span::in_file(FileId(0), 0, 0));
-            let mut asked = Vec::new();
-            map_sym_expr(lowered, &mut |name| {
-                asked.push((self.reference(&name), here.clone()));
-                Expr::Sym(name)
-            });
-            self.asked.extend(asked);
-        }
         self.evaluate(expr).is_ok()
     }
 }
