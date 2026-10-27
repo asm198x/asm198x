@@ -93,6 +93,14 @@ In five parts, each measured first:
 
 The named list should be empty at the end.
 
+## The audit before step 7
+
+[`audit.md`](audit.md) runs the old reader's whole test suite through the
+walk and sorts what it still lacks: the source-language gaps, the outputs
+besides bytes, diagnostics, linker configs, the old fixtures pinned to ca65
+V2.18, and ca65's 13 CPU modes. It proposes 6d.5 (outputs), 6e (the
+language gaps), 6f (fixtures on V2.19) and then step 7.
+
 ## Where Lang198x follows the manual over ca65 V2.19
 
 These are recorded in
