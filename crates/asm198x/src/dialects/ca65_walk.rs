@@ -39,14 +39,16 @@ use std::collections::{BTreeMap, HashMap, HashSet};
 
 use lang198x_ca65::Profile;
 use lang198x_ca65::ast::{Expr as SourceExpr, NameRef};
-use lang198x_ca65::expand::{Expander, Host};
-use lang198x_ca65::lower::{self, Known, Scope, Segment, Size, Value, Visibility, Visible};
+use lang198x_ca65::expand::{ActiveLine, Expander, Host};
+use lang198x_ca65::lower::{self, Binary, Known, Scope, Segment, Size, Value, Visibility, Visible};
 use lang198x_ca65::syntax::{self, DiagnosticKind};
 
+use super::ca65_flat::{Resolution, load_binary, load_include, slice_incbin};
 use super::ca65_layout::Layout;
 use crate::ast::map_syms;
 use crate::dialect::Dialect;
-use crate::engine::{AsmError, Expr, Operation, Place, Statement, Warning, next_pc};
+use crate::engine::{AsmError, Expr, Operation, Place, Statement, Warning, align_pad, next_pc};
+use crate::source::{SourceLoader, SourceMap};
 use crate::span::{FileId, Span};
 
 const PROFILE: Profile = Profile::CA65_2_19_6502;
@@ -102,6 +104,24 @@ impl Dialect for Ca65Walk {
 
     fn parse_warned(&self, source: &str) -> Result<(Vec<Statement>, Vec<Warning>), AsmError> {
         let (statements, image) = Walk::default().run(source, self.layout.as_ref())?;
+        self.image.set(image);
+        Ok((statements, Vec::new()))
+    }
+
+    /// A program whose root is `FileId(0)` in `map`, reading `.include` and
+    /// `.incbin` files through `loader`, from the requesting file's folder
+    /// and then each folder of the files that included it, as ca65 does.
+    fn parse_multi_warned(
+        &self,
+        map: &mut SourceMap,
+        loader: &dyn SourceLoader,
+    ) -> Result<(Vec<Statement>, Vec<Warning>), AsmError> {
+        let root = map.contents(FileId(0)).unwrap_or_default().to_owned();
+        let walk = Walk {
+            files: Some(Files { map, loader }),
+            ..Walk::default()
+        };
+        let (statements, image) = walk.run(&root, self.layout.as_ref())?;
         self.image.set(image);
         Ok((statements, Vec::new()))
     }
@@ -182,9 +202,20 @@ struct Declaration {
     order: usize,
 }
 
+/// The files a program may read, for the multi-file entry points.
+struct Files<'f> {
+    map: &'f mut SourceMap,
+    loader: &'f dyn SourceLoader,
+}
+
 /// What the walk knows as it reads the program.
 #[derive(Default)]
-struct Walk {
+struct Walk<'f> {
+    /// The files the program may read, or `None` when it is one file.
+    files: Option<Files<'f>>,
+    /// For each file the expander read, by its number there: its id in the
+    /// source map, and the file that read it in. The root is first.
+    read: Vec<(FileId, Option<usize>)>,
     /// Each name declared to a linker, by its full name in the scope that
     /// declared it.
     declared: HashMap<String, Declaration>,
@@ -265,7 +296,7 @@ enum Lookup {
     Plain(String),
 }
 
-impl Walk {
+impl Walk<'_> {
     /// The program's statements, and the size of the image `layout` makes
     /// of them, if there is a layout.
     fn run(
@@ -275,17 +306,31 @@ impl Walk {
     ) -> Result<(Vec<Statement>, Option<usize>), AsmError> {
         let mut expander = Expander::new(source, PROFILE)
             .map_err(|_| AsmError::new(0, "the program is too long to parse"))?;
+        self.read = vec![(FileId(0), None)];
+        let result = self.read_lines(&mut expander, layout);
+        // Recorded whether or not the program assembles, so a problem in an
+        // included file can name the chain of files that read it.
+        self.record_includes(&expander);
+        result
+    }
+
+    /// Reads and lowers every line `expander` hands on.
+    fn read_lines(
+        &mut self,
+        expander: &mut Expander,
+        layout: Option<&Layout>,
+    ) -> Result<(Vec<Statement>, Option<usize>), AsmError> {
         let mut statements = Vec::new();
         let sectioned = layout.is_some();
         let start = Span::in_file(FileId(0), 1, 1);
         self.use_segment("CODE", None, sectioned, &mut statements, &start)?;
         loop {
-            let line = expander.next_line(&mut self);
-            check(&expander)?;
+            let line = expander.next_line(self);
+            self.check(expander)?;
             let Some(line) = line else { break };
-            let at = place(&expander, line.span());
+            let at = self.site(expander, line.span());
             self.here = Some(at.clone());
-            let lowered = lower::line(&line, PROFILE, &self);
+            let lowered = lower::line(&line, PROFILE, &*self);
             self.record_reads();
             let lowered = lowered.map_err(|diagnostic| {
                 let span = syntax::Span::new(line.text(), diagnostic.range());
@@ -295,7 +340,7 @@ impl Walk {
                     }
                     _ => diagnostic.message().to_owned(),
                 };
-                AsmError::at(place(&expander, span), message)
+                AsmError::at(self.site(expander, span), message)
             })?;
             let made = self.made;
             let mut labels = Vec::new();
@@ -311,6 +356,11 @@ impl Walk {
                     labels.push(label.clone());
                 }
                 statements.push(statement(&at, label, op));
+            }
+            if let Some(binary) = &lowered.binary {
+                let op = self.binary(expander, &line, binary, &at)?;
+                let op = self.apply(None, None, Some(op), &at)?;
+                statements.push(statement(&at, None, op));
             }
             let line_size = self.made - made;
             for label in labels {
@@ -577,6 +627,109 @@ impl Walk {
         full
     }
 
+    /// Records where each file was included from. Lowering reads a file
+    /// before it knows the line that asked, so this is done at the end.
+    fn record_includes(&mut self, expander: &Expander) {
+        let sites: Vec<(FileId, Span)> = expander
+            .files()
+            .iter()
+            .filter_map(|file| {
+                let number = usize::try_from(file.id().get()).ok()?;
+                let id = self.read.get(number)?.0;
+                Some((id, self.site(expander, file.site())))
+            })
+            .collect();
+        if let Some(files) = &mut self.files {
+            for (id, site) in sites {
+                files.map.set_included_from(id, site.file, site.line);
+            }
+        }
+    }
+
+    /// Stops at the expander's first problem.
+    fn check(&self, expander: &Expander) -> Result<(), AsmError> {
+        match expander.diagnostics().first() {
+            Some((text, diagnostic)) => {
+                let span = syntax::Span::new(*text, diagnostic.range());
+                Err(AsmError::at(
+                    self.site(expander, span),
+                    diagnostic.message(),
+                ))
+            }
+            None => Ok(()),
+        }
+    }
+
+    /// Where `span` was written: its file, line and column.
+    fn site(&self, expander: &Expander, span: syntax::Span) -> Span {
+        match expander.locate(span) {
+            Some(at) => Span::in_file(self.file_id(at.file.get()), at.line, at.column),
+            None => Span::in_file(FileId(0), 0, 0),
+        }
+    }
+
+    /// The source map's id for the expander's file `number`.
+    fn file_id(&self, number: u32) -> FileId {
+        usize::try_from(number)
+            .ok()
+            .and_then(|n| self.read.get(n))
+            .map_or(FileId(0), |(id, _)| *id)
+    }
+
+    /// The files a request from the expander's file `number` is looked for
+    /// beside, as `load_include` takes them: the root first and that file
+    /// last.
+    fn chain(&self, number: usize) -> Vec<FileId> {
+        let mut chain = Vec::new();
+        let mut at = Some(number);
+        while let Some(n) = at {
+            let Some(&(id, parent)) = self.read.get(n) else {
+                break;
+            };
+            chain.push(id);
+            at = parent;
+        }
+        chain.reverse();
+        chain
+    }
+
+    /// The bytes `.incbin` puts here, read beside the file the line is in.
+    fn binary(
+        &self,
+        expander: &Expander,
+        line: &ActiveLine,
+        binary: &Binary,
+        at: &Span,
+    ) -> Result<Operation, AsmError> {
+        let Some(files) = &self.files else {
+            return Err(AsmError::at(
+                at.clone(),
+                format!(
+                    "cannot resolve `.incbin \"{}\"` here — the single-source API assembles \
+                     one file; use the multi-file entry point (the CLI resolves binary \
+                     inclusions automatically)",
+                    binary.name
+                ),
+            ));
+        };
+        let number = expander
+            .locate(line.span())
+            .and_then(|at| usize::try_from(at.file.get()).ok())
+            .unwrap_or(0);
+        let chain = self.chain(number);
+        let data = load_binary(
+            files.map,
+            files.loader,
+            &binary.name,
+            &chain,
+            Resolution::AncestorChain,
+        )
+        .map_err(|error| AsmError::at(at.clone(), error.to_string()))?;
+        let bytes = slice_incbin(&data, binary.offset, binary.size)
+            .map_err(|message| AsmError::at(at.clone(), format!("`{}`: {message}", binary.name)))?;
+        Ok(Operation::Binary(bytes))
+    }
+
     /// Records the names lowering read as uses, each of which must be
     /// defined by the end. A name only `.const` read is in no statement, so
     /// this is the only record of it.
@@ -698,6 +851,12 @@ impl Walk {
                 self.org = Some(value);
                 return Ok(Some(Operation::PseudoPc(Some(Expr::Num(value)))));
             }
+            // ca65 aligns within the segment, wherever ld65 places it, so
+            // `.align 3` in a segment at $8000 pads to offset 3.
+            Some(Operation::AlignTo { modulus, fill }) => Some(Operation::Fill {
+                count: Expr::Num(align_pad(self.offset(), modulus)),
+                value: fill.first().copied().unwrap_or(0),
+            }),
             other => other,
         };
         if let Some(op) = &op
@@ -881,7 +1040,7 @@ fn unnamed(index: usize) -> String {
     format!(":{index}")
 }
 
-impl Known for Walk {
+impl Known for Walk<'_> {
     /// A plain name this scope has not defined is known by its address size
     /// only, from the innermost scope further out that has.
     fn name(&self, name: &str) -> Value {
@@ -940,7 +1099,27 @@ impl Known for Walk {
     }
 }
 
-impl Host for Walk {
+impl Host for Walk<'_> {
+    /// A file `.include` reads, looked for beside the file that asks and
+    /// then beside each file that included it. A single file has none.
+    fn include(&mut self, name: &str, from: syntax::FileId) -> Option<String> {
+        let from = usize::try_from(from.get()).ok()?;
+        let chain = self.chain(from);
+        let files = self.files.as_mut()?;
+        let id = load_include(
+            files.map,
+            files.loader,
+            name,
+            &chain,
+            0,
+            Resolution::AncestorChain,
+        )
+        .ok()?;
+        let text = files.map.contents(id)?.to_owned();
+        self.read.push((id, Some(from)));
+        Some(text)
+    }
+
     /// A condition or count, which ca65 needs now: a constant expression.
     fn evaluate(&mut self, expr: &SourceExpr) -> Result<i64, String> {
         let lowered = lower::expression(expr, &*self);
@@ -963,25 +1142,6 @@ impl Host for Walk {
     /// `.ifconst`, which ca65 counts as a use of each name it reads.
     fn is_constant(&mut self, expr: &SourceExpr) -> bool {
         self.evaluate(expr).is_ok()
-    }
-}
-
-/// Stops at the expander's first problem.
-fn check(expander: &Expander) -> Result<(), AsmError> {
-    match expander.diagnostics().first() {
-        Some((text, diagnostic)) => {
-            let span = syntax::Span::new(*text, diagnostic.range());
-            Err(AsmError::at(place(expander, span), diagnostic.message()))
-        }
-        None => Ok(()),
-    }
-}
-
-/// Where `span` was written. This step reads one file.
-fn place(expander: &Expander, span: syntax::Span) -> Span {
-    match expander.locate(span) {
-        Some(at) => Span::in_file(FileId(0), at.line, at.column),
-        None => Span::in_file(FileId(0), 0, 0),
     }
 }
 

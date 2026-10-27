@@ -1160,7 +1160,7 @@ fn include_resolves(
 /// path it resolved, so the `included from` notes stay honest — and a failure
 /// is reported as the requester's own (it names the request as written and
 /// the file that asked).
-fn load_include(
+pub(crate) fn load_include(
     map: &mut SourceMap,
     loader: &dyn SourceLoader,
     request: &str,
@@ -1212,7 +1212,7 @@ fn load_include(
 /// [`load_include`] (KTD8: include and incbin can never fork resolution
 /// behaviour — probe-confirmed for all three anchors). No `FileId` is minted
 /// — binary data has no spans.
-fn load_binary(
+pub(crate) fn load_binary(
     map: &SourceMap,
     loader: &dyn SourceLoader,
     request: &str,
@@ -1402,7 +1402,11 @@ fn quoted_name<'a>(
 /// missing **or negative** size means the rest of the file; offset at EOF or
 /// size 0 are legal and empty. `Err` carries the message body; the caller
 /// wraps it with the request name and the directive's span.
-fn slice_incbin(data: &[u8], offset: Option<i64>, size: Option<i64>) -> Result<Vec<u8>, String> {
+pub(crate) fn slice_incbin(
+    data: &[u8],
+    offset: Option<i64>,
+    size: Option<i64>,
+) -> Result<Vec<u8>, String> {
     let len = data.len() as i64;
     let off = offset.unwrap_or(0);
     if off < 0 {
