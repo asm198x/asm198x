@@ -267,9 +267,9 @@ gaps, for 6e:
 
 - `.org` stays in force across a change of segment, until `.reloc`, and
   counts the bytes every segment makes: in ca65 V2.19, `.org $2000`, then
-  a byte in `RODATA`, then `.word *` back in `CODE` writes $2001. The walk
-  starts each segment afresh.
-- `.reloc` is not lowered.
+  a byte in `RODATA`, then `.word *` back in `CODE` writes $2001 (done in
+  6e).
+- `.reloc` is not lowered (done in 6e).
 
 The same run found a label spelt like a register, `a:`, which one of the
 old reader's tests accepts. ca65 V2.19 refuses it ("Expected
@@ -301,10 +301,27 @@ a scope, the name stays the scope's own until the end, so it stays
 absolute. 13 probes; the old reader gets the scoped one wrong, a gap
 against #940.
 
-One difference is deliberate. ca65 V2.19 refuses an unused equate that
-reads itself at the top (`p=p+1`), but accepts `red=red+1` inside a scope
-when nothing uses `inner::red`. The walk refuses both, since the same
-definition cannot be both right and wrong.
+ca65 refuses a circle of equates at once, with one exception: an equate in
+a scope that reads its own name while a name further out is defined, such
+as `red=red+1` under a top-level `red`, is refused only where it is used,
+even behind a lazy `&&` or `||`. The engine lets a dialect leave such an
+equate without a value (`leaves_equate_unresolved`), so only a use of it
+fails. Six probes record it.
+
+**`.org` and `.reloc`.** In ca65 V2.19, `.org` stays in force across a
+change of segment, counting every segment's bytes, until `.reloc`
+(`lang198x-ca65` 0.0.11 lowers it). In a linked program the walk opens a
+section at each, with the address `.org` gave or where the segment has
+got to; a section with nothing in it is left out of the debug record. A
+flat program closes each `PseudoPc` block `.org` opened.
+
+**Lines a macro makes.** They belong to the outermost call, which
+`lang198x-ca65` 0.0.11 now names (`Expander::macro_call`), so a call with
+no label, which the walk never sees, is right too.
+
+**Cheap locals and equates.** ca65 reads an assignment's value before its
+name starts a new cheap local scope, and a label before the rest of its
+line; the walk now does both.
 
 ## After this step
 

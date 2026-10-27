@@ -284,6 +284,14 @@ fn resolve_deferred_equates(
             break;
         }
     }
+    // What the dialect leaves without a value is refused only where it is
+    // used.
+    deferred.retain(|(index, _)| {
+        equate(*index).is_some_and(|(label, _)| !dialect.leaves_equate_unresolved(label))
+    });
+    if deferred.is_empty() {
+        return Ok(());
+    }
     let unresolved: Vec<&String> = deferred
         .iter()
         .filter_map(|(index, _)| equate(*index).map(|(label, _)| label))
@@ -1778,6 +1786,9 @@ fn assemble_statements(
                     },
                 );
             }
+            // An equate the dialect left without a value has none to record.
+            let valueless =
+                matches!(&s.op, Some(Operation::Equ(_))) && !symbols.contains_key(label);
             let kind = if matches!(&s.op, Some(Operation::Equ(_))) {
                 // An `equ`/`=` constant: its value, not an address, and no space.
                 let value = symbols.get(label).copied().unwrap_or_default();
@@ -1802,10 +1813,12 @@ fn assemble_statements(
                     space: None,
                 }
             };
-            debug.symbols.push(debug198x::Symbol {
-                name: label.clone(),
-                kind,
-            });
+            if !valueless {
+                debug.symbols.push(debug198x::Symbol {
+                    name: label.clone(),
+                    kind,
+                });
+            }
         }
         // A source-bearing statement that emitted bytes gets a line span; `org`
         // gaps and `align` fill do not (the padding rule).

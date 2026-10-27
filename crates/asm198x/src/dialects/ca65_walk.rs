@@ -75,6 +75,9 @@ pub(crate) struct Ca65Walk {
     /// Where the link put each segment, and how long each is, once the walk
     /// has placed them.
     linked: RefCell<Option<Linked>>,
+    /// The equates of the last program ca65 refuses as circular only where
+    /// they are used.
+    lazy: RefCell<HashSet<String>>,
 }
 
 /// What a link made of the program's segments.
@@ -104,6 +107,7 @@ impl Ca65Walk {
         Self {
             layout: None,
             linked: RefCell::new(None),
+            lazy: RefCell::new(HashSet::new()),
         }
     }
 
@@ -118,7 +122,16 @@ impl Ca65Walk {
         Self {
             layout: Some(layout),
             linked: RefCell::new(None),
+            lazy: RefCell::new(HashSet::new()),
         }
+    }
+
+    /// Keeps what the engine asks of a program read, and gives it the
+    /// statements and warnings.
+    fn keep(&self, ran: Ran) -> (Vec<Statement>, Vec<Warning>) {
+        self.linked.replace(ran.linked);
+        self.lazy.replace(ran.lazy);
+        (ran.statements, ran.warnings)
     }
 
     /// The result of a linked assembly, with its debug record by segment.
@@ -161,9 +174,8 @@ impl Dialect for Ca65Walk {
     }
 
     fn parse_warned(&self, source: &str) -> Result<(Vec<Statement>, Vec<Warning>), AsmError> {
-        let (statements, linked, warnings) = Walk::default().run(source, self.layout.as_ref())?;
-        self.linked.replace(linked);
-        Ok((statements, warnings))
+        let ran = Walk::default().run(source, self.layout.as_ref())?;
+        Ok(self.keep(ran))
     }
 
     /// A program whose root is `FileId(0)` in `map`, reading `.include` and
@@ -179,9 +191,8 @@ impl Dialect for Ca65Walk {
             files: Some(Files { map, loader }),
             ..Walk::default()
         };
-        let (statements, linked, warnings) = walk.run(&root, self.layout.as_ref())?;
-        self.linked.replace(linked);
-        Ok((statements, warnings))
+        let ran = walk.run(&root, self.layout.as_ref())?;
+        Ok(self.keep(ran))
     }
 
     fn equ_label_colon(&self) -> bool {
@@ -207,6 +218,10 @@ impl Dialect for Ca65Walk {
         true
     }
 
+    fn leaves_equate_unresolved(&self, label: &str) -> bool {
+        self.lazy.borrow().contains(label)
+    }
+
     /// A linked program's budgets are checked against its link.
     fn engine_checks_budgets(&self) -> bool {
         self.layout.is_none()
@@ -230,9 +245,16 @@ impl Dialect for Ca65Walk {
     }
 }
 
-/// What reading a program gives: its statements, what its link made, if
-/// it was linked, and what ca65 warned of.
-type Ran = (Vec<Statement>, Option<Linked>, Vec<Warning>);
+/// What reading a program gives.
+struct Ran {
+    statements: Vec<Statement>,
+    /// What its link made, if it was linked.
+    linked: Option<Linked>,
+    /// What ca65 warned of.
+    warnings: Vec<Warning>,
+    /// The equates ca65 refuses as circular only where they are used.
+    lazy: HashSet<String>,
+}
 
 /// A segment the program has used.
 struct Seg {
@@ -342,15 +364,22 @@ struct Walk<'f> {
     reserving: HashSet<String>,
     /// What ca65 warned of so far.
     warnings: Vec<Warning>,
-    /// Each line that calls a macro, as the expander handed it on.
-    calls: Vec<syntax::Span>,
+    /// Equates in a scope that read their own name while a name further
+    /// out was defined. ca65 refuses the circle only where one is used.
+    lazy: HashSet<String>,
     /// Where the line being read is, for what the host is asked about it.
     here: Option<Span>,
-    /// The address, while `.org` makes it known.
+    /// The address, while `.org` makes it known. ca65 keeps it across a
+    /// change of segment, counting every segment's bytes, until `.reloc`.
     org: Option<i64>,
-    /// An address `.org` set on the line being read, for a linked program,
-    /// where it opens a section of its own.
-    org_section: Option<i64>,
+    /// A section the line being read opens in a linked program: at the
+    /// address `.org` gave, or where the segment has got to after `.reloc`.
+    opens: Option<Option<i64>>,
+    /// How many `PseudoPc` blocks `.org` has opened in a flat program.
+    pseudo: usize,
+    /// What `.reloc` leaves behind in a flat program: one end for each
+    /// `PseudoPc` block.
+    after: Vec<Operation>,
     /// How many bytes the program has made.
     made: i64,
     /// The full name of the last label that was not a cheap local, which a
@@ -416,7 +445,12 @@ impl Walk<'_> {
         // included file can name the chain of files that read it.
         self.record_includes(&expander);
         let (statements, linked) = result?;
-        Ok((statements, linked, self.warnings))
+        Ok(Ran {
+            statements,
+            linked,
+            warnings: self.warnings,
+            lazy: self.lazy,
+        })
     }
 
     /// Reads and lowers every line `expander` hands on.
@@ -444,9 +478,6 @@ impl Walk<'_> {
             let Some(line) = line else { break };
             let at = self.site(expander, line.span());
             let made_at = self.statement_site(expander, line.span());
-            if line.label_only() {
-                self.calls.push(line.span());
-            }
             self.here = Some(at.clone());
             let lowered = lower::line(&line, PROFILE, &*self);
             self.record_reads();
@@ -467,9 +498,22 @@ impl Walk<'_> {
                 // before its names are bound.
                 let value = item.op.as_ref().map(|op| self.value_of(op));
                 let waits = item.op.as_ref().is_some_and(|op| self.reads_unknown(op));
-                let label = item.label.map(|name| self.define_label(&name));
-                let op = item.op.map(|op| self.names_in(op));
-                let sized = !matches!(op, Some(Operation::Equ(_) | Operation::Set(_)));
+                // ca65 reads an assignment's value before its name is
+                // defined, which matters to a cheap local, and a label
+                // before the rest of its line.
+                let sized = !matches!(item.op, Some(Operation::Equ(_) | Operation::Set(_)));
+                if let (Some(name), Some(op)) = (&item.label, &item.op)
+                    && self.reads_itself_in_a_scope(name, op)
+                {
+                    self.lazy.insert(qualify(self.path(), name));
+                }
+                let (label, op) = if sized {
+                    let label = item.label.map(|name| self.define_label(&name));
+                    (label, item.op.map(|op| self.names_in(op)))
+                } else {
+                    let op = item.op.map(|op| self.names_in(op));
+                    (item.label.map(|name| self.define_label(&name)), op)
+                };
                 let op = self.apply(label.as_deref(), value, waits, op, &at)?;
                 if let (Some(label), true) = (&label, sized) {
                     labels.push(label.clone());
@@ -478,8 +522,11 @@ impl Walk<'_> {
                     self.used.insert(self.segment.clone());
                 }
                 statements.push(statement(&made_at, label, op));
-                if let Some(address) = self.org_section.take() {
-                    self.open_section(Some(address), &mut statements, &made_at);
+                if let Some(address) = self.opens.take() {
+                    self.open_section(address, &mut statements, &made_at);
+                }
+                for op in std::mem::take(&mut self.after) {
+                    statements.push(statement(&made_at, None, Some(op)));
                 }
             }
             if let Some(binary) = &lowered.binary {
@@ -644,9 +691,8 @@ impl Walk<'_> {
             return Ok(());
         }
         self.segment = name.to_owned();
-        self.org = None;
         if sectioned {
-            self.open_section(None, statements, at);
+            self.open_section(self.org, statements, at);
         }
         Ok(())
     }
@@ -811,15 +857,7 @@ impl Walk<'_> {
     /// written, or for a line a macro made, the outermost call, as ca65's
     /// debug information gives it. A repeat's lines stay its own.
     fn statement_site(&self, expander: &Expander, span: syntax::Span) -> Span {
-        let sites = expander.provenance().sites(span);
-        let call = sites.iter().rev().find(|site| {
-            self.calls.iter().any(|call| {
-                call.text() == site.text()
-                    && call.range().start() <= site.range().start()
-                    && site.range().end() <= call.range().end()
-            })
-        });
-        self.site(expander, call.copied().unwrap_or(span))
+        self.site(expander, expander.macro_call(span).unwrap_or(span))
     }
 
     /// Where `span` was written: its file, line and column.
@@ -966,6 +1004,23 @@ impl Walk<'_> {
         }
     }
 
+    /// Whether `op` is an equate in a scope that reads its own name `name`,
+    /// written plain, while a name further out is defined.
+    fn reads_itself_in_a_scope(&self, name: &str, op: &Operation) -> bool {
+        let Operation::Equ(value) = op else {
+            return false;
+        };
+        if self.path().is_empty() || !matches!(self.lookup(name), Lookup::Plain(_)) {
+            return false;
+        }
+        let mut itself = false;
+        map_sym_expr(value.clone(), &mut |read| {
+            itself |= read == name;
+            Expr::Sym(read)
+        });
+        itself && self.defined(name).is_some()
+    }
+
     /// Whether `op` is an equate that reads a name nothing is known of yet.
     fn reads_unknown(&self, op: &Operation) -> bool {
         let Operation::Equ(value) = op else {
@@ -1041,10 +1096,20 @@ impl Walk<'_> {
                 // the address `.org` gives opens one. A flat program has no
                 // sections and moves only what addresses read as.
                 if self.linking {
-                    self.org_section = Some(value);
+                    self.opens = Some(Some(value));
                     return Ok(None);
                 }
+                self.pseudo += 1;
                 return Ok(Some(Operation::PseudoPc(Some(Expr::Num(value)))));
+            }
+            // `.reloc` ends what `.org` began: addresses count from where the
+            // segment has got to again.
+            Some(Operation::PseudoPc(None)) => {
+                if self.org.take().is_some() && self.linking {
+                    self.opens = Some(None);
+                }
+                self.after = vec![Operation::PseudoPc(None); std::mem::take(&mut self.pseudo)];
+                return Ok(None);
             }
             // ld65 drops what a `bss` or `zp` segment holds, and warns of
             // what the program wrote there. A reservation is not written,

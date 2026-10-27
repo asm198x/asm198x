@@ -477,3 +477,35 @@ fn the_walk_warns_as_ca65_and_ld65_do() {
     assert_eq!(warning.line, 2);
     assert_eq!(r.files[warning.file.0 as usize], "part.inc");
 }
+
+/// In ca65 V2.19, `.org` stays in force across a change of segment until
+/// `.reloc`, counting every segment's bytes. Measured with ca65 and ld65
+/// under this configuration.
+#[test]
+fn the_walk_keeps_org_across_segments() {
+    use asm198x::source::MemoryLoader;
+    let cfg = "MEMORY { ZP: start=$0000, size=$100, type=rw, file=\"\"; \
+               MAIN: start=$1000, size=$1000, fill=no, file=%O; }\n\
+               SEGMENTS { ZEROPAGE: load=ZP, type=zp; CODE: load=MAIN, type=ro; \
+               RODATA: load=MAIN, type=ro; }\n";
+    let none = MemoryLoader::new();
+    for (source, bytes) in [
+        (
+            ".org $2000\n.segment \"RODATA\"\n.byte 1\n.segment \"CODE\"\n.word *\n",
+            vec![0x01, 0x20, 0x01],
+        ),
+        (
+            ".segment \"CODE\"\n.org $2000\nnop\n.segment \"RODATA\"\nl: .word l\n\
+             .segment \"CODE\"\n.word *\n",
+            vec![0xEA, 0x03, 0x20, 0x01, 0x20],
+        ),
+        (
+            ".segment \"CODE\"\n.org $2000\nnop\n.reloc\n.segment \"RODATA\"\nl: .word l\n",
+            vec![0xEA, 0x01, 0x10],
+        ),
+    ] {
+        let r = asm198x::assemble_ca65_lang198x_files_with_config(source, "main.s", &none, cfg)
+            .unwrap_or_else(|e| panic!("{source}: {}", e.error));
+        assert_eq!(r.bytes, bytes, "{source}");
+    }
+}
