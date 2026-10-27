@@ -1455,6 +1455,39 @@ const PROBES: &[Probe] = &[
     ok ("ca65", "an export is a use", ".export v\nv=1\n.byte .ref(v)\n"),
     ok ("ca65", "a global is not a use", ".global v\n.byte .ref(v)\nv=1\n"),
 
+    // ca65's messages and assertions, measured on V2.19 for the walk's
+    // step 6d.3.
+    ok ("ca65", ".out says its string", ".out \"hi\"\n.byte 1\n"),
+    ok ("ca65", ".warning carries on", ".warning \"w\"\n.byte 1\n"),
+    ok ("ca65", ".error stops", ".error \"e\"\n.byte 1\n"),
+    ok ("ca65", ".fatal stops", ".fatal \"f\"\n.byte 1\n"),
+    ok ("ca65", ".out takes a string", ".out 1\n"),
+    ok ("ca65", ".out needs a string", ".out\n"),
+    ok ("ca65", ".out takes one string", ".out \"a\",\"b\"\n"),
+    ok ("ca65", ".out of a made string", ".out .concat(\"a\",\"b\")\n"),
+    ok ("ca65", ".error in an untaken branch", ".if 0\n.error \"e\"\n.endif\n.byte 1\n"),
+    ok ("ca65", ".warning reads past its string", ".warning \"a\", \"b\"\n.byte 1\n"),
+    ok ("ca65", ".warning ignores what follows", ".warning \"a\" junk\n.byte 1\n"),
+    ok ("ca65", ".out refuses what follows", ".out \"a\" junk\n.byte 1\n"),
+    ok ("ca65", ".warning takes a string", ".warning 1\n"),
+    ok ("ca65", ".assert that holds", ".assert 1, error, \"x\"\n.byte 1\n"),
+    ok ("ca65", ".assert error that fails", ".assert 0, error, \"x\"\n.byte 1\n"),
+    ok ("ca65", ".assert warning that fails", ".assert 0, warning, \"x\"\n.byte 1\n"),
+    ok ("ca65", ".assert without a message", ".assert 0, error\n.byte 1\n"),
+    ok ("ca65", ".assert ldwarning", ".assert 0, ldwarning, \"x\"\n.byte 1\n"),
+    ok ("ca65", ".assert lderror", ".assert 0, lderror, \"x\"\n.byte 1\n"),
+    ok ("ca65", ".assert's action ignores case", ".assert 1, WARNING, \"a\"\n.byte 1\n"),
+    ok ("ca65", ".assert of a later label that fails", ".assert l=2, error, \"x\"\n.byte 1\nl:\n"),
+    ok ("ca65", ".assert of a later label that holds", ".assert l=1, error, \"x\"\n.byte 1\nl:\n"),
+    ok ("ca65", ".assert of * on its line", ".assert *=0, error\n"),
+    ok ("ca65", ".assert of a nonzero value", ".assert 2, error\n"),
+    ok ("ca65", ".assert needs an action it knows", ".assert 0, bogus\n"),
+    ok ("ca65", ".assert needs an action", ".assert 0\n"),
+    ok ("ca65", ".assert of an undefined name", ".assert v, error\n"),
+    ok ("ca65", ".assert's message is a string", ".assert 0, warning, 1\n.byte 1\n"),
+    ok ("ca65", ".assert refuses what follows", ".assert 0, warning, \"a\" junk\n.byte 1\n"),
+    ok ("ca65", ".assert in a scope binds further out", ".scope s\n.assert v=1, error\n.endscope\nv=1\n"),
+
     // ca65's lexical axes in its default mode, measured on V2.19 before the
     // new front end's lexer is written (lang198x/ca65 step 3). Every
     // `.feature` is off, `.case` is on and `.linecont` is off.
