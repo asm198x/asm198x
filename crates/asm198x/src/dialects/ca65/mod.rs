@@ -44,7 +44,7 @@ mod link;
 mod project;
 pub(super) mod string_tokens;
 pub(crate) use link::VisRule;
-use link::{Emit, Resolved, area_usage, emit, link, resolve};
+use link::{Emit, Resolved, emit, link, resolve};
 use project::{Sweep, collect_syms, map_expr_syms, map_kind_syms, parsed_from_program};
 
 // ---------------------------------------------------------------------------
@@ -1072,7 +1072,7 @@ fn assemble_program(
         sections.push(section);
     }
     let rom = link(&seg_bytes, layout)?;
-    let areas = area_usage(layout_def, layout, &offsets);
+    let areas = ca65_layout::area_usage(layout_def, layout, &offsets);
     Ok((
         rom,
         warnings,

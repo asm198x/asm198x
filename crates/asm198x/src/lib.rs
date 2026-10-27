@@ -618,14 +618,146 @@ pub fn assemble_ca65_lang198x(source: &str) -> Result<AssemblyResult, AsmError> 
 
 /// The ca65 walk over Lang198x's front end (step 6c of
 /// `docs/plans/2026-10-27-ca65-walk/plan.md`), linked as the NES curriculum
-/// is: the ROM image [`assemble_ca65`] makes. Hidden until step 7 switches
-/// the main reader over.
+/// is: the ROM image [`assemble_ca65`] makes, with its debug record by
+/// segment and its memory map. Hidden until step 7 switches the main reader
+/// over.
 ///
 /// # Errors
 /// An [`AsmError`] for anything ca65 or ld65 refuses.
 #[doc(hidden)]
 pub fn assemble_ca65_nes_lang198x(source: &str) -> Result<AssemblyResult, AsmError> {
-    engine::assemble(source, &dialects::ca65_walk::Ca65Walk::nes()).map(AssemblyResult::from)
+    assemble_ca65_nes_lang198x_debug(source, "input.s").map(|(result, _)| result)
+}
+
+/// [`assemble_ca65_nes_lang198x`], also giving the full
+/// [`debug198x::DebugInfo`], as [`assemble_ca65_debug`] does. `source_path`
+/// names the source in the record.
+///
+/// # Errors
+/// As [`assemble_ca65_nes_lang198x`].
+#[doc(hidden)]
+pub fn assemble_ca65_nes_lang198x_debug(
+    source: &str,
+    source_path: &str,
+) -> Result<(AssemblyResult, debug198x::DebugInfo), AsmError> {
+    let walk = dialects::ca65_walk::Ca65Walk::nes();
+    let assembly = engine::assemble(source, &walk)?;
+    let (result, capture) = walk.linked_result(assembly);
+    check_linked_budgets(&[("input", source)], capture.as_ref(), &result.areas)?;
+    let info = ca65_debug_info(capture, vec![source_path.to_owned()]);
+    Ok((result, info))
+}
+
+/// Checks the `asm198x:` budgets in each of `sources` against a linked
+/// program's routines and memory areas. Each file is checked on its own so
+/// a failure names the file it is in.
+fn check_linked_budgets(
+    sources: &[(&str, &str)],
+    capture: Option<&listing::DebugCaptureMulti>,
+    areas: &[engine::AreaUsage],
+) -> Result<(), AsmError> {
+    let Some(capture) = capture else {
+        return Ok(());
+    };
+    let costs = capture.cycle_costs();
+    for (i, source) in sources.iter().enumerate() {
+        cycles::check_budgets(&[*source], &costs, capture.cycle_coverage, areas)
+            .map_err(|e| dialects::ca65_flat::stamp_file(e, span::FileId(i as u32)))?;
+    }
+    Ok(())
+}
+
+/// The debug record a linked ca65 assembly gives, for the files in
+/// `sources`.
+fn ca65_debug_info(
+    capture: Option<listing::DebugCaptureMulti>,
+    sources: Vec<String>,
+) -> debug198x::DebugInfo {
+    let capture = capture.unwrap_or(listing::DebugCaptureMulti {
+        cycle_coverage: engine::CycleCoverage::Full,
+        file_offsets: std::collections::BTreeMap::new(),
+        sections: Vec::new(),
+        symbols: Vec::new(),
+        lines: Vec::new(),
+        cycles: Vec::new(),
+    });
+    listing::capture_debug_info_multi(capture, "6502", "ca65", sources)
+}
+
+/// A multi-file program through the ca65 walk, linked by `walk`, with its
+/// debug record when it is linked.
+fn assemble_ca65_walk_files(
+    walk: &dialects::ca65_walk::Ca65Walk,
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<(AssemblyResult, debug198x::DebugInfo), MultiFileError> {
+    let mut map = new_source_map(input_path, source);
+    match engine::assemble_multi(&mut map, loader, walk) {
+        Ok(assembly) => {
+            let (mut result, capture) = walk.linked_result(assembly);
+            let sources: Vec<(&str, &str)> = (0..)
+                .map_while(|i| {
+                    let id = span::FileId(i);
+                    Some((map.path(id)?, map.contents(id)?))
+                })
+                .collect();
+            if let Err(error) = check_linked_budgets(&sources, capture.as_ref(), &result.areas) {
+                return Err(MultiFileError {
+                    error,
+                    source_map: Box::new(map),
+                });
+            }
+            result.files = map.file_table();
+            let info = ca65_debug_info(capture, result.files.clone());
+            Ok((result, info))
+        }
+        Err(error) => Err(MultiFileError {
+            error,
+            source_map: Box::new(map),
+        }),
+    }
+}
+
+/// The ca65 walk linked under a project's ld65 configuration, as
+/// [`assemble_ca65_files_with_config`] links the old reader's. Hidden until
+/// step 7 switches the main reader over.
+///
+/// # Errors
+/// As [`assemble_ca65_files_with_config`].
+#[doc(hidden)]
+pub fn assemble_ca65_lang198x_files_with_config(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+    cfg: &str,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_ca65_lang198x_files_debug_with_config(source, input_path, loader, cfg)
+        .map(|(result, _)| result)
+}
+
+/// [`assemble_ca65_lang198x_files_with_config`], also giving the full
+/// [`debug198x::DebugInfo`].
+///
+/// # Errors
+/// As [`assemble_ca65_files_with_config`].
+#[doc(hidden)]
+pub fn assemble_ca65_lang198x_files_debug_with_config(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+    cfg: &str,
+) -> Result<(AssemblyResult, debug198x::DebugInfo), MultiFileError> {
+    let layout = dialects::ca65_layout::from_cfg(cfg).map_err(|error| MultiFileError {
+        error,
+        source_map: Box::new(new_source_map(input_path, source)),
+    })?;
+    assemble_ca65_walk_files(
+        &dialects::ca65_walk::Ca65Walk::with_layout(layout),
+        source,
+        input_path,
+        loader,
+    )
 }
 
 /// [`assemble_ca65_lang198x`] for a multi-file program: `.include` and
@@ -662,7 +794,21 @@ pub fn assemble_ca65_nes_lang198x_files(
     input_path: &str,
     loader: &dyn source::SourceLoader,
 ) -> Result<AssemblyResult, MultiFileError> {
-    assemble_files(
+    assemble_ca65_nes_lang198x_files_debug(source, input_path, loader).map(|(result, _)| result)
+}
+
+/// [`assemble_ca65_nes_lang198x_files`], also giving the full
+/// [`debug198x::DebugInfo`], as [`assemble_ca65_files_debug`] does.
+///
+/// # Errors
+/// As [`assemble_ca65_lang198x_files`].
+#[doc(hidden)]
+pub fn assemble_ca65_nes_lang198x_files_debug(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<(AssemblyResult, debug198x::DebugInfo), MultiFileError> {
+    assemble_ca65_walk_files(
         &dialects::ca65_walk::Ca65Walk::nes(),
         source,
         input_path,

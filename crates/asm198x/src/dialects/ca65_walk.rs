@@ -8,9 +8,8 @@
 //! keeps ca65's scopes, cheap locals and unnamed labels. The engine then
 //! assembles the statements in two passes.
 //!
-//! This is step 6c of `docs/plans/2026-10-27-ca65-walk/plan.md`: scopes and
-//! segments. Visibility comes next. The old reader in `dialects/ca65` stays
-//! the default until then.
+//! This is step 6 of `docs/plans/2026-10-27-ca65-walk/plan.md`. The old
+//! reader in `dialects/ca65` stays the default until step 7.
 //!
 //! # Scopes
 //!
@@ -33,8 +32,23 @@
 //! the linker's layout (`ca65_layout`): the address the CPU sees it at, and
 //! where its bytes go in the image, or nowhere for RAM. A flat link has one
 //! segment, `CODE`, at 0, as Asm198x's recorded verdicts were linked.
+//!
+//! In a linked program, `.org` opens a section too, at the address it
+//! gives, with its bytes placed where the segment had got to. ca65 moves
+//! only what addresses read as, not where bytes go, and a section carries
+//! both. A flat program has no sections, so there `.org` moves the
+//! engine's `PseudoPc` instead.
+//!
+//! # What a link gives besides its image
+//!
+//! The engine keeps each section's debug records apart, and `linked` names
+//! them by segment, as the old reader does, for the sidecar, the listing
+//! and the memory map. A linked program's `asm198x:` budgets are checked
+//! against that, once the walk's caller has it.
 
-use std::cell::{Cell, RefCell};
+mod linked;
+
+use std::cell::RefCell;
 use std::collections::{BTreeMap, HashMap, HashSet};
 
 use lang198x_ca65::Profile;
@@ -44,7 +58,7 @@ use lang198x_ca65::lower::{self, Binary, Known, Scope, Segment, Size, Value, Vis
 use lang198x_ca65::syntax::{self, DiagnosticKind};
 
 use super::ca65_flat::{Resolution, load_binary, load_include, slice_incbin};
-use super::ca65_layout::Layout;
+use super::ca65_layout::{Layout, ResolvedLayout};
 use crate::ast::map_syms;
 use crate::dialect::Dialect;
 use crate::engine::{AsmError, Expr, Operation, Place, Statement, Warning, align_pad, next_pc};
@@ -58,9 +72,29 @@ pub(crate) struct Ca65Walk {
     /// Where the linker puts each segment, or `None` for a flat link, which
     /// has only `CODE`, at 0.
     layout: Option<Layout>,
-    /// The size of the image the layout makes, once the walk has placed the
-    /// segments.
-    image: Cell<Option<usize>>,
+    /// Where the link put each segment, and how long each is, once the walk
+    /// has placed them.
+    linked: RefCell<Option<Linked>>,
+}
+
+/// What a link made of the program's segments.
+pub(crate) struct Linked {
+    /// Where each segment went.
+    pub(crate) resolved: ResolvedLayout,
+    /// How long each segment the program used is, by name.
+    pub(crate) lengths: BTreeMap<String, u32>,
+    /// Each section the walk opened and placed, in order.
+    pub(crate) opened: Vec<Opened>,
+}
+
+/// A section the walk opened.
+pub(crate) struct Opened {
+    /// Its segment.
+    pub(crate) segment: String,
+    /// How far into the segment it starts.
+    pub(crate) offset: i64,
+    /// The address `.org` gave it, if it gave one.
+    pub(crate) org: Option<i64>,
 }
 
 impl Ca65Walk {
@@ -69,16 +103,40 @@ impl Ca65Walk {
     pub(crate) fn flat() -> Self {
         Self {
             layout: None,
-            image: Cell::new(None),
+            linked: RefCell::new(None),
         }
     }
 
     /// The NES curriculum's link: the iNES header, 32K of PRG and 8K of CHR,
     /// with the RAM segments in their areas.
     pub(crate) fn nes() -> Self {
+        Self::with_layout(Layout::nes_default())
+    }
+
+    /// The link a project's own ld65 configuration describes.
+    pub(crate) fn with_layout(layout: Layout) -> Self {
         Self {
-            layout: Some(Layout::nes_default()),
-            image: Cell::new(None),
+            layout: Some(layout),
+            linked: RefCell::new(None),
+        }
+    }
+
+    /// The result of a linked assembly, with its debug record by segment.
+    /// A flat program gives its result as the engine made it, and no
+    /// record.
+    pub(crate) fn linked_result(
+        &self,
+        assembly: crate::engine::Assembly,
+    ) -> (
+        crate::AssemblyResult,
+        Option<crate::listing::DebugCaptureMulti>,
+    ) {
+        match (&self.layout, self.linked.take()) {
+            (Some(layout), Some(linked)) => {
+                let (result, capture) = linked::result(layout, &linked, assembly);
+                (result, Some(capture))
+            }
+            _ => (crate::AssemblyResult::from(assembly), None),
         }
     }
 }
@@ -103,8 +161,8 @@ impl Dialect for Ca65Walk {
     }
 
     fn parse_warned(&self, source: &str) -> Result<(Vec<Statement>, Vec<Warning>), AsmError> {
-        let (statements, image) = Walk::default().run(source, self.layout.as_ref())?;
-        self.image.set(image);
+        let (statements, linked) = Walk::default().run(source, self.layout.as_ref())?;
+        self.linked.replace(linked);
         Ok((statements, Vec::new()))
     }
 
@@ -121,8 +179,8 @@ impl Dialect for Ca65Walk {
             files: Some(Files { map, loader }),
             ..Walk::default()
         };
-        let (statements, image) = walk.run(&root, self.layout.as_ref())?;
-        self.image.set(image);
+        let (statements, linked) = walk.run(&root, self.layout.as_ref())?;
+        self.linked.replace(linked);
         Ok((statements, Vec::new()))
     }
 
@@ -137,7 +195,28 @@ impl Dialect for Ca65Walk {
 
     /// A layout's image is its file areas, filled to their size.
     fn image_size(&self, _: &[u8]) -> Option<usize> {
-        self.image.get()
+        self.linked
+            .borrow()
+            .as_ref()
+            .map(|linked| linked.resolved.image_size)
+    }
+
+    /// A linked program's budgets are checked against its link.
+    fn engine_checks_budgets(&self) -> bool {
+        self.layout.is_none()
+    }
+
+    /// ca65 counts addresses in 24 bits, so `.org` may give a linked
+    /// section any address below $1000000. A flat link is checked as the
+    /// recorded verdicts were.
+    fn address_bits(&self) -> u32 {
+        if self.layout.is_some() { 24 } else { 16 }
+    }
+
+    /// ca65's `.res` with a value and `.align` are written in the source,
+    /// so the bytes they make belong to their lines.
+    fn fill_has_lines(&self) -> bool {
+        true
     }
 
     fn gap_fill(&self) -> u8 {
@@ -213,6 +292,8 @@ struct Files<'f> {
 struct Walk<'f> {
     /// The files the program may read, or `None` when it is one file.
     files: Option<Files<'f>>,
+    /// Whether the program is linked from a layout rather than flat.
+    linking: bool,
     /// For each file the expander read, by its number there: its id in the
     /// source map, and the file that read it in. The root is first.
     read: Vec<(FileId, Option<usize>)>,
@@ -242,10 +323,15 @@ struct Walk<'f> {
     reads: RefCell<Vec<String>>,
     /// Names bound at the end of the program.
     pending: Vec<Pending>,
+    /// Each line that calls a macro, as the expander handed it on.
+    calls: Vec<syntax::Span>,
     /// Where the line being read is, for what the host is asked about it.
     here: Option<Span>,
     /// The address, while `.org` makes it known.
     org: Option<i64>,
+    /// An address `.org` set on the line being read, for a linked program,
+    /// where it opens a section of its own.
+    org_section: Option<i64>,
     /// How many bytes the program has made.
     made: i64,
     /// The full name of the last label that was not a cheap local, which a
@@ -257,11 +343,14 @@ struct Walk<'f> {
     segment: String,
     /// Each segment used so far.
     segments: HashMap<String, Seg>,
+    /// The segments something has been put in, by a label or a command.
+    used: HashSet<String>,
     /// The segments `.pushseg` saved, last on top.
     saved: Vec<String>,
-    /// Each statement that opens a section, with its segment and how far
-    /// into the segment it starts, for placing at the end.
-    sections: Vec<(usize, String, i64)>,
+    /// Each statement that opens a section, with its segment, how far into
+    /// the segment it starts, and the address `.org` gave it, if any, for
+    /// placing at the end.
+    sections: Vec<(usize, String, i64, Option<i64>)>,
 }
 
 /// `name` in the scope whose full name is `path`.
@@ -303,7 +392,7 @@ impl Walk<'_> {
         mut self,
         source: &str,
         layout: Option<&Layout>,
-    ) -> Result<(Vec<Statement>, Option<usize>), AsmError> {
+    ) -> Result<(Vec<Statement>, Option<Linked>), AsmError> {
         let mut expander = Expander::new(source, PROFILE)
             .map_err(|_| AsmError::new(0, "the program is too long to parse"))?;
         self.read = vec![(FileId(0), None)];
@@ -319,9 +408,10 @@ impl Walk<'_> {
         &mut self,
         expander: &mut Expander,
         layout: Option<&Layout>,
-    ) -> Result<(Vec<Statement>, Option<usize>), AsmError> {
+    ) -> Result<(Vec<Statement>, Option<Linked>), AsmError> {
         let mut statements = Vec::new();
         let sectioned = layout.is_some();
+        self.linking = sectioned;
         let start = Span::in_file(FileId(0), 1, 1);
         self.use_segment("CODE", None, sectioned, &mut statements, &start)?;
         loop {
@@ -329,6 +419,10 @@ impl Walk<'_> {
             self.check(expander)?;
             let Some(line) = line else { break };
             let at = self.site(expander, line.span());
+            let made_at = self.statement_site(expander, line.span());
+            if line.label_only() {
+                self.calls.push(line.span());
+            }
             self.here = Some(at.clone());
             let lowered = lower::line(&line, PROFILE, &*self);
             self.record_reads();
@@ -355,12 +449,18 @@ impl Walk<'_> {
                 if let (Some(label), true) = (&label, sized) {
                     labels.push(label.clone());
                 }
-                statements.push(statement(&at, label, op));
+                if sized && (label.is_some() || op.is_some()) {
+                    self.used.insert(self.segment.clone());
+                }
+                statements.push(statement(&made_at, label, op));
+                if let Some(address) = self.org_section.take() {
+                    self.open_section(Some(address), &mut statements, &made_at);
+                }
             }
             if let Some(binary) = &lowered.binary {
                 let op = self.binary(expander, &line, binary, &at)?;
                 let op = self.apply(None, None, Some(op), &at)?;
-                statements.push(statement(&at, None, op));
+                statements.push(statement(&made_at, None, op));
             }
             let line_size = self.made - made;
             for label in labels {
@@ -405,18 +505,18 @@ impl Walk<'_> {
                 format!("Symbol `{name}` is undefined"),
             ));
         }
-        let image = self.place(layout, &mut statements)?;
-        Ok((statements, image))
+        let linked = self.place(layout, &mut statements)?;
+        Ok((statements, linked))
     }
 
     /// Places each section from `layout`, now that every segment's length
-    /// is known, and gives the image's size. With no layout, the link is
+    /// is known, and says what the link made. With no layout, the link is
     /// flat: `CODE` alone, at 0.
     fn place(
         &self,
         layout: Option<&Layout>,
         statements: &mut [Statement],
-    ) -> Result<Option<usize>, AsmError> {
+    ) -> Result<Option<Linked>, AsmError> {
         let unplaced = |name: &str| {
             AsmError::new(
                 0,
@@ -443,7 +543,8 @@ impl Walk<'_> {
         }
         let resolved = layout.resolve(&lengths)?;
         layout.validate_extents(&resolved, &lengths)?;
-        for (index, name, offset) in &self.sections {
+        let mut opened = Vec::new();
+        for (index, name, offset, org) in &self.sections {
             let Some(seg) = resolved.seg(name) else {
                 // An empty segment with no area: nothing to place.
                 if let Some(statement) = statements.get_mut(*index) {
@@ -455,16 +556,27 @@ impl Walk<'_> {
                 Some(file_at) => Place::At(file_at as i64 + offset),
                 None => Place::Discard,
             };
+            opened.push(Opened {
+                segment: name.clone(),
+                offset: *offset,
+                org: *org,
+            });
             if let Some(statement) = statements.get_mut(*index) {
                 statement.op = Some(Operation::Section {
                     name: name.clone(),
-                    base: Some(i64::from(seg.base) + offset),
+                    base: Some(org.unwrap_or(i64::from(seg.base) + offset)),
                     at,
                     bank: None,
                 });
             }
         }
-        Ok(Some(resolved.image_size))
+        // What the program put nothing in is not part of its link's record.
+        lengths.retain(|name, _| self.used.contains(name));
+        Ok(Some(Linked {
+            resolved,
+            lengths,
+            opened,
+        }))
     }
 
     /// How far into the current segment the next byte goes.
@@ -509,20 +621,30 @@ impl Walk<'_> {
         self.segment = name.to_owned();
         self.org = None;
         if sectioned {
-            statements.push(statement(
-                at,
-                None,
-                Some(Operation::Section {
-                    name: name.to_owned(),
-                    base: None,
-                    at: Place::ByAddress,
-                    bank: None,
-                }),
-            ));
-            self.sections
-                .push((statements.len() - 1, name.to_owned(), self.offset()));
+            self.open_section(None, statements, at);
         }
         Ok(())
+    }
+
+    /// Opens a section in the current segment where it has got to, placed
+    /// at the end. `org` is the address `.org` gave it, if it gave one.
+    fn open_section(&mut self, org: Option<i64>, statements: &mut Vec<Statement>, at: &Span) {
+        statements.push(statement(
+            at,
+            None,
+            Some(Operation::Section {
+                name: self.segment.clone(),
+                base: None,
+                at: Place::ByAddress,
+                bank: None,
+            }),
+        ));
+        self.sections.push((
+            statements.len() - 1,
+            self.segment.clone(),
+            self.offset(),
+            org,
+        ));
     }
 
     /// `.segment`, its short forms, `.pushseg` or `.popseg`.
@@ -658,6 +780,21 @@ impl Walk<'_> {
             }
             None => Ok(()),
         }
+    }
+
+    /// The line a statement made from `span` belongs to: where it was
+    /// written, or for a line a macro made, the outermost call, as ca65's
+    /// debug information gives it. A repeat's lines stay its own.
+    fn statement_site(&self, expander: &Expander, span: syntax::Span) -> Span {
+        let sites = expander.provenance().sites(span);
+        let call = sites.iter().rev().find(|site| {
+            self.calls.iter().any(|call| {
+                call.text() == site.text()
+                    && call.range().start() <= site.range().start()
+                    && site.range().end() <= call.range().end()
+            })
+        });
+        self.site(expander, call.copied().unwrap_or(span))
     }
 
     /// Where `span` was written: its file, line and column.
@@ -805,8 +942,8 @@ impl Walk<'_> {
     }
 
     /// Records what a statement tells the walk: its label's value, and the
-    /// address. `.org` becomes the engine's `PseudoPc`, since ca65 moves
-    /// only what addresses read as, not where bytes go.
+    /// address. `.org` opens a section in a linked program, and moves the
+    /// engine's `PseudoPc` in a flat one.
     fn apply(
         &mut self,
         label: Option<&str>,
@@ -849,6 +986,13 @@ impl Walk<'_> {
                     return Err(refuse("Range error".to_owned()));
                 }
                 self.org = Some(value);
+                // A linked program's sections carry their own addresses, so
+                // the address `.org` gives opens one. A flat program has no
+                // sections and moves only what addresses read as.
+                if self.linking {
+                    self.org_section = Some(value);
+                    return Ok(None);
+                }
                 return Ok(Some(Operation::PseudoPc(Some(Expr::Num(value)))));
             }
             // ca65 aligns within the segment, wherever ld65 places it, so

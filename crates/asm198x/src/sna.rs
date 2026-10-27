@@ -105,6 +105,7 @@ mod tests {
             start,
             warnings: Vec::new(),
             debug: crate::DebugData::default(),
+            sections: Vec::new(),
         }
         .into()
     }

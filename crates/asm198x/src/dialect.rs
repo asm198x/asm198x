@@ -282,6 +282,28 @@ pub(crate) trait Dialect {
         None
     }
 
+    /// Whether the engine checks the source's `asm198x:` budgets as it
+    /// finishes. A dialect whose program is linked afterwards says no and
+    /// checks them against the link, which is where the memory areas and
+    /// each segment's routines are known.
+    fn engine_checks_budgets(&self) -> bool {
+        true
+    }
+
+    /// How many bits of address the CPU's addresses are counted in, which
+    /// bounds where a program may put bytes. Sixteen unless the toolchain
+    /// counts further.
+    fn address_bits(&self) -> u32 {
+        16
+    }
+
+    /// Whether a fill the source wrote, such as a reservation with a value
+    /// or an alignment, gets a line span in the debug record. Most toolchains
+    /// treat fill as padding, which carries none.
+    fn fill_has_lines(&self) -> bool {
+        false
+    }
+
     /// The byte that fills space the source reserved but did not define — an
     /// `org` gap, or a `ds`/`rmb`/`res`/`block` reservation.
     ///

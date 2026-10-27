@@ -41,6 +41,7 @@ mod tests {
             start: None,
             warnings: Vec::new(),
             debug: crate::DebugData::default(),
+            sections: Vec::new(),
         }
         .into();
         assert_eq!(

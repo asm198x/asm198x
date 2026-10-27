@@ -92,6 +92,20 @@ pub struct Assembly {
     /// section-less (the flat engine is a single implicit section 0, based at
     /// `origin`). Capturing it never changes an emitted byte.
     pub debug: DebugData,
+    /// The same record split by section, for a dialect that opens sections:
+    /// one entry per section statement, in the order the program opened
+    /// them. Empty for a flat program.
+    pub(crate) sections: Vec<SectionRecord>,
+}
+
+/// One section's slice of [`Assembly::debug`]: each symbol, line and
+/// timing record made while the section was open. Its offsets count from
+/// the section's own base, as the whole record's do for a sectioned
+/// program.
+#[derive(Debug, Clone)]
+pub(crate) struct SectionRecord {
+    pub(crate) name: String,
+    pub(crate) debug: DebugData,
 }
 
 /// The engine's slice of a `.debug198x` record: typed symbols and line→address
@@ -177,6 +191,48 @@ pub struct LineRec {
     /// engine just carries the data.
     #[serde(default, skip_serializing_if = "FileId::is_root")]
     pub file: FileId,
+}
+
+/// How many symbols, lines and timing records a [`DebugData`] held at some
+/// point, so the records made after it can be told apart.
+#[derive(Debug, Clone, Copy, Default)]
+struct Mark {
+    symbols: usize,
+    lines: usize,
+    cycles: usize,
+}
+
+impl DebugData {
+    fn mark(&self) -> Mark {
+        Mark {
+            symbols: self.symbols.len(),
+            lines: self.lines.len(),
+            cycles: self.cycles.len(),
+        }
+    }
+
+    /// The records split at each section's mark: a section holds what was
+    /// made from its mark to the next section's.
+    fn split(&self, opened: &[(String, Mark)]) -> Vec<SectionRecord> {
+        let end = self.mark();
+        opened
+            .iter()
+            .enumerate()
+            .map(|(i, (name, from))| {
+                let to = opened.get(i + 1).map_or(end, |next| next.1);
+                SectionRecord {
+                    name: name.clone(),
+                    debug: DebugData {
+                        symbols: self.symbols[from.symbols..to.symbols].to_vec(),
+                        lines: self.lines[from.lines..to.lines].to_vec(),
+                        cycles: self.cycles[from.cycles..to.cycles].to_vec(),
+                        cycle_coverage: self.cycle_coverage,
+                        ..DebugData::default()
+                    },
+                }
+            })
+            .collect()
+    }
 }
 
 /// What an empty cycle capture means for this assembly (#497): the dialect's
@@ -313,7 +369,9 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
     let a = assemble_statements(statements, warnings, dialect)?;
     // Budget assertions (#497) hold wherever assembly happens, so they run
     // here rather than in any one front-end.
-    crate::cycles::check_cycle_budgets(&[("input", source)], &a.debug, &a.areas)?;
+    if dialect.engine_checks_budgets() {
+        crate::cycles::check_cycle_budgets(&[("input", source)], &a.debug, &a.areas)?;
+    }
     Ok(a)
 }
 
@@ -339,7 +397,9 @@ pub(crate) fn assemble_multi(
             Some((map.path(id)?, map.contents(id)?))
         })
         .collect();
-    crate::cycles::check_cycle_budgets(&sources, &a.debug, &a.areas)?;
+    if dialect.engine_checks_budgets() {
+        crate::cycles::check_cycle_budgets(&sources, &a.debug, &a.areas)?;
+    }
     Ok(a)
 }
 
@@ -875,6 +935,12 @@ fn assemble_statements(
         cycle_coverage,
         ..DebugData::default()
     };
+    // Each section a section statement closed: its name, and where its
+    // records start in `debug`.
+    let mut opened: Vec<(String, Mark)> = Vec::new();
+    let fill_has_lines = dialect.fill_has_lines();
+    let address_limit = 1i64 << dialect.address_bits();
+    let mut debug_mark = Mark::default();
     // The second counter again, rebuilt for pass 2 — the statements are the
     // same, so it retraces the same path.
     let mut pseudo: i64 = 0;
@@ -976,6 +1042,8 @@ fn assemble_statements(
                 // written-range trims and the 64K check all measure within
                 // this section rather than across the image.
                 if base.is_some() || *at == Place::Next {
+                    opened.push((section_name.clone(), debug_mark));
+                    debug_mark = debug.mark();
                     runs.push(Run {
                         name: std::mem::take(&mut section_name),
                         base: origin,
@@ -1660,7 +1728,7 @@ fn assemble_statements(
                     | Operation::Binary(_)
                     | Operation::Reserve(_)
             )
-        );
+        ) || (fill_has_lines && matches!(&s.op, Some(Operation::Fill { .. })));
         // ACME's `!xor`, applied to what this statement *wrote*. A
         // reservation and an `org` gap are both excluded, for the same reason
         // they are excluded from `written_len` below: nothing wrote those
@@ -1825,8 +1893,12 @@ fn assemble_statements(
                 written_start = None;
                 wrote_any = false;
             }
-        } else if origin + bytes.len().div_ceil(addr_unit as usize) as i64 > 0x1_0000 {
-            return Err(s.err("program exceeds the 64K address space"));
+        } else if origin + bytes.len().div_ceil(addr_unit as usize) as i64 > address_limit {
+            return Err(s.err(if address_limit == 0x1_0000 {
+                "program exceeds the 64K address space".to_owned()
+            } else {
+                format!("program exceeds the {address_limit:#x}-byte address space")
+            }));
         }
     }
 
@@ -1880,6 +1952,7 @@ fn assemble_statements(
     // Lay the sections into one image. Only a dialect that opened a section
     // reaches this; the flat path below is unchanged for the other twenty.
     if !runs.is_empty() {
+        opened.push((section_name.clone(), debug_mark));
         runs.push(Run {
             name: section_name,
             base: origin,
@@ -1915,7 +1988,9 @@ fn assemble_statements(
                 c.offset -= base;
             }
         }
+        let sections = debug.split(&opened);
         return Ok(Assembly {
+            sections,
             requested_output,
             requested_symbols,
             artifacts,
@@ -1999,6 +2074,7 @@ fn assemble_statements(
             },
     );
     Ok(Assembly {
+        sections: Vec::new(),
         requested_output,
         requested_symbols,
         artifacts,
