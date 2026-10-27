@@ -103,6 +103,29 @@ These are refused or reported as unsupported, where ca65 accepts them:
   `.ident` of a register's name;
 - text after the file name on an `.include` line.
 
+## Where the walk stands
+
+| Step | State |
+|---|---|
+| 6a, lowering | Done in `lang198x-ca65` 0.0.3: expressions, instructions with ca65's address sizes, labels, assignments, data and space commands. |
+| 6b, the walk | `dialects/ca65_walk.rs`, behind the hidden `assemble_ca65_lang198x`. It reads the program once, keeps what ca65 knows of each name, names cheap locals and unnamed labels, and makes `.org` the engine's `PseudoPc`. |
+
+`tests/ca65_lang198x.rs` replays the 352 `ca65` verdicts. At the start of
+6b, 338 match. The 14 others are named in the test:
+
+- 5 need scopes and `::` (6c);
+- 2 need `.ref`, `.const` and `.tcount` (6d);
+- 7 are ones Lang198x reports as unsupported: `.ident` of a name that
+  reads as a register (5), a label before `.endrepeat`, and a byte above
+  127 made by `.sprintf`. Each waits for a decision on how to hold such
+  text.
+
+Replaying the verdicts also found three places where `lang198x-ca65` gave a
+line a different meaning from ca65, fixed there: `*` in a data list, a
+label on a conditional's line, and `.sprintf`'s `%c` above 127.
+
+The 51 NES curriculum digests wait for segments (6c).
+
 ## After this step
 
 Step 7, the switch: the walk becomes the default for the main reader, `fmt`
