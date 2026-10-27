@@ -3241,6 +3241,23 @@ const MULTI_PROBES: &[MultiProbe] = &[
     },
 ];
 
+/// The `ca65-nes` probes the walk does not link as ld65 does yet, by how
+/// each note starts, with what each needs (the walk's plan, step 6e).
+const WALK_NOT_YET: &[&str] = &[
+    // `.autoimport`.
+    "the visibility words emit nothing",
+    // A difference of two labels in one segment is a constant.
+    "the nine conditional heads",
+    // `.list`, `.listbytes`, `.pagelen`, `.debuginfo`, `.dbg`, `.fileopt`.
+    "listing and object-metadata words",
+    // `.struct`, `.union`, `.enum` and `.tag`.
+    "records:",
+    // `.setcpu`, `.p02`, `.smart`, `.pushcpu` and `.popcpu`.
+    ".setcpu \"6502\"",
+    // `.reloc`.
+    ".org moves the address",
+];
+
 #[test]
 #[ignore = "needs sjasmplus + pasmo + acme + ca65/ld65 + rgbasm/rgblink + lwasm; run with --ignored"]
 fn multi_file_source_matches_reference() {
@@ -3464,6 +3481,27 @@ fn multi_file_source_matches_reference() {
                 &reference[..reference.len().min(64)]
             )),
             Err(e) => failures.push(format!("{}: we reject it: {}", p.note, e.error)),
+        }
+        // The ca65 walk over Lang198x's front end must link the same ROM
+        // (docs/plans/2026-10-27-ca65-walk/plan.md, step 6d.4), except for
+        // the probes it does not reach yet, named by how their note starts.
+        if p.dialect == "ca65-nes" && !WALK_NOT_YET.iter().any(|start| p.note.starts_with(start)) {
+            match asm198x::assemble_ca65_nes_lang198x_files(
+                &source,
+                &root_path.to_string_lossy(),
+                &loader,
+            ) {
+                Ok(r) if matches(&r.bytes) => {}
+                Ok(r) => failures.push(format!(
+                    "{} (the walk): bytes diverge — ours {:02X?} vs ref {:02X?}",
+                    p.note,
+                    &r.bytes[..r.bytes.len().min(64)],
+                    &reference[..reference.len().min(64)]
+                )),
+                Err(e) => {
+                    failures.push(format!("{} (the walk): we reject it: {}", p.note, e.error))
+                }
+            }
         }
     }
     assert!(

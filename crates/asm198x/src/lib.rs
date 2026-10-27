@@ -628,6 +628,48 @@ pub fn assemble_ca65_nes_lang198x(source: &str) -> Result<AssemblyResult, AsmErr
     engine::assemble(source, &dialects::ca65_walk::Ca65Walk::nes()).map(AssemblyResult::from)
 }
 
+/// [`assemble_ca65_lang198x`] for a multi-file program: `.include` and
+/// `.incbin` read through `loader`, from the requesting file's folder and
+/// then from each folder of the files that included it, as ca65 does.
+/// Hidden until step 7 switches the main reader over.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure and the source map built up
+/// to it.
+#[doc(hidden)]
+pub fn assemble_ca65_lang198x_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(
+        &dialects::ca65_walk::Ca65Walk::flat(),
+        source,
+        input_path,
+        loader,
+    )
+}
+
+/// [`assemble_ca65_nes_lang198x`] for a multi-file program, as
+/// [`assemble_ca65_files`] links it. Hidden until step 7 switches the main
+/// reader over.
+///
+/// # Errors
+/// As [`assemble_ca65_lang198x_files`].
+#[doc(hidden)]
+pub fn assemble_ca65_nes_lang198x_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(
+        &dialects::ca65_walk::Ca65Walk::nes(),
+        source,
+        input_path,
+        loader,
+    )
+}
+
 /// Assemble ca65-syntax 65816 source (native mode) into a flat binary — the
 /// 65816 as a target extension of the 6502 (`isa::mos6502` + `isa::mos65816`).
 /// Accumulator/index immediate width follows the `.a8`/`.a16`/`.i8`/`.i16`
