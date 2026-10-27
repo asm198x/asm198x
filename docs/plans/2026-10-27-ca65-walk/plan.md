@@ -262,7 +262,7 @@ walk writes the fixtures' sidecars exactly. The record works as follows:
 
 ca65 counts addresses in 24 bits, so a linked section may sit above $FFFF.
 
-Running the old reader's tests through the walk found three more language
+Running the old reader's tests through the walk found two more language
 gaps, for 6e:
 
 - `.org` stays in force across a change of segment, until `.reloc`, and
@@ -270,7 +270,10 @@ gaps, for 6e:
   a byte in `RODATA`, then `.word *` back in `CODE` writes $2001. The walk
   starts each segment afresh.
 - `.reloc` is not lowered.
-- A label spelt like a register, such as `a:`, is refused.
+
+The same run found a label spelt like a register, `a:`, which one of the
+old reader's tests accepts. ca65 V2.19 refuses it ("Expected
+‘end-of-line’ but found ‘a:’"), and so does the walk.
 
 Warnings follow ca65 V2.19 and ld65, measured. A name exported to the
 zero page warns if its address size is absolute, constant or label alike:
