@@ -161,9 +161,9 @@ impl Dialect for Ca65Walk {
     }
 
     fn parse_warned(&self, source: &str) -> Result<(Vec<Statement>, Vec<Warning>), AsmError> {
-        let (statements, linked) = Walk::default().run(source, self.layout.as_ref())?;
+        let (statements, linked, warnings) = Walk::default().run(source, self.layout.as_ref())?;
         self.linked.replace(linked);
-        Ok((statements, Vec::new()))
+        Ok((statements, warnings))
     }
 
     /// A program whose root is `FileId(0)` in `map`, reading `.include` and
@@ -179,9 +179,9 @@ impl Dialect for Ca65Walk {
             files: Some(Files { map, loader }),
             ..Walk::default()
         };
-        let (statements, linked) = walk.run(&root, self.layout.as_ref())?;
+        let (statements, linked, warnings) = walk.run(&root, self.layout.as_ref())?;
         self.linked.replace(linked);
-        Ok((statements, Vec::new()))
+        Ok((statements, warnings))
     }
 
     fn equ_label_colon(&self) -> bool {
@@ -223,6 +223,10 @@ impl Dialect for Ca65Walk {
         self.layout.as_ref().map_or(0, |layout| layout.fill)
     }
 }
+
+/// What reading a program gives: its statements, what its link made, if
+/// it was linked, and what ca65 warned of.
+type Ran = (Vec<Statement>, Option<Linked>, Vec<Warning>);
 
 /// A segment the program has used.
 struct Seg {
@@ -323,6 +327,10 @@ struct Walk<'f> {
     reads: RefCell<Vec<String>>,
     /// Names bound at the end of the program.
     pending: Vec<Pending>,
+    /// The segments the layout only reserves: `bss` and `zp`.
+    reserving: HashSet<String>,
+    /// What ca65 warned of so far.
+    warnings: Vec<Warning>,
     /// Each line that calls a macro, as the expander handed it on.
     calls: Vec<syntax::Span>,
     /// Where the line being read is, for what the host is asked about it.
@@ -386,13 +394,9 @@ enum Lookup {
 }
 
 impl Walk<'_> {
-    /// The program's statements, and the size of the image `layout` makes
-    /// of them, if there is a layout.
-    fn run(
-        mut self,
-        source: &str,
-        layout: Option<&Layout>,
-    ) -> Result<(Vec<Statement>, Option<Linked>), AsmError> {
+    /// The program's statements, what the link `layout` describes made of
+    /// them, if there is a layout, and what ca65 warned of.
+    fn run(mut self, source: &str, layout: Option<&Layout>) -> Result<Ran, AsmError> {
         let mut expander = Expander::new(source, PROFILE)
             .map_err(|_| AsmError::new(0, "the program is too long to parse"))?;
         self.read = vec![(FileId(0), None)];
@@ -400,7 +404,8 @@ impl Walk<'_> {
         // Recorded whether or not the program assembles, so a problem in an
         // included file can name the chain of files that read it.
         self.record_includes(&expander);
-        result
+        let (statements, linked) = result?;
+        Ok((statements, linked, self.warnings))
     }
 
     /// Reads and lowers every line `expander` hands on.
@@ -412,6 +417,14 @@ impl Walk<'_> {
         let mut statements = Vec::new();
         let sectioned = layout.is_some();
         self.linking = sectioned;
+        if let Some(layout) = layout {
+            self.reserving = layout
+                .segments
+                .iter()
+                .filter(|def| !def.initialized)
+                .map(|def| def.name.clone())
+                .collect();
+        }
         let start = Span::in_file(FileId(0), 1, 1);
         self.use_segment("CODE", None, sectioned, &mut statements, &start)?;
         loop {
@@ -974,6 +987,7 @@ impl Walk<'_> {
                 self.variables.insert(label.to_owned());
             }
             self.names.insert(label.to_owned(), value);
+            self.check_zero_page(label, at);
         }
         let op = match op {
             Some(Operation::Org(address)) => {
@@ -994,6 +1008,15 @@ impl Walk<'_> {
                     return Ok(None);
                 }
                 return Ok(Some(Operation::PseudoPc(Some(Expr::Num(value)))));
+            }
+            // ld65 drops what a `bss` or `zp` segment holds, and warns of
+            // what the program wrote there. A reservation is not written,
+            // so it makes zeros, whatever the layout fills with.
+            Some(Operation::Reserve(count)) if self.reserving.contains(&self.segment) => {
+                Some(Operation::Fill {
+                    count: Expr::Num(count as i64),
+                    value: 0,
+                })
             }
             // ca65 aligns within the segment, wherever ld65 places it, so
             // `.align 3` in a segment at $8000 pads to offset 3.
@@ -1039,6 +1062,7 @@ impl Walk<'_> {
                 // ca65 counts an export as a use of the name.
                 self.referenced.insert(full.clone());
             }
+            let check = full.clone();
             match self.declared.get_mut(&full) {
                 None => {
                     let path = self.path().to_owned();
@@ -1073,8 +1097,40 @@ impl Walk<'_> {
                     }
                 }
             }
+            self.check_zero_page(&check, at);
         }
         Ok(())
+    }
+
+    /// Warns, as ca65 does, of a name exported to the zero page whose
+    /// address size is absolute, once both its declaration and its
+    /// definition have been read. A `.globalzp` the program defines is an
+    /// export. A constant warns by its size, as a label does.
+    fn check_zero_page(&mut self, full: &str, at: &Span) {
+        let Some(declaration) = self.declared.get(full) else {
+            return;
+        };
+        if declaration.size != Size::Zero
+            || !matches!(declaration.kind, Visible::Export | Visible::Global)
+        {
+            return;
+        }
+        let size = match self.names.get(full) {
+            None => return,
+            Some(Value::Constant(value)) => Size::of(*value),
+            Some(Value::Address(size)) => *size,
+            Some(_) => Size::Absolute,
+        };
+        if size != Size::Zero {
+            let name = &declaration.name;
+            self.warnings.push(
+                Warning::new(
+                    at.line as usize,
+                    format!("Symbol `{name}` is absolute but exported zeropage"),
+                )
+                .in_file(at.file),
+            );
+        }
     }
 
     /// At the end, what ld65 checks of the declarations in one program. An

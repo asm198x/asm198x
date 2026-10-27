@@ -8,13 +8,17 @@
 //! section of the debug record with that address, placed in the file where
 //! its bytes went. A segment with no bytes in the file, such as `ZEROPAGE`
 //! or `BSS`, keeps its labels but has no lines.
+//!
+//! ld65 drops what a `bss` or `zp` segment holds, and warns once for each
+//! such segment that holds a byte other than zero. The warning is given at
+//! the first line that made one.
 
 use std::collections::BTreeMap;
 
 use super::{Linked, Opened};
 use crate::contract::AssemblyResult;
 use crate::dialects::ca65_layout::{Layout, ResolvedSeg, area_usage};
-use crate::engine::{Assembly, DebugData, SectionRecord};
+use crate::engine::{Assembly, DebugData, SectionRecord, Warning};
 use crate::listing::DebugCaptureMulti;
 
 /// The result of a linked assembly, and its debug record.
@@ -53,6 +57,8 @@ pub(crate) fn result(
     // which holds nothing; the rest are the sections the walk opened and
     // placed, in order.
     let records = assembly.sections.iter().filter(|r| !r.name.is_empty());
+    let mut warnings = assembly.warnings;
+    let mut warned = Vec::new();
     for (record, opened) in records.zip(&linked.opened) {
         let Some((id, seg)) = resolved
             .segs
@@ -67,6 +73,24 @@ pub(crate) fn result(
         // sees it, so it has no lines.
         let lines = seg.file_at.is_some() && seg.name != "HEADER";
         add(&mut capture, record, id, delta, lines);
+        let reserves = layout
+            .segments
+            .iter()
+            .any(|def| def.name == seg.name && !def.initialized);
+        if reserves
+            && !warned.contains(&seg.name)
+            && let Some(line) = first_data(record)
+        {
+            warned.push(seg.name.clone());
+            let name = &seg.name;
+            warnings.push(
+                Warning::new(
+                    line.line as usize,
+                    format!("Segment `{name}` with type `bss` contains initialized data"),
+                )
+                .in_file(line.file),
+            );
+        }
     }
     sections.extend(spans.sections);
     capture.sections = sections;
@@ -78,10 +102,23 @@ pub(crate) fn result(
     symbols.sort_by(|a, b| a.name.cmp(&b.name));
     symbols.extend(labels);
     capture.symbols = symbols;
-    let mut result = AssemblyResult::image_warned(assembly.bytes, assembly.warnings);
+    let mut result = AssemblyResult::image_warned(assembly.bytes, warnings);
     result.section_debug = capture.section_debug();
     result.areas = area_usage(layout, resolved, &linked.lengths);
     (result, capture)
+}
+
+/// The first line of a section the image has no place for that made a byte
+/// other than zero.
+fn first_data(record: &SectionRecord) -> Option<&crate::engine::LineRec> {
+    record.debug.lines.iter().find(|line| {
+        let start = line.offset as usize;
+        let end = start + line.length as usize;
+        record
+            .discarded
+            .get(start..end)
+            .is_some_and(|bytes| bytes.iter().any(|&b| b != 0))
+    })
 }
 
 /// The debug section for segment number `id`, with its records' addresses
