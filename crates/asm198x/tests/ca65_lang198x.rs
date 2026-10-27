@@ -15,13 +15,8 @@ use verdict_corpus::{Corpus, Outcome, Suite};
 /// The cases the walk does not match yet: a case's name, and the step of
 /// the plan that covers it.
 const NOT_YET: &[(&str, &str)] = &[
-    // Scopes: `.scope`, `.proc`, `::` and `.sizeof`.
-    (".left takes a constant count in a scope", "6c"),
-    (".sizeof a label and a later scope's label", "6c"),
-    ("a label on .endscope", "6c"),
-    ("a qualified label defines into a closed scope", "6c"),
-    ("the scope operator", "6c"),
     // Functions that ask about the program or count tokens.
+    (".defined finds a name further out", "6d"),
     (".ref and .const keep source order", "6d"),
     (".tcount of an opening brace", "6d"),
     // Unsupported by Lang198x's ca65 front end, as its preprocessing plan
