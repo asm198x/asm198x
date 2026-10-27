@@ -323,6 +323,19 @@ no label, which the walk never sees, is right too.
 name starts a new cheap local scope, and a label before the rest of its
 line; the walk now does both.
 
+**Settings that make no bytes.** `lang198x-ca65` 0.0.12 checks the CPU
+commands, the switches (`.smart`, `.autoimport`, `.list`, `.debuginfo`),
+`.listbytes`, `.pagelen`, `.fileopt` and the hand-written forms of `.dbg`
+as ca65 V2.19's `pseudo.c` does, and then they have no effect. Only the
+6502 profile exists, so `.setcpu "6502"` and `.p02` change nothing, and
+another CPU is not lowered yet; that is stage 4. The walk keeps ca65's
+stack of eight CPUs: it refuses a ninth `.pushcpu` and a `.popcpu` with
+nothing kept, and warns "CPU stack is not empty" at the last line read.
+`.condes`, `.constructor`, `.destructor` and `.interruptor` export their
+name, with the type and priority checked; the tables ld65 builds from them
+are stage 5. 18 probes; the old reader gets `.condes` wrong, a gap against
+#940.
+
 ## After this step
 
 Step 7, the switch: the walk becomes the default for the main reader, `fmt`
