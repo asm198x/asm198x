@@ -19,20 +19,9 @@ const NOT_YET: &[(&str, &str)] = &[
     (".defined finds a name further out", "6d"),
     (".ref and .const keep source order", "6d"),
     (".tcount of an opening brace", "6d"),
-    // Unsupported by Lang198x's ca65 front end, as its preprocessing plan
-    // records: `.ident` of a name that reads as a register, a `.endrepeat`
-    // after other tokens on its line, and a byte above 127 made by
-    // `.sprintf`. Each waits for a decision on how to hold such text.
-    ("a generated name is a repeat counter", "unsupported"),
-    ("a generated name is imported", "unsupported"),
-    ("a generated register-spelt constant", "unsupported"),
-    ("a generated register-spelt label", "unsupported"),
-    (
-        "a generated register-spelt label is exported",
-        "unsupported",
-    ),
-    ("a label on .endrepeat", "unsupported"),
-    ("a macro argument keeps a function's comma", "unsupported"),
+    // Imports and exports, here of a name `.ident` made.
+    ("a generated name is imported", "6d"),
+    ("a generated register-spelt label is exported", "6d"),
 ];
 
 #[test]
