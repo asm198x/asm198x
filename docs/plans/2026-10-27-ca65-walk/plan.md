@@ -110,7 +110,7 @@ These are refused or reported as unsupported, where ca65 accepts them:
 | 6a, lowering | Done in `lang198x-ca65` 0.0.3: expressions, instructions with ca65's address sizes, labels, assignments, data and space commands. |
 | 6b, the walk | `dialects/ca65_walk.rs`, behind the hidden `assemble_ca65_lang198x`. It reads the program once, keeps what ca65 knows of each name, names cheap locals and unnamed labels, and makes `.org` the engine's `PseudoPc`. |
 | 6c, scopes | `lang198x-ca65` 0.0.4 reports `.scope`, `.proc` and their ends, and lowers `.sizeof` through `Known::size_of`. The walk keeps the scopes, their sizes and each label's size. |
-| 6c, segments | Next: `.segment`, `.pushseg` and `.popseg` as sections placed by the layout. |
+| 6c, segments | `lang198x-ca65` 0.0.6 reports `.segment`, its short forms, `.pushseg` and `.popseg`. The walk keeps each segment's length and address size, and opens an engine `Section` at each change, placed at the end from `ca65_layout`. A hidden `assemble_ca65_nes_lang198x` links as the curriculum does. |
 
 The scope rules, measured on ca65 V2.19 and recorded as 57 probes in
 `tests/differential.rs`:
@@ -130,11 +130,21 @@ The scope rules, measured on ca65 V2.19 and recorded as 57 probes in
 The old reader is frozen (#940). Twelve of the new probes are ones it gets
 wrong, so they are recorded as gaps against that issue.
 
-`tests/ca65_lang198x.rs` replays the 409 `ca65` verdicts. 404 match. The
+`tests/ca65_lang198x.rs` replays the 423 `ca65` verdicts. 418 match. The
 5 others need step 6d and are named in the test:
 
 - 3 need `.defined`, `.ref`, `.const` and `.tcount` as functions;
 - 2 need `.import` and `.export`, of a name `.ident` made.
+
+It also builds the 51 NES curriculum programs, and all 51 ROMs match the
+ones ca65 V2.19 and ld65 built. That half runs where the curriculum is
+checked out: CI's replay job, or anywhere `ASM198X_CODE_SAMPLES` is set.
+
+Segments follow ca65 and ld65, measured on V2.19 and recorded as 14 probes:
+a program starts in `CODE`; a segment carries on where it left off; a label
+takes its segment's address size, the zero page in `ZEROPAGE`; ca65's own
+segments keep their address sizes; names are case-sensitive; and only a
+segment that holds bytes needs an area in the link.
 
 The seven cases Lang198x once reported as unsupported now match.
 `lang198x-ca65` 0.0.5 hands on the tokens it makes rather than text (its
@@ -147,8 +157,6 @@ Replaying the verdicts in 6b also found three places where `lang198x-ca65`
 gave a line a different meaning from ca65, fixed there: `*` in a data list,
 a label on a conditional's line, and `.sprintf`'s `%c` above 127, which it
 wrote as two bytes. 0.0.3 refused that `%c`; 0.0.5 makes the byte.
-
-The 51 NES curriculum digests wait for segments (6c).
 
 ## After this step
 

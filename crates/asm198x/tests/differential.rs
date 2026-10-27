@@ -1333,6 +1333,22 @@ const PROBES: &[Probe] = &[
     ok ("ca65", "an unnamed label before .scope", ": .scope s\n.byte 1\n.endscope\n.word :-\n"),
     ok ("ca65", "an unnamed label before .proc", ": .proc p\n.byte 1\n.endproc\n.word :-,p\n"),
     gap("ca65", "an unnamed label on .endscope", ".scope s\n.byte 1\n: .endscope\n.word :-\n", 940),
+    // ca65's segments under the flat link, measured on V2.19 for the
+    // walk's step 6c.
+    ok ("ca65", "a .segment line for CODE", ".segment \"CODE\"\nnop\n"),
+    ok ("ca65", "going back to CODE carries on", ".code\nnop\n.segment \"CODE\"\nnop\n"),
+    ok ("ca65", ".pushseg and .popseg restore the segment", "nop\n.pushseg\n.code\n.byte 1\n.popseg\n.byte 2\n"),
+    ok ("ca65", ".popseg with nothing pushed", ".popseg\n"),
+    ok ("ca65", "a segment the link has no area for", ".segment \"FOO\"\n.byte 1\n"),
+    ok ("ca65", "segment names are case-sensitive", ".segment \"code\"\n.byte 1\n"),
+    ok ("ca65", "CODE cannot be the zero page", ".segment \"CODE\": zeropage\nnop\n"),
+    gap("ca65", "CODE may say it is absolute", ".segment \"CODE\": absolute\nnop\n", 940),
+    ok ("ca65", "ZEROPAGE has no area in a flat link", ".zeropage\nv: .res 1\n.code\nlda v\n"),
+    ok ("ca65", "pushed segments nest", ".pushseg\n.pushseg\n.popseg\n.popseg\n.byte 1\n"),
+    ok ("ca65", ".segment takes a string", ".segment 5\n"),
+    ok ("ca65", "RODATA has no area in a flat link", ".rodata\n.byte 1\n"),
+    ok ("ca65", "an empty segment needs no area", ".segment \"FOO\"\n.code\n.byte 1\n"),
+    ok ("ca65", "a .pushseg left on the stack", ".pushseg\n.byte 1\n"),
 
     // ca65's lexical axes in its default mode, measured on V2.19 before the
     // new front end's lexer is written (lang198x/ca65 step 3). Every

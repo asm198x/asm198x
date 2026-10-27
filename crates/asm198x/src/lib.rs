@@ -613,7 +613,19 @@ pub fn format_vasm(source: &str) -> Result<String, AsmError> {
 /// Returns an [`AsmError`] (with source line) on any failure.
 #[doc(hidden)]
 pub fn assemble_ca65_lang198x(source: &str) -> Result<AssemblyResult, AsmError> {
-    engine::assemble(source, &dialects::ca65_walk::Ca65Walk).map(AssemblyResult::from)
+    engine::assemble(source, &dialects::ca65_walk::Ca65Walk::flat()).map(AssemblyResult::from)
+}
+
+/// The ca65 walk over Lang198x's front end (step 6c of
+/// `docs/plans/2026-10-27-ca65-walk/plan.md`), linked as the NES curriculum
+/// is: the ROM image [`assemble_ca65`] makes. Hidden until step 7 switches
+/// the main reader over.
+///
+/// # Errors
+/// An [`AsmError`] for anything ca65 or ld65 refuses.
+#[doc(hidden)]
+pub fn assemble_ca65_nes_lang198x(source: &str) -> Result<AssemblyResult, AsmError> {
+    engine::assemble(source, &dialects::ca65_walk::Ca65Walk::nes()).map(AssemblyResult::from)
 }
 
 /// Assemble ca65-syntax 65816 source (native mode) into a flat binary — the
