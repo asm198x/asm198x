@@ -130,18 +130,23 @@ The scope rules, measured on ca65 V2.19 and recorded as 57 probes in
 The old reader is frozen (#940). Twelve of the new probes are ones it gets
 wrong, so they are recorded as gaps against that issue.
 
-`tests/ca65_lang198x.rs` replays the 409 `ca65` verdicts. 399 match. The
-10 others are named in the test:
+`tests/ca65_lang198x.rs` replays the 409 `ca65` verdicts. 404 match. The
+5 others need step 6d and are named in the test:
 
-- 3 need `.defined`, `.ref`, `.const` and `.tcount` as functions (6d);
-- 7 are ones Lang198x reports as unsupported: `.ident` of a name that
-  reads as a register (5), a label before `.endrepeat`, and a byte above
-  127 made by `.sprintf`. Each waits for a decision on how to hold such
-  text.
+- 3 need `.defined`, `.ref`, `.const` and `.tcount` as functions;
+- 2 need `.import` and `.export`, of a name `.ident` made.
+
+The seven cases Lang198x once reported as unsupported now match.
+`lang198x-ca65` 0.0.5 hands on the tokens it makes rather than text (its
+plan `docs/plans/2026-10-27-made-tokens.md`): a name `.ident` makes stays a
+name even when it is spelt like a register, and a made string keeps a byte
+above 127. It also joins a mid-line `.endrepeat`'s line to the next line,
+as ca65 does.
 
 Replaying the verdicts in 6b also found three places where `lang198x-ca65`
 gave a line a different meaning from ca65, fixed there: `*` in a data list,
-a label on a conditional's line, and `.sprintf`'s `%c` above 127.
+a label on a conditional's line, and `.sprintf`'s `%c` above 127, which it
+wrote as two bytes. 0.0.3 refused that `%c`; 0.0.5 makes the byte.
 
 The 51 NES curriculum digests wait for segments (6c).
 
