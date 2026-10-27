@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.73](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.72...asm198x-v0.0.73) - 2026-10-27
+
+### Added
+
+- read ca65's included files in the walk
+- pass ca65's messages and assertions on through the walk
+- keep ca65's imports and exports in the walk
+- answer ca65's functions of tokens and symbols in the walk
+- place ca65 segments in the walk, and build the NES curriculum
+- keep ca65 scopes in the walk over Lang198x's front end
+- walk ca65 programs over Lang198x's ca65 front end
+- sjasmplus fake instructions, index-half spellings and sli
+- format pasmo and pasmonext source with Lang198x's formatter
+- make the walk the default path for pasmo and pasmonext
+- run PasmoNext's third pass in the walk
+- take PasmoNext's --bracket and --w8080 on the walk's path
+- keep the Next's banks and SAVEBIN in the walk
+- give PasmoNext's warnings and MESSAGE lines on the walk's path
+- keep PasmoNext's structures and reserve counter in the walk
+- take PasmoNext's --nocase, --equ and --alocal on the walk's path
+- keep PasmoNext's scopes in the walk over Lang198x's front end
+- assemble PasmoNext through Lang198x's front end, as a second path
+
+### Fixed
+
+- give the ca65 readers ca65's two arithmetic levels
+- read unary plus, := and a spaced label colon in ca65
+- read the sjasmplus syntax the 1.24.0 probes found missing
+- reject PasmoNext's dropped block-end text on the walk's path
+- name PasmoNext's bugs as deviations in the walk's gate, not copies
+- check the curriculum's PasmoNext verdicts on the second path in CI
+
 ## [0.0.72](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.71...asm198x-v0.0.72) - 2026-10-23
 
 The boundary between the dialect front ends and the assembler back end now
