@@ -20,10 +20,6 @@ use verdict_corpus::{Corpus, Outcome, Suite};
 /// The cases the walk does not match yet: a case's name, and the step of
 /// the plan that covers it.
 const NOT_YET: &[(&str, &str)] = &[
-    // Functions that ask about the program or count tokens.
-    (".defined finds a name further out", "6d"),
-    (".ref and .const keep source order", "6d"),
-    (".tcount of an opening brace", "6d"),
     // Imports and exports, here of a name `.ident` made.
     ("a generated name is imported", "6d"),
     ("a generated register-spelt label is exported", "6d"),
