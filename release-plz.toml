@@ -23,7 +23,8 @@ git_tag_enable = true
 changelog_update = true
 # Only reader-facing changes earn a release. Release-process work uses `ci:` or
 # `chore(release):`; changelog filtering alone does not prevent a version bump.
-release_commits = "^(feat|fix|perf|revert)[(:]"
+# A breaking change, such as `feat!:`, earns one too.
+release_commits = "^(feat|fix|perf|revert)(\\([^)]*\\))?!?:"
 
 [changelog]
 protect_breaking_commits = true
