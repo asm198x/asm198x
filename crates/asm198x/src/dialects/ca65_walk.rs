@@ -40,7 +40,7 @@ use std::collections::{BTreeMap, HashMap, HashSet};
 use lang198x_ca65::Profile;
 use lang198x_ca65::ast::{Expr as SourceExpr, NameRef};
 use lang198x_ca65::expand::{Expander, Host};
-use lang198x_ca65::lower::{self, Known, Scope, Segment, Size, Value};
+use lang198x_ca65::lower::{self, Known, Scope, Segment, Size, Value, Visibility, Visible};
 use lang198x_ca65::syntax::{self, DiagnosticKind};
 
 use super::ca65_layout::Layout;
@@ -166,9 +166,31 @@ struct Pending {
     name: String,
 }
 
+/// A name the program declared to a linker, in the scope it was declared
+/// in.
+struct Declaration {
+    kind: Visible,
+    /// Its address size, absolute unless one was written.
+    size: Size,
+    /// Its scope.
+    path: String,
+    /// The name as written.
+    name: String,
+    /// Where it was first declared.
+    at: Span,
+    /// How many names were declared before it.
+    order: usize,
+}
+
 /// What the walk knows as it reads the program.
 #[derive(Default)]
 struct Walk {
+    /// Each name declared to a linker, by its full name in the scope that
+    /// declared it.
+    declared: HashMap<String, Declaration>,
+    /// The full names `.set` defined, which ca65 does not let a program
+    /// export.
+    variables: HashSet<String>,
     /// What is known of each name defined so far, by its full name.
     names: HashMap<String, Value>,
     /// The bytes each label's line made, by its full name, for `.sizeof`.
@@ -300,6 +322,9 @@ impl Walk {
             if let Some(change) = lowered.segment {
                 self.change_segment(change, sectioned, &mut statements, &at)?;
             }
+            if let Some(declared) = lowered.visibility {
+                self.declare(declared, &at)?;
+            }
         }
         if let Some(frame) = self.open.last() {
             let name = frame.name.as_deref().unwrap_or("");
@@ -311,6 +336,7 @@ impl Walk {
             ));
         }
         let bound = self.bind_pending();
+        self.check_declarations()?;
         if !bound.is_empty() {
             for statement in &mut statements {
                 if let Some(op) = statement.op.take() {
@@ -642,6 +668,21 @@ impl Walk {
             if !redefinable && self.names.contains_key(label) {
                 return Err(refuse(format!("Symbol `{label}` is already defined")));
             }
+            if let Some(declaration) = self.declared.get(label) {
+                if is_import(declaration.kind) {
+                    let name = &declaration.name;
+                    return Err(refuse(format!("Symbol `{name}` is already an import")));
+                }
+                if redefinable && declaration.kind == Visible::Export {
+                    let name = &declaration.name;
+                    return Err(refuse(format!(
+                        "Var symbol `{name}` cannot be an export or global symbol"
+                    )));
+                }
+            }
+            if redefinable {
+                self.variables.insert(label.to_owned());
+            }
             self.names.insert(label.to_owned(), value);
         }
         let op = match op {
@@ -674,6 +715,98 @@ impl Walk {
             }
         }
         Ok(op)
+    }
+
+    /// Declares names to a linker. Each is declared in the current scope,
+    /// and declaring one again must agree with what was declared before.
+    fn declare(&mut self, declared: Visibility, at: &Span) -> Result<(), AsmError> {
+        let refuse = |message: String| AsmError::at(at.clone(), message);
+        let kind = declared.kind;
+        for name in declared.names {
+            let size = name.size.unwrap_or(Size::Absolute);
+            let full = qualify(self.path(), &name.name);
+            let name = name.name;
+            if is_import(kind) && self.names.contains_key(&full) {
+                return Err(refuse(format!("Symbol `{name}` is already defined")));
+            }
+            if kind == Visible::Export && self.variables.contains(&full) {
+                return Err(refuse(format!("Var symbol `{name}` cannot be exported")));
+            }
+            if kind == Visible::Export {
+                // ca65 counts an export as a use of the name.
+                self.referenced.insert(full.clone());
+            }
+            match self.declared.get_mut(&full) {
+                None => {
+                    let path = self.path().to_owned();
+                    let order = self.declared.len();
+                    self.declared.insert(
+                        full,
+                        Declaration {
+                            kind,
+                            size,
+                            path,
+                            name,
+                            at: at.clone(),
+                            order,
+                        },
+                    );
+                }
+                Some(before) => {
+                    if is_import(kind) && before.kind == Visible::Export {
+                        return Err(refuse(format!("Cannot import exported symbol `{name}`")));
+                    }
+                    if kind == Visible::Export && is_import(before.kind) {
+                        return Err(refuse(format!("Symbol `{name}` is already an import")));
+                    }
+                    if before.size != size {
+                        return Err(refuse(format!("Address size mismatch for symbol `{name}`")));
+                    }
+                    // `.global` takes the kind of a declaration beside it.
+                    if before.kind == Visible::Global
+                        || (before.kind == Visible::Import && kind == Visible::ForceImport)
+                    {
+                        before.kind = kind;
+                    }
+                }
+            }
+        }
+        Ok(())
+    }
+
+    /// At the end, what ld65 checks of the declarations in one program. An
+    /// export must be defined, in its own scope or one further out, and not
+    /// by `.set`. A name forced in is never defined, since defining an
+    /// import is refused. A `.global` the program defined is an export, and
+    /// any other import is resolved only if it is used, which the engine
+    /// refuses as an undefined name.
+    fn check_declarations(&self) -> Result<(), AsmError> {
+        let mut declarations: Vec<&Declaration> = self.declared.values().collect();
+        declarations.sort_by_key(|d| d.order);
+        for declaration in declarations {
+            let name = &declaration.name;
+            let refuse = |message: String| AsmError::at(declaration.at.clone(), message);
+            let defined = outwards(&declaration.path)
+                .map(|path| qualify(path, name))
+                .find(|full| self.names.contains_key(full));
+            match (declaration.kind, defined) {
+                (Visible::ForceImport, _) => {
+                    return Err(refuse(format!("Unresolved external `{name}`")));
+                }
+                (Visible::Export, None) => {
+                    return Err(refuse(format!(
+                        "Exported symbol `{name}` was never defined"
+                    )));
+                }
+                (Visible::Export | Visible::Global, Some(full))
+                    if self.variables.contains(&full) =>
+                {
+                    return Err(refuse(format!("Var symbol `{name}` cannot be exported")));
+                }
+                _ => {}
+            }
+        }
+        Ok(())
     }
 
     /// Opens or closes a scope.
@@ -735,6 +868,11 @@ impl Walk {
         }
         bound
     }
+}
+
+/// Whether `kind` asks a linker for the names.
+fn is_import(kind: Visible) -> bool {
+    matches!(kind, Visible::Import | Visible::ForceImport)
 }
 
 /// The name the `index`th unnamed label defines. ca65 gives them no names a
