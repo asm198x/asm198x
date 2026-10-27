@@ -123,6 +123,7 @@ These are refused or reported as unsupported, where ca65 accepts them:
 | 6c, segments | `lang198x-ca65` 0.0.6 reports `.segment`, its short forms, `.pushseg` and `.popseg`. The walk keeps each segment's length and address size, and opens an engine `Section` at each change, placed at the end from `ca65_layout`. A hidden `assemble_ca65_nes_lang198x` links as the curriculum does. |
 | 6d.1, functions | `lang198x-ca65` 0.0.7 makes the functions of tokens in its expander and lowers `.defined`, `.referenced` and `.const` through `Known`. The walk answers them, and counts each name lowering reads as a use. |
 | 6d.2, imports and exports | `lang198x-ca65` 0.0.8 reports what a line declares to a linker. The walk keeps each declaration and checks, in one program, what ca65 and ld65 check between them. |
+| 6d.3, messages and assertions | `lang198x-ca65` 0.0.9 lowers `.out`, `.warning`, `.error`, `.fatal` and `.assert` to the engine's `Diagnose` and `Assert`, which the walk passes on. |
 
 The scope rules, measured on ca65 V2.19 and recorded as 57 probes in
 `tests/differential.rs`:
@@ -142,8 +143,10 @@ The scope rules, measured on ca65 V2.19 and recorded as 57 probes in
 The old reader is frozen (#940). Twelve of the new probes are ones it gets
 wrong, so they are recorded as gaps against that issue.
 
-`tests/ca65_lang198x.rs` replays the 522 `ca65` verdicts, and all of them
-match, so the list of named differences is empty.
+`tests/ca65_lang198x.rs` replays the 552 `ca65` verdicts, and all of them
+match, so the list of named differences is empty. It also checks that the
+walk's warnings and errors say what the old reader's do, since the
+verdicts compare bytes only.
 
 It also builds the 51 NES curriculum programs, and all 51 ROMs match the
 ones ca65 V2.19 and ld65 built. That half runs where the curriculum is
@@ -184,6 +187,13 @@ agree on its address size, an import may not be exported or defined, and
 does not. ca65 also warns of a zero-page export of an absolute label; the
 walk has no warnings yet, and step 7 needs them. The old reader gets 4 of
 the probes wrong, and they are gaps against #940.
+
+Messages and assertions follow ca65 V2.19, recorded as 30 probes, all of
+which the old reader already matches. `.warning`, `.error` and `.fatal`
+read one string and ignore the rest of the line; `.out` takes exactly one.
+An assertion is checked once the program is linked, so it may name a label
+further on, and `error` and `lderror` refuse a program where `warning` and
+`ldwarning` only warn.
 
 Replaying the verdicts in 6b also found three places where `lang198x-ca65`
 gave a line a different meaning from ca65, fixed there: `*` in a data list,
