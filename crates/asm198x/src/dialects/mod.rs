@@ -11,6 +11,7 @@ pub(crate) mod ca65_816;
 pub(crate) mod ca65_flat;
 pub(crate) mod ca65_huc6280;
 pub(crate) mod ca65_layout;
+pub(crate) mod ca65_walk;
 pub(crate) mod cdp1802;
 pub(crate) mod cp1610;
 pub(crate) mod f8;

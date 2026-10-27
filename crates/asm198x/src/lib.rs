@@ -602,6 +602,20 @@ pub fn format_vasm(source: &str) -> Result<String, AsmError> {
     ))
 }
 
+/// Assembles single-source ca65 for the 6502 through Lang198x's ca65 front
+/// end and the walk in `dialects/ca65_walk.rs`, linked flat from 0.
+///
+/// Hidden: this is the path under test against ca65's recorded verdicts
+/// (`docs/plans/2026-10-27-ca65-walk/plan.md`), and [`assemble_ca65`] stays
+/// the default until it passes them.
+///
+/// # Errors
+/// Returns an [`AsmError`] (with source line) on any failure.
+#[doc(hidden)]
+pub fn assemble_ca65_lang198x(source: &str) -> Result<AssemblyResult, AsmError> {
+    engine::assemble(source, &dialects::ca65_walk::Ca65Walk).map(AssemblyResult::from)
+}
+
 /// Assemble ca65-syntax 65816 source (native mode) into a flat binary — the
 /// 65816 as a target extension of the 6502 (`isa::mos6502` + `isa::mos65816`).
 /// Accumulator/index immediate width follows the `.a8`/`.a16`/`.i8`/`.i16`
