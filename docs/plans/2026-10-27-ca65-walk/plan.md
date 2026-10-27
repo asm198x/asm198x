@@ -285,6 +285,27 @@ nothing, so it never warns, whatever the layout fills with. ca65 gives an
 equate of a name defined later its warning at the equate's own line, which
 waits for the forward equate in 6e.
 
+### 6e, the language gaps
+
+Each gap is measured on ca65 V2.19 first and recorded as a probe.
+
+**Equates of names defined further on.** ca65 works out an equate when it
+is used, so `other=value` before `value=$34` is fine, and chains resolve in
+whatever order they need. The engine now lets a dialect defer such an
+equate to the end of its first pass (`defers_equates`), and refuses one
+that reads itself, directly or not, as ca65 does: "Circular reference in
+definition of symbol". The walk keeps each equate that read a name nothing
+was known of, and works it out again when it is used. So `lda other` is
+absolute before `value` is defined and zero page after, as in ca65. Inside
+a scope, the name stays the scope's own until the end, so it stays
+absolute. 13 probes; the old reader gets the scoped one wrong, a gap
+against #940.
+
+One difference is deliberate. ca65 V2.19 refuses an unused equate that
+reads itself at the top (`p=p+1`), but accepts `red=red+1` inside a scope
+when nothing uses `inner::red`. The walk refuses both, since the same
+definition cannot be both right and wrong.
+
 ## After this step
 
 Step 7, the switch: the walk becomes the default for the main reader, `fmt`
