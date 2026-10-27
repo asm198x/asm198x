@@ -5,9 +5,9 @@ observation of a real reference assembler, not an expectation written
 by hand. Regenerate with `cargo xtask ledger`.
 
 - **Release:** `v0.0.73`
-- **Corpus hash:** `df55f5a762fbc9f8ddb9165cc4b9b84da7867798be8d34dfab573c1609637e62`
+- **Corpus hash:** `7a5b80fff545d5b8e6ee6f86e89b1eb0159eee218255a534124c26da5c82c093`
 - **Pinned curriculum:** `f11698d0b51b3a6c1209cec3d649229aa35af97f` (2026-08-27)
-- **CPUs:** 23, holding 9830 verdict(s)
+- **CPUs:** 23, holding 9854 verdict(s)
 
 ## 1802
 
@@ -36,7 +36,7 @@ Form coverage: **151/151** (100.0%)
 | arbiter | version | verdicts |
 |---|---|---|
 | `acme` | This is ACME, release 0.97 ("Zem"), 1 Aug 2025 | curriculum 138, form 151, fuzz 100, probe 103 |
-| `ca65` | ca65 V2.19 - Git 8d86ca7 | curriculum 51, form 151, fuzz 100, probe 301 |
+| `ca65` | ca65 V2.19 - Git 8d86ca7 | curriculum 51, form 151, fuzz 100, probe 325 |
 
 Tracked divergences — differences we know about and check:
 
@@ -50,7 +50,7 @@ Tracked divergences — differences we know about and check:
 - `issue-876` — 1 case(s)
 - `issue-891` — 1 case(s)
 - `issue-918` — 1 case(s)
-- `issue-940` — 29 case(s)
+- `issue-940` — 30 case(s)
 
 ## 65816
 

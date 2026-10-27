@@ -117,8 +117,7 @@ pub(crate) fn result(
 /// Whether an engine section has a label, or, if `lines`, a line.
 fn holds_something(record: &SectionRecord, lines: bool) -> bool {
     let labels = record.debug.symbols.iter().any(|symbol| {
-        !symbol.name.starts_with(':')
-            && !matches!(symbol.kind, debug198x::SymbolKind::Const { .. })
+        !symbol.name.starts_with(':') && !matches!(symbol.kind, debug198x::SymbolKind::Const { .. })
     });
     labels || (lines && !record.debug.lines.is_empty())
 }

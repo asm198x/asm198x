@@ -13,7 +13,7 @@ instead. If you are deciding whether to move a project that already builds, what
 you need is not reassurance — it is to know what will change.
 
 <!-- generated: xtask divergences --markdown -->
-16 tracked differences across 48 recorded cases.
+16 tracked differences across 49 recorded cases.
 
 | Difference | CPU | Dialect | Reference tool | Cases |
 |---|---|---|---|---|
@@ -31,7 +31,7 @@ you need is not reassurance — it is to know what will change.
 | [`issue-895`](https://github.com/asm198x/asm198x/issues/895) | 65816 | ca65-816 | ca65 | 1 |
 | [`issue-918`](https://github.com/asm198x/asm198x/issues/918) | 6502 | ca65 | ca65 | 1 |
 | [`issue-928`](https://github.com/asm198x/asm198x/issues/928) | 65816 | ca65-816 | ca65 | 1 |
-| [`issue-940`](https://github.com/asm198x/asm198x/issues/940) | 6502 | ca65 | ca65 | 29 |
+| [`issue-940`](https://github.com/asm198x/asm198x/issues/940) | 6502 | ca65 | ca65 | 30 |
 | [`issue-984`](https://github.com/asm198x/asm198x/issues/984) | Z80N | pasmonext | pasmo | 1 |
 <!-- /generated -->
 

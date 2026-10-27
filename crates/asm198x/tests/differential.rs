@@ -1338,6 +1338,12 @@ const PROBES: &[Probe] = &[
     ok ("ca65", "an unused circle of equates in a scope", "p=9\n.scope s\nq=r\nr=q\n.endscope\nnop\n"),
     ok ("ca65", "an equate that reads itself behind a false &&", "red=2\n.scope inner\nred=red-red\n.org $20\n.byte 0,(*=$20)&&red\n.endscope\n"),
     ok ("ca65", "an equate that reads itself behind a true &&", "red=2\n.scope inner\nred=red-red\n.org $20\n.byte 0,(*=$21)&&red\n.endscope\n"),
+    // `.reloc` ends what `.org` began, however many `.org`s there were.
+    ok ("ca65", ".reloc with no .org", "nop\n.reloc\nnop\n"),
+    ok ("ca65", ".reloc returns to the segment's addresses", ".org $10\nl: nop\n.reloc\nm: .word l, m\n"),
+    ok ("ca65", ".reloc after two .orgs", ".org $10\n.org $20\nl: nop\n.reloc\nm: .word l, m\n"),
+    ok ("ca65", ".org after .reloc", ".org $10\n.reloc\n.org $20\nl: .word l\n"),
+    ok ("ca65", ".reloc takes nothing", ".reloc 1\n"),
     ok ("ca65", ".ifdef in a scope does not see later names", ".scope s\n.ifdef v\n.byte 1\n.endif\n.endscope\nv=1\n"),
     ok ("ca65", ".res needs a constant of its own scope", "v=2\n.scope s\n.res v\n.endscope\n"),
     ok ("ca65", ".ifconst of a name further out is false", "v=2\n.scope s\n.ifconst v\n.byte 1\n.else\n.byte 2\n.endif\n.endscope\n"),
@@ -3278,8 +3284,6 @@ const WALK_NOT_YET: &[&str] = &[
     "records:",
     // `.setcpu`, `.p02`, `.smart`, `.pushcpu` and `.popcpu`.
     ".setcpu \"6502\"",
-    // `.reloc`.
-    ".org moves the address",
 ];
 
 #[test]

@@ -1787,7 +1787,8 @@ fn assemble_statements(
                 );
             }
             // An equate the dialect left without a value has none to record.
-            let valueless = matches!(&s.op, Some(Operation::Equ(_))) && !symbols.contains_key(label);
+            let valueless =
+                matches!(&s.op, Some(Operation::Equ(_))) && !symbols.contains_key(label);
             let kind = if matches!(&s.op, Some(Operation::Equ(_))) {
                 // An `equ`/`=` constant: its value, not an address, and no space.
                 let value = symbols.get(label).copied().unwrap_or_default();
