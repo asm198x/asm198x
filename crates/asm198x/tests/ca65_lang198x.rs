@@ -180,3 +180,78 @@ fn the_walk_says_what_messages_say() {
         assert!(error.to_string().contains(text), "{source:?}: {error}");
     }
 }
+
+/// The walk's multi-file entry: `.include` and `.incbin` read through the
+/// loader, the bytes interleave in include order, and the file table and
+/// include chain come back with the result. ca65 measures these through the
+/// live multi-file probes; these hold the walk to them without the tools.
+#[test]
+fn the_walk_reads_included_files() {
+    use asm198x::source::MemoryLoader;
+    let loader = MemoryLoader::new()
+        .text(
+            "a.s",
+            " lda #$02\n .INCLUDE \"b.s\"\n lda #$04\nptr = $10\n",
+        )
+        .text("b.s", " lda #$03\n")
+        .binary(
+            "data.bin",
+            vec![0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17],
+        );
+    let src = " lda #$01\n .include \"a.s\"\n lda #$05\n lda ptr\n\
+               .incbin \"data.bin\", 2, 3\n .incbin \"data.bin\", 6\n";
+    let r = asm198x::assemble_ca65_lang198x_files(src, "main.s", &loader).expect("assembles");
+    assert_eq!(
+        r.bytes,
+        [
+            0xA9, 0x01, 0xA9, 0x02, 0xA9, 0x03, 0xA9, 0x04, 0xA9, 0x05, 0xA5, 0x10, 0x12, 0x13,
+            0x14, 0x16, 0x17,
+        ]
+    );
+    assert_eq!(r.files, ["main.s", "a.s", "b.s"]);
+
+    // A macro and a scope cross a file boundary, as ca65's text does.
+    let loader = MemoryLoader::new().text("uses.s", " two\n.endscope\n");
+    let src = ".macro two\n nop\n nop\n.endmacro\n.scope s\n .include \"uses.s\"\n";
+    let r = asm198x::assemble_ca65_lang198x_files(src, "main.s", &loader).expect("assembles");
+    assert_eq!(r.bytes, [0xEA, 0xEA]);
+}
+
+#[test]
+fn the_walk_names_the_file_a_problem_is_in() {
+    use asm198x::source::MemoryLoader;
+    let loader = MemoryLoader::new()
+        .text("a.s", " .include \"b.s\"\n")
+        .text("b.s", " lda #$01\n frob $10\n");
+    let e = asm198x::assemble_ca65_lang198x_files(" .include \"a.s\"\n", "main.s", &loader)
+        .expect_err("frob is unknown");
+    let span = e.error.span.as_ref().expect("a span");
+    assert_eq!(span.line, 2, "line 2 of b.s");
+    let table = e.source_map.file_table();
+    assert_eq!(
+        table.get(span.file.0 as usize).map(String::as_str),
+        Some("b.s")
+    );
+    assert_eq!(
+        e.source_map.include_chain(span.file),
+        vec![("a.s".to_string(), 1), ("main.s".to_string(), 1)]
+    );
+
+    // A missing file, and a window outside the data, are refused at the
+    // line that asked.
+    let loader = MemoryLoader::new().binary("data.bin", vec![1, 2]);
+    for (src, line) in [
+        (" nop\n .include \"nothere.s\"\n", 2),
+        (" nop\n .incbin \"nothere.bin\"\n", 2),
+        (" .incbin \"data.bin\", 3\n", 1),
+        (" .incbin \"data.bin\", 1, 2\n", 1),
+    ] {
+        let e = asm198x::assemble_ca65_lang198x_files(src, "main.s", &loader).expect_err(src);
+        let span = e.error.span.as_ref().expect("a span");
+        assert_eq!(span.line, line, "{src:?}: {}", e.error);
+    }
+
+    // One file reads no others, and says where to go instead.
+    let e = asm198x::assemble_ca65_lang198x(".incbin \"data.bin\"\n").expect_err("one file");
+    assert!(e.to_string().contains("multi-file"), "{e}");
+}

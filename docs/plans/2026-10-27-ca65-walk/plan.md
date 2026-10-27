@@ -124,6 +124,7 @@ These are refused or reported as unsupported, where ca65 accepts them:
 | 6d.1, functions | `lang198x-ca65` 0.0.7 makes the functions of tokens in its expander and lowers `.defined`, `.referenced` and `.const` through `Known`. The walk answers them, and counts each name lowering reads as a use. |
 | 6d.2, imports and exports | `lang198x-ca65` 0.0.8 reports what a line declares to a linker. The walk keeps each declaration and checks, in one program, what ca65 and ld65 check between them. |
 | 6d.3, messages and assertions | `lang198x-ca65` 0.0.9 lowers `.out`, `.warning`, `.error`, `.fatal` and `.assert` to the engine's `Diagnose` and `Assert`, which the walk passes on. |
+| 6d.4, files | `lang198x-ca65` 0.0.10 reports `.incbin`. Hidden `assemble_ca65_lang198x_files` and `assemble_ca65_nes_lang198x_files` read `.include` and `.incbin` through a loader, as the old reader's multi-file entries do. |
 
 The scope rules, measured on ca65 V2.19 and recorded as 57 probes in
 `tests/differential.rs`:
@@ -194,6 +195,29 @@ read one string and ignore the rest of the line; `.out` takes exactly one.
 An assertion is checked once the program is linked, so it may name a label
 further on, and `error` and `lderror` refuse a program where `warning` and
 `ldwarning` only warn.
+
+Files are read as the old reader reads them, which its multi-file probes
+measured: a request is looked for beside the file that asks, then beside
+each file that included it, out to the root; `.incbin`'s offset and size
+are constants known on the line, a negative size means the rest of the
+file, and a window past the data is refused. A macro or scope crosses a
+file boundary, as ca65's text does. The live multi-file probes now run each
+`ca65-nes` case through the walk too, and every one it reaches links the
+ROM ld65 links. Running them found a walk bug, fixed here: `.align` pads
+within the segment, not to the absolute address.
+
+They also found what the walk does not reach yet, which the verdicts never
+covered, named in `WALK_NOT_YET` in `tests/differential.rs`:
+
+- `.autoimport`;
+- `.list`, `.listbytes`, `.pagelen`, `.debuginfo`, `.dbg` and `.fileopt`;
+- `.struct`, `.union`, `.enum` and `.tag`;
+- `.setcpu`, `.p02`, `.smart`, `.pushcpu` and `.popcpu`;
+- `.reloc`;
+- a difference of two labels in one segment as a constant, so
+  `.ifconst LB-LA` is true.
+
+The old reader supports each of them, so step 7 needs them first.
 
 Replaying the verdicts in 6b also found three places where `lang198x-ca65`
 gave a line a different meaning from ca65, fixed there: `*` in a data list,
