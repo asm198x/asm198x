@@ -68,11 +68,17 @@ pub(crate) fn result(
         else {
             continue;
         };
-        let (id, delta) = spans.locate(id, seg, opened, &mut capture.file_offsets);
         // The iNES header is the file's, not the program's: the CPU never
         // sees it, so it has no lines.
         let lines = seg.file_at.is_some() && seg.name != "HEADER";
-        add(&mut capture, record, id, delta, lines);
+        // A section `.org` gave an address is in the record only once
+        // something is in it.
+        if holds_something(record, lines) {
+            let (id, delta) = spans.locate(id, seg, opened, &mut capture.file_offsets);
+            add(&mut capture, record, id, delta, lines);
+        } else {
+            add_constants(&mut capture, record);
+        }
         let reserves = layout
             .segments
             .iter()
@@ -106,6 +112,27 @@ pub(crate) fn result(
     result.section_debug = capture.section_debug();
     result.areas = area_usage(layout, resolved, &linked.lengths);
     (result, capture)
+}
+
+/// Whether an engine section has a label, or, if `lines`, a line.
+fn holds_something(record: &SectionRecord, lines: bool) -> bool {
+    let labels = record.debug.symbols.iter().any(|symbol| {
+        !symbol.name.starts_with(':') && !matches!(symbol.kind, debug198x::SymbolKind::Const { .. })
+    });
+    labels || (lines && !record.debug.lines.is_empty())
+}
+
+/// Adds the constants an engine section's statements defined, which belong
+/// to no section.
+fn add_constants(capture: &mut DebugCaptureMulti, record: &SectionRecord) {
+    capture.symbols.extend(
+        record
+            .debug
+            .symbols
+            .iter()
+            .filter(|symbol| matches!(symbol.kind, debug198x::SymbolKind::Const { .. }))
+            .cloned(),
+    );
 }
 
 /// The first line of a section the image has no place for that made a byte
