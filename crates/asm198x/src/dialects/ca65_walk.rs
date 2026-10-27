@@ -54,7 +54,9 @@ use std::collections::{BTreeMap, HashMap, HashSet};
 use lang198x_ca65::Profile;
 use lang198x_ca65::ast::{Expr as SourceExpr, NameRef};
 use lang198x_ca65::expand::{ActiveLine, Expander, Host};
-use lang198x_ca65::lower::{self, Binary, Known, Scope, Segment, Size, Value, Visibility, Visible};
+use lang198x_ca65::lower::{
+    self, Binary, CpuStack, Known, Scope, Segment, Size, Value, Visibility, Visible,
+};
 use lang198x_ca65::syntax::{self, DiagnosticKind};
 
 use super::ca65_flat::{Resolution, load_binary, load_include, slice_incbin};
@@ -364,6 +366,8 @@ struct Walk<'f> {
     reserving: HashSet<String>,
     /// What ca65 warned of so far.
     warnings: Vec<Warning>,
+    /// How many CPUs `.pushcpu` has kept. ca65 keeps eight at most.
+    cpus: usize,
     /// Equates in a scope that read their own name while a name further
     /// out was defined. ca65 refuses the circle only where one is used.
     lazy: HashSet<String>,
@@ -547,6 +551,26 @@ impl Walk<'_> {
             if let Some(declared) = lowered.visibility {
                 self.declare(declared, &at)?;
             }
+            match lowered.cpu {
+                Some(CpuStack::Push) if self.cpus == 8 => {
+                    return Err(AsmError::at(at, "CPU stack overflow"));
+                }
+                Some(CpuStack::Push) => self.cpus += 1,
+                Some(CpuStack::Pop) if self.cpus == 0 => {
+                    return Err(AsmError::at(at, "CPU stack is empty"));
+                }
+                Some(CpuStack::Pop) => self.cpus -= 1,
+                _ => {}
+            }
+        }
+        // ca65 warns at the last line it read.
+        if self.cpus > 0
+            && let Some(at) = &self.here
+        {
+            self.warnings.push(
+                Warning::new(at.line as usize, "CPU stack is not empty".to_owned())
+                    .in_file(at.file),
+            );
         }
         if let Some(frame) = self.open.last() {
             let name = frame.name.as_deref().unwrap_or("");

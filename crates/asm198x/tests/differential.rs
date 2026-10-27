@@ -1338,6 +1338,25 @@ const PROBES: &[Probe] = &[
     ok ("ca65", "an unused circle of equates in a scope", "p=9\n.scope s\nq=r\nr=q\n.endscope\nnop\n"),
     ok ("ca65", "an equate that reads itself behind a false &&", "red=2\n.scope inner\nred=red-red\n.org $20\n.byte 0,(*=$20)&&red\n.endscope\n"),
     ok ("ca65", "an equate that reads itself behind a true &&", "red=2\n.scope inner\nred=red-red\n.org $20\n.byte 0,(*=$21)&&red\n.endscope\n"),
+    // Settings that make no bytes, checked as ca65 checks them (step 6e).
+    ok ("ca65", ".setcpu of the 6502", ".setcpu \"6502\"\n.p02\nnop\n"),
+    ok ("ca65", ".setcpu of a CPU ca65 does not know", ".setcpu \"nope\"\n"),
+    ok ("ca65", "the switches take +, -, on and off", ".smart\n.smart +\n.autoimport -\n.list ON\n.debuginfo off\nnop\n"),
+    ok ("ca65", "a switch takes nothing else", ".smart 1\n"),
+    ok ("ca65", ".listbytes from 4 to 255", ".listbytes 4\n.listbytes 255\n.listbytes unlimited\nnop\n"),
+    ok ("ca65", ".listbytes below 4", ".listbytes 3\n"),
+    ok ("ca65", ".pagelen from 32 to 127", ".pagelen 32\n.pagelength 127\nnop\n"),
+    ok ("ca65", ".pagelen above 127", ".pagelen 128\n"),
+    ok ("ca65", ".fileopt by keyword or number", ".fileopt author, \"x\"\n.fopt 3, \"y\"\nnop\n"),
+    ok ("ca65", ".fileopt of an unknown keyword", ".fileopt bogus, \"x\"\n"),
+    ok ("ca65", ".pushcpu and .popcpu balance", ".pushcpu\n.pushcpu\n.popcpu\n.popcpu\nnop\n"),
+    ok ("ca65", ".popcpu with nothing pushed", ".popcpu\nnop\n"),
+    ok ("ca65", "a ninth .pushcpu", ".repeat 9\n.pushcpu\n.endrepeat\n"),
+    gap("ca65", ".condes exports its name", ".condes init, 0, 1\n.constructor more\ninit: rts\nmore: rts\n", 940),
+    ok ("ca65", ".condes of an undefined name", ".condes init, 0\nnop\n"),
+    ok ("ca65", ".condes priority above 32", ".condes init, 0, 33\ninit: rts\n"),
+    ok ("ca65", ".condes type above 6", ".condes init, 7\ninit: rts\n"),
+    ok ("ca65", ".dbg line and file", ".dbg line\n.dbg file, \"x.c\", 10, 0\nnop\n"),
     // `.reloc` ends what `.org` began, however many `.org`s there were.
     ok ("ca65", ".reloc with no .org", "nop\n.reloc\nnop\n"),
     ok ("ca65", ".reloc returns to the segment's addresses", ".org $10\nl: nop\n.reloc\nm: .word l, m\n"),
@@ -3274,16 +3293,10 @@ const MULTI_PROBES: &[MultiProbe] = &[
 /// The `ca65-nes` probes the walk does not link as ld65 does yet, by how
 /// each note starts, with what each needs (the walk's plan, step 6e).
 const WALK_NOT_YET: &[&str] = &[
-    // `.autoimport`.
-    "the visibility words emit nothing",
     // A difference of two labels in one segment is a constant.
     "the nine conditional heads",
-    // `.list`, `.listbytes`, `.pagelen`, `.debuginfo`, `.dbg`, `.fileopt`.
-    "listing and object-metadata words",
     // `.struct`, `.union`, `.enum` and `.tag`.
     "records:",
-    // `.setcpu`, `.p02`, `.smart`, `.pushcpu` and `.popcpu`.
-    ".setcpu \"6502\"",
 ];
 
 #[test]

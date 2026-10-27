@@ -184,6 +184,33 @@ fn the_walk_says_what_messages_say() {
     }
 }
 
+/// ca65 V2.19 keeps eight CPUs on its stack. It refuses a ninth
+/// `.pushcpu` and a `.popcpu` with nothing kept, and warns at the last line
+/// it read when CPUs are still kept at the end. Measured on V2.19.
+#[test]
+fn the_walk_keeps_ca65s_cpu_stack() {
+    let warned = |source: &str| {
+        let result = asm198x::assemble_ca65_lang198x(source).expect(source);
+        result
+            .warnings
+            .iter()
+            .map(|w| (w.line, w.message.clone()))
+            .collect::<Vec<_>>()
+    };
+    let left = |line| vec![(line, "CPU stack is not empty".to_owned())];
+    assert_eq!(warned("nop\n.pushcpu\nnop\n\n"), left(4));
+    assert_eq!(warned(".pushcpu\n.pushcpu\n.popcpu\nnop"), left(4));
+    assert_eq!(warned(".repeat 8\n.pushcpu\n.endrepeat\nnop\n"), left(4));
+    assert!(warned(".pushcpu\n.popcpu\nnop\n").is_empty());
+    for (source, text) in [
+        (".repeat 9\n.pushcpu\n.endrepeat\n", "CPU stack overflow"),
+        ("nop\n.popcpu\n", "CPU stack is empty"),
+    ] {
+        let error = asm198x::assemble_ca65_lang198x(source).expect_err(source);
+        assert!(error.to_string().contains(text), "{source:?}: {error}");
+    }
+}
+
 /// The walk's multi-file entry: `.include` and `.incbin` read through the
 /// loader, the bytes interleave in include order, and the file table and
 /// include chain come back with the result. ca65 measures these through the
