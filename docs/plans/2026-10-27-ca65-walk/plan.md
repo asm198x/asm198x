@@ -138,6 +138,7 @@ These are refused or reported as unsupported, where ca65 accepts them:
 | 6d.3, messages and assertions | `lang198x-ca65` 0.0.9 lowers `.out`, `.warning`, `.error`, `.fatal` and `.assert` to the engine's `Diagnose` and `Assert`, which the walk passes on. |
 | 6d.4, files | `lang198x-ca65` 0.0.10 reports `.incbin`. Hidden `assemble_ca65_lang198x_files` and `assemble_ca65_nes_lang198x_files` read `.include` and `.incbin` through a loader, as the old reader's multi-file entries do. |
 | 6d.5.1, the link's record | The engine keeps each section's debug records apart, and the walk names them by segment, as the old reader does. Hidden `_debug` and `_with_config` entry points give the record, the memory map, no origin, and check budgets against the link. |
+| 6d.5.2, warnings | The walk warns, as ca65 V2.19 does, of a name exported to the zero page with an absolute address size, and, as ld65 does, of a `bss` or `zp` segment that holds a byte other than zero. |
 
 The scope rules, measured on ca65 V2.19 and recorded as 57 probes in
 `tests/differential.rs`:
@@ -270,6 +271,16 @@ gaps, for 6e:
   starts each segment afresh.
 - `.reloc` is not lowered.
 - A label spelt like a register, such as `a:`, is refused.
+
+Warnings follow ca65 V2.19 and ld65, measured. A name exported to the
+zero page warns if its address size is absolute, constant or label alike:
+`K = $1234` warns where `K = 7` does not, which the old reader gets wrong.
+The warning is at whichever of the declaration and the definition comes
+second. ld65 warns once for each `bss` or `zp` segment that holds a byte
+other than zero, at the first line that wrote one; a reservation writes
+nothing, so it never warns, whatever the layout fills with. ca65 gives an
+equate of a name defined later its warning at the equate's own line, which
+waits for the forward equate in 6e.
 
 ## After this step
 

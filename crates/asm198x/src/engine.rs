@@ -106,6 +106,9 @@ pub struct Assembly {
 pub(crate) struct SectionRecord {
     pub(crate) name: String,
     pub(crate) debug: DebugData,
+    /// The bytes of a section the image has no place for, such as RAM,
+    /// which a toolchain may still want to look at. Empty for the others.
+    pub(crate) discarded: Vec<u8>,
 }
 
 /// The engine's slice of a `.debug198x` record: typed symbols and line→address
@@ -213,25 +216,33 @@ impl DebugData {
 
     /// The records split at each section's mark: a section holds what was
     /// made from its mark to the next section's.
-    fn split(&self, opened: &[(String, Mark)]) -> Vec<SectionRecord> {
-        let end = self.mark();
+    fn split(&self, opened: Vec<(String, Mark, Vec<u8>)>) -> Vec<SectionRecord> {
+        let mut ends: Vec<Mark> = opened.iter().skip(1).map(|next| next.1).collect();
+        ends.push(self.mark());
         opened
-            .iter()
-            .enumerate()
-            .map(|(i, (name, from))| {
-                let to = opened.get(i + 1).map_or(end, |next| next.1);
-                SectionRecord {
-                    name: name.clone(),
-                    debug: DebugData {
-                        symbols: self.symbols[from.symbols..to.symbols].to_vec(),
-                        lines: self.lines[from.lines..to.lines].to_vec(),
-                        cycles: self.cycles[from.cycles..to.cycles].to_vec(),
-                        cycle_coverage: self.cycle_coverage,
-                        ..DebugData::default()
-                    },
-                }
+            .into_iter()
+            .zip(ends)
+            .map(|((name, from, discarded), to)| SectionRecord {
+                name,
+                discarded,
+                debug: DebugData {
+                    symbols: self.symbols[from.symbols..to.symbols].to_vec(),
+                    lines: self.lines[from.lines..to.lines].to_vec(),
+                    cycles: self.cycles[from.cycles..to.cycles].to_vec(),
+                    cycle_coverage: self.cycle_coverage,
+                    ..DebugData::default()
+                },
             })
             .collect()
+    }
+}
+
+/// A copy of a section's bytes if `at` gives them no place in the image.
+fn discarded_bytes(at: Place, bytes: &[u8]) -> Vec<u8> {
+    if at == Place::Discard {
+        bytes.to_vec()
+    } else {
+        Vec::new()
     }
 }
 
@@ -935,9 +946,9 @@ fn assemble_statements(
         cycle_coverage,
         ..DebugData::default()
     };
-    // Each section a section statement closed: its name, and where its
-    // records start in `debug`.
-    let mut opened: Vec<(String, Mark)> = Vec::new();
+    // Each section a section statement closed: its name, where its records
+    // start in `debug`, and its bytes if the image has no place for them.
+    let mut opened: Vec<(String, Mark, Vec<u8>)> = Vec::new();
     let fill_has_lines = dialect.fill_has_lines();
     let address_limit = 1i64 << dialect.address_bits();
     let mut debug_mark = Mark::default();
@@ -1042,7 +1053,8 @@ fn assemble_statements(
                 // written-range trims and the 64K check all measure within
                 // this section rather than across the image.
                 if base.is_some() || *at == Place::Next {
-                    opened.push((section_name.clone(), debug_mark));
+                    let discarded = discarded_bytes(section_at, &bytes);
+                    opened.push((section_name.clone(), debug_mark, discarded));
                     debug_mark = debug.mark();
                     runs.push(Run {
                         name: std::mem::take(&mut section_name),
@@ -1952,7 +1964,8 @@ fn assemble_statements(
     // Lay the sections into one image. Only a dialect that opened a section
     // reaches this; the flat path below is unchanged for the other twenty.
     if !runs.is_empty() {
-        opened.push((section_name.clone(), debug_mark));
+        let discarded = discarded_bytes(section_at, &bytes);
+        opened.push((section_name.clone(), debug_mark, discarded));
         runs.push(Run {
             name: section_name,
             base: origin,
@@ -1988,7 +2001,7 @@ fn assemble_statements(
                 c.offset -= base;
             }
         }
-        let sections = debug.split(&opened);
+        let sections = debug.split(opened);
         return Ok(Assembly {
             sections,
             requested_output,

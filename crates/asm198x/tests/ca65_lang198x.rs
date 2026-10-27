@@ -411,3 +411,69 @@ fn the_walk_links_under_a_configuration() {
         .expect("walk");
     assert_eq!(plain, walk);
 }
+
+/// The walk warns where ca65 V2.19 and ld65 warn, as measured: of a name
+/// exported to the zero page whose address size is absolute, at whichever
+/// of its declaration and definition comes second, and of a `bss` or `zp`
+/// segment that holds a byte other than zero, once, at the first line that
+/// wrote one.
+#[test]
+fn the_walk_warns_as_ca65_and_ld65_do() {
+    let warned = |source: &str| {
+        let result = asm198x::assemble_ca65_nes_lang198x(source).expect(source);
+        result
+            .warnings
+            .iter()
+            .map(|w| (w.line, w.message.clone()))
+            .collect::<Vec<_>>()
+    };
+    let zp = |name: &str| format!("Symbol `{name}` is absolute but exported zeropage");
+    let code = ".segment \"CODE\"\n";
+    for (source, expected) in [
+        (".exportzp foo\nfoo: .byte 1\n", vec![(3, zp("foo"))]),
+        ("foo: .byte 1\n.exportzp foo\n", vec![(3, zp("foo"))]),
+        (".globalzp foo\nfoo: .byte 1\n", vec![(3, zp("foo"))]),
+        (
+            ".exportzp foo, bar\nfoo: .byte 1\nbar: .byte 2\n",
+            vec![(3, zp("foo")), (4, zp("bar"))],
+        ),
+        // A constant warns by its size, as a label does.
+        ("K = $1234\n.exportzp K\n", vec![(3, zp("K"))]),
+        ("K = 7\n.exportzp K\n", vec![]),
+        (".org $10\n.exportzp foo\nfoo: .byte 1\n", vec![]),
+        (".global foo\nfoo: .byte 1\n", vec![]),
+    ] {
+        assert_eq!(warned(&format!("{code}{source}")), expected, "{source}");
+    }
+    assert!(
+        warned(".segment \"ZEROPAGE\"\nfoo: .res 1\n.segment \"CODE\"\n.exportzp foo\n").is_empty()
+    );
+
+    let bss = |name: &str| format!("Segment `{name}` with type `bss` contains initialized data");
+    for (source, expected) in [
+        (
+            ".segment \"BSS\"\n.byte 0\n.byte 2\n.byte 3\n",
+            vec![(3, bss("BSS"))],
+        ),
+        (".segment \"BSS\"\n.byte 0\n.res 2\n.align 4\n", vec![]),
+        (
+            ".segment \"ZEROPAGE\"\nv: .byte 5\n.segment \"BSS\"\n.res 2, 1\n",
+            vec![(2, bss("ZEROPAGE")), (4, bss("BSS"))],
+        ),
+        (".segment \"BSS\"\n.word w\nw:\n", vec![(2, bss("BSS"))]),
+    ] {
+        assert_eq!(warned(source), expected, "{source}");
+    }
+
+    // A warning in an included file names that file.
+    let loader = asm198x::source::MemoryLoader::new().text("part.inc", ".byte 0\n.byte 1\n");
+    let r = asm198x::assemble_ca65_nes_lang198x_files(
+        ".segment \"BSS\"\n.include \"part.inc\"\n",
+        "main.s",
+        &loader,
+    )
+    .expect("assembles");
+    let warning = r.warnings.first().expect("a warning");
+    assert_eq!(warning.line, 2);
+    assert_eq!(r.files[warning.file.0 as usize], "part.inc");
+}
