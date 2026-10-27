@@ -89,7 +89,11 @@ In five parts, each measured first:
 3. Messages and assertions: `.out`, `.warning`, `.error`, `.fatal` and
    `.assert`.
 4. `.incbin`.
-5. The debug capture the CLI's `--debug` writes.
+5. What a link gives besides its image, in two parts:
+   1. the debug record by segment, which the sidecar, the symbol table and
+      the listings are made from, the memory map, and the budgets checked
+      against them;
+   2. warnings.
 
 The named list should be empty at the end.
 
@@ -133,6 +137,7 @@ These are refused or reported as unsupported, where ca65 accepts them:
 | 6d.2, imports and exports | `lang198x-ca65` 0.0.8 reports what a line declares to a linker. The walk keeps each declaration and checks, in one program, what ca65 and ld65 check between them. |
 | 6d.3, messages and assertions | `lang198x-ca65` 0.0.9 lowers `.out`, `.warning`, `.error`, `.fatal` and `.assert` to the engine's `Diagnose` and `Assert`, which the walk passes on. |
 | 6d.4, files | `lang198x-ca65` 0.0.10 reports `.incbin`. Hidden `assemble_ca65_lang198x_files` and `assemble_ca65_nes_lang198x_files` read `.include` and `.incbin` through a loader, as the old reader's multi-file entries do. |
+| 6d.5.1, the link's record | The engine keeps each section's debug records apart, and the walk names them by segment, as the old reader does. Hidden `_debug` and `_with_config` entry points give the record, the memory map, no origin, and check budgets against the link. |
 
 The scope rules, measured on ca65 V2.19 and recorded as 57 probes in
 `tests/differential.rs`:
@@ -231,6 +236,40 @@ Replaying the verdicts in 6b also found three places where `lang198x-ca65`
 gave a line a different meaning from ca65, fixed there: `*` in a data list,
 a label on a conditional's line, and `.sprintf`'s `%c` above 127, which it
 wrote as two bytes. 0.0.3 refused that `%c`; 0.0.5 makes the byte.
+
+A linked program's debug record follows the old reader's, which the
+Debug198x fixtures pin, and `tests/ca65_lang198x.rs` checks the walk gives
+the same record, memory map and image for the fixtures, a set of small
+programs and, where the curriculum is checked out, every NES program. The
+walk writes the fixtures' sidecars exactly. The record works as follows:
+
+- A segment's number is its place in the layout, and only a segment the
+  program put something in is in the record.
+- Constants come first, by name, then labels as the program made them.
+  Unnamed labels are left out.
+- Every statement that makes bytes in the file has a line, including `.res`
+  with a value and `.align`. The iNES header has none, and neither does a
+  segment with no bytes in the file.
+- A macro's lines are the line that called it, as ca65's own debug
+  information gives them. A repeat's lines are its own.
+- `.org` gives a section an address of its own. The record gives it a
+  section of its own, numbered after the layout's, with the address and the
+  place in the file its bytes went. A later `.org` that carries on from it
+  stays in it.
+- `cycles()` and `free()` budgets are checked against the link, so a
+  routine is counted within its own segment and an area is the layout's.
+
+ca65 counts addresses in 24 bits, so a linked section may sit above $FFFF.
+
+Running the old reader's tests through the walk found three more language
+gaps, for 6e:
+
+- `.org` stays in force across a change of segment, until `.reloc`, and
+  counts the bytes every segment makes: in ca65 V2.19, `.org $2000`, then
+  a byte in `RODATA`, then `.word *` back in `CODE` writes $2001. The walk
+  starts each segment afresh.
+- `.reloc` is not lowered.
+- A label spelt like a register, such as `a:`, is refused.
 
 ## After this step
 

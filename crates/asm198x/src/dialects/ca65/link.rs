@@ -12,58 +12,6 @@ use super::{
     AddressSize, AsmError, DiagSeverity, Expr, FileId, Kind, Warning, WarningKind, display_label,
 };
 
-/// The layout's memory account (#499): each area's capacity against the
-/// segments the program placed or reserved in it, in address order. `free` is
-/// the total unoccupied span; `largest_free` merges the placed intervals and
-/// takes the widest hole — a pinned segment (VECTORS at $FFFA) splits the free
-/// space, and a routine needs one piece, not a total.
-pub(super) fn area_usage(
-    layout_def: &super::ca65_layout::Layout,
-    layout: &super::ca65_layout::ResolvedLayout,
-    offsets: &BTreeMap<String, u32>,
-) -> Vec<crate::engine::AreaUsage> {
-    layout_def
-        .areas
-        .iter()
-        .enumerate()
-        .map(|(i, area)| {
-            let mut segments: Vec<crate::engine::SegmentUsage> = layout_def
-                .segments
-                .iter()
-                .filter(|s| s.area == i)
-                .filter_map(|s| {
-                    let length = *offsets.get(&s.name)?;
-                    let base = layout.seg(&s.name)?.base;
-                    Some(crate::engine::SegmentUsage {
-                        name: s.name.clone(),
-                        base,
-                        length,
-                    })
-                })
-                .collect();
-            segments.sort_by_key(|s| s.base);
-            let used: u32 = segments.iter().map(|s| s.length).sum();
-            let end = area.start + area.size;
-            let mut largest = 0u32;
-            let mut cursor = area.start;
-            for s in &segments {
-                largest = largest.max(s.base.saturating_sub(cursor));
-                cursor = cursor.max(s.base + s.length);
-            }
-            largest = largest.max(end.saturating_sub(cursor));
-            crate::engine::AreaUsage {
-                name: area.name.clone(),
-                start: area.start,
-                size: area.size,
-                used,
-                free: area.size - used,
-                largest_free: largest,
-                segments,
-            }
-        })
-        .collect()
-}
-
 /// Lay the file segments into the layout's image.
 pub(super) fn link(
     seg_bytes: &BTreeMap<String, Vec<u8>>,
