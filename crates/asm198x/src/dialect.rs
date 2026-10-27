@@ -289,6 +289,14 @@ pub(crate) trait Dialect {
         false
     }
 
+    /// Whether a deferred equate named `label` that never gets a value is
+    /// left without one rather than refused, so that only a use of it is
+    /// refused. Only asked when [`defers_equates`](Self::defers_equates).
+    fn leaves_equate_unresolved(&self, label: &str) -> bool {
+        let _ = label;
+        false
+    }
+
     /// Whether the engine checks the source's `asm198x:` budgets as it
     /// finishes. A dialect whose program is linked afterwards says no and
     /// checks them against the link, which is where the memory areas and

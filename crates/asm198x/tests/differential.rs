@@ -1329,6 +1329,15 @@ const PROBES: &[Probe] = &[
     ok ("ca65", "an unused equate of an undefined name is refused", "p=q\nnop\n"),
     ok ("ca65", "a forward equate's low byte", "p=q\n.byte <p\nq=$1234\n"),
     ok ("ca65", "an export of an equate of a name further on", "red=blue\nblue=2\n.export red\nnop\n"),
+    // ca65 refuses a circle of equates at once, except one in a scope that
+    // reads its own name while a name further out is defined, which it
+    // refuses only where it is used.
+    ok ("ca65", "an unused equate that reads itself over a name further out", "p=9\n.scope s\np=p+1\n.endscope\nnop\n"),
+    ok ("ca65", "an equate that reads itself over a name further out, used", "p=9\n.scope s\np=p+1\n.endscope\n.byte s::p\n"),
+    ok ("ca65", "an unused equate that reads itself in a scope", ".scope s\np=p+1\n.endscope\nnop\n"),
+    ok ("ca65", "an unused circle of equates in a scope", "p=9\n.scope s\nq=r\nr=q\n.endscope\nnop\n"),
+    ok ("ca65", "an equate that reads itself behind a false &&", "red=2\n.scope inner\nred=red-red\n.org $20\n.byte 0,(*=$20)&&red\n.endscope\n"),
+    ok ("ca65", "an equate that reads itself behind a true &&", "red=2\n.scope inner\nred=red-red\n.org $20\n.byte 0,(*=$21)&&red\n.endscope\n"),
     ok ("ca65", ".ifdef in a scope does not see later names", ".scope s\n.ifdef v\n.byte 1\n.endif\n.endscope\nv=1\n"),
     ok ("ca65", ".res needs a constant of its own scope", "v=2\n.scope s\n.res v\n.endscope\n"),
     ok ("ca65", ".ifconst of a name further out is false", "v=2\n.scope s\n.ifconst v\n.byte 1\n.else\n.byte 2\n.endif\n.endscope\n"),
