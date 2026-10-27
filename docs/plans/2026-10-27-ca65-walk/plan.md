@@ -109,20 +109,39 @@ These are refused or reported as unsupported, where ca65 accepts them:
 |---|---|
 | 6a, lowering | Done in `lang198x-ca65` 0.0.3: expressions, instructions with ca65's address sizes, labels, assignments, data and space commands. |
 | 6b, the walk | `dialects/ca65_walk.rs`, behind the hidden `assemble_ca65_lang198x`. It reads the program once, keeps what ca65 knows of each name, names cheap locals and unnamed labels, and makes `.org` the engine's `PseudoPc`. |
+| 6c, scopes | `lang198x-ca65` 0.0.4 reports `.scope`, `.proc` and their ends, and lowers `.sizeof` through `Known::size_of`. The walk keeps the scopes, their sizes and each label's size. |
+| 6c, segments | Next: `.segment`, `.pushseg` and `.popseg` as sections placed by the layout. |
 
-`tests/ca65_lang198x.rs` replays the 352 `ca65` verdicts. At the start of
-6b, 338 match. The 14 others are named in the test:
+The scope rules, measured on ca65 V2.19 and recorded as 57 probes in
+`tests/differential.rs`:
 
-- 5 need scopes and `::` (6c);
-- 2 need `.ref`, `.const` and `.tcount` (6d);
+- A name written without a scope binds at the end of the program to the
+  innermost scope around the reference that defines it. Until then, a
+  constant from further out is known only by its address size: zero-page
+  addressing still applies, but `.ifconst` is false and `.res` refuses it.
+- A qualified name's first scope is found from the innermost scope
+  outwards. One not opened yet is taken to be in the current scope.
+- A cheap local belongs to its scope as well as to the last label.
+- `.sizeof` must be known on its line. A label's size is the bytes its line
+  made. A closed scope's size is its bytes, and a scope is looked up before
+  a label.
+- An unnamed `.proc` is an unnamed `.scope`.
+
+The old reader is frozen (#940). Twelve of the new probes are ones it gets
+wrong, so they are recorded as gaps against that issue.
+
+`tests/ca65_lang198x.rs` replays the 409 `ca65` verdicts. 399 match. The
+10 others are named in the test:
+
+- 3 need `.defined`, `.ref`, `.const` and `.tcount` as functions (6d);
 - 7 are ones Lang198x reports as unsupported: `.ident` of a name that
   reads as a register (5), a label before `.endrepeat`, and a byte above
   127 made by `.sprintf`. Each waits for a decision on how to hold such
   text.
 
-Replaying the verdicts also found three places where `lang198x-ca65` gave a
-line a different meaning from ca65, fixed there: `*` in a data list, a
-label on a conditional's line, and `.sprintf`'s `%c` above 127.
+Replaying the verdicts in 6b also found three places where `lang198x-ca65`
+gave a line a different meaning from ca65, fixed there: `*` in a data list,
+a label on a conditional's line, and `.sprintf`'s `%c` above 127.
 
 The 51 NES curriculum digests wait for segments (6c).
 
