@@ -20,9 +20,6 @@ use verdict_corpus::{Corpus, Outcome, Suite};
 /// The cases the walk does not match yet: a case's name, and the step of
 /// the plan that covers it.
 const NOT_YET: &[(&str, &str)] = &[
-    // Imports and exports, here of a name `.ident` made.
-    ("a generated name is imported", "6d"),
-    ("a generated register-spelt label is exported", "6d"),
 ];
 
 #[test]

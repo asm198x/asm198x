@@ -122,6 +122,7 @@ These are refused or reported as unsupported, where ca65 accepts them:
 | 6c, scopes | `lang198x-ca65` 0.0.4 reports `.scope`, `.proc` and their ends, and lowers `.sizeof` through `Known::size_of`. The walk keeps the scopes, their sizes and each label's size. |
 | 6c, segments | `lang198x-ca65` 0.0.6 reports `.segment`, its short forms, `.pushseg` and `.popseg`. The walk keeps each segment's length and address size, and opens an engine `Section` at each change, placed at the end from `ca65_layout`. A hidden `assemble_ca65_nes_lang198x` links as the curriculum does. |
 | 6d.1, functions | `lang198x-ca65` 0.0.7 makes the functions of tokens in its expander and lowers `.defined`, `.referenced` and `.const` through `Known`. The walk answers them, and counts each name lowering reads as a use. |
+| 6d.2, imports and exports | `lang198x-ca65` 0.0.8 reports what a line declares to a linker. The walk keeps each declaration and checks, in one program, what ca65 and ld65 check between them. |
 
 The scope rules, measured on ca65 V2.19 and recorded as 57 probes in
 `tests/differential.rs`:
@@ -141,9 +142,8 @@ The scope rules, measured on ca65 V2.19 and recorded as 57 probes in
 The old reader is frozen (#940). Twelve of the new probes are ones it gets
 wrong, so they are recorded as gaps against that issue.
 
-`tests/ca65_lang198x.rs` replays the 466 `ca65` verdicts. 464 match. The
-2 others need `.import` and `.export`, of a name `.ident` made, and are
-named in the test.
+`tests/ca65_lang198x.rs` replays the 522 `ca65` verdicts, and all of them
+match, so the list of named differences is empty.
 
 It also builds the 51 NES curriculum programs, and all 51 ROMs match the
 ones ca65 V2.19 and ld65 built. That half runs where the curriculum is
@@ -172,6 +172,18 @@ register is a token of its own, so `.match(a,b)` is 0. A line's label is
 known on its own line, so `l: lda l` under `.org $10` is zero page, which
 the walk got wrong before. The old reader gets 12 of the probes wrong, and
 they are gaps against #940.
+
+Imports and exports follow ca65 and ld65 under a flat link, recorded as 56
+probes. A program here is one translation unit, so an import that is used
+is never resolved, and the engine refuses it as an undefined name. An unused
+import is fine. An export must be defined by the end, in its own scope or
+one further out, and not by `.set`. A `.global` is an export if the program
+defines the name, and an import if it does not. Declaring a name again must
+agree on its address size, an import may not be exported or defined, and
+`.forceimport` is always unresolved. An export counts as a use, an import
+does not. ca65 also warns of a zero-page export of an absolute label; the
+walk has no warnings yet, and step 7 needs them. The old reader gets 4 of
+the probes wrong, and they are gaps against #940.
 
 Replaying the verdicts in 6b also found three places where `lang198x-ca65`
 gave a line a different meaning from ca65, fixed there: `*` in a data list,
