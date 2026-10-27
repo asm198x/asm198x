@@ -237,6 +237,78 @@ impl DebugData {
     }
 }
 
+/// Gives each deferred equate its value, once every name it reads has one,
+/// in whatever order that takes. One that never gets a value is refused: as
+/// a circular reference if it reads another that never does, and otherwise
+/// with the reason its value cannot be worked out.
+fn resolve_deferred_equates(
+    statements: &[Statement],
+    mut deferred: Vec<(usize, i64)>,
+    symbols: &mut BTreeMap<String, i64>,
+    dialect: &dyn Dialect,
+) -> Result<(), AsmError> {
+    let equate = |index: usize| match (&statements[index].label, &statements[index].op) {
+        (Some(label), Some(Operation::Equ(e))) => Some((label, e)),
+        _ => None,
+    };
+    loop {
+        let before = deferred.len();
+        let mut waiting = Vec::new();
+        for (index, pc) in deferred {
+            let s = &statements[index];
+            let Some((label, e)) = equate(index) else {
+                continue;
+            };
+            let Ok(v) = e.eval(symbols, pc, s.line) else {
+                waiting.push((index, pc));
+                continue;
+            };
+            if let Some(range) = dialect.equ_range()
+                && !range.contains(&v)
+            {
+                return Err(s.err(format!(
+                    "equ value {v} out of range {}..={}",
+                    range.start(),
+                    range.end()
+                )));
+            }
+            if symbols.insert(label.clone(), v).is_some() {
+                return Err(s.err(format!("duplicate label `{label}`")));
+            }
+        }
+        deferred = waiting;
+        if deferred.is_empty() {
+            return Ok(());
+        }
+        if deferred.len() == before {
+            break;
+        }
+    }
+    let unresolved: Vec<&String> = deferred
+        .iter()
+        .filter_map(|(index, _)| equate(*index).map(|(label, _)| label))
+        .collect();
+    let (index, pc) = deferred[0];
+    let s = &statements[index];
+    let Some((label, e)) = equate(index) else {
+        return Ok(());
+    };
+    let mut reads = Vec::new();
+    crate::ast::map_sym_expr(e.clone(), &mut |name| {
+        reads.push(name.clone());
+        Expr::Sym(name)
+    });
+    if reads.iter().any(|name| unresolved.contains(&name)) {
+        return Err(s.err(format!(
+            "Circular reference in definition of symbol `{label}`"
+        )));
+    }
+    match e.eval(symbols, pc, s.line) {
+        Err(err) => Err(s.stamp(err)),
+        Ok(_) => Ok(()),
+    }
+}
+
 /// A copy of a section's bytes if `at` gives them no place in the image.
 fn discarded_bytes(at: Place, bytes: &[u8]) -> Vec<u8> {
     if at == Place::Discard {
@@ -638,7 +710,11 @@ fn assemble_statements(
     // modules; each trailer covers its own module, not everything before it.
     let mut os9_module_start: Option<usize> = None;
     let mut origin: Option<i64> = None;
-    for s in &mut statements {
+    // Equates of names defined further on, for a dialect that allows them:
+    // each one's statement and the address it was written at.
+    let defers_equates = dialect.defers_equates();
+    let mut deferred: Vec<(usize, i64)> = Vec::new();
+    for (index, s) in statements.iter_mut().enumerate() {
         if let Some(Operation::Entry(expr)) = &s.op {
             nex_end = Some((expr.clone(), pc, s.line, s.file));
         }
@@ -654,7 +730,14 @@ fn assemble_statements(
                 .label
                 .as_ref()
                 .ok_or_else(|| s.err("`equ` needs a label"))?;
-            let v = e.eval(&symbols, pc, s.line).map_err(|err| s.stamp(err))?;
+            let v = match e.eval(&symbols, pc, s.line) {
+                Ok(v) => v,
+                Err(_) if defers_equates => {
+                    deferred.push((index, pc));
+                    continue;
+                }
+                Err(err) => return Err(s.stamp(err)),
+            };
             if let Some(range) = dialect.equ_range()
                 && !range.contains(&v)
             {
@@ -810,6 +893,7 @@ fn assemble_statements(
             pc &= 0xffff;
         }
     }
+    resolve_deferred_equates(&statements, deferred, &mut symbols, dialect)?;
     let mut origin = origin.unwrap_or(0);
     let has_nex = statements
         .iter()
