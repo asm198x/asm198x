@@ -472,6 +472,8 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
       assert.equal(facts.cases.length, 49);
       for (const [name, text] of Object.entries(facts.files)) write(name, text);
       for (const fact of facts.cases) {
+        // A ca65 V2.19 fact the frozen old reader misses (#940).
+        if (fact.old_reader_gap) continue;
         write('cpu.cfg', fact.config); write('cpu.s', fact.source);
         write('cpu.bin', 'previous image');
         const assemble = input => run(['--dialect', 'ca65', '-C', 'cpu.cfg', input, '-o', 'cpu.bin', '--debug=scope.debug198x']);
@@ -532,6 +534,8 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
         fs.mkdirSync(path.dirname(path.join(root, name)), { recursive: true }); write(name, text);
       }
       for (const fact of facts.cases) {
+        // A ca65 V2.19 fact the frozen old reader misses (#940).
+        if (fact.old_reader_gap) continue;
         write('cpu.cfg', fact.config); write('cpu.s', fact.source);
         write('cpu.bin', 'previous image');
         const assemble = input => run(['--dialect', 'ca65', '-C', 'cpu.cfg', input, '-o', 'cpu.bin', '--debug=scope.debug198x']);
@@ -656,6 +660,8 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
         fs.mkdirSync(path.dirname(path.join(root, name)), { recursive: true }); write(name, text);
       }
       for (const fact of facts.cases) {
+        // A ca65 V2.19 fact the frozen old reader misses (#940).
+        if (fact.old_reader_gap) continue;
         write('cpu.cfg', fact.config); write('cpu.s', fact.source);
         write('cpu.bin', 'previous image');
         const assemble = input => run(['--dialect', 'ca65', '-C', 'cpu.cfg', input, '-o', 'cpu.bin', '--debug=scope.debug198x']);
@@ -687,6 +693,8 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
         fs.mkdirSync(path.dirname(path.join(root, name)), { recursive: true }); write(name, text);
       }
       for (const fact of facts.cases) {
+        // A ca65 V2.19 fact the frozen old reader misses (#940).
+        if (fact.old_reader_gap) continue;
         write('cpu.cfg', fact.config); write('cpu.s', fact.source);
         write('cpu.bin', 'previous image');
         const assemble = input => run(['--dialect', 'ca65', '-C', 'cpu.cfg', input, '-o', 'cpu.bin', '--debug=scope.debug198x']);
@@ -1006,6 +1014,8 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
         fs.mkdirSync(path.dirname(path.join(root, name)), { recursive: true }); write(name, text);
       }
       for (const fact of facts.cases) {
+        // A ca65 V2.19 fact the frozen old reader misses (#940).
+        if (fact.old_reader_gap) continue;
         write('cpu.cfg', fact.config); write('cpu.s', fact.source);
         const outputs = ['cpu.bin', 'scope.debug198x', 'scope.sym', 'scope.lst.json'];
         for (const output of outputs) write(output, 'previous image');
@@ -1196,6 +1206,8 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
         fs.mkdirSync(path.dirname(path.join(root, name)), { recursive: true }); write(name, text);
       }
       for (const fact of facts.cases) {
+        // A ca65 V2.19 fact the frozen old reader misses (#940).
+        if (fact.old_reader_gap) continue;
         write('cpu.cfg', fact.config); write('cpu.s', fact.source);
         write('cpu.bin', 'previous image');
         const assemble = input => run(['--dialect', 'ca65', '-C', 'cpu.cfg', input, '-o', 'cpu.bin', '--debug=scope.debug198x']);
@@ -1480,6 +1492,8 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
         fs.mkdirSync(path.dirname(path.join(root, name)), { recursive: true }); write(name, text);
       }
       for (const fact of facts.cases) {
+        // A ca65 V2.19 fact the frozen old reader misses (#940).
+        if (fact.old_reader_gap) continue;
         write('cpu.cfg', fact.config); write('cpu.s', fact.source);
         const outputs = ['cpu.bin', 'scope.debug198x', 'scope.sym', 'scope.lst.json'];
         for (const output of outputs) write(output, 'previous image');
@@ -1557,6 +1571,8 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
         fs.mkdirSync(path.dirname(path.join(root, name)), { recursive: true }); write(name, text);
       }
       for (const fact of facts.cases) {
+        // A ca65 V2.19 fact the frozen old reader misses (#940).
+        if (fact.old_reader_gap) continue;
         write('cpu.cfg', fact.config); write('cpu.s', fact.source);
         write('cpu.bin', 'previous image');
         const assemble = input => run(['--dialect', fact.dialect, ...(fact.dialect === 'ca65' ? ['-C', 'cpu.cfg'] : []), input, '-o', 'cpu.bin', '--debug=scope.debug198x']);
@@ -1770,6 +1786,8 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
         fs.mkdirSync(path.dirname(path.join(root, name)), { recursive: true }); write(name, text);
       }
       for (const fact of facts.cases) {
+        // A ca65 V2.19 fact the frozen old reader misses (#940).
+        if (fact.old_reader_gap) continue;
         write('cpu.cfg', fact.config); write('cpu.s', fact.source); write('cpu.bin', 'previous image');
         const p = run(['--dialect', 'ca65', '-C', 'cpu.cfg', 'cpu.s', '-o', 'cpu.bin', '--debug=scope.debug198x']);
         if (fact.native.at(-1).exit === 0 && !fact.assembly_gaps) {
@@ -1800,6 +1818,8 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
         fs.mkdirSync(path.dirname(path.join(root, name)), { recursive: true }); write(name, text);
       }
       for (const fact of facts.cases) {
+        // A ca65 V2.19 fact the frozen old reader misses (#940).
+        if (fact.old_reader_gap) continue;
         write('cpu.cfg', fact.config); write('cpu.s', fact.source); write('cpu.bin', 'previous image');
         const p = run(['--dialect', 'ca65', '-C', 'cpu.cfg', 'cpu.s', '-o', 'cpu.bin', '--debug=scope.debug198x']);
         if (fact.native.at(-1).exit === 0 && !fact.assembly_gaps) {
@@ -2099,6 +2119,8 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
       }
       let labelCount = 0;
       for (const fact of facts.cases) {
+        // A ca65 V2.19 fact the frozen old reader misses (#940).
+        if (fact.old_reader_gap) continue;
         write('cpu.cfg', fact.config); write('cpu.s', fact.source); write('cpu.bin', 'previous image');
         const p = run(['--dialect', 'ca65', '-C', 'cpu.cfg', 'cpu.s', '-o', 'cpu.bin', '--debug=scope.debug198x']);
         if (fact.native.at(-1).exit === 0 && !fact.assembly_gaps) {
