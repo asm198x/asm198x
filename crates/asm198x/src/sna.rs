@@ -7,16 +7,14 @@
 //! all registers zero except the fixed defaults below — so an assembled program
 //! round-trips byte-for-byte against that reference (see #31).
 
+use format198x_sinclair_zx_spectrum_sna::{RAM_LEN as RAM_SIZE, Registers, Sna};
+
 use crate::contract::AssemblyResult;
 use crate::engine::AsmError;
 
 /// The Spectrum's RAM starts at `$4000`; the low 16K is ROM (absent from a
 /// 48K snapshot).
 const RAM_BASE: usize = 0x4000;
-/// 48K of RAM, `$4000..=$FFFF`.
-const RAM_SIZE: usize = 0xC000;
-/// The Z80 register block that precedes the memory image.
-const HEADER_LEN: usize = 27;
 /// The screen attribute map (`$5800..=$5AFF`) as an offset into the RAM image,
 /// and its length — the ROM power-on clear fills it with [`DEFAULT_ATTR`].
 const ATTR_OFFSET: usize = 0x5800 - RAM_BASE;
@@ -72,19 +70,19 @@ pub fn sna_48k(asm: &AssemblyResult) -> Result<Vec<u8>, AsmError> {
     let base = origin - RAM_BASE;
     ram[base..base + asm.bytes.len()].copy_from_slice(&asm.bytes);
 
-    let sp: u16 = 0xFFFC;
-    let sp_off = usize::from(sp) - RAM_BASE;
-    ram[sp_off] = (start & 0xFF) as u8;
-    ram[sp_off + 1] = (start >> 8) as u8;
-
-    let mut out = vec![0u8; HEADER_LEN];
-    out[19] = 0x04; // IFF2 set — interrupts enabled
-    out[23] = (sp & 0xFF) as u8; // SP, little-endian
-    out[24] = (sp >> 8) as u8;
-    out[25] = 0x01; // interrupt mode 1
-    out[26] = 0x07; // border: white
-    out.extend_from_slice(&ram);
-    Ok(out)
+    Sna::new_48k(
+        Registers {
+            iff2: true,
+            im: 1,
+            sp: 0xFFFE,
+            ..Registers::default()
+        },
+        start,
+        7,
+        ram,
+    )
+    .and_then(|snapshot| snapshot.encode())
+    .map_err(|error| AsmError::new(0, format!("cannot encode 48K SNA snapshot: {error}")))
 }
 
 #[cfg(test)]

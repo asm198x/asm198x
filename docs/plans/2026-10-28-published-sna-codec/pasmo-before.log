@@ -1,0 +1,29 @@
+[
+  {
+    "case": "normal",
+    "bytes": 49179,
+    "pasmo_differing_offsets": [],
+    "sha256": "e74d5ba740ee86e95c22bf8838d55d8674b4fb2c84b878dd047d35343fc0db4a"
+  },
+  {
+    "case": "ram_start",
+    "bytes": 49179,
+    "pasmo_differing_offsets": [],
+    "sha256": "518d4c3749ff60c16703203aa853f34196431dac9b21cadfe91887fbb633b9a2"
+  },
+  {
+    "case": "attributes",
+    "bytes": 49179,
+    "pasmo_differing_offsets": [
+      6171,
+      6172
+    ],
+    "sha256": "010145e6dfa74884418cb5d2e0da0cb47d190c4589990f5ede9d4c1ba3f2f6db"
+  },
+  {
+    "case": "stack_overlap",
+    "bytes": 49179,
+    "pasmo_differing_offsets": [],
+    "sha256": "e91e60bbb6c7f0567d6deb900786f689eaceae03cffa2011de3ef00f7a8eb625"
+  }
+]
