@@ -8,6 +8,7 @@ version = "0.0.73"
 dependencies = [
  "asm198x-ir",
  "debug198x",
+ "format198x-commodore-c64-prg",
  "format198x-sinclair-zx-spectrum-tap",
  "format198x-tzx",
  "isa198x",
@@ -98,6 +99,12 @@ name = "find-msvc-tools"
 version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d45db016d36b838f563236e9193d0ee6ce38f3f68b6c94e914b4929c96bbb890"
+
+[[package]]
+name = "format198x-commodore-c64-prg"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5f305b0281270a2bdae54c557550a3dfb0b655dcbcd6cc34a3d2775e8cb61951"
 
 [[package]]
 name = "format198x-sinclair-zx-spectrum-tap"

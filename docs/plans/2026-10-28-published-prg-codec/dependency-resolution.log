@@ -1,0 +1,21 @@
+    Updating crates.io index
+     Locking 1 package to highest compatible version
+      Adding format198x-commodore-c64-prg v0.1.0
+    Checking isa198x v0.1.7
+    Checking memchr v2.8.3
+    Checking itoa v1.0.18
+    Checking lang198x-syntax v0.1.3
+    Checking format198x-commodore-c64-prg v0.1.0
+    Checking format198x-tzx v0.1.0
+    Checking serde_core v1.0.229
+    Checking zmij v1.0.23
+    Checking format198x-sinclair-zx-spectrum-tap v0.1.1
+    Checking isa198x-disasm v0.1.7
+    Checking serde v1.0.229
+    Checking serde_json v1.0.154
+    Checking asm198x-ir v0.0.73 (/private/tmp/198x-batch3-asm/crates/asm198x-ir)
+    Checking debug198x v0.1.0
+    Checking lang198x-z80-asm v0.2.5
+    Checking lang198x-ca65 v0.0.15
+    Checking asm198x v0.0.73 (/private/tmp/198x-batch3-asm/crates/asm198x)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 7.37s

@@ -6,18 +6,18 @@
 //! assembled program round-trips byte-for-byte against that reference (see #35).
 
 use crate::contract::AssemblyResult;
+use format198x_commodore_c64_prg::PrgFile;
 
 /// Serialize an [`AssemblyResult`] into a C64 `.prg`: the load address (the flat
 /// origin, little-endian) followed by the code bytes. Only meaningful for a flat
 /// result (the CLI restricts `--prg` to the acme C64 dialect); a linked image
 /// has no flat origin, so it serialises at load address `$0000`.
 pub fn prg(asm: &AssemblyResult) -> Vec<u8> {
-    let origin = asm.origin.unwrap_or(0);
-    let mut out = Vec::with_capacity(2 + asm.bytes.len());
-    out.push((origin & 0xFF) as u8);
-    out.push((origin >> 8) as u8);
-    out.extend_from_slice(&asm.bytes);
-    out
+    PrgFile {
+        load_address: asm.origin.unwrap_or(0) as u16,
+        data: asm.bytes.clone(),
+    }
+    .encode()
 }
 
 #[cfg(test)]

@@ -1,0 +1,45 @@
+    Updating crates.io index
+ Downloading crates ...
+  Downloaded lang198x-ca65 v0.0.15
+  Downloaded lang198x-z80-asm v0.2.5
+  Downloaded lang198x-syntax v0.1.3
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.24
+   Compiling serde_core v1.0.229
+   Compiling serde v1.0.229
+   Compiling isa198x v0.1.7
+   Compiling zmij v1.0.23
+   Compiling typenum v1.20.1
+   Compiling serde_json v1.0.154
+   Compiling libc v0.2.189
+   Compiling memchr v2.8.3
+   Compiling itoa v1.0.18
+   Compiling lang198x-syntax v0.1.3
+   Compiling const-oid v0.10.2
+   Compiling cfg-if v1.0.4
+   Compiling format198x-tzx v0.1.0
+   Compiling format198x-sinclair-zx-spectrum-tap v0.1.1
+   Compiling hybrid-array v0.4.14
+   Compiling crypto-common v0.2.2
+   Compiling block-buffer v0.12.1
+   Compiling isa198x-disasm v0.1.7
+   Compiling cpufeatures v0.3.0
+   Compiling syn v3.0.4
+   Compiling digest v0.11.3
+   Compiling sha2 v0.11.1
+   Compiling serde_derive v1.0.229
+   Compiling asm198x-ir v0.0.73 (/private/tmp/198x-batch3-asm/crates/asm198x-ir)
+   Compiling debug198x v0.1.0
+   Compiling verdict-corpus v0.0.73 (/private/tmp/198x-batch3-asm/crates/verdict-corpus)
+   Compiling lang198x-ca65 v0.0.15
+   Compiling lang198x-z80-asm v0.2.5
+   Compiling asm198x v0.0.73 (/private/tmp/198x-batch3-asm/crates/asm198x)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 15.97s
+     Running unittests src/lib.rs (/private/tmp/198x-batch3-asm-target/debug/deps/asm198x-ba28e3ba982fe3d6)
+
+running 1 test
+test prg::tests::prepends_little_endian_load_address ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 768 filtered out; finished in 0.00s
+
