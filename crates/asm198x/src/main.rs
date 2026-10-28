@@ -1832,7 +1832,19 @@ fn write_debug_artifacts(
 /// included file names *that* file, not the root input. An error with no span
 /// (or an unresolvable file id) falls back to the pre-multi-file
 /// `input: <error>` shape.
+///
+/// A dialect that carries on past an error, as its reference assembler does,
+/// fails with every error it found; each is rendered, in order, one after
+/// another.
 fn render_error(input: &str, files: &[String], e: &asm198x::AsmError) -> String {
+    e.all()
+        .map(|e| render_one(input, files, e))
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
+/// One error of a failure, rendered as [`render_error`] describes.
+fn render_one(input: &str, files: &[String], e: &asm198x::AsmError) -> String {
     let resolved = e
         .span
         .as_ref()
@@ -1923,11 +1935,17 @@ fn render_include_notes(map: &asm198x::source::SourceMap, file: asm198x::FileId)
 /// the `included from` chain when the error sits inside an include.
 fn render_multi_error(input: &str, e: &asm198x::MultiFileError) -> String {
     let table = e.source_map.file_table();
-    let mut message = render_error(input, &table, &e.error);
-    if let Some(span) = &e.error.span {
-        message.push_str(&render_include_notes(&e.source_map, span.file));
-    }
-    message
+    e.error
+        .all()
+        .map(|error| {
+            let mut message = render_one(input, &table, error);
+            if let Some(span) = &error.span {
+                message.push_str(&render_include_notes(&e.source_map, span.file));
+            }
+            message
+        })
+        .collect::<Vec<_>>()
+        .join("\n")
 }
 
 /// The filesystem loader for an include-capable run: anchored at the input's
@@ -2399,18 +2417,24 @@ fn emit_json(
             Ok(String::new())
         }
         Err(error) => {
-            // A single diagnostic today (one fatal error); a Vec so the JSON shape
-            // is stable if multi-error accumulation lands later. On the
+            // One diagnostic per error, in order: a dialect that carries on
+            // past an error fails with every one it found. On the
             // include-capable path, the span's additive `path` field resolves
             // its file from the failure-path table (KTD2) — the array shape
             // itself is unchanged.
-            let mut diagnostic = asm198x::Diagnostic::from(error);
-            if !failure_files.is_empty() {
-                diagnostic.span = diagnostic
-                    .span
-                    .map(|span| asm198x::resolve_span_path(span, &failure_files));
-            }
-            let diagnostics = [diagnostic];
+            let diagnostics: Vec<asm198x::Diagnostic> = error
+                .into_all()
+                .into_iter()
+                .map(|error| {
+                    let mut diagnostic = asm198x::Diagnostic::from(error);
+                    if !failure_files.is_empty() {
+                        diagnostic.span = diagnostic
+                            .span
+                            .map(|span| asm198x::resolve_span_path(span, &failure_files));
+                    }
+                    diagnostic
+                })
+                .collect();
             let json = serde_json::to_string(&diagnostics)
                 .map_err(|e| format!("json encode failed: {e}"))?;
             println!("{json}");
@@ -2549,6 +2573,7 @@ mod tests {
             code: asm198x::Code::AssemblyError,
             message: "value 300 does not fit in a byte".to_string(),
             span: Some(Span::in_file(FileId(1), 12, 8)),
+            further: None,
         };
         assert_eq!(
             render_error("main.s", &files, &e),
@@ -2574,11 +2599,28 @@ mod tests {
             code: asm198x::Code::AssemblyError,
             message: "unknown instruction `frob`".to_string(),
             span: Some(span),
+            further: None,
         };
         assert_eq!(
             render_error("main.asm", &files, &e),
             "main.asm:3: error: unknown instruction `frob`\n\
              in expansion of macro `bad` defined at defs.asm:1, invoked at main.asm:3"
+        );
+    }
+
+    /// A failure carrying further errors renders each, in order, on lines of
+    /// their own.
+    #[test]
+    fn render_error_renders_every_error() {
+        let files = vec!["main.s".to_string()];
+        let e = AsmError::gather(vec![
+            AsmError::at(Span::in_file(FileId(0), 2, 3), "first"),
+            AsmError::at(Span::in_file(FileId(0), 5, 0), "second"),
+        ])
+        .expect("two errors");
+        assert_eq!(
+            render_error("main.s", &files, &e),
+            "main.s:2:3: error: first\nmain.s:5: error: second"
         );
     }
 
@@ -2592,6 +2634,7 @@ mod tests {
             code: asm198x::Code::AssemblyError,
             message: "boom".to_string(),
             span: Some(Span::in_file(FileId(0), 4, 0)),
+            further: None,
         };
         assert_eq!(render_error("main.s", &files, &e), "main.s:4: error: boom");
     }
@@ -2606,6 +2649,7 @@ mod tests {
             line: 2,
             message: "no entry point".to_string(),
             span: None,
+            further: None,
         };
         assert_eq!(
             render_error("main.s", &files, &spanless),
@@ -2617,6 +2661,7 @@ mod tests {
             line: 3,
             message: "boom".to_string(),
             span: Some(Span::in_file(FileId(7), 3, 1)),
+            further: None,
         };
         assert_eq!(
             render_error("main.s", &files, &out_of_table),

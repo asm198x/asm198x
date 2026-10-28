@@ -387,6 +387,21 @@ not defined, so `.defined` and `.ifdef` say no, and its size is the one
 declared, so `.importzp` is on the zero page. The walk read the outer name
 instead and accepted programs ca65 refuses when it cannot find the import.
 12 probes.
+**Every error.** The owner chose to report every error, as ca65 does,
+rather than stop at the first. A failure now carries the errors after the
+first in `AsmError.further` (a dated note in
+[`core-contract-freeze.md`](../../../decisions/core-contract-freeze.md)),
+which the CLI renders one by one and its JSON failure output lists. The walk
+reports an error and carries on with the next line, as ca65 V2.19 does. A
+line the parser could not read is abandoned, so it gets one error. Then, as
+in ca65, it checks the names at the end only if it found no error on the
+way, and one-byte data only if the names are sound. ca65 lists undefined
+names in its symbol table's order, and the walk in the order they were
+used.
+
+Still to do, in the shared engine for every dialect: carry on past an error
+in pass two, so that range errors, `.error` and the rest are all reported,
+and `.fatal` stops at once, as in ca65.
 
 ## After this step
 

@@ -536,3 +536,43 @@ fn the_walk_keeps_org_across_segments() {
         assert_eq!(r.bytes, bytes, "{source}");
     }
 }
+
+/// ca65 V2.19 reports an error and carries on with the next line, then, if
+/// it found none, each name used but never defined, and then, if those are
+/// sound, each one-byte value that does not fit. A line it cannot read is
+/// abandoned, so it gets one error. Measured on V2.19.
+#[test]
+fn the_walk_reports_every_error() {
+    let errors = |source: &str| {
+        let error = asm198x::assemble_ca65_lang198x(source).expect_err(source);
+        error
+            .all()
+            .map(|e| (e.line, e.message.clone()))
+            .collect::<Vec<_>>()
+    };
+    let lines = |source: &str| {
+        errors(source)
+            .iter()
+            .map(|(line, _)| *line)
+            .collect::<Vec<_>>()
+    };
+    assert_eq!(lines(".byte 1,\n.byte 2\nnop\nlda (\n"), [1, 4, 4]);
+    assert_eq!(lines("foo: nop\nfoo: nop\nbar: nop\nbar: nop\n"), [2, 4]);
+    assert_eq!(
+        lines(".struct P\nf1 .byte 0\nf2 .res 0\n.endstruct\n"),
+        [2, 3]
+    );
+    assert_eq!(
+        errors(".byte nosuch\n.byte other\n.byte nosuch\n"),
+        [
+            (1, "Symbol `nosuch` is undefined".to_owned()),
+            (2, "Symbol `other` is undefined".to_owned()),
+        ]
+    );
+    assert_eq!(lines("lab: .byte lab\n.byte lab+1\n"), [1, 2]);
+    // A line's error stops the checks at the end, and an undefined name
+    // stops the check of the data.
+    assert_eq!(lines(".byte 1,\n.byte nosuch\n"), [1]);
+    assert_eq!(lines("foo: nop\nfoo: nop\nlab: .byte lab\n"), [2]);
+    assert_eq!(lines(".byte nosuch\nlab: .byte lab\n"), [1]);
+}

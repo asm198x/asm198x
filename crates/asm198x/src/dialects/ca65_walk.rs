@@ -52,13 +52,13 @@ use std::cell::RefCell;
 use std::collections::{BTreeMap, HashMap, HashSet};
 
 use lang198x_ca65::Profile;
-use lang198x_ca65::ast::{Expr as SourceExpr, NameRef};
+use lang198x_ca65::ast::{Expr as SourceExpr, NameRef, View};
 use lang198x_ca65::expand::{ActiveLine, Expander, Host};
 use lang198x_ca65::lower::{
     self, Binary, CpuStack, Known, Record, RecordKind, Scope, Segment, Size, Value, Visibility,
     Visible,
 };
-use lang198x_ca65::syntax::{self, DiagnosticKind};
+use lang198x_ca65::syntax::{self, DiagnosticKind, TextId, TextRange};
 
 use super::ca65_flat::{Resolution, load_binary, load_include, slice_incbin};
 use super::ca65_layout::{Layout, ResolvedLayout};
@@ -407,6 +407,10 @@ struct Walk<'f> {
     cpus: usize,
     /// The records being read, innermost last.
     records: Vec<RecordFrame>,
+    /// The errors found so far. ca65 reports each and carries on.
+    errors: Vec<AsmError>,
+    /// How many of the expander's problems are among `errors`.
+    expander_seen: usize,
     /// Each one-byte value whose size ca65 checks at the end, once every
     /// name is known: a `.byte`'s values and an immediate operand, with the
     /// address of its line and where it is.
@@ -524,119 +528,19 @@ impl Walk<'_> {
         self.use_segment("CODE", None, sectioned, &mut statements, &start)?;
         loop {
             let line = expander.next_line(self);
-            self.check(expander)?;
+            let found = self.gather_expander(expander);
             let Some(line) = line else { break };
-            let at = self.site(expander, line.span());
-            let made_at = self.statement_site(expander, line.span());
-            self.here = Some(at.clone());
-            let lowered = lower::line(&line, PROFILE, &*self);
-            self.record_reads();
-            let lowered = lowered.map_err(|diagnostic| {
-                let span = syntax::Span::new(line.text(), diagnostic.range());
-                let message = match diagnostic.kind() {
-                    DiagnosticKind::Unsupported => {
-                        format!("{} (Lang198x's ca65 front end)", diagnostic.message())
-                    }
-                    _ => diagnostic.message().to_owned(),
-                };
-                AsmError::at(self.site(expander, span), message)
-            })?;
-            let made = self.made;
-            let mut items: Vec<(Option<String>, Option<Operation>)> = lowered
-                .items
-                .into_iter()
-                .map(|item| (item.label, item.op))
-                .collect();
-            let mut members = Vec::new();
-            match lowered.record {
-                Some(record) => self.change_record(record, &mut items, &mut members, &at)?,
-                None => {
-                    if let Some(frame) = self.records.last() {
-                        let busy = !items.is_empty()
-                            || lowered.scope.is_some()
-                            || lowered.segment.is_some()
-                            || lowered.visibility.is_some()
-                            || lowered.binary.is_some()
-                            || lowered.cpu.is_some();
-                        if busy {
-                            let message = match frame.kind {
-                                RecordKind::Enum => "Expected an identifier",
-                                _ => "Expected a storage allocator",
-                            };
-                            return Err(AsmError::at(at, message));
-                        }
-                    }
-                }
+            // ca65 abandons a line it cannot read, reports the error and
+            // carries on with the next one.
+            let range = line.line().syntax().text_range();
+            if found
+                .iter()
+                .any(|(text, at)| *text == line.text() && range.contains_range(*at))
+            {
+                continue;
             }
-            let mut labels = Vec::new();
-            for (item_label, item_op) in items {
-                // What a label is known as comes from the line as written,
-                // before its names are bound.
-                let value = item_op.as_ref().map(|op| self.value_of(op));
-                let waits = item_op.as_ref().is_some_and(|op| self.reads_unknown(op));
-                // ca65 reads an assignment's value before its name is
-                // defined, which matters to a cheap local, and a label
-                // before the rest of its line.
-                let sized = !matches!(item_op, Some(Operation::Equ(_) | Operation::Set(_)));
-                if let (Some(name), Some(op)) = (&item_label, &item_op)
-                    && self.reads_itself_in_a_scope(name, op)
-                {
-                    self.lazy.insert(qualify(self.path(), name));
-                }
-                let (label, op) = if sized {
-                    let label = item_label.map(|name| self.define_label(&name));
-                    (label, item_op.map(|op| self.names_in(op)))
-                } else {
-                    let op = item_op.map(|op| self.names_in(op));
-                    (item_label.map(|name| self.define_label(&name)), op)
-                };
-                if let Some(op) = &op {
-                    self.note_fits(op, &at);
-                }
-                let op = self.apply(label.as_deref(), value, waits, op, &at)?;
-                if let (Some(label), true) = (&label, sized) {
-                    labels.push(label.clone());
-                }
-                if sized && (label.is_some() || op.is_some()) {
-                    self.used.insert(self.segment.clone());
-                }
-                statements.push(statement(&made_at, label, op));
-                if let Some(address) = self.opens.take() {
-                    self.open_section(address, &mut statements, &made_at);
-                }
-                for op in std::mem::take(&mut self.after) {
-                    statements.push(statement(&made_at, None, Some(op)));
-                }
-            }
-            if let Some(binary) = &lowered.binary {
-                let op = self.binary(expander, &line, binary, &at)?;
-                let op = self.apply(None, None, false, Some(op), &at)?;
-                statements.push(statement(&made_at, None, op));
-            }
-            let line_size = self.made - made;
-            for label in labels {
-                self.sizes.insert(label, line_size);
-            }
-            self.sizes.extend(members);
-            if let Some(change) = lowered.scope {
-                self.change_scope(change, &at)?;
-            }
-            if let Some(change) = lowered.segment {
-                self.change_segment(change, sectioned, &mut statements, &at)?;
-            }
-            if let Some(declared) = lowered.visibility {
-                self.declare(declared, &at)?;
-            }
-            match lowered.cpu {
-                Some(CpuStack::Push) if self.cpus == 8 => {
-                    return Err(AsmError::at(at, "CPU stack overflow"));
-                }
-                Some(CpuStack::Push) => self.cpus += 1,
-                Some(CpuStack::Pop) if self.cpus == 0 => {
-                    return Err(AsmError::at(at, "CPU stack is empty"));
-                }
-                Some(CpuStack::Pop) => self.cpus -= 1,
-                _ => {}
+            if let Err(error) = self.read_line(expander, &line, sectioned, &mut statements) {
+                self.errors.push(error);
             }
         }
         // ca65 warns at the last line it read.
@@ -648,30 +552,31 @@ impl Walk<'_> {
                     .in_file(at.file),
             );
         }
+        let last = self
+            .here
+            .clone()
+            .unwrap_or_else(|| Span::in_file(FileId(0), 0, 0));
         if let Some(frame) = self.records.last() {
             let end = match frame.kind {
                 RecordKind::Struct => "Expected `.ENDSTRUCT` but found end-of-file",
                 RecordKind::Union => "Expected `.ENDUNION` but found end-of-file",
                 _ => "`.ENDENUM` expected but found end-of-file",
             };
-            return Err(AsmError::at(
-                self.here
-                    .clone()
-                    .unwrap_or_else(|| Span::in_file(FileId(0), 0, 0)),
-                end,
-            ));
-        }
-        if let Some(frame) = self.open.last() {
+            self.errors.push(AsmError::at(last.clone(), end));
+        } else if let Some(frame) = self.open.last() {
             let name = frame.name.as_deref().unwrap_or("");
-            return Err(AsmError::at(
-                self.here
-                    .clone()
-                    .unwrap_or_else(|| Span::in_file(FileId(0), 0, 0)),
+            self.errors.push(AsmError::at(
+                last,
                 format!("Local scope `{name}` was not closed"),
             ));
         }
+        // ca65 checks the names and the data at the end only if it found
+        // no error on the way, and the data only if the names are sound.
+        self.stop_if_errors()?;
         let bound = self.bind_pending();
-        self.check_declarations()?;
+        if let Err(error) = self.check_declarations() {
+            self.errors.push(error);
+        }
         if !bound.is_empty() {
             for statement in &mut statements {
                 if let Some(op) = statement.op.take() {
@@ -681,16 +586,20 @@ impl Walk<'_> {
                 }
             }
         }
-        if let Some((name, at)) = self.asked.iter().find(|(name, _)| {
-            let name = bound.get(name).unwrap_or(name);
-            !self.names.contains_key(name)
-        }) {
-            return Err(AsmError::at(
-                at.clone(),
-                format!("Symbol `{name}` is undefined"),
-            ));
+        // Each name used but never defined, once, where it was first used.
+        let mut undefined = HashSet::new();
+        for (name, at) in &self.asked {
+            let full = bound.get(name).unwrap_or(name);
+            if !self.names.contains_key(full) && undefined.insert(full.clone()) {
+                self.errors.push(AsmError::at(
+                    at.clone(),
+                    format!("Symbol `{name}` is undefined"),
+                ));
+            }
         }
-        self.check_fits(&bound)?;
+        self.stop_if_errors()?;
+        self.check_fits(&bound);
+        self.stop_if_errors()?;
         let linked = self.place(layout, &mut statements)?;
         Ok((statements, linked))
     }
@@ -720,7 +629,7 @@ impl Walk<'_> {
     /// read the program: `.byte lab` for a label in a segment whose
     /// addresses take two bytes. A value whose names are not all defined is
     /// left for the error that says so.
-    fn check_fits(&mut self, bound: &HashMap<String, String>) -> Result<(), AsmError> {
+    fn check_fits(&mut self, bound: &HashMap<String, String>) {
         // An equate worked out when it is used reads its names as they are
         // bound at the end.
         for value in self.equates.values_mut() {
@@ -728,6 +637,7 @@ impl Walk<'_> {
                 Expr::Sym(bound.get(&name).cloned().unwrap_or(name))
             });
         }
+        let mut found = Vec::new();
         for (value, pc, at) in &self.fits {
             let value = map_sym_expr(value.clone(), &mut |name| {
                 Expr::Sym(bound.get(&name).cloned().unwrap_or(name))
@@ -754,10 +664,133 @@ impl Walk<'_> {
                 Size::Absolute => 2,
                 _ => 3,
             };
-            return Err(AsmError::at(
+            found.push(AsmError::at(
                 at.clone(),
                 format!("Range error (Address size {bytes} does not match fragment size 1)"),
             ));
+        }
+        self.errors.extend(found);
+    }
+
+    /// Reads one line that runs: lowers it, and follows what it does.
+    fn read_line(
+        &mut self,
+        expander: &mut Expander,
+        line: &ActiveLine,
+        sectioned: bool,
+        statements: &mut Vec<Statement>,
+    ) -> Result<(), AsmError> {
+        let at = self.site(expander, line.span());
+        let made_at = self.statement_site(expander, line.span());
+        self.here = Some(at.clone());
+        let lowered = lower::line(line, PROFILE, &*self);
+        self.record_reads();
+        let lowered = lowered.map_err(|diagnostic| {
+            let span = syntax::Span::new(line.text(), diagnostic.range());
+            let message = match diagnostic.kind() {
+                DiagnosticKind::Unsupported => {
+                    format!("{} (Lang198x's ca65 front end)", diagnostic.message())
+                }
+                _ => diagnostic.message().to_owned(),
+            };
+            AsmError::at(self.site(expander, span), message)
+        })?;
+        let made = self.made;
+        let mut items: Vec<(Option<String>, Option<Operation>)> = lowered
+            .items
+            .into_iter()
+            .map(|item| (item.label, item.op))
+            .collect();
+        let mut members = Vec::new();
+        match lowered.record {
+            Some(record) => self.change_record(record, &mut items, &mut members, &at)?,
+            None => {
+                if let Some(frame) = self.records.last() {
+                    let busy = !items.is_empty()
+                        || lowered.scope.is_some()
+                        || lowered.segment.is_some()
+                        || lowered.visibility.is_some()
+                        || lowered.binary.is_some()
+                        || lowered.cpu.is_some();
+                    if busy {
+                        let message = match frame.kind {
+                            RecordKind::Enum => "Expected an identifier",
+                            _ => "Expected a storage allocator",
+                        };
+                        return Err(AsmError::at(at, message));
+                    }
+                }
+            }
+        }
+        let mut labels = Vec::new();
+        for (item_label, item_op) in items {
+            // What a label is known as comes from the line as written,
+            // before its names are bound.
+            let value = item_op.as_ref().map(|op| self.value_of(op));
+            let waits = item_op.as_ref().is_some_and(|op| self.reads_unknown(op));
+            // ca65 reads an assignment's value before its name is
+            // defined, which matters to a cheap local, and a label
+            // before the rest of its line.
+            let sized = !matches!(item_op, Some(Operation::Equ(_) | Operation::Set(_)));
+            if let (Some(name), Some(op)) = (&item_label, &item_op)
+                && self.reads_itself_in_a_scope(name, op)
+            {
+                self.lazy.insert(qualify(self.path(), name));
+            }
+            let (label, op) = if sized {
+                let label = item_label.map(|name| self.define_label(&name));
+                (label, item_op.map(|op| self.names_in(op)))
+            } else {
+                let op = item_op.map(|op| self.names_in(op));
+                (item_label.map(|name| self.define_label(&name)), op)
+            };
+            if let Some(op) = &op {
+                self.note_fits(op, &at);
+            }
+            let op = self.apply(label.as_deref(), value, waits, op, &at)?;
+            if let (Some(label), true) = (&label, sized) {
+                labels.push(label.clone());
+            }
+            if sized && (label.is_some() || op.is_some()) {
+                self.used.insert(self.segment.clone());
+            }
+            statements.push(statement(&made_at, label, op));
+            if let Some(address) = self.opens.take() {
+                self.open_section(address, statements, &made_at);
+            }
+            for op in std::mem::take(&mut self.after) {
+                statements.push(statement(&made_at, None, Some(op)));
+            }
+        }
+        if let Some(binary) = &lowered.binary {
+            let op = self.binary(expander, line, binary, &at)?;
+            let op = self.apply(None, None, false, Some(op), &at)?;
+            statements.push(statement(&made_at, None, op));
+        }
+        let line_size = self.made - made;
+        for label in labels {
+            self.sizes.insert(label, line_size);
+        }
+        self.sizes.extend(members);
+        if let Some(change) = lowered.scope {
+            self.change_scope(change, &at)?;
+        }
+        if let Some(change) = lowered.segment {
+            self.change_segment(change, sectioned, statements, &at)?;
+        }
+        if let Some(declared) = lowered.visibility {
+            self.declare(declared, &at)?;
+        }
+        match lowered.cpu {
+            Some(CpuStack::Push) if self.cpus == 8 => {
+                return Err(AsmError::at(at, "CPU stack overflow"));
+            }
+            Some(CpuStack::Push) => self.cpus += 1,
+            Some(CpuStack::Pop) if self.cpus == 0 => {
+                return Err(AsmError::at(at, "CPU stack is empty"));
+            }
+            Some(CpuStack::Pop) => self.cpus -= 1,
+            _ => {}
         }
         Ok(())
     }
@@ -1040,18 +1073,29 @@ impl Walk<'_> {
         }
     }
 
-    /// Stops at the expander's first problem.
-    fn check(&self, expander: &Expander) -> Result<(), AsmError> {
-        match expander.diagnostics().first() {
-            Some((text, diagnostic)) => {
-                let span = syntax::Span::new(*text, diagnostic.range());
-                Err(AsmError::at(
-                    self.site(expander, span),
-                    diagnostic.message(),
-                ))
-            }
+    /// Fails with every error found so far, if there are any.
+    fn stop_if_errors(&mut self) -> Result<(), AsmError> {
+        match AsmError::gather(std::mem::take(&mut self.errors)) {
+            Some(error) => Err(error),
             None => Ok(()),
         }
+    }
+
+    /// Adds the expander's new problems to the errors, and says where each
+    /// one is.
+    fn gather_expander(&mut self, expander: &Expander) -> Vec<(TextId, TextRange)> {
+        let found = expander.diagnostics();
+        let mut at = Vec::new();
+        for (text, diagnostic) in &found[self.expander_seen.min(found.len())..] {
+            let span = syntax::Span::new(*text, diagnostic.range());
+            self.errors.push(AsmError::at(
+                self.site(expander, span),
+                diagnostic.message(),
+            ));
+            at.push((*text, diagnostic.range()));
+        }
+        self.expander_seen = found.len();
+        at
     }
 
     /// The line a statement made from `span` belongs to: where it was

@@ -71,6 +71,23 @@ them (a secondary trigger, per R7):
 
 ## Dated notes (additive changes while draft)
 
+- **2026-10-28 — a failure may carry every error.** `AsmError.further`
+  (`Option<Box<Vec<AsmError>>>`, boxed so the error stays under clippy's
+  `result_large_err` limit) holds the errors found after the first in the
+  same assembly, in order, for a
+  dialect that carries on past an error as its reference assembler does; the
+  owner chose this for ca65, which reports every error. Each further error
+  carries none of its own (`AsmError::gather` flattens). `Display` still shows
+  the first alone; `AsmError::all` gives every one. The CLI renders each, and
+  its JSON failure output, already an array "so the JSON shape is stable if
+  multi-error accumulation lands later", now lists one diagnostic per error.
+  A dialect that stops at the first error leaves the field `None`, so its
+  output is unchanged. No version bump: additive, and the contract is still
+  draft. `AsmError` is not `#[non_exhaustive]`; nothing outside this
+  workspace builds one with a struct literal, so the new field breaks no
+  consumer. The shared engine still stops at its first error in pass two;
+  carrying on there, for every dialect, is the next step
+  (`docs/plans/2026-10-27-ca65-walk/plan.md`).
 - **2026-09-06 — native ca65 section records (#521).** `AssemblyResult.section_debug`
   composes the existing Debug198x `Section` and `DebugData`, plus an optional
   output-file byte offset. Each nested debug record's offsets are relative to
