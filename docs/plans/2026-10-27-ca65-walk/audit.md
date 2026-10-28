@@ -43,6 +43,9 @@ So before step 7, every ca65 fixture should be captured again with V2.19, as
 old reader is frozen (#940), so a V2.19 fact it misses becomes a gap against
 that issue rather than a fix.
 
+Done in 6f (2026-10-28): 301 cases are marked `old_reader_gap`. See the plan's
+"6f" section.
+
 ## Finding 2: the walk fixes 40 recorded divergences
 
 All 40 verdict-replay failures through the walk are tracked divergences of

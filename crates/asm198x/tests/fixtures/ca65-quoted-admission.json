@@ -4655,7 +4655,8 @@
       ],
       "native_hex": null,
       "dialect": "ca65",
-      "native_error_line": 1
+      "native_error_line": 1,
+      "old_reader_gap": 940
     },
     {
       "name": "cr_inside_character",
@@ -4895,7 +4896,8 @@
       ],
       "native_hex": "060107",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_1_inactive",
@@ -4931,7 +4933,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_1_unused_macro",
@@ -4967,7 +4970,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_2_direct",
@@ -5003,7 +5007,8 @@
       ],
       "native_hex": "060207",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_2_inactive",
@@ -5039,7 +5044,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_2_unused_macro",
@@ -5075,7 +5081,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_3_direct",
@@ -5111,7 +5118,8 @@
       ],
       "native_hex": "060307",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_3_inactive",
@@ -5147,7 +5155,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_3_unused_macro",
@@ -5183,7 +5192,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_4_direct",
@@ -5219,7 +5229,8 @@
       ],
       "native_hex": "060407",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_4_inactive",
@@ -5255,7 +5266,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_4_unused_macro",
@@ -5291,7 +5303,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_5_direct",
@@ -5327,7 +5340,8 @@
       ],
       "native_hex": "060507",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_5_inactive",
@@ -5363,7 +5377,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_5_unused_macro",
@@ -5399,7 +5414,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_6_direct",
@@ -5435,7 +5451,8 @@
       ],
       "native_hex": "060607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_6_inactive",
@@ -5471,7 +5488,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_6_unused_macro",
@@ -5507,7 +5525,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_7_direct",
@@ -5543,7 +5562,8 @@
       ],
       "native_hex": "060707",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_7_inactive",
@@ -5579,7 +5599,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_7_unused_macro",
@@ -5615,7 +5636,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_8_direct",
@@ -5651,7 +5673,8 @@
       ],
       "native_hex": "060807",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_8_inactive",
@@ -5687,7 +5710,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_8_unused_macro",
@@ -5723,7 +5747,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_9_direct",
@@ -5759,7 +5784,8 @@
       ],
       "native_hex": "060907",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_9_inactive",
@@ -5795,7 +5821,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_9_unused_macro",
@@ -5831,7 +5858,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_10_direct",
@@ -5933,7 +5961,8 @@
       ],
       "native_hex": "060b07",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_11_inactive",
@@ -5969,7 +5998,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_11_unused_macro",
@@ -6005,7 +6035,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_12_direct",
@@ -6041,7 +6072,8 @@
       ],
       "native_hex": "060c07",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_12_inactive",
@@ -6077,7 +6109,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_12_unused_macro",
@@ -6113,7 +6146,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_13_direct",
@@ -6215,7 +6249,8 @@
       ],
       "native_hex": "060e07",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_14_inactive",
@@ -6251,7 +6286,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_14_unused_macro",
@@ -6287,7 +6323,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_15_direct",
@@ -6323,7 +6360,8 @@
       ],
       "native_hex": "060f07",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_15_inactive",
@@ -6359,7 +6397,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_15_unused_macro",
@@ -6395,7 +6434,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_16_direct",
@@ -6431,7 +6471,8 @@
       ],
       "native_hex": "061007",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_16_inactive",
@@ -6467,7 +6508,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_16_unused_macro",
@@ -6503,7 +6545,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_17_direct",
@@ -6539,7 +6582,8 @@
       ],
       "native_hex": "061107",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_17_inactive",
@@ -6575,7 +6619,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_17_unused_macro",
@@ -6611,7 +6656,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_18_direct",
@@ -6647,7 +6693,8 @@
       ],
       "native_hex": "061207",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_18_inactive",
@@ -6683,7 +6730,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_18_unused_macro",
@@ -6719,7 +6767,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_19_direct",
@@ -6755,7 +6804,8 @@
       ],
       "native_hex": "061307",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_19_inactive",
@@ -6791,7 +6841,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_19_unused_macro",
@@ -6827,7 +6878,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_20_direct",
@@ -6863,7 +6915,8 @@
       ],
       "native_hex": "061407",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_20_inactive",
@@ -6899,7 +6952,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_20_unused_macro",
@@ -6935,7 +6989,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_21_direct",
@@ -6971,7 +7026,8 @@
       ],
       "native_hex": "061507",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_21_inactive",
@@ -7007,7 +7063,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_21_unused_macro",
@@ -7043,7 +7100,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_22_direct",
@@ -7079,7 +7137,8 @@
       ],
       "native_hex": "061607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_22_inactive",
@@ -7115,7 +7174,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_22_unused_macro",
@@ -7151,7 +7211,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_23_direct",
@@ -7187,7 +7248,8 @@
       ],
       "native_hex": "061707",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_23_inactive",
@@ -7223,7 +7285,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_23_unused_macro",
@@ -7259,7 +7322,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_24_direct",
@@ -7295,7 +7359,8 @@
       ],
       "native_hex": "061807",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_24_inactive",
@@ -7331,7 +7396,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_24_unused_macro",
@@ -7367,7 +7433,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_25_direct",
@@ -7403,7 +7470,8 @@
       ],
       "native_hex": "061907",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_25_inactive",
@@ -7439,7 +7507,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_25_unused_macro",
@@ -7475,7 +7544,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_26_direct",
@@ -7511,7 +7581,8 @@
       ],
       "native_hex": "061a07",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_26_inactive",
@@ -7547,7 +7618,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_26_unused_macro",
@@ -7583,7 +7655,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_27_direct",
@@ -7619,7 +7692,8 @@
       ],
       "native_hex": "061b07",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_27_inactive",
@@ -7655,7 +7729,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_27_unused_macro",
@@ -7691,7 +7766,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_28_direct",
@@ -7727,7 +7803,8 @@
       ],
       "native_hex": "061c07",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_28_inactive",
@@ -7763,7 +7840,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_28_unused_macro",
@@ -7799,7 +7877,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_29_direct",
@@ -7835,7 +7914,8 @@
       ],
       "native_hex": "061d07",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_29_inactive",
@@ -7871,7 +7951,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_29_unused_macro",
@@ -7907,7 +7988,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_30_direct",
@@ -7943,7 +8025,8 @@
       ],
       "native_hex": "061e07",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_30_inactive",
@@ -7979,7 +8062,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_30_unused_macro",
@@ -8015,7 +8099,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_31_direct",
@@ -8051,7 +8136,8 @@
       ],
       "native_hex": "061f07",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_31_inactive",
@@ -8087,7 +8173,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_31_unused_macro",
@@ -8123,7 +8210,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_32_direct",
@@ -18419,7 +18507,8 @@
       ],
       "native_hex": "067f07",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_127_inactive",
@@ -18455,7 +18544,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     },
     {
       "name": "ascii_127_unused_macro",
@@ -18491,7 +18581,8 @@
       ],
       "native_hex": "0607",
       "dialect": "ca65",
-      "native_error_line": null
+      "native_error_line": null,
+      "old_reader_gap": 940
     }
   ]
 }

@@ -2874,7 +2874,8 @@
           "stderr": ""
         }
       ],
-      "native_hex": "00ff"
+      "native_hex": "00ff",
+      "old_reader_gap": 940
     },
     {
       "name": "scope_macro",
@@ -2942,7 +2943,8 @@
           "stderr": ""
         }
       ],
-      "native_hex": "00ff"
+      "native_hex": "00ff",
+      "old_reader_gap": 940
     },
     {
       "name": "proc_value_no_data",
