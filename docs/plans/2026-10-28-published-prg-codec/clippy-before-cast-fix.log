@@ -1,0 +1,50 @@
+    Checking cfg-if v1.0.4
+    Checking typenum v1.20.1
+    Checking libc v0.2.189
+    Checking const-oid v0.10.2
+    Checking rand_core v0.10.1
+    Checking bitflags v2.13.1
+    Checking fastrand v2.5.0
+    Checking once_cell v1.21.4
+    Checking fnv v1.0.7
+    Checking bit-vec v0.10.1
+    Checking asm198x-ir v0.0.73 (/private/tmp/198x-batch3-asm/crates/asm198x-ir)
+    Checking verdict-corpus v0.0.73 (/private/tmp/198x-batch3-asm/crates/verdict-corpus)
+    Checking quick-error v1.2.3
+    Checking num-traits v0.2.19
+    Checking core_detect v1.0.0
+    Checking chacha20 v0.10.2
+    Checking rand_xorshift v0.5.0
+    Checking regex-syntax v0.8.11
+    Checking unarray v0.1.4
+    Checking bit-set v0.11.1
+    Checking cpufeatures v0.3.0
+    Checking errno v0.3.14
+    Checking getrandom v0.4.3
+    Checking wait-timeout v0.2.1
+    Checking lang198x-ca65 v0.0.15
+    Checking lang198x-z80-asm v0.2.5
+    Checking rustix v1.1.5
+    Checking rand v0.10.3
+    Checking hybrid-array v0.4.14
+    Checking crypto-common v0.2.2
+    Checking block-buffer v0.12.1
+    Checking asm198x v0.0.73 (/private/tmp/198x-batch3-asm/crates/asm198x)
+    Checking tempfile v3.27.0
+    Checking rusty-fork v0.3.1
+    Checking digest v0.11.3
+    Checking proptest v1.12.0
+    Checking sha2 v0.11.1
+error: casting to the same type is unnecessary (`u16` -> `u16`)
+  --> crates/asm198x/src/prg.rs:17:23
+   |
+17 |         load_address: asm.origin.unwrap_or(0) as u16,
+   |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: try: `asm.origin.unwrap_or(0)`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#unnecessary_cast
+   = note: `-D clippy::unnecessary-cast` implied by `-D warnings`
+   = help: to override `-D warnings` add `#[allow(clippy::unnecessary_cast)]`
+
+error: could not compile `asm198x` (lib) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `asm198x` (lib test) due to 1 previous error

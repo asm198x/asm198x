@@ -1,0 +1,4 @@
+   Compiling xtask v0.0.73 (/private/tmp/198x-batch3-asm/xtask)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.86s
+     Running `/private/tmp/198x-batch3-asm-target/debug/xtask docs --check`
+10 generated block(s) across 65 page(s), and 47 generated page(s), are current; the nav lists 64 page(s), all present

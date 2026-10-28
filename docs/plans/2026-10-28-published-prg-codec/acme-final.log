@@ -1,0 +1,22 @@
+[
+  {
+    "case": "basic_origin",
+    "bytes": 8,
+    "sha256": "63bc72abd2713d042eb13e17ecda52d669e3da853f2286d0a1a665e3ca408880"
+  },
+  {
+    "case": "mixed_data",
+    "bytes": 6,
+    "sha256": "892e8ffce7eed1e49e35ee21dc544b24aef9e2cfa6a40379c3e8993fcf8ddb89"
+  },
+  {
+    "case": "last_address",
+    "bytes": 3,
+    "sha256": "e4d9aa3b161d0f1693b10cff12130c7b8e410c80fa8eb69b6d42074ff3ca8ff9"
+  },
+  {
+    "case": "zero_origin",
+    "bytes": 3,
+    "sha256": "a24f6ea43dfa4eaefb42b9a96f3914492427e4d6488d54a4bde9d5a40bccf565"
+  }
+]
