@@ -407,6 +407,10 @@ struct Walk<'f> {
     cpus: usize,
     /// The records being read, innermost last.
     records: Vec<RecordFrame>,
+    /// Each one-byte value whose size ca65 checks at the end, once every
+    /// name is known: a `.byte`'s values and an immediate operand, with the
+    /// address of its line and where it is.
+    fits: Vec<(Expr, Value, Span)>,
     /// The full names of the scopes structs and unions opened, which
     /// `.tag` takes.
     record_scopes: HashSet<String>,
@@ -586,6 +590,9 @@ impl Walk<'_> {
                     let op = item_op.map(|op| self.names_in(op));
                     (item_label.map(|name| self.define_label(&name)), op)
                 };
+                if let Some(op) = &op {
+                    self.note_fits(op, &at);
+                }
                 let op = self.apply(label.as_deref(), value, waits, op, &at)?;
                 if let (Some(label), true) = (&label, sized) {
                     labels.push(label.clone());
@@ -683,8 +690,76 @@ impl Walk<'_> {
                 format!("Symbol `{name}` is undefined"),
             ));
         }
+        self.check_fits(&bound)?;
         let linked = self.place(layout, &mut statements)?;
         Ok((statements, linked))
+    }
+
+    /// Keeps each value of `op` that takes one byte, for [`check_fits`].
+    ///
+    /// [`check_fits`]: Self::check_fits
+    fn note_fits(&mut self, op: &Operation, at: &Span) {
+        let values = match op {
+            Operation::Sized {
+                width: 1, values, ..
+            } => values,
+            Operation::Instruction {
+                mode: "immediate",
+                operands,
+                ..
+            } => operands,
+            _ => return,
+        };
+        let pc = self.pc();
+        self.fits
+            .extend(values.iter().map(|value| (value.clone(), pc, at.clone())));
+    }
+
+    /// Refuses a one-byte value that is not known until the link and whose
+    /// address size is bigger than a byte, as ca65 V2.19 does once it has
+    /// read the program: `.byte lab` for a label in a segment whose
+    /// addresses take two bytes. A value whose names are not all defined is
+    /// left for the error that says so.
+    fn check_fits(&mut self, bound: &HashMap<String, String>) -> Result<(), AsmError> {
+        // An equate worked out when it is used reads its names as they are
+        // bound at the end.
+        for value in self.equates.values_mut() {
+            *value = map_sym_expr(value.clone(), &mut |name| {
+                Expr::Sym(bound.get(&name).cloned().unwrap_or(name))
+            });
+        }
+        for (value, pc, at) in &self.fits {
+            let value = map_sym_expr(value.clone(), &mut |name| {
+                Expr::Sym(bound.get(&name).cloned().unwrap_or(name))
+            });
+            let known = AtPc {
+                walk: self,
+                pc: *pc,
+            };
+            let mut undefined = false;
+            map_sym_expr(value.clone(), &mut |name| {
+                undefined |= matches!(known.name(&name), Value::Unknown);
+                Expr::Sym(name)
+            });
+            if undefined
+                || matches!(
+                    lower::value(&value, &known),
+                    Value::Constant(_) | Value::Measured { .. }
+                )
+            {
+                continue;
+            }
+            let bytes = match lower::size(&value, &known) {
+                Size::Zero => continue,
+                Size::Absolute => 2,
+                _ => 3,
+            };
+            return Err(AsmError::at(
+                at.clone(),
+                format!("Range error (Address size {bytes} does not match fragment size 1)"),
+            ));
+        }
+        Ok(())
     }
 
     /// Places each section from `layout`, now that every segment's length
@@ -1649,6 +1724,23 @@ impl Walk<'_> {
         let now = lower::value(expr, &FullNames(self));
         self.evaluating.borrow_mut().remove(full);
         now
+    }
+}
+
+/// The walk at the end of the program, asked about a value of a line it
+/// read earlier: its names are full names, and `*` is that line's address.
+struct AtPc<'w, 'f> {
+    walk: &'w Walk<'f>,
+    pc: Value,
+}
+
+impl Known for AtPc<'_, '_> {
+    fn name(&self, name: &str) -> Value {
+        self.walk.known(name)
+    }
+
+    fn pc(&self) -> Value {
+        self.pc
     }
 }
 
