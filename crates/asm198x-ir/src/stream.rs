@@ -605,6 +605,7 @@ pub enum Operation {
         modulus: i64,
         /// One address unit of fill, in output byte order. Byte-addressed
         /// dialects carry one byte; the word-addressed CP1610 carries two.
+        /// Empty takes the dialect's gap fill, as a reserve does.
         fill: Vec<u8>,
     },
     /// Open a section: subsequent bytes are placed at `base` rather than

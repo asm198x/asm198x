@@ -389,6 +389,9 @@ struct Walk<'f> {
     equates: HashMap<String, Expr>,
     /// The equates being worked out, so one that reads itself stops.
     evaluating: RefCell<HashSet<String>>,
+    /// Every equate's value, with the names it reads bound, and where it
+    /// was defined, for the circles ca65 finds as it reads a value.
+    definitions: HashMap<String, (Expr, Span)>,
     /// The bytes each label's line made, by its full name, for `.sizeof`.
     sizes: HashMap<String, i64>,
     /// Every scope opened so far, by its full name, with its size once it
@@ -710,7 +713,21 @@ impl Walk<'_> {
         let made_at = self.statement_site(expander, line.span());
         self.here = Some(at.clone());
         self.binding = self.binds(line);
+        // ca65 defines a line's label before it reads the rest of the line,
+        // so an equate read there that reads the label sees it.
+        let early = line
+            .line()
+            .label()
+            .and_then(|label| label.name())
+            .map(|name| self.as_read(&name.text()))
+            .filter(|full| !self.names.contains_key(full) && !self.declared.contains_key(full));
+        if let Some(full) = &early {
+            self.names.insert(full.clone(), self.pc());
+        }
         let lowered = lower::line(line, PROFILE, &*self);
+        if let Some(full) = &early {
+            self.names.remove(full);
+        }
         self.binding = None;
         self.record_reads();
         let lowered = lowered.map_err(|diagnostic| {
@@ -778,10 +795,13 @@ impl Walk<'_> {
             // defined, which matters to a cheap local, and a label
             // before the rest of its line.
             let sized = !matches!(item_op, Some(Operation::Equ(_) | Operation::Set(_)));
-            if let (Some(name), Some(op)) = (&item_label, &item_op)
-                && self.reads_itself_in_a_scope(name, op)
+            // ca65 checks an equate for a circular definition at the end
+            // only if its value had no address size of its own as it was
+            // read. One that had is refused only where it is used.
+            if let (Some(name), Some(Operation::Equ(value))) = (&item_label, &item_op)
+                && lower::has_size(value, &*self)
             {
-                self.lazy.insert(qualify(self.path(), name));
+                self.lazy.insert(self.as_read(name));
             }
             let (label, op) = if sized {
                 let label = item_label.map(|name| self.define_label(&name));
@@ -792,6 +812,15 @@ impl Walk<'_> {
             };
             if let Some(op) = &op {
                 self.note_fits(op, &at);
+            }
+            // ca65 studies an equate's value as it reads it, and refuses a
+            // name in it whose definition comes back round to itself.
+            if let Some(Operation::Equ(value)) = &op {
+                self.study(value, &at)?;
+                if let Some(label) = &label {
+                    self.definitions
+                        .insert(label.clone(), (value.clone(), at.clone()));
+                }
             }
             let op = self.apply(label.as_deref(), value, waits, op, &at)?;
             if let (Some(label), true) = (&label, sized) {
@@ -1356,21 +1385,80 @@ impl Walk<'_> {
         }
     }
 
-    /// Whether `op` is an equate in a scope that reads its own name `name`,
-    /// written plain, while a name further out is defined.
-    fn reads_itself_in_a_scope(&self, name: &str, op: &Operation) -> bool {
-        let Operation::Equ(value) = op else {
-            return false;
-        };
-        if self.path().is_empty() || !matches!(self.lookup(name), Lookup::Plain(_)) {
-            return false;
+    /// Refuses what ca65's `StudyExpr` refuses as it reads `value`, whose
+    /// names are bound: a name whose definition comes back round to itself,
+    /// and a division by zero it can work out.
+    fn study(&self, value: &Expr, at: &Span) -> Result<(), AsmError> {
+        if let Some((name, site)) = self.circle(value) {
+            return Err(AsmError::at(
+                site,
+                format!(
+                    "Circular reference in definition of symbol `{}`",
+                    name.rsplit("::").next().unwrap_or(&name)
+                ),
+            ));
         }
-        let mut itself = false;
-        map_sym_expr(value.clone(), &mut |read| {
-            itself |= read == name;
-            Expr::Sym(read)
-        });
-        itself && self.defined(name).is_some()
+        let constant = |name: &str| match self.known(name) {
+            Value::Constant(value) => Some(value),
+            _ => None,
+        };
+        match value.eval_with(&constant, None, 0) {
+            Err(error) if error.message.starts_with("division by zero") => {
+                Err(AsmError::at(at.clone(), "Division by zero"))
+            }
+            Err(error) if error.message.starts_with("modulo by zero") => {
+                Err(AsmError::at(at.clone(), "Modulo operation with zero"))
+            }
+            _ => Ok(()),
+        }
+    }
+
+    /// The first equate `value` reaches that comes back round to itself,
+    /// with where it was defined, following each equate's names in turn.
+    /// Like ca65, it skips the side of `&&` and `||` a constant decides.
+    fn circle(&self, value: &Expr) -> Option<(String, Span)> {
+        fn reads(value: &Expr, names: &mut Vec<String>) {
+            let decided = |lhs: &Expr| lhs.eval_with(&|_| None, None, 0).ok();
+            match value {
+                Expr::Sym(name) => names.push(name.clone()),
+                Expr::Bin(BinOp::LogAnd, lhs, _) if decided(lhs) == Some(0) => reads(lhs, names),
+                Expr::Bin(BinOp::LogOr, lhs, _) if decided(lhs).is_some_and(|v| v != 0) => {
+                    reads(lhs, names);
+                }
+                Expr::Bin(_, lhs, rhs) => {
+                    reads(lhs, names);
+                    reads(rhs, names);
+                }
+                Expr::Lo(inner)
+                | Expr::Hi(inner)
+                | Expr::Bank(inner)
+                | Expr::Neg(inner)
+                | Expr::BitNot(inner)
+                | Expr::FixRound(inner)
+                | Expr::TrailingZeros(inner)
+                | Expr::LogNot(inner) => reads(inner, names),
+                Expr::Num(_) | Expr::Pc => {}
+            }
+        }
+        fn visit(walk: &Walk<'_>, value: &Expr, path: &mut Vec<String>) -> Option<(String, Span)> {
+            let mut names = Vec::new();
+            reads(value, &mut names);
+            for name in names {
+                let Some((inner, site)) = walk.definitions.get(&name) else {
+                    continue;
+                };
+                if path.contains(&name) {
+                    return Some((name, site.clone()));
+                }
+                path.push(name);
+                if let Some(found) = visit(walk, inner, path) {
+                    return Some(found);
+                }
+                path.pop();
+            }
+            None
+        }
+        visit(self, value, &mut Vec::new())
     }
 
     /// Whether `op` is an equate that reads a name nothing is known of yet.
@@ -1378,9 +1466,11 @@ impl Walk<'_> {
         let Operation::Equ(value) = op else {
             return false;
         };
+        // A name only sized for now, such as one a scope may yet define,
+        // may change too.
         let mut unknown = false;
         map_sym_expr(value.clone(), &mut |name| {
-            unknown |= matches!(self.name(&name), Value::Unknown);
+            unknown |= matches!(self.name(&name), Value::Unknown | Value::Opaque(_));
             Expr::Sym(name)
         });
         unknown
@@ -1474,10 +1564,21 @@ impl Walk<'_> {
             }
             // ca65 aligns within the segment, wherever ld65 places it, so
             // `.align 3` in a segment at $8000 pads to offset 3.
-            Some(Operation::AlignTo { modulus, fill }) => Some(Operation::Fill {
-                count: Expr::Num(align_pad(self.offset(), modulus)),
-                value: fill.first().copied().unwrap_or(0),
-            }),
+            // With no fill of its own, the gap is room, as `.res` makes.
+            Some(Operation::AlignTo { modulus, fill }) => {
+                let count = align_pad(self.offset(), modulus);
+                Some(match fill.first() {
+                    Some(&value) => Operation::Fill {
+                        count: Expr::Num(count),
+                        value,
+                    },
+                    None if self.reserving.contains(&self.segment) => Operation::Fill {
+                        count: Expr::Num(count),
+                        value: 0,
+                    },
+                    None => Operation::Reserve(usize::try_from(count).unwrap_or(0)),
+                })
+            }
             other => other,
         };
         if let Some(op) = &op
@@ -2024,6 +2125,23 @@ fn unnamed(index: usize) -> String {
 }
 
 impl Walk<'_> {
+    /// The address size of the name defined further out than `full`'s
+    /// scope with the same spelling, if there is one.
+    fn outer_size(&self, full: &str) -> Option<Size> {
+        let (path, name) = full.rsplit_once("::")?;
+        outwards(path)
+            .skip(1)
+            .find_map(|outer| self.names.get(&qualify(outer, name)))
+            .map(|value| match value {
+                Value::Constant(value) => Size::of(*value),
+                Value::Address(size)
+                | Value::Opaque(size)
+                | Value::Placed { size, .. }
+                | Value::Measured { size, .. } => *size,
+                _ => Size::Absolute,
+            })
+    }
+
     /// What is known of the name whose full name is `full`. An equate whose
     /// value was not known when it was defined is worked out again, from
     /// the names it read.
@@ -2044,6 +2162,9 @@ impl Walk<'_> {
                         Value::Opaque(size)
                     }
                 }
+                // A name its scope has not defined yet is sized, as ca65
+                // sizes it, as the name of that spelling further out.
+                _ if !self.ended => self.outer_size(full).map_or(Value::Unknown, Value::Opaque),
                 _ => Value::Unknown,
             };
         };
@@ -2222,6 +2343,15 @@ impl Host for Walk<'_> {
         let lowered = lower::expression(expr, &*self);
         self.record_reads();
         let lowered = lowered.map_err(|d| d.message().to_owned())?;
+        // ca65 studies a condition as it does any value.
+        let bound = map_sym_expr(lowered.clone(), &mut |name| Expr::Sym(self.as_read(&name)));
+        let at = self
+            .here
+            .clone()
+            .unwrap_or_else(|| Span::in_file(FileId(0), 0, 0));
+        if let Err(error) = self.study(&bound, &at) {
+            self.errors.push(error);
+        }
         match lower::value(&lowered, &*self) {
             Value::Constant(value) | Value::Measured { value, .. } => Ok(value),
             _ => Err("Constant expression expected".to_owned()),

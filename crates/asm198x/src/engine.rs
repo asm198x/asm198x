@@ -520,7 +520,9 @@ pub(crate) fn lay_out(
 ) -> Result<(i64, Vec<u8>), AsmError> {
     runs.retain(|r| !r.bytes.is_empty() && r.at != Place::Discard);
     if runs.is_empty() {
-        return Ok((image_base.unwrap_or(0), Vec::new()));
+        // A linker may still write an image of fill alone.
+        let image = vec![gap_fill; image_size(&[]).unwrap_or(0)];
+        return Ok((image_base.unwrap_or(0), image));
     }
     // A `Next` section belongs immediately after the one before it, whatever
     // either is addressed at, so fold it in before anything is placed. What is
@@ -1446,6 +1448,12 @@ fn assemble_once(
             }
             Some(Operation::AlignTo { modulus, fill }) => {
                 let pad = align_pad(pc, *modulus);
+                // No fill of its own takes the gap's, as `.res` does.
+                let fill = if fill.is_empty() {
+                    std::slice::from_ref(&gap_fill)
+                } else {
+                    fill.as_slice()
+                };
                 for _ in 0..pad {
                     bytes.extend_from_slice(fill);
                 }
@@ -2075,7 +2083,11 @@ fn assemble_once(
                 written_start = None;
                 wrote_any = false;
             }
-        } else if origin + bytes.len().div_ceil(addr_unit as usize) as i64 > address_limit {
+        } else if !matches!(section_at, Place::At(_))
+            && origin + bytes.len().div_ceil(addr_unit as usize) as i64 > address_limit
+        {
+            // A section placed in the file by a linker holds its bytes there,
+            // whatever addresses its labels have.
             return Err(s.err(if address_limit == 0x1_0000 {
                 "program exceeds the 64K address space".to_owned()
             } else {
