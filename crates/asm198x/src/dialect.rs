@@ -127,6 +127,13 @@ pub(crate) trait Dialect {
     /// "Program counter undefined" — so a forgotten `*=` fails loudly rather than
     /// silently assembling at `$0000`. Off by default: a flat binary at origin 0
     /// is a legitimate default for the Z80/6809 tools (`org` optional).
+    /// Whether the engine carries on past an error in its second pass, as
+    /// this dialect's reference assembler does, and fails with every error
+    /// it found. The default stops at the first.
+    fn reports_every_error(&self) -> bool {
+        false
+    }
+
     fn requires_explicit_origin(&self) -> bool {
         false
     }

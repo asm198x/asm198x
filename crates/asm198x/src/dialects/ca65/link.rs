@@ -290,7 +290,9 @@ pub(super) fn emit(
     match item {
         Resolved::Nothing => {}
         Resolved::Message(severity, text) => match severity {
-            DiagSeverity::Error => return Err(AsmError::new(line_for_errors, text)),
+            DiagSeverity::Error | DiagSeverity::Fatal => {
+                return Err(AsmError::new(line_for_errors, text));
+            }
             DiagSeverity::Warning | DiagSeverity::Note => {
                 warnings.push(Warning::new(line_for_errors, text).in_file(file).with_kind(
                     if severity == DiagSeverity::Note {

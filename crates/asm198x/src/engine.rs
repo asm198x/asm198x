@@ -684,11 +684,80 @@ fn address_debug_base(debug: &DebugData, image_origin: u64) -> u64 {
 /// The shared two-pass driver over an already-parsed statement stream — the
 /// single body behind [`assemble`] and [`assemble_multi`], so the single- and
 /// multi-file paths cannot drift.
+/// The most errors a dialect that reports every error collects before it
+/// stops, so a program full of them still ends quickly.
+const MOST_ERRORS: usize = 100;
+
+/// Assembles `statements`. A dialect that [reports every
+/// error](Dialect::reports_every_error) carries on past an error in the
+/// second pass: the failing statement is recorded, put back as room of the
+/// size the first pass gave it, so every later address stays where it was,
+/// and the pass runs again. It stops at an error the first pass met, at a
+/// fatal one, or after [`MOST_ERRORS`].
 fn assemble_statements(
     mut statements: Vec<Statement>,
     parse_warnings: Vec<Warning>,
     dialect: &dyn Dialect,
 ) -> Result<Assembly, AsmError> {
+    if !dialect.reports_every_error() {
+        return assemble_once(
+            statements,
+            parse_warnings,
+            dialect,
+            &mut Progress::default(),
+        );
+    }
+    let mut errors = Vec::new();
+    loop {
+        let mut progress = Progress::default();
+        let result = assemble_once(
+            statements.clone(),
+            parse_warnings.clone(),
+            dialect,
+            &mut progress,
+        );
+        let error = match result {
+            Ok(assembly) if errors.is_empty() => return Ok(assembly),
+            Ok(_) => break,
+            Err(error) => error,
+        };
+        errors.push(error);
+        let Some(index) = progress.failing else { break };
+        let fatal = matches!(
+            statements[index].op,
+            Some(Operation::Diagnose {
+                severity: DiagSeverity::Fatal,
+                ..
+            })
+        );
+        if fatal || errors.len() >= MOST_ERRORS {
+            break;
+        }
+        let size = progress.sizes.get(index).copied().unwrap_or(0);
+        statements[index].op = Some(Operation::Fill {
+            count: Expr::Num(size),
+            value: 0,
+        });
+    }
+    Err(AsmError::gather(errors).unwrap_or_else(|| AsmError::new(0, "assembly failed")))
+}
+
+/// What one run of [`assemble_once`] learned, for a dialect that carries on
+/// past an error: how much room the first pass gave each statement, and the
+/// statement the second pass failed at, if it failed there.
+#[derive(Default)]
+struct Progress {
+    sizes: Vec<i64>,
+    failing: Option<usize>,
+}
+
+fn assemble_once(
+    mut statements: Vec<Statement>,
+    parse_warnings: Vec<Warning>,
+    dialect: &dyn Dialect,
+    progress: &mut Progress,
+) -> Result<Assembly, AsmError> {
+    progress.sizes = vec![0; statements.len()];
     let default_set = dialect.instruction_set();
     let default_ext = dialect.extension_set();
     let cycle_coverage = dialect.cycle_coverage();
@@ -894,7 +963,10 @@ fn assemble_statements(
                 }
             },
             Some(op) => {
-                pc = next_pc(op, pc, set, ext, addr_unit, s.line).map_err(|err| s.stamp(err))?;
+                let next =
+                    next_pc(op, pc, set, ext, addr_unit, s.line).map_err(|err| s.stamp(err))?;
+                progress.sizes[index] = next - pc;
+                pc = next;
             }
         }
         if wraps_address_space {
@@ -1060,7 +1132,8 @@ fn assemble_statements(
         Vec::new()
     };
     let mut image_saves: Vec<(String, i64, Vec<Option<u8>>)> = Vec::new();
-    for s in &statements {
+    for (index, s) in statements.iter().enumerate() {
+        progress.failing = Some(index);
         let (set, ext) = match s.instruction_set {
             Some(set) => (set, s.extension_set),
             None => (default_set, default_ext),
@@ -1399,7 +1472,7 @@ fn assemble_statements(
                     .with_code(crate::contract::Code::UnsupportedFeature));
             }
             Some(Operation::Diagnose { severity, message }) => match severity {
-                DiagSeverity::Error => return Err(s.err(message)),
+                DiagSeverity::Error | DiagSeverity::Fatal => return Err(s.err(message)),
                 DiagSeverity::Warning | DiagSeverity::Note => warnings.push(
                     Warning::new(s.line, message.clone())
                         .in_file(s.file)
@@ -2010,6 +2083,7 @@ fn assemble_statements(
             }));
         }
     }
+    progress.failing = None;
 
     for (name, at, span) in image_saves {
         let bytes = span

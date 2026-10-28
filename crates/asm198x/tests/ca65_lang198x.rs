@@ -576,3 +576,27 @@ fn the_walk_reports_every_error() {
     assert_eq!(lines("foo: nop\nfoo: nop\nlab: .byte lab\n"), [2]);
     assert_eq!(lines(".byte nosuch\nlab: .byte lab\n"), [1]);
 }
+
+/// Past the walk, the engine carries on too: ca65 V2.19 reports each
+/// `.error` and each value out of range, and stops at `.fatal`. Measured
+/// on V2.19.
+#[test]
+fn the_walk_reports_every_error_in_its_bytes() {
+    let lines = |source: &str| {
+        asm198x::assemble_ca65_lang198x(source)
+            .expect_err(source)
+            .all()
+            .map(|e| e.line)
+            .collect::<Vec<_>>()
+    };
+    assert_eq!(lines(".error \"one\"\n.error \"two\"\nnop\n"), [1, 2]);
+    assert_eq!(lines(".byte 300\n.byte 301\nnop\n"), [1, 2]);
+    assert_eq!(lines(".byte 300\nlda #$1234\n.word $12345\n"), [1, 2, 3]);
+    assert_eq!(
+        lines(".error \"one\"\n.fatal \"stop\"\n.error \"three\"\n"),
+        [1, 2]
+    );
+    // An error leaves the room its line takes, so what follows keeps its
+    // address: `l` is 2, and `l + 254` does not fit a byte.
+    assert_eq!(lines(".org 0\n.byte 300, 2\nl: .byte l+254\n"), [2, 3]);
+}

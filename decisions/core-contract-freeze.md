@@ -85,9 +85,10 @@ them (a secondary trigger, per R7):
   output is unchanged. No version bump: additive, and the contract is still
   draft. `AsmError` is not `#[non_exhaustive]`; nothing outside this
   workspace builds one with a struct literal, so the new field breaks no
-  consumer. The shared engine still stops at its first error in pass two;
-  carrying on there, for every dialect, is the next step
-  (`docs/plans/2026-10-27-ca65-walk/plan.md`).
+  consumer. The engine carries on past an error in its second pass for a
+  dialect whose `Dialect::reports_every_error` says so (default no; only
+  the ca65 walk does), and `DiagSeverity` gains `Fatal`, ca65's `.fatal`,
+  which stops at once (`docs/plans/2026-10-27-ca65-walk/plan.md`).
 - **2026-09-06 — native ca65 section records (#521).** `AssemblyResult.section_debug`
   composes the existing Debug198x `Section` and `DebugData`, plus an optional
   output-file byte offset. Each nested debug record's offsets are relative to
