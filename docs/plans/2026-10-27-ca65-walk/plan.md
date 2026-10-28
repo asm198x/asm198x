@@ -420,6 +420,37 @@ What still differs from ca65:
   fatal one; lowering can say so itself once an `asm198x-ir` release carries
   the new severity.
 
+## 6f: the fixtures on V2.19
+
+Every ca65 fixture and native audit was captured again with ca65 V2.19 and
+its ld65: 13,401 cases, replayed in a scratch directory with the case's own
+files and config. Where V2.19 now accepts a source V2.18 refused, the case
+gains the link step that makes its bytes. Two audits can't be replayed,
+because the config their links used was never stored with them, so they stay
+V2.18 records: `2026-10-18-ca65-4510-phd/address-override-boundary.json` and
+`2026-10-19-ca65-generated-format/assignment-boundary-red.json`. No test
+reads either.
+
+A few sources make V2.19 stop with an internal check ("Check failed: IStack
+== 0"). That is a fault in ca65, not a verdict, so those cases keep their
+V2.18 record, and each fixture lists them under `kept_from_v2_18` with the
+V2.19 output.
+
+The old reader is frozen (#940), so 301 cases it now gets wrong are marked
+`"old_reader_gap": 940` and its tests skip them. They are the differences in
+[`audit.md`](audit.md)'s Finding 1, and two more:
+
+| Fixture | Cases | What V2.19 does |
+|---|---|---|
+| `ca65-cheap-root.json` and three others | 158 | accepts a cheap local with no global label before it |
+| `ca65-quoted-admission.json` | 91 | accepts a control character inside a string |
+| `ca65-include-streams.json` and two others | 29 | reads an `.include` in a macro or `.repeat` where it is named |
+| `ca65-scoped-externals.json` | 12 | sizes `import & 255` on the zero page |
+| `ca65-scope-binding.json` and `ca65-scoped-constants.json` | 11 | `VALUE&255` on the zero page; a missing nested scope is created; `jmp ($xxFF)` refused |
+
+ld65 V2.19 also puts `Assertion failed: ` before each assertion message, so
+the text-consumer test now strips it.
+
 ## After this step
 
 Step 7, the switch: the walk becomes the default for the main reader, `fmt`

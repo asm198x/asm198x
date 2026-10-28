@@ -2756,7 +2756,8 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07"
+      "native_hex": "07",
+      "old_reader_gap": 940
     },
     {
       "name": "definition_root_generated_cheap",
@@ -2790,7 +2791,8 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07"
+      "native_hex": "07",
+      "old_reader_gap": 940
     },
     {
       "name": "definition_anchored_digit_cheap",
@@ -2961,7 +2963,8 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07"
+      "native_hex": "07",
+      "old_reader_gap": 940
     },
     {
       "name": "call_root_generated_cheap",
@@ -2995,7 +2998,8 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07"
+      "native_hex": "07",
+      "old_reader_gap": 940
     },
     {
       "name": "call_anchored_digit_cheap",

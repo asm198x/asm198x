@@ -236,7 +236,8 @@
           "stderr": ""
         }
       ],
-      "native_hex": "0707"
+      "native_hex": "0707",
+      "old_reader_gap": 940
     },
     {
       "name": "repeat_include_named",
@@ -290,7 +291,8 @@
           "stderr": ""
         }
       ],
-      "native_hex": "0707"
+      "native_hex": "0707",
+      "old_reader_gap": 940
     },
     {
       "name": "outside_repeat_scope_include",
@@ -384,7 +386,8 @@
           "stderr": "input.s:6: Error: Symbol ‘VALUE’ is undefined\n"
         }
       ],
-      "native_hex": null
+      "native_hex": null,
+      "old_reader_gap": 940
     },
     {
       "name": "repeat_include_existing_global",
@@ -418,7 +421,8 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07"
+      "native_hex": "07",
+      "old_reader_gap": 940
     },
     {
       "name": "repeat_include_external",
@@ -486,7 +490,8 @@
           "stderr": ""
         }
       ],
-      "native_hex": "0007010709"
+      "native_hex": "0007010709",
+      "old_reader_gap": 940
     },
     {
       "name": "repeat_lifo",
@@ -520,7 +525,8 @@
           "stderr": ""
         }
       ],
-      "native_hex": "01020309"
+      "native_hex": "01020309",
+      "old_reader_gap": 940
     },
     {
       "name": "repeat_scope_late",
@@ -540,7 +546,8 @@
           "stderr": "input.s:6: Error: Symbol ‘VALUE’ is undefined\n"
         }
       ],
-      "native_hex": null
+      "native_hex": null,
+      "old_reader_gap": 940
     },
     {
       "name": "repeat_nested_scope",
@@ -560,7 +567,8 @@
           "stderr": "input.s:8: Error: Symbol ‘VALUE’ is undefined\n"
         }
       ],
-      "native_hex": null
+      "native_hex": null,
+      "old_reader_gap": 940
     },
     {
       "name": "macro_order",
@@ -594,7 +602,8 @@
           "stderr": ""
         }
       ],
-      "native_hex": "01070209"
+      "native_hex": "01070209",
+      "old_reader_gap": 940
     },
     {
       "name": "macro_scope",
@@ -614,7 +623,8 @@
           "stderr": "input.s:7: Error: Symbol ‘VALUE’ is undefined\n"
         }
       ],
-      "native_hex": null
+      "native_hex": null,
+      "old_reader_gap": 940
     },
     {
       "name": "macro_counter",
@@ -736,7 +746,8 @@
           "stderr": ""
         }
       ],
-      "native_hex": "000703040107030409"
+      "native_hex": "000703040107030409",
+      "old_reader_gap": 940
     },
     {
       "name": "pending_file_repeated",
@@ -770,7 +781,8 @@
           "stderr": ""
         }
       ],
-      "native_hex": "010301030103"
+      "native_hex": "010301030103",
+      "old_reader_gap": 940
     },
     {
       "name": "pending_search_path",
@@ -804,7 +816,8 @@
           "stderr": ""
         }
       ],
-      "native_hex": "a1a203"
+      "native_hex": "a1a203",
+      "old_reader_gap": 940
     },
     {
       "name": "pending_incbin_path",
@@ -838,7 +851,8 @@
           "stderr": ""
         }
       ],
-      "native_hex": "a15203"
+      "native_hex": "a15203",
+      "old_reader_gap": 940
     },
     {
       "name": "pending_child_reuses_sibling",
@@ -872,7 +886,8 @@
           "stderr": ""
         }
       ],
-      "native_hex": "01010203"
+      "native_hex": "01010203",
+      "old_reader_gap": 940
     },
     {
       "name": "repeat_condition_before_include",
@@ -906,7 +921,8 @@
           "stderr": ""
         }
       ],
-      "native_hex": "03"
+      "native_hex": "03",
+      "old_reader_gap": 940
     },
     {
       "name": "macro_condition_before_include",
@@ -940,7 +956,8 @@
           "stderr": ""
         }
       ],
-      "native_hex": "03"
+      "native_hex": "03",
+      "old_reader_gap": 940
     },
     {
       "name": "incbin_immediate",
@@ -1008,7 +1025,8 @@
           "stderr": ""
         }
       ],
-      "native_hex": "01020102"
+      "native_hex": "01020102",
+      "old_reader_gap": 940
     },
     {
       "name": "macro_nested",
@@ -1042,7 +1060,8 @@
           "stderr": ""
         }
       ],
-      "native_hex": "010209"
+      "native_hex": "010209",
+      "old_reader_gap": 940
     },
     {
       "name": "macro_in_repeat",
@@ -1076,7 +1095,8 @@
           "stderr": ""
         }
       ],
-      "native_hex": "0100010109"
+      "native_hex": "0100010109",
+      "old_reader_gap": 940
     },
     {
       "name": "repeat_in_macro",
@@ -1110,7 +1130,8 @@
           "stderr": ""
         }
       ],
-      "native_hex": "010001010309"
+      "native_hex": "010001010309",
+      "old_reader_gap": 940
     },
     {
       "name": "pending_file_with_macro",
@@ -1144,7 +1165,8 @@
           "stderr": ""
         }
       ],
-      "native_hex": "010102040309"
+      "native_hex": "010102040309",
+      "old_reader_gap": 940
     },
     {
       "name": "dead_macro_include",
@@ -1266,7 +1288,8 @@
           "stderr": ""
         }
       ],
-      "native_hex": "01030010"
+      "native_hex": "01030010",
+      "old_reader_gap": 940
     },
     {
       "name": "repeat_live_constant",
@@ -1354,7 +1377,8 @@
           "stderr": "dir/first.inc:1: Error: Cannot open include file ‘only.dat’: No such file or directory\ninput.s:3: Note: Expanded from here\n"
         }
       ],
-      "native_hex": null
+      "native_hex": null,
+      "old_reader_gap": 940
     },
     {
       "name": "include_debug",
@@ -1388,7 +1412,8 @@
           "stderr": ""
         }
       ],
-      "native_hex": "ea0103ea00100310"
+      "native_hex": "ea0103ea00100310",
+      "old_reader_gap": 940
     }
   ]
 }

@@ -628,7 +628,8 @@
         }
       ],
       "native_hex": "",
-      "dialect": "ca65"
+      "dialect": "ca65",
+      "old_reader_gap": 940
     },
     {
       "name": "ordinary_counter",
@@ -733,7 +734,8 @@
         }
       ],
       "native_hex": "0907090708",
-      "dialect": "ca65"
+      "dialect": "ca65",
+      "old_reader_gap": 940
     }
   ],
   "dialect": "ca65",
