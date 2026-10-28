@@ -1,31 +1,31 @@
 {
   "tools": {
     "ca65": {
-      "path": "/opt/homebrew/bin/ca65",
-      "sha256": "1a57997819fd98814e4601b5160df589e7a1a24e1888a80fee51ae450d8fd0ea",
+      "path": "/tmp/claude-0/cc65/bin/ca65",
+      "sha256": "1b23fe20161368b7a428ad85d7fa1f83e6ddef33c6f8648350d387d4952e1624",
       "version": {
         "argv": [
-          "/opt/homebrew/bin/ca65",
+          "/tmp/claude-0/cc65/bin/ca65",
           "--version"
         ],
-        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+        "cwd": "/",
         "exit": 0,
         "stdout": "",
-        "stderr": "ca65 V2.18 - N/A\n"
+        "stderr": "ca65 V2.19 - Git 8d86ca7\n"
       }
     },
     "ld65": {
-      "path": "/opt/homebrew/bin/ld65",
-      "sha256": "36bb196207a6b2c90a4aa991b419d6113885303951b14b60b455f51c777b3339",
+      "path": "/tmp/claude-0/cc65/bin/ld65",
+      "sha256": "7cd8d54c683bbf28ba55b92fa52efbdcf5e6da47bc47a70186a06e3aa19b6b4a",
       "version": {
         "argv": [
-          "/opt/homebrew/bin/ld65",
+          "/tmp/claude-0/cc65/bin/ld65",
           "--version"
         ],
-        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+        "cwd": "/",
         "exit": 0,
         "stdout": "",
-        "stderr": "ld65 V2.18 - N/A\n"
+        "stderr": "ld65 V2.19 - Git 8d86ca7\n"
       }
     }
   },
@@ -38,15 +38,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Unexpected trailing garbage characters\n"
+          "stderr": "input.s:1: Error: Expected ‘end-of-line’ but found ‘xFF’\n"
         }
       ],
       "native_hex": null
@@ -58,26 +58,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -92,15 +92,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Unexpected trailing garbage characters\n"
+          "stderr": "input.s:1: Error: Expected ‘end-of-line’ but found ‘G’\n"
         }
       ],
       "native_hex": null
@@ -112,26 +112,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -146,15 +146,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Invalid digits in number\n"
+          "stderr": "input.s:1: Error: Invalid digits in number\n"
         }
       ],
       "native_hex": null
@@ -166,15 +166,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(2): Error: Invalid digits in number\n"
+          "stderr": "input.s:2: Error: Invalid digits in number\n"
         }
       ],
       "native_hex": null
@@ -186,26 +186,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -220,26 +220,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -254,15 +254,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Number out of range\n"
+          "stderr": "input.s:1: Error: Number out of range\n"
         }
       ],
       "native_hex": null
@@ -274,15 +274,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(2): Error: Number out of range\n"
+          "stderr": "input.s:2: Error: Number out of range\n"
         }
       ],
       "native_hex": null
@@ -294,15 +294,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Overflow in hexadecimal number\ninput.s(1): Error: Unexpected trailing garbage characters\n"
+          "stderr": "input.s:1: Error: Overflow in hexadecimal number\ninput.s:1: Error: Expected ‘end-of-line’ but found ‘G’\n"
         }
       ],
       "native_hex": null
@@ -314,15 +314,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(2): Error: Overflow in hexadecimal number\n"
+          "stderr": "input.s:2: Error: Overflow in hexadecimal number\n"
         }
       ],
       "native_hex": null
@@ -334,15 +334,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Unexpected trailing garbage characters\n"
+          "stderr": "input.s:1: Error: Expected ‘end-of-line’ but found ‘G’\n"
         }
       ],
       "native_hex": null
@@ -354,26 +354,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -388,15 +388,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Hexadecimal digit expected\n"
+          "stderr": "input.s:1: Error: Hexadecimal digit expected\n"
         }
       ],
       "native_hex": null
@@ -408,15 +408,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(2): Error: Hexadecimal digit expected\n"
+          "stderr": "input.s:2: Error: Hexadecimal digit expected\n"
         }
       ],
       "native_hex": null
@@ -428,15 +428,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Binary digit expected\n"
+          "stderr": "input.s:1: Error: Binary digit expected\n"
         }
       ],
       "native_hex": null
@@ -448,15 +448,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(2): Error: Binary digit expected\n"
+          "stderr": "input.s:2: Error: Binary digit expected\n"
         }
       ],
       "native_hex": null
@@ -468,15 +468,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Overflow in binary number\n"
+          "stderr": "input.s:1: Error: Overflow in binary number\n"
         }
       ],
       "native_hex": null
@@ -488,15 +488,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(2): Error: Overflow in binary number\n"
+          "stderr": "input.s:2: Error: Overflow in binary number\n"
         }
       ],
       "native_hex": null
@@ -508,26 +508,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -542,26 +542,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -576,15 +576,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Unexpected trailing garbage characters\n"
+          "stderr": "input.s:1: Error: Expected ‘end-of-line’ but found ‘2’\n"
         }
       ],
       "native_hex": null
@@ -596,26 +596,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -630,15 +630,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Unexpected trailing garbage characters\n"
+          "stderr": "input.s:1: Error: Expected ‘end-of-line’ but found ‘_4294967300’\n"
         }
       ],
       "native_hex": null
@@ -650,26 +650,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -684,15 +684,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Symbol 'name4294967300' is undefined\n"
+          "stderr": "input.s:1: Error: Symbol ‘name4294967300’ is undefined\n"
         }
       ],
       "native_hex": null
@@ -704,26 +704,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -738,15 +738,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Overflow in hexadecimal number\ninput.s(1): Error: Unexpected trailing garbage characters\n"
+          "stderr": "input.s:1: Error: Overflow in hexadecimal number\ninput.s:1: Error: Expected ‘end-of-line’ but found ‘0’\n"
         }
       ],
       "native_hex": null
@@ -758,15 +758,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(2): Error: Overflow in hexadecimal number\n"
+          "stderr": "input.s:2: Error: Overflow in hexadecimal number\n"
         }
       ],
       "native_hex": null
@@ -778,15 +778,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: No preceeding global symbol\n"
+          "stderr": "input.s:1: Error: Symbol ‘@name4294967300’ is undefined\n"
         }
       ],
       "native_hex": null
@@ -798,26 +798,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -832,15 +832,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Number out of range\ninput.s(1): Error: Unexpected trailing garbage characters\n"
+          "stderr": "input.s:1: Error: Number out of range\ninput.s:1: Error: Expected ‘end-of-line’ but found ‘G’\n"
         }
       ],
       "native_hex": null
@@ -852,15 +852,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(2): Error: Number out of range\n"
+          "stderr": "input.s:2: Error: Number out of range\n"
         }
       ],
       "native_hex": null
@@ -872,15 +872,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Unexpected trailing garbage characters\n"
+          "stderr": "input.s:1: Error: Expected ‘end-of-line’ but found ‘G’\n"
         }
       ],
       "native_hex": null
@@ -892,26 +892,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -926,15 +926,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Number out of range\ninput.s(1): Error: Unexpected trailing garbage characters\n"
+          "stderr": "input.s:1: Error: Number out of range\ninput.s:1: Error: Expected ‘end-of-line’ but found ‘_’\n"
         }
       ],
       "native_hex": null
@@ -946,15 +946,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(2): Error: Number out of range\n"
+          "stderr": "input.s:2: Error: Number out of range\n"
         }
       ],
       "native_hex": null
@@ -966,15 +966,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Number out of range\n"
+          "stderr": "input.s:1: Error: Number out of range\n"
         }
       ],
       "native_hex": null
@@ -986,15 +986,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(2): Error: Number out of range\n"
+          "stderr": "input.s:2: Error: Number out of range\n"
         }
       ],
       "native_hex": null
@@ -1006,26 +1006,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1040,26 +1040,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1074,26 +1074,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1108,26 +1108,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1142,15 +1142,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Unexpected trailing garbage characters\n"
+          "stderr": "input.s:1: Error: Expected ‘end-of-line’ but found ‘_FFFFFFFF’\n"
         }
       ],
       "native_hex": null
@@ -1162,26 +1162,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1196,26 +1196,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1230,26 +1230,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1264,15 +1264,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Unexpected trailing garbage characters\n"
+          "stderr": "input.s:1: Error: Expected ‘end-of-line’ but found ‘G’\n"
         }
       ],
       "native_hex": null
@@ -1284,26 +1284,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1318,15 +1318,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Invalid digits in number\ninput.s(1): Error: Unexpected trailing garbage characters\n"
+          "stderr": "input.s:1: Error: Invalid digits in number\ninput.s:1: Error: Expected ‘end-of-line’ but found ‘_4294967300’\n"
         }
       ],
       "native_hex": null
@@ -1338,15 +1338,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(2): Error: Invalid digits in number\n"
+          "stderr": "input.s:2: Error: Invalid digits in number\n"
         }
       ],
       "native_hex": null
@@ -1358,15 +1358,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Illegal character constant\ninput.s(1): Error: Unexpected trailing garbage characters\ninput.s(1): Error: Illegal character constant\n"
+          "stderr": "input.s:1: Error: Illegal character constant\ninput.s:1: Error: Newline in string constant\ninput.s:1: Error: Illegal character constant\ninput.s:1: Error: Expected an expression but found ‘end-of-file’\n"
         }
       ],
       "native_hex": null
@@ -1378,15 +1378,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(2): Error: Illegal character constant\ninput.s(2): Error: Illegal character constant\n"
+          "stderr": "input.s:2: Error: Illegal character constant\ninput.s:2: Error: Newline in string constant\ninput.s:2: Error: Illegal character constant\ninput.s:2: Error: Invalid input character: 0x2E\ninput.s:1: Error: Conditional assembly branch was never closed\n"
         }
       ],
       "native_hex": null
@@ -1398,15 +1398,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Syntax error\n"
+          "stderr": "input.s:1: Error: Expected an expression but found ‘\"4294967300\"’\ninput.s:1: Error: Expected ‘end-of-line’ but found ‘\"4294967300\"’\n"
         }
       ],
       "native_hex": null
@@ -1418,26 +1418,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1452,15 +1452,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Unexpected trailing garbage characters\n"
+          "stderr": "input.s:1: Error: Expected ‘end-of-line’ but found ‘h’\n"
         }
       ],
       "native_hex": null
@@ -1472,26 +1472,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1506,15 +1506,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Number out of range\ninput.s(1): Error: Unexpected trailing garbage characters\n"
+          "stderr": "input.s:1: Error: Number out of range\ninput.s:1: Error: Expected ‘end-of-line’ but found ‘0’\n"
         }
       ],
       "native_hex": null
@@ -1526,15 +1526,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(2): Error: Number out of range\n"
+          "stderr": "input.s:2: Error: Number out of range\n"
         }
       ],
       "native_hex": null
@@ -1546,15 +1546,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Unexpected trailing garbage characters\n"
+          "stderr": "input.s:1: Error: Expected ‘end-of-line’ but found ‘_’\n"
         }
       ],
       "native_hex": null
@@ -1566,26 +1566,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1600,15 +1600,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Unexpected trailing garbage characters\n"
+          "stderr": "input.s:1: Error: Expected ‘end-of-line’ but found ‘foo’\n"
         }
       ],
       "native_hex": null
@@ -1620,26 +1620,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1654,15 +1654,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Number out of range\n"
+          "stderr": "input.s:1: Error: Number out of range\n"
         }
       ],
       "native_hex": null
@@ -1674,15 +1674,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(2): Error: Number out of range\n"
+          "stderr": "input.s:2: Error: Number out of range\n"
         }
       ],
       "native_hex": null
@@ -1694,15 +1694,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Number out of range\n"
+          "stderr": "input.s:1: Error: Number out of range\n"
         }
       ],
       "native_hex": null
@@ -1714,15 +1714,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(2): Error: Number out of range\n"
+          "stderr": "input.s:2: Error: Number out of range\n"
         }
       ],
       "native_hex": null
@@ -1734,15 +1734,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Number out of range\n"
+          "stderr": "input.s:1: Error: Number out of range\n"
         }
       ],
       "native_hex": null
@@ -1754,15 +1754,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(2): Error: Number out of range\n"
+          "stderr": "input.s:2: Error: Number out of range\n"
         }
       ],
       "native_hex": null
@@ -1774,15 +1774,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Overflow in hexadecimal number\n"
+          "stderr": "input.s:1: Error: Overflow in hexadecimal number\n"
         }
       ],
       "native_hex": null
@@ -1794,15 +1794,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-_i6512g2",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(2): Error: Overflow in hexadecimal number\n"
+          "stderr": "input.s:2: Error: Overflow in hexadecimal number\n"
         }
       ],
       "native_hex": null
