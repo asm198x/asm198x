@@ -1338,6 +1338,19 @@ const PROBES: &[Probe] = &[
     ok ("ca65", "an unused circle of equates in a scope", "p=9\n.scope s\nq=r\nr=q\n.endscope\nnop\n"),
     ok ("ca65", "an equate that reads itself behind a false &&", "red=2\n.scope inner\nred=red-red\n.org $20\n.byte 0,(*=$20)&&red\n.endscope\n"),
     ok ("ca65", "an equate that reads itself behind a true &&", "red=2\n.scope inner\nred=red-red\n.org $20\n.byte 0,(*=$21)&&red\n.endscope\n"),
+    // Imports in a scope, which hide a name further out (step 6e).
+    ok ("ca65", "an import in a scope hides a name further out", "v = 1\n.scope s\n.import v\nlda v\n.endscope\n"),
+    ok ("ca65", "an import in a scope after a use there", "v = 1\n.scope s\nlda v\n.import v\n.endscope\n"),
+    ok ("ca65", "an import in a scope leaves the top alone", ".scope s\n.import v\n.endscope\nv = 1\n.byte v\n"),
+    ok ("ca65", "an import to the zero page in a proc hides a label", "v: nop\n.proc p\n.importzp v\nlda v\n.endproc\n"),
+    ok ("ca65", "an import in a scope and at the top, unused", ".import v\n.scope s\n.import v\n.endscope\n"),
+    ok ("ca65", "an import in a scope read from outside", "v = 1\n.scope s\n.import v\n.endscope\n.byte s::v\n"),
+    ok ("ca65", "an import in a scope and an export at the top", ".scope s\n.import v\n.byte v\n.endscope\n.export v\nv = 2\n"),
+    ok ("ca65", "an export in a scope beside a name at the top", "v = 1\n.scope s\n.export v\nv = 2\n.endscope\n.byte v, s::v\n"),
+    ok ("ca65", "an import to the zero page, used", ".importzp e\nlda e\n"),
+    ok ("ca65", "an import defined later", ".importzp e\nlda e\ne = 3\n"),
+    ok ("ca65", "an import is not defined", ".import v\n.byte .defined(v)\n.ifdef v\n.byte 1\n.endif\n.byte .referenced(v)\n"),
+    ok ("ca65", "an import in a scope is not defined there", "v = 1\n.scope s\n.import v\n.byte .defined(v)\n.endscope\n"),
     // A value ca65 learns only at the link must fit its room by its
     // address size, and operands take the size ca65 studies (step 6e).
     ok ("ca65", "a label in a .byte", "lab: .byte lab\n"),
