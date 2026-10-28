@@ -380,6 +380,14 @@ operators make one byte; anything else counts its numbers as well. The
 walk checks each `.byte` value and immediate operand at the end. 31
 probes; the old reader gets 3 wrong, gaps against #940.
 
+**Imports in a scope.** An `.import` in a scope makes the name the
+scope's own, so it hides a name of the same spelling further out, as a
+definition would, even for a use read before the `.import`. The import is
+not defined, so `.defined` and `.ifdef` say no, and its size is the one
+declared, so `.importzp` is on the zero page. The walk read the outer name
+instead and accepted programs ca65 refuses when it cannot find the import.
+12 probes.
+
 ## After this step
 
 Step 7, the switch: the walk becomes the default for the main reader, `fmt`

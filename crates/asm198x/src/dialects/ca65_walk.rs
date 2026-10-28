@@ -981,10 +981,20 @@ impl Walk<'_> {
 
     /// The innermost full name of plain `name` that is defined, from this
     /// scope outwards.
+    /// The full name `name` is found as, from this scope outwards: a name
+    /// defined so far, or one imported, which hides a name further out as
+    /// a definition does.
     fn defined(&self, name: &str) -> Option<String> {
         outwards(self.path())
             .map(|path| qualify(path, name))
-            .find(|full| self.names.contains_key(full))
+            .find(|full| self.names.contains_key(full) || self.imported(full))
+    }
+
+    /// Whether `full` is imported, and not defined here.
+    fn imported(&self, full: &str) -> bool {
+        self.declared
+            .get(full)
+            .is_some_and(|declaration| is_import(declaration.kind))
     }
 
     /// The full name a reference to `name` stands for, recorded as read. A
@@ -994,7 +1004,10 @@ impl Walk<'_> {
             Lookup::Full(full) => full,
             Lookup::Plain(name) => {
                 let here = qualify(self.path(), &name);
-                if !self.path().is_empty() && !self.names.contains_key(&here) {
+                if !self.path().is_empty()
+                    && !self.names.contains_key(&here)
+                    && !self.imported(&here)
+                {
                     self.pending.push(Pending {
                         here: here.clone(),
                         path: self.path().to_owned(),
@@ -1157,7 +1170,10 @@ impl Walk<'_> {
     fn has(&self, name: &str) -> bool {
         match self.lookup(name) {
             Lookup::Full(full) => self.names.contains_key(&full),
-            Lookup::Plain(name) => self.defined(&name).is_some(),
+            // An import is not defined, and hides a name further out.
+            Lookup::Plain(name) => self
+                .defined(&name)
+                .is_some_and(|full| self.names.contains_key(&full)),
         }
     }
 
@@ -1681,13 +1697,13 @@ impl Walk<'_> {
     fn bind_pending(&self) -> HashMap<String, String> {
         let mut bound = HashMap::new();
         for pending in &self.pending {
-            if self.names.contains_key(&pending.here) {
+            if self.names.contains_key(&pending.here) || self.imported(&pending.here) {
                 continue;
             }
             if let Some(full) = outwards(&pending.path)
                 .skip(1)
                 .map(|path| qualify(path, &pending.name))
-                .find(|full| self.names.contains_key(full))
+                .find(|full| self.names.contains_key(full) || self.imported(full))
             {
                 bound.insert(pending.here.clone(), full);
             }
@@ -1713,7 +1729,13 @@ impl Walk<'_> {
     /// the names it read.
     fn known(&self, full: &str) -> Value {
         let Some(&value) = self.names.get(full) else {
-            return Value::Unknown;
+            // An import's address is the linker's, of the size declared.
+            return match self.declared.get(full) {
+                Some(declaration) if is_import(declaration.kind) => {
+                    Value::Address(declaration.size)
+                }
+                _ => Value::Unknown,
+            };
         };
         let Some(expr) = self.equates.get(full) else {
             return value;
