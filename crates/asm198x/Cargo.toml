@@ -30,6 +30,7 @@ lua = ["dep:mlua"]
 # loading and diagnostics.
 asm198x-ir = { path = "../asm198x-ir", version = "0.0.73" }
 format198x-commodore-c64-prg = { workspace = true }
+format198x-sinclair-zx-spectrum-sna = { workspace = true }
 format198x-sinclair-zx-spectrum-tap = { workspace = true }
 format198x-tzx = { workspace = true }
 # version (lockstep with the workspace) is required so `cargo package` can

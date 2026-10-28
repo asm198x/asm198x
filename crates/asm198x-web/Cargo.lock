@@ -9,6 +9,7 @@ dependencies = [
  "asm198x-ir",
  "debug198x",
  "format198x-commodore-c64-prg",
+ "format198x-sinclair-zx-spectrum-sna",
  "format198x-sinclair-zx-spectrum-tap",
  "format198x-tzx",
  "isa198x",
@@ -105,6 +106,12 @@ name = "format198x-commodore-c64-prg"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5f305b0281270a2bdae54c557550a3dfb0b655dcbcd6cc34a3d2775e8cb61951"
+
+[[package]]
+name = "format198x-sinclair-zx-spectrum-sna"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "26802f2cc96b8e2e4e8fb125646f142e6165d2a55390c457af8d2ea08cf31b9f"
 
 [[package]]
 name = "format198x-sinclair-zx-spectrum-tap"
