@@ -345,8 +345,11 @@ struct Pending {
 /// in.
 struct Declaration {
     kind: Visible,
-    /// Its address size, absolute unless one was written.
-    size: Size,
+    /// Its address size as an import or `.global`: the size written, or
+    /// its segment's. An export alone gives it none.
+    size: Option<Size>,
+    /// The address size written for it as an export, if one was.
+    export: Option<Size>,
     /// Its scope.
     path: String,
     /// The name as written.
@@ -428,6 +431,12 @@ struct Walk<'f> {
     lazy: HashSet<String>,
     /// Where the line being read is, for what the host is asked about it.
     here: Option<Span>,
+    /// The full name the line being lowered gives a value to. ca65 makes
+    /// the name before it reads the value.
+    binding: Option<String>,
+    /// Whether the whole program has been read, when what is left of each
+    /// `.global` is an import.
+    ended: bool,
     /// The address, while `.org` makes it known. ca65 keeps it across a
     /// change of segment, counting every segment's bytes, until `.reloc`.
     org: Option<i64>,
@@ -467,6 +476,13 @@ fn qualify(path: &str, name: &str) -> String {
     } else {
         format!("{path}::{name}")
     }
+}
+
+/// A full name as ca65 writes it in a message: a cheap local by its own
+/// name, without the label it belongs to.
+fn as_written(full: &str) -> &str {
+    let last = full.rsplit_once("::").map_or(full, |(_, last)| last);
+    last.find('@').map_or(full, |at| &last[at..])
 }
 
 /// `path` and each scope around it, out to the top, innermost first.
@@ -579,14 +595,18 @@ impl Walk<'_> {
         // no error on the way, and the data only if the names are sound.
         self.stop_if_errors()?;
         let bound = self.bind_pending();
+        // The names a use of an import stands for once it is linked. Its
+        // size is still the one declared for it.
+        let mut linked = bound.clone();
+        linked.extend(self.link_imports());
         if let Err(error) = self.check_declarations() {
             self.errors.push(error);
         }
-        if !bound.is_empty() {
+        if !linked.is_empty() {
             for statement in &mut statements {
                 if let Some(op) = statement.op.take() {
                     statement.op = Some(map_syms(op, &mut |name| {
-                        Expr::Sym(bound.get(&name).cloned().unwrap_or(name))
+                        Expr::Sym(linked.get(&name).cloned().unwrap_or(name))
                     }));
                 }
             }
@@ -594,15 +614,16 @@ impl Walk<'_> {
         // Each name used but never defined, once, where it was first used.
         let mut undefined = HashSet::new();
         for (name, at) in &self.asked {
-            let full = bound.get(name).unwrap_or(name);
+            let full = linked.get(name).unwrap_or(name);
             if !self.names.contains_key(full) && undefined.insert(full.clone()) {
                 self.errors.push(AsmError::at(
                     at.clone(),
-                    format!("Symbol `{name}` is undefined"),
+                    format!("Symbol `{}` is undefined", as_written(name)),
                 ));
             }
         }
         self.stop_if_errors()?;
+        self.ended = true;
         self.check_fits(&bound);
         self.stop_if_errors()?;
         let linked = self.place(layout, &mut statements)?;
@@ -688,7 +709,9 @@ impl Walk<'_> {
         let at = self.site(expander, line.span());
         let made_at = self.statement_site(expander, line.span());
         self.here = Some(at.clone());
+        self.binding = self.binds(line);
         let lowered = lower::line(line, PROFILE, &*self);
+        self.binding = None;
         self.record_reads();
         let lowered = lowered.map_err(|diagnostic| {
             let span = syntax::Span::new(line.text(), diagnostic.range());
@@ -777,7 +800,11 @@ impl Walk<'_> {
             if sized && (label.is_some() || op.is_some()) {
                 self.used.insert(self.segment.clone());
             }
+            let page = op.as_ref().and_then(page_check);
             statements.push(statement(&made_at, label, op));
+            if let Some(check) = page {
+                statements.push(statement(&made_at, None, Some(check)));
+            }
             if let Some(address) = self.opens.take() {
                 self.open_section(address, statements, &made_at);
             }
@@ -1030,7 +1057,9 @@ impl Walk<'_> {
             return Lookup::Full(format!("{}::{rest}", self.scope_named(first)));
         }
         if name.starts_with('@') {
-            return Lookup::Full(qualify(self.path(), &format!("{}{name}", self.cheap)));
+            // A cheap local belongs to the label before it, whatever scope
+            // it is written in.
+            return Lookup::Full(format!("{}{name}", self.cheap));
         }
         Lookup::Plain(name.to_owned())
     }
@@ -1048,9 +1077,22 @@ impl Walk<'_> {
 
     /// Whether `full` is imported, and not defined here.
     fn imported(&self, full: &str) -> bool {
-        self.declared
-            .get(full)
-            .is_some_and(|declaration| is_import(declaration.kind))
+        self.declared.get(full).is_some_and(|declaration| {
+            // `.global` imports a name the program does not define.
+            is_import(declaration.kind)
+                || (declaration.kind == Visible::Global && !self.names.contains_key(full))
+        })
+    }
+
+    /// The full name a reference to `name` stands for, as [`reference`]
+    /// gives it, without recording it.
+    ///
+    /// [`reference`]: Self::reference
+    fn as_read(&self, name: &str) -> String {
+        match self.lookup(name) {
+            Lookup::Full(full) => full,
+            Lookup::Plain(name) => qualify(self.path(), &name),
+        }
     }
 
     /// The full name a reference to `name` stands for, recorded as read. A
@@ -1229,19 +1271,58 @@ impl Walk<'_> {
         };
         match self.lookup(name) {
             Lookup::Full(full) => read(&full),
-            Lookup::Plain(name) => outwards(self.path()).any(|path| read(&qualify(path, &name))),
+            Lookup::Plain(name) => match self.innermost(&name) {
+                Some(full) => read(&full),
+                None => outwards(self.path()).any(|path| read(&qualify(path, &name))),
+            },
         }
+    }
+
+    /// The innermost full name plain `name` stands for that ca65 has made
+    /// so far: one defined, declared to a linker, or used in this scope,
+    /// which makes it here, or the name the line being lowered defines.
+    fn innermost(&self, name: &str) -> Option<String> {
+        let here = qualify(self.path(), name);
+        if self.binding.as_deref() == Some(&*here) {
+            return Some(here);
+        }
+        let used_here =
+            !self.path().is_empty() && self.reads.borrow().iter().any(|read| read == name);
+        outwards(self.path())
+            .map(|path| qualify(path, name))
+            .find(|full| {
+                self.names.contains_key(full)
+                    || self.declared.contains_key(full)
+                    || (used_here && *full == here)
+                    || self.pending.iter().any(|pending| pending.here == *full)
+            })
     }
 
     /// Whether `name` is defined so far.
     fn has(&self, name: &str) -> bool {
         match self.lookup(name) {
             Lookup::Full(full) => self.names.contains_key(&full),
-            // An import is not defined, and hides a name further out.
+            // An import hides a name further out, as does a name used here
+            // or being defined, though none of them is defined yet.
             Lookup::Plain(name) => self
-                .defined(&name)
+                .innermost(&name)
                 .is_some_and(|full| self.names.contains_key(&full)),
         }
+    }
+
+    /// The full name `line` gives a value to, if it is an assignment or an
+    /// enum's member.
+    fn binds(&self, line: &ActiveLine) -> Option<String> {
+        use lang198x_ca65::ast::Statement as Source;
+        let name = match line.line().statement()? {
+            Source::Assignment(assignment) => assignment.name()?,
+            Source::Member(member) if member.storage().is_none() => member.name()?,
+            _ => return None,
+        };
+        Some(match self.lookup(&name.text()) {
+            Lookup::Full(full) => full,
+            Lookup::Plain(name) => qualify(self.path(), &name),
+        })
     }
 
     /// `op` with each name it reads bound, and recorded as read.
@@ -1417,60 +1498,137 @@ impl Walk<'_> {
     }
 
     /// Declares names to a linker. Each is declared in the current scope,
-    /// and declaring one again must agree with what was declared before.
+    /// and declaring one again must agree with what was declared before,
+    /// as ca65's `SymImport`, `SymExport` and `SymGlobal` check.
     fn declare(&mut self, declared: Visibility, at: &Span) -> Result<(), AsmError> {
         let refuse = |message: String| AsmError::at(at.clone(), message);
         let kind = declared.kind;
         for name in declared.names {
-            let size = name.size.unwrap_or(Size::Absolute);
+            let written = name.size;
             let full = qualify(self.path(), &name.name);
             let name = name.name;
-            if is_import(kind) && self.names.contains_key(&full) {
-                return Err(refuse(format!("Symbol `{name}` is already defined")));
-            }
-            if kind == Visible::Export && self.variables.contains(&full) {
-                return Err(refuse(format!("Var symbol `{name}` cannot be exported")));
-            }
-            if kind == Visible::Export {
-                // ca65 counts an export as a use of the name.
-                self.referenced.insert(full.clone());
-            }
-            let check = full.clone();
+            let defined = self.names.contains_key(&full);
+            let variable = self.variables.contains(&full);
+            // A size not written is the segment's, for an import.
+            let size = written.unwrap_or_else(|| self.segment_size());
+            let mismatch = || refuse(format!("Address size mismatch for symbol `{name}`"));
+            let before = self
+                .declared
+                .get(&full)
+                .map(|d| (d.kind, d.size.unwrap_or(Size::Absolute), d.export));
+            let kept = self.declared.get(&full).and_then(|d| d.size);
+            // An export written without a size takes the size of what it
+            // exports, once that is defined.
+            let actual = self.names.get(&full).map(|value| match value {
+                Value::Constant(value) => Size::of(*value),
+                Value::Address(size)
+                | Value::Opaque(size)
+                | Value::Placed { size, .. }
+                | Value::Measured { size, .. } => *size,
+                _ => Size::Absolute,
+            });
+            let export_size = written.or(actual);
+            let (kind, size, export) = match (kind, before) {
+                (Visible::Import | Visible::ForceImport, before) => {
+                    if defined {
+                        return Err(refuse(format!("Symbol `{name}` is already defined")));
+                    }
+                    match before {
+                        Some((Visible::Export, ..)) => {
+                            return Err(refuse(format!("Cannot import exported symbol `{name}`")));
+                        }
+                        Some((before @ (Visible::Import | Visible::ForceImport), was, _)) => {
+                            if before != kind {
+                                return Err(refuse(format!(
+                                    "Redeclaration mismatch for symbol `{name}`"
+                                )));
+                            }
+                            if size != was {
+                                return Err(mismatch());
+                            }
+                        }
+                        Some((Visible::Global, was, _)) if size != was => return Err(mismatch()),
+                        _ => {}
+                    }
+                    (kind, Some(size), None)
+                }
+                (Visible::Export, before) => {
+                    if variable {
+                        return Err(refuse(format!("Var symbol `{name}` cannot be exported")));
+                    }
+                    match before {
+                        Some((Visible::Import | Visible::ForceImport, ..)) => {
+                            return Err(refuse(format!("Symbol `{name}` is already an import")));
+                        }
+                        Some((Visible::Global, _, was)) if was != written => {
+                            return Err(mismatch());
+                        }
+                        Some((Visible::Export, _, was)) if !defined && was != written => {
+                            return Err(mismatch());
+                        }
+                        _ => {}
+                    }
+                    // ca65 counts an export as a use of the name.
+                    self.referenced.insert(full.clone());
+                    (Visible::Export, kept, export_size)
+                }
+                (Visible::Global, before) => {
+                    if variable {
+                        return Err(refuse(format!("Var symbol `{name}` cannot be made global")));
+                    }
+                    match before {
+                        Some((Visible::Import | Visible::ForceImport, was, _)) => {
+                            if size != was {
+                                return Err(mismatch());
+                            }
+                            continue;
+                        }
+                        Some((Visible::Export, _, was)) => {
+                            if (!defined || written.is_some()) && written != was {
+                                return Err(mismatch());
+                            }
+                            continue;
+                        }
+                        Some((Visible::Global, _, was)) => {
+                            if written != was {
+                                return Err(mismatch());
+                            }
+                            continue;
+                        }
+                        _ => {}
+                    }
+                    // A name already defined is exported at once.
+                    if defined {
+                        (Visible::Export, None, export_size)
+                    } else {
+                        (Visible::Global, Some(size), written)
+                    }
+                }
+                (other, _) => (other, Some(size), written),
+            };
             match self.declared.get_mut(&full) {
+                Some(declaration) => {
+                    declaration.kind = kind;
+                    declaration.size = size;
+                    declaration.export = export;
+                }
                 None => {
-                    let path = self.path().to_owned();
                     let order = self.declared.len();
                     self.declared.insert(
-                        full,
+                        full.clone(),
                         Declaration {
                             kind,
                             size,
-                            path,
+                            export,
+                            path: self.path().to_owned(),
                             name,
                             at: at.clone(),
                             order,
                         },
                     );
                 }
-                Some(before) => {
-                    if is_import(kind) && before.kind == Visible::Export {
-                        return Err(refuse(format!("Cannot import exported symbol `{name}`")));
-                    }
-                    if kind == Visible::Export && is_import(before.kind) {
-                        return Err(refuse(format!("Symbol `{name}` is already an import")));
-                    }
-                    if before.size != size {
-                        return Err(refuse(format!("Address size mismatch for symbol `{name}`")));
-                    }
-                    // `.global` takes the kind of a declaration beside it.
-                    if before.kind == Visible::Global
-                        || (before.kind == Visible::Import && kind == Visible::ForceImport)
-                    {
-                        before.kind = kind;
-                    }
-                }
             }
-            self.check_zero_page(&check, at);
+            self.check_zero_page(&full, at);
         }
         Ok(())
     }
@@ -1483,7 +1641,7 @@ impl Walk<'_> {
         let Some(declaration) = self.declared.get(full) else {
             return;
         };
-        if declaration.size != Size::Zero
+        if declaration.export != Some(Size::Zero)
             || !matches!(declaration.kind, Visible::Export | Visible::Global)
         {
             return;
@@ -1492,7 +1650,10 @@ impl Walk<'_> {
             None => return,
             Some(Value::Constant(value)) => Size::of(*value),
             Some(
-                Value::Address(size) | Value::Placed { size, .. } | Value::Measured { size, .. },
+                Value::Address(size)
+                | Value::Opaque(size)
+                | Value::Placed { size, .. }
+                | Value::Measured { size, .. },
             ) => *size,
             Some(_) => Size::Absolute,
         };
@@ -1540,7 +1701,38 @@ impl Walk<'_> {
                 _ => {}
             }
         }
+        // ld65 links by name, so two definitions exported under one name
+        // are refused.
+        let mut exports = HashMap::new();
+        for declaration in self.declared.values() {
+            let Some(full) = self.export_of(declaration) else {
+                continue;
+            };
+            if let Some(other) = exports.insert(&declaration.name, full.clone())
+                && other != full
+            {
+                return Err(AsmError::at(
+                    declaration.at.clone(),
+                    format!("Duplicate external identifier: `{}`", declaration.name),
+                ));
+            }
+        }
         Ok(())
+    }
+
+    /// The definition `declaration` exports, if it exports one: an export,
+    /// or a `.global` the program defines.
+    fn export_of(&self, declaration: &Declaration) -> Option<String> {
+        match declaration.kind {
+            // An export may be defined in a scope further out.
+            Visible::Export => outwards(&declaration.path)
+                .map(|path| qualify(path, &declaration.name))
+                .find(|full| self.names.contains_key(full)),
+            // A `.global` its own scope does not define is an import.
+            Visible::Global => Some(qualify(&declaration.path, &declaration.name))
+                .filter(|full| self.names.contains_key(full)),
+            _ => None,
+        }
     }
 
     /// Opens or closes a scope.
@@ -1576,6 +1768,11 @@ impl Walk<'_> {
                         return Err(refuse(format!("No open {word}")));
                     }
                 };
+                // ca65 defines the size of a scope that made bytes, and
+                // cheap locals then belong to that size's name.
+                if self.made > frame.start {
+                    self.cheap = format!("{}::.size", frame.path);
+                }
                 self.scopes
                     .insert(frame.path, Some(self.made - frame.start));
             }
@@ -1655,9 +1852,11 @@ impl Walk<'_> {
                 if frame.scoped
                     && let Some(scope) = self.open.pop()
                 {
-                    // An enum has no size, as in ca65.
+                    // An enum has no size, as in ca65. Defining the size of a
+                    // struct or union moves cheap locals on, as a label does.
                     if kind != RecordKind::Enum {
                         self.scopes.insert(scope.path.clone(), Some(frame.size));
+                        self.cheap = format!("{}::.size", scope.path);
                         self.record_scopes.insert(scope.path);
                     }
                 }
@@ -1675,7 +1874,12 @@ impl Walk<'_> {
                 count,
             } => {
                 let size = self.record_size(&record, "struct/union", at)?;
-                self.member(name, size * count, items, members, at)?;
+                // ca65 keeps a member under 16 MB.
+                let bytes = size
+                    .checked_mul(count)
+                    .filter(|bytes| *bytes <= 0xFF_FFFF)
+                    .ok_or_else(|| refuse("Range error"))?;
+                self.member(name, bytes, items, members, at)?;
             }
             Record::Offset { name, offset } => {
                 self.member(name, 0, items, members, at)?;
@@ -1684,16 +1888,25 @@ impl Walk<'_> {
                 }
             }
             Record::Enumerator { name, value } => {
+                // ca65 binds the names in a member's value as it reads it,
+                // so the members after it count on from what they meant
+                // there: a cheap local, say, before this member moves them.
+                let bound = value.as_ref().map(|value| {
+                    map_sym_expr(value.clone(), &mut |name| {
+                        Expr::Sym(format!("::{}", self.as_read(&name)))
+                    })
+                });
                 let Some(frame) = self.records.last_mut() else {
                     return Err(refuse("Expected an identifier"));
                 };
-                if let Some(value) = value {
-                    frame.base = value;
+                if let Some(bound) = bound {
+                    frame.base = bound;
                     frame.count = 0;
                 }
-                let value = match frame.count {
-                    0 => frame.base.clone(),
-                    count => Expr::Bin(
+                let value = match (frame.count, value) {
+                    (0, Some(value)) => value,
+                    (0, None) => frame.base.clone(),
+                    (count, _) => Expr::Bin(
                         BinOp::Add,
                         Box::new(frame.base.clone()),
                         Box::new(Expr::Num(count)),
@@ -1777,6 +1990,26 @@ impl Walk<'_> {
         }
         bound
     }
+
+    /// Each import linked to the definition exported under its name, as
+    /// ld65 links them, wherever in the program each is written.
+    fn link_imports(&self) -> HashMap<String, String> {
+        self.declared
+            .iter()
+            .filter(|(full, _)| self.imported(full))
+            .filter_map(|(full, declaration)| {
+                Some((full.clone(), self.exported(&declaration.name)?))
+            })
+            .collect()
+    }
+
+    /// The full name of the definition exported as `name`, if one is.
+    fn exported(&self, name: &str) -> Option<String> {
+        self.declared
+            .values()
+            .filter(|declaration| declaration.name == name)
+            .find_map(|declaration| self.export_of(declaration))
+    }
 }
 
 /// Whether `kind` asks a linker for the names.
@@ -1799,7 +2032,17 @@ impl Walk<'_> {
             // An import's address is the linker's, of the size declared.
             return match self.declared.get(full) {
                 Some(declaration) if is_import(declaration.kind) => {
-                    Value::Address(declaration.size)
+                    Value::Address(declaration.size.unwrap_or(Size::Absolute))
+                }
+                // `.global` makes an import only at the end, if nothing
+                // defines the name by then.
+                Some(declaration) if declaration.kind == Visible::Global => {
+                    let size = declaration.size.unwrap_or(Size::Absolute);
+                    if self.ended {
+                        Value::Address(size)
+                    } else {
+                        Value::Opaque(size)
+                    }
                 }
                 _ => Value::Unknown,
             };
@@ -1874,12 +2117,29 @@ impl Known for Walk<'_> {
         match self.lookup(name) {
             Lookup::Full(full) => self.known(&full),
             Lookup::Plain(name) => match self.defined(&name) {
-                Some(full) if full == qualify(self.path(), &name) => self.known(&full),
-                Some(full) => match self.known(&full) {
-                    Value::Constant(value) => Value::Address(Size::of(value)),
-                    Value::Placed { size, .. } | Value::Measured { size, .. } => {
-                        Value::Address(size)
+                // A name declared with an address size of its own, and not
+                // defined yet, has that size.
+                _ if let Some((full, declaration)) = self
+                    .innermost(&name)
+                    .filter(|full| !self.names.contains_key(full))
+                    .and_then(|full| Some((full.clone(), self.declared.get(&full)?)))
+                    && let Some(size) = declaration.size =>
+                {
+                    if is_import(declaration.kind) || declaration.kind == Visible::Global {
+                        self.known(&full)
+                    } else {
+                        Value::Opaque(size)
                     }
+                }
+                Some(full) if full == qualify(self.path(), &name) => self.known(&full),
+                // The name may yet be defined here, so ca65 folds it with
+                // nothing, and sizes it as the name further out.
+                Some(full) => match self.known(&full) {
+                    Value::Constant(value) => Value::Opaque(Size::of(value)),
+                    Value::Address(size)
+                    | Value::Opaque(size)
+                    | Value::Placed { size, .. }
+                    | Value::Measured { size, .. } => Value::Opaque(size),
                     other => other,
                 },
                 None => Value::Unknown,
@@ -1898,7 +2158,7 @@ impl Known for Walk<'_> {
                 offset: seg.length,
                 size: seg.size,
             },
-            (None, None) => Value::Address(self.segment_size()),
+            (None, None) => Value::Opaque(self.segment_size()),
         }
     }
 
@@ -1980,6 +2240,32 @@ impl Host for Walk<'_> {
     fn is_constant(&mut self, expr: &SourceExpr) -> bool {
         self.evaluate(expr).is_ok()
     }
+}
+
+/// The check ca65 adds to a 6502 `jmp (abs)`, whose pointer the 6502
+/// cannot read across a page: the link fails if the pointer's low byte is
+/// `$FF`.
+fn page_check(op: &Operation) -> Option<Operation> {
+    let Operation::Instruction {
+        mnemonic,
+        mode: "indirect",
+        operands,
+    } = op
+    else {
+        return None;
+    };
+    let pointer = operands
+        .first()
+        .filter(|_| mnemonic.eq_ignore_ascii_case("jmp"))?;
+    Some(Operation::Assert {
+        cond: Expr::Bin(
+            BinOp::Ne,
+            Box::new(Expr::Lo(Box::new(pointer.clone()))),
+            Box::new(Expr::Num(0xFF)),
+        ),
+        fatal: true,
+        message: "\"jmp (abs)\" across page border".to_owned(),
+    })
 }
 
 fn statement(at: &Span, label: Option<String>, op: Option<Operation>) -> Statement {
