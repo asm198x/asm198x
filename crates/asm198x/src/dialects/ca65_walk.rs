@@ -55,7 +55,8 @@ use lang198x_ca65::Profile;
 use lang198x_ca65::ast::{Expr as SourceExpr, NameRef};
 use lang198x_ca65::expand::{ActiveLine, Expander, Host};
 use lang198x_ca65::lower::{
-    self, Binary, CpuStack, Known, Scope, Segment, Size, Value, Visibility, Visible,
+    self, Binary, CpuStack, Known, Record, RecordKind, Scope, Segment, Size, Value, Visibility,
+    Visible,
 };
 use lang198x_ca65::syntax::{self, DiagnosticKind};
 
@@ -63,7 +64,9 @@ use super::ca65_flat::{Resolution, load_binary, load_include, slice_incbin};
 use super::ca65_layout::{Layout, ResolvedLayout};
 use crate::ast::{map_sym_expr, map_syms};
 use crate::dialect::Dialect;
-use crate::engine::{AsmError, Expr, Operation, Place, Statement, Warning, align_pad, next_pc};
+use crate::engine::{
+    AsmError, BinOp, Expr, Operation, Place, Statement, Warning, align_pad, next_pc,
+};
 use crate::source::{SourceLoader, SourceMap};
 use crate::span::{FileId, Span};
 
@@ -286,8 +289,40 @@ struct Frame {
     name: Option<String>,
     /// Whether `.proc` opened it.
     procedure: bool,
+    /// Whether a record opened it, which only the record's end closes.
+    record: bool,
     /// How many bytes the program had made when it opened.
     start: i64,
+}
+
+impl RecordFrame {
+    /// Takes `bytes` for a member: a struct's next member follows it, and
+    /// a union is as big as its biggest member.
+    fn take(&mut self, bytes: i64) {
+        if self.kind == RecordKind::Union {
+            self.size = self.size.max(bytes);
+        } else {
+            self.offset += bytes;
+            self.size += bytes;
+        }
+    }
+}
+
+/// A record being read: a `.struct`, `.union` or `.enum`.
+struct RecordFrame {
+    kind: RecordKind,
+    /// Whether it has a name, and so opened a scope.
+    scoped: bool,
+    /// Where its next member goes. A union's members all go here.
+    offset: i64,
+    /// How big it is so far.
+    size: i64,
+    /// The full name of the member whose storage it is, in the record
+    /// around it.
+    field: Option<String>,
+    /// An enum's last value written, and how many members have followed it.
+    base: Expr,
+    count: i64,
 }
 
 /// A name written without a scope, in a scope that did not define it when
@@ -370,6 +405,11 @@ struct Walk<'f> {
     warnings: Vec<Warning>,
     /// How many CPUs `.pushcpu` has kept. ca65 keeps eight at most.
     cpus: usize,
+    /// The records being read, innermost last.
+    records: Vec<RecordFrame>,
+    /// The full names of the scopes structs and unions opened, which
+    /// `.tag` takes.
+    record_scopes: HashSet<String>,
     /// Equates in a scope that read their own name while a name further
     /// out was defined. ca65 refuses the circle only where one is used.
     lazy: HashSet<String>,
@@ -498,27 +538,53 @@ impl Walk<'_> {
                 AsmError::at(self.site(expander, span), message)
             })?;
             let made = self.made;
+            let mut items: Vec<(Option<String>, Option<Operation>)> = lowered
+                .items
+                .into_iter()
+                .map(|item| (item.label, item.op))
+                .collect();
+            let mut members = Vec::new();
+            match lowered.record {
+                Some(record) => self.change_record(record, &mut items, &mut members, &at)?,
+                None => {
+                    if let Some(frame) = self.records.last() {
+                        let busy = !items.is_empty()
+                            || lowered.scope.is_some()
+                            || lowered.segment.is_some()
+                            || lowered.visibility.is_some()
+                            || lowered.binary.is_some()
+                            || lowered.cpu.is_some();
+                        if busy {
+                            let message = match frame.kind {
+                                RecordKind::Enum => "Expected an identifier",
+                                _ => "Expected a storage allocator",
+                            };
+                            return Err(AsmError::at(at, message));
+                        }
+                    }
+                }
+            }
             let mut labels = Vec::new();
-            for item in lowered.items {
+            for (item_label, item_op) in items {
                 // What a label is known as comes from the line as written,
                 // before its names are bound.
-                let value = item.op.as_ref().map(|op| self.value_of(op));
-                let waits = item.op.as_ref().is_some_and(|op| self.reads_unknown(op));
+                let value = item_op.as_ref().map(|op| self.value_of(op));
+                let waits = item_op.as_ref().is_some_and(|op| self.reads_unknown(op));
                 // ca65 reads an assignment's value before its name is
                 // defined, which matters to a cheap local, and a label
                 // before the rest of its line.
-                let sized = !matches!(item.op, Some(Operation::Equ(_) | Operation::Set(_)));
-                if let (Some(name), Some(op)) = (&item.label, &item.op)
+                let sized = !matches!(item_op, Some(Operation::Equ(_) | Operation::Set(_)));
+                if let (Some(name), Some(op)) = (&item_label, &item_op)
                     && self.reads_itself_in_a_scope(name, op)
                 {
                     self.lazy.insert(qualify(self.path(), name));
                 }
                 let (label, op) = if sized {
-                    let label = item.label.map(|name| self.define_label(&name));
-                    (label, item.op.map(|op| self.names_in(op)))
+                    let label = item_label.map(|name| self.define_label(&name));
+                    (label, item_op.map(|op| self.names_in(op)))
                 } else {
-                    let op = item.op.map(|op| self.names_in(op));
-                    (item.label.map(|name| self.define_label(&name)), op)
+                    let op = item_op.map(|op| self.names_in(op));
+                    (item_label.map(|name| self.define_label(&name)), op)
                 };
                 let op = self.apply(label.as_deref(), value, waits, op, &at)?;
                 if let (Some(label), true) = (&label, sized) {
@@ -544,6 +610,7 @@ impl Walk<'_> {
             for label in labels {
                 self.sizes.insert(label, line_size);
             }
+            self.sizes.extend(members);
             if let Some(change) = lowered.scope {
                 self.change_scope(change, &at)?;
             }
@@ -573,6 +640,19 @@ impl Walk<'_> {
                 Warning::new(at.line as usize, "CPU stack is not empty".to_owned())
                     .in_file(at.file),
             );
+        }
+        if let Some(frame) = self.records.last() {
+            let end = match frame.kind {
+                RecordKind::Struct => "Expected `.ENDSTRUCT` but found end-of-file",
+                RecordKind::Union => "Expected `.ENDUNION` but found end-of-file",
+                _ => "`.ENDENUM` expected but found end-of-file",
+            };
+            return Err(AsmError::at(
+                self.here
+                    .clone()
+                    .unwrap_or_else(|| Span::in_file(FileId(0), 0, 0)),
+                end,
+            ));
         }
         if let Some(frame) = self.open.last() {
             let name = frame.name.as_deref().unwrap_or("");
@@ -1326,12 +1406,13 @@ impl Walk<'_> {
                     path,
                     name,
                     procedure,
+                    record: false,
                     start: self.made,
                 });
             }
             Scope::Close { procedure } => {
                 let frame = match self.open.pop() {
-                    Some(frame) if frame.procedure == procedure => frame,
+                    Some(frame) if frame.procedure == procedure && !frame.record => frame,
                     _ => {
                         let word = if procedure { ".PROC" } else { ".SCOPE" };
                         return Err(refuse(format!("No open {word}")));
@@ -1343,6 +1424,180 @@ impl Walk<'_> {
             _ => return Err(refuse("this change of scope is not supported".to_owned())),
         }
         Ok(())
+    }
+
+    /// Follows a line of a record, as ca65's `struct.c` and `enum.c` read
+    /// it. Each member becomes an equate of its offset, or an enum's
+    /// value, in `items`, and its size goes in `members`. A `.tag` in the
+    /// program makes room for the record.
+    fn change_record(
+        &mut self,
+        record: Record,
+        items: &mut Vec<(Option<String>, Option<Operation>)>,
+        members: &mut Vec<(String, i64)>,
+        at: &Span,
+    ) -> Result<(), AsmError> {
+        let refuse = |message: &str| AsmError::at(at.clone(), message.to_owned());
+        match record {
+            Record::Open { kind, name, field } => {
+                let (start, field) = match self.records.last() {
+                    Some(frame) if frame.kind == RecordKind::Enum => {
+                        return Err(refuse("Expected an identifier"));
+                    }
+                    Some(_) if kind == RecordKind::Enum => {
+                        return Err(refuse("Expected a storage allocator"));
+                    }
+                    Some(frame) => {
+                        let offset = frame.offset;
+                        let field = field.map(|field| {
+                            let full = qualify(self.path(), &field);
+                            items.push((Some(field), Some(Operation::Equ(Expr::Num(offset)))));
+                            full
+                        });
+                        (if name.is_some() { 0 } else { offset }, field)
+                    }
+                    None => (0, None),
+                };
+                if let Some(name) = &name {
+                    let path = qualify(self.path(), name);
+                    if self.scopes.contains_key(&path) {
+                        return Err(refuse(&format!("Duplicate scope `{name}`")));
+                    }
+                    self.scopes.insert(path.clone(), None);
+                    self.open.push(Frame {
+                        path,
+                        name: Some(name.clone()),
+                        procedure: false,
+                        record: true,
+                        start: self.made,
+                    });
+                }
+                self.records.push(RecordFrame {
+                    kind,
+                    scoped: name.is_some(),
+                    offset: start,
+                    size: 0,
+                    field,
+                    base: Expr::Num(0),
+                    count: 0,
+                });
+            }
+            Record::Close(kind) => {
+                let frame = match self.records.pop() {
+                    Some(frame) if frame.kind == kind => frame,
+                    Some(frame) => {
+                        return Err(refuse(match frame.kind {
+                            RecordKind::Struct => "Expected `.ENDSTRUCT`",
+                            RecordKind::Union => "Expected `.ENDUNION`",
+                            _ => "`.ENDENUM` expected",
+                        }));
+                    }
+                    None => return Err(refuse("Unexpected end of a record")),
+                };
+                if frame.scoped
+                    && let Some(scope) = self.open.pop()
+                {
+                    // An enum has no size, as in ca65.
+                    if kind != RecordKind::Enum {
+                        self.scopes.insert(scope.path.clone(), Some(frame.size));
+                        self.record_scopes.insert(scope.path);
+                    }
+                }
+                if let Some(field) = frame.field {
+                    members.push((field, frame.size));
+                }
+                if let Some(parent) = self.records.last_mut() {
+                    parent.take(frame.size);
+                }
+            }
+            Record::Field { name, bytes } => self.member(name, bytes, items, members, at)?,
+            Record::Tag {
+                name,
+                record,
+                count,
+            } => {
+                let size = self.record_size(&record, "struct/union", at)?;
+                self.member(name, size * count, items, members, at)?;
+            }
+            Record::Offset { name, offset } => {
+                self.member(name, 0, items, members, at)?;
+                if let Some(frame) = self.records.last_mut() {
+                    frame.offset = offset;
+                }
+            }
+            Record::Enumerator { name, value } => {
+                let Some(frame) = self.records.last_mut() else {
+                    return Err(refuse("Expected an identifier"));
+                };
+                if let Some(value) = value {
+                    frame.base = value;
+                    frame.count = 0;
+                }
+                let value = match frame.count {
+                    0 => frame.base.clone(),
+                    count => Expr::Bin(
+                        BinOp::Add,
+                        Box::new(frame.base.clone()),
+                        Box::new(Expr::Num(count)),
+                    ),
+                };
+                frame.count += 1;
+                items.push((Some(name), Some(Operation::Equ(value))));
+            }
+            Record::Reserve { record, count } => {
+                let size = self.record_size(&record, "struct", at)?;
+                let bytes = usize::try_from(size * count).unwrap_or(usize::MAX);
+                match items.last_mut() {
+                    Some((_, op @ None)) => *op = Some(Operation::Reserve(bytes)),
+                    _ => items.push((None, Some(Operation::Reserve(bytes)))),
+                }
+            }
+            _ => return Err(refuse("this part of a record is not supported")),
+        }
+        Ok(())
+    }
+
+    /// A member of the struct or union being read, which takes `bytes`.
+    fn member(
+        &mut self,
+        name: Option<String>,
+        bytes: i64,
+        items: &mut Vec<(Option<String>, Option<Operation>)>,
+        members: &mut Vec<(String, i64)>,
+        at: &Span,
+    ) -> Result<(), AsmError> {
+        let path = self.path().to_owned();
+        let Some(frame) = self.records.last_mut() else {
+            return Err(AsmError::at(at.clone(), "Expected a storage allocator"));
+        };
+        if frame.kind == RecordKind::Enum {
+            return Err(AsmError::at(at.clone(), "Expected an identifier"));
+        }
+        if let Some(name) = name {
+            members.push((qualify(&path, &name), bytes));
+            items.push((Some(name), Some(Operation::Equ(Expr::Num(frame.offset)))));
+        }
+        frame.take(bytes);
+        Ok(())
+    }
+
+    /// The size of the struct or union `name` names, as `.tag` reads it.
+    /// `what` names what ca65 expected, for its messages.
+    fn record_size(&self, name: &str, what: &str, at: &Span) -> Result<i64, AsmError> {
+        let refuse = |message: String| AsmError::at(at.clone(), message);
+        let full = match self.lookup(name) {
+            Lookup::Full(full) => Some(full),
+            Lookup::Plain(name) => outwards(self.path())
+                .map(|path| qualify(path, &name))
+                .find(|full| self.scopes.contains_key(full)),
+        };
+        let Some(full) = full.filter(|full| self.scopes.contains_key(full)) else {
+            return Err(refuse(format!("Unknown {what}")));
+        };
+        if !self.record_scopes.contains(&full) {
+            return Err(refuse(format!("Not a {what}")));
+        }
+        self.scopes[&full].ok_or_else(|| refuse("Size of struct/union is unknown".to_owned()))
     }
 
     /// Binds each pending name to the innermost scope around its reference
