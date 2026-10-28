@@ -366,9 +366,19 @@ does. A macro's lines inside a record are members. 44 probes; the old
 reader gets 7 wrong, gaps against #940. With records done, every
 multi-file ca65 probe runs through the walk.
 
-One gap found on the way is not about records: ca65 refuses `.byte` of an
-expression whose address size is absolute, such as a label in a segment,
-even when its value fits, and the walk does not yet.
+**Data that must fit its room.** ca65 refuses a one-byte value it learns
+only at the link, such as `.byte lab` or `lda #lab` for a label in a
+segment, if its address size is bigger than a byte, even when the value
+would fit. It checks once it has read the program, so a name defined
+further on is judged by what it turns out to be. `lang198x-ca65` 0.0.15
+sizes expressions as ca65's `StudyExpr` does, read from its listings: in
+names and numbers added, taken away, negated or multiplied by a number,
+only the names count, so `zz + $100` is on the zero page; `&` takes the
+smaller side, so `lda lab & $FF` is on the zero page too, where the walk
+used to make it absolute; `<`, `>`, `^`, comparisons and the logical
+operators make one byte; anything else counts its numbers as well. The
+walk checks each `.byte` value and immediate operand at the end. 31
+probes; the old reader gets 3 wrong, gaps against #940.
 
 ## After this step
 
