@@ -75,6 +75,12 @@ pub struct AsmError {
     /// this engine error path — not the AST — so every CPU inherits diagnostics,
     /// and column accuracy improves as CPUs adopt the AST.
     pub span: Option<Span>,
+    /// The errors found after this one in the same assembly, in the order
+    /// they were found, for a dialect that carries on past an error as its
+    /// reference assembler does. Empty for one that stops at the first.
+    /// `Display` shows this error alone; [`all`](Self::all) gives every one.
+    /// `None` when there are none; boxed, to keep the error small.
+    pub further: Option<Box<Vec<AsmError>>>,
 }
 
 impl AsmError {
@@ -85,6 +91,7 @@ impl AsmError {
             message: message.into(),
             span: None,
             code: Code::AssemblyError,
+            further: None,
         }
     }
 
@@ -96,6 +103,7 @@ impl AsmError {
             message: message.into(),
             span: Some(span),
             code: Code::AssemblyError,
+            further: None,
         }
     }
 
@@ -108,6 +116,34 @@ impl AsmError {
 
     pub fn unsupported(line: usize, message: impl Into<String>) -> Self {
         Self::new(line, message).with_code(Code::UnsupportedFeature)
+    }
+
+    /// The first of `errors`, carrying the rest as [`further`](Self::further),
+    /// or `None` if there are none. Errors that already carry further ones
+    /// are flattened in order, so no further error carries any of its own.
+    #[must_use]
+    pub fn gather(errors: Vec<AsmError>) -> Option<Self> {
+        let mut flat = errors.into_iter().flat_map(AsmError::into_all);
+        let mut first = flat.next()?;
+        let further: Vec<AsmError> = flat.collect();
+        first.further = (!further.is_empty()).then(|| Box::new(further));
+        Some(first)
+    }
+
+    /// This error, then each [`further`](Self::further) one, in order.
+    pub fn all(&self) -> impl Iterator<Item = &AsmError> {
+        std::iter::once(self).chain(self.further.iter().flat_map(|further| further.iter()))
+    }
+
+    /// This error and each further one, apart, in order.
+    #[must_use]
+    pub fn into_all(mut self) -> Vec<AsmError> {
+        let further = self
+            .further
+            .take()
+            .map(|further| *further)
+            .unwrap_or_default();
+        std::iter::once(self).chain(further).collect()
     }
 }
 
@@ -217,5 +253,29 @@ impl fmt::Display for Warning {
         } else {
             write!(f, "line {}: {label}: {}", self.line, self.message)
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::AsmError;
+
+    /// `gather` makes the first error carry the rest, in order, flattening
+    /// any that already carried further ones; `all` and `into_all` give them
+    /// back in the same order.
+    #[test]
+    fn errors_gather_in_order() {
+        assert!(AsmError::gather(Vec::new()).is_none());
+        let carried = AsmError::gather(vec![AsmError::new(2, "b"), AsmError::new(3, "c")])
+            .expect("two errors");
+        let all = AsmError::gather(vec![AsmError::new(1, "a"), carried, AsmError::new(4, "d")])
+            .expect("errors");
+        let messages: Vec<&str> = all.all().map(|e| e.message.as_str()).collect();
+        assert_eq!(messages, ["a", "b", "c", "d"]);
+        assert!(all.all().skip(1).all(|e| e.further.is_none()));
+        // `Display` shows the first alone.
+        assert_eq!(all.to_string(), "line 1: a");
+        let lines: Vec<usize> = all.into_all().iter().map(|e| e.line).collect();
+        assert_eq!(lines, [1, 2, 3, 4]);
     }
 }
