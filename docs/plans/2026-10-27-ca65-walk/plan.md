@@ -350,6 +350,26 @@ closes. `lang198x-ca65` 0.0.13 adds `Value::Placed` and `Value::Measured`
 for this, and the walk numbers each segment and says how far into it each
 label is. 19 probes; the old reader gets 12 wrong, gaps against #940.
 
+**Records.** `lang198x-ca65` 0.0.14 lowers `.struct`, `.union`, `.enum`
+and `.tag` as ca65 V2.19's `struct.c` and `enum.c` read them, and the walk
+counts the offsets. A named record is a scope whose members are constants
+counted from zero; a struct's members follow one another, and a union's all
+start at the same place, which makes it as big as its biggest member. A
+record with no name inside another carries on from where that one has got
+to, and puts its members in the same scope; a named one starts again at
+zero, and the record around it makes room for it. `.org` in a struct moves
+the next member but not the size. An enum's member is the last value
+written plus a count, worked out when it is used, so it may be a name
+defined further on. An enum has no size. `.tag` in a struct takes its count
+with no comma; in the program it makes room for the record, as `.res`
+does. A macro's lines inside a record are members. 44 probes; the old
+reader gets 7 wrong, gaps against #940. With records done, every
+multi-file ca65 probe runs through the walk.
+
+One gap found on the way is not about records: ca65 refuses `.byte` of an
+expression whose address size is absolute, such as a label in a segment,
+even when its value fits, and the walk does not yet.
+
 ## After this step
 
 Step 7, the switch: the walk becomes the default for the main reader, `fmt`

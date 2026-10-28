@@ -1338,6 +1338,51 @@ const PROBES: &[Probe] = &[
     ok ("ca65", "an unused circle of equates in a scope", "p=9\n.scope s\nq=r\nr=q\n.endscope\nnop\n"),
     ok ("ca65", "an equate that reads itself behind a false &&", "red=2\n.scope inner\nred=red-red\n.org $20\n.byte 0,(*=$20)&&red\n.endscope\n"),
     ok ("ca65", "an equate that reads itself behind a true &&", "red=2\n.scope inner\nred=red-red\n.org $20\n.byte 0,(*=$21)&&red\n.endscope\n"),
+    // Records: `.struct`, `.union`, `.enum` and `.tag` (step 6e).
+    ok ("ca65", "struct members take their storage's size", ".struct P\nf1 .byte\nf2 .word\nf3 .dword\nf4 .faraddr\nf5 .dbyt\nf6 .addr\n.endstruct\n.byte P::f1,P::f2,P::f3,P::f4,P::f5,P::f6,.sizeof(P)\n"),
+    ok ("ca65", "struct members take a count", ".struct P\nf1 .byte 3\nf2 .res 2\nf3 .word 2\n.endstruct\n.byte P::f1,P::f2,P::f3,.sizeof(P),.sizeof(P::f1),.sizeof(P::f2),.sizeof(P::f3)\n"),
+    ok ("ca65", "storage with no name takes room", ".struct P\n.byte\nf1 .word\n.endstruct\n.byte P::f1,.sizeof(P)\n"),
+    gap("ca65", ".org in a struct moves the next member, not the size", ".struct P\nf1 .byte\n.org 10\nf2 .byte\n.endstruct\n.byte P::f1,P::f2,.sizeof(P)\n", 940),
+    gap("ca65", "an unnamed struct in a struct carries on", ".struct P\nf1 .byte\n.struct\nq .word\nr .byte\n.endstruct\nf2 .byte\n.endstruct\n.byte P::f1,P::q,P::r,P::f2,.sizeof(P)\n", 940),
+    gap("ca65", "an unnamed union in a struct", ".struct P\nf1 .byte\n.union\nq .word\nr .byte\n.endunion\nf2 .byte\n.endstruct\n.byte P::f1,P::q,P::r,P::f2,.sizeof(P)\n", 940),
+    ok ("ca65", "a named struct in a struct starts at zero", ".struct P\nf1 .byte\n.struct I\nq .word\n.endstruct\nf2 .byte\n.endstruct\n.byte P::f1,P::I::q,P::f2,.sizeof(P),.sizeof(P::I)\n"),
+    gap("ca65", "a member's struct has no name", ".struct P\nf1 .byte\nf2 .struct\ng1 .word\n.endstruct\nf3 .byte\n.endstruct\n.byte P::f2,P::g1,P::f3,.sizeof(P::f2)\n", 940),
+    ok ("ca65", ".tag in a struct takes a count without a comma", ".struct Q\nf1 .word\n.endstruct\n.struct P\nt .tag Q 3\nu .tag Q\n.endstruct\n.byte P::t,P::u,.sizeof(P),.sizeof(P::t)\n"),
+    ok ("ca65", ".tag in a struct with a comma", ".struct Q\nf1 .word\n.endstruct\n.struct P\nt .tag Q, 3\n.endstruct\n"),
+    ok ("ca65", ".tag with no name in a struct", ".struct P\nf1 .byte\n.endstruct\n.struct Q\n.tag P\ng .byte\n.endstruct\n.byte Q::g,.sizeof(Q)\n"),
+    ok ("ca65", ".tag of the struct being read", ".struct P\nf1 .byte\nt .tag P\n.endstruct\n"),
+    gap("ca65", ".tag makes room in the program", ".struct Q\nf1 .word\n.endstruct\np: .tag Q\nq: .tag Q, 2\n.byte .sizeof(p),.sizeof(q)\n", 940),
+    ok ("ca65", ".tag of an empty struct", ".struct P\n.endstruct\n.tag P\n.byte 1\n"),
+    ok ("ca65", ".tag of a proc", ".proc Q\nnop\n.endproc\n.tag Q\n"),
+    ok ("ca65", ".tag of nothing", ".tag Nope\n"),
+    ok ("ca65", ".tag of none", ".struct P\nf1 .word\n.endstruct\n.tag P, 0\n"),
+    ok ("ca65", "a member count of zero", ".struct P\nf1 .byte 0\n.endstruct\n"),
+    ok ("ca65", "a .res of zero in a struct", ".struct P\nf1 .res 0\n.endstruct\n"),
+    ok ("ca65", "a member count not known yet", ".struct P\nf1 .word K\n.endstruct\nK=2\n"),
+    ok ("ca65", ".org in a struct needs an address", ".struct P\n.org\n.endstruct\n"),
+    ok ("ca65", "a struct's members are constants", ".struct P\nf1 .byte\n.endstruct\nlda P::f1\nlda #.sizeof(P)\n"),
+    ok ("ca65", "a struct is a scope, not a value", ".struct P\nf1 .byte\n.endstruct\n.byte P\n"),
+    ok ("ca65", "a struct's name is a scope", ".struct P\nf1 .byte\n.endstruct\n.struct P\nf2 .byte\n.endstruct\n"),
+    gap("ca65", "a struct with no name puts members here", ".struct\nf1 .byte\n.endstruct\n.byte f1\n", 940),
+    ok ("ca65", "an instruction in a struct", ".struct P\nf1 .byte\nnop\n.endstruct\n"),
+    ok ("ca65", "a member twice", ".struct P\nf1 .word\nf1 .byte\n.endstruct\n"),
+    ok ("ca65", "a struct inside a scope", ".scope S\n.struct P\nf1 .word\nf2 .byte\n.endstruct\n.endscope\n.byte S::P::f2, .sizeof(S::P)\n"),
+    ok ("ca65", "a struct read from a scope", ".struct P\nf1 .word\n.endstruct\n.scope\n.byte P::f1\n.endscope\n"),
+    ok ("ca65", "a struct's members are known", ".struct P\nf1 .word\n.endstruct\n.ifconst P::f1\n.byte 1\n.endif\n.ifdef P::f1\n.byte 2\n.endif\n.byte .defined(P), .defined(P::f1)\n"),
+    ok ("ca65", "a struct ended as a union", ".struct P\nf1 .byte\n.endunion\n"),
+    ok ("ca65", "a struct never ended", ".struct P\nf1 .byte\n"),
+    ok ("ca65", "a macro makes struct members", ".macro two\nm1 .byte\nm2 .word\n.endmacro\n.struct S\ns1 .byte\ntwo\n.endstruct\n.byte S::s1,S::m1,S::m2,.sizeof(S)\n"),
+    ok ("ca65", "a union's members all start at zero", ".union U\nu1 .byte\nu2 .word\nu3 .res 5\n.endunion\n.byte U::u1,U::u2,U::u3,.sizeof(U)\n"),
+    gap("ca65", "an unnamed struct in a union", ".union U\nu1 .byte\n.struct\ns1 .byte\ns2 .word\n.endstruct\n.endunion\n.byte U::s1,U::s2,.sizeof(U)\n", 940),
+    ok ("ca65", "an enum counts on from each value", ".enum E\ne1\ne2\ne3 = 10\ne4\ne5 = 2+3\ne6\n.endenum\n.byte E::e1,E::e2,E::e3,E::e4,E::e5,E::e6\n"),
+    ok ("ca65", "an enum with no name puts members here", ".enum\ne1\ne2\n.endenum\n.byte e1,e2\n"),
+    ok ("ca65", "an enum of a name defined further on", ".enum E\ne1 = later\ne2\n.endenum\n.byte E::e1,E::e2\nlater = 7\n"),
+    ok ("ca65", "an enum's members take their value's size", ".enum E\ne1\n.endenum\nlda E::e1\nlda #E::e1\n.enum F\nf1 = $1234\n.endenum\nlda F::f1\n"),
+    ok ("ca65", "conditionals in an enum", ".enum E\ne1\n.if 0\ne2\n.endif\ne3\n.endenum\n.byte E::e1,E::e3\n"),
+    ok ("ca65", "a macro makes enum members", ".macro two\nm1\nm2\n.endmacro\n.enum E\ne1\ntwo\n.endenum\n.byte E::e1,E::m1,E::m2\n"),
+    ok ("ca65", "an enum has no size", ".enum E\ne1\n.endenum\n.byte .sizeof(E)\n"),
+    ok ("ca65", "storage in an enum", ".enum E\ne1\n.byte\n.endenum\n"),
+    ok ("ca65", "an enum's name is a scope", ".enum E\n.endenum\n.enum E\n.endenum\n"),
     // Labels in one segment are a known distance apart (step 6e).
     gap("ca65", "two labels in one segment are a known distance apart", "l: nop\nr: nop\n.res r-l\n.byte r-l\n", 940),
     gap("ca65", "a distance may be added, taken away and multiplied", "l: nop\nr: nop\n.res r-l+l-l+r-l\n.res (r-l)*2\n.res r*2-l*2\n.res r+r-l-l\n.res -l+r\n", 940),
@@ -3312,10 +3357,7 @@ const MULTI_PROBES: &[MultiProbe] = &[
 
 /// The `ca65-nes` probes the walk does not link as ld65 does yet, by how
 /// each note starts, with what each needs (the walk's plan, step 6e).
-const WALK_NOT_YET: &[&str] = &[
-    // `.struct`, `.union`, `.enum` and `.tag`.
-    "records:",
-];
+const WALK_NOT_YET: &[&str] = &[];
 
 #[test]
 #[ignore = "needs sjasmplus + pasmo + acme + ca65/ld65 + rgbasm/rgblink + lwasm; run with --ignored"]
