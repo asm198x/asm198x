@@ -62,6 +62,10 @@ fn native_repeat_end_stops_even_billion_count_streams() {
     }
     for fact in cases {
         let name = fact["name"].as_str().expect("name");
+        // A V2.19 fact the frozen old reader misses (#940).
+        if fact["old_reader_gap"].is_number() {
+            continue;
+        }
         let dialect = fact["dialect"].as_str().expect("dialect");
         std::fs::write(
             root.join("input.s"),

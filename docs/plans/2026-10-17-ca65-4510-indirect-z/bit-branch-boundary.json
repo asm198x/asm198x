@@ -48,26 +48,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "native.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-boundary-7nmb3j0x",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "native.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-boundary-7nmb3j0x",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -96,26 +96,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "native.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-boundary-7nmb3j0x",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "native.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-boundary-7nmb3j0x",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -144,26 +144,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "native.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-boundary-7nmb3j0x",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "native.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-boundary-7nmb3j0x",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -192,26 +192,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "native.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-boundary-7nmb3j0x",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "native.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-boundary-7nmb3j0x",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -240,26 +240,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "native.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-boundary-7nmb3j0x",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "native.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-boundary-7nmb3j0x",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -288,26 +288,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "native.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-boundary-7nmb3j0x",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "native.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-boundary-7nmb3j0x",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -336,26 +336,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "native.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-boundary-7nmb3j0x",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "native.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-boundary-7nmb3j0x",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -384,26 +384,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "native.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-boundary-7nmb3j0x",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "native.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-boundary-7nmb3j0x",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -432,26 +432,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "native.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-boundary-7nmb3j0x",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "native.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-boundary-7nmb3j0x",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -480,26 +480,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "native.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-boundary-7nmb3j0x",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "native.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-boundary-7nmb3j0x",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -528,26 +528,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "native.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-boundary-7nmb3j0x",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "native.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-boundary-7nmb3j0x",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -576,26 +576,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "native.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-boundary-7nmb3j0x",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "native.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-boundary-7nmb3j0x",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -624,26 +624,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "native.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-boundary-7nmb3j0x",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "native.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-boundary-7nmb3j0x",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -672,26 +672,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "native.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-boundary-7nmb3j0x",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "native.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-boundary-7nmb3j0x",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -720,26 +720,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "native.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-boundary-7nmb3j0x",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "native.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-boundary-7nmb3j0x",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -768,26 +768,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "native.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-boundary-7nmb3j0x",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "native.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-4510-boundary-7nmb3j0x",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""

@@ -1,31 +1,31 @@
 {
   "tools": {
     "ca65": {
-      "path": "/opt/homebrew/bin/ca65",
-      "sha256": "1a57997819fd98814e4601b5160df589e7a1a24e1888a80fee51ae450d8fd0ea",
+      "path": "/tmp/claude-0/cc65/bin/ca65",
+      "sha256": "1b23fe20161368b7a428ad85d7fa1f83e6ddef33c6f8648350d387d4952e1624",
       "version": {
         "argv": [
-          "/opt/homebrew/bin/ca65",
+          "/tmp/claude-0/cc65/bin/ca65",
           "--version"
         ],
-        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+        "cwd": "/",
         "exit": 0,
         "stdout": "",
-        "stderr": "ca65 V2.18 - N/A\n"
+        "stderr": "ca65 V2.19 - Git 8d86ca7\n"
       }
     },
     "ld65": {
-      "path": "/opt/homebrew/bin/ld65",
-      "sha256": "36bb196207a6b2c90a4aa991b419d6113885303951b14b60b455f51c777b3339",
+      "path": "/tmp/claude-0/cc65/bin/ld65",
+      "sha256": "7cd8d54c683bbf28ba55b92fa52efbdcf5e6da47bc47a70186a06e3aa19b6b4a",
       "version": {
         "argv": [
-          "/opt/homebrew/bin/ld65",
+          "/tmp/claude-0/cc65/bin/ld65",
           "--version"
         ],
-        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+        "cwd": "/",
         "exit": 0,
         "stdout": "",
-        "stderr": "ld65 V2.18 - N/A\n"
+        "stderr": "ld65 V2.19 - Git 8d86ca7\n"
       }
     }
   },
@@ -67,15 +67,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(6): Error: Range error (256 not in [0..255])\ninput.s(4): Note: Macro was defined here\n"
+          "stderr": "input.s:6: Error: Range error (256 not in [0..255])\ninput.s:4: Note: Expanded from macro here\n"
         }
       ],
       "native_hex": null
@@ -87,15 +87,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "65816_byte_range_included.inc(4): Error: Range error (256 not in [0..255])\n65816_byte_range_included.inc(2): Note: Macro was defined here\n"
+          "stderr": "65816_byte_range_included.inc:4: Error: Range error (256 not in [0..255])\n65816_byte_range_included.inc:2: Note: Expanded from macro here\n"
         }
       ],
       "native_hex": null
@@ -107,15 +107,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(9): Error: Range error (256 not in [0..255])\ninput.s(7): Note: Macro was defined here\ninput.s(4): Note: Macro was defined here\n"
+          "stderr": "input.s:9: Error: Range error (256 not in [0..255])\ninput.s:7: Note: Expanded from macro here\ninput.s:4: Note: Expanded from macro here\n"
         }
       ],
       "native_hex": null
@@ -127,15 +127,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "65816_byte_range_nested_included.inc(7): Error: Range error (256 not in [0..255])\n65816_byte_range_nested_included.inc(5): Note: Macro was defined here\n65816_byte_range_nested_included.inc(2): Note: Macro was defined here\n"
+          "stderr": "65816_byte_range_nested_included.inc:7: Error: Range error (256 not in [0..255])\n65816_byte_range_nested_included.inc:5: Note: Expanded from macro here\n65816_byte_range_nested_included.inc:2: Note: Expanded from macro here\n"
         }
       ],
       "native_hex": null
@@ -147,15 +147,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(3): Error: Range error (256 not in [0..255])\n"
+          "stderr": "input.s:3: Error: Range error (256 not in [0..255])\n"
         }
       ],
       "native_hex": null
@@ -167,26 +167,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -201,15 +201,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(6): Error: Range error (65536 not in [0..65535])\ninput.s(4): Note: Macro was defined here\n"
+          "stderr": "input.s:6: Error: Range error (65536 not in [0..65535])\ninput.s:4: Note: Expanded from macro here\n"
         }
       ],
       "native_hex": null
@@ -221,15 +221,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "65816_word_range_included.inc(4): Error: Range error (65536 not in [0..65535])\n65816_word_range_included.inc(2): Note: Macro was defined here\n"
+          "stderr": "65816_word_range_included.inc:4: Error: Range error (65536 not in [0..65535])\n65816_word_range_included.inc:2: Note: Expanded from macro here\n"
         }
       ],
       "native_hex": null
@@ -241,15 +241,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(9): Error: Range error (65536 not in [0..65535])\ninput.s(7): Note: Macro was defined here\ninput.s(4): Note: Macro was defined here\n"
+          "stderr": "input.s:9: Error: Range error (65536 not in [0..65535])\ninput.s:7: Note: Expanded from macro here\ninput.s:4: Note: Expanded from macro here\n"
         }
       ],
       "native_hex": null
@@ -261,15 +261,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "65816_word_range_nested_included.inc(7): Error: Range error (65536 not in [0..65535])\n65816_word_range_nested_included.inc(5): Note: Macro was defined here\n65816_word_range_nested_included.inc(2): Note: Macro was defined here\n"
+          "stderr": "65816_word_range_nested_included.inc:7: Error: Range error (65536 not in [0..65535])\n65816_word_range_nested_included.inc:5: Note: Expanded from macro here\n65816_word_range_nested_included.inc:2: Note: Expanded from macro here\n"
         }
       ],
       "native_hex": null
@@ -281,15 +281,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(3): Error: Range error (65536 not in [0..65535])\n"
+          "stderr": "input.s:3: Error: Range error (65536 not in [0..65535])\n"
         }
       ],
       "native_hex": null
@@ -301,26 +301,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -335,15 +335,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(6): Error: Range error (16777216 not in [0..16777215])\ninput.s(4): Note: Macro was defined here\n"
+          "stderr": "input.s:6: Error: Range error (16777216 not in [0..16777215])\ninput.s:4: Note: Expanded from macro here\n"
         }
       ],
       "native_hex": null
@@ -355,15 +355,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "65816_faraddr_range_included.inc(4): Error: Range error (16777216 not in [0..16777215])\n65816_faraddr_range_included.inc(2): Note: Macro was defined here\n"
+          "stderr": "65816_faraddr_range_included.inc:4: Error: Range error (16777216 not in [0..16777215])\n65816_faraddr_range_included.inc:2: Note: Expanded from macro here\n"
         }
       ],
       "native_hex": null
@@ -375,15 +375,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(9): Error: Range error (16777216 not in [0..16777215])\ninput.s(7): Note: Macro was defined here\ninput.s(4): Note: Macro was defined here\n"
+          "stderr": "input.s:9: Error: Range error (16777216 not in [0..16777215])\ninput.s:7: Note: Expanded from macro here\ninput.s:4: Note: Expanded from macro here\n"
         }
       ],
       "native_hex": null
@@ -395,15 +395,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "65816_faraddr_range_nested_included.inc(7): Error: Range error (16777216 not in [0..16777215])\n65816_faraddr_range_nested_included.inc(5): Note: Macro was defined here\n65816_faraddr_range_nested_included.inc(2): Note: Macro was defined here\n"
+          "stderr": "65816_faraddr_range_nested_included.inc:7: Error: Range error (16777216 not in [0..16777215])\n65816_faraddr_range_nested_included.inc:5: Note: Expanded from macro here\n65816_faraddr_range_nested_included.inc:2: Note: Expanded from macro here\n"
         }
       ],
       "native_hex": null
@@ -415,15 +415,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(3): Error: Range error (16777216 not in [0..16777215])\n"
+          "stderr": "input.s:3: Error: Range error (16777216 not in [0..16777215])\n"
         }
       ],
       "native_hex": null
@@ -435,26 +435,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -469,15 +469,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(6): Error: Symbol 'MISSING' is undefined\n"
+          "stderr": "input.s:6: Error: Symbol ‘MISSING’ is undefined\n"
         }
       ],
       "native_hex": null
@@ -489,15 +489,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "65816_undefined_included.inc(4): Error: Symbol 'MISSING' is undefined\n"
+          "stderr": "65816_undefined_included.inc:4: Error: Symbol ‘MISSING’ is undefined\n"
         }
       ],
       "native_hex": null
@@ -509,15 +509,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(9): Error: Symbol 'MISSING' is undefined\n"
+          "stderr": "input.s:9: Error: Symbol ‘MISSING’ is undefined\n"
         }
       ],
       "native_hex": null
@@ -529,15 +529,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "65816_undefined_nested_included.inc(7): Error: Symbol 'MISSING' is undefined\n"
+          "stderr": "65816_undefined_nested_included.inc:7: Error: Symbol ‘MISSING’ is undefined\n"
         }
       ],
       "native_hex": null
@@ -549,15 +549,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(3): Error: Symbol 'MISSING' is undefined\n"
+          "stderr": "input.s:3: Error: Symbol ‘MISSING’ is undefined\n"
         }
       ],
       "native_hex": null
@@ -569,26 +569,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -603,15 +603,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(6): Error: Syntax error\ninput.s(4): Note: Macro was defined here\n"
+          "stderr": "input.s:6: Error: Expected an expression but found ‘)’\ninput.s:4: Note: Expanded from macro here\ninput.s:6: Error: Expected ‘end-of-line’ but found ‘)’\ninput.s:4: Note: Expanded from macro here\n"
         }
       ],
       "native_hex": null
@@ -623,15 +623,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "65816_syntax_included.inc(4): Error: Syntax error\n65816_syntax_included.inc(2): Note: Macro was defined here\n"
+          "stderr": "65816_syntax_included.inc:4: Error: Expected an expression but found ‘)’\n65816_syntax_included.inc:2: Note: Expanded from macro here\n65816_syntax_included.inc:4: Error: Expected ‘end-of-line’ but found ‘)’\n65816_syntax_included.inc:2: Note: Expanded from macro here\n"
         }
       ],
       "native_hex": null
@@ -643,15 +643,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(9): Error: Syntax error\ninput.s(7): Note: Macro was defined here\ninput.s(4): Note: Macro was defined here\n"
+          "stderr": "input.s:9: Error: Expected an expression but found ‘)’\ninput.s:7: Note: Expanded from macro here\ninput.s:4: Note: Expanded from macro here\ninput.s:9: Error: Expected ‘end-of-line’ but found ‘)’\ninput.s:7: Note: Expanded from macro here\ninput.s:4: Note: Expanded from macro here\n"
         }
       ],
       "native_hex": null
@@ -663,15 +663,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "65816_syntax_nested_included.inc(7): Error: Syntax error\n65816_syntax_nested_included.inc(5): Note: Macro was defined here\n65816_syntax_nested_included.inc(2): Note: Macro was defined here\n"
+          "stderr": "65816_syntax_nested_included.inc:7: Error: Expected an expression but found ‘)’\n65816_syntax_nested_included.inc:5: Note: Expanded from macro here\n65816_syntax_nested_included.inc:2: Note: Expanded from macro here\n65816_syntax_nested_included.inc:7: Error: Expected ‘end-of-line’ but found ‘)’\n65816_syntax_nested_included.inc:5: Note: Expanded from macro here\n65816_syntax_nested_included.inc:2: Note: Expanded from macro here\n"
         }
       ],
       "native_hex": null
@@ -683,15 +683,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(3): Error: Syntax error\n"
+          "stderr": "input.s:3: Error: Expected an expression but found ‘)’\ninput.s:3: Error: Expected ‘end-of-line’ but found ‘)’\n"
         }
       ],
       "native_hex": null
@@ -703,26 +703,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -737,15 +737,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(6): Error: Range error\ninput.s(4): Note: Macro was defined here\n"
+          "stderr": "input.s:6: Error: Invalid number of bytes specified\ninput.s:4: Note: Expanded from macro here\n"
         }
       ],
       "native_hex": null
@@ -757,15 +757,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "65816_negative_reserve_included.inc(4): Error: Range error\n65816_negative_reserve_included.inc(2): Note: Macro was defined here\n"
+          "stderr": "65816_negative_reserve_included.inc:4: Error: Invalid number of bytes specified\n65816_negative_reserve_included.inc:2: Note: Expanded from macro here\n"
         }
       ],
       "native_hex": null
@@ -777,15 +777,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(9): Error: Range error\ninput.s(7): Note: Macro was defined here\ninput.s(4): Note: Macro was defined here\n"
+          "stderr": "input.s:9: Error: Invalid number of bytes specified\ninput.s:7: Note: Expanded from macro here\ninput.s:4: Note: Expanded from macro here\n"
         }
       ],
       "native_hex": null
@@ -797,15 +797,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "65816_negative_reserve_nested_included.inc(7): Error: Range error\n65816_negative_reserve_nested_included.inc(5): Note: Macro was defined here\n65816_negative_reserve_nested_included.inc(2): Note: Macro was defined here\n"
+          "stderr": "65816_negative_reserve_nested_included.inc:7: Error: Invalid number of bytes specified\n65816_negative_reserve_nested_included.inc:5: Note: Expanded from macro here\n65816_negative_reserve_nested_included.inc:2: Note: Expanded from macro here\n"
         }
       ],
       "native_hex": null
@@ -817,15 +817,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(3): Error: Range error\n"
+          "stderr": "input.s:3: Error: Invalid number of bytes specified\n"
         }
       ],
       "native_hex": null
@@ -837,26 +837,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -871,26 +871,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -905,26 +905,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -939,26 +939,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -973,26 +973,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1007,15 +1007,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(6): Error: Range error (256 not in [0..255])\ninput.s(4): Note: Macro was defined here\n"
+          "stderr": "input.s:6: Error: Range error (256 not in [0..255])\ninput.s:4: Note: Expanded from macro here\n"
         }
       ],
       "native_hex": null
@@ -1027,15 +1027,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "huc6280_byte_range_included.inc(4): Error: Range error (256 not in [0..255])\nhuc6280_byte_range_included.inc(2): Note: Macro was defined here\n"
+          "stderr": "huc6280_byte_range_included.inc:4: Error: Range error (256 not in [0..255])\nhuc6280_byte_range_included.inc:2: Note: Expanded from macro here\n"
         }
       ],
       "native_hex": null
@@ -1047,15 +1047,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(9): Error: Range error (256 not in [0..255])\ninput.s(7): Note: Macro was defined here\ninput.s(4): Note: Macro was defined here\n"
+          "stderr": "input.s:9: Error: Range error (256 not in [0..255])\ninput.s:7: Note: Expanded from macro here\ninput.s:4: Note: Expanded from macro here\n"
         }
       ],
       "native_hex": null
@@ -1067,15 +1067,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "huc6280_byte_range_nested_included.inc(7): Error: Range error (256 not in [0..255])\nhuc6280_byte_range_nested_included.inc(5): Note: Macro was defined here\nhuc6280_byte_range_nested_included.inc(2): Note: Macro was defined here\n"
+          "stderr": "huc6280_byte_range_nested_included.inc:7: Error: Range error (256 not in [0..255])\nhuc6280_byte_range_nested_included.inc:5: Note: Expanded from macro here\nhuc6280_byte_range_nested_included.inc:2: Note: Expanded from macro here\n"
         }
       ],
       "native_hex": null
@@ -1087,15 +1087,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(3): Error: Range error (256 not in [0..255])\n"
+          "stderr": "input.s:3: Error: Range error (256 not in [0..255])\n"
         }
       ],
       "native_hex": null
@@ -1107,26 +1107,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1141,15 +1141,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(6): Error: Range error (65536 not in [0..65535])\ninput.s(4): Note: Macro was defined here\n"
+          "stderr": "input.s:6: Error: Range error (65536 not in [0..65535])\ninput.s:4: Note: Expanded from macro here\n"
         }
       ],
       "native_hex": null
@@ -1161,15 +1161,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "huc6280_word_range_included.inc(4): Error: Range error (65536 not in [0..65535])\nhuc6280_word_range_included.inc(2): Note: Macro was defined here\n"
+          "stderr": "huc6280_word_range_included.inc:4: Error: Range error (65536 not in [0..65535])\nhuc6280_word_range_included.inc:2: Note: Expanded from macro here\n"
         }
       ],
       "native_hex": null
@@ -1181,15 +1181,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(9): Error: Range error (65536 not in [0..65535])\ninput.s(7): Note: Macro was defined here\ninput.s(4): Note: Macro was defined here\n"
+          "stderr": "input.s:9: Error: Range error (65536 not in [0..65535])\ninput.s:7: Note: Expanded from macro here\ninput.s:4: Note: Expanded from macro here\n"
         }
       ],
       "native_hex": null
@@ -1201,15 +1201,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "huc6280_word_range_nested_included.inc(7): Error: Range error (65536 not in [0..65535])\nhuc6280_word_range_nested_included.inc(5): Note: Macro was defined here\nhuc6280_word_range_nested_included.inc(2): Note: Macro was defined here\n"
+          "stderr": "huc6280_word_range_nested_included.inc:7: Error: Range error (65536 not in [0..65535])\nhuc6280_word_range_nested_included.inc:5: Note: Expanded from macro here\nhuc6280_word_range_nested_included.inc:2: Note: Expanded from macro here\n"
         }
       ],
       "native_hex": null
@@ -1221,15 +1221,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(3): Error: Range error (65536 not in [0..65535])\n"
+          "stderr": "input.s:3: Error: Range error (65536 not in [0..65535])\n"
         }
       ],
       "native_hex": null
@@ -1241,26 +1241,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1275,15 +1275,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(6): Error: Range error (16777216 not in [0..16777215])\ninput.s(4): Note: Macro was defined here\n"
+          "stderr": "input.s:6: Error: Range error (16777216 not in [0..16777215])\ninput.s:4: Note: Expanded from macro here\n"
         }
       ],
       "native_hex": null
@@ -1295,15 +1295,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "huc6280_faraddr_range_included.inc(4): Error: Range error (16777216 not in [0..16777215])\nhuc6280_faraddr_range_included.inc(2): Note: Macro was defined here\n"
+          "stderr": "huc6280_faraddr_range_included.inc:4: Error: Range error (16777216 not in [0..16777215])\nhuc6280_faraddr_range_included.inc:2: Note: Expanded from macro here\n"
         }
       ],
       "native_hex": null
@@ -1315,15 +1315,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(9): Error: Range error (16777216 not in [0..16777215])\ninput.s(7): Note: Macro was defined here\ninput.s(4): Note: Macro was defined here\n"
+          "stderr": "input.s:9: Error: Range error (16777216 not in [0..16777215])\ninput.s:7: Note: Expanded from macro here\ninput.s:4: Note: Expanded from macro here\n"
         }
       ],
       "native_hex": null
@@ -1335,15 +1335,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "huc6280_faraddr_range_nested_included.inc(7): Error: Range error (16777216 not in [0..16777215])\nhuc6280_faraddr_range_nested_included.inc(5): Note: Macro was defined here\nhuc6280_faraddr_range_nested_included.inc(2): Note: Macro was defined here\n"
+          "stderr": "huc6280_faraddr_range_nested_included.inc:7: Error: Range error (16777216 not in [0..16777215])\nhuc6280_faraddr_range_nested_included.inc:5: Note: Expanded from macro here\nhuc6280_faraddr_range_nested_included.inc:2: Note: Expanded from macro here\n"
         }
       ],
       "native_hex": null
@@ -1355,15 +1355,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(3): Error: Range error (16777216 not in [0..16777215])\n"
+          "stderr": "input.s:3: Error: Range error (16777216 not in [0..16777215])\n"
         }
       ],
       "native_hex": null
@@ -1375,26 +1375,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1409,15 +1409,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(6): Error: Symbol 'MISSING' is undefined\n"
+          "stderr": "input.s:6: Error: Symbol ‘MISSING’ is undefined\n"
         }
       ],
       "native_hex": null
@@ -1429,15 +1429,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "huc6280_undefined_included.inc(4): Error: Symbol 'MISSING' is undefined\n"
+          "stderr": "huc6280_undefined_included.inc:4: Error: Symbol ‘MISSING’ is undefined\n"
         }
       ],
       "native_hex": null
@@ -1449,15 +1449,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(9): Error: Symbol 'MISSING' is undefined\n"
+          "stderr": "input.s:9: Error: Symbol ‘MISSING’ is undefined\n"
         }
       ],
       "native_hex": null
@@ -1469,15 +1469,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "huc6280_undefined_nested_included.inc(7): Error: Symbol 'MISSING' is undefined\n"
+          "stderr": "huc6280_undefined_nested_included.inc:7: Error: Symbol ‘MISSING’ is undefined\n"
         }
       ],
       "native_hex": null
@@ -1489,15 +1489,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(3): Error: Symbol 'MISSING' is undefined\n"
+          "stderr": "input.s:3: Error: Symbol ‘MISSING’ is undefined\n"
         }
       ],
       "native_hex": null
@@ -1509,26 +1509,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1543,15 +1543,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(6): Error: Syntax error\ninput.s(4): Note: Macro was defined here\n"
+          "stderr": "input.s:6: Error: Expected an expression but found ‘)’\ninput.s:4: Note: Expanded from macro here\ninput.s:6: Error: Expected ‘end-of-line’ but found ‘)’\ninput.s:4: Note: Expanded from macro here\n"
         }
       ],
       "native_hex": null
@@ -1563,15 +1563,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "huc6280_syntax_included.inc(4): Error: Syntax error\nhuc6280_syntax_included.inc(2): Note: Macro was defined here\n"
+          "stderr": "huc6280_syntax_included.inc:4: Error: Expected an expression but found ‘)’\nhuc6280_syntax_included.inc:2: Note: Expanded from macro here\nhuc6280_syntax_included.inc:4: Error: Expected ‘end-of-line’ but found ‘)’\nhuc6280_syntax_included.inc:2: Note: Expanded from macro here\n"
         }
       ],
       "native_hex": null
@@ -1583,15 +1583,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(9): Error: Syntax error\ninput.s(7): Note: Macro was defined here\ninput.s(4): Note: Macro was defined here\n"
+          "stderr": "input.s:9: Error: Expected an expression but found ‘)’\ninput.s:7: Note: Expanded from macro here\ninput.s:4: Note: Expanded from macro here\ninput.s:9: Error: Expected ‘end-of-line’ but found ‘)’\ninput.s:7: Note: Expanded from macro here\ninput.s:4: Note: Expanded from macro here\n"
         }
       ],
       "native_hex": null
@@ -1603,15 +1603,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "huc6280_syntax_nested_included.inc(7): Error: Syntax error\nhuc6280_syntax_nested_included.inc(5): Note: Macro was defined here\nhuc6280_syntax_nested_included.inc(2): Note: Macro was defined here\n"
+          "stderr": "huc6280_syntax_nested_included.inc:7: Error: Expected an expression but found ‘)’\nhuc6280_syntax_nested_included.inc:5: Note: Expanded from macro here\nhuc6280_syntax_nested_included.inc:2: Note: Expanded from macro here\nhuc6280_syntax_nested_included.inc:7: Error: Expected ‘end-of-line’ but found ‘)’\nhuc6280_syntax_nested_included.inc:5: Note: Expanded from macro here\nhuc6280_syntax_nested_included.inc:2: Note: Expanded from macro here\n"
         }
       ],
       "native_hex": null
@@ -1623,15 +1623,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(3): Error: Syntax error\n"
+          "stderr": "input.s:3: Error: Expected an expression but found ‘)’\ninput.s:3: Error: Expected ‘end-of-line’ but found ‘)’\n"
         }
       ],
       "native_hex": null
@@ -1643,26 +1643,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1677,15 +1677,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(6): Error: Range error\ninput.s(4): Note: Macro was defined here\n"
+          "stderr": "input.s:6: Error: Invalid number of bytes specified\ninput.s:4: Note: Expanded from macro here\n"
         }
       ],
       "native_hex": null
@@ -1697,15 +1697,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "huc6280_negative_reserve_included.inc(4): Error: Range error\nhuc6280_negative_reserve_included.inc(2): Note: Macro was defined here\n"
+          "stderr": "huc6280_negative_reserve_included.inc:4: Error: Invalid number of bytes specified\nhuc6280_negative_reserve_included.inc:2: Note: Expanded from macro here\n"
         }
       ],
       "native_hex": null
@@ -1717,15 +1717,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(9): Error: Range error\ninput.s(7): Note: Macro was defined here\ninput.s(4): Note: Macro was defined here\n"
+          "stderr": "input.s:9: Error: Invalid number of bytes specified\ninput.s:7: Note: Expanded from macro here\ninput.s:4: Note: Expanded from macro here\n"
         }
       ],
       "native_hex": null
@@ -1737,15 +1737,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "huc6280_negative_reserve_nested_included.inc(7): Error: Range error\nhuc6280_negative_reserve_nested_included.inc(5): Note: Macro was defined here\nhuc6280_negative_reserve_nested_included.inc(2): Note: Macro was defined here\n"
+          "stderr": "huc6280_negative_reserve_nested_included.inc:7: Error: Invalid number of bytes specified\nhuc6280_negative_reserve_nested_included.inc:5: Note: Expanded from macro here\nhuc6280_negative_reserve_nested_included.inc:2: Note: Expanded from macro here\n"
         }
       ],
       "native_hex": null
@@ -1757,15 +1757,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(3): Error: Range error\n"
+          "stderr": "input.s:3: Error: Invalid number of bytes specified\n"
         }
       ],
       "native_hex": null
@@ -1777,26 +1777,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1811,26 +1811,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1845,26 +1845,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1879,26 +1879,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1913,26 +1913,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-ph8p2sus",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""

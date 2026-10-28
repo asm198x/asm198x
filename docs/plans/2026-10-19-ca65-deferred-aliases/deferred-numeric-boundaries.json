@@ -1,31 +1,31 @@
 {
   "tools": {
     "ca65": {
-      "path": "/opt/homebrew/bin/ca65",
-      "sha256": "1a57997819fd98814e4601b5160df589e7a1a24e1888a80fee51ae450d8fd0ea",
+      "path": "/tmp/claude-0/cc65/bin/ca65",
+      "sha256": "1b23fe20161368b7a428ad85d7fa1f83e6ddef33c6f8648350d387d4952e1624",
       "version": {
         "argv": [
-          "/opt/homebrew/bin/ca65",
+          "/tmp/claude-0/cc65/bin/ca65",
           "--version"
         ],
-        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+        "cwd": "/",
         "exit": 0,
         "stdout": "",
-        "stderr": "ca65 V2.18 - N/A\n"
+        "stderr": "ca65 V2.19 - Git 8d86ca7\n"
       }
     },
     "ld65": {
-      "path": "/opt/homebrew/bin/ld65",
-      "sha256": "36bb196207a6b2c90a4aa991b419d6113885303951b14b60b455f51c777b3339",
+      "path": "/tmp/claude-0/cc65/bin/ld65",
+      "sha256": "7cd8d54c683bbf28ba55b92fa52efbdcf5e6da47bc47a70186a06e3aa19b6b4a",
       "version": {
         "argv": [
-          "/opt/homebrew/bin/ld65",
+          "/tmp/claude-0/cc65/bin/ld65",
           "--version"
         ],
-        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+        "cwd": "/",
         "exit": 0,
         "stdout": "",
-        "stderr": "ld65 V2.18 - N/A\n"
+        "stderr": "ld65 V2.19 - Git 8d86ca7\n"
       }
     }
   },
@@ -38,26 +38,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -72,26 +72,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -106,26 +106,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -140,26 +140,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -174,26 +174,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -208,26 +208,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -242,26 +242,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -276,26 +276,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -310,26 +310,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -344,26 +344,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -378,26 +378,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -412,26 +412,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -446,26 +446,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -480,26 +480,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -514,26 +514,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -548,26 +548,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -582,26 +582,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -616,26 +616,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -650,15 +650,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Overflow in hexadecimal number\n"
+          "stderr": "input.s:1: Error: Overflow in hexadecimal number\n"
         }
       ],
       "native_hex": null
@@ -670,15 +670,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(4): Error: Overflow in hexadecimal number\ninput.s(4): Error: Range error\n"
+          "stderr": "input.s:4: Error: Overflow in hexadecimal number\ninput.s:4: Error: Range error\n"
         }
       ],
       "native_hex": null
@@ -690,15 +690,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Number out of range\n"
+          "stderr": "input.s:1: Error: Number out of range\n"
         }
       ],
       "native_hex": null
@@ -710,15 +710,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(4): Error: Number out of range\ninput.s(4): Error: Range error\n"
+          "stderr": "input.s:4: Error: Number out of range\ninput.s:4: Error: Range error\n"
         }
       ],
       "native_hex": null
@@ -730,15 +730,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Overflow in binary number\n"
+          "stderr": "input.s:1: Error: Overflow in binary number\n"
         }
       ],
       "native_hex": null
@@ -750,15 +750,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(4): Error: Overflow in binary number\ninput.s(4): Error: Range error\n"
+          "stderr": "input.s:4: Error: Overflow in binary number\ninput.s:4: Error: Range error\n"
         }
       ],
       "native_hex": null
@@ -770,26 +770,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -804,26 +804,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -838,15 +838,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Overflow in hexadecimal number\n"
+          "stderr": "input.s:1: Error: Overflow in hexadecimal number\n"
         }
       ],
       "native_hex": null
@@ -858,15 +858,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(4): Error: Overflow in hexadecimal number\n"
+          "stderr": "input.s:4: Error: Overflow in hexadecimal number\n"
         }
       ],
       "native_hex": null
@@ -878,15 +878,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Number out of range\n"
+          "stderr": "input.s:1: Error: Number out of range\n"
         }
       ],
       "native_hex": null
@@ -898,15 +898,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(4): Error: Number out of range\ninput.s(4): Error: Range error\n"
+          "stderr": "input.s:4: Error: Number out of range\ninput.s:4: Error: Range error\n"
         }
       ],
       "native_hex": null
@@ -918,15 +918,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Overflow in binary number\n"
+          "stderr": "input.s:1: Error: Overflow in binary number\n"
         }
       ],
       "native_hex": null
@@ -938,15 +938,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(4): Error: Overflow in binary number\n"
+          "stderr": "input.s:4: Error: Overflow in binary number\n"
         }
       ],
       "native_hex": null
@@ -958,15 +958,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Number out of range\n"
+          "stderr": "input.s:1: Error: Number out of range\n"
         }
       ],
       "native_hex": null
@@ -978,15 +978,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(4): Error: Number out of range\ninput.s(4): Error: Range error\n"
+          "stderr": "input.s:4: Error: Number out of range\ninput.s:4: Error: Range error\n"
         }
       ],
       "native_hex": null
@@ -998,15 +998,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Overflow in hexadecimal number\n"
+          "stderr": "input.s:1: Error: Overflow in hexadecimal number\n"
         }
       ],
       "native_hex": null
@@ -1018,15 +1018,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(4): Error: Overflow in hexadecimal number\n"
+          "stderr": "input.s:4: Error: Overflow in hexadecimal number\n"
         }
       ],
       "native_hex": null
@@ -1038,15 +1038,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Number out of range\n"
+          "stderr": "input.s:1: Error: Number out of range\n"
         }
       ],
       "native_hex": null
@@ -1058,15 +1058,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(4): Error: Number out of range\ninput.s(4): Error: Range error\n"
+          "stderr": "input.s:4: Error: Number out of range\ninput.s:4: Error: Range error\n"
         }
       ],
       "native_hex": null
@@ -1078,15 +1078,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Overflow in binary number\n"
+          "stderr": "input.s:1: Error: Overflow in binary number\n"
         }
       ],
       "native_hex": null
@@ -1098,15 +1098,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(4): Error: Overflow in binary number\ninput.s(4): Error: Range error\n"
+          "stderr": "input.s:4: Error: Overflow in binary number\ninput.s:4: Error: Range error\n"
         }
       ],
       "native_hex": null
@@ -1118,15 +1118,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Number out of range\n"
+          "stderr": "input.s:1: Error: Number out of range\n"
         }
       ],
       "native_hex": null
@@ -1138,15 +1138,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(4): Error: Number out of range\ninput.s(4): Error: Range error\n"
+          "stderr": "input.s:4: Error: Number out of range\ninput.s:4: Error: Range error\n"
         }
       ],
       "native_hex": null
@@ -1158,15 +1158,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Overflow in hexadecimal number\n"
+          "stderr": "input.s:1: Error: Overflow in hexadecimal number\n"
         }
       ],
       "native_hex": null
@@ -1178,15 +1178,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(4): Error: Overflow in hexadecimal number\n"
+          "stderr": "input.s:4: Error: Overflow in hexadecimal number\n"
         }
       ],
       "native_hex": null
@@ -1198,15 +1198,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Number out of range\n"
+          "stderr": "input.s:1: Error: Number out of range\n"
         }
       ],
       "native_hex": null
@@ -1218,15 +1218,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(4): Error: Number out of range\ninput.s(4): Error: Range error\n"
+          "stderr": "input.s:4: Error: Number out of range\ninput.s:4: Error: Range error\n"
         }
       ],
       "native_hex": null
@@ -1238,15 +1238,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Overflow in binary number\n"
+          "stderr": "input.s:1: Error: Overflow in binary number\n"
         }
       ],
       "native_hex": null
@@ -1258,15 +1258,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(4): Error: Overflow in binary number\n"
+          "stderr": "input.s:4: Error: Overflow in binary number\n"
         }
       ],
       "native_hex": null
@@ -1278,15 +1278,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Number out of range\n"
+          "stderr": "input.s:1: Error: Number out of range\n"
         }
       ],
       "native_hex": null
@@ -1298,15 +1298,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(4): Error: Number out of range\ninput.s(4): Error: Range error\n"
+          "stderr": "input.s:4: Error: Number out of range\ninput.s:4: Error: Range error\n"
         }
       ],
       "native_hex": null
@@ -1318,15 +1318,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Overflow in hexadecimal number\n"
+          "stderr": "input.s:1: Error: Overflow in hexadecimal number\n"
         }
       ],
       "native_hex": null
@@ -1338,15 +1338,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(4): Error: Overflow in hexadecimal number\n"
+          "stderr": "input.s:4: Error: Overflow in hexadecimal number\n"
         }
       ],
       "native_hex": null
@@ -1358,15 +1358,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Number out of range\n"
+          "stderr": "input.s:1: Error: Number out of range\n"
         }
       ],
       "native_hex": null
@@ -1378,15 +1378,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(4): Error: Number out of range\ninput.s(4): Error: Range error\n"
+          "stderr": "input.s:4: Error: Number out of range\ninput.s:4: Error: Range error\n"
         }
       ],
       "native_hex": null
@@ -1398,15 +1398,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Overflow in binary number\n"
+          "stderr": "input.s:1: Error: Overflow in binary number\n"
         }
       ],
       "native_hex": null
@@ -1418,15 +1418,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(4): Error: Overflow in binary number\ninput.s(4): Error: Range error\n"
+          "stderr": "input.s:4: Error: Overflow in binary number\ninput.s:4: Error: Range error\n"
         }
       ],
       "native_hex": null
@@ -1438,15 +1438,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Number out of range\n"
+          "stderr": "input.s:1: Error: Number out of range\n"
         }
       ],
       "native_hex": null
@@ -1458,15 +1458,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(4): Error: Number out of range\ninput.s(4): Error: Range error\n"
+          "stderr": "input.s:4: Error: Number out of range\ninput.s:4: Error: Range error\n"
         }
       ],
       "native_hex": null
@@ -1478,15 +1478,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Overflow in hexadecimal number\n"
+          "stderr": "input.s:1: Error: Overflow in hexadecimal number\n"
         }
       ],
       "native_hex": null
@@ -1498,15 +1498,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(4): Error: Overflow in hexadecimal number\n"
+          "stderr": "input.s:4: Error: Overflow in hexadecimal number\n"
         }
       ],
       "native_hex": null
@@ -1518,15 +1518,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Number out of range\n"
+          "stderr": "input.s:1: Error: Number out of range\n"
         }
       ],
       "native_hex": null
@@ -1538,15 +1538,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(4): Error: Number out of range\ninput.s(4): Error: Range error\n"
+          "stderr": "input.s:4: Error: Number out of range\ninput.s:4: Error: Range error\n"
         }
       ],
       "native_hex": null
@@ -1558,15 +1558,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Overflow in binary number\n"
+          "stderr": "input.s:1: Error: Overflow in binary number\n"
         }
       ],
       "native_hex": null
@@ -1578,15 +1578,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-prgbbstf",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(4): Error: Overflow in binary number\n"
+          "stderr": "input.s:4: Error: Overflow in binary number\n"
         }
       ],
       "native_hex": null

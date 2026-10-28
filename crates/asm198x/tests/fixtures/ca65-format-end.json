@@ -1,31 +1,31 @@
 {
   "tools": {
     "ca65": {
-      "path": "/opt/homebrew/bin/ca65",
-      "sha256": "1a57997819fd98814e4601b5160df589e7a1a24e1888a80fee51ae450d8fd0ea",
+      "path": "/tmp/claude-0/cc65/bin/ca65",
+      "sha256": "1b23fe20161368b7a428ad85d7fa1f83e6ddef33c6f8648350d387d4952e1624",
       "version": {
         "argv": [
-          "/opt/homebrew/bin/ca65",
+          "/tmp/claude-0/cc65/bin/ca65",
           "--version"
         ],
-        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+        "cwd": "/",
         "exit": 0,
         "stdout": "",
-        "stderr": "ca65 V2.18 - N/A\n"
+        "stderr": "ca65 V2.19 - Git 8d86ca7\n"
       }
     },
     "ld65": {
-      "path": "/opt/homebrew/bin/ld65",
-      "sha256": "36bb196207a6b2c90a4aa991b419d6113885303951b14b60b455f51c777b3339",
+      "path": "/tmp/claude-0/cc65/bin/ld65",
+      "sha256": "7cd8d54c683bbf28ba55b92fa52efbdcf5e6da47bc47a70186a06e3aa19b6b4a",
       "version": {
         "argv": [
-          "/opt/homebrew/bin/ld65",
+          "/tmp/claude-0/cc65/bin/ld65",
           "--version"
         ],
-        "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+        "cwd": "/",
         "exit": 0,
         "stdout": "",
-        "stderr": "ld65 V2.18 - N/A\n"
+        "stderr": "ld65 V2.19 - Git 8d86ca7\n"
       }
     }
   },
@@ -38,26 +38,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -72,26 +72,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -140,26 +140,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -174,26 +174,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -208,26 +208,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -242,26 +242,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -277,26 +277,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -311,26 +311,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -345,26 +345,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -448,26 +448,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -482,15 +482,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Conditional assembly branch was never closed\n"
+          "stderr": "input.s:1: Error: Conditional assembly branch was never closed\n"
         }
       ],
       "native_hex": null
@@ -536,26 +536,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -570,26 +570,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -604,26 +604,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
-          "stderr": "input.s(3): Warning: No reference to unnamed label\n"
+          "stderr": "input.s:3: Warning: No reference to unnamed label\n"
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -638,26 +638,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -672,26 +672,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -760,26 +760,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -794,15 +794,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(3): Error: Overflow in hexadecimal number\n"
+          "stderr": "input.s:3: Error: Overflow in hexadecimal number\n"
         }
       ],
       "native_hex": null
@@ -814,15 +814,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(3): Error: Overflow in hexadecimal number\n"
+          "stderr": "input.s:3: Error: Overflow in hexadecimal number\n"
         }
       ],
       "native_hex": null
@@ -834,26 +834,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
-          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-attached-label-probe-n9p4k5s4",
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -862,5 +862,31 @@
       "native_hex": "2e656e640008"
     }
   ],
-  "dialect": "ca65"
+  "dialect": "ca65",
+  "kept_from_v2_18": [
+    {
+      "name": "called_macro",
+      "v2_19": "ca65: Check failed: IStack == 0, file 'ca65/istack.c', line 186"
+    },
+    {
+      "name": "called_end_unclosed_if",
+      "v2_19": "ca65: Check failed: IStack == 0, file 'ca65/istack.c', line 186"
+    },
+    {
+      "name": "called_end_unclosed_scope",
+      "v2_19": "ca65: Check failed: IStack == 0, file 'ca65/istack.c', line 186"
+    },
+    {
+      "name": "repeat_end",
+      "v2_19": "ca65: Check failed: IStack == 0, file 'ca65/istack.c', line 186"
+    },
+    {
+      "name": "define_end",
+      "v2_19": "ca65: Check failed: IStack == 0, file 'ca65/istack.c', line 186"
+    },
+    {
+      "name": "define_end_bad_argument",
+      "v2_19": "input.s:3: Error: Invalid format string\ninput.s:3: Error: ‘)’ expected\nca65: Check failed: IStack == 0, file 'ca65/istack.c', line 186"
+    }
+  ]
 }

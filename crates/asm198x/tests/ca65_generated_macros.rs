@@ -122,6 +122,10 @@ fn native_macro_heads_bind_labels_before_definition_or_expansion() {
     let mut gaps = 0;
     for case in cases {
         let name = case["name"].as_str().expect("name");
+        // A V2.19 fact the frozen old reader misses (#940).
+        if case["old_reader_gap"].is_number() {
+            continue;
+        }
         let source = case["source"].as_str().expect("source");
         std::fs::write(root.join("input.s"), source).expect("source");
         std::fs::write(

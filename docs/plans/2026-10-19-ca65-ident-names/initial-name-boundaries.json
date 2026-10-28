@@ -3,8 +3,34 @@
   "sha256": "1fdcbf84dace5acad9ee6d11f5677a83906937cfbe3cc846ca2be9903646905d",
   "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
   "tools": {
-    "ca65": "1a57997819fd98814e4601b5160df589e7a1a24e1888a80fee51ae450d8fd0ea",
-    "ld65": "36bb196207a6b2c90a4aa991b419d6113885303951b14b60b455f51c777b3339"
+    "ca65": {
+      "path": "/tmp/claude-0/cc65/bin/ca65",
+      "sha256": "1b23fe20161368b7a428ad85d7fa1f83e6ddef33c6f8648350d387d4952e1624",
+      "version": {
+        "argv": [
+          "/tmp/claude-0/cc65/bin/ca65",
+          "--version"
+        ],
+        "cwd": "/",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "ca65 V2.19 - Git 8d86ca7\n"
+      }
+    },
+    "ld65": {
+      "path": "/tmp/claude-0/cc65/bin/ld65",
+      "sha256": "7cd8d54c683bbf28ba55b92fa52efbdcf5e6da47bc47a70186a06e3aa19b6b4a",
+      "version": {
+        "argv": [
+          "/tmp/claude-0/cc65/bin/ld65",
+          "--version"
+        ],
+        "cwd": "/",
+        "exit": 0,
+        "stdout": "",
+        "stderr": "ld65 V2.19 - Git 8d86ca7\n"
+      }
+    }
   },
   "cases": [
     {
@@ -15,24 +41,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -64,24 +92,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -113,24 +143,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -162,24 +194,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -211,14 +245,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+          "stderr": "input.s:1: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Expected an expression but found ‘end-of-line’\n"
         }
       ],
       "native_hex": null,
@@ -247,14 +282,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+          "stderr": "input.s:1: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Expected an expression but found ‘end-of-line’\n"
         }
       ],
       "native_hex": null,
@@ -283,14 +319,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+          "stderr": "input.s:1: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Expected an expression but found ‘end-of-line’\n"
         }
       ],
       "native_hex": null,
@@ -319,14 +356,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+          "stderr": "input.s:1: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Expected an expression but found ‘end-of-line’\n"
         }
       ],
       "native_hex": null,
@@ -355,14 +393,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+          "stderr": "input.s:1: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Expected an expression but found ‘end-of-line’\n"
         }
       ],
       "native_hex": null,
@@ -391,14 +430,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+          "stderr": "input.s:1: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Expected an expression but found ‘end-of-line’\n"
         }
       ],
       "native_hex": null,
@@ -427,14 +467,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+          "stderr": "input.s:1: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Expected an expression but found ‘end-of-line’\n"
         }
       ],
       "native_hex": null,
@@ -463,14 +504,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+          "stderr": "input.s:1: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Expected an expression but found ‘end-of-line’\n"
         }
       ],
       "native_hex": null,
@@ -499,14 +541,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+          "stderr": "input.s:1: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Expected an expression but found ‘end-of-line’\n"
         }
       ],
       "native_hex": null,
@@ -535,14 +578,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+          "stderr": "input.s:1: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Expected an expression but found ‘end-of-line’\n"
         }
       ],
       "native_hex": null,
@@ -571,14 +615,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+          "stderr": "input.s:1: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Expected an expression but found ‘end-of-line’\n"
         }
       ],
       "native_hex": null,
@@ -607,14 +652,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+          "stderr": "input.s:1: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Expected an expression but found ‘end-of-line’\n"
         }
       ],
       "native_hex": null,
@@ -643,14 +689,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+          "stderr": "input.s:1: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Expected an expression but found ‘end-of-line’\n"
         }
       ],
       "native_hex": null,
@@ -679,14 +726,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+          "stderr": "input.s:1: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Expected an expression but found ‘end-of-line’\n"
         }
       ],
       "native_hex": null,
@@ -715,14 +763,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+          "stderr": "input.s:1: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Expected an expression but found ‘end-of-line’\n"
         }
       ],
       "native_hex": null,
@@ -751,14 +800,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+          "stderr": "input.s:1: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Expected an expression but found ‘end-of-line’\n"
         }
       ],
       "native_hex": null,
@@ -787,14 +837,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+          "stderr": "input.s:1: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Expected an expression but found ‘end-of-line’\n"
         }
       ],
       "native_hex": null,
@@ -823,14 +874,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+          "stderr": "input.s:1: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Expected an expression but found ‘end-of-line’\n"
         }
       ],
       "native_hex": null,
@@ -859,14 +911,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+          "stderr": "input.s:1: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Expected an expression but found ‘end-of-line’\n"
         }
       ],
       "native_hex": null,
@@ -895,14 +948,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+          "stderr": "input.s:1: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Expected an expression but found ‘end-of-line’\n"
         }
       ],
       "native_hex": null,
@@ -931,14 +985,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+          "stderr": "input.s:1: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Expected an expression but found ‘end-of-line’\n"
         }
       ],
       "native_hex": null,
@@ -967,14 +1022,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+          "stderr": "input.s:1: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Expected an expression but found ‘end-of-line’\n"
         }
       ],
       "native_hex": null,
@@ -1003,14 +1059,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+          "stderr": "input.s:1: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Expected an expression but found ‘end-of-line’\n"
         }
       ],
       "native_hex": null,
@@ -1039,14 +1096,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Argument of .IDENT is not a valid identifier\ninput.s(2): Error: Syntax error\n"
+          "stderr": "input.s:1: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Argument of .IDENT is not a valid identifier\ninput.s:2: Error: Expected an expression but found ‘end-of-line’\n"
         }
       ],
       "native_hex": null,
@@ -1075,17 +1133,32 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "exit": 1,
+          "cwd": "<run directory>",
+          "exit": 0,
           "stdout": "",
-          "stderr": "input.s(1): Error: No preceeding global symbol\ninput.s(2): Error: No preceeding global symbol\n"
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/tmp/claude-0/cc65/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "<run directory>",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
         }
       ],
-      "native_hex": null,
+      "native_hex": "070010",
       "actual": {
         "argv": [
           "/private/tmp/asm198x-text-call-spacing-clean-producer/asm198x",
@@ -1111,17 +1184,32 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "exit": 1,
+          "cwd": "<run directory>",
+          "exit": 0,
           "stdout": "",
-          "stderr": "input.s(1): Error: No preceeding global symbol\ninput.s(2): Error: No preceeding global symbol\n"
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/tmp/claude-0/cc65/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "<run directory>",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
         }
       ],
-      "native_hex": null,
+      "native_hex": "070010",
       "actual": {
         "argv": [
           "/private/tmp/asm198x-text-call-spacing-clean-producer/asm198x",
@@ -1147,17 +1235,32 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "exit": 1,
+          "cwd": "<run directory>",
+          "exit": 0,
           "stdout": "",
-          "stderr": "input.s(1): Error: No preceeding global symbol\ninput.s(2): Error: No preceeding global symbol\n"
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/tmp/claude-0/cc65/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "<run directory>",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
         }
       ],
-      "native_hex": null,
+      "native_hex": "070010",
       "actual": {
         "argv": [
           "/private/tmp/asm198x-text-call-spacing-clean-producer/asm198x",
@@ -1183,17 +1286,32 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
-          "exit": 1,
+          "cwd": "<run directory>",
+          "exit": 0,
           "stdout": "",
-          "stderr": "input.s(1): Error: No preceeding global symbol\ninput.s(2): Error: No preceeding global symbol\n"
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/tmp/claude-0/cc65/bin/ld65",
+            "-C",
+            "input.cfg",
+            "input.o",
+            "-o",
+            "native.bin"
+          ],
+          "cwd": "<run directory>",
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
         }
       ],
-      "native_hex": null,
+      "native_hex": "070010",
       "actual": {
         "argv": [
           "/private/tmp/asm198x-text-call-spacing-clean-producer/asm198x",
@@ -1219,14 +1337,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Syntax error\ninput.s(1): Error: Unexpected trailing garbage characters\n"
+          "stderr": "input.s:1: Error: Expected an expression but found ‘:’\ninput.s:1: Error: Expected ‘end-of-line’ but found ‘:’\n"
         }
       ],
       "native_hex": null,
@@ -1255,14 +1374,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Syntax error\ninput.s(1): Error: Unexpected trailing garbage characters\n"
+          "stderr": "input.s:1: Error: Expected an expression but found ‘:’\ninput.s:1: Error: Expected ‘end-of-line’ but found ‘:’\n"
         }
       ],
       "native_hex": null,
@@ -1291,14 +1411,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Syntax error\ninput.s(1): Error: Unexpected trailing garbage characters\n"
+          "stderr": "input.s:1: Error: Expected an expression but found ‘:’\ninput.s:1: Error: Expected ‘end-of-line’ but found ‘:’\n"
         }
       ],
       "native_hex": null,
@@ -1327,14 +1448,15 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
+          "cwd": "<run directory>",
           "exit": 1,
           "stdout": "",
-          "stderr": "input.s(1): Error: Syntax error\ninput.s(1): Error: Unexpected trailing garbage characters\n"
+          "stderr": "input.s:1: Error: Expected an expression but found ‘:’\ninput.s:1: Error: Expected ‘end-of-line’ but found ‘:’\n"
         }
       ],
       "native_hex": null,
@@ -1363,24 +1485,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1412,24 +1536,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1461,24 +1587,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
@@ -1510,24 +1638,26 @@
       "native": [
         {
           "argv": [
-            "/opt/homebrew/bin/ca65",
+            "/tmp/claude-0/cc65/bin/ca65",
             "input.s",
             "-o",
             "input.o"
           ],
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""
         },
         {
           "argv": [
-            "/opt/homebrew/bin/ld65",
+            "/tmp/claude-0/cc65/bin/ld65",
             "-C",
             "input.cfg",
             "input.o",
             "-o",
             "native.bin"
           ],
+          "cwd": "<run directory>",
           "exit": 0,
           "stdout": "",
           "stderr": ""

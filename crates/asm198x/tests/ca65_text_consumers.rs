@@ -122,6 +122,10 @@ fn native_audits_have_complete_portable_and_memory_coverage() {
                     // Native can print the same assertion warning in both phases;
                     // the existing fused assembler emits one logical diagnostic.
                     for stage in native["native"].as_array().expect("native stages") {
+                        // ld65 V2.19 puts its own prefix before the message.
+                        let linker = stage["argv"][0]
+                            .as_str()
+                            .is_some_and(|tool| tool.ends_with("ld65"));
                         let messages: Vec<_> = stage["stderr"]
                             .as_str()
                             .expect("stderr")
@@ -130,11 +134,12 @@ fn native_audits_have_complete_portable_and_memory_coverage() {
                                 line.split_once(": Warning: ")
                                     .or_else(|| line.split_once(": Error: "))
                                     .map(|(_, text)| {
-                                        serde_json::Value::String(
-                                            text.strip_prefix("input.s(2): ")
-                                                .unwrap_or(text)
-                                                .to_string(),
-                                        )
+                                        let text = if linker {
+                                            text.strip_prefix("Assertion failed: ").unwrap_or(text)
+                                        } else {
+                                            text
+                                        };
+                                        serde_json::Value::String(text.to_string())
                                     })
                             })
                             .collect();
