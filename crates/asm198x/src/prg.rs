@@ -14,7 +14,7 @@ use format198x_commodore_c64_prg::PrgFile;
 /// has no flat origin, so it serialises at load address `$0000`.
 pub fn prg(asm: &AssemblyResult) -> Vec<u8> {
     PrgFile {
-        load_address: asm.origin.unwrap_or(0) as u16,
+        load_address: asm.origin.unwrap_or(0),
         data: asm.bytes.clone(),
     }
     .encode()

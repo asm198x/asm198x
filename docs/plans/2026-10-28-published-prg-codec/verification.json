@@ -1,0 +1,41 @@
+{
+  "base": "ac925e45f5f051e646a03e23a029e1e968e59d8d",
+  "dependency_approved": "2026-10-28, format198x-commodore-c64-prg 0.1",
+  "full_workspace_source_commit": "2b4e6cbef43dcdb8ec8a65854c1c82a02263d83e",
+  "full_workspace_counts": {
+    "passed": 1734,
+    "failed": 0,
+    "ignored": 37
+  },
+  "final_source_delta": "Removed an unnecessary u16-to-u16 cast; existing PRG test, full-file ACME controls, strict workspace Clippy and generated docs rechecked afterward. Final CI checks the complete final head.",
+  "acme_cases": [
+    {
+      "case": "basic_origin",
+      "bytes": 8,
+      "sha256": "63bc72abd2713d042eb13e17ecda52d669e3da853f2286d0a1a665e3ca408880"
+    },
+    {
+      "case": "mixed_data",
+      "bytes": 6,
+      "sha256": "892e8ffce7eed1e49e35ee21dc544b24aef9e2cfa6a40379c3e8993fcf8ddb89"
+    },
+    {
+      "case": "last_address",
+      "bytes": 3,
+      "sha256": "e4d9aa3b161d0f1693b10cff12130c7b8e410c80fa8eb69b6d42074ff3ca8ff9"
+    },
+    {
+      "case": "zero_origin",
+      "bytes": 3,
+      "sha256": "a24f6ea43dfa4eaefb42b9a96f3914492427e4d6488d54a4bde9d5a40bccf565"
+    }
+  ],
+  "excluded_web_lock": "cargo metadata --locked --manifest-path crates/asm198x-web/Cargo.toml --format-version 1 passed",
+  "shipped_dependencies": "Approved PRG codec is present; verdict-corpus and sha2 remain absent from normal edges.",
+  "fixture_retention": {
+    "repository": "/Users/stevehill/Projects/198x/Code198x/code-samples",
+    "local_ref": "refs/codex/fixture-pins/asm198x/f11698d0b51b3a6c1209cec3d649229aa35af97f",
+    "sha": "f11698d0b51b3a6c1209cec3d649229aa35af97f",
+    "reason": "The existing pinned commit had no containing local ref. Preserve it before removing the clean temporary shared clone; no source branch or working file was changed."
+  }
+}

@@ -1,0 +1,37 @@
+asm198x v0.0.73 (/private/tmp/198x-batch3-asm/crates/asm198x)
+├── asm198x-ir v0.0.73 (/private/tmp/198x-batch3-asm/crates/asm198x-ir)
+│   ├── isa198x v0.1.7
+│   └── serde v1.0.229
+│       ├── serde_core v1.0.229
+│       └── serde_derive v1.0.229 (proc-macro)
+│           ├── proc-macro2 v1.0.107
+│           │   └── unicode-ident v1.0.24
+│           ├── quote v1.0.47
+│           │   └── proc-macro2 v1.0.107 (*)
+│           └── syn v3.0.4
+│               ├── proc-macro2 v1.0.107 (*)
+│               ├── quote v1.0.47 (*)
+│               └── unicode-ident v1.0.24
+├── debug198x v0.1.0
+│   ├── serde v1.0.229 (*)
+│   └── serde_json v1.0.154
+│       ├── itoa v1.0.18
+│       ├── memchr v2.8.3
+│       ├── serde_core v1.0.229
+│       └── zmij v1.0.23
+├── format198x-commodore-c64-prg v0.1.0
+├── format198x-sinclair-zx-spectrum-tap v0.1.1
+├── format198x-tzx v0.1.0
+├── isa198x v0.1.7
+├── isa198x-disasm v0.1.7
+│   └── isa198x v0.1.7
+├── lang198x-ca65 v0.0.15
+│   ├── asm198x-ir v0.0.73 (/private/tmp/198x-batch3-asm/crates/asm198x-ir) (*)
+│   ├── isa198x v0.1.7
+│   └── lang198x-syntax v0.1.3
+├── lang198x-z80-asm v0.2.5
+│   ├── asm198x-ir v0.0.73 (/private/tmp/198x-batch3-asm/crates/asm198x-ir) (*)
+│   ├── isa198x v0.1.7
+│   └── lang198x-syntax v0.1.3
+├── serde v1.0.229 (*)
+└── serde_json v1.0.154 (*)

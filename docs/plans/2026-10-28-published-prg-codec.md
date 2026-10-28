@@ -38,3 +38,14 @@ the broader local workspace suite, Clippy and docs checks run. It must be
 ready and all checks complete successfully before merge. Completion evidence
 will be linked in its review comments; this plan does not call a pending check
 successful.
+
+## Local completion
+
+The full workspace suite passed: 1734 executed passes, zero failures and
+37 explicit existing ignores. Strict workspace Clippy caught the redundant
+cast in the proposed wrapper: AssemblyResult already stores a u16 origin. The
+cast is removed, and final PRG/ACME controls still match all original bytes.
+Strict Clippy, generated docs and the complete excluded-web lock resolution
+pass. The normal dependency tree includes the approved codec and excludes the
+test-only verdict-corpus and sha2 crates. Native candidate CI must still pass
+on the final head before merge.
