@@ -1,0 +1,10 @@
+   Compiling format198x-commodore-c64-prg v0.1.0
+   Compiling asm198x v0.0.73 (/private/tmp/198x-batch3-asm/crates/asm198x)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 7.91s
+     Running unittests src/lib.rs (/private/tmp/198x-batch3-asm-target/debug/deps/asm198x-fbe06a7656d8289e)
+
+running 1 test
+test prg::tests::prepends_little_endian_load_address ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 768 filtered out; finished in 0.00s
+
