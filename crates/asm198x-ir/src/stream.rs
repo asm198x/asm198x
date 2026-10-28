@@ -952,7 +952,11 @@ pub enum Place {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DiagSeverity {
     /// Stops the assembly: `!error`, `!serious`, `FAIL`, lwasm's `error`.
+    /// A dialect that reports every error reports this one and carries on.
     Error,
+    /// Stops the assembly at once, even for a dialect that reports every
+    /// error: ca65's `.fatal`.
+    Fatal,
     /// Notes and carries on: `!warn`, `WARN`.
     Warning,
     /// Text the source asked to print, and not a complaint about anything:

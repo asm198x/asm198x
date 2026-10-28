@@ -65,7 +65,7 @@ use super::ca65_layout::{Layout, ResolvedLayout};
 use crate::ast::{map_sym_expr, map_syms};
 use crate::dialect::Dialect;
 use crate::engine::{
-    AsmError, BinOp, Expr, Operation, Place, Statement, Warning, align_pad, next_pc,
+    AsmError, BinOp, DiagSeverity, Expr, Operation, Place, Statement, Warning, align_pad, next_pc,
 };
 use crate::source::{SourceLoader, SourceMap};
 use crate::span::{FileId, Span};
@@ -228,6 +228,11 @@ impl Dialect for Ca65Walk {
     }
 
     /// A linked program's budgets are checked against its link.
+    /// ca65 reports every error, and stops only at `.fatal`.
+    fn reports_every_error(&self) -> bool {
+        true
+    }
+
     fn engine_checks_budgets(&self) -> bool {
         self.layout.is_none()
     }
@@ -696,10 +701,28 @@ impl Walk<'_> {
             AsmError::at(self.site(expander, span), message)
         })?;
         let made = self.made;
+        // ca65 stops at `.fatal`, where it reports `.error` and carries on.
+        let fatal = matches!(
+            line.line().statement(),
+            Some(lang198x_ca65::ast::Statement::Command(command))
+                if command.word().is_some_and(|w| w.text().eq_ignore_ascii_case(".fatal"))
+        );
         let mut items: Vec<(Option<String>, Option<Operation>)> = lowered
             .items
             .into_iter()
-            .map(|item| (item.label, item.op))
+            .map(|item| match item.op {
+                Some(Operation::Diagnose {
+                    severity: DiagSeverity::Error,
+                    message,
+                }) if fatal => (
+                    item.label,
+                    Some(Operation::Diagnose {
+                        severity: DiagSeverity::Fatal,
+                        message,
+                    }),
+                ),
+                op => (item.label, op),
+            })
             .collect();
         let mut members = Vec::new();
         match lowered.record {

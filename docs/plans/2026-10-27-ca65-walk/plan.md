@@ -399,9 +399,26 @@ way, and one-byte data only if the names are sound. ca65 lists undefined
 names in its symbol table's order, and the walk in the order they were
 used.
 
-Still to do, in the shared engine for every dialect: carry on past an error
-in pass two, so that range errors, `.error` and the rest are all reported,
-and `.fatal` stops at once, as in ca65.
+The engine carries on too, for a dialect that says it should
+(`Dialect::reports_every_error`, which only the walk does): when a statement
+fails in the second pass, the error is kept, the statement is put back as
+room of the size the first pass gave it, so every later address stays put,
+and the pass runs again. So every `.error` and every value out of range is
+reported, as in ca65, and `.fatal`, now its own `DiagSeverity::Fatal`, stops
+at once. It gives up after 100 errors.
+
+What still differs from ca65:
+
+- ca65 refuses a constant out of range, such as `.byte 300`, as it reads the
+  line, so a syntax error elsewhere does not hide it; the walk leaves it to
+  the engine, which does not run once the walk has found an error. Lowering
+  could refuse it at the line instead, with ca65's message, "Range error (300
+  not in [0..255])".
+- An error inside `.repeat` is at the line inside it; ca65 names the line of
+  `.endrepeat`.
+- `lang198x-ca65` lowers `.fatal` as `.error`, and the walk turns it into a
+  fatal one; lowering can say so itself once an `asm198x-ir` release carries
+  the new severity.
 
 ## After this step
 
