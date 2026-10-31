@@ -38,6 +38,11 @@ Labels sit at column 0 and take their own line; operations are indented one
 level; an own-line comment stays on its own line. `loop: sta screen,x` becomes
 two lines, which is the one change people are surprised by.
 
+The pasmo, pasmonext and ca65 dialects format with their Lang198x front ends
+instead, which never add, remove or reorder lines. A label stays on its line,
+spelled as written; the operation starts at column 9 and a trailing comment at
+column 33.
+
 **What it does not touch is the point.** Comments keep their wording and their
 position. Operand spelling is left exactly as written — `$c000` is not
 re-cased, `screen + $100` is not folded, and a number written in binary stays

@@ -482,7 +482,17 @@ As for PasmoNext, in three parts:
    implement as the declared surface says (`.charmap`, `.case`, `.feature`,
    `.linecont`, `.localchar`, `.macpack`, `.null`), and a CPU other than the
    6502 and 4510 as not lowered yet (stage 4).
-2. **`fmt` moves onto Lang198x's tree.** Until then the old formatter writes
-   a label named `Z`, `A` or `F` as `Z:`, which ca65 reads as an address
-   size; three cases mark it (`formatter_gap`, #848).
-3. **The old reader is deleted.**
+2. **`fmt` moves onto Lang198x's tree** (`lang198x_ca65::format`, 0.0.18).
+   It never adds, removes or reorders lines: a label stays in column 1,
+   spelled as written, a statement starts in column 9 and a trailing comment
+   in column 33. A macro's body, everything after `.end`, and an unreadable
+   line with the lines after it up to the next readable one are kept as
+   written; ca65 reads an unclosed string on into the next lines, so their
+   spaces matter. ca65 V2.19 and ld65 assembled every ca65 fixture and verdict
+   source (10,840) and every NES curriculum program (388) to the same bytes
+   once formatted, or refused it with the same errors.
+   `tests/fmt_ca65_gate.rs` keeps the check through the walk. The old
+   reader's parse-only entry points went with its formatter, and the three
+   `formatter_gap` cases (#848) are formatted again.
+3. **The old reader is deleted.** What is left of it serves the 65816 and
+   HuC6280 dialects through `ca65_flat`, so it goes with them in stage 4.

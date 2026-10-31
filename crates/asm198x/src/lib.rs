@@ -269,19 +269,19 @@ pub fn assemble_ca65_debug(
     assemble_ca65_nes_lang198x_debug(source, source_path)
 }
 
-/// Reformat ca65-syntax NES source to canonical layout (the `--fmt` formatter).
-/// Parses into the source-preserving semantic AST and emits canonical
-/// same-dialect source — reassembling byte-identical to the input, with the
-/// named, `@cheap`, and anonymous (`:`) label forms preserved.
+/// Format ca65 source with Lang198x's formatter (the `fmt` command). It
+/// never adds, removes or reorders lines: a label starts in column 1,
+/// spelled as written, a statement in column 9 and a trailing comment in
+/// column 33, each kept as written. Comment-only lines, unreadable lines,
+/// macro bodies and everything after `.end` are kept as written. ca65 V2.19
+/// assembles the result to the same bytes, or refuses it with the same
+/// errors, and formatting it again changes nothing.
 ///
 /// # Errors
-/// Returns an [`AsmError`] on any parse failure.
+/// Returns an [`AsmError`] only for source too long to parse.
 pub fn format_ca65(source: &str) -> Result<String, AsmError> {
-    Ok(ast::emit(
-        // The formatter must not expand macros — see the dialect's parse.
-        &dialects::ca65::parse_program(&isa::mos6502::SET, source, dialects::macros::Expand::No)?,
-        false,
-    ))
+    lang198x_ca65::format(source, lang198x_ca65::Profile::CA65_2_19_6502)
+        .map_err(|_| AsmError::new(0, "the source is too long to format"))
 }
 
 /// Assemble Motorola-syntax 68000 source into a flat big-endian code image
