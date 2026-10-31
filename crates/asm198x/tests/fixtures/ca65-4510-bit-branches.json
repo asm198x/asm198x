@@ -35,6 +35,8 @@
   "cases": [
     {
       "name": "bbr0_$00",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "0f0031",
       "source": ".p4510\n bbr0 $00,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -69,6 +71,8 @@
     },
     {
       "name": "bbr0_$02",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "0f0231",
       "source": ".p4510\n bbr0 $02,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -103,6 +107,8 @@
     },
     {
       "name": "bbr0_$ff",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "0fff31",
       "source": ".p4510\n bbr0 $ff,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -177,6 +183,8 @@
     },
     {
       "name": "bbr1_$00",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "1f0031",
       "source": ".p4510\n bbr1 $00,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -211,6 +219,8 @@
     },
     {
       "name": "bbr1_$02",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "1f0231",
       "source": ".p4510\n bbr1 $02,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -245,6 +255,8 @@
     },
     {
       "name": "bbr1_$ff",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "1fff31",
       "source": ".p4510\n bbr1 $ff,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -319,6 +331,8 @@
     },
     {
       "name": "bbr2_$00",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "2f0031",
       "source": ".p4510\n bbr2 $00,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -353,6 +367,8 @@
     },
     {
       "name": "bbr2_$02",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "2f0231",
       "source": ".p4510\n bbr2 $02,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -387,6 +403,8 @@
     },
     {
       "name": "bbr2_$ff",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "2fff31",
       "source": ".p4510\n bbr2 $ff,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -461,6 +479,8 @@
     },
     {
       "name": "bbr3_$00",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "3f0031",
       "source": ".p4510\n bbr3 $00,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -495,6 +515,8 @@
     },
     {
       "name": "bbr3_$02",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "3f0231",
       "source": ".p4510\n bbr3 $02,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -529,6 +551,8 @@
     },
     {
       "name": "bbr3_$ff",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "3fff31",
       "source": ".p4510\n bbr3 $ff,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -603,6 +627,8 @@
     },
     {
       "name": "bbr4_$00",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "4f0031",
       "source": ".p4510\n bbr4 $00,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -637,6 +663,8 @@
     },
     {
       "name": "bbr4_$02",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "4f0231",
       "source": ".p4510\n bbr4 $02,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -671,6 +699,8 @@
     },
     {
       "name": "bbr4_$ff",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "4fff31",
       "source": ".p4510\n bbr4 $ff,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -745,6 +775,8 @@
     },
     {
       "name": "bbr5_$00",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "5f0031",
       "source": ".p4510\n bbr5 $00,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -779,6 +811,8 @@
     },
     {
       "name": "bbr5_$02",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "5f0231",
       "source": ".p4510\n bbr5 $02,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -813,6 +847,8 @@
     },
     {
       "name": "bbr5_$ff",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "5fff31",
       "source": ".p4510\n bbr5 $ff,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -887,6 +923,8 @@
     },
     {
       "name": "bbr6_$00",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "6f0031",
       "source": ".p4510\n bbr6 $00,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -921,6 +959,8 @@
     },
     {
       "name": "bbr6_$02",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "6f0231",
       "source": ".p4510\n bbr6 $02,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -955,6 +995,8 @@
     },
     {
       "name": "bbr6_$ff",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "6fff31",
       "source": ".p4510\n bbr6 $ff,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -1029,6 +1071,8 @@
     },
     {
       "name": "bbr7_$00",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "7f0031",
       "source": ".p4510\n bbr7 $00,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -1063,6 +1107,8 @@
     },
     {
       "name": "bbr7_$02",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "7f0231",
       "source": ".p4510\n bbr7 $02,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -1097,6 +1143,8 @@
     },
     {
       "name": "bbr7_$ff",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "7fff31",
       "source": ".p4510\n bbr7 $ff,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -1171,6 +1219,8 @@
     },
     {
       "name": "bbs0_$00",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "8f0031",
       "source": ".p4510\n bbs0 $00,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -1205,6 +1255,8 @@
     },
     {
       "name": "bbs0_$02",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "8f0231",
       "source": ".p4510\n bbs0 $02,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -1239,6 +1291,8 @@
     },
     {
       "name": "bbs0_$ff",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "8fff31",
       "source": ".p4510\n bbs0 $ff,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -1313,6 +1367,8 @@
     },
     {
       "name": "bbs1_$00",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "9f0031",
       "source": ".p4510\n bbs1 $00,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -1347,6 +1403,8 @@
     },
     {
       "name": "bbs1_$02",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "9f0231",
       "source": ".p4510\n bbs1 $02,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -1381,6 +1439,8 @@
     },
     {
       "name": "bbs1_$ff",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "9fff31",
       "source": ".p4510\n bbs1 $ff,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -1455,6 +1515,8 @@
     },
     {
       "name": "bbs2_$00",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "af0031",
       "source": ".p4510\n bbs2 $00,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -1489,6 +1551,8 @@
     },
     {
       "name": "bbs2_$02",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "af0231",
       "source": ".p4510\n bbs2 $02,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -1523,6 +1587,8 @@
     },
     {
       "name": "bbs2_$ff",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "afff31",
       "source": ".p4510\n bbs2 $ff,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -1597,6 +1663,8 @@
     },
     {
       "name": "bbs3_$00",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "bf0031",
       "source": ".p4510\n bbs3 $00,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -1631,6 +1699,8 @@
     },
     {
       "name": "bbs3_$02",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "bf0231",
       "source": ".p4510\n bbs3 $02,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -1665,6 +1735,8 @@
     },
     {
       "name": "bbs3_$ff",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "bfff31",
       "source": ".p4510\n bbs3 $ff,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -1739,6 +1811,8 @@
     },
     {
       "name": "bbs4_$00",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "cf0031",
       "source": ".p4510\n bbs4 $00,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -1773,6 +1847,8 @@
     },
     {
       "name": "bbs4_$02",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "cf0231",
       "source": ".p4510\n bbs4 $02,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -1807,6 +1883,8 @@
     },
     {
       "name": "bbs4_$ff",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "cfff31",
       "source": ".p4510\n bbs4 $ff,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -1881,6 +1959,8 @@
     },
     {
       "name": "bbs5_$00",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "df0031",
       "source": ".p4510\n bbs5 $00,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -1915,6 +1995,8 @@
     },
     {
       "name": "bbs5_$02",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "df0231",
       "source": ".p4510\n bbs5 $02,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -1949,6 +2031,8 @@
     },
     {
       "name": "bbs5_$ff",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "dfff31",
       "source": ".p4510\n bbs5 $ff,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -2023,6 +2107,8 @@
     },
     {
       "name": "bbs6_$00",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "ef0031",
       "source": ".p4510\n bbs6 $00,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -2057,6 +2143,8 @@
     },
     {
       "name": "bbs6_$02",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "ef0231",
       "source": ".p4510\n bbs6 $02,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -2091,6 +2179,8 @@
     },
     {
       "name": "bbs6_$ff",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "efff31",
       "source": ".p4510\n bbs6 $ff,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -2165,6 +2255,8 @@
     },
     {
       "name": "bbs7_$00",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "ff0031",
       "source": ".p4510\n bbs7 $00,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -2199,6 +2291,8 @@
     },
     {
       "name": "bbs7_$02",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "ff0231",
       "source": ".p4510\n bbs7 $02,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -2233,6 +2327,8 @@
     },
     {
       "name": "bbs7_$ff",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "ffff31",
       "source": ".p4510\n bbs7 $ff,*+$34\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -2347,6 +2443,8 @@
     },
     {
       "name": "pc_-127",
+      "divergence": "bit-branch-pc",
+      "walk_hex": null,
       "source": ".p4510\n bbr0 $02,*+(-127)\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -2381,6 +2479,8 @@
     },
     {
       "name": "pc_0",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "0f02fd",
       "source": ".p4510\n bbr0 $02,*+(0)\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -2415,6 +2515,8 @@
     },
     {
       "name": "pc_1",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "0f02fe",
       "source": ".p4510\n bbr0 $02,*+(1)\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -2449,6 +2551,8 @@
     },
     {
       "name": "pc_2",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "0f02ff",
       "source": ".p4510\n bbr0 $02,*+(2)\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -2483,6 +2587,8 @@
     },
     {
       "name": "pc_3",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "0f0200",
       "source": ".p4510\n bbr0 $02,*+(3)\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -2517,6 +2623,8 @@
     },
     {
       "name": "pc_127",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "0f027c",
       "source": ".p4510\n bbr0 $02,*+(127)\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -2551,6 +2659,8 @@
     },
     {
       "name": "pc_128",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "0f027d",
       "source": ".p4510\n bbr0 $02,*+(128)\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -2585,6 +2695,8 @@
     },
     {
       "name": "pc_129",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "0f027e",
       "source": ".p4510\n bbr0 $02,*+(129)\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -2605,6 +2717,8 @@
     },
     {
       "name": "pc_130",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "0f027f",
       "source": ".p4510\n bbr0 $02,*+(130)\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -2725,6 +2839,8 @@
     },
     {
       "name": "target_*",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "1ffffd",
       "source": ".p4510\n bbr1 $ff,*\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -2759,6 +2875,8 @@
     },
     {
       "name": "target_(*+2)",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "1fffff",
       "source": ".p4510\n bbr1 $ff,(*+2)\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -3437,6 +3555,8 @@
     },
     {
       "name": "zp_pc",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "0f2000",
       "source": ".p4510\n.org $20\n bbr0 *,*+3\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -3661,6 +3781,8 @@
     },
     {
       "name": "repeat",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "0f00000f01000f0200",
       "source": ".p4510\n.repeat 3,I\n bbr0 I,*+3\n.endrepeat\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -3695,6 +3817,8 @@
     },
     {
       "name": "include_debug",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "ea2f0900ea00100410",
       "source": ".p4510\nbefore: nop\n.include \"branch.inc\"\nafter: nop\n.word before,after\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -3729,6 +3853,8 @@
     },
     {
       "name": "cpu_restore",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "eaff0700",
       "source": ".p4510\n.pushcpu\n.p02\n nop\n.popcpu\n bbs7 7,*+3\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -3957,6 +4083,8 @@
     },
     {
       "name": "syntax_(1),*+3",
+      "divergence": "bit-branch-pc",
+      "walk_hex": "0f0100",
       "source": ".p4510\n bbr0 (1),*+3\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [

@@ -146,6 +146,18 @@ fn formatted_source_keeps_native_bytes_and_failed_outputs() {
             .expect("native stage")["exit"]
             == 0
             && case["formatted_assembly_gap"].is_null();
+        // A named divergence: the walk's own answer is recorded beside ca65's.
+        let divergent = case["divergence"].is_string();
+        let accepted = if divergent {
+            case["walk_hex"].is_string()
+        } else {
+            accepted
+        };
+        let want_hex = if divergent {
+            &case["walk_hex"]
+        } else {
+            &case["native_hex"]
+        };
         for mode in ["human", "json"] {
             for output in outputs {
                 std::fs::write(root.join(output), format!("previous {output}"))
@@ -182,7 +194,7 @@ fn formatted_source_keeps_native_bytes_and_failed_outputs() {
                     .collect();
                 assert_eq!(
                     hex,
-                    case["native_hex"].as_str().expect("native bytes"),
+                    want_hex.as_str().expect("expected bytes"),
                     "{name}/{mode}"
                 );
             } else {
