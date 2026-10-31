@@ -920,9 +920,6 @@
         }
       ],
       "native_hex": "0210",
-      "assembly_gaps": [
-        850
-      ],
       "dialect": "ca65"
     },
     {
@@ -1230,6 +1227,8 @@
     },
     {
       "name": "alias_end_bad_format",
+      "divergence": "define-alias-end",
+      "walk_hex": "",
       "source": ".define STOP .end\nSTOP .sprintf(\"%bad\",0)\n.byte 8\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -1251,6 +1250,8 @@
     },
     {
       "name": "alias_end_large_token",
+      "divergence": "define-alias-end",
+      "walk_hex": "",
       "source": ".define STOP .end\nSTOP .sprintf(\"%d\",4294967300)\n.byte 8\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -1272,6 +1273,8 @@
     },
     {
       "name": "named_alias_end",
+      "divergence": "define-alias-end",
+      "walk_hex": "0210",
       "source": ".define STOP .end\n.word finish\nfinish: STOP .sprintf(\"%bad\",0)\n.byte 8\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -1401,9 +1404,6 @@
         }
       ],
       "native_hex": "07",
-      "assembly_gaps": [
-        844
-      ],
       "dialect": "ca65"
     },
     {
@@ -1474,9 +1474,6 @@
         }
       ],
       "native_hex": "07",
-      "assembly_gaps": [
-        844
-      ],
       "dialect": "ca65"
     },
     {
@@ -1733,6 +1730,7 @@
     },
     {
       "name": "6502_Z_space",
+      "formatter_gap": "asm198x#848",
       "source": ".setcpu \"6502\"\n.byte 7\nZ :.end\n.byte 8\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -1764,10 +1762,7 @@
         }
       ],
       "native_hex": "07",
-      "dialect": "ca65",
-      "assembly_gaps": [
-        848
-      ]
+      "dialect": "ca65"
     },
     {
       "name": "6502_Z_ident",
@@ -1827,6 +1822,7 @@
     },
     {
       "name": "6502_F_space",
+      "formatter_gap": "asm198x#848",
       "source": ".setcpu \"6502\"\n.byte 7\nF :.end\n.byte 8\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -1858,10 +1854,7 @@
         }
       ],
       "native_hex": "07",
-      "dialect": "ca65",
-      "assembly_gaps": [
-        848
-      ]
+      "dialect": "ca65"
     },
     {
       "name": "6502_F_ident",
@@ -2670,6 +2663,7 @@
     },
     {
       "name": "4510_F_space",
+      "formatter_gap": "asm198x#848",
       "source": ".setcpu \"4510\"\n.byte 7\nF :.end\n.byte 8\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -2701,10 +2695,7 @@
         }
       ],
       "native_hex": "07",
-      "dialect": "ca65",
-      "assembly_gaps": [
-        848
-      ]
+      "dialect": "ca65"
     },
     {
       "name": "4510_F_ident",

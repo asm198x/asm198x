@@ -238,10 +238,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "61626364",
-      "assembly_gaps": [
-        872
-      ]
+      "native_hex": "61626364"
     },
     {
       "name": "tcount_0",
@@ -786,10 +783,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "61626364",
-      "assembly_gaps": [
-        872
-      ]
+      "native_hex": "61626364"
     },
     {
       "name": "tcount_1",
@@ -1334,10 +1328,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "61626364",
-      "assembly_gaps": [
-        872
-      ]
+      "native_hex": "61626364"
     },
     {
       "name": "tcount_2",
@@ -1882,10 +1873,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "61626364",
-      "assembly_gaps": [
-        872
-      ]
+      "native_hex": "61626364"
     },
     {
       "name": "tcount_3",

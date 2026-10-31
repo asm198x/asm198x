@@ -151,7 +151,7 @@ fn native_generated_openings_keep_selected_label_and_name_rules() {
         );
         assert_eq!(shape(&root), before, "{name}: symbols and sections");
     }
-    assert_eq!(gaps, 6);
+    assert_eq!(gaps, 0);
 }
 
 #[test]

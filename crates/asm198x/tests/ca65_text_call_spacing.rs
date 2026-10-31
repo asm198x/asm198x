@@ -151,7 +151,7 @@ fn native_text_function_boundaries_keep_bytes_and_real_label_bindings() {
         );
         assert_eq!(shape(&root), before, "{name}: symbols and sections");
     }
-    assert_eq!(gaps, 4);
+    assert_eq!(gaps, 0);
 }
 
 #[test]

@@ -2946,10 +2946,7 @@
       ],
       "native_hex": "070110",
       "dialect": "ca65",
-      "symbol_values": {},
-      "assembly_gaps": [
-        866
-      ]
+      "symbol_values": {}
     },
     {
       "name": "static_labelled_endrepeat",
@@ -2985,10 +2982,7 @@
       ],
       "native_hex": "070110",
       "dialect": "ca65",
-      "symbol_values": {},
-      "assembly_gaps": [
-        866
-      ]
+      "symbol_values": {}
     },
     {
       "name": "static_labelled_else",
@@ -3024,10 +3018,7 @@
       ],
       "native_hex": "070110",
       "dialect": "ca65",
-      "symbol_values": {},
-      "assembly_gaps": [
-        866
-      ]
+      "symbol_values": {}
     },
     {
       "name": "labelled_endif",
@@ -3063,10 +3054,7 @@
       ],
       "native_hex": "070110",
       "dialect": "ca65",
-      "symbol_values": {},
-      "assembly_gaps": [
-        866
-      ]
+      "symbol_values": {}
     },
     {
       "name": "labelled_endrepeat",
@@ -3102,10 +3090,7 @@
       ],
       "native_hex": "070110",
       "dialect": "ca65",
-      "symbol_values": {},
-      "assembly_gaps": [
-        866
-      ]
+      "symbol_values": {}
     },
     {
       "name": "labelled_else",
@@ -3141,10 +3126,7 @@
       ],
       "native_hex": "070110",
       "dialect": "ca65",
-      "symbol_values": {},
-      "assembly_gaps": [
-        866
-      ]
+      "symbol_values": {}
     }
   ]
 }

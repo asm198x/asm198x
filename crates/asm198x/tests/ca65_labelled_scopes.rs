@@ -151,7 +151,7 @@ fn native_scope_openings_bind_labels_in_the_enclosing_namespace() {
         );
         assert_eq!(shape(&root), before, "{name}: symbols and sections");
     }
-    assert_eq!(gaps, 4);
+    assert_eq!(gaps, 0);
 }
 
 #[test]
