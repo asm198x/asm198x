@@ -177,6 +177,19 @@ fn verify_native_cases(fixture: &str, count: usize, accepted: usize, audits: &[(
             .expect("stage")["exit"]
             == 0
             && !case["assembly_gaps"].is_array();
+        // A named divergence (the walk's plan lists them): the walk's own
+        // answer is recorded beside ca65's.
+        let divergent = case["divergence"].is_string();
+        let native_accepted = if divergent {
+            case["walk_hex"].is_string()
+        } else {
+            native_accepted
+        };
+        let want_hex = if divergent {
+            &case["walk_hex"]
+        } else {
+            &case["native_hex"]
+        };
         assert_eq!(
             result.status.code(),
             Some(if native_accepted { 0 } else { 1 }),
@@ -204,11 +217,7 @@ fn verify_native_cases(fixture: &str, count: usize, accepted: usize, audits: &[(
         accepted_count += 1;
         let bytes = std::fs::read(root.join("out.bin")).expect("image");
         let hex: String = bytes.iter().map(|b| format!("{b:02x}")).collect();
-        assert_eq!(
-            hex,
-            case["native_hex"].as_str().expect("native bytes"),
-            "{name}"
-        );
+        assert_eq!(hex, want_hex.as_str().expect("expected bytes"), "{name}");
         let before = shape(&root);
         debug198x::DebugInfo::read(
             &std::fs::read_to_string(root.join("out.debug198x")).expect("sidecar"),
@@ -268,7 +277,7 @@ fn native_string_consumers_and_selected_capture_lifetimes_survive() {
     verify_native_cases(
         include_str!("fixtures/ca65-string-consumers.json"),
         132,
-        104,
+        106,
         &[
             (
                 "consumers",

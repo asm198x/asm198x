@@ -1059,9 +1059,6 @@
         }
       ],
       "native_hex": "0607",
-      "assembly_gaps": [
-        876
-      ],
       "symbol_values": {
         "anchor": 4096
       },
@@ -1177,9 +1174,6 @@
         }
       ],
       "native_hex": "0607",
-      "assembly_gaps": [
-        876
-      ],
       "symbol_values": {
         "anchor": 4096
       },

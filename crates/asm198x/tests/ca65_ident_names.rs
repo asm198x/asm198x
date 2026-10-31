@@ -191,7 +191,7 @@ fn native_ident_names_validate_before_source_token_emission() {
         );
         assert_eq!(shape(&root), before, "{name}: symbols and sections");
     }
-    assert_eq!(gaps, 2);
+    assert_eq!(gaps, 0);
 }
 
 #[test]

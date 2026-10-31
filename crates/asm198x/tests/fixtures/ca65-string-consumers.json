@@ -3581,10 +3581,7 @@
       ],
       "native_hex": "42",
       "audit": "index_scope",
-      "dialect": "ca65",
-      "assembly_gaps": [
-        795
-      ]
+      "dialect": "ca65"
     },
     {
       "name": "named_reference",
@@ -3620,10 +3617,7 @@
       ],
       "native_hex": "4101",
       "audit": "index_scope",
-      "dialect": "ca65",
-      "assembly_gaps": [
-        795
-      ]
+      "dialect": "ca65"
     },
     {
       "name": "literal_arithmetic",

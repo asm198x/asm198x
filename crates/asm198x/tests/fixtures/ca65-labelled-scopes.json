@@ -2814,10 +2814,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "070110",
-      "assembly_gaps": [
-        868
-      ]
+      "native_hex": "070110"
     },
     {
       "name": "generated_scope_closer",
@@ -2851,10 +2848,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "070110",
-      "assembly_gaps": [
-        868
-      ]
+      "native_hex": "070110"
     },
     {
       "name": "static_proc_closer",
@@ -2888,10 +2882,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "070110",
-      "assembly_gaps": [
-        868
-      ]
+      "native_hex": "070110"
     },
     {
       "name": "generated_proc_closer",
@@ -2925,10 +2916,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "070110",
-      "assembly_gaps": [
-        868
-      ]
+      "native_hex": "070110"
     },
     {
       "name": "comment_boundary_False_.scope",
