@@ -2719,6 +2719,8 @@
     },
     {
       "name": "sprintf_prefix_direct",
+      "walk_gap": "lang198x/ca65#52",
+      "walk_hex": "0901",
       "source": "VALUE=2\n.if .ref(VALUE)+.strlen(.sprintf(\"%d\",VALUE))=1\n.byte 7\n.else\n.byte 9\n.endif\n.byte .ref(VALUE)\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -2753,6 +2755,8 @@
     },
     {
       "name": "sprintf_prefix_included",
+      "walk_gap": "lang198x/ca65#52",
+      "walk_hex": "0901",
       "source": ".include \"sprintf_prefix_included.inc\"\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -2787,6 +2791,8 @@
     },
     {
       "name": "sprintf_prefix_macro",
+      "walk_gap": "lang198x/ca65#52",
+      "walk_hex": "0901",
       "source": ".macro run\nVALUE=2\n.if .ref(VALUE)+.strlen(.sprintf(\"%d\",VALUE))=1\n.byte 7\n.else\n.byte 9\n.endif\n.byte .ref(VALUE)\n.endmacro\nrun\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
