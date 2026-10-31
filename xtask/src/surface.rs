@@ -587,12 +587,11 @@ mod tests {
             ours.contains("byte"),
             "an implemented directive counts as covered"
         );
-        // `.condes` rather than `.export`: `.export` became an implemented
-        // check once ca65 turned out to enforce one, and `.condes` needs
-        // linker-config features the fixed NROM layout does not declare.
+        // `.charmap`: `.export`, then `.condes`, sat here until each was
+        // implemented.
         assert!(
-            !ours.contains("condes"),
-            "`.condes` is declared and not implemented, so it is still a gap"
+            !ours.contains("charmap"),
+            "`.charmap` is declared and not implemented, so it is still a gap"
         );
     }
     /// The measured surface is not empty, and is keyed on `--dialect` names
