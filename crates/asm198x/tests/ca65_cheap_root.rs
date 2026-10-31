@@ -246,18 +246,13 @@ fn cheap_root_failures_keep_include_and_macro_locations() {
             .iter()
             .map(|name| std::fs::read(root.join(name)).expect("output"))
             .collect();
+        // ca65 V2.19 accepts a cheap local with no global label before it, so
+        // the failures here are a use of one that was never defined, written
+        // in the include and in a macro the include calls (measured).
         for (invalid, line) in [
-            ("; include context\n@near:.byte 7\n", 2),
-            ("; include context\n@near=7\n.byte @near\n", 2),
-            ("; include context\n.byte .defined(@near)\n", 2),
             ("; include context\n.word @near\n", 2),
-            ("; include context\n.ifdef @near\n.byte 7\n.endif\n", 2),
             (
-                "; include context\n@near:.macro emit\n.byte 7\n.endmacro\n",
-                2,
-            ),
-            (
-                "; include context\n.macro emit\n@near:.byte 7\n.endmacro\nemit\n",
+                "; include context\n.macro emit\n.word @near\n.endmacro\nemit\n",
                 5,
             ),
         ] {
@@ -272,7 +267,7 @@ fn cheap_root_failures_keep_include_and_macro_locations() {
                     errors[0]["message"]
                         .as_str()
                         .expect("message")
-                        .contains("no preceding global symbol")
+                        .contains("Symbol `@near` is undefined")
                 );
                 if line == 5 {
                     let frame = &errors[0]["span"]["expansion_frames"][0];

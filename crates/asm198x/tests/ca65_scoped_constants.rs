@@ -142,11 +142,14 @@ fn include_refusals_complete_with_locations_and_preserve_previous_outputs() {
         "out.lst.json",
     ];
     for mode in ["human", "json"] {
-        for invalid in [
-            " nop\nVALUE=7\nVALUE=8\n",
-            " nop\nVALUE=7\nVALUE=7\n",
-            " nop\nVALUE=7\ninner::VALUE=8\n",
-            " nop\n nop\ninner::missing::VALUE=7\n",
+        // Where ca65 V2.19 reports each (measured). Defining a name in a scope
+        // that does not exist is accepted where it is written; it is the use
+        // of `VALUE` on `input.s` line 4 that has nothing to read.
+        for (invalid, file, line) in [
+            (" nop\nVALUE=7\nVALUE=8\n", "constants.inc", 3),
+            (" nop\nVALUE=7\nVALUE=7\n", "constants.inc", 3),
+            (" nop\nVALUE=7\ninner::VALUE=8\n", "constants.inc", 3),
+            (" nop\n nop\ninner::missing::VALUE=7\n", "input.s", 4),
         ] {
             std::fs::write(
                 root.join("constants.inc"),
@@ -191,16 +194,16 @@ fn include_refusals_complete_with_locations_and_preserve_previous_outputs() {
             if mode == "json" {
                 let errors: serde_json::Value =
                     serde_json::from_slice(&failure.stdout).expect("JSON diagnostics");
-                assert_eq!(errors[0]["span"]["line"], 3);
+                assert_eq!(errors[0]["span"]["line"], line);
                 assert!(
                     errors[0]["span"]["path"]
                         .as_str()
                         .expect("error path")
-                        .ends_with("constants.inc")
+                        .ends_with(file)
                 );
             } else {
                 assert!(
-                    String::from_utf8_lossy(&failure.stderr).contains("constants.inc:3"),
+                    String::from_utf8_lossy(&failure.stderr).contains(&format!("{file}:{line}")),
                     "{failure:?}"
                 );
             }

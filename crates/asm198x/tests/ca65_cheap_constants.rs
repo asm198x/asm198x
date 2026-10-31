@@ -128,7 +128,7 @@ fn native_cheap_constants_follow_global_definition_anchors() {
 }
 
 #[test]
-fn unanchored_cheap_constant_preserves_outputs_and_reports_its_file() {
+fn circular_cheap_constant_preserves_outputs_and_reports_its_file() {
     let root = scratch::dir("ca65-cheap-constants-preserve");
     let facts: serde_json::Value =
         serde_json::from_str(include_str!("fixtures/ca65-cheap-constants.json"))
@@ -136,7 +136,9 @@ fn unanchored_cheap_constant_preserves_outputs_and_reports_its_file() {
     let config = facts["cases"][0]["config"].as_str().expect("config");
     std::fs::write(root.join("input.cfg"), config).expect("config");
     let source = ".include \"definitions.inc\"\n";
-    let invalid = "@value=7\n.byte @value\n";
+    // ca65 V2.19 accepts a cheap local with no label before it, so the
+    // failure here is one it refuses itself, on line 1 (measured).
+    let invalid = "@value=@value+1\n.byte @value\n";
     std::fs::write(root.join("input.s"), source).expect("source");
     let outputs = [
         "out.bin",
