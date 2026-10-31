@@ -114,9 +114,25 @@ Each one needs a probe whose verdict is a divergence:
 - `.exitmacro` inside a repeat inside a macro leaves at once.
 - `.end` inside a repeat ends the program, where ca65 fails an internal
   check.
-- `.sprintf` follows C for `%x` of a negative number, `%#x` of 0, and the
-  width of `%c` and `%s`.
+- `.sprintf` follows C for `%x` of a negative number, `%#x` of 0, the
+  alignment of `%c` and `%s` in a width, and the `+` and space flags, which
+  C applies only to signed conversions (`sprintf-c-width` in the fixtures).
 - `.mid` takes a start above 100 as given.
+
+Step 7 named three more, each marked `divergence` in the fixtures with the
+walk's own bytes in `walk_hex`:
+
+- `bit-branch-pc`: ca65 emits a bit branch's opcode before it reads the
+  operands, so `*` in either operand counts from the wrong byte (64 4510
+  cases). The walk reads `*` as the instruction's address.
+- `define-alias-end`: `.end` reached through a `.define` stops reading at
+  once, as `.end` does; ca65 still runs the token functions after it on
+  that line (4 cases).
+- `sprintf-c-width`, above, for `%3s` of a UTF-8 string (2 cases).
+
+One gap is left, marked `walk_gap` with the walk's bytes so any change shows:
+a token function runs before the rest of its line is read
+([lang198x/ca65#52](https://github.com/lang198x/ca65/issues/52), 27 cases).
 
 These are refused or reported as unsupported, where ca65 accepts them:
 
@@ -451,7 +467,22 @@ The old reader is frozen (#940), so 301 cases it now gets wrong are marked
 ld65 V2.19 also puts `Assertion failed: ` before each assertion message, so
 the text-consumer test now strips it.
 
-## After this step
+## Step 7, the switch
 
-Step 7, the switch: the walk becomes the default for the main reader, `fmt`
-moves onto Lang198x's tree, and the old reader is deleted, as for PasmoNext.
+As for PasmoNext, in three parts:
+
+1. **The walk becomes the default** for every ca65 entry point, and so the
+   CLI and the web shell. The old reader's assembler and linker go with it;
+   its parser stays for `fmt`, and the 65816 and HuC6280 dialects keep the
+   shared `ca65_flat` reader. The old reader's tests run through the walk.
+   Every `old_reader_gap` and `assembly_gaps` marker comes off, since the
+   walk gives ca65's answer for each, and so do the 64 tracked divergences
+   in the verdict corpus. Tests that held V2.18 or old-reader facts were
+   measured again on V2.19. The walk refuses a word ca65 has and it does not
+   implement as the declared surface says (`.charmap`, `.case`, `.feature`,
+   `.linecont`, `.localchar`, `.macpack`, `.null`), and a CPU other than the
+   6502 and 4510 as not lowered yet (stage 4).
+2. **`fmt` moves onto Lang198x's tree.** Until then the old formatter writes
+   a label named `Z`, `A` or `F` as `Z:`, which ca65 reads as an address
+   size; three cases mark it (`formatter_gap`, #848).
+3. **The old reader is deleted.**
