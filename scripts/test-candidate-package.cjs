@@ -1085,9 +1085,6 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
           assert.deepEqual(read('cpu.bin'), Buffer.from(fact.native_hex, 'hex'), fact.name);
           assert.deepEqual(JSON.parse(p.stdout).bytes, Array.from(Buffer.from(fact.native_hex, 'hex')), fact.name + ': JSON bytes');
           const before = shape();
-          // Formatting moves a label onto its own line, which changes what a
-          // token function sees while lang198x/ca65#52 is open.
-          if (fact.walk_gap) continue;
           const formatted = run(['fmt', '--dialect', 'ca65', 'cpu.s']);
           assert.equal(formatted.status, 0, fact.name + ': ' + formatted.stderr);
           write('scope-formatted.s', formatted.stdout);
@@ -1720,8 +1717,6 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
           assert.deepEqual(read('cpu.bin'), Buffer.from(fact.native_hex, 'hex'), fact.name);
           const shape = () => read('scope.debug198x').toString().trim().split('\n').map(s => JSON.parse(s)).filter(r => r.t === 'symbol' || r.t === 'section');
           const before = shape();
-          // The old formatter writes a label named `Z` as `Z:`, an address size (#848).
-          if (fact.formatter_gap) continue;
           const formatted = run(['fmt', '--dialect', 'ca65', 'cpu.s']);
           assert.equal(formatted.status, 0, fact.name + ': ' + formatted.stderr);
           write('scope-formatted.s', formatted.stdout);
@@ -2314,7 +2309,9 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
         else assert.equal(read('cpu.bin').toString(), 'previous image', fact.name);
         const formatted = run(['fmt', '--dialect', 'ca65', 'cpu.s']);
         assert.equal(formatted.status, 0, fact.name + ': ' + formatted.stderr);
-        for (const head of fact.generated_heads) assert(formatted.stdout.split('\n').includes(head + ':'), fact.name + ': canonical label');
+        // A label a token function makes stays on its line, spelled as written.
+        const unspaced = text => text.replace(/\s+/g, '');
+        for (const head of fact.generated_heads) assert(formatted.stdout.split('\n').some(line => unspaced(line).includes(unspaced(head + ':'))), fact.name + ': the label keeps its line');
         write('scope-formatted.s', formatted.stdout);
         const again = run(['fmt', '--dialect', 'ca65', 'scope-formatted.s']);
         assert.equal(again.status, 0, fact.name + ': ' + again.stderr);

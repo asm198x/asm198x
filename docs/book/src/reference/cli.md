@@ -142,9 +142,11 @@ start:  ld a,1
         ret
 ```
 
-The operations line up at column 9 and the label stays on its line. A
-PasmoNext formatter never adds, removes or reorders lines, and leaves the
-comment untouched, including its wording and its position above the code.
+The operations line up at column 9 and the label stays on its line. The
+pasmo, pasmonext and ca65 formatters come from Lang198x's front ends: they
+never add, remove or reorder lines, keep each label as written, and leave the
+comment untouched, including its wording and its position above the code. A
+trailing comment starts at column 33.
 
 ### `dialects` — list what `--dialect` accepts
 

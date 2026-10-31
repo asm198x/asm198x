@@ -145,11 +145,6 @@ fn native_end_labels_bind_before_termination() {
                 );
             }
         }
-        // The formatter writes `Z:` for a label named `Z`, which ca65 reads as
-        // an address size; it moves onto Lang198x's tree next.
-        if case["formatter_gap"].is_string() {
-            continue;
-        }
         let formatted = run(&root, &["fmt", "--dialect", "ca65", "input.s"]);
         assert!(formatted.status.success(), "{name}: {formatted:?}");
         std::fs::write(root.join("formatted.s"), &formatted.stdout).expect("formatted source");

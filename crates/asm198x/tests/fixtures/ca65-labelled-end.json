@@ -1730,7 +1730,6 @@
     },
     {
       "name": "6502_Z_space",
-      "formatter_gap": "asm198x#848",
       "source": ".setcpu \"6502\"\n.byte 7\nZ :.end\n.byte 8\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -1822,7 +1821,6 @@
     },
     {
       "name": "6502_F_space",
-      "formatter_gap": "asm198x#848",
       "source": ".setcpu \"6502\"\n.byte 7\nF :.end\n.byte 8\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -2663,7 +2661,6 @@
     },
     {
       "name": "4510_F_space",
-      "formatter_gap": "asm198x#848",
       "source": ".setcpu \"4510\"\n.byte 7\nF :.end\n.byte 8\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [

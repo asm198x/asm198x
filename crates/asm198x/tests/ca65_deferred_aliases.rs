@@ -285,11 +285,6 @@ fn verify_fixture(fixture: &str, count: usize) {
             serde_json::json!(&bytes),
             "{name}: JSON bytes"
         );
-        // Formatting moves a label onto its own line, which changes what a
-        // token function sees while the gap is open.
-        if known {
-            continue;
-        }
         let debug = shape(&root);
         let formatted = run(&root, &["fmt", "--dialect", dialect, "input.s"]);
         assert!(formatted.status.success(), "{name}: {formatted:?}");
