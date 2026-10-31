@@ -4,7 +4,7 @@ What the recorded verdict corpus proves, per CPU. Every row is an
 observation of a real reference assembler, not an expectation written
 by hand. Regenerate with `cargo xtask ledger`.
 
-- **Release:** `v0.0.73`
+- **Release:** `v0.0.74`
 - **Corpus hash:** `926f18d6e28b1826b893cfa02c158d52d2e551a412f70e1e6af9fa3671c4b544`
 - **Pinned curriculum:** `f11698d0b51b3a6c1209cec3d649229aa35af97f` (2026-08-27)
 - **CPUs:** 23, holding 9978 verdict(s)
