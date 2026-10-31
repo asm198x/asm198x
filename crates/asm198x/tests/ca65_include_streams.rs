@@ -52,10 +52,6 @@ fn native_include_streams_match_bytes_bindings_and_formatter() {
     }
     for fact in cases {
         let name = fact["name"].as_str().expect("name");
-        // A V2.19 fact the frozen old reader misses (#940).
-        if fact["old_reader_gap"].is_number() {
-            continue;
-        }
         let dialect = if name.starts_with("65816_") {
             "65816"
         } else {
@@ -185,11 +181,7 @@ fn include_refusals_complete_with_locations_and_preserve_previous_outputs() {
                 .iter()
                 .map(|b| format!("{b:02x}"))
                 .collect();
-            // ca65 V2.19 reads an include in a macro where the macro names
-            // it; the frozen old reader still reads it after the body (#940).
-            if fact["old_reader_gap"].is_null() {
-                assert_eq!(hex, fact["native_hex"].as_str().expect("native image"));
-            }
+            assert_eq!(hex, fact["native_hex"].as_str().expect("native image"));
             let previous: Vec<_> = outputs
                 .iter()
                 .map(|name| std::fs::read(root.join(name)).expect("output"))

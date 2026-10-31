@@ -275,12 +275,6 @@ impl MacroState {
     pub(crate) fn defines(&self, name: &str) -> bool {
         self.macros.contains_key(name)
     }
-
-    /// Register a definition captured by a live dialect reader. The dialect
-    /// owns duplicate-name policy and the definition's authored provenance.
-    pub(crate) fn register(&mut self, name: String, def: MacroDef) {
-        self.macros.entry(name).or_default().push(def);
-    }
 }
 
 /// A definition the pre-pass lifted out of the source.

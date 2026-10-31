@@ -99,8 +99,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07",
-      "old_reader_gap": 940
+      "native_hex": "07"
     },
     {
       "name": "cheap_two_anchors",

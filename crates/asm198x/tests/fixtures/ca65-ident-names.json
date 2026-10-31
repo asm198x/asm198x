@@ -4197,8 +4197,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "070010",
-      "old_reader_gap": 940
+      "native_hex": "070010"
     },
     {
       "name": "generated_missing_anchor",
@@ -4232,8 +4231,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "070010",
-      "old_reader_gap": 940
+      "native_hex": "070010"
     },
     {
       "name": "generated_with_anchor",

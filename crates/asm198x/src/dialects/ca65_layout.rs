@@ -80,9 +80,6 @@ pub(crate) struct ResolvedSeg {
 pub(crate) struct ResolvedLayout {
     pub(crate) segs: Vec<ResolvedSeg>,
     pub(crate) image_size: usize,
-    pub(crate) fill: u8,
-    /// See [`Layout::from_config`].
-    pub(crate) from_config: bool,
 }
 
 /// The layout's memory account (#499): each area's capacity against the
@@ -141,22 +138,6 @@ impl ResolvedLayout {
     pub(crate) fn seg(&self, name: &str) -> Option<&ResolvedSeg> {
         self.segs.iter().find(|s| s.name == name)
     }
-
-    pub(crate) fn seg_id(&self, name: &str) -> debug198x::SectionId {
-        self.segs
-            .iter()
-            .position(|s| s.name == name)
-            .expect("seg validated against the layout") as debug198x::SectionId
-    }
-
-    /// The valid segment names, for a rejection message.
-    pub(crate) fn known(&self) -> String {
-        self.segs
-            .iter()
-            .map(|s| s.name.as_str())
-            .collect::<Vec<_>>()
-            .join(", ")
-    }
 }
 
 impl Layout {
@@ -199,17 +180,6 @@ impl Layout {
             fill: 0x00,
             from_config: false,
         }
-    }
-
-    /// Whether resolution needs segment lengths at all: true when some
-    /// segment floats behind another in its area (bradsmith's `RODATA` after
-    /// `CODE`). The default layout answers false, so the historical path
-    /// never runs a sizing pass and cannot change behaviour.
-    pub(crate) fn needs_lengths(&self) -> bool {
-        self.segments
-            .iter()
-            .enumerate()
-            .any(|(i, s)| s.start.is_none() && self.segments[..i].iter().any(|p| p.area == s.area))
     }
 
     /// Resolve every segment to its base and file position. `lengths` feeds
@@ -307,12 +277,7 @@ impl Layout {
                 *offset += file_base[definition.area];
             }
         }
-        Ok(ResolvedLayout {
-            segs,
-            image_size,
-            fill: self.fill,
-            from_config: self.from_config,
-        })
+        Ok(ResolvedLayout { segs, image_size })
     }
 
     /// Check actual occupied extents before emission or the memory account.
@@ -607,7 +572,6 @@ mod tests {
             ]
         );
         assert_eq!(r.image_size, 0x10 + 0x8000 + 0x2000);
-        assert_eq!(r.fill, 0x00);
     }
 
     /// A floating segment lands after its area-mate's recorded length — the

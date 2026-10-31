@@ -62,10 +62,6 @@ fn native_scoped_bindings_and_source_time_forms_match_native() {
     }
     for fact in cases {
         let name = fact["name"].as_str().expect("name");
-        // A V2.19 fact the frozen old reader misses (#940).
-        if fact["old_reader_gap"].is_number() {
-            continue;
-        }
         let dialect = if name.starts_with("65816_") {
             "65816"
         } else {

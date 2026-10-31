@@ -848,8 +848,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "ea",
-      "old_reader_gap": 940
+      "native_hex": "ea"
     },
     {
       "name": "missing_global_nested_refusal",
@@ -883,8 +882,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "ea",
-      "old_reader_gap": 940
+      "native_hex": "ea"
     },
     {
       "name": "empty_segment_refusal",
@@ -1200,8 +1198,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "ea",
-      "old_reader_gap": 940
+      "native_hex": "ea"
     },
     {
       "name": "unnamed_siblings",
@@ -1439,8 +1436,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "",
-      "old_reader_gap": 940
+      "native_hex": ""
     },
     {
       "name": "empty_global_name_refusal",

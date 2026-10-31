@@ -27,41 +27,25 @@ use std::cell::{Cell, RefCell};
 use std::collections::{BTreeMap, BTreeSet};
 
 use super::ca65_flat::{self, DirectiveLine, FlatWalk, WalkDirective, parse_number};
-use super::ca65_layout;
 use super::macros::{self, MacroSyntax};
 use super::mos6502::{
     self, BytePrec, assignment_split, fold_const, is_ident, split_first_word, split_top_level,
     string_literal,
 };
 use crate::directives::{Category, Directive, Pattern, lookup};
-use crate::engine::{AsmError, DiagSeverity, Expr, Operation, Warning, WarningKind};
-use crate::source::{SourceLoader, SourceMap};
+use crate::engine::{AsmError, DiagSeverity, Expr, Operation};
 use crate::span::FileId;
 
-mod deferred;
 mod format;
 mod link;
 mod project;
 pub(super) mod string_tokens;
 pub(crate) use link::VisRule;
-use link::{Emit, Resolved, emit, link, resolve};
-use project::{Sweep, collect_syms, map_expr_syms, map_kind_syms, parsed_from_program};
+use project::{map_expr_syms, map_kind_syms};
 
 // ---------------------------------------------------------------------------
 // The fixed NES (NROM) layout
 // ---------------------------------------------------------------------------
-
-/// What an assemble hands back: the linked image, its warnings, the debug
-/// capture, and the layout's memory account (#499).
-type Assembled<Capture> = Result<
-    (
-        Vec<u8>,
-        Vec<Warning>,
-        Capture,
-        Vec<crate::engine::AreaUsage>,
-    ),
-    AsmError,
->;
 
 // The segments the assembler places are the active layout's
 // (`super::ca65_layout`, #483): resolved names, base addresses, and file
@@ -94,26 +78,6 @@ fn is_segment_directive(trimmed: &str) -> bool {
     }
     let word = trimmed.split_whitespace().next().unwrap_or("");
     word == ".pushseg" || word == ".popseg" || segment_shorthand(word).is_some()
-}
-
-/// What a segment-switching node does to the active segment.
-enum SegSwitch {
-    To(String),
-    Push,
-    Pop,
-}
-
-/// Read a source-only node back as a segment switch. `None` for any other
-/// item-less node (a label-only line, a comment flush).
-fn segment_switch(source: &str) -> Option<SegSwitch> {
-    if let Some(rest) = source.strip_prefix(".segment") {
-        return Some(SegSwitch::To(rest.trim().trim_matches('"').to_string()));
-    }
-    match source.split_whitespace().next().unwrap_or("") {
-        ".pushseg" => Some(SegSwitch::Push),
-        ".popseg" => Some(SegSwitch::Pop),
-        w => segment_shorthand(w).map(|name| SegSwitch::To(name.to_string())),
-    }
 }
 
 // ---------------------------------------------------------------------------
@@ -192,11 +156,6 @@ enum Kind {
     /// warning rather than moving the bytes. The boundary need not be a power
     /// of two.
     Align(i64, Option<u8>),
-    /// A resolved `.incbin` payload (language-surface U5): raw asset bytes at
-    /// the directive's location in the active segment. Never parsed into a
-    /// native node — the multi-file walk resolves the directive into a shared
-    /// [`Item::Binary`](crate::ast::Item) and the projection carries it here.
-    Raw(Vec<u8>),
     BitBranch {
         form: &'static isa::Form,
         zero_page: Expr,
@@ -210,96 +169,6 @@ enum Kind {
     },
 }
 
-#[derive(Clone)]
-struct BoundInsn {
-    form: &'static isa::Form,
-    operands: Vec<Expr>,
-    unsigned_word: bool,
-}
-
-struct Stmt {
-    line: usize,
-    /// The file `line` counts within (language-surface U5): the root for a
-    /// single-file assemble, an include's `FileId` otherwise. Layout/emit
-    /// errors and debug line records are stamped with it.
-    file: FileId,
-    expansion_frames: Vec<crate::span::ExpansionFrame>,
-    seg: String,
-    label: Option<String>,
-    kind: Kind,
-    bound_insn: Option<BoundInsn>,
-}
-
-struct Placed {
-    seg: String,
-    addr: u32,
-    line: usize,
-    file: FileId,
-    expansion_frames: Vec<crate::span::ExpansionFrame>,
-    item: Resolved,
-    /// Default reservation/alignment fill is not initialized BSS content.
-    has_initializer: bool,
-}
-
-/// Ask the shared evaluator which unresolved numeric values are actually
-/// demanded after ready aliases have values. Logical branches stay lazy.
-fn demanded_values(placed: &[Placed], values: &BTreeMap<String, i64>) -> BTreeSet<String> {
-    let demanded = RefCell::new(BTreeSet::new());
-    let lookup = |name: &str| {
-        values.get(name).copied().or_else(|| {
-            demanded.borrow_mut().insert(name.to_string());
-            None
-        })
-    };
-    for at in placed {
-        match &at.item {
-            Resolved::Bytes(exprs)
-            | Resolved::Words(exprs)
-            | Resolved::FarAddrs(exprs)
-            | Resolved::DBytes(exprs)
-            | Resolved::DWords(exprs)
-            | Resolved::Insn {
-                operands: exprs, ..
-            } => {
-                let width = match &at.item {
-                    Resolved::Bytes(_) => 1,
-                    Resolved::Words(_) | Resolved::DBytes(_) => 2,
-                    Resolved::FarAddrs(_) => 3,
-                    Resolved::DWords(_) => 4,
-                    _ => 0, // Instruction operands retain their statement PC.
-                };
-                let mut pc = i64::from(at.addr);
-                for value in exprs {
-                    let _ = value.eval_with(&lookup, Some(pc), at.line);
-                    pc += width;
-                }
-            }
-            Resolved::Assert(value, ..) => {
-                let _ = value.eval_with(&lookup, Some(i64::from(at.addr)), at.line);
-            }
-            Resolved::Visible(rule, _, names) if *rule != VisRule::MustNotBeDefined => {
-                demanded.borrow_mut().extend(names.iter().cloned());
-            }
-            _ => {}
-        }
-    }
-    demanded.into_inner()
-}
-
-fn statement_error(
-    error: AsmError,
-    file: FileId,
-    frames: &[crate::span::ExpansionFrame],
-) -> AsmError {
-    let mut error = ca65_flat::stamp_file(error, file);
-    if let Some(span) = error.span.as_mut()
-        && span.expansion_frames.is_empty()
-    {
-        span.expansion_frames.extend_from_slice(frames);
-    }
-    error
-}
-
 // The ca65 statement kind is the family-owned native payload carried in the AST
 // (`decisions/ast-native-payload-for-multipass-cisc.md`): parse builds it into
 // the tree, and the assemble+link driver reads it back. `=` constants use the
@@ -308,20 +177,6 @@ impl crate::ast::NativeItem for Kind {
     fn as_any(&self) -> &dyn std::any::Any {
         self
     }
-}
-
-struct Parsed {
-    /// Explicit segment selections, including empty segments, in taken source.
-    declared_segments: BTreeSet<String>,
-    stmts: Vec<Stmt>,
-    /// Each label's segment, for the zero-page-vs-absolute decision.
-    label_seg: BTreeMap<String, String>,
-    /// `=` constants, folded in source order.
-    consts: BTreeMap<String, i64>,
-    /// Authored constants and stable auxiliary names for debug output;
-    /// canonical keys remain private to expression resolution.
-    const_names: BTreeMap<String, String>,
-    deferred: deferred::Deferred,
 }
 
 // ---------------------------------------------------------------------------
@@ -333,805 +188,13 @@ struct Parsed {
 // symbols, and line spans — all post-link CPU addresses (what a debugger
 // needs), never file offsets. A read-out of data layout already computes;
 // capturing it cannot change a byte.
-use crate::listing::{DebugCapture, DebugCaptureMulti};
 
-/// Assemble to bytes alone — the round-trip and unit tests' entry.
+/// Assemble to bytes alone, through the walk — the unit tests' entry. The
+/// tests were written against this reader's assembler, which the walk has
+/// replaced, so they now check the walk.
 #[cfg(test)]
-pub(crate) fn assemble(source: &str) -> Result<(Vec<u8>, Vec<Warning>), AsmError> {
-    assemble_with_debug(source).map(|(rom, warnings, _, _)| (rom, warnings))
-}
-
-/// Assemble ca65 source and link it into a `.nes` ROM image. Single-source: a
-/// `.include`/`.incbin` directive is rejected with a pointer to the multi-file
-/// entry (`assemble_multi`).
-///
-/// # Errors
-/// Returns an [`AsmError`] on any parse, range, or symbol-resolution failure.
-/// Assemble + link, also returning the debug [`Capture`] read out of layout
-/// (Debug198x U4). One code path: [`assemble`] delegates here, so the bytes
-/// with and without capture are identical by construction (AE2).
-///
-/// # Errors
-/// Returns an [`AsmError`] on any parse, range, or symbol-resolution failure.
-pub(crate) fn assemble_with_debug(source: &str) -> Assembled<DebugCapture> {
-    let (rom, warnings, capture, areas) = assemble_program(
-        &parse_program(&isa::mos6502::SET, source, macros::Expand::Yes)?,
-        &super::ca65_layout::Layout::nes_default(),
-        Sweep::single(&isa::mos6502::SET, source),
-    )?;
-    crate::cycles::check_budgets(
-        &[("input", source)],
-        &capture.cycle_costs(),
-        crate::engine::CycleCoverage::Full,
-        &areas,
-    )?;
-    Ok((rom, warnings, capture.into_single(), areas))
-}
-
-/// Assemble + link a **multi-file** NES program (language-surface U5): the
-/// root is `map`'s `FileId(0)`, `.include`/`.incbin` resolve lazily through
-/// `loader` under ca65's probe-pinned semantics
-/// ([`CA65_SEMANTICS`](ca65_flat::CA65_SEMANTICS) — the flat family's U4b
-/// probes, re-confirmed under the NES link), and the returned capture's line
-/// records carry each statement's real file for the debug sidecar.
-///
-/// # Errors
-/// Any per-line parse failure (stamped with its file), a missing target, an
-/// include cycle, a bad `.incbin` window, or any layout/link failure.
-pub(crate) fn assemble_multi(
-    map: &mut SourceMap,
-    loader: &dyn SourceLoader,
-) -> Assembled<DebugCaptureMulti> {
-    assemble_multi_with(map, loader, &super::ca65_layout::Layout::nes_default())
-}
-
-/// [`assemble_multi`] under a caller-supplied layout — the `-C` path (#483):
-/// the same assembly, placed by the project's own configuration.
-///
-/// # Errors
-/// As [`assemble_multi`], plus the layout's own resolution failures (a
-/// pinned `start` behind its area's fill).
-pub(crate) fn assemble_multi_with(
-    map: &mut SourceMap,
-    loader: &dyn SourceLoader,
-    layout: &super::ca65_layout::Layout,
-) -> Assembled<DebugCaptureMulti> {
-    let program = parse_program_multi(&isa::mos6502::SET, map, loader)?;
-    let out = assemble_program(
-        &program,
-        layout,
-        Sweep::multi(&isa::mos6502::SET, map, loader),
-    )?;
-    let sources: Vec<(&str, &str)> = (0..)
-        .map_while(|i| {
-            let id = crate::span::FileId(i);
-            Some((map.path(id)?, map.contents(id)?))
-        })
-        .collect();
-    let costs = out.2.cycle_costs();
-    // Check each file separately so the diagnostic retains its actual FileId.
-    for (i, source) in sources.iter().enumerate() {
-        crate::cycles::check_budgets(
-            &[*source],
-            &costs,
-            crate::engine::CycleCoverage::Full,
-            &out.3,
-        )
-        .map_err(|e| ca65_flat::stamp_file(e, FileId(i as u32)))?;
-    }
-    Ok(out)
-}
-
-/// Assemble + link a parsed [`Program`](crate::ast::Program) — the one body
-/// behind the single-source and multi-file entries, so their bytes can never
-/// drift. The capture's line records carry each statement's file (U5); the
-/// single-source wrapper collapses them back to the root.
-///
-/// # Errors
-/// Returns an [`AsmError`] on any projection, range, or symbol-resolution
-/// failure.
-fn assemble_program(
-    program: &crate::ast::Program,
-    layout_def: &super::ca65_layout::Layout,
-    sweep: Sweep<'_>,
-) -> Assembled<DebugCaptureMulti> {
-    let set = &isa::mos6502::SET;
-    // The AST is the single front-end IR: the parse built the source-preserving
-    // `Program` (carrying each statement's native `Kind`, `=` constants, and the
-    // segment directives); project it to the assembler's `Parsed`. Same
-    // bytes as the old direct parse — see
-    // `decisions/ast-native-payload-for-multipass-cisc.md`.
-    let parsed = parsed_from_program(program, sweep)?;
-
-    // Scoped label references, answered now that every definition is known:
-    // `v` written inside `a::b` is `a::b::v` if that exists, else `a::v`, else
-    // `v`. Constants were answered at parse time, positionally, which is what
-    // ca65 requires of them; a label may stand anywhere, so it waits for this.
-    let mut parsed = parsed;
-    {
-        let mut refs: BTreeSet<String> = BTreeSet::new();
-        for stmt in &parsed.stmts {
-            collect_syms(&stmt.kind, &mut refs);
-            if let Kind::Visible { rule, names, .. } = &stmt.kind
-                && *rule != VisRule::MustNotBeDefined
-            {
-                refs.extend(names.iter().cloned());
-            }
-        }
-        for definition in parsed.deferred.definitions.values() {
-            collect_syms(&Kind::Bytes(vec![definition.value.clone()]), &mut refs);
-        }
-        refs.extend(
-            parsed
-                .deferred
-                .source_reads
-                .iter()
-                .map(|(name, _)| name.clone()),
-        );
-        let known: BTreeSet<&String> = parsed
-            .label_seg
-            .keys()
-            .chain(parsed.consts.keys())
-            .chain(parsed.deferred.definitions.keys())
-            .collect();
-        let scoped: BTreeSet<String> = refs
-            .iter()
-            .filter(|k| k.starts_with(SCOPE_MARK))
-            .cloned()
-            .collect();
-        let targets = scope_targets(&scoped, &|name| {
-            known.contains(&name.to_string())
-                || parsed
-                    .deferred
-                    .declarations
-                    .get(name)
-                    .is_some_and(|decl| decl.is_external())
-        });
-        // An external binds through an explicit export of its public spelling,
-        // never through ordinary enclosing-scope fallback. Keep its declaration
-        // key separate so an imported value is not mistaken for a definition.
-        let mut exports = BTreeMap::new();
-        for stmt in &parsed.stmts {
-            if let Kind::Visible { rule, names, .. } = &stmt.kind
-                && *rule != VisRule::MustNotBeDefined
-            {
-                for name in names {
-                    let target = targets.get(name).unwrap_or(name);
-                    if known.contains(target) {
-                        let external = target.rsplit("::").next().unwrap_or(target).to_string();
-                        if let Some(previous) = exports.insert(external.clone(), target.clone())
-                            && previous != *target
-                        {
-                            return Err(statement_error(
-                                AsmError::new(
-                                    stmt.line,
-                                    format!("duplicate external identifier `{external}`"),
-                                ),
-                                stmt.file,
-                                &stmt.expansion_frames,
-                            ));
-                        }
-                    }
-                }
-            }
-        }
-        let external_targets: BTreeMap<String, String> = parsed
-            .deferred
-            .declarations
-            .iter()
-            .filter(|(key, declaration)| declaration.is_external() && !known.contains(*key))
-            .map(|(key, _)| key)
-            .filter_map(|key| {
-                let spelling = key.rsplit("::").next().unwrap_or(key);
-                exports
-                    .get(spelling)
-                    .map(|target| (key.clone(), target.clone()))
-            })
-            .collect();
-        let value_target = |name: &String| {
-            let target = targets.get(name).unwrap_or(name);
-            external_targets.get(target).unwrap_or(target).clone()
-        };
-        for (name, span) in &parsed.deferred.source_reads {
-            let target = value_target(name);
-            if !known.contains(&target) {
-                return Err(AsmError::at(
-                    span.clone(),
-                    format!("undefined symbol `{}`", display_label(&target)),
-                ));
-            }
-        }
-        for definition in parsed.deferred.definitions.values_mut() {
-            definition.source_value = map_expr_syms(&definition.source_value, &|name| {
-                targets.get(name).map(|target| Expr::Sym(target.clone()))
-            });
-            definition.value = map_expr_syms(&definition.value, &|name| {
-                targets.get(name).map(|target| Expr::Sym(target.clone()))
-            });
-        }
-        for stmt in &mut parsed.stmts {
-            stmt.kind = map_kind_syms(&stmt.kind, &|name| {
-                targets.get(name).map(|target| Expr::Sym(target.clone()))
-            });
-            if let Kind::Visible { rule, names, .. } = &mut stmt.kind
-                && *rule != VisRule::MustNotBeDefined
-            {
-                for name in names {
-                    if let Some(target) = targets.get(name) {
-                        *name = target.clone();
-                    }
-                }
-            }
-            if let Some(bound) = &mut stmt.bound_insn {
-                for operand in &mut bound.operands {
-                    *operand = map_expr_syms(operand, &|name| {
-                        targets.get(name).map(|target| Expr::Sym(target.clone()))
-                    });
-                }
-            }
-            // `.sizeof` reads a size the declaration stored. A name that
-            // declared none has no size to give, which is ca65's `Size of 'V'
-            // is unknown` — answered here, where the message can still name
-            // what the source wrote rather than the key it became.
-            let mut named = BTreeSet::new();
-            collect_syms(&stmt.kind, &mut named);
-            for key in &named {
-                let Some(name) = key.strip_suffix(SIZE_SUFFIX) else {
-                    continue;
-                };
-                if !parsed.consts.contains_key(key) {
-                    return Err(statement_error(
-                        AsmError::new(
-                            stmt.line,
-                            format!("size of `{}` is unknown", display_label(name)),
-                        ),
-                        stmt.file,
-                        &stmt.expansion_frames,
-                    ));
-                }
-            }
-        }
-        project::validate_external_bytes(&parsed)?;
-        for definition in parsed.deferred.definitions.values_mut() {
-            definition.value = map_expr_syms(&definition.value, &|name| {
-                external_targets
-                    .get(name)
-                    .map(|target| Expr::Sym(target.clone()))
-            });
-        }
-        for stmt in &mut parsed.stmts {
-            stmt.kind = map_kind_syms(&stmt.kind, &|name| {
-                external_targets
-                    .get(name)
-                    .map(|target| Expr::Sym(target.clone()))
-            });
-            if let Some(bound) = &mut stmt.bound_insn {
-                for operand in &mut bound.operands {
-                    *operand = map_expr_syms(operand, &|name| {
-                        external_targets
-                            .get(name)
-                            .map(|target| Expr::Sym(target.clone()))
-                    });
-                }
-            }
-        }
-    }
-
-    // The address-size environment: constants by value, plus zero-page labels
-    // pinned below $100 so the shared mode picker selects the short form.
-    let mut size_env = parsed.consts.clone();
-    for (name, seg) in &parsed.label_seg {
-        if seg == "ZEROPAGE" {
-            size_env.insert(name.clone(), 0);
-        }
-    }
-
-    // Where a segment floats behind another in its area (a project config's
-    // RODATA after CODE), its base is a function of the earlier segments'
-    // lengths — so size everything first, with the same `resolve` the layout
-    // pass uses, and feed the lengths to the layout's resolution. No
-    // statement's size depends on its absolute address (`.align` measures
-    // from the segment's start), so this pass cannot disagree with the real
-    // one. The default layout floats nothing and skips this entirely.
-    let seg_lengths = if layout_def.from_config || layout_def.needs_lengths() {
-        // Config resolution also needs presence: an explicitly selected empty
-        // segment exists for ld65, while an absent declaration reserves nothing.
-        let mut lengths: BTreeMap<String, u32> = parsed
-            .declared_segments
-            .iter()
-            .map(|name| (name.clone(), 0))
-            .collect();
-        for stmt in &parsed.stmts {
-            let off = *lengths.entry(stmt.seg.clone()).or_insert(0);
-            let (_, size) = resolve(
-                set,
-                stmt.kind.clone(),
-                &size_env,
-                off,
-                stmt.line,
-                layout_def.fill,
-                stmt.bound_insn.clone(),
-            )
-            .map_err(|e| statement_error(e, stmt.file, &stmt.expansion_frames))?;
-            *lengths.get_mut(&stmt.seg).expect("segment length") += size as u32;
-        }
-        lengths
-    } else {
-        BTreeMap::new()
-    };
-    let layout = &layout_def.resolve(&seg_lengths)?;
-
-    // Layout pass: resolve each instruction's mode and size, lay statements out
-    // within their segment, and record every label's absolute address.
-    let mut offsets: BTreeMap<String, u32> = BTreeMap::new();
-    // Absolute addresses are `i64` to match the engine's expression evaluator;
-    // the NES is 16-bit, so values are masked to a word on emit.
-    let mut addr_env: BTreeMap<String, i64> = BTreeMap::new();
-    for (name, value) in &parsed.consts {
-        addr_env.insert(name.clone(), *value);
-    }
-    // Native default absolute mode advances one cursor across segment changes.
-    // Physical segment offsets still decide where the bytes are placed.
-    let mut absolute_pc: Option<i64> = None;
-    let mut placed: Vec<Placed> = Vec::new();
-    // The debug read-out (U4): symbols and line spans fall out of the layout
-    // values already in hand — `(section, offset)` is `(seg, addr - base)`.
-    let mut dbg_symbols: Vec<debug198x::Symbol> = Vec::new();
-    let mut dbg_lines: Vec<(FileId, u32, debug198x::SectionId, u64, u64)> = Vec::new();
-    let mut dbg_cycles = Vec::new();
-    let mut dbg_spans = DebugSpans::default();
-    for (name, value) in &parsed.consts {
-        dbg_symbols.push(debug198x::Symbol {
-            name: parsed.const_names.get(name).unwrap_or(name).clone(),
-            kind: debug198x::SymbolKind::Const {
-                value: *value as u64,
-            },
-        });
-    }
-    // Every name an `.import` claims, before any label is placed: ca65 refuses
-    // the *definition* of an imported name, and reports it there, so the set
-    // has to be known before the label pass rather than gathered by it.
-    let imported: BTreeSet<String> = parsed
-        .stmts
-        .iter()
-        .filter_map(|s| match &s.kind {
-            Kind::Visible {
-                rule: VisRule::MustNotBeDefined,
-                names,
-                ..
-            } => Some(names.clone()),
-            _ => None,
-        })
-        .flatten()
-        .collect();
-
-    let mut definition_positions = BTreeMap::new();
-    let needed_positions: BTreeSet<usize> = parsed
-        .deferred
-        .definitions
-        .values()
-        .map(|definition| definition.position)
-        .collect();
-    for (position, stmt) in parsed.stmts.into_iter().enumerate() {
-        let info = layout.seg(&stmt.seg).ok_or_else(|| {
-            // Layout errors are stamped with the statement's file (U5), so a
-            // failure inside an included file names that file.
-            statement_error(
-                AsmError::new(
-                    stmt.line,
-                    if layout.from_config {
-                        format!(
-                            "segment `{}` is not in the linker config (valid: {}); like \
-                             `ld65`, a segment outside SEGMENTS has no memory area to \
-                             place it in",
-                            stmt.seg,
-                            layout.known()
-                        )
-                    } else {
-                        format!(
-                            "segment `{}` is not in the NES config (valid: {}); this assembler \
-                             links the curriculum's fixed NROM layout, which — like `ld65` with \
-                             its `nes.cfg` — has no memory area for other segments",
-                            stmt.seg,
-                            layout.known()
-                        )
-                    },
-                ),
-                stmt.file,
-                &stmt.expansion_frames,
-            )
-        })?;
-        let off = *offsets.entry(stmt.seg.clone()).or_insert(0);
-        let addr = info.base + off;
-        let prior_pc = absolute_pc.unwrap_or(i64::from(addr));
-        if needed_positions.contains(&position) {
-            definition_positions.insert(position, prior_pc);
-        }
-        if let Some(label) = &stmt.label {
-            // Real ca65 rejects a duplicate symbol; accepting one would also
-            // make the debug record lie (the record keeps every definition,
-            // the encoder the last — a debugger would disagree with the bytes).
-            // `addr_env` was seeded with the `=` constants, so this covers a
-            // label colliding with a constant too.
-            if parsed.deferred.definitions.contains_key(label) {
-                return Err(statement_error(
-                    AsmError::new(
-                        stmt.line,
-                        format!("duplicate symbol `{}`", display_label(label)),
-                    ),
-                    stmt.file,
-                    &stmt.expansion_frames,
-                ));
-            }
-            if imported.contains(label) {
-                return Err(statement_error(
-                    AsmError::new(
-                        stmt.line,
-                        format!("symbol `{}` is already an import", display_label(label)),
-                    ),
-                    stmt.file,
-                    &stmt.expansion_frames,
-                ));
-            }
-            if addr_env.insert(label.clone(), prior_pc).is_some() {
-                return Err(statement_error(
-                    AsmError::new(
-                        stmt.line,
-                        format!("duplicate symbol `{}`", display_label(label)),
-                    ),
-                    stmt.file,
-                    &stmt.expansion_frames,
-                ));
-            }
-            // Anonymous (`:`) labels are positional, not names — a debugger
-            // cannot look one up, so they stay out of the symbol record. Cheap
-            // (`@name`) labels are qualified with a control byte internally;
-            // render the source form.
-            if !label.starts_with(LABEL_SEP) {
-                let (section, offset) = dbg_spans.location(
-                    layout.seg_id(&stmt.seg),
-                    layout.segs.len(),
-                    info,
-                    off,
-                    prior_pc,
-                );
-                dbg_symbols.push(debug198x::Symbol {
-                    name: display_label(label),
-                    kind: debug198x::SymbolKind::Label {
-                        section,
-                        offset,
-                        space: None,
-                    },
-                });
-            }
-        }
-        // Native defines the label before the directive changes the PC/mode.
-        match &stmt.kind {
-            Kind::Org(e) => {
-                let target = e
-                    .eval(&addr_env, prior_pc, stmt.line)
-                    .map_err(|e| statement_error(e, stmt.file, &stmt.expansion_frames))?;
-                // Native DoOrg validates the 24-bit origin before changing mode.
-                if !(0..=0xFF_FFFF).contains(&target) {
-                    return Err(statement_error(
-                        AsmError::new(stmt.line, "origin is outside the 24-bit range"),
-                        stmt.file,
-                        &stmt.expansion_frames,
-                    ));
-                }
-                absolute_pc = Some(target);
-            }
-            Kind::Reloc => {
-                absolute_pc = None;
-            }
-            _ => {}
-        }
-        // A constant-only bit-branch target has no segment base to cancel
-        // ca65's relocatable PC. Native ca65 refuses it before linking; `.org`
-        // makes the PC absolute even when it matches the linked address.
-        if absolute_pc.is_none()
-            && let Kind::BitBranch { target, .. } = &stmt.kind
-            && fold_const(target, &parsed.consts, stmt.line).is_ok()
-        {
-            return Err(statement_error(
-                AsmError::new(
-                    stmt.line,
-                    "constant bit-branch target requires absolute mode (`.org`)",
-                ),
-                stmt.file,
-                &stmt.expansion_frames,
-            ));
-        }
-        let has_initializer = !matches!(stmt.kind, Kind::Res(_, None) | Kind::Align(_, None));
-        let (resolved, size) = resolve(
-            set,
-            stmt.kind,
-            &size_env,
-            off,
-            stmt.line,
-            layout_def.fill,
-            stmt.bound_insn,
-        )
-        .map_err(|e| statement_error(e, stmt.file, &stmt.expansion_frames))?;
-        *offsets.get_mut(&stmt.seg).expect("segment offset") += size as u32;
-        // A line span per byte-emitting statement (address-space-only
-        // reservations — ZEROPAGE/BSS `.res` — carry no bytes, so no span; the
-        // HEADER segment is iNES file metadata, not CPU-addressed code, so its
-        // records would alias CPU $0000 — skipped, per AE3's no-fabrication rule).
-        if size > 0 && info.file_at.is_some() && stmt.seg != "HEADER" {
-            let (section, offset) = dbg_spans.location(
-                layout.seg_id(&stmt.seg),
-                layout.segs.len(),
-                info,
-                off,
-                absolute_pc.unwrap_or(i64::from(addr)),
-            );
-            dbg_lines.push((stmt.file, stmt.line as u32, section, offset, size as u64));
-            if let Resolved::Insn { form, .. } = &resolved {
-                dbg_cycles.push((
-                    section,
-                    crate::engine::CycleRec {
-                        file: stmt.file,
-                        line: stmt.line as u32,
-                        offset,
-                        base: form.cycles.base,
-                        page_cross: form.cycles.page_cross,
-                        branch_taken: form.cycles.branch_taken,
-                        bounds: None,
-                    },
-                ));
-            }
-        }
-        if !matches!(resolved, Resolved::Nothing) {
-            // The address the statement *reports* — what `*` reads and what a
-            // relative branch measures from. Where its bytes go is the
-            // segment buffer's business, and that has not moved.
-            let reported = u32::try_from(absolute_pc.unwrap_or(i64::from(addr))).map_err(|_| {
-                statement_error(
-                    AsmError::new(
-                        stmt.line,
-                        "`.org` puts this statement outside the address space",
-                    ),
-                    stmt.file,
-                    &stmt.expansion_frames,
-                )
-            })?;
-            placed.push(Placed {
-                seg: stmt.seg,
-                addr: reported,
-                line: stmt.line,
-                file: stmt.file,
-                expansion_frames: stmt.expansion_frames,
-                has_initializer,
-                item: resolved,
-            });
-        }
-        if let Some(pc) = &mut absolute_pc {
-            *pc += size as i64;
-        }
-    }
-
-    for (name, definition) in &parsed.deferred.definitions {
-        if imported.contains(name) {
-            return Err(AsmError::at(
-                definition.span.clone(),
-                format!("symbol `{}` is already an import", display_label(name)),
-            ));
-        }
-    }
-    parsed
-        .deferred
-        .finish(&mut addr_env, &definition_positions, &|values| {
-            demanded_values(&placed, values)
-        })?;
-    for name in parsed.deferred.definitions.keys() {
-        if !parsed.consts.contains_key(name)
-            && let Some(value) = addr_env.get(name)
-        {
-            dbg_symbols.push(debug198x::Symbol {
-                name: parsed.const_names.get(name).unwrap_or(name).clone(),
-                kind: debug198x::SymbolKind::Const {
-                    value: *value as u64,
-                },
-            });
-        }
-    }
-
-    let mut actual_lengths = offsets.clone();
-    for name in &parsed.declared_segments {
-        actual_lengths.entry(name.clone()).or_insert(0);
-    }
-    layout_def.validate_extents(layout, &actual_lengths)?;
-
-    // The section table: every segment the program touched (placed bytes or
-    // just labels/reservations), in config order. CPU-addressed segments carry
-    // their absolute base; HEADER (file metadata) and CHARS (PPU address space)
-    // are *not* CPU-addressable, so they get `base: None` — the reader's
-    // absolute lookups skip them rather than aliasing them onto the zero page,
-    // and a PPU-space consumer can supply a `BaseMap` (KTD7). A `Space`
-    // qualifier is the eventual richer answer (KTD5, U7).
-    let mut sections: Vec<debug198x::Section> = layout
-        .segs
-        .iter()
-        .enumerate()
-        .filter(|(_, s)| offsets.contains_key(&s.name))
-        .map(|(id, s)| debug198x::Section {
-            id: id as debug198x::SectionId,
-            name: s.name.clone(),
-            base: s.cpu_addressable.then_some(u64::from(s.base)),
-            // The NES mapper's banking is not modelled here; no space is fabricated.
-            space: None,
-        })
-        .collect();
-
-    // Emit pass: turn each placed item into bytes, per segment. Statements run
-    // in source order across segments, so `.out` notes come out in the order
-    // they were written.
-    let mut seg_bytes: BTreeMap<String, Vec<u8>> = BTreeMap::new();
-    let mut warnings: Vec<Warning> = Vec::new();
-    let uninitialized: BTreeSet<&str> = layout_def
-        .segments
-        .iter()
-        .filter(|s| !s.initialized)
-        .map(|s| s.name.as_str())
-        .collect();
-    let mut warned_segments = BTreeSet::new();
-    let mut exports: BTreeMap<String, String> = BTreeMap::new();
-    for Placed {
-        seg,
-        addr,
-        line,
-        file,
-        expansion_frames,
-        item,
-        has_initializer,
-    } in placed
-    {
-        if let Resolved::Visible(rule, _, names) = &item
-            && *rule != VisRule::MustNotBeDefined
-        {
-            for name in names.iter().filter(|name| addr_env.contains_key(*name)) {
-                let external = name.rsplit("::").next().unwrap_or(name).to_string();
-                if let Some(previous) = exports.insert(external.clone(), name.clone())
-                    && previous != *name
-                {
-                    return Err(statement_error(
-                        AsmError::new(line, format!("duplicate external identifier `{external}`")),
-                        file,
-                        &expansion_frames,
-                    ));
-                }
-            }
-        }
-        // A diagnostic carries no bytes, so it is answered before the segment
-        // filter: an `.out` written inside BSS still prints.
-        let diagnostic = matches!(item, Resolved::Message(..) | Resolved::Assert(..));
-        if !diagnostic && layout.seg(&seg).expect("seg").file_at.is_none() {
-            // ld65 ignores reservations and all-zero initialized content.
-            // Validate omitted expressions before inspecting their actual bytes.
-            let check_content = has_initializer && uninitialized.contains(seg.as_str());
-            let nonzero = match &item {
-                Resolved::Nothing => false,
-                Resolved::Raw(bytes) => check_content && bytes.iter().any(|&b| b != 0),
-                Resolved::Fill(count, fill) => check_content && *count != 0 && *fill != 0,
-                _ => {
-                    let mut bytes = Vec::new();
-                    emit(
-                        item,
-                        addr,
-                        &Emit {
-                            env: &addr_env,
-                            label_seg: &parsed.label_seg,
-                            file,
-                            line,
-                        },
-                        &mut bytes,
-                        &mut warnings,
-                    )
-                    .map_err(|e| statement_error(e, file, &expansion_frames))?;
-                    check_content && bytes.iter().any(|&b| b != 0)
-                }
-            };
-            if nonzero && warned_segments.insert(seg.clone()) {
-                warnings.push(
-                    Warning::new(
-                        line,
-                        format!("segment `{seg}` with type bss contains initialized data"),
-                    )
-                    .in_file(file),
-                );
-            }
-            continue;
-        }
-        let buf = seg_bytes.entry(seg).or_default();
-        emit(
-            item,
-            addr,
-            &Emit {
-                env: &addr_env,
-                label_seg: &parsed.label_seg,
-                file,
-                line,
-            },
-            buf,
-            &mut warnings,
-        )
-        .map_err(|e| statement_error(e, file, &expansion_frames))?;
-    }
-
-    let mut file_offsets: BTreeMap<_, _> = layout
-        .segs
-        .iter()
-        .enumerate()
-        .filter_map(|(id, s)| Some((id as debug198x::SectionId, s.file_at? as u64)))
-        .collect();
-    for (section, file_offset, _, _) in dbg_spans.spans {
-        if let Some(at) = file_offset {
-            file_offsets.insert(section.id, at);
-        }
-        sections.push(section);
-    }
-    let rom = link(&seg_bytes, layout)?;
-    let areas = ca65_layout::area_usage(layout_def, layout, &offsets);
-    Ok((
-        rom,
-        warnings,
-        DebugCaptureMulti {
-            cycle_coverage: crate::engine::CycleCoverage::Full,
-            file_offsets,
-            sections,
-            symbols: dbg_symbols,
-            lines: dbg_lines,
-            cycles: dbg_cycles,
-        },
-        areas,
-    ))
-}
-
-/// Logical debug coordinates retain a separate physical mapping for each span.
-#[derive(Default)]
-struct DebugSpans {
-    spans: Vec<(debug198x::Section, Option<u64>, u32, i64)>,
-    last: BTreeMap<debug198x::SectionId, usize>,
-}
-
-impl DebugSpans {
-    fn location(
-        &mut self,
-        parent: debug198x::SectionId,
-        configured_count: usize,
-        info: &ca65_layout::ResolvedSeg,
-        physical: u32,
-        logical: i64,
-    ) -> (debug198x::SectionId, u64) {
-        if logical == i64::from(info.base) + i64::from(physical) {
-            return (parent, u64::from(physical));
-        }
-        if let Some(&index) = self.last.get(&parent) {
-            let (section, _, start, base) = &self.spans[index];
-            if let Some(delta) = physical.checked_sub(*start)
-                && base.checked_add(i64::from(delta)) == Some(logical)
-            {
-                return (section.id, u64::from(delta));
-            }
-        }
-        let id = debug198x::SectionId::try_from(configured_count + self.spans.len())
-            .expect("debug section count fits section ID");
-        let section = debug198x::Section {
-            id,
-            name: info.name.clone(),
-            base: info
-                .cpu_addressable
-                .then(|| u64::try_from(logical).expect("validated PC")),
-            space: None,
-        };
-        let file_offset = info
-            .file_at
-            .and_then(|at| (at as u64).checked_add(u64::from(physical)));
-        self.last.insert(parent, self.spans.len());
-        self.spans.push((section, file_offset, physical, logical));
-        (id, 0)
-    }
+pub(crate) fn assemble(source: &str) -> Result<(Vec<u8>, Vec<crate::engine::Warning>), AsmError> {
+    crate::assemble_ca65(source).map(|result| (result.bytes, result.warnings))
 }
 
 // ---------------------------------------------------------------------------
@@ -1266,46 +329,6 @@ pub(crate) fn parse_program(
     w.finish(source.lines().count() as u32)
 }
 
-/// Parse a multi-file NES ca65 program (language-surface U5, KTD1): the
-/// **interleaved, environment-threaded walk** over the source map, resolving
-/// `.include`/`.incbin` lazily through `loader` under ca65's probe-pinned
-/// semantics ([`CA65_SEMANTICS`](ca65_flat::CA65_SEMANTICS) — ancestor-chain
-/// resolution, the negative-size incbin sentinel; re-confirmed under the NES
-/// link). Everything the parse accumulates crosses include boundaries in both
-/// directions, exactly as ca65's textual splice does (probe-pinned):
-/// `=` constants, the cheap-local anchor (the scoped environment's), the
-/// anonymous-label stream, and — via the projection reading the spliced node
-/// order — the active `.segment` (a switch inside an include persists into
-/// the includer afterwards).
-///
-/// # Errors
-/// Any per-line parse failure (stamped with the file it occurred in), a
-/// missing target, an include cycle, a bad `.incbin` window, or the depth
-/// backstop — all at the directive's span.
-pub(crate) fn parse_program_multi(
-    set: &'static isa::InstructionSet,
-    map: &mut SourceMap,
-    loader: &dyn SourceLoader,
-) -> Result<crate::ast::Program, AsmError> {
-    // Structure only (#481): includes are not resolved here — the projection
-    // sweep opens each one at the moment it reads the directive, so a target
-    // inside an untaken branch is never opened at all.
-    let mut w = Walker::structural(set);
-    let root = map.contents(FileId(0)).unwrap_or_default().to_owned();
-    let root_lines = root.lines().count() as u32;
-    let mut stack = vec![FileId(0)];
-    ca65_flat::walk_file(
-        &mut w,
-        &root,
-        FileId(0),
-        map,
-        loader,
-        &mut stack,
-        &ca65_flat::CA65_SEMANTICS,
-    )?;
-    w.finish(root_lines)
-}
-
 /// The per-line parse walk shared by [`parse_program`] (single source) and
 /// [`parse_program_multi`] (the include-capable walk). The environment — the
 /// `=` constants, the cheap-local scope, the anonymous-label stream, and
@@ -1317,7 +340,6 @@ struct Walker {
     extension: Option<&'static isa::InstructionSet>,
     cpu_stack: Vec<Option<&'static isa::InstructionSet>>,
     repeat_registers: Option<bool>,
-    text_names: BTreeSet<String>,
     anons: AnonCtx,
     /// The scoped symbol environment (#484): the cheap-local anchor — the
     /// current global that `@cheap` labels key under, re-anchored by native
@@ -1326,7 +348,6 @@ struct Walker {
     /// `::`-path scope stack below is staged to follow.
     scope_env: crate::scopes::ScopeEnv,
     consts: BTreeMap<String, i64>,
-    source_offsets: BTreeMap<String, u32>,
     pending_leading: Vec<crate::ast::Comment>,
     nodes: Vec<crate::ast::Node>,
     /// The scopes open at this line, outermost first — what `.proc`/`.scope`
@@ -1447,11 +468,9 @@ impl Walker {
             extension: None,
             cpu_stack: Vec::new(),
             repeat_registers: None,
-            text_names: BTreeSet::new(),
             anons: AnonCtx::default(),
             scope_env: crate::scopes::ScopeEnv::new(),
             consts: BTreeMap::new(),
-            source_offsets: BTreeMap::new(),
             pending_leading: Vec::new(),
             nodes: Vec::new(),
             scopes: Vec::new(),
@@ -2211,16 +1230,6 @@ impl Walker {
                 // Native source aliases need not be ISA mnemonics.
                 || (extended && matches!(head, "INA" | "DEA" | "PHD"))
         }
-    }
-
-    /// Statement-head token policy after text processing. Explicit .ident
-    /// creates an identifier with a register spelling; mnemonics stay reserved.
-    fn reserved_head_label(&self, name: &str, generated: bool) -> bool {
-        let upper = name.to_ascii_uppercase();
-        self.instruction_name(&upper)
-            || (!generated
-                && (matches!(upper.as_str(), "A" | "X" | "Y" | "F" | "Z")
-                    || (self.extension.is_some() && matches!(upper.as_str(), "S" | "SP"))))
     }
 
     /// Rewrite every name in a statement to the key it resolves under. A no-op
@@ -4523,19 +3532,6 @@ fn expr_function_positional(
     }
 }
 
-/// Answer every `.defined` marker in an expression against what is defined so
-/// far. Anything else is left alone.
-fn resolve_defined<'a>(
-    consts: &'a BTreeMap<String, i64>,
-    labels: &'a BTreeMap<String, String>,
-) -> impl Fn(&str) -> Option<Expr> + 'a {
-    move |name| {
-        let sym = name.strip_prefix(DEFINED_MARK)?;
-        let known = consts.contains_key(sym) || labels.contains_key(sym);
-        Some(Expr::Num(i64::from(known)))
-    }
-}
-
 /// Marks an unqualified reference written inside a scope. ca65 resolves such a
 /// name against the innermost enclosing scope that holds it, and only the
 /// *whole file* knows which that is, so the parse records the path the
@@ -4565,56 +3561,6 @@ fn split_scope_ref(key: &str) -> Option<(&str, &str)> {
     key.strip_prefix(SCOPE_MARK)?.split_once('\u{2}')
 }
 
-/// What each scoped reference resolves to, given everything the file defines.
-///
-/// ca65 looks a name up in the scope it was written in, then in that scope's
-/// parent, and outward to the top — so `v` inside `a::b` is `a::b::v` if that
-/// exists, else `a::v`, else `v`. A name that resolves nowhere keeps its bare
-/// spelling, so the diagnostic names what the source wrote rather than an
-/// internal key.
-fn scope_targets(
-    refs: &BTreeSet<String>,
-    defined: &dyn Fn(&str) -> bool,
-) -> BTreeMap<String, String> {
-    let mut out = BTreeMap::new();
-    for key in refs {
-        let Some((path, name)) = split_scope_ref(key) else {
-            continue;
-        };
-        let mut segments: Vec<&str> = if path.is_empty() {
-            Vec::new()
-        } else {
-            path.split("::").collect()
-        };
-        let target = loop {
-            let candidate = if segments.is_empty() {
-                name.to_string()
-            } else {
-                format!("{}::{name}", segments.join("::"))
-            };
-            if defined(&candidate) {
-                break candidate;
-            }
-            if segments.pop().is_none() {
-                break name.to_string();
-            }
-        };
-        out.insert(key.clone(), target);
-    }
-    out
-}
-
-/// Answer every `.ref` marker against what has been *used* so far. The set is
-/// the projection's, and it is updated after each statement is answered, so a
-/// name a statement mentions is not yet referenced for that statement's own
-/// `.ref` — which is what asking "above this line" means.
-fn resolve_ref(used: &BTreeSet<String>) -> impl Fn(&str) -> Option<Expr> + '_ {
-    move |name| {
-        let sym = name.strip_prefix(REF_MARK)?;
-        Some(Expr::Num(i64::from(used.contains(sym))))
-    }
-}
-
 /// ca65 cheap tokens allow digits after `@`, but never a dot keyword.
 fn is_cheap_ident(name: &str) -> bool {
     !name.is_empty() && name.bytes().all(|c| c.is_ascii_alphanumeric() || c == b'_')
@@ -4640,13 +3586,6 @@ fn checked_cheap_key(global: &str, name: &str, line: usize) -> Result<String, As
 /// (`global\u{1}name`) label keys. Never valid in user source, so keys cannot
 /// collide with real names — but it must not leak into user-facing artifacts.
 pub(crate) const LABEL_SEP: char = '\u{1}';
-
-/// A label key rendered for a user-facing artifact (the debug record): a cheap
-/// key `global\u{1}name` reads back as its source form `global@name`; plain
-/// names pass through.
-fn display_label(key: &str) -> String {
-    key.replace(LABEL_SEP, "@")
-}
 
 #[cfg(test)]
 mod tests {
