@@ -53,7 +53,7 @@ use std::collections::{BTreeMap, HashMap, HashSet};
 
 use lang198x_ca65::Profile;
 use lang198x_ca65::ast::{Expr as SourceExpr, NameRef, View};
-use lang198x_ca65::expand::{ActiveLine, Expander, Host};
+use lang198x_ca65::expand::{ActiveLine, Expander, Host, Location, Reading};
 use lang198x_ca65::lower::{
     self, Binary, CpuStack, Known, Record, RecordKind, Scope, Segment, Size, Value, Visibility,
     Visible,
@@ -68,7 +68,7 @@ use crate::engine::{
     AsmError, BinOp, DiagSeverity, Expr, Operation, Place, Statement, Warning, align_pad, next_pc,
 };
 use crate::source::{SourceLoader, SourceMap};
-use crate::span::{FileId, Span};
+use crate::span::{ExpansionFrame, FileId, Span};
 
 const PROFILE: Profile = Profile::CA65_2_19_6502;
 
@@ -440,6 +440,8 @@ struct Walk<'f> {
     /// Whether the whole program has been read, when what is left of each
     /// `.global` is an import.
     ended: bool,
+    /// Why the last `.include` that failed could not be read.
+    missing_include: Option<String>,
     /// The address, while `.org` makes it known. ca65 keeps it across a
     /// change of segment, counting every segment's bytes, until `.reloc`.
     org: Option<i64>,
@@ -709,7 +711,7 @@ impl Walk<'_> {
         sectioned: bool,
         statements: &mut Vec<Statement>,
     ) -> Result<(), AsmError> {
-        let at = self.site(expander, line.span());
+        let at = self.error_site(expander, line.span());
         let made_at = self.statement_site(expander, line.span());
         self.here = Some(at.clone());
         self.binding = self.binds(line);
@@ -738,7 +740,7 @@ impl Walk<'_> {
                 }
                 _ => diagnostic.message().to_owned(),
             };
-            AsmError::at(self.site(expander, span), message)
+            AsmError::at(self.error_site(expander, span), message)
         })?;
         let made = self.made;
         // ca65 stops at `.fatal`, where it reports `.error` and carries on.
@@ -815,6 +817,14 @@ impl Walk<'_> {
             }
             // ca65 studies an equate's value as it reads it, and refuses a
             // name in it whose definition comes back round to itself.
+            // So it does the data and operands a line makes, once read.
+            if let Some(op) = &op {
+                for value in values_of(op) {
+                    if let Some((name, site)) = self.circle(value) {
+                        return Err(circular(&name, site));
+                    }
+                }
+            }
             if let Some(Operation::Equ(value)) = &op {
                 self.study(value, &at)?;
                 if let Some(label) = &label {
@@ -830,21 +840,21 @@ impl Walk<'_> {
                 self.used.insert(self.segment.clone());
             }
             let page = op.as_ref().and_then(page_check);
-            statements.push(statement(&made_at, label, op));
+            statements.push(statement_at(&made_at, &at, label, op));
             if let Some(check) = page {
-                statements.push(statement(&made_at, None, Some(check)));
+                statements.push(statement_at(&made_at, &at, None, Some(check)));
             }
             if let Some(address) = self.opens.take() {
                 self.open_section(address, statements, &made_at);
             }
             for op in std::mem::take(&mut self.after) {
-                statements.push(statement(&made_at, None, Some(op)));
+                statements.push(statement_at(&made_at, &at, None, Some(op)));
             }
         }
         if let Some(binary) = &lowered.binary {
             let op = self.binary(expander, line, binary, &at)?;
             let op = self.apply(None, None, false, Some(op), &at)?;
-            statements.push(statement(&made_at, None, op));
+            statements.push(statement_at(&made_at, &at, None, op));
         }
         let line_size = self.made - made;
         for label in labels {
@@ -882,10 +892,29 @@ impl Walk<'_> {
         layout: Option<&Layout>,
         statements: &mut [Statement],
     ) -> Result<Option<Linked>, AsmError> {
+        let known = || {
+            layout.map_or_else(String::new, |layout| {
+                let names: Vec<&str> = layout.segments.iter().map(|d| d.name.as_str()).collect();
+                names.join(", ")
+            })
+        };
         let unplaced = |name: &str| {
             AsmError::new(
                 0,
-                format!("Missing memory area assignment for segment `{name}`"),
+                if layout.is_some_and(|l| !l.from_config) {
+                    format!(
+                        "segment `{name}` is not in the NES config (valid: {}); this assembler \
+                         links the curriculum's fixed NROM layout, which — like `ld65` with \
+                         its `nes.cfg` — has no memory area for other segments",
+                        known()
+                    )
+                } else {
+                    format!(
+                        "segment `{name}` is not in the linker config (valid: {}); like \
+                         `ld65`, a segment outside SEGMENTS has no memory area to place it in",
+                        known()
+                    )
+                },
             )
         };
         // ld65 places only the segments that hold bytes: an empty one it has
@@ -906,7 +935,13 @@ impl Walk<'_> {
                 lengths.insert(name.clone(), length);
             }
         }
-        let resolved = layout.resolve(&lengths)?;
+        // The built-in layout places every segment where it always goes, so
+        // an overlap is left to the check of extents, which names both.
+        let resolved = if layout.from_config {
+            layout.resolve(&lengths)?
+        } else {
+            layout.resolve(&BTreeMap::new())?
+        };
         layout.validate_extents(&resolved, &lengths)?;
         let mut opened = Vec::new();
         for (index, name, offset, org) in &self.sections {
@@ -1182,10 +1217,21 @@ impl Walk<'_> {
         let mut at = Vec::new();
         for (text, diagnostic) in &found[self.expander_seen.min(found.len())..] {
             let span = syntax::Span::new(*text, diagnostic.range());
-            self.errors.push(AsmError::at(
-                self.site(expander, span),
-                diagnostic.message(),
-            ));
+            // ca65 reports a macro that calls itself too deeply at the call
+            // as written, with no notes.
+            let site = if diagnostic
+                .message()
+                .starts_with("too many nested macro calls")
+            {
+                self.site(expander, span)
+            } else {
+                self.error_site(expander, span)
+            };
+            let message = match self.missing_include.take() {
+                Some(why) if diagnostic.message().starts_with("there is no file `") => why,
+                _ => diagnostic.message().to_owned(),
+            };
+            self.errors.push(AsmError::at(site, message));
             at.push((*text, diagnostic.range()));
         }
         self.expander_seen = found.len();
@@ -1197,6 +1243,35 @@ impl Walk<'_> {
     /// debug information gives it. A repeat's lines stay its own.
     fn statement_site(&self, expander: &Expander, span: syntax::Span) -> Span {
         self.site(expander, expander.macro_call(span).unwrap_or(span))
+    }
+
+    /// Where an error at `span` is reported. ca65 reports one in a line a
+    /// macro made at the outermost call, and each call it came through
+    /// notes where the macro is defined and where it was called.
+    fn error_site(&self, expander: &Expander, span: syntax::Span) -> Span {
+        self.reported(&expander.reading(span))
+    }
+
+    /// Where the expander says a problem on a line is reported, with its
+    /// macro frames.
+    fn reported(&self, reading: &Reading) -> Span {
+        let place = |at: Option<Location>| match at {
+            Some(at) => Span::in_file(self.file_id(at.file.get()), at.line, at.column),
+            None => Span::in_file(FileId(0), 0, 0),
+        };
+        let mut at = place(reading.at);
+        at.expansion_frames = reading
+            .frames
+            .iter()
+            .map(|frame| {
+                ExpansionFrame::new(
+                    frame.name.clone(),
+                    Some(place(frame.defined)),
+                    place(frame.called),
+                )
+            })
+            .collect();
+        at
     }
 
     /// Where `span` was written: its file, line and column.
@@ -1390,13 +1465,7 @@ impl Walk<'_> {
     /// and a division by zero it can work out.
     fn study(&self, value: &Expr, at: &Span) -> Result<(), AsmError> {
         if let Some((name, site)) = self.circle(value) {
-            return Err(AsmError::at(
-                site,
-                format!(
-                    "Circular reference in definition of symbol `{}`",
-                    name.rsplit("::").next().unwrap_or(&name)
-                ),
-            ));
+            return Err(circular(&name, site));
         }
         let constant = |name: &str| match self.known(name) {
             Value::Constant(value) => Some(value),
@@ -2127,8 +2196,12 @@ fn unnamed(index: usize) -> String {
 impl Walk<'_> {
     /// The address size of the name defined further out than `full`'s
     /// scope with the same spelling, if there is one.
+    /// ca65 looks only while it reads in that scope.
     fn outer_size(&self, full: &str) -> Option<Size> {
         let (path, name) = full.rsplit_once("::")?;
+        if path != self.path() {
+            return None;
+        }
         outwards(path)
             .skip(1)
             .find_map(|outer| self.names.get(&qualify(outer, name)))
@@ -2318,21 +2391,58 @@ impl Known for Walk<'_> {
 }
 
 impl Host for Walk<'_> {
+    /// Where the line the expander acts on next is, for the problems its
+    /// questions find.
+    fn reading(&mut self, reading: &Reading) {
+        self.here = Some(self.reported(reading));
+    }
+
     /// A file `.include` reads, looked for beside the file that asks and
     /// then beside each file that included it. A single file has none.
     fn include(&mut self, name: &str, from: syntax::FileId) -> Option<String> {
         let from = usize::try_from(from.get()).ok()?;
         let chain = self.chain(from);
-        let files = self.files.as_mut()?;
-        let id = load_include(
+        let at = self
+            .here
+            .clone()
+            .unwrap_or_else(|| Span::in_file(FileId(0), 0, 0));
+        let Some(files) = self.files.as_mut() else {
+            self.errors.push(AsmError::at(
+                at,
+                format!(
+                    "cannot resolve `.include \"{name}\"` here — the single-source API \
+                     assembles one file; use the multi-file entry point (the CLI resolves \
+                     includes automatically)"
+                ),
+            ));
+            return Some(String::new());
+        };
+        let id = match load_include(
             files.map,
             files.loader,
             name,
             &chain,
             0,
             Resolution::AncestorChain,
-        )
-        .ok()?;
+        ) {
+            Ok(id) => id,
+            Err(error) => {
+                // The loader says why, which the expander's report takes on.
+                self.missing_include = Some(error.to_string());
+                return None;
+            }
+        };
+        // ca65 has no check of its own and fails when it runs out of open
+        // files; a file that includes itself is refused at once instead.
+        if chain.contains(&id) {
+            let path = |file: &FileId| files.map.path(*file).unwrap_or("?").to_owned();
+            let cycle: Vec<String> = chain.iter().chain(std::iter::once(&id)).map(path).collect();
+            self.errors.push(AsmError::at(
+                at,
+                format!("include cycle: {}", cycle.join(" -> ")),
+            ));
+            return Some(String::new());
+        }
         let text = files.map.contents(id)?.to_owned();
         self.read.push((id, Some(from)));
         Some(text)
@@ -2396,6 +2506,42 @@ fn page_check(op: &Operation) -> Option<Operation> {
         fatal: true,
         message: "\"jmp (abs)\" across page border".to_owned(),
     })
+}
+
+/// ca65's error for a name whose definition comes back round to itself,
+/// at that definition.
+fn circular(name: &str, site: Span) -> AsmError {
+    AsmError::at(
+        site,
+        format!(
+            "Circular reference in definition of symbol `{}`",
+            name.rsplit("::").next().unwrap_or(name)
+        ),
+    )
+}
+
+/// The values a data or instruction line reads.
+fn values_of(op: &Operation) -> &[Expr] {
+    match op {
+        Operation::Sized { values, .. } => values,
+        Operation::Instruction { operands, .. } => operands,
+        _ => &[],
+    }
+}
+
+/// A statement placed at `placed`, whose errors the engine reports at
+/// `reported`, with its macro frames, when that is the same line.
+fn statement_at(
+    placed: &Span,
+    reported: &Span,
+    label: Option<String>,
+    op: Option<Operation>,
+) -> Statement {
+    let mut made = statement(placed, label, op);
+    if reported.file == placed.file && reported.line == placed.line {
+        made.operand_span = Some(reported.clone());
+    }
+    made
 }
 
 fn statement(at: &Span, label: Option<String>, op: Option<Operation>) -> Statement {
