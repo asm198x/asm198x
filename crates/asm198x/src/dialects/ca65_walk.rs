@@ -425,7 +425,7 @@ struct Walk<'f> {
     /// Each one-byte value whose size ca65 checks at the end, once every
     /// name is known: a `.byte`'s values and an immediate operand, with the
     /// address of its line and where it is.
-    fits: Vec<(Expr, Value, Span)>,
+    fits: Vec<(Expr, Value, Span, Fit)>,
     /// The full names of the scopes structs and unions opened, which
     /// `.tag` takes.
     record_scopes: HashSet<String>,
@@ -442,6 +442,8 @@ struct Walk<'f> {
     ended: bool,
     /// Why the last `.include` that failed could not be read.
     missing_include: Option<String>,
+    /// The CPU the line being read is for, once one is.
+    cpu: Option<lang198x_ca65::Cpu>,
     /// The address, while `.org` makes it known. ca65 keeps it across a
     /// change of segment, counting every segment's bytes, until `.reloc`.
     org: Option<i64>,
@@ -639,20 +641,39 @@ impl Walk<'_> {
     ///
     /// [`check_fits`]: Self::check_fits
     fn note_fits(&mut self, op: &Operation, at: &Span) {
-        let values = match op {
+        let pc = self.pc();
+        let (values, distance): (&[Expr], Option<&Expr>) = match op {
             Operation::Sized {
                 width: 1, values, ..
-            } => values,
+            } => (values, None),
             Operation::Instruction {
                 mode: "immediate",
                 operands,
                 ..
-            } => operands,
+            } => (operands, None),
+            Operation::Instruction {
+                mode: "relative",
+                operands,
+                ..
+            } => (&[], operands.first()),
+            Operation::Instruction {
+                mode: "zeropage,relative",
+                operands,
+                ..
+            } => (operands.get(..1).unwrap_or(&[]), operands.get(1)),
             _ => return,
         };
-        let pc = self.pc();
-        self.fits
-            .extend(values.iter().map(|value| (value.clone(), pc, at.clone())));
+        self.fits.extend(
+            values
+                .iter()
+                .map(|value| (value.clone(), pc, at.clone(), Fit::Value)),
+        );
+        // ca65 reads a branch as the distance to its target, and that has
+        // to be known before the link.
+        if let Some(target) = distance {
+            let distance = Expr::Bin(BinOp::Sub, Box::new(target.clone()), Box::new(Expr::Pc));
+            self.fits.push((distance, pc, at.clone(), Fit::Distance));
+        }
     }
 
     /// Refuses a one-byte value that is not known until the link and whose
@@ -669,7 +690,7 @@ impl Walk<'_> {
             });
         }
         let mut found = Vec::new();
-        for (value, pc, at) in &self.fits {
+        for (value, pc, at, fit) in &self.fits {
             let value = map_sym_expr(value.clone(), &mut |name| {
                 Expr::Sym(bound.get(&name).cloned().unwrap_or(name))
             });
@@ -690,9 +711,9 @@ impl Walk<'_> {
             {
                 continue;
             }
-            let bytes = match lower::size(&value, &known) {
-                Size::Zero => continue,
-                Size::Absolute => 2,
+            let bytes = match (lower::size(&value, &known), fit) {
+                (Size::Zero, Fit::Value) => continue,
+                (Size::Zero | Size::Absolute, _) => 2,
                 _ => 3,
             };
             found.push(AsmError::at(
@@ -715,6 +736,7 @@ impl Walk<'_> {
         let made_at = self.statement_site(expander, line.span());
         self.here = Some(at.clone());
         self.binding = self.binds(line);
+        self.cpu = Some(line.cpu());
         // ca65 defines a line's label before it reads the rest of the line,
         // so an equate read there that reads the label sees it.
         let early = line
@@ -819,8 +841,10 @@ impl Walk<'_> {
             // name in it whose definition comes back round to itself.
             // So it does the data and operands a line makes, once read.
             if let Some(op) = &op {
+                // Under `.org`, `*` is the line's address; lowering has
+                // already added each list item's offset to it.
                 for value in values_of(op) {
-                    if let Some((name, site)) = self.circle(value) {
+                    if let Some((name, site)) = self.circle(value, self.org) {
                         return Err(circular(&name, site));
                     }
                 }
@@ -840,21 +864,21 @@ impl Walk<'_> {
                 self.used.insert(self.segment.clone());
             }
             let page = op.as_ref().and_then(page_check);
-            statements.push(statement_at(&made_at, &at, label, op));
+            statements.push(statement_at(self.sets(), &made_at, &at, label, op));
             if let Some(check) = page {
-                statements.push(statement_at(&made_at, &at, None, Some(check)));
+                statements.push(statement_at(self.sets(), &made_at, &at, None, Some(check)));
             }
             if let Some(address) = self.opens.take() {
                 self.open_section(address, statements, &made_at);
             }
             for op in std::mem::take(&mut self.after) {
-                statements.push(statement_at(&made_at, &at, None, Some(op)));
+                statements.push(statement_at(self.sets(), &made_at, &at, None, Some(op)));
             }
         }
         if let Some(binary) = &lowered.binary {
             let op = self.binary(expander, line, binary, &at)?;
             let op = self.apply(None, None, false, Some(op), &at)?;
-            statements.push(statement_at(&made_at, &at, None, op));
+            statements.push(statement_at(self.sets(), &made_at, &at, None, op));
         }
         let line_size = self.made - made;
         for label in labels {
@@ -1245,6 +1269,16 @@ impl Walk<'_> {
         self.site(expander, expander.macro_call(span).unwrap_or(span))
     }
 
+    /// The instruction sets of the CPU the line being read is for.
+    fn sets(
+        &self,
+    ) -> (
+        &'static isa::InstructionSet,
+        Option<&'static isa::InstructionSet>,
+    ) {
+        lower::sets(self.cpu.unwrap_or(lang198x_ca65::Cpu::Mos6502))
+    }
+
     /// Where an error at `span` is reported. ca65 reports one in a line a
     /// macro made at the outermost call, and each call it came through
     /// notes where the macro is defined and where it was called.
@@ -1464,7 +1498,7 @@ impl Walk<'_> {
     /// names are bound: a name whose definition comes back round to itself,
     /// and a division by zero it can work out.
     fn study(&self, value: &Expr, at: &Span) -> Result<(), AsmError> {
-        if let Some((name, site)) = self.circle(value) {
+        if let Some((name, site)) = self.circle(value, self.org) {
             return Err(circular(&name, site));
         }
         let constant = |name: &str| match self.known(name) {
@@ -1485,18 +1519,21 @@ impl Walk<'_> {
     /// The first equate `value` reaches that comes back round to itself,
     /// with where it was defined, following each equate's names in turn.
     /// Like ca65, it skips the side of `&&` and `||` a constant decides.
-    fn circle(&self, value: &Expr) -> Option<(String, Span)> {
-        fn reads(value: &Expr, names: &mut Vec<String>) {
-            let decided = |lhs: &Expr| lhs.eval_with(&|_| None, None, 0).ok();
+    /// `*` is `pc`, if it is known.
+    fn circle(&self, value: &Expr, pc: Option<i64>) -> Option<(String, Span)> {
+        fn reads(value: &Expr, pc: Option<i64>, names: &mut Vec<String>) {
+            let decided = |lhs: &Expr| lhs.eval_with(&|_| None, pc, 0).ok();
             match value {
                 Expr::Sym(name) => names.push(name.clone()),
-                Expr::Bin(BinOp::LogAnd, lhs, _) if decided(lhs) == Some(0) => reads(lhs, names),
+                Expr::Bin(BinOp::LogAnd, lhs, _) if decided(lhs) == Some(0) => {
+                    reads(lhs, pc, names)
+                }
                 Expr::Bin(BinOp::LogOr, lhs, _) if decided(lhs).is_some_and(|v| v != 0) => {
-                    reads(lhs, names);
+                    reads(lhs, pc, names);
                 }
                 Expr::Bin(_, lhs, rhs) => {
-                    reads(lhs, names);
-                    reads(rhs, names);
+                    reads(lhs, pc, names);
+                    reads(rhs, pc, names);
                 }
                 Expr::Lo(inner)
                 | Expr::Hi(inner)
@@ -1505,13 +1542,18 @@ impl Walk<'_> {
                 | Expr::BitNot(inner)
                 | Expr::FixRound(inner)
                 | Expr::TrailingZeros(inner)
-                | Expr::LogNot(inner) => reads(inner, names),
+                | Expr::LogNot(inner) => reads(inner, pc, names),
                 Expr::Num(_) | Expr::Pc => {}
             }
         }
-        fn visit(walk: &Walk<'_>, value: &Expr, path: &mut Vec<String>) -> Option<(String, Span)> {
+        fn visit(
+            walk: &Walk<'_>,
+            value: &Expr,
+            pc: Option<i64>,
+            path: &mut Vec<String>,
+        ) -> Option<(String, Span)> {
             let mut names = Vec::new();
-            reads(value, &mut names);
+            reads(value, pc, &mut names);
             for name in names {
                 let Some((inner, site)) = walk.definitions.get(&name) else {
                     continue;
@@ -1520,14 +1562,14 @@ impl Walk<'_> {
                     return Some((name, site.clone()));
                 }
                 path.push(name);
-                if let Some(found) = visit(walk, inner, path) {
+                if let Some(found) = visit(walk, inner, None, path) {
                     return Some(found);
                 }
                 path.pop();
             }
             None
         }
-        visit(self, value, &mut Vec::new())
+        visit(self, value, pc, &mut Vec::new())
     }
 
     /// Whether `op` is an equate that reads a name nothing is known of yet.
@@ -1654,7 +1696,8 @@ impl Walk<'_> {
             && !matches!(op, Operation::Equ(_) | Operation::Set(_))
         {
             let pc = self.org.unwrap_or_else(|| self.offset());
-            let next = next_pc(op, pc, &isa::mos6502::SET, None, 1, at.line as usize)
+            let (set, extension) = self.sets();
+            let next = next_pc(op, pc, set, extension, 1, at.line as usize)
                 .map_err(|error| refuse(error.message))?;
             self.made += next - pc;
             if let Some(seg) = self.segments.get_mut(&self.segment) {
@@ -2255,6 +2298,15 @@ impl Walk<'_> {
 
 /// The walk at the end of the program, asked about a value of a line it
 /// read earlier: its names are full names, and `*` is that line's address.
+/// What [`Walk::check_fits`] checks a value for.
+#[derive(Clone, Copy)]
+enum Fit {
+    /// A byte: its address size has to be the zero page's.
+    Value,
+    /// A branch's distance: it has to be known before the link.
+    Distance,
+}
+
 struct AtPc<'w, 'f> {
     walk: &'w Walk<'f>,
     pc: Value,
@@ -2532,12 +2584,21 @@ fn values_of(op: &Operation) -> &[Expr] {
 /// A statement placed at `placed`, whose errors the engine reports at
 /// `reported`, with its macro frames, when that is the same line.
 fn statement_at(
+    sets: (
+        &'static isa::InstructionSet,
+        Option<&'static isa::InstructionSet>,
+    ),
     placed: &Span,
     reported: &Span,
     label: Option<String>,
     op: Option<Operation>,
 ) -> Statement {
     let mut made = statement(placed, label, op);
+    // A line for a CPU with more than the 6502's instructions names them.
+    if sets.1.is_some() {
+        made.instruction_set = Some(sets.0);
+        made.extension_set = sets.1;
+    }
     if reported.file == placed.file && reported.line == placed.line {
         made.operand_span = Some(reported.clone());
     }
