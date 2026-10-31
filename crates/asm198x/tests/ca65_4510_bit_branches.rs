@@ -17,17 +17,24 @@ fn native_4510_bit_branches_match_configured_link() {
         let config = case["config"].as_str().expect("config");
         let stages = case["native"].as_array().expect("stages");
         let result = assemble_ca65_files_with_config(source, "input.s", &loader, config);
-        if stages.last().expect("final stage")["exit"] != 0 {
-            assert!(result.is_err(), "{name}: native refuses");
+        // ca65 emits a bit branch's opcode before it reads the operands, so
+        // `*` there counts from the wrong byte. Lang198x reads `*` as the
+        // instruction's address, a named divergence (`bit-branch-pc`), and
+        // the walk's answer is recorded beside ca65's.
+        let want = if case["divergence"].is_string() {
+            &case["walk_hex"]
+        } else if stages.last().expect("final stage")["exit"] != 0 {
+            &serde_json::Value::Null
+        } else {
+            &case["native_hex"]
+        };
+        let Some(want) = want.as_str() else {
+            assert!(result.is_err(), "{name}: refused");
             continue;
-        }
+        };
         let result = result.unwrap_or_else(|error| panic!("{name}: {error:?}"));
         let hex: String = result.bytes.iter().map(|b| format!("{b:02x}")).collect();
-        assert_eq!(
-            hex,
-            case["native_hex"].as_str().expect("native bytes"),
-            "{name}"
-        );
+        assert_eq!(hex, want, "{name}");
         let formatted = asm198x::format_ca65(source).expect("format native source");
         assert_eq!(
             asm198x::format_ca65(&formatted).expect("format twice"),
@@ -114,7 +121,8 @@ fn configured_cli_preserves_include_locations_and_previous_outputs() {
             .iter()
             .map(|b| format!("{b:02x}"))
             .collect();
-        assert_eq!(hex, fact["native_hex"].as_str().expect("native bytes"));
+        // `branch.inc` reads `*` in a bit branch (`bit-branch-pc`).
+        assert_eq!(hex, fact["walk_hex"].as_str().expect("the walk's bytes"));
         let originals: Vec<_> = names
             .iter()
             .map(|name| std::fs::read(dir.join(name)).expect("output"))

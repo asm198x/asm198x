@@ -267,8 +267,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07",
-      "formatted_assembly_gap": 844
+      "native_hex": "07"
     },
     {
       "name": "root_end_unclosed_macro",
@@ -404,8 +403,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07",
-      "formatted_assembly_gap": 844
+      "native_hex": "07"
     },
     {
       "name": "called_end_unclosed_scope",
@@ -735,6 +733,8 @@
     },
     {
       "name": "define_end_bad_argument",
+      "divergence": "define-alias-end",
+      "walk_hex": "07",
       "source": ".define STOP .end\n.byte 7\nSTOP .sprintf(\"%bad\",0)\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
