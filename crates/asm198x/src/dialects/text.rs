@@ -241,23 +241,6 @@ pub(crate) trait TextSyntax {
     }
 }
 
-/// Invoke one grammar call without eagerly folding its returned token stream.
-/// The live numeric callback and dialect grammar still own argument reading.
-pub(crate) fn call<S: TextSyntax>(
-    syntax: &S,
-    name: &str,
-    arguments: &str,
-    line: usize,
-) -> Result<Option<Folded>, AsmError> {
-    let numbers = BTreeMap::new();
-    let evaluate = |t: &str, n: &BTreeMap<String, i64>, l: usize| syntax.evaluate_checked(t, n, l);
-    let scope = Scope {
-        numbers: &numbers,
-        evaluate: &evaluate,
-    };
-    syntax.function(name, &split_args(arguments), &scope, line)
-}
-
 /// Run the pass over a whole source.
 ///
 /// # Errors

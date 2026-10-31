@@ -147,7 +147,6 @@ fn path_in(sources: &[String], file: FileId) -> String {
 /// completes it. Collection is strictly passive — read out beside layout or
 /// emission, never branching on it.
 pub(crate) struct DebugCapture {
-    pub(crate) section_debug: Vec<crate::contract::SectionDebug>,
     pub(crate) sections: Vec<debug198x::Section>,
     pub(crate) symbols: Vec<debug198x::Symbol>,
     pub(crate) lines: Vec<(u32, debug198x::SectionId, u64, u64)>,
@@ -229,7 +228,6 @@ impl DebugCaptureMulti {
     /// shape through this.
     pub(crate) fn into_single(self) -> DebugCapture {
         DebugCapture {
-            section_debug: self.section_debug(),
             sections: self.sections,
             symbols: self.symbols,
             lines: self

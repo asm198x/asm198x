@@ -21523,8 +21523,7 @@
           "stderr": "ld65: Warning: Address size mismatch for ‘RED’: Exported from input.o, input.s:1 as ‘zeropage’, import in input.o, input.s:4 as ‘absolute’\n"
         }
       ],
-      "native_hex": "02",
-      "old_reader_gap": 940
+      "native_hex": "02"
     },
     {
       "name": "external_import_arithmetic_byte_mask_included",
@@ -21558,8 +21557,7 @@
           "stderr": "ld65: Warning: Address size mismatch for ‘RED’: Exported from input.o, import_arithmetic_byte_mask_included.inc:1 as ‘zeropage’, import in input.o, import_arithmetic_byte_mask_included.inc:4 as ‘absolute’\n"
         }
       ],
-      "native_hex": "02",
-      "old_reader_gap": 940
+      "native_hex": "02"
     },
     {
       "name": "external_import_arithmetic_byte_mask_macro",
@@ -21593,8 +21591,7 @@
           "stderr": "ld65: Warning: Address size mismatch for ‘RED’: Exported from input.o, input.s:9 as ‘zeropage’, import in input.o, input.s:9 as ‘absolute’\n"
         }
       ],
-      "native_hex": "02",
-      "old_reader_gap": 940
+      "native_hex": "02"
     },
     {
       "name": "external_import_arithmetic_byte_mask_inactive",
@@ -22292,8 +22289,7 @@
           "stderr": "ld65: Warning: Address size mismatch for ‘RED’: Exported from input.o, input.s:1 as ‘zeropage’, import in input.o, input.s:4 as ‘absolute’\n"
         }
       ],
-      "native_hex": "a502",
-      "old_reader_gap": 940
+      "native_hex": "a502"
     },
     {
       "name": "external_import_arithmetic_lda_mask_included",
@@ -22327,8 +22323,7 @@
           "stderr": "ld65: Warning: Address size mismatch for ‘RED’: Exported from input.o, import_arithmetic_lda_mask_included.inc:1 as ‘zeropage’, import in input.o, import_arithmetic_lda_mask_included.inc:4 as ‘absolute’\n"
         }
       ],
-      "native_hex": "a502",
-      "old_reader_gap": 940
+      "native_hex": "a502"
     },
     {
       "name": "external_import_arithmetic_lda_mask_macro",
@@ -22362,8 +22357,7 @@
           "stderr": "ld65: Warning: Address size mismatch for ‘RED’: Exported from input.o, input.s:9 as ‘zeropage’, import in input.o, input.s:9 as ‘absolute’\n"
         }
       ],
-      "native_hex": "a502",
-      "old_reader_gap": 940
+      "native_hex": "a502"
     },
     {
       "name": "external_import_arithmetic_lda_mask_inactive",
@@ -24761,8 +24755,7 @@
           "stderr": "ld65: Warning: Address size mismatch for ‘RED’: Exported from input.o, input.s:1 as ‘zeropage’, import in input.o, input.s:4 as ‘absolute’\n"
         }
       ],
-      "native_hex": "02",
-      "old_reader_gap": 940
+      "native_hex": "02"
     },
     {
       "name": "external_global_arithmetic_byte_mask_included",
@@ -24796,8 +24789,7 @@
           "stderr": "ld65: Warning: Address size mismatch for ‘RED’: Exported from input.o, global_arithmetic_byte_mask_included.inc:1 as ‘zeropage’, import in input.o, global_arithmetic_byte_mask_included.inc:4 as ‘absolute’\n"
         }
       ],
-      "native_hex": "02",
-      "old_reader_gap": 940
+      "native_hex": "02"
     },
     {
       "name": "external_global_arithmetic_byte_mask_macro",
@@ -24831,8 +24823,7 @@
           "stderr": "ld65: Warning: Address size mismatch for ‘RED’: Exported from input.o, input.s:9 as ‘zeropage’, import in input.o, input.s:9 as ‘absolute’\n"
         }
       ],
-      "native_hex": "02",
-      "old_reader_gap": 940
+      "native_hex": "02"
     },
     {
       "name": "external_global_arithmetic_byte_mask_inactive",
@@ -25530,8 +25521,7 @@
           "stderr": "ld65: Warning: Address size mismatch for ‘RED’: Exported from input.o, input.s:1 as ‘zeropage’, import in input.o, input.s:4 as ‘absolute’\n"
         }
       ],
-      "native_hex": "a502",
-      "old_reader_gap": 940
+      "native_hex": "a502"
     },
     {
       "name": "external_global_arithmetic_lda_mask_included",
@@ -25565,8 +25555,7 @@
           "stderr": "ld65: Warning: Address size mismatch for ‘RED’: Exported from input.o, global_arithmetic_lda_mask_included.inc:1 as ‘zeropage’, import in input.o, global_arithmetic_lda_mask_included.inc:4 as ‘absolute’\n"
         }
       ],
-      "native_hex": "a502",
-      "old_reader_gap": 940
+      "native_hex": "a502"
     },
     {
       "name": "external_global_arithmetic_lda_mask_macro",
@@ -25600,8 +25589,7 @@
           "stderr": "ld65: Warning: Address size mismatch for ‘RED’: Exported from input.o, input.s:9 as ‘zeropage’, import in input.o, input.s:9 as ‘absolute’\n"
         }
       ],
-      "native_hex": "a502",
-      "old_reader_gap": 940
+      "native_hex": "a502"
     },
     {
       "name": "external_global_arithmetic_lda_mask_inactive",

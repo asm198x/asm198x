@@ -159,11 +159,7 @@ pub fn assemble_acme_files(
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
 pub fn assemble_ca65(source: &str) -> Result<AssemblyResult, AsmError> {
-    let (rom, warnings, capture, areas) = dialects::ca65::assemble_with_debug(source)?;
-    let mut result = AssemblyResult::image_warned(rom, warnings);
-    result.section_debug = capture.section_debug;
-    result.areas = areas;
-    Ok(result)
+    assemble_ca65_nes_lang198x(source)
 }
 
 /// The source map every multi-file entry point starts from: the root at
@@ -204,20 +200,7 @@ pub fn assemble_ca65_files(
     input_path: &str,
     loader: &dyn source::SourceLoader,
 ) -> Result<AssemblyResult, MultiFileError> {
-    let mut map = new_source_map(input_path, source);
-    match dialects::ca65::assemble_multi(&mut map, loader) {
-        Ok((rom, warnings, capture, areas)) => {
-            let mut result = AssemblyResult::image_warned(rom, warnings);
-            result.section_debug = capture.section_debug();
-            result.files = map.file_table();
-            result.areas = areas;
-            Ok(result)
-        }
-        Err(error) => Err(MultiFileError {
-            error,
-            source_map: Box::new(map),
-        }),
-    }
+    assemble_ca65_nes_lang198x_files(source, input_path, loader)
 }
 
 /// [`assemble_ca65_files`] under a project-supplied ld65 configuration — the
@@ -234,29 +217,7 @@ pub fn assemble_ca65_files_with_config(
     loader: &dyn source::SourceLoader,
     cfg: &str,
 ) -> Result<AssemblyResult, MultiFileError> {
-    let mut map = new_source_map(input_path, source);
-    let layout = match dialects::ca65_layout::from_cfg(cfg) {
-        Ok(layout) => layout,
-        Err(error) => {
-            return Err(MultiFileError {
-                error,
-                source_map: Box::new(map),
-            });
-        }
-    };
-    match dialects::ca65::assemble_multi_with(&mut map, loader, &layout) {
-        Ok((rom, warnings, capture, areas)) => {
-            let mut result = AssemblyResult::image_warned(rom, warnings);
-            result.section_debug = capture.section_debug();
-            result.files = map.file_table();
-            result.areas = areas;
-            Ok(result)
-        }
-        Err(error) => Err(MultiFileError {
-            error,
-            source_map: Box::new(map),
-        }),
-    }
+    assemble_ca65_lang198x_files_with_config(source, input_path, loader, cfg)
 }
 
 /// As [`assemble_ca65_files`], also returning the full
@@ -275,23 +236,7 @@ pub fn assemble_ca65_files_debug(
     input_path: &str,
     loader: &dyn source::SourceLoader,
 ) -> Result<(AssemblyResult, debug198x::DebugInfo), MultiFileError> {
-    let mut map = new_source_map(input_path, source);
-    match dialects::ca65::assemble_multi(&mut map, loader) {
-        Ok((rom, warnings, capture, areas)) => {
-            let files = map.file_table();
-            let section_debug = capture.section_debug();
-            let info = listing::capture_debug_info_multi(capture, "6502", "ca65", files.clone());
-            let mut result = AssemblyResult::image_warned(rom, warnings);
-            result.files = files;
-            result.section_debug = section_debug;
-            result.areas = areas;
-            Ok((result, info))
-        }
-        Err(error) => Err(MultiFileError {
-            error,
-            source_map: Box::new(map),
-        }),
-    }
+    assemble_ca65_nes_lang198x_files_debug(source, input_path, loader)
 }
 
 /// [`assemble_ca65_files_debug`] under a project-supplied ld65 configuration
@@ -305,32 +250,7 @@ pub fn assemble_ca65_files_debug_with_config(
     loader: &dyn source::SourceLoader,
     cfg: &str,
 ) -> Result<(AssemblyResult, debug198x::DebugInfo), MultiFileError> {
-    let mut map = new_source_map(input_path, source);
-    let layout = match dialects::ca65_layout::from_cfg(cfg) {
-        Ok(layout) => layout,
-        Err(error) => {
-            return Err(MultiFileError {
-                error,
-                source_map: Box::new(map),
-            });
-        }
-    };
-    match dialects::ca65::assemble_multi_with(&mut map, loader, &layout) {
-        Ok((rom, warnings, capture, areas)) => {
-            let files = map.file_table();
-            let section_debug = capture.section_debug();
-            let info = listing::capture_debug_info_multi(capture, "6502", "ca65", files.clone());
-            let mut result = AssemblyResult::image_warned(rom, warnings);
-            result.files = files;
-            result.section_debug = section_debug;
-            result.areas = areas;
-            Ok((result, info))
-        }
-        Err(error) => Err(MultiFileError {
-            error,
-            source_map: Box::new(map),
-        }),
-    }
+    assemble_ca65_lang198x_files_debug_with_config(source, input_path, loader, cfg)
 }
 
 /// Assemble + link ca65 source, also returning the full [`debug198x::DebugInfo`]
@@ -346,14 +266,7 @@ pub fn assemble_ca65_debug(
     source: &str,
     source_path: &str,
 ) -> Result<(AssemblyResult, debug198x::DebugInfo), AsmError> {
-    let (rom, warnings, capture, areas) = dialects::ca65::assemble_with_debug(source)?;
-    let mut result = AssemblyResult::image_warned(rom, warnings);
-    result.section_debug = capture.section_debug.clone();
-    result.areas = areas;
-    Ok((
-        result,
-        listing::capture_debug_info(capture, "6502", "ca65", source_path),
-    ))
+    assemble_ca65_nes_lang198x_debug(source, source_path)
 }
 
 /// Reformat ca65-syntax NES source to canonical layout (the `--fmt` formatter).

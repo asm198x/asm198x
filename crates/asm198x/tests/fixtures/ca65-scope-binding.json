@@ -5244,8 +5244,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "a534",
-      "old_reader_gap": 940
+      "native_hex": "a534"
     },
     {
       "name": "width_$1234_None_VALUE&255_True",
@@ -5279,8 +5278,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "a534",
-      "old_reader_gap": 940
+      "native_hex": "a534"
     },
     {
       "name": "width_$1234_None_VALUE|256_False",
@@ -5978,8 +5976,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "a534",
-      "old_reader_gap": 940
+      "native_hex": "a534"
     },
     {
       "name": "width_$1234_$34_VALUE&255_True",
@@ -6013,8 +6010,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "a534",
-      "old_reader_gap": 940
+      "native_hex": "a534"
     },
     {
       "name": "width_$1234_$34_VALUE|256_False",
@@ -6712,8 +6708,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "a534",
-      "old_reader_gap": 940
+      "native_hex": "a534"
     },
     {
       "name": "width_$1234_$1234_VALUE&255_True",
@@ -6747,8 +6742,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "a534",
-      "old_reader_gap": 940
+      "native_hex": "a534"
     },
     {
       "name": "width_$1234_$1234_VALUE|256_False",
@@ -7624,8 +7618,7 @@
           "stderr": "input.s:1: Error: \"jmp (abs)\" across page border\n"
         }
       ],
-      "native_hex": null,
-      "old_reader_gap": 940
+      "native_hex": null
     },
     {
       "name": "negative_memory_lda #{x}_-1",

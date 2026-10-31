@@ -66,8 +66,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "070010",
-      "old_reader_gap": 940
+      "native_hex": "070010"
     },
     {
       "name": "root_plain_constant",
@@ -101,8 +100,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07",
-      "old_reader_gap": 940
+      "native_hex": "07"
     },
     {
       "name": "root_plain_defined",
@@ -136,8 +134,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "00",
-      "old_reader_gap": 940
+      "native_hex": "00"
     },
     {
       "name": "root_plain_referenced",
@@ -171,8 +168,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "00",
-      "old_reader_gap": 940
+      "native_hex": "00"
     },
     {
       "name": "root_plain_const",
@@ -226,8 +222,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "08",
-      "old_reader_gap": 940
+      "native_hex": "08"
     },
     {
       "name": "root_plain_ifconst",
@@ -281,8 +276,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07",
-      "old_reader_gap": 940
+      "native_hex": "07"
     },
     {
       "name": "root_generated_label",
@@ -316,8 +310,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "070010",
-      "old_reader_gap": 940
+      "native_hex": "070010"
     },
     {
       "name": "root_generated_constant",
@@ -351,8 +344,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07",
-      "old_reader_gap": 940
+      "native_hex": "07"
     },
     {
       "name": "root_generated_defined",
@@ -386,8 +378,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "00",
-      "old_reader_gap": 940
+      "native_hex": "00"
     },
     {
       "name": "root_generated_referenced",
@@ -421,8 +412,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "00",
-      "old_reader_gap": 940
+      "native_hex": "00"
     },
     {
       "name": "root_generated_const",
@@ -476,8 +466,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "08",
-      "old_reader_gap": 940
+      "native_hex": "08"
     },
     {
       "name": "root_generated_ifconst",
@@ -531,8 +520,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07",
-      "old_reader_gap": 940
+      "native_hex": "07"
     },
     {
       "name": "label_plain_label",
@@ -1498,8 +1486,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "06070110",
-      "old_reader_gap": 940
+      "native_hex": "06070110"
     },
     {
       "name": "anonymous_plain_constant",
@@ -1533,8 +1520,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "0607",
-      "old_reader_gap": 940
+      "native_hex": "0607"
     },
     {
       "name": "anonymous_plain_defined",
@@ -1568,8 +1554,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "0600",
-      "old_reader_gap": 940
+      "native_hex": "0600"
     },
     {
       "name": "anonymous_plain_referenced",
@@ -1603,8 +1588,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "0600",
-      "old_reader_gap": 940
+      "native_hex": "0600"
     },
     {
       "name": "anonymous_plain_const",
@@ -1658,8 +1642,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "0608",
-      "old_reader_gap": 940
+      "native_hex": "0608"
     },
     {
       "name": "anonymous_plain_ifconst",
@@ -1713,8 +1696,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "0607",
-      "old_reader_gap": 940
+      "native_hex": "0607"
     },
     {
       "name": "anonymous_generated_label",
@@ -1748,8 +1730,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "06070110",
-      "old_reader_gap": 940
+      "native_hex": "06070110"
     },
     {
       "name": "anonymous_generated_constant",
@@ -1783,8 +1764,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "0607",
-      "old_reader_gap": 940
+      "native_hex": "0607"
     },
     {
       "name": "anonymous_generated_defined",
@@ -1818,8 +1798,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "0600",
-      "old_reader_gap": 940
+      "native_hex": "0600"
     },
     {
       "name": "anonymous_generated_referenced",
@@ -1853,8 +1832,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "0600",
-      "old_reader_gap": 940
+      "native_hex": "0600"
     },
     {
       "name": "anonymous_generated_const",
@@ -1908,8 +1886,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "0608",
-      "old_reader_gap": 940
+      "native_hex": "0608"
     },
     {
       "name": "anonymous_generated_ifconst",
@@ -1963,8 +1940,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "0607",
-      "old_reader_gap": 940
+      "native_hex": "0607"
     },
     {
       "name": "origin_plain_label",
@@ -1998,8 +1974,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "070010",
-      "old_reader_gap": 940
+      "native_hex": "070010"
     },
     {
       "name": "origin_plain_constant",
@@ -2033,8 +2008,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07",
-      "old_reader_gap": 940
+      "native_hex": "07"
     },
     {
       "name": "origin_plain_defined",
@@ -2068,8 +2042,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "00",
-      "old_reader_gap": 940
+      "native_hex": "00"
     },
     {
       "name": "origin_plain_referenced",
@@ -2103,8 +2076,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "00",
-      "old_reader_gap": 940
+      "native_hex": "00"
     },
     {
       "name": "origin_plain_const",
@@ -2158,8 +2130,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "08",
-      "old_reader_gap": 940
+      "native_hex": "08"
     },
     {
       "name": "origin_plain_ifconst",
@@ -2213,8 +2184,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07",
-      "old_reader_gap": 940
+      "native_hex": "07"
     },
     {
       "name": "origin_generated_label",
@@ -2248,8 +2218,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "070010",
-      "old_reader_gap": 940
+      "native_hex": "070010"
     },
     {
       "name": "origin_generated_constant",
@@ -2283,8 +2252,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07",
-      "old_reader_gap": 940
+      "native_hex": "07"
     },
     {
       "name": "origin_generated_defined",
@@ -2318,8 +2286,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "00",
-      "old_reader_gap": 940
+      "native_hex": "00"
     },
     {
       "name": "origin_generated_referenced",
@@ -2353,8 +2320,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "00",
-      "old_reader_gap": 940
+      "native_hex": "00"
     },
     {
       "name": "origin_generated_const",
@@ -2408,8 +2374,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "08",
-      "old_reader_gap": 940
+      "native_hex": "08"
     },
     {
       "name": "origin_generated_ifconst",
@@ -2463,8 +2428,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07",
-      "old_reader_gap": 940
+      "native_hex": "07"
     },
     {
       "name": "scope_plain_label",
@@ -2498,8 +2462,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "070010",
-      "old_reader_gap": 940
+      "native_hex": "070010"
     },
     {
       "name": "scope_plain_constant",
@@ -2533,8 +2496,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07",
-      "old_reader_gap": 940
+      "native_hex": "07"
     },
     {
       "name": "scope_plain_defined",
@@ -2568,8 +2530,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "00",
-      "old_reader_gap": 940
+      "native_hex": "00"
     },
     {
       "name": "scope_plain_referenced",
@@ -2603,8 +2564,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "00",
-      "old_reader_gap": 940
+      "native_hex": "00"
     },
     {
       "name": "scope_plain_const",
@@ -2658,8 +2618,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "08",
-      "old_reader_gap": 940
+      "native_hex": "08"
     },
     {
       "name": "scope_plain_ifconst",
@@ -2713,8 +2672,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07",
-      "old_reader_gap": 940
+      "native_hex": "07"
     },
     {
       "name": "scope_generated_label",
@@ -2748,8 +2706,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "070010",
-      "old_reader_gap": 940
+      "native_hex": "070010"
     },
     {
       "name": "scope_generated_constant",
@@ -2783,8 +2740,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07",
-      "old_reader_gap": 940
+      "native_hex": "07"
     },
     {
       "name": "scope_generated_defined",
@@ -2818,8 +2774,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "00",
-      "old_reader_gap": 940
+      "native_hex": "00"
     },
     {
       "name": "scope_generated_referenced",
@@ -2853,8 +2808,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "00",
-      "old_reader_gap": 940
+      "native_hex": "00"
     },
     {
       "name": "scope_generated_const",
@@ -2908,8 +2862,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "08",
-      "old_reader_gap": 940
+      "native_hex": "08"
     },
     {
       "name": "scope_generated_ifconst",
@@ -2963,8 +2916,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07",
-      "old_reader_gap": 940
+      "native_hex": "07"
     },
     {
       "name": "proc_plain_label",
@@ -3482,8 +3434,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "070010",
-      "old_reader_gap": 940
+      "native_hex": "070010"
     },
     {
       "name": "unnamed_scope_plain_constant",
@@ -3517,8 +3468,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07",
-      "old_reader_gap": 940
+      "native_hex": "07"
     },
     {
       "name": "unnamed_scope_plain_defined",
@@ -3552,8 +3502,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "00",
-      "old_reader_gap": 940
+      "native_hex": "00"
     },
     {
       "name": "unnamed_scope_plain_referenced",
@@ -3587,8 +3536,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "00",
-      "old_reader_gap": 940
+      "native_hex": "00"
     },
     {
       "name": "unnamed_scope_plain_const",
@@ -3642,8 +3590,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "08",
-      "old_reader_gap": 940
+      "native_hex": "08"
     },
     {
       "name": "unnamed_scope_plain_ifconst",
@@ -3697,8 +3644,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07",
-      "old_reader_gap": 940
+      "native_hex": "07"
     },
     {
       "name": "unnamed_scope_generated_label",
@@ -3732,8 +3678,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "070010",
-      "old_reader_gap": 940
+      "native_hex": "070010"
     },
     {
       "name": "unnamed_scope_generated_constant",
@@ -3767,8 +3712,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07",
-      "old_reader_gap": 940
+      "native_hex": "07"
     },
     {
       "name": "unnamed_scope_generated_defined",
@@ -3802,8 +3746,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "00",
-      "old_reader_gap": 940
+      "native_hex": "00"
     },
     {
       "name": "unnamed_scope_generated_referenced",
@@ -3837,8 +3780,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "00",
-      "old_reader_gap": 940
+      "native_hex": "00"
     },
     {
       "name": "unnamed_scope_generated_const",
@@ -3892,8 +3834,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "08",
-      "old_reader_gap": 940
+      "native_hex": "08"
     },
     {
       "name": "unnamed_scope_generated_ifconst",
@@ -3947,8 +3888,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07",
-      "old_reader_gap": 940
+      "native_hex": "07"
     },
     {
       "name": "scope_after_label_plain_label",
@@ -4466,8 +4406,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "070010",
-      "old_reader_gap": 940
+      "native_hex": "070010"
     },
     {
       "name": "empty_scope_before_plain_constant",
@@ -4501,8 +4440,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07",
-      "old_reader_gap": 940
+      "native_hex": "07"
     },
     {
       "name": "empty_scope_before_plain_defined",
@@ -4536,8 +4474,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "00",
-      "old_reader_gap": 940
+      "native_hex": "00"
     },
     {
       "name": "empty_scope_before_plain_referenced",
@@ -4571,8 +4508,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "00",
-      "old_reader_gap": 940
+      "native_hex": "00"
     },
     {
       "name": "empty_scope_before_plain_const",
@@ -4626,8 +4562,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "08",
-      "old_reader_gap": 940
+      "native_hex": "08"
     },
     {
       "name": "empty_scope_before_plain_ifconst",
@@ -4681,8 +4616,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07",
-      "old_reader_gap": 940
+      "native_hex": "07"
     },
     {
       "name": "empty_scope_before_generated_label",
@@ -4716,8 +4650,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "070010",
-      "old_reader_gap": 940
+      "native_hex": "070010"
     },
     {
       "name": "empty_scope_before_generated_constant",
@@ -4751,8 +4684,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07",
-      "old_reader_gap": 940
+      "native_hex": "07"
     },
     {
       "name": "empty_scope_before_generated_defined",
@@ -4786,8 +4718,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "00",
-      "old_reader_gap": 940
+      "native_hex": "00"
     },
     {
       "name": "empty_scope_before_generated_referenced",
@@ -4821,8 +4752,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "00",
-      "old_reader_gap": 940
+      "native_hex": "00"
     },
     {
       "name": "empty_scope_before_generated_const",
@@ -4876,8 +4806,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "08",
-      "old_reader_gap": 940
+      "native_hex": "08"
     },
     {
       "name": "empty_scope_before_generated_ifconst",
@@ -4931,8 +4860,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07",
-      "old_reader_gap": 940
+      "native_hex": "07"
     },
     {
       "name": "scope_output_before_plain_label",
@@ -5414,8 +5342,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "070010",
-      "old_reader_gap": 940
+      "native_hex": "070010"
     },
     {
       "name": "segment_before_plain_constant",
@@ -5449,8 +5376,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07",
-      "old_reader_gap": 940
+      "native_hex": "07"
     },
     {
       "name": "segment_before_plain_defined",
@@ -5484,8 +5410,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "00",
-      "old_reader_gap": 940
+      "native_hex": "00"
     },
     {
       "name": "segment_before_plain_referenced",
@@ -5519,8 +5444,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "00",
-      "old_reader_gap": 940
+      "native_hex": "00"
     },
     {
       "name": "segment_before_plain_const",
@@ -5574,8 +5498,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "08",
-      "old_reader_gap": 940
+      "native_hex": "08"
     },
     {
       "name": "segment_before_plain_ifconst",
@@ -5629,8 +5552,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07",
-      "old_reader_gap": 940
+      "native_hex": "07"
     },
     {
       "name": "segment_before_generated_label",
@@ -5664,8 +5586,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "070010",
-      "old_reader_gap": 940
+      "native_hex": "070010"
     },
     {
       "name": "segment_before_generated_constant",
@@ -5699,8 +5620,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07",
-      "old_reader_gap": 940
+      "native_hex": "07"
     },
     {
       "name": "segment_before_generated_defined",
@@ -5734,8 +5654,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "00",
-      "old_reader_gap": 940
+      "native_hex": "00"
     },
     {
       "name": "segment_before_generated_referenced",
@@ -5769,8 +5688,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "00",
-      "old_reader_gap": 940
+      "native_hex": "00"
     },
     {
       "name": "segment_before_generated_const",
@@ -5824,8 +5742,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "08",
-      "old_reader_gap": 940
+      "native_hex": "08"
     },
     {
       "name": "segment_before_generated_ifconst",
@@ -5879,8 +5796,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07",
-      "old_reader_gap": 940
+      "native_hex": "07"
     },
     {
       "name": "macro_before_plain_label",
@@ -5914,8 +5830,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "070010",
-      "old_reader_gap": 940
+      "native_hex": "070010"
     },
     {
       "name": "macro_before_plain_constant",
@@ -5949,8 +5864,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07",
-      "old_reader_gap": 940
+      "native_hex": "07"
     },
     {
       "name": "macro_before_plain_defined",
@@ -5984,8 +5898,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "00",
-      "old_reader_gap": 940
+      "native_hex": "00"
     },
     {
       "name": "macro_before_plain_referenced",
@@ -6019,8 +5932,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "00",
-      "old_reader_gap": 940
+      "native_hex": "00"
     },
     {
       "name": "macro_before_plain_const",
@@ -6074,8 +5986,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "08",
-      "old_reader_gap": 940
+      "native_hex": "08"
     },
     {
       "name": "macro_before_plain_ifconst",
@@ -6129,8 +6040,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07",
-      "old_reader_gap": 940
+      "native_hex": "07"
     },
     {
       "name": "macro_before_generated_label",
@@ -6164,8 +6074,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "070010",
-      "old_reader_gap": 940
+      "native_hex": "070010"
     },
     {
       "name": "macro_before_generated_constant",
@@ -6199,8 +6108,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07",
-      "old_reader_gap": 940
+      "native_hex": "07"
     },
     {
       "name": "macro_before_generated_defined",
@@ -6234,8 +6142,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "00",
-      "old_reader_gap": 940
+      "native_hex": "00"
     },
     {
       "name": "macro_before_generated_referenced",
@@ -6269,8 +6176,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "00",
-      "old_reader_gap": 940
+      "native_hex": "00"
     },
     {
       "name": "macro_before_generated_const",
@@ -6324,8 +6230,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "08",
-      "old_reader_gap": 940
+      "native_hex": "08"
     },
     {
       "name": "macro_before_generated_ifconst",
@@ -6379,8 +6284,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07",
-      "old_reader_gap": 940
+      "native_hex": "07"
     },
     {
       "name": "macro_emits_before_plain_label",
@@ -6414,8 +6318,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "06070110",
-      "old_reader_gap": 940
+      "native_hex": "06070110"
     },
     {
       "name": "macro_emits_before_plain_constant",
@@ -6449,8 +6352,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "0607",
-      "old_reader_gap": 940
+      "native_hex": "0607"
     },
     {
       "name": "macro_emits_before_plain_defined",
@@ -6484,8 +6386,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "0600",
-      "old_reader_gap": 940
+      "native_hex": "0600"
     },
     {
       "name": "macro_emits_before_plain_referenced",
@@ -6519,8 +6420,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "0600",
-      "old_reader_gap": 940
+      "native_hex": "0600"
     },
     {
       "name": "macro_emits_before_plain_const",
@@ -6574,8 +6474,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "0608",
-      "old_reader_gap": 940
+      "native_hex": "0608"
     },
     {
       "name": "macro_emits_before_plain_ifconst",
@@ -6629,8 +6528,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "0607",
-      "old_reader_gap": 940
+      "native_hex": "0607"
     },
     {
       "name": "macro_emits_before_generated_label",
@@ -6664,8 +6562,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "06070110",
-      "old_reader_gap": 940
+      "native_hex": "06070110"
     },
     {
       "name": "macro_emits_before_generated_constant",
@@ -6699,8 +6596,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "0607",
-      "old_reader_gap": 940
+      "native_hex": "0607"
     },
     {
       "name": "macro_emits_before_generated_defined",
@@ -6734,8 +6630,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "0600",
-      "old_reader_gap": 940
+      "native_hex": "0600"
     },
     {
       "name": "macro_emits_before_generated_referenced",
@@ -6769,8 +6664,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "0600",
-      "old_reader_gap": 940
+      "native_hex": "0600"
     },
     {
       "name": "macro_emits_before_generated_const",
@@ -6824,8 +6718,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "0608",
-      "old_reader_gap": 940
+      "native_hex": "0608"
     },
     {
       "name": "macro_emits_before_generated_ifconst",
@@ -6879,8 +6772,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "0607",
-      "old_reader_gap": 940
+      "native_hex": "0607"
     },
     {
       "name": "repeat_emits_before_plain_label",
@@ -6914,8 +6806,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "06070110",
-      "old_reader_gap": 940
+      "native_hex": "06070110"
     },
     {
       "name": "repeat_emits_before_plain_constant",
@@ -6949,8 +6840,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "0607",
-      "old_reader_gap": 940
+      "native_hex": "0607"
     },
     {
       "name": "repeat_emits_before_plain_defined",
@@ -6984,8 +6874,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "0600",
-      "old_reader_gap": 940
+      "native_hex": "0600"
     },
     {
       "name": "repeat_emits_before_plain_referenced",
@@ -7019,8 +6908,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "0600",
-      "old_reader_gap": 940
+      "native_hex": "0600"
     },
     {
       "name": "repeat_emits_before_plain_const",
@@ -7074,8 +6962,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "0608",
-      "old_reader_gap": 940
+      "native_hex": "0608"
     },
     {
       "name": "repeat_emits_before_plain_ifconst",
@@ -7129,8 +7016,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "0607",
-      "old_reader_gap": 940
+      "native_hex": "0607"
     },
     {
       "name": "repeat_emits_before_generated_label",
@@ -7164,8 +7050,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "06070110",
-      "old_reader_gap": 940
+      "native_hex": "06070110"
     },
     {
       "name": "repeat_emits_before_generated_constant",
@@ -7199,8 +7084,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "0607",
-      "old_reader_gap": 940
+      "native_hex": "0607"
     },
     {
       "name": "repeat_emits_before_generated_defined",
@@ -7234,8 +7118,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "0600",
-      "old_reader_gap": 940
+      "native_hex": "0600"
     },
     {
       "name": "repeat_emits_before_generated_referenced",
@@ -7269,8 +7152,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "0600",
-      "old_reader_gap": 940
+      "native_hex": "0600"
     },
     {
       "name": "repeat_emits_before_generated_const",
@@ -7324,8 +7206,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "0608",
-      "old_reader_gap": 940
+      "native_hex": "0608"
     },
     {
       "name": "repeat_emits_before_generated_ifconst",
@@ -7379,8 +7260,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "0607",
-      "old_reader_gap": 940
+      "native_hex": "0607"
     },
     {
       "name": "taken_label_plain_label",
@@ -7862,8 +7742,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "070010",
-      "old_reader_gap": 940
+      "native_hex": "070010"
     },
     {
       "name": "skipped_label_plain_constant",
@@ -7897,8 +7776,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07",
-      "old_reader_gap": 940
+      "native_hex": "07"
     },
     {
       "name": "skipped_label_plain_defined",
@@ -7932,8 +7810,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "00",
-      "old_reader_gap": 940
+      "native_hex": "00"
     },
     {
       "name": "skipped_label_plain_referenced",
@@ -7967,8 +7844,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "00",
-      "old_reader_gap": 940
+      "native_hex": "00"
     },
     {
       "name": "skipped_label_plain_const",
@@ -8022,8 +7898,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "08",
-      "old_reader_gap": 940
+      "native_hex": "08"
     },
     {
       "name": "skipped_label_plain_ifconst",
@@ -8077,8 +7952,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07",
-      "old_reader_gap": 940
+      "native_hex": "07"
     },
     {
       "name": "skipped_label_generated_label",
@@ -8112,8 +7986,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "070010",
-      "old_reader_gap": 940
+      "native_hex": "070010"
     },
     {
       "name": "skipped_label_generated_constant",
@@ -8147,8 +8020,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07",
-      "old_reader_gap": 940
+      "native_hex": "07"
     },
     {
       "name": "skipped_label_generated_defined",
@@ -8182,8 +8054,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "00",
-      "old_reader_gap": 940
+      "native_hex": "00"
     },
     {
       "name": "skipped_label_generated_referenced",
@@ -8217,8 +8088,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "00",
-      "old_reader_gap": 940
+      "native_hex": "00"
     },
     {
       "name": "skipped_label_generated_const",
@@ -8272,8 +8142,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "08",
-      "old_reader_gap": 940
+      "native_hex": "08"
     },
     {
       "name": "skipped_label_generated_ifconst",
@@ -8327,8 +8196,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07",
-      "old_reader_gap": 940
+      "native_hex": "07"
     },
     {
       "name": "zero_repeat_label_plain_label",
@@ -8362,8 +8230,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "070010",
-      "old_reader_gap": 940
+      "native_hex": "070010"
     },
     {
       "name": "zero_repeat_label_plain_constant",
@@ -8397,8 +8264,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07",
-      "old_reader_gap": 940
+      "native_hex": "07"
     },
     {
       "name": "zero_repeat_label_plain_defined",
@@ -8432,8 +8298,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "00",
-      "old_reader_gap": 940
+      "native_hex": "00"
     },
     {
       "name": "zero_repeat_label_plain_referenced",
@@ -8467,8 +8332,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "00",
-      "old_reader_gap": 940
+      "native_hex": "00"
     },
     {
       "name": "zero_repeat_label_plain_const",
@@ -8522,8 +8386,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "08",
-      "old_reader_gap": 940
+      "native_hex": "08"
     },
     {
       "name": "zero_repeat_label_plain_ifconst",
@@ -8577,8 +8440,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07",
-      "old_reader_gap": 940
+      "native_hex": "07"
     },
     {
       "name": "zero_repeat_label_generated_label",
@@ -8612,8 +8474,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "070010",
-      "old_reader_gap": 940
+      "native_hex": "070010"
     },
     {
       "name": "zero_repeat_label_generated_constant",
@@ -8647,8 +8508,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07",
-      "old_reader_gap": 940
+      "native_hex": "07"
     },
     {
       "name": "zero_repeat_label_generated_defined",
@@ -8682,8 +8542,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "00",
-      "old_reader_gap": 940
+      "native_hex": "00"
     },
     {
       "name": "zero_repeat_label_generated_referenced",
@@ -8717,8 +8576,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "00",
-      "old_reader_gap": 940
+      "native_hex": "00"
     },
     {
       "name": "zero_repeat_label_generated_const",
@@ -8772,8 +8630,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "08",
-      "old_reader_gap": 940
+      "native_hex": "08"
     },
     {
       "name": "zero_repeat_label_generated_ifconst",
@@ -8827,8 +8684,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07",
-      "old_reader_gap": 940
+      "native_hex": "07"
     },
     {
       "name": "included_anchor_plain_label",
@@ -9658,8 +9514,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "",
-      "old_reader_gap": 940
+      "native_hex": ""
     },
     {
       "name": "root_repeat_head",
@@ -9693,8 +9548,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "",
-      "old_reader_gap": 940
+      "native_hex": ""
     },
     {
       "name": "root_macro_definition_head",
@@ -9728,8 +9582,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "08",
-      "old_reader_gap": 940
+      "native_hex": "08"
     },
     {
       "name": "unused_macro",
@@ -9797,8 +9650,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07",
-      "old_reader_gap": 940
+      "native_hex": "07"
     },
     {
       "name": "zero_repeat",
@@ -9934,8 +9786,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07001006",
-      "old_reader_gap": 940
+      "native_hex": "07001006"
     },
     {
       "name": "repeat_delayed_include_anchor",
@@ -9969,8 +9820,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "07001006",
-      "old_reader_gap": 940
+      "native_hex": "07001006"
     },
     {
       "name": "include_missing_anchor",
@@ -10004,8 +9854,7 @@
           "stderr": ""
         }
       ],
-      "native_hex": "070010",
-      "old_reader_gap": 940
+      "native_hex": "070010"
     }
   ],
   "excluded_cases": [

@@ -184,10 +184,6 @@ fn verify_fixture(fixture: &str, count: usize) {
     }
     for fact in cases {
         let name = fact["name"].as_str().expect("name");
-        // A V2.19 fact the frozen old reader misses (#940).
-        if fact["old_reader_gap"].is_number() {
-            continue;
-        }
         let dialect = fact["dialect"].as_str().unwrap_or_else(|| {
             if name.starts_with("65816_") {
                 "65816"

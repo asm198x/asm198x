@@ -1663,99 +1663,7 @@ pub(crate) trait LiveNumbers {
     fn constancy(&self, text: &str, line: usize) -> Result<i64, AsmError>;
 }
 
-pub(crate) struct LiveText<'a> {
-    pub target: Target,
-    pub token_target: Option<Target>,
-    pub numbers: &'a BTreeMap<String, i64>,
-    pub strings: &'a StringTokens,
-    pub defined: &'a std::collections::BTreeSet<String>,
-    pub context: &'a dyn LiveNumbers,
-}
-
-fn live_syntax<'a>(line: usize, live: &LiveText<'a>) -> Ca65Text<'a> {
-    Ca65Text {
-        source_line: Some(line),
-        target: live.target,
-        token_target: live.token_target,
-        depth: std::cell::Cell::new(0),
-        numbers: Cow::Borrowed(live.numbers),
-        defined: Cow::Borrowed(live.defined),
-        strings: Cow::Borrowed(live.strings),
-        live: Some(live.context),
-        numeric_admission: None,
-    }
-}
-
-/// Token selectors return source to the numeric reader, which must consume
-/// that source before any later query or list operand is evaluated.
-pub(crate) fn select_ca65_live(
-    name: &str,
-    arguments: &str,
-    line: usize,
-    live: LiveText<'_>,
-) -> Result<String, AsmError> {
-    match text::call(&live_syntax(line, &live), name, arguments, line)? {
-        Some(text::Folded::Bare(source)) => Ok(source),
-        _ => Err(AsmError::new(
-            line,
-            format!("`{name}` did not produce a token sequence"),
-        )),
-    }
-}
-
-pub(crate) fn expand_ca65_live(
-    source: &str,
-    line: usize,
-    live: LiveText<'_>,
-) -> Result<String, AsmError> {
-    let syntax = live_syntax(line, &live);
-    text::expand(&syntax, source)
-        .map(|text| text.trim_end_matches('\n').to_string())
-        .map_err(|mut error| {
-            if error.span.is_none() {
-                error.line = line;
-            }
-            live.strings.error(error)
-        })
-}
-
 type NumericAdmission<'a> = dyn Fn(&str, usize) -> Result<(), AsmError> + 'a;
-
-pub(crate) struct LineText<'a> {
-    pub target: Target,
-    pub token_target: Option<Target>,
-    pub numbers: &'a BTreeMap<String, i64>,
-    pub defined: &'a std::collections::BTreeSet<String>,
-    pub strings: &'a StringTokens,
-    pub depth: usize,
-    pub admission: Option<&'a NumericAdmission<'a>>,
-}
-
-pub(crate) fn expand_ca65_line(
-    source: &str,
-    line: usize,
-    text: LineText<'_>,
-) -> Result<String, AsmError> {
-    let syntax = Ca65Text {
-        live: None,
-        numeric_admission: text.admission,
-        source_line: Some(line),
-        target: text.target,
-        token_target: text.token_target,
-        depth: std::cell::Cell::new(text.depth),
-        numbers: Cow::Borrowed(text.numbers),
-        defined: Cow::Borrowed(text.defined),
-        strings: Cow::Borrowed(text.strings),
-    };
-    text::expand(&syntax, source)
-        .map(|text| text.trim_end_matches('\n').to_string())
-        .map_err(|mut error| {
-            if error.span.is_none() {
-                error.line = line;
-            }
-            text.strings.error(error)
-        })
-}
 
 /// Which CPU a ca65 parse is for.
 ///
@@ -1771,17 +1679,13 @@ pub(crate) fn expand_ca65_line(
 pub(crate) enum Target {
     #[default]
     Mos6502,
-    Csg4510,
     Wdc65816,
     HuC6280,
 }
 
 impl Target {
     fn holds_register(self, name: &str) -> bool {
-        matches!(
-            (self, name),
-            (_, "a" | "x" | "y") | (Target::Wdc65816, "s") | (Target::Csg4510, "s" | "z")
-        )
+        matches!((self, name), (_, "a" | "x" | "y") | (Target::Wdc65816, "s"))
     }
 
     /// Whether the CPU has this mnemonic. ca65 reads the name
@@ -1792,11 +1696,6 @@ impl Target {
         isa::mos6502::SET.has_mnemonic(&upper)
             || match self {
                 Target::Mos6502 => false,
-                Target::Csg4510 => isa::csg65ce02::CSG4502_SET.has_mnemonic(if upper == "PHD" {
-                    "PHW"
-                } else {
-                    &upper
-                }),
                 Target::Wdc65816 => isa::mos65816::SET.has_mnemonic(&upper),
                 Target::HuC6280 => isa::huc6280::SET.has_mnemonic(&upper),
             }
@@ -2930,60 +2829,6 @@ fn take<const N: usize>(
 
 #[cfg(test)]
 mod tests {
-    #[test]
-    fn nested_live_string_queries_preserve_definition_diagnostics() {
-        use crate::span::{ExpansionFrame, FileId, Span};
-        struct Reject(Span);
-        impl super::LiveNumbers for Reject {
-            fn literal(
-                &self,
-                _text: &str,
-                _line: usize,
-            ) -> Result<Option<i64>, crate::engine::AsmError> {
-                unreachable!("sprintf numeric argument")
-            }
-            fn number(
-                &self,
-                _text: &str,
-                _line: usize,
-            ) -> Result<Option<i64>, crate::engine::AsmError> {
-                let mut error = crate::engine::AsmError::unsupported(
-                    self.0.line as usize,
-                    "definition cannot be evaluated",
-                );
-                error.span = Some(self.0.clone());
-                Err(error)
-            }
-            fn constancy(&self, _text: &str, _line: usize) -> Result<i64, crate::engine::AsmError> {
-                unreachable!("numeric sprintf argument")
-            }
-        }
-        let mut span = Span::in_file(FileId(3), 7, 4);
-        span.expansion_frames.push(ExpansionFrame::new(
-            "definition".to_string(),
-            Some(Span::in_file(FileId(3), 2, 1)),
-            Span::in_file(FileId(0), 11, 1),
-        ));
-        let strings = super::StringTokens::default();
-        let numbers = std::collections::BTreeMap::new();
-        let defined = std::collections::BTreeSet::new();
-        let error = super::expand_ca65_live(
-            ".strlen(.sprintf(\"%d\",VALUE))",
-            17,
-            super::LiveText {
-                target: super::Target::Mos6502,
-                token_target: None,
-                numbers: &numbers,
-                strings: &strings,
-                defined: &defined,
-                context: &Reject(span.clone()),
-            },
-        )
-        .expect_err("nested read must refuse");
-        assert_eq!(error.span, Some(span));
-        assert_eq!(error.code, crate::contract::Code::UnsupportedFeature);
-        assert_eq!(error.message, "definition cannot be evaluated");
-    }
 
     use super::*;
 
