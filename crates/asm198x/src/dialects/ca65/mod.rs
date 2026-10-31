@@ -2743,14 +2743,16 @@ pub const DIRECTIVES: &[Directive] = &[
         },
         category: Category::Ignored,
     },
+    // The walk keeps each constructor, destructor and interruptor, and checks
+    // what ld65 would of them.
     Directive {
-        id: "unsupported-symbol",
+        id: "condes",
         pattern: Pattern::Sigilled {
             sigil: '.',
             names: &["condes", "constructor", "destructor", "interruptor"],
             required: true,
         },
-        category: Category::KnownUnsupported,
+        category: Category::Operation,
     },
     // Walk-handled, like the segment directives: the scope stack is parse
     // state, so these are read before `parse_directive` sees a line.
@@ -2810,12 +2812,22 @@ pub const DIRECTIVES: &[Directive] = &[
         },
         category: Category::Operation,
     },
-    // Remaining unsupported macro-management surface.
+    // Lang198x's expander deletes a macro.
     Directive {
-        id: "unsupported-macros",
+        id: "delmac",
         pattern: Pattern::Sigilled {
             sigil: '.',
-            names: &["delmac", "delmacro", "macpack"],
+            names: &["delmac", "delmacro"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    // ca65's macro packages are not shipped here.
+    Directive {
+        id: "macpack",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["macpack"],
             required: true,
         },
         category: Category::KnownUnsupported,
@@ -3728,14 +3740,14 @@ mod tests {
         // ca65 answers a name it has never seen with "Symbol is undefined"
         // rather than with 0, so a 0 here would be an invention.
         let e = refused(".byte .const(zzz)");
-        assert!(e.to_string().contains("undefined symbol `zzz`"), "{e}");
+        assert!(e.to_string().contains("Symbol `zzz` is undefined"), "{e}");
 
         // Native ld65 rejects an imported name that the query actually reads.
         let e = refused(".import ext\n.byte .const(ext)");
-        assert!(e.to_string().contains("undefined symbol `ext`"), "{e}");
+        assert!(e.to_string().contains("Symbol `ext` is undefined"), "{e}");
         // Explicit qualification cannot fall back to the root's N.
         let e = refused("N = 1\n.byte .const(pa::N)");
-        assert!(e.to_string().contains("no such scope `pa`"), "{e}");
+        assert!(e.to_string().contains("Symbol `pa::N` is undefined"), "{e}");
 
         // ca65 takes a bare name for `.ismnem` and nothing else.
         refused(".byte .ismnem(\"lda\")");
@@ -3836,13 +3848,15 @@ mod tests {
         );
     }
 
-    /// `.sprintf` against ca65 V2.18, one row per measured case.
+    /// `.sprintf`, one row per case measured on ca65.
     ///
-    /// The whole matrix is here rather than a sample because the rules are not
-    /// C's and not guessable: `%x` is signed where `%X` is not, `%s` and `%c`
-    /// align the opposite way to everything else, and `#` on `%x` shows a
-    /// prefix even for zero. Every row was read off the tool before it was
-    /// written down.
+    /// ca65's formatter is not C's: `%x` is signed where `%X` is not, `%s` and
+    /// `%c` align the opposite way to everything else, `#` on `%x` shows a
+    /// prefix even for zero, and `+` and a space mark unsigned conversions
+    /// too. ca65's manual calls the format "similar to the one of the C printf
+    /// function", so Lang198x gives C's result in each of those cases, a named
+    /// divergence (`docs/plans/2026-10-27-ca65-walk/plan.md`). Those rows hold
+    /// C's answer; the rest are ca65's.
     #[test]
     fn sprintf_formats_the_way_ca65_formats() {
         let text = |src: &str| {
@@ -3861,8 +3875,8 @@ mod tests {
             ("%u", "5", "5"),
             ("%u", "-5", "18446744073709551611"),
             ("%x", "255", "ff"),
-            ("%x", "-255", "-ff"),
-            ("%x", "-1", "-1"),
+            ("%x", "-255", "ffffffffffffff01"),
+            ("%x", "-1", "ffffffffffffffff"),
             ("%X", "255", "FF"),
             ("%X", "-255", "FFFFFFFFFFFFFF01"),
             ("%X", "-1", "FFFFFFFFFFFFFFFF"),
@@ -3877,8 +3891,8 @@ mod tests {
             ("% d", "-5", "-5"),
             ("% d", "0", " 0"),
             ("%#x", "255", "0xff"),
-            ("%#x", "-255", "-0xff"),
-            ("%#x", "-1", "-0x1"),
+            ("%#x", "-255", "0xffffffffffffff01"),
+            ("%#x", "-1", "0xffffffffffffffff"),
             ("%#X", "255", "0XFF"),
             ("%#X", "-255", "0XFFFFFFFFFFFFFF01"),
             ("%#X", "-1", "0XFFFFFFFFFFFFFFFF"),
@@ -3889,28 +3903,28 @@ mod tests {
             ("%#d", "0", "0"),
             ("%#s", "\"ab\"", "ab"),
             ("%#c", "65", "A"),
-            ("%+u", "5", "+5"),
-            ("%+u", "-5", "+18446744073709551611"),
-            ("%+x", "255", "+ff"),
-            ("%+x", "-255", "-ff"),
-            ("%+x", "-1", "-1"),
-            ("%+X", "255", "+FF"),
-            ("%+X", "-255", "+FFFFFFFFFFFFFF01"),
-            ("%+X", "-1", "+FFFFFFFFFFFFFFFF"),
-            ("%+o", "9", "+11"),
-            ("%+o", "-9", "+1777777777777777777767"),
+            ("%+u", "5", "5"),
+            ("%+u", "-5", "18446744073709551611"),
+            ("%+x", "255", "ff"),
+            ("%+x", "-255", "ffffffffffffff01"),
+            ("%+x", "-1", "ffffffffffffffff"),
+            ("%+X", "255", "FF"),
+            ("%+X", "-255", "FFFFFFFFFFFFFF01"),
+            ("%+X", "-1", "FFFFFFFFFFFFFFFF"),
+            ("%+o", "9", "11"),
+            ("%+o", "-9", "1777777777777777777767"),
             ("%+c", "65", "A"),
             ("%+s", "\"ab\"", "ab"),
-            ("% u", "5", " 5"),
-            ("% u", "-5", " 18446744073709551611"),
-            ("% x", "255", " ff"),
-            ("% x", "-255", "-ff"),
-            ("% x", "-1", "-1"),
-            ("% X", "255", " FF"),
-            ("% X", "-255", " FFFFFFFFFFFFFF01"),
-            ("% X", "-1", " FFFFFFFFFFFFFFFF"),
-            ("% o", "9", " 11"),
-            ("% o", "-9", " 1777777777777777777767"),
+            ("% u", "5", "5"),
+            ("% u", "-5", "18446744073709551611"),
+            ("% x", "255", "ff"),
+            ("% x", "-255", "ffffffffffffff01"),
+            ("% x", "-1", "ffffffffffffffff"),
+            ("% X", "255", "FF"),
+            ("% X", "-255", "FFFFFFFFFFFFFF01"),
+            ("% X", "-1", "FFFFFFFFFFFFFFFF"),
+            ("% o", "9", "11"),
+            ("% o", "-9", "1777777777777777777767"),
             ("% s", "\"ab\"", "ab"),
             ("% c", "65", "A"),
             ("%6d", "5", "     5"),
@@ -3929,26 +3943,26 @@ mod tests {
             ("%+06d", "-5", "-00005"),
             ("%+06d", "0", "+00000"),
             ("%6x", "255", "    ff"),
-            ("%6x", "-255", "   -ff"),
-            ("%6x", "-1", "    -1"),
+            ("%6x", "-255", "ffffffffffffff01"),
+            ("%6x", "-1", "ffffffffffffffff"),
             ("%-6x", "255", "ff    "),
-            ("%-6x", "-255", "-ff   "),
-            ("%-6x", "-1", "-1    "),
+            ("%-6x", "-255", "ffffffffffffff01"),
+            ("%-6x", "-1", "ffffffffffffffff"),
             ("%06x", "255", "0000ff"),
-            ("%06x", "-255", "-000ff"),
-            ("%06x", "-1", "-00001"),
+            ("%06x", "-255", "ffffffffffffff01"),
+            ("%06x", "-1", "ffffffffffffffff"),
             ("%#08x", "255", "0x0000ff"),
-            ("%#08x", "-255", "-0x000ff"),
-            ("%#08x", "-1", "-0x00001"),
-            ("%+#08x", "255", "+0x000ff"),
-            ("%+#08x", "-255", "-0x000ff"),
-            ("%+#08x", "-1", "-0x00001"),
+            ("%#08x", "-255", "0xffffffffffffff01"),
+            ("%#08x", "-1", "0xffffffffffffffff"),
+            ("%+#08x", "255", "0x0000ff"),
+            ("%+#08x", "-255", "0xffffffffffffff01"),
+            ("%+#08x", "-1", "0xffffffffffffffff"),
             ("%#08X", "255", "0X0000FF"),
             ("%#08X", "-255", "0XFFFFFFFFFFFFFF01"),
             ("%#08X", "-1", "0XFFFFFFFFFFFFFFFF"),
-            ("%+#08X", "255", "+0X000FF"),
-            ("%+#08X", "-255", "+0XFFFFFFFFFFFFFF01"),
-            ("%+#08X", "-1", "+0XFFFFFFFFFFFFFFFF"),
+            ("%+#08X", "255", "0X0000FF"),
+            ("%+#08X", "-255", "0XFFFFFFFFFFFFFF01"),
+            ("%+#08X", "-1", "0XFFFFFFFFFFFFFFFF"),
             ("%6X", "255", "    FF"),
             ("%6X", "-255", "FFFFFFFFFFFFFF01"),
             ("%6X", "-1", "FFFFFFFFFFFFFFFF"),
@@ -3963,21 +3977,21 @@ mod tests {
             ("%6u", "-5", "18446744073709551611"),
             ("%06u", "5", "000005"),
             ("%06u", "-5", "18446744073709551611"),
-            ("%6s", "\"ab\"", "ab    "),
-            ("%-6s", "\"ab\"", "    ab"),
-            ("%06s", "\"ab\"", "ab    "),
+            ("%6s", "\"ab\"", "    ab"),
+            ("%-6s", "\"ab\"", "ab    "),
+            ("%06s", "\"ab\"", "    ab"),
             ("%.2s", "\"ab\"", "ab"),
             ("%.6s", "\"ab\"", "ab"),
-            ("%6c", "65", "A     "),
-            ("%-6c", "65", "     A"),
-            ("%06c", "65", "A     "),
+            ("%6c", "65", "     A"),
+            ("%-6c", "65", "A     "),
+            ("%06c", "65", "     A"),
             ("%.1c", "65", "A"),
             ("%.3d", "5", "005"),
             ("%.3d", "-5", "-005"),
             ("%.3d", "0", "000"),
             ("%.4x", "255", "00ff"),
-            ("%.4x", "-255", "-00ff"),
-            ("%.4x", "-1", "-0001"),
+            ("%.4x", "-255", "ffffffffffffff01"),
+            ("%.4x", "-1", "ffffffffffffffff"),
             ("%.4X", "255", "00FF"),
             ("%.4X", "-255", "FFFFFFFFFFFFFF01"),
             ("%.4X", "-1", "FFFFFFFFFFFFFFFF"),
@@ -4127,10 +4141,13 @@ mod tests {
         let t = rom(".code\n lda #.strlen(\"hello\")\n lda #.strat(\"abc\", 1)\n");
         assert_eq!(&t[16..20], &[0xA9, 0x05, 0xA9, 0x62]);
         for (src, want) in [
-            (".code\n lda #.strlen(5)\n", "takes a string, not a value"),
+            (
+                ".code\n lda #.strlen(5)\n",
+                "expected a string in `.strlen`",
+            ),
             (
                 ".code\n lda #.lobyte(\"hi\")\n",
-                "takes a value, not a string",
+                "a string is not a value here",
             ),
         ] {
             let e = assemble(src).expect_err(src).to_string();
@@ -4155,7 +4172,7 @@ mod tests {
         // string literal fails earlier, in the tokenizer.
         let err = assemble(".code\nV = 1\n lda #.bank(V)\n").expect_err("not implemented");
         assert!(
-            err.to_string().contains("not an expression function"),
+            err.to_string().contains("is not lowered yet"),
             "got `{err}`"
         );
         // `.sizeof` *is* implemented, and refuses a name that declared no size
@@ -4354,7 +4371,11 @@ two:\n\
             ".segment \"CODE\"\n.out 5\n",
         ] {
             let err = crate::assemble_ca65(src).expect_err(src);
-            assert!(err.to_string().contains("one string"), "got `{err}`");
+            assert!(
+                err.to_string().contains("takes one string")
+                    || err.to_string().contains("expected a string"),
+                "got `{err}`"
+            );
         }
     }
 
@@ -4393,7 +4414,10 @@ two:\n\
         for word in [".global", ".import"] {
             let src = format!(".segment \"CODE\"\n{word} v := 1\n.byte 1\n");
             let err = crate::assemble_ca65(&src).expect_err(word);
-            assert!(err.to_string().contains("`:=`"), "{word}: got `{err}`");
+            assert!(
+                err.to_string().contains("takes no value"),
+                "{word}: got `{err}`"
+            );
         }
     }
 
@@ -4511,7 +4535,7 @@ two:\n\
             assert_eq!(r.warnings.first().expect("one warning").message, "a");
         }
         let err = crate::assemble_ca65(".segment \"CODE\"\n.warning 5\n").expect_err("no string");
-        assert!(err.to_string().contains("string constant"), "got `{err}`");
+        assert!(err.to_string().contains("expected a string"), "got `{err}`");
     }
 
     /// A message inside an untaken branch is never said: conditionals fold
@@ -4691,12 +4715,8 @@ two:\n\
     #[test]
     fn a_real_directive_is_told_apart_from_a_typo() {
         let err = |src: &str| super::assemble(src).expect_err(src).to_string();
-        // `.condes` rather than `.export`, which became an implemented check
-        // once ca65 turned out to enforce one. `.condes` builds an ld65
-        // constructor table from linker-config features our fixed layout does
-        // not declare, so it stays a gap by decision rather than by schedule
-        // (`decisions/reference-parity-goal.md`).
-        for d in [".condes foo, 1", ".charmap $41, $42", ".macpack cpu"] {
+        // `.export` sat here, then `.condes`, each implemented in turn.
+        for d in [".charmap $41, $42", ".macpack cpu"] {
             let e = err(&format!("\t{d}\n"));
             assert!(
                 e.contains("is a real directive here"),
@@ -4704,7 +4724,7 @@ two:\n\
             );
         }
         assert!(
-            err("\t.zzqq\n").contains("is not a directive ca65 has"),
+            err("\t.zzqq\n").contains("is not a control command ca65 knows"),
             "and a word ca65 does not have should say so"
         );
     }
@@ -4783,7 +4803,10 @@ two:\n\
     fn undefining_an_unknown_text_symbol_is_refused() {
         let error = crate::assemble_ca65(".undefine nothing\n")
             .expect_err("ca65 refuses to undefine the undefined");
-        assert!(error.to_string().contains("to undefine"), "{error}");
+        assert!(
+            error.to_string().contains("no define-style macro is named"),
+            "{error}"
+        );
     }
 
     /// Probed: `.ifdef` of a *live* text symbol substitutes the argument like
@@ -4793,7 +4816,7 @@ two:\n\
     fn ifdef_of_a_live_text_symbol_lands_on_its_value() {
         let error = crate::assemble_ca65(".define hi 8\n.ifdef hi\n.byte 1\n.endif\n")
             .expect_err("the argument was substituted");
-        assert!(error.to_string().contains("identifier"), "{error}");
+        assert!(error.to_string().contains("expected a name"), "{error}");
     }
 
     /// Probed: `.end` inside a taken branch stops the reader before the
@@ -5014,16 +5037,19 @@ two:\n\
         };
         // The closers are paired by kind: ca65 answers `.endscope` over an open
         // `.proc` with `No open .SCOPE`, not with a mismatch report.
-        assert!(err(".proc p\n nop\n.endscope\n").contains("no open `.scope`"));
-        assert!(err(".scope s\n nop\n.endproc\n").contains("no open `.proc`"));
-        assert!(err(".endproc\n").contains("no open `.proc`"));
+        assert!(err(".proc p\n nop\n.endscope\n").contains("No open .SCOPE"));
+        assert!(err(".scope s\n nop\n.endproc\n").contains("No open .PROC"));
+        assert!(err(".endproc\n").contains("No open .PROC"));
         // ca65: `Local scope was not closed`.
-        assert!(err(".proc p\n nop\n").contains("never closed"));
+        assert!(err(".proc p\n nop\n").contains("was not closed"));
         // ca65: `Duplicate scope 'sa'` — one name per parent.
-        assert!(err(".scope sa\n.endscope\n.scope sa\n.endscope\n").contains("duplicate scope"));
-        // A scope reference may only name one opened above it: ca65 answers
-        // `No such scope: 'p'` rather than waiting to see whether one arrives.
-        assert!(err(" .word p::inner\n.proc p\ninner: nop\n.endproc\n").contains("no such scope"));
+        assert!(err(".scope sa\n.endscope\n.scope sa\n.endscope\n").contains("Duplicate scope"));
+        // ca65 V2.19 reads a scope named before it is opened: `p::inner` is
+        // the label inside the `.proc` below (measured).
+        assert!(
+            super::assemble(".segment \"CODE\"\n .word p::inner\n.proc p\ninner: nop\n.endproc\n")
+                .is_ok()
+        );
     }
 
     /// Cheap locals belong to the scope they are written in, so the same `@l`
@@ -5093,16 +5119,17 @@ two:\n\
         };
         // ca65 pairs them strictly: inside an `.enum`, `.endstruct` is read as
         // a member name and answered `Identifier expected`.
-        assert!(err(".union U\nua .byte\n.endstruct\n").contains("closes a `.union`"));
-        assert!(err(".struct S\nsa .byte\n").contains("never closed"));
-        assert!(err(".endstruct\n").contains("no open record"));
+        assert!(err(".union U\nua .byte\n.endstruct\n").contains("Expected `.ENDUNION`"));
+        assert!(err(".struct S\nsa .byte\n").contains("Expected `.ENDSTRUCT`"));
+        assert!(err(".endstruct\n").contains("Unexpected end of a record"));
         // A storage allocator ca65 does not have, and a `.tag` naming nothing.
-        assert!(err(".struct S\nsa .zzz\n.endstruct\n").contains("not a storage allocator"));
-        assert!(err(".struct S\nsa .tag Nope\n.endstruct\n").contains("not a record declared"));
+        assert!(err(".struct S\nsa .zzz\n.endstruct\n").contains("not a control command"));
+        assert!(err(".struct S\nsa .tag Nope\n.endstruct\n").contains("Unknown struct/union"));
         // A *field* may repeat (`.tag Inner 3`); a statement may not, which is
         // ca65's `Unexpected trailing garbage characters`.
         assert!(
-            err(".struct S\nsa .byte\n.endstruct\nq: .tag S 2\n").contains("takes nothing after")
+            err(".struct S\nsa .byte\n.endstruct\nq: .tag S 2\n")
+                .contains("expected the end of the line")
         );
     }
 
@@ -5122,17 +5149,18 @@ two:\n\
                 .to_string()
         };
         // ca65's other processors: each a different opcode set, so taking one
-        // silently would assemble the wrong instructions.
+        // silently would assemble the wrong instructions. They come with the
+        // other CPUs, stage 4 of Lang198x's plan.
         for src in [".setcpu \"65C02\"", ".pc02", ".p816", ".psc02"] {
             assert!(
-                err(src).contains("the gap is ours"),
+                err(src).contains("is not lowered yet"),
                 "`{src}` should read as our gap: {}",
                 err(src)
             );
         }
         // A name ca65 does not know is its `CPU not supported`, not our gap.
         let e = err(".setcpu \"zz\"");
-        assert!(e.contains("not a processor ca65 knows"), "got: {e}");
+        assert!(e.contains("CPU not supported"), "got: {e}");
         // `.asize`/`.isize` are 65816-only, and ca65 refuses them here too.
         let e = err(".asize");
         assert!(e.contains("only valid in 65816 mode"), "got: {e}");

@@ -52,6 +52,8 @@ use std::cell::RefCell;
 use std::collections::{BTreeMap, HashMap, HashSet};
 
 use lang198x_ca65::Profile;
+
+use crate::directives::Category;
 use lang198x_ca65::ast::{Expr as SourceExpr, NameRef, View};
 use lang198x_ca65::expand::{ActiveLine, Expander, Host, Location, Reading};
 use lang198x_ca65::lower::{
@@ -556,8 +558,37 @@ impl Walk<'_> {
         self.use_segment("CODE", None, sectioned, &mut statements, &start)?;
         loop {
             let line = expander.next_line(self);
+            let before = self.errors.len();
             let found = self.gather_expander(expander);
             let Some(line) = line else { break };
+            // A word ca65 has that the walk does not implement, or that ca65
+            // itself refuses, is reported as the declared surface says, in
+            // place of whatever reading it found.
+            if let Some(message) = surface_refusal(&line) {
+                let range = line.line().syntax().text_range();
+                let mut index = before;
+                for (text, at) in &found {
+                    if *text == line.text() && range.contains_range(*at) {
+                        self.errors.remove(index);
+                    } else {
+                        index += 1;
+                    }
+                }
+                let at = self.error_site(expander, line.span());
+                self.errors.push(AsmError::at(at, message));
+                continue;
+            }
+            if let Some(name) = unknown_word(&line) {
+                let message = format!(
+                    "unknown instruction `{name}`: a name at the start of a line \
+                     needs a `:` after it to make it a label"
+                );
+                for error in &mut self.errors[before..] {
+                    if error.message == UNLABELLED {
+                        error.message.clone_from(&message);
+                    }
+                }
+            }
             // ca65 abandons a line it cannot read, reports the error and
             // carries on with the next one.
             let range = line.line().syntax().text_range();
@@ -1253,6 +1284,16 @@ impl Walk<'_> {
             };
             let message = match self.missing_include.take() {
                 Some(why) if diagnostic.message().starts_with("there is no file `") => why,
+                // The expander reads `.macpack` itself, and ships no package.
+                _ if diagnostic
+                    .message()
+                    .starts_with("there is no macro package")
+                    || diagnostic.message().starts_with("`.macpack`") =>
+                {
+                    "`.macpack` is a real directive here and asm198x does not implement it \
+                     yet — the source is valid and the gap is ours"
+                        .to_owned()
+                }
                 _ => diagnostic.message().to_owned(),
             };
             self.errors.push(AsmError::at(site, message));
@@ -2298,6 +2339,56 @@ impl Walk<'_> {
 
 /// The walk at the end of the program, asked about a value of a line it
 /// read earlier: its names are full names, and `*` is that line's address.
+/// The parser's word for a name at the start of a line with no `:` after it.
+const UNLABELLED: &str = "expected `:` after a name to make it a label";
+
+/// The first word of `line` that starts with a `.`, as written.
+fn command_word(line: &ActiveLine) -> Option<String> {
+    line.line()
+        .syntax()
+        .descendants()
+        .filter_map(syntax::SyntaxElement::into_token)
+        .map(|token| token.text().to_owned())
+        .find(|text| text.starts_with('.') && text.len() > 1)
+}
+
+/// How ca65's declared surface refuses the command on `line`, if it does:
+/// a word ca65 has and the walk does not implement, or one ca65 refuses
+/// itself.
+fn surface_refusal(line: &ActiveLine) -> Option<String> {
+    let word = command_word(line)?.to_ascii_lowercase();
+    let entry = crate::directives::lookup(super::ca65::DIRECTIVES, &word)?;
+    match entry.category {
+        Category::KnownUnsupported => Some(format!(
+            "`{word}` is a real directive here and asm198x does not implement it yet — \
+             the source is valid and the gap is ours"
+        )),
+        Category::RefusedByReference(rule) => Some(crate::directives::refused_by_reference(
+            "the ca65+ld65 pipeline",
+            &word,
+            rule,
+        )),
+        _ => None,
+    }
+}
+
+/// The name at the start of `line`, if the parser found no `:` after it:
+/// a word that is neither an instruction nor a macro here.
+fn unknown_word(line: &ActiveLine) -> Option<String> {
+    line.line()
+        .syntax()
+        .descendants()
+        .filter_map(syntax::SyntaxElement::into_token)
+        .find(|token| {
+            !matches!(
+                token.kind(),
+                syntax::SyntaxKind::WHITESPACE | syntax::SyntaxKind::NEWLINE
+            )
+        })
+        .map(|token| token.text().to_owned())
+        .filter(|text| text.starts_with(|c: char| c.is_ascii_alphabetic() || c == '_'))
+}
+
 /// What [`Walk::check_fits`] checks a value for.
 #[derive(Clone, Copy)]
 enum Fit {
