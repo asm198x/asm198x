@@ -13,25 +13,14 @@ instead. If you are deciding whether to move a project that already builds, what
 you need is not reassurance — it is to know what will change.
 
 <!-- generated: xtask divergences --markdown -->
-16 tracked differences across 72 recorded cases.
+5 tracked differences across 8 recorded cases.
 
 | Difference | CPU | Dialect | Reference tool | Cases |
 |---|---|---|---|---|
 | [`issue-110`](https://github.com/asm198x/asm198x/issues/110) | 68000 | vasm | vasmm68k_mot | 4 |
-| [`issue-761`](https://github.com/asm198x/asm198x/issues/761) | 6502 | ca65 | ca65 | 1 |
-| [`issue-798`](https://github.com/asm198x/asm198x/issues/798) | 6502 | ca65 | ca65 | 1 |
 | [`issue-820`](https://github.com/asm198x/asm198x/issues/820) | 65816 | ca65-816 | ca65 | 1 |
-| [`issue-844`](https://github.com/asm198x/asm198x/issues/844) | 6502 | ca65 | ca65 | 1 |
-| [`issue-850`](https://github.com/asm198x/asm198x/issues/850) | 6502 | ca65 | ca65 | 1 |
-| [`issue-866`](https://github.com/asm198x/asm198x/issues/866) | 6502 | ca65 | ca65 | 2 |
-| [`issue-868`](https://github.com/asm198x/asm198x/issues/868) | 6502 | ca65 | ca65 | 1 |
-| [`issue-872`](https://github.com/asm198x/asm198x/issues/872) | 6502 | ca65 | ca65 | 1 |
-| [`issue-876`](https://github.com/asm198x/asm198x/issues/876) | 6502 | ca65 | ca65 | 1 |
-| [`issue-891`](https://github.com/asm198x/asm198x/issues/891) | 6502 | ca65 | ca65 | 1 |
 | [`issue-895`](https://github.com/asm198x/asm198x/issues/895) | 65816 | ca65-816 | ca65 | 1 |
-| [`issue-918`](https://github.com/asm198x/asm198x/issues/918) | 6502 | ca65 | ca65 | 1 |
 | [`issue-928`](https://github.com/asm198x/asm198x/issues/928) | 65816 | ca65-816 | ca65 | 1 |
-| [`issue-940`](https://github.com/asm198x/asm198x/issues/940) | 6502 | ca65 | ca65 | 53 |
 | [`issue-984`](https://github.com/asm198x/asm198x/issues/984) | Z80N | pasmonext | pasmo | 1 |
 <!-- /generated -->
 
