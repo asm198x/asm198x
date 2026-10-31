@@ -639,7 +639,7 @@ reset:  lda #2\n\
     assert!(!out.status.success(), "a duplicate label is an error");
     let stderr = String::from_utf8_lossy(&out.stderr);
     assert!(
-        stderr.contains("duplicate symbol `reset`"),
+        stderr.contains("Symbol `reset` is already defined"),
         "the error names the symbol: {stderr}"
     );
 }

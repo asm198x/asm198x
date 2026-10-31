@@ -127,8 +127,11 @@ fn native_scope_closures_follow_definitions_and_emitted_spans() {
     }
 }
 
+/// A cheap constant is named in the debug record as a cheap label is, after
+/// the label it belongs to (`anchor@value`, as `--sym` writes `reset@wait`),
+/// and no internal key reaches the record.
 #[test]
-fn cheap_constant_debug_symbols_preserve_authored_names() {
+fn cheap_constant_debug_symbols_name_their_anchor() {
     let root = scratch::dir("ca65-cheap-debug-names");
     let facts: serde_json::Value =
         serde_json::from_str(include_str!("fixtures/ca65-scope-anchors.json"))
@@ -140,7 +143,8 @@ fn cheap_constant_debug_symbols_preserve_authored_names() {
     .expect("config");
     std::fs::write(
         root.join("input.s"),
-        "anchor:\n@value=7\n.byte @value\n.struct Point\nx .byte\n.endstruct\n",
+        // `px`, not `x`: ca65 reads `x` there as the register.
+        "anchor:\n@value=7\n.byte @value\n.struct Point\npx .byte\n.endstruct\n",
     )
     .expect("source");
     let result = run(
@@ -161,14 +165,18 @@ fn cheap_constant_debug_symbols_preserve_authored_names() {
     assert!(
         symbols
             .iter()
-            .any(|r| r["t"] == "symbol" && r["name"] == "@value" && r["value"] == 7)
+            .any(|r| r["t"] == "symbol" && r["name"] == "anchor@value" && r["value"] == 7)
     );
     assert!(!symbols.iter().any(|r| {
         r["name"]
             .as_str()
             .is_some_and(|n| n.contains("anchor\u{1}value"))
     }));
-    assert!(symbols.iter().any(|r| r["name"] == "Point::x\u{1}size"));
+    assert!(
+        symbols
+            .iter()
+            .any(|r| r["name"] == "Point::px" && r["value"] == 0)
+    );
 }
 
 #[test]

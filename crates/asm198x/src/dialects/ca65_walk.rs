@@ -1645,6 +1645,7 @@ impl Walk<'_> {
             let value = value.unwrap_or_else(|| self.pc());
             let redefinable = matches!(op, Some(Operation::Set(_)));
             if !redefinable && self.names.contains_key(label) {
+                let label = as_written(label);
                 return Err(refuse(format!("Symbol `{label}` is already defined")));
             }
             if let Some(declaration) = self.declared.get(label) {

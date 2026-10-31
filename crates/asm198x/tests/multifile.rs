@@ -3395,7 +3395,9 @@ fn ca65_nes_error_in_included_file_names_that_file_with_its_chain() {
     )
     .expect_err("duplicate symbol");
     assert!(
-        e.error.message.contains("duplicate symbol `reset`"),
+        e.error
+            .message
+            .contains("Symbol `reset` is already defined"),
         "names the symbol: {}",
         e.error.message
     );

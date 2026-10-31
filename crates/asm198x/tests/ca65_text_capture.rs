@@ -129,6 +129,26 @@ fn native_text_capture_matches_definition_and_invocation_order() {
 
 #[test]
 fn captured_include_macro_errors_keep_frames_and_preserve_outputs() {
+    /// Where ca65 reports a problem in the included macro.
+    #[derive(Clone, Copy)]
+    enum Site {
+        /// The macro's own `.macro` line.
+        Definition,
+        /// The outermost call, with a note at the definition.
+        Call,
+        /// The call inside the macro, for a macro that calls itself.
+        Recursion,
+    }
+    impl Site {
+        fn place(self) -> (&'static str, u64) {
+            match self {
+                Self::Definition => ("macros.inc", 1),
+                Self::Call => ("input.s", 6),
+                Self::Recursion => ("macros.inc", 2),
+            }
+        }
+    }
+
     let facts: serde_json::Value =
         serde_json::from_str(include_str!("fixtures/ca65-text-capture.json")).expect("captures");
     let fact = facts["cases"]
@@ -153,20 +173,25 @@ fn captured_include_macro_errors_keep_frames_and_preserve_outputs() {
         "out.lst.json",
     ];
     for mode in ["human", "json"] {
-        for (invalid, definition_error) in [
-            (".macro included\nfrobnicate\n.endmacro\n", false),
-            (".macro included VALUE\n.byte VALUE\n.endmacro\n", true),
-            (".macro included\nincluded\n.endmacro\n", false),
+        for (invalid, site) in [
+            (".macro included\nfrobnicate\n.endmacro\n", Site::Call),
+            (
+                ".macro included VALUE\n.byte VALUE\n.endmacro\n",
+                Site::Definition,
+            ),
+            // ca65 V2.19 reports a macro that calls itself too deeply at the
+            // call inside it, with no notes (measured).
+            (".macro included\nincluded\n.endmacro\n", Site::Recursion),
             (
                 ".macro included\n.if MISSING\n.byte 1\n.endif\n.endmacro\n",
-                false,
+                Site::Call,
             ),
             (
                 ".macro included\n.repeat MISSING\n.byte 1\n.endrepeat\n.endmacro\n",
-                false,
+                Site::Call,
             ),
-            (".macro included\n.byte 256\n.endmacro\n", false),
-            (".macro included\n.byte )\n.endmacro\n", false),
+            (".macro included\n.byte 256\n.endmacro\n", Site::Call),
+            (".macro included\n.byte )\n.endmacro\n", Site::Call),
         ] {
             std::fs::write(
                 root.join("macros.inc"),
@@ -209,27 +234,21 @@ fn captured_include_macro_errors_keep_frames_and_preserve_outputs() {
                 let errors: serde_json::Value =
                     serde_json::from_slice(&failure.stdout).expect("diagnostics");
                 let span = &errors[0]["span"];
-                if definition_error {
-                    assert_eq!(span["line"], 1);
-                    assert!(span["path"].as_str().expect("path").ends_with("macros.inc"));
-                } else {
-                    assert_eq!(span["line"], 6);
-                    assert!(span["path"].as_str().expect("path").ends_with("input.s"));
+                let (file, line) = site.place();
+                assert_eq!(span["line"], line);
+                assert!(span["path"].as_str().expect("path").ends_with(file));
+                if matches!(site, Site::Call) {
                     let frame = &span["expansion_frames"][0];
                     assert_eq!(frame["macro_name"], "included");
                     assert_eq!(frame["defined_at"]["file"], 1);
                     assert_eq!(frame["invoked_at"]["line"], 6);
+                } else {
+                    assert_eq!(span["expansion_frames"], serde_json::json!([]));
                 }
             } else {
                 let text = String::from_utf8_lossy(&failure.stderr);
-                assert!(
-                    text.contains(if definition_error {
-                        "macros.inc:1:"
-                    } else {
-                        "input.s:6:"
-                    }),
-                    "{failure:?}"
-                );
+                let (file, line) = site.place();
+                assert!(text.contains(&format!("{file}:{line}:")), "{failure:?}");
             }
             for (name, bytes) in outputs.iter().zip(previous) {
                 assert_eq!(
