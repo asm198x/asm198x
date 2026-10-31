@@ -75,13 +75,21 @@ fn canonical_reader_retains_complete_end_source_without_evaluation() {
         let name = case["name"].as_str().expect("name");
         let source = case["source"].as_str().expect("source");
         let formatted = asm198x::format_ca65(source).expect(name);
-        for variant in [
-            source.replace('\n', "\r\n"),
-            source.trim_end_matches('\n').to_string(),
+        // The formatter keeps the line endings it is given, and a last line
+        // with none.
+        for (variant, expected) in [
+            (
+                source.replace('\n', "\r\n"),
+                formatted.replace('\n', "\r\n"),
+            ),
+            (
+                source.trim_end_matches('\n').to_string(),
+                formatted.trim_end_matches('\n').to_string(),
+            ),
         ] {
             assert_eq!(
                 asm198x::format_ca65(&variant).expect(name),
-                formatted,
+                expected,
                 "{name}: newline convention"
             );
         }
@@ -95,21 +103,25 @@ fn canonical_reader_retains_complete_end_source_without_evaluation() {
             formatted,
             "{name}: idempotence"
         );
+        // Lines after `.end` are kept as written. That is always safe, even
+        // where ca65 reads them, as here, where `.repeat 0` skips the `.end`.
         if name == "zero_repeat" {
             assert_eq!(
                 formatted,
-                "        .repeat 0\n        .end\n        .endrepeat\n        .byte 8\n"
+                "        .repeat 0\n        .end\n.endrepeat\n.byte 8\n"
             );
         }
+        // A statement keeps its own text, so an assignment is not aligned.
         if name == "constant_runs" {
             assert!(
-                formatted.starts_with("SHORT     = 1\nLONG_NAME = $02\n"),
+                formatted.starts_with("        SHORT=1\n        LONG_NAME=$02\n"),
                 "{formatted}"
             );
         }
+        // A label stays on its statement's line, in column 1.
         if name == "ordinary_labels" {
             assert!(
-                formatted.starts_with("entry:\n        .byte 7\n@cheap:\n"),
+                formatted.starts_with("entry:  .byte 7\n@cheap: .byte 8\n:       .word entry\n"),
                 "{formatted}"
             );
         }

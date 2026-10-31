@@ -36,7 +36,6 @@ use crate::directives::{Category, Directive, Pattern, lookup};
 use crate::engine::{AsmError, DiagSeverity, Expr, Operation};
 use crate::span::FileId;
 
-mod format;
 mod link;
 mod project;
 pub(super) mod string_tokens;
@@ -260,20 +259,6 @@ impl AnonCtx {
             Ok(Self::name(index))
         }
     }
-
-    /// Fail on the first forward reference (in parse order) whose definition
-    /// never arrived, with the same message an out-of-range backward one gets.
-    fn check(&self) -> Result<(), AsmError> {
-        let seen = self.seen.get();
-        for (index, level, span) in self.forward.borrow().iter() {
-            if *index >= seen {
-                let mut e = no_anon('+', *level, span.line as usize);
-                e = ca65_flat::stamp_file(e, span.file);
-                return Err(e);
-            }
-        }
-        Ok(())
-    }
 }
 
 /// The "no anonymous label `:{run}` in that direction" diagnostic.
@@ -301,33 +286,6 @@ fn anon_ref(tok: &str) -> Option<(char, usize)> {
 // ---------------------------------------------------------------------------
 // Parsing
 // ---------------------------------------------------------------------------
-
-/// Parse ca65 (NES) source into the source-preserving semantic
-/// [`Program`](crate::ast::Program) — the single front-end IR the assemble+link
-/// driver and the `--fmt` formatter both consume. Each line becomes a node
-/// carrying its label (the **source form** — `name`, `@cheap`, or empty for an
-/// anonymous `:` — for the formatter, and the resolved name for assembly), the
-/// verbatim operation source, and comment trivia.
-///
-/// The ca65 statement [`Kind`] is the family-owned native payload
-/// (`decisions/ast-native-payload-for-multipass-cisc.md`); `=` constants are the
-/// shared [`Item::Equ`](crate::ast::Item), folded in source order so `.res`
-/// counts and the zero-page size decision see earlier definitions; a `.segment`
-/// directive is a byte-neutral source-only node the assembly projection reads to
-/// track the active segment.
-pub(crate) fn parse_program(
-    set: &'static isa::InstructionSet,
-    source: &str,
-    mode: macros::Expand,
-) -> Result<crate::ast::Program, AsmError> {
-    if matches!(mode, macros::Expand::No) {
-        return Ok(format::parse(source));
-    }
-    // Assembly keeps definitions and calls unread for the selected sweep.
-    let mut w = Walker::structural_source(set, source);
-    ca65_flat::walk_source_expanded(&mut w, source, FileId(0))?;
-    w.finish(source.lines().count() as u32)
-}
 
 /// The per-line parse walk shared by [`parse_program`] (single source) and
 /// [`parse_program_multi`] (the include-capable walk). The environment — the
@@ -454,61 +412,11 @@ struct OpenScope {
     /// on an open `.proc` is `No open .SCOPE`, and the reverse is `No open
     /// .PROC`.
     is_proc: bool,
-    /// Where it was opened, so an unclosed one can say where to look.
-    line: usize,
     /// A positive physical span causes a native size definition on closure.
     has_output: bool,
 }
 
 impl Walker {
-    fn new(set: &'static isa::InstructionSet, expand_text_defines: bool) -> Self {
-        Self {
-            set,
-            strings: string_tokens::StringTokens::default(),
-            extension: None,
-            cpu_stack: Vec::new(),
-            repeat_registers: None,
-            anons: AnonCtx::default(),
-            scope_env: crate::scopes::ScopeEnv::new(),
-            consts: BTreeMap::new(),
-            pending_leading: Vec::new(),
-            nodes: Vec::new(),
-            scopes: Vec::new(),
-            opened: BTreeSet::new(),
-            source_known: BTreeSet::new(),
-            source_unresolved: RefCell::new(BTreeSet::new()),
-            source_referenced: RefCell::new(BTreeSet::new()),
-            unnamed: 0,
-            ended: false,
-            records: Vec::new(),
-            text_defines: BTreeMap::new(),
-            expand_text_defines,
-            structural: false,
-            macro_lines: RefCell::new(BTreeSet::new()),
-            in_macro: Cell::new(false),
-        }
-    }
-
-    /// The structure-only walker (#481): blocks are grouped, every line is
-    /// kept unread. The projection sweep owns the eager twin that reads them.
-    fn structural(set: &'static isa::InstructionSet) -> Self {
-        Self {
-            structural: true,
-            ..Self::new(set, true)
-        }
-    }
-
-    /// Close the walk: flush trailing comments (a trailing block or a
-    /// comment-only file), then fail any forward anonymous reference whose
-    /// definition never arrived.
-    /// CPU selection belongs to the live reader, including across includes
-    /// and selected branches. Each instruction retains its selection (#722).
-    fn structural_source(set: &'static isa::InstructionSet, source: &str) -> Self {
-        let reader = Self::structural(set);
-        reader.prepare_macro_lines(source);
-        reader
-    }
-
     fn prepare_macro_lines(&self, source: &str) {
         let lines: Vec<_> = source.lines().collect();
         let mut opaque = self.macro_lines.borrow_mut();
@@ -559,40 +467,6 @@ impl Walker {
             _ => return Ok(false), // Existing validation diagnoses other profiles.
         }
         Ok(true)
-    }
-
-    fn finish(mut self, last_line: u32) -> Result<crate::ast::Program, AsmError> {
-        use crate::ast::{Node, Program, Span, Trivia};
-        if !self.pending_leading.is_empty() {
-            self.nodes.push(Node {
-                operand_span: None,
-                label: None,
-                item: None,
-                source: String::new(),
-                span: Span::at(last_line, 1),
-                trivia: Trivia {
-                    leading: std::mem::take(&mut self.pending_leading),
-                    trailing: None,
-                },
-            });
-        }
-        if let Some(open) = self.records.last() {
-            let (opener, closer) = open.kind.words();
-            return Err(AsmError::new(
-                open.line,
-                format!("`{opener}` is never closed — `{closer}` is missing"),
-            ));
-        }
-        // ca65: `Local scope was not closed`, reported at the end of the file.
-        if let Some(open) = self.scopes.last() {
-            let word = if open.is_proc { ".proc" } else { ".scope" };
-            return Err(AsmError::new(
-                open.line,
-                format!("`{word}` is never closed"),
-            ));
-        }
-        self.anons.check()?;
-        Ok(Program { nodes: self.nodes })
     }
 
     /// The path of the scopes open here.
@@ -676,7 +550,6 @@ impl Walker {
         self.scopes.push(OpenScope {
             segment: name,
             is_proc,
-            line,
             has_output: false,
         });
         Ok(Some(label))
@@ -692,7 +565,6 @@ impl Walker {
         self.scopes.push(OpenScope {
             segment: name.to_string(),
             is_proc: false,
-            line,
             has_output: false,
         });
         Ok(path)
