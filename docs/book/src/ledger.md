@@ -5,9 +5,9 @@ observation of a real reference assembler, not an expectation written
 by hand. Regenerate with `cargo xtask ledger`.
 
 - **Release:** `v0.0.73`
-- **Corpus hash:** `6eebe07fb3415f84653de2972735336b81a0ee7cc26841948677d0198015c6f1`
+- **Corpus hash:** `6ef4bd49fd2f7d14e5f3ed3a7d71a04f943b03f280583178030c0979791d207c`
 - **Pinned curriculum:** `f11698d0b51b3a6c1209cec3d649229aa35af97f` (2026-08-27)
-- **CPUs:** 23, holding 9978 verdict(s)
+- **CPUs:** 30, holding 11505 verdict(s)
 
 ## 1802
 
@@ -29,6 +29,14 @@ Form coverage: **245/245** (100.0%)
 
 No tracked divergences.
 
+## 4510
+
+| arbiter | version | verdicts |
+|---|---|---|
+| `ca65` | ca65 V2.19 - Git 8d86ca7 | probe 261 |
+
+No tracked divergences.
+
 ## 6502
 
 Form coverage: **151/151** (100.0%)
@@ -37,6 +45,22 @@ Form coverage: **151/151** (100.0%)
 |---|---|---|
 | `acme` | This is ACME, release 0.97 ("Zem"), 1 Aug 2025 | curriculum 138, form 151, fuzz 100, probe 103 |
 | `ca65` | ca65 V2.19 - Git 8d86ca7 | curriculum 51, form 151, fuzz 100, probe 449 |
+
+No tracked divergences.
+
+## 6502DTV
+
+| arbiter | version | verdicts |
+|---|---|---|
+| `ca65` | ca65 V2.19 - Git 8d86ca7 | probe 187 |
+
+No tracked divergences.
+
+## 6502X
+
+| arbiter | version | verdicts |
+|---|---|---|
+| `ca65` | ca65 V2.19 - Git 8d86ca7 | probe 218 |
 
 No tracked divergences.
 
@@ -51,6 +75,30 @@ Form coverage: **270/270** (100.0%)
 Tracked divergences — differences we know about and check:
 
 - `sprintf-c-width` — 4 case(s)
+
+## 65C02
+
+| arbiter | version | verdicts |
+|---|---|---|
+| `ca65` | ca65 V2.19 - Git 8d86ca7 | probe 210 |
+
+No tracked divergences.
+
+## 65CE02
+
+| arbiter | version | verdicts |
+|---|---|---|
+| `ca65` | ca65 V2.19 - Git 8d86ca7 | probe 261 |
+
+No tracked divergences.
+
+## 65SC02
+
+| arbiter | version | verdicts |
+|---|---|---|
+| `ca65` | ca65 V2.19 - Git 8d86ca7 | probe 178 |
+
+No tracked divergences.
 
 ## 6800
 
@@ -179,6 +227,14 @@ Form coverage: **69/69** (100.0%)
 | arbiter | version | verdicts |
 |---|---|---|
 | `asl` | Macro Assembler 1.42 Beta [Bld 311] | form 69, sweep-chunk 56 |
+
+No tracked divergences.
+
+## W65C02
+
+| arbiter | version | verdicts |
+|---|---|---|
+| `ca65` | ca65 V2.19 - Git 8d86ca7 | probe 212 |
 
 No tracked divergences.
 
