@@ -1,5 +1,5 @@
 //! Shared `.include`/`.incbin` machinery for the **ca65-syntax flat family**
-//! (`ca65_816`, `ca65_huc6280`) — language-surface U4, KTD1/KTD5/KTD8 — and
+//! (`ca65_816`; the HuC6280 now reads through the ca65 walk) — language-surface U4, KTD1/KTD5/KTD8 — and
 //! the recursion driver the other flat walk-based dialects (rgbasm, lwasm)
 //! reuse. The driver ([`walk_file`]) owns what is genuinely shared: the
 //! interleaved per-line walk, lazy include/incbin resolution (KTD1), cycle
@@ -1680,7 +1680,6 @@ pub(crate) enum Target {
     #[default]
     Mos6502,
     Wdc65816,
-    HuC6280,
 }
 
 impl Target {
@@ -1697,7 +1696,6 @@ impl Target {
             || match self {
                 Target::Mos6502 => false,
                 Target::Wdc65816 => isa::mos65816::SET.has_mnemonic(&upper),
-                Target::HuC6280 => isa::huc6280::SET.has_mnemonic(&upper),
             }
     }
 }

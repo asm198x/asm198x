@@ -9,7 +9,6 @@ pub(crate) mod asl;
 pub(crate) mod ca65;
 pub(crate) mod ca65_816;
 pub(crate) mod ca65_flat;
-pub(crate) mod ca65_huc6280;
 pub(crate) mod ca65_layout;
 pub(crate) mod ca65_walk;
 pub(crate) mod cdp1802;
@@ -39,7 +38,6 @@ pub(crate) mod z8000;
 
 pub(crate) use acme::Acme;
 pub(crate) use ca65_816::Ca65_816;
-pub(crate) use ca65_huc6280::Ca65Huc6280;
 pub(crate) use cdp1802::Cdp1802;
 pub(crate) use cp1610::Cp1610;
 pub(crate) use f8::F8;

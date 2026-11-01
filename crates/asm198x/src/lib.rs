@@ -769,20 +769,24 @@ pub fn assemble_ca65_816_files(
     assemble_files(&dialects::Ca65_816, source, input_path, loader)
 }
 
-/// Assemble ca65-syntax HuC6280 source into a flat little-endian binary — the
-/// HuC6280 (PC Engine / TurboGrafx-16 CPU) as a target extension of the 6502
-/// (`isa::mos6502` + `isa::huc6280`), mirroring the 65816 mechanism. Covers the
-/// 65C02 additions, the Rockwell bit ops, and the HuC6280-specific instructions
-/// (`st0`–`st2`, `tam`/`tma`, `tst`, `bsr`, and the block transfers). Matches
-/// `ca65 --cpu huc6280` linked flat. Single-source: a `.include`/`.incbin`
-/// directive is an error here — use [`assemble_ca65_huc6280_files`] for a
-/// multi-file program.
+/// Assemble ca65-syntax HuC6280 source into a flat little-endian binary, as
+/// `ca65 --cpu huc6280` assembles it and links it flat. The program reads
+/// through Lang198x's ca65 front end and the walk in `dialects/ca65_walk.rs`,
+/// starting on the HuC6280, so it has all of the 6502 dialect's language. It
+/// covers the 65C02 additions, the Rockwell bit instructions and the HuC6280's
+/// own (`st0`–`st2`, `tam`/`tma` and `tamn`/`tman`, `tst`, `bsr` and the block
+/// transfers). Single-source: a `.include`/`.incbin` directive is an error
+/// here; use [`assemble_ca65_huc6280_files`] for a multi-file program.
 ///
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
 pub fn assemble_ca65_huc6280(source: &str) -> Result<AssemblyResult, AsmError> {
-    engine::assemble(source, &dialects::Ca65Huc6280).map(AssemblyResult::from)
+    engine::assemble(
+        source,
+        &dialects::ca65_walk::Ca65Walk::flat_on(lang198x_ca65::Cpu::HuC6280),
+    )
+    .map(AssemblyResult::from)
 }
 
 /// Assemble a **multi-file** ca65-HuC6280 program (language-surface U4): as
@@ -798,7 +802,12 @@ pub fn assemble_ca65_huc6280_files(
     input_path: &str,
     loader: &dyn source::SourceLoader,
 ) -> Result<AssemblyResult, MultiFileError> {
-    assemble_files(&dialects::Ca65Huc6280, source, input_path, loader)
+    assemble_files(
+        &dialects::ca65_walk::Ca65Walk::flat_on(lang198x_ca65::Cpu::HuC6280),
+        source,
+        input_path,
+        loader,
+    )
 }
 
 /// Assemble rgbasm-syntax SM83 (Game Boy) source into a flat binary at the
@@ -1688,13 +1697,15 @@ pub fn format_ca65_816(source: &str) -> Result<String, AsmError> {
     format_ast(&dialects::Ca65_816, source)
 }
 
-/// Reformat ca65-syntax HuC6280 source to canonical layout (the `--fmt`
-/// formatter). Reassembles byte-identical to the input.
+/// Reformat ca65-syntax HuC6280 source with Lang198x's ca65 formatter, as
+/// [`format_ca65`] does, reading the HuC6280's mnemonics and registers.
 ///
 /// # Errors
-/// Returns an [`AsmError`] on any parse failure.
+/// Returns an [`AsmError`] if the source is too long to format.
 pub fn format_ca65_huc6280(source: &str) -> Result<String, AsmError> {
-    format_ast(&dialects::Ca65Huc6280, source)
+    let profile = lang198x_ca65::Profile::CA65_2_19_6502.with_cpu(lang198x_ca65::Cpu::HuC6280);
+    lang198x_ca65::format(source, profile)
+        .map_err(|_| AsmError::new(0, "the source is too long to format"))
 }
 
 /// Reformat asl-syntax PDP-11 source to canonical layout (the `--fmt`
