@@ -7,6 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.74](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.73...asm198x-v0.0.74) - 2026-11-01
+
+### Added
+
+- *(cli)* start a ca65 program on the CPU --cpu names
+- *(ca65)* assemble the 65816 through the walk, and delete the old readers
+- *(ca65)* assemble and format the HuC6280 through the walk
+- *(ca65)* format ca65 source with Lang198x's formatter
+- *(ca65)* assemble the 4510 in the walk, and check branch distances
+- *(ca65)* carry on past errors in the engine, and stop at .fatal
+- *(ca65)* report every error, as ca65 does
+- *(ca65)* read records in the walk
+- *(ca65)* know the distance between two labels in the walk
+- *(ca65)* keep ca65's CPU stack and check its settings in the walk
+- *(ca65)* follow ca65 on `.reloc`, `.org` across segments and macro lines
+- *(ca65)* let the walk's equates read names defined further on
+- *(ca65)* warn in the walk as ca65 and ld65 do
+- *(ca65)* give the walk's link a debug record by segment
+
+### Dependencies
+
+- *(deps)* take lang198x-ca65 0.0.22 and isa198x 0.1.10
+- *(deps)* take lang198x-ca65 0.0.21 and isa198x 0.1.9
+- *(deps)* take lang198x-ca65 0.0.20 and isa198x 0.1.8
+- *(deps)* take lang198x-ca65 0.0.19
+
+### Fixed
+
+- *(ca65)* read SWEET 16 with its own instructions
+- *(ca65)* refuse the walk's unimplemented words as the surface declares
+- *(ca65)* report where ca65 does in the walk
+- *(ca65)* circles, fills and late names in the walk as ca65 V2.19 has them
+- *(ca65)* follow ca65 V2.19 in the walk on the gaps the switch found
+- *(ca65)* let an import in a scope hide a name further out
+- *(ca65)* refuse one-byte data that does not fit, as ca65 does
+
 ## [0.0.73](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.72...asm198x-v0.0.73) - 2026-10-27
 
 ### Added
