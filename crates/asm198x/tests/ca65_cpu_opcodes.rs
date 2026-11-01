@@ -2,8 +2,8 @@
 //! opcode tests.
 //!
 //! Asm198x claims a CPU only once that CPU has its own section of the
-//! verdict corpus. The 6502X, 6502DTV, 65SC02, 65C02, W65C02, 65CE02 and
-//! 4510 have no disassembler here to drive a form audit, so their sections
+//! verdict corpus. The 6502X, 6502DTV, 65SC02, 65C02, W65C02, 65CE02, 4510
+//! and 45GS02 have no disassembler here to drive a form audit, so their sections
 //! come from an independent source instead: every instruction line of
 //! cc65's `test/asm/opcodes/<cpu>-opcodes.s`, in
 //! `fixtures/ca65-cpu-opcodes.json`.
@@ -44,6 +44,7 @@ fn every_cpu_has_its_lines() {
         counts,
         [
             ("4510", 261),
+            ("45GS02", 336),
             ("6502DTV", 187),
             ("6502X", 219),
             ("65C02", 210),
