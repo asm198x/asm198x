@@ -62,8 +62,8 @@ use lang198x_ca65::lower::{
 };
 use lang198x_ca65::syntax::{self, DiagnosticKind, TextId, TextRange};
 
-use super::ca65_flat::{Resolution, load_binary, load_include, slice_incbin};
 use super::ca65_layout::{Layout, ResolvedLayout};
+use super::flat_walk::{Resolution, load_binary, load_include, slice_incbin};
 use crate::ast::{map_sym_expr, map_syms};
 use crate::dialect::Dialect;
 use crate::engine::{

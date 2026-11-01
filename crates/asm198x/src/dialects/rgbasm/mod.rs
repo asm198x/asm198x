@@ -21,7 +21,7 @@
 //! Output is validated byte-identical against `rgbasm`/`rgblink` (RGBDS).
 //!
 //! `INCLUDE`/`INCBIN` (language-surface U4) resolve through the shared
-//! [`super::ca65_flat`] walk driver with rgbasm's probe-pinned semantics
+//! [`super::flat_walk`] walk driver with rgbasm's probe-pinned semantics
 //! (rgbasm v1.0.1): every relative request — however deeply nested — anchors
 //! at the **root input's directory** (rgbasm searches the process cwd, never
 //! the including file's directory; our input's directory stands in for the
@@ -42,7 +42,7 @@
 
 use std::collections::BTreeMap;
 
-use super::ca65_flat::{self, DirectiveLine, FlatWalk, WalkDirective};
+use super::flat_walk::{self, DirectiveLine, FlatWalk, WalkDirective};
 use super::macros;
 use super::mos6502::{
     self, BytePrec, Caret, ExprOpts, fold_const, is_ident, split_data_items, split_first_word,
@@ -194,7 +194,7 @@ pub(crate) fn parse_program(source: &str, mode: macros::Expand) -> Result<Progra
     let origins = macros::line_origins(&expanded);
     // The shared cursor: it groups `IF`/`REPT` blocks and keeps every include
     // unresolved (KTD1), which is what `--fmt` needs.
-    ca65_flat::walk_source_expanded(&mut w, text, FileId(0))
+    flat_walk::walk_source_expanded(&mut w, text, FileId(0))
         .map_err(|e| macros::remap_lines(e, origins))?;
     w.flush_trailing(text.lines().count() as u32);
     macros::place_nodes(&mut w.nodes, origins);
@@ -221,7 +221,7 @@ pub(crate) fn parse_program_multi(
     let mut w = Walker::new();
     let root = map.contents(FileId(0)).unwrap_or_default().to_owned();
     let mut stack = vec![FileId(0)];
-    ca65_flat::walk_file(
+    flat_walk::walk_file(
         &mut w,
         &root,
         FileId(0),
@@ -236,8 +236,8 @@ pub(crate) fn parse_program_multi(
 /// rgbasm's probe-pinned multi-file semantics: root-anchored resolution (the
 /// cwd stance mapped to our input directory) and the no-negatives incbin
 /// window.
-pub(crate) const SEMANTICS: ca65_flat::WalkSemantics = ca65_flat::WalkSemantics {
-    resolution: ca65_flat::Resolution::Root,
+pub(crate) const SEMANTICS: flat_walk::WalkSemantics = flat_walk::WalkSemantics {
+    resolution: flat_walk::Resolution::Root,
     window: slice_incbin,
     include_default_ext: None,
 };
@@ -357,12 +357,12 @@ impl Walker {
         let (word, args) = split_first_word(rest);
         match word.to_ascii_uppercase().as_str() {
             "INCLUDE" => Ok(Some(WalkDirective::Include {
-                request: ca65_flat::include_request(args, line, "INCLUDE")?,
+                request: flat_walk::include_request(args, line, "INCLUDE")?,
             })),
             "INCBIN" => {
                 let fold =
                     |piece: &str| fold_const(&value(piece.trim(), line)?, &self.consts, line);
-                let (request, offset, size) = ca65_flat::incbin_args(args, line, "INCBIN", &fold)?;
+                let (request, offset, size) = flat_walk::incbin_args(args, line, "INCBIN", &fold)?;
                 Ok(Some(WalkDirective::Incbin {
                     request,
                     offset,
@@ -390,8 +390,8 @@ impl FlatWalk for Walker {
         expand_rgbasm(source, macros::Expand::Yes)
     }
 
-    fn block_keyword(&self, code: &str) -> Option<ca65_flat::BlockKw> {
-        use ca65_flat::BlockKw;
+    fn block_keyword(&self, code: &str) -> Option<flat_walk::BlockKw> {
+        use flat_walk::BlockKw;
         let word = code.split_whitespace().next()?.to_ascii_uppercase();
         Some(match word.as_str() {
             "IF" => BlockKw::CondOpen,
@@ -602,7 +602,7 @@ impl FlatWalk for Walker {
                 label: label.map(|name| self.symbol(name)),
                 source: rest.trim().to_string(),
                 span: Span::in_file(file, line as u32, 1),
-                operand_span: ca65_flat::directive_operand_span(raw, rest, line, file),
+                operand_span: flat_walk::directive_operand_span(raw, rest, line, file),
                 trivia: Trivia {
                     leading: std::mem::take(&mut self.pending_leading),
                     trailing,

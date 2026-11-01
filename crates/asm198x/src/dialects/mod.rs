@@ -7,12 +7,12 @@
 pub(crate) mod acme;
 pub(crate) mod asl;
 pub(crate) mod ca65;
-pub(crate) mod ca65_flat;
 pub(crate) mod ca65_layout;
 pub(crate) mod ca65_walk;
 pub(crate) mod cdp1802;
 pub(crate) mod cp1610;
 pub(crate) mod f8;
+pub(crate) mod flat_walk;
 pub(crate) mod i8048;
 pub(crate) mod i8080;
 pub(crate) mod lwasm;

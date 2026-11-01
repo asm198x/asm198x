@@ -1,25 +1,19 @@
-//! Shared `.include`/`.incbin` machinery for the **ca65-syntax flat family**
-//! (`ca65_816`; the HuC6280 now reads through the ca65 walk) — language-surface U4, KTD1/KTD5/KTD8 — and
-//! the recursion driver the other flat walk-based dialects (rgbasm, lwasm)
-//! reuse. The driver ([`walk_file`]) owns what is genuinely shared: the
-//! interleaved per-line walk, lazy include/incbin resolution (KTD1), cycle
-//! detection, the depth backstop, label-binds-at-the-point, and per-file error
-//! stamping. What the probes proved **divergent** — the resolution anchor and
-//! the incbin window arithmetic — is per-dialect, supplied through
-//! [`WalkSemantics`] so a dialect states its probe-pinned semantics rather
-//! than inheriting ca65's.
+//! The include walk shared by the flat dialects: asl, lwasm, rgbasm and vasm
+//! drive whole files through it, and the ca65 walk borrows its file loading
+//! and `.incbin` window. It began as the ca65 flat readers' machinery, which
+//! is why ca65's probe-pinned semantics are the ones written out below; those
+//! readers are gone, and ca65 now reads through `ca65_walk`.
 //!
-//! Both flat ca65 dialects parse line-by-line with an accumulated environment
-//! (constants; the 65816 adds the `.a8`/`.a16`/`.i8`/`.i16` width state), so
-//! their multi-file walk is the z80 family's interleaved model: each live line
-//! parses with the environment so far, an include's lines parse with the *same*
-//! environment, and everything the include defined — constants driving zp/abs
-//! selection, a width flip sizing later immediates — flows back out to the
-//! includer's subsequent lines (probe-pinned against `ca65 --cpu 65816` and
-//! `--cpu huc6280`, V2.18). The dialects differ only in their per-line parse,
-//! supplied through [`FlatWalk`]; the directive recognition, argument grammar,
-//! window semantics, and the recursion driver live here so the two skins
-//! cannot drift apart.
+//! The driver ([`walk_file`]) owns what is genuinely shared: the interleaved
+//! per-line walk, lazy include/incbin resolution (KTD1), cycle detection, the
+//! depth backstop, label-binds-at-the-point, and per-file error stamping.
+//! What the probes proved **divergent** — the resolution anchor and the
+//! incbin window arithmetic — is per-dialect, supplied through
+//! [`WalkSemantics`] so a dialect states its probe-pinned semantics rather
+//! than inheriting ca65's. A dialect's per-line parse comes through
+//! [`FlatWalk`], and an include's lines parse with the same environment as
+//! the includer's, so what the include defines flows back out to the lines
+//! after it.
 //!
 //! **Resolution order (probe-pinned, ca65 V2.18):** a relative request is
 //! tried against the requesting file's own directory first, then each
@@ -125,7 +119,7 @@ pub(crate) const CA65_SEMANTICS: WalkSemantics = WalkSemantics {
     include_default_ext: None,
 };
 
-/// The per-line seam a flat ca65 dialect supplies to the shared walk: parse
+/// The per-line seam a flat dialect supplies to the shared walk: parse
 /// one line with the live environment, pushing ordinary nodes internally and
 /// handing a `.include`/`.incbin` back for the driver.
 /// What a line does to a block, as far as the shared cursor is concerned.
