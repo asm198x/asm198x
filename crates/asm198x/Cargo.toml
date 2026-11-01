@@ -42,7 +42,7 @@ isa = { package = "isa198x", version = "0.1.7" }
 # `dialects/pasmo_walk.rs` drives it. It asks for `asm198x-ir` from crates.io,
 # which the workspace patches to `crates/asm198x-ir`, so there is one copy.
 lang198x-z80-asm = { version = "0.2.5", features = ["ir"] }
-lang198x-ca65 = { version = "0.0.21", features = ["ir"] }
+lang198x-ca65 = { version = "0.0.22", features = ["ir"] }
 isa-disasm = { package = "isa198x-disasm", version = "0.1.7" }
 # debug198x graduated to its own repo on 2026-08-27 and comes from crates.io
 # now, not from this workspace. It is the contract between this assembler and
