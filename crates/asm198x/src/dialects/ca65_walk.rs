@@ -2712,8 +2712,9 @@ fn statement_at(
     op: Option<Operation>,
 ) -> Statement {
     let mut made = statement(placed, label, op);
-    // A line for a CPU with more than the 6502's instructions names them.
-    if sets.1.is_some() {
+    // A line for a CPU other than the plain 6502 names its instructions:
+    // most add an extension to the 6502's, and SWEET 16 replaces them.
+    if sets.1.is_some() || !std::ptr::eq(sets.0, &isa::mos6502::SET) {
         made.instruction_set = Some(sets.0);
         made.extension_set = sets.1;
     }

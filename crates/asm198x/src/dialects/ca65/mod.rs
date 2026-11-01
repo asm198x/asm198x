@@ -2155,16 +2155,17 @@ two:\n\
                 .expect_err(src)
                 .to_string()
         };
-        // ca65's other processors: each a different opcode set, so taking one
-        // silently would assemble the wrong instructions. They come with the
-        // other CPUs, stage 4 of Lang198x's plan.
-        for src in [".setcpu \"m740\"", ".pm740", ".psweet16"] {
-            assert!(
-                err(src).contains("is not lowered yet"),
-                "`{src}` should read as our gap: {}",
-                err(src)
-            );
-        }
+        // Every other processor ca65 knows is read too. The M740 shares the
+        // 6502's `nop`; SWEET 16 is a different machine, where `nop` is not
+        // an instruction but `rtn` is.
+        let image = rom(".segment \"CODE\"\n.pm740\n nop\n.psweet16\n rtn\n");
+        assert_eq!(&image[16..18], &[0xEA, 0x00]);
+        let e = err(".psweet16");
+        assert!(e.contains("unknown instruction `nop`"), "got: {e}");
+        // `.setcpu "none"` is a CPU with no instructions at all, which we
+        // do not read.
+        let e = err(".setcpu \"none\"");
+        assert!(e.contains("is not lowered yet"), "got: {e}");
         // A name ca65 does not know is its `CPU not supported`, not our gap.
         let e = err(".setcpu \"zz\"");
         assert!(e.contains("CPU not supported"), "got: {e}");
