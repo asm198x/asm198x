@@ -2158,7 +2158,7 @@ two:\n\
         // ca65's other processors: each a different opcode set, so taking one
         // silently would assemble the wrong instructions. They come with the
         // other CPUs, stage 4 of Lang198x's plan.
-        for src in [".setcpu \"6502DTV\"", ".pdtv", ".psweet16"] {
+        for src in [".setcpu \"m740\"", ".pm740", ".psweet16"] {
             assert!(
                 err(src).contains("is not lowered yet"),
                 "`{src}` should read as our gap: {}",

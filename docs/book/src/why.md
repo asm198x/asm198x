@@ -40,10 +40,10 @@ Because you can check, rather than take it on faith.
 <!-- generated: xtask evidence --markdown -->
 **Every CPU is arbitrated against a real assembler.** The differential suites
 assemble the same source with the reference tool and compare bytes. 8 tools
-across 23 instruction sets: ACME, ca65, lwasm, pasmo, RGBDS, sjasmplus, vasm and
+across 30 instruction sets: ACME, ca65, lwasm, pasmo, RGBDS, sjasmplus, vasm and
 Macro Assembler AS, which covers the 14 less-travelled ones.
 
-**What they produced is recorded, not remembered.** 9,978 verdicts, each naming
+**What they produced is recorded, not remembered.** 11,505 verdicts, each naming
 the reference version that answered it, committed to this repository. CI replays
 every one of them on machines with none of those tools installed, so a change
 that alters our output fails against what the real assembler did — not against a
