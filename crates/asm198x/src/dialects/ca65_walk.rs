@@ -72,10 +72,11 @@ use crate::engine::{
 use crate::source::{SourceLoader, SourceMap};
 use crate::span::{ExpansionFrame, FileId, Span};
 
-const PROFILE: Profile = Profile::CA65_2_19_6502;
-
-/// The ca65 dialect through Lang198x's front end, for the 6502.
+/// The ca65 dialect through Lang198x's front end, starting on one CPU,
+/// as `ca65 --cpu` does.
 pub(crate) struct Ca65Walk {
+    /// The profile a program starts on.
+    profile: Profile,
     /// Where the linker puts each segment, or `None` for a flat link, which
     /// has only `CODE`, at 0.
     layout: Option<Layout>,
@@ -111,7 +112,13 @@ impl Ca65Walk {
     /// A flat link: `CODE` at 0, written as it is, as Asm198x's recorded
     /// verdicts were linked.
     pub(crate) fn flat() -> Self {
+        Self::flat_on(lang198x_ca65::Cpu::Mos6502)
+    }
+
+    /// A flat link of a program that starts on `cpu`.
+    pub(crate) fn flat_on(cpu: lang198x_ca65::Cpu) -> Self {
         Self {
+            profile: Profile::CA65_2_19_6502.with_cpu(cpu),
             layout: None,
             linked: RefCell::new(None),
             lazy: RefCell::new(HashSet::new()),
@@ -127,6 +134,7 @@ impl Ca65Walk {
     /// The link a project's own ld65 configuration describes.
     pub(crate) fn with_layout(layout: Layout) -> Self {
         Self {
+            profile: Profile::CA65_2_19_6502,
             layout: Some(layout),
             linked: RefCell::new(None),
             lazy: RefCell::new(HashSet::new()),
@@ -181,7 +189,11 @@ impl Dialect for Ca65Walk {
     }
 
     fn parse_warned(&self, source: &str) -> Result<(Vec<Statement>, Vec<Warning>), AsmError> {
-        let ran = Walk::default().run(source, self.layout.as_ref())?;
+        let walk = Walk {
+            profile: Starting(self.profile),
+            ..Walk::default()
+        };
+        let ran = walk.run(source, self.layout.as_ref())?;
         Ok(self.keep(ran))
     }
 
@@ -196,6 +208,7 @@ impl Dialect for Ca65Walk {
         let root = map.contents(FileId(0)).unwrap_or_default().to_owned();
         let walk = Walk {
             files: Some(Files { map, loader }),
+            profile: Starting(self.profile),
             ..Walk::default()
         };
         let ran = walk.run(&root, self.layout.as_ref())?;
@@ -371,6 +384,8 @@ struct Files<'f> {
 /// What the walk knows as it reads the program.
 #[derive(Default)]
 struct Walk<'f> {
+    /// The profile the program starts on.
+    profile: Starting,
     /// The files the program may read, or `None` when it is one file.
     files: Option<Files<'f>>,
     /// Whether the program is linked from a layout rather than flat.
@@ -508,6 +523,17 @@ fn outwards(path: &str) -> impl Iterator<Item = &str> {
     })
 }
 
+/// The profile a program starts on: the 6502's unless a dialect chooses
+/// another CPU.
+#[derive(Clone, Copy)]
+struct Starting(Profile);
+
+impl Default for Starting {
+    fn default() -> Self {
+        Self(Profile::CA65_2_19_6502)
+    }
+}
+
 /// How a name as written is found.
 enum Lookup {
     /// A full name: a scope was written, or it is a cheap local or an
@@ -521,7 +547,7 @@ impl Walk<'_> {
     /// The program's statements, what the link `layout` describes made of
     /// them, if there is a layout, and what ca65 warned of.
     fn run(mut self, source: &str, layout: Option<&Layout>) -> Result<Ran, AsmError> {
-        let mut expander = Expander::new(source, PROFILE)
+        let mut expander = Expander::new(source, self.profile.0)
             .map_err(|_| AsmError::new(0, "the program is too long to parse"))?;
         self.read = vec![(FileId(0), None)];
         let result = self.read_lines(&mut expander, layout);
@@ -779,7 +805,7 @@ impl Walk<'_> {
         if let Some(full) = &early {
             self.names.insert(full.clone(), self.pc());
         }
-        let lowered = lower::line(line, PROFILE, &*self);
+        let lowered = lower::line(line, self.profile.0, &*self);
         if let Some(full) = &early {
             self.names.remove(full);
         }
@@ -1317,7 +1343,7 @@ impl Walk<'_> {
         &'static isa::InstructionSet,
         Option<&'static isa::InstructionSet>,
     ) {
-        lower::sets(self.cpu.unwrap_or(lang198x_ca65::Cpu::Mos6502))
+        lower::sets(self.cpu.unwrap_or(self.profile.0.cpu()))
     }
 
     /// Where an error at `span` is reported. ca65 reports one in a line a

@@ -335,7 +335,7 @@ pub fn surfaces() -> Vec<DialectSurface> {
         },
         DialectSurface {
             dialect: "huc6280",
-            directives: dialects::ca65_huc6280::DIRECTIVES.to_vec(),
+            directives: dialects::ca65::DIRECTIVES.to_vec(),
         },
         DialectSurface {
             dialect: "acme",
