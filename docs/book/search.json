@@ -422,6 +422,12 @@
       "slug": "ledger"
     },
     {
+      "context": "Tracked divergences — differences we know about and check:",
+      "heading": "M740",
+      "page": "Conformance ledger",
+      "slug": "ledger"
+    },
+    {
       "context": "Form coverage: 96/96 (100.0%)",
       "heading": "PDP-11",
       "page": "Conformance ledger",
@@ -436,6 +442,12 @@
     {
       "context": "No tracked divergences.",
       "heading": "SM83",
+      "page": "Conformance ledger",
+      "slug": "ledger"
+    },
+    {
+      "context": "No tracked divergences.",
+      "heading": "SWEET16",
       "page": "Conformance ledger",
       "slug": "ledger"
     },

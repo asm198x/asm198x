@@ -5,9 +5,9 @@ observation of a real reference assembler, not an expectation written
 by hand. Regenerate with `cargo xtask ledger`.
 
 - **Release:** `v0.0.73`
-- **Corpus hash:** `51ed91d14ada09ac1558b3a986421399a3a28838d47cd77643b33fdff2ff7550`
+- **Corpus hash:** `bfb4b51cf27a37a3e34fcfc015acccabd53f54e675a7a0d2100fd7156b6d5e44`
 - **Pinned curriculum:** `f11698d0b51b3a6c1209cec3d649229aa35af97f` (2026-08-27)
-- **CPUs:** 31, holding 11841 verdict(s)
+- **CPUs:** 33, holding 12325 verdict(s)
 
 ## 1802
 
@@ -190,6 +190,18 @@ Form coverage: **253/253** (100.0%)
 
 No tracked divergences.
 
+## M740
+
+| arbiter | version | verdicts |
+|---|---|---|
+| `ca65` | ca65 V2.19 - Git 8d86ca7 | probe 231 |
+
+Tracked divergences — differences we know about and check:
+
+- `m740-bit-branch-a` — 16 case(s)
+- `m740-inc-dec-a` — 2 case(s)
+- `m740-ldm-order` — 1 case(s)
+
 ## PDP-11
 
 Form coverage: **96/96** (100.0%)
@@ -215,6 +227,14 @@ No tracked divergences.
 | arbiter | version | verdicts |
 |---|---|---|
 | `rgbasm` | rgbasm v1.0.4 | probe 59 |
+
+No tracked divergences.
+
+## SWEET16
+
+| arbiter | version | verdicts |
+|---|---|---|
+| `ca65` | ca65 V2.19 - Git 8d86ca7 | probe 253 |
 
 No tracked divergences.
 

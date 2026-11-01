@@ -13,12 +13,15 @@ instead. If you are deciding whether to move a project that already builds, what
 you need is not reassurance — it is to know what will change.
 
 <!-- generated: xtask divergences --markdown -->
-3 tracked differences across 9 recorded cases.
+6 tracked differences across 28 recorded cases.
 
 | Difference | CPU | Dialect | Reference tool | Cases |
 |---|---|---|---|---|
 | [`issue-110`](https://github.com/asm198x/asm198x/issues/110) | 68000 | vasm | vasmm68k_mot | 4 |
 | [`issue-984`](https://github.com/asm198x/asm198x/issues/984) | Z80N | pasmonext | pasmo | 1 |
+| `m740-bit-branch-a` | M740 | ca65 | ca65 | 16 |
+| `m740-inc-dec-a` | M740 | ca65 | ca65 | 2 |
+| `m740-ldm-order` | M740 | ca65 | ca65 | 1 |
 | `sprintf-c-width` | 65816 | ca65-816 | ca65 | 4 |
 <!-- /generated -->
 
