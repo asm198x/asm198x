@@ -677,7 +677,7 @@
       "slug": "reference/cli"
     },
     {
-      "context": "--cpu picks a CPU where a dialect serves more than one. Today that is Z80:",
+      "context": "--cpu picks a CPU where a dialect serves more than one. For the Z80 dialects",
       "heading": "Targets",
       "page": "The command line",
       "slug": "reference/cli"

@@ -125,6 +125,17 @@ impl Ca65Walk {
         }
     }
 
+    /// The same link, for a program that starts on `cpu`.
+    pub(crate) fn starting_on(mut self, cpu: lang198x_ca65::Cpu) -> Self {
+        self.profile = self.profile.with_cpu(cpu);
+        self
+    }
+
+    /// The CPU a program starts on.
+    pub(crate) fn cpu(&self) -> lang198x_ca65::Cpu {
+        self.profile.cpu()
+    }
+
     /// The NES curriculum's link: the iNES header, 32K of PRG and 8K of CHR,
     /// with the RAM segments in their areas.
     pub(crate) fn nes() -> Self {
