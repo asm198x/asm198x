@@ -151,9 +151,9 @@ dependencies = [
 
 [[package]]
 name = "isa198x"
-version = "0.1.8"
+version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "83c86cdb838feb6e460d64bb1a6015de4c33cf3ff7130df7ee9c7e1397bd411a"
+checksum = "1dbae6b7942f3122a0e9a151bbc33e6e91d50c8e33a4a0e541af0d94927eda1e"
 
 [[package]]
 name = "isa198x-disasm"
@@ -183,9 +183,9 @@ dependencies = [
 
 [[package]]
 name = "lang198x-ca65"
-version = "0.0.20"
+version = "0.0.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "da80e5cca309ed9c8dc03469a07d3b44937373b97b2fb07dbc71d98b4979c492"
+checksum = "38fab370b084c8ec14e2c8f4f847f5698373a91e1c55eb781773881bd1ef17cd"
 dependencies = [
  "asm198x-ir",
  "isa198x",
