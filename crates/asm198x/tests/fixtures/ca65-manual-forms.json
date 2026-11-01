@@ -1,0 +1,1480 @@
+{
+ "source": "M740: every code of the opcode map in Appendix 3 of the Renesas 740 Family Software Manual, Rev.2.00 (2006), written in ca65's syntax (reference/by-topic/cpu-m740/ in the umbrella library). SWEET16: every instruction of Wozniak's opcode summary with every register (reference/by-topic/cpu-sweet16/). Each line is read under `.setcpu` and `.org 0`. A line marked with a divergence is one where ca65 V2.19 contradicts the manual and Asm198x follows the manual.",
+ "cpus": {
+  "M740": [
+   {
+    "line": "brk"
+   },
+   {
+    "line": "ora ($12,x)"
+   },
+   {
+    "line": "jsr ($12)"
+   },
+   {
+    "line": "bbs0 a, 2",
+    "divergence": "m740-bit-branch-a"
+   },
+   {
+    "line": "ora $12"
+   },
+   {
+    "line": "asl $12"
+   },
+   {
+    "line": "bbs0 $12, 3"
+   },
+   {
+    "line": "php"
+   },
+   {
+    "line": "ora #$12"
+   },
+   {
+    "line": "asl a"
+   },
+   {
+    "line": "seb0 a"
+   },
+   {
+    "line": "ora $3456"
+   },
+   {
+    "line": "asl $3456"
+   },
+   {
+    "line": "seb0 $12"
+   },
+   {
+    "line": "bpl 2"
+   },
+   {
+    "line": "ora ($12),y"
+   },
+   {
+    "line": "clt"
+   },
+   {
+    "line": "bbc0 a, 2",
+    "divergence": "m740-bit-branch-a"
+   },
+   {
+    "line": "ora $12,x"
+   },
+   {
+    "line": "asl $12,x"
+   },
+   {
+    "line": "bbc0 $12, 3"
+   },
+   {
+    "line": "clc"
+   },
+   {
+    "line": "ora $3456,y"
+   },
+   {
+    "line": "dec a",
+    "divergence": "m740-inc-dec-a"
+   },
+   {
+    "line": "clb0 a"
+   },
+   {
+    "line": "ora $3456,x"
+   },
+   {
+    "line": "asl $3456,x"
+   },
+   {
+    "line": "clb0 $12"
+   },
+   {
+    "line": "jsr $3456"
+   },
+   {
+    "line": "and ($12,x)"
+   },
+   {
+    "line": "jsr $FF12"
+   },
+   {
+    "line": "bbs1 a, 2",
+    "divergence": "m740-bit-branch-a"
+   },
+   {
+    "line": "bit $12"
+   },
+   {
+    "line": "and $12"
+   },
+   {
+    "line": "rol $12"
+   },
+   {
+    "line": "bbs1 $12, 3"
+   },
+   {
+    "line": "plp"
+   },
+   {
+    "line": "and #$12"
+   },
+   {
+    "line": "rol a"
+   },
+   {
+    "line": "seb1 a"
+   },
+   {
+    "line": "bit $3456"
+   },
+   {
+    "line": "and $3456"
+   },
+   {
+    "line": "rol $3456"
+   },
+   {
+    "line": "seb1 $12"
+   },
+   {
+    "line": "bmi 2"
+   },
+   {
+    "line": "and ($12),y"
+   },
+   {
+    "line": "set"
+   },
+   {
+    "line": "bbc1 a, 2",
+    "divergence": "m740-bit-branch-a"
+   },
+   {
+    "line": "and $12,x"
+   },
+   {
+    "line": "rol $12,x"
+   },
+   {
+    "line": "bbc1 $12, 3"
+   },
+   {
+    "line": "sec"
+   },
+   {
+    "line": "and $3456,y"
+   },
+   {
+    "line": "inc a",
+    "divergence": "m740-inc-dec-a"
+   },
+   {
+    "line": "clb1 a"
+   },
+   {
+    "line": "ldm $12, #$34",
+    "divergence": "m740-ldm-order"
+   },
+   {
+    "line": "and $3456,x"
+   },
+   {
+    "line": "rol $3456,x"
+   },
+   {
+    "line": "clb1 $12"
+   },
+   {
+    "line": "rti"
+   },
+   {
+    "line": "eor ($12,x)"
+   },
+   {
+    "line": "stp"
+   },
+   {
+    "line": "bbs2 a, 2",
+    "divergence": "m740-bit-branch-a"
+   },
+   {
+    "line": "com $12"
+   },
+   {
+    "line": "eor $12"
+   },
+   {
+    "line": "lsr $12"
+   },
+   {
+    "line": "bbs2 $12, 3"
+   },
+   {
+    "line": "pha"
+   },
+   {
+    "line": "eor #$12"
+   },
+   {
+    "line": "lsr a"
+   },
+   {
+    "line": "seb2 a"
+   },
+   {
+    "line": "jmp $3456"
+   },
+   {
+    "line": "eor $3456"
+   },
+   {
+    "line": "lsr $3456"
+   },
+   {
+    "line": "seb2 $12"
+   },
+   {
+    "line": "bvc 2"
+   },
+   {
+    "line": "eor ($12),y"
+   },
+   {
+    "line": "bbc2 a, 2",
+    "divergence": "m740-bit-branch-a"
+   },
+   {
+    "line": "eor $12,x"
+   },
+   {
+    "line": "lsr $12,x"
+   },
+   {
+    "line": "bbc2 $12, 3"
+   },
+   {
+    "line": "cli"
+   },
+   {
+    "line": "eor $3456,y"
+   },
+   {
+    "line": "clb2 a"
+   },
+   {
+    "line": "eor $3456,x"
+   },
+   {
+    "line": "lsr $3456,x"
+   },
+   {
+    "line": "clb2 $12"
+   },
+   {
+    "line": "rts"
+   },
+   {
+    "line": "adc ($12,x)"
+   },
+   {
+    "line": "mul $12,x"
+   },
+   {
+    "line": "bbs3 a, 2",
+    "divergence": "m740-bit-branch-a"
+   },
+   {
+    "line": "tst $12"
+   },
+   {
+    "line": "adc $12"
+   },
+   {
+    "line": "ror $12"
+   },
+   {
+    "line": "bbs3 $12, 3"
+   },
+   {
+    "line": "pla"
+   },
+   {
+    "line": "adc #$12"
+   },
+   {
+    "line": "ror a"
+   },
+   {
+    "line": "seb3 a"
+   },
+   {
+    "line": "jmp ($3456)"
+   },
+   {
+    "line": "adc $3456"
+   },
+   {
+    "line": "ror $3456"
+   },
+   {
+    "line": "seb3 $12"
+   },
+   {
+    "line": "bvs 2"
+   },
+   {
+    "line": "adc ($12),y"
+   },
+   {
+    "line": "bbc3 a, 2",
+    "divergence": "m740-bit-branch-a"
+   },
+   {
+    "line": "adc $12,x"
+   },
+   {
+    "line": "ror $12,x"
+   },
+   {
+    "line": "bbc3 $12, 3"
+   },
+   {
+    "line": "sei"
+   },
+   {
+    "line": "adc $3456,y"
+   },
+   {
+    "line": "clb3 a"
+   },
+   {
+    "line": "adc $3456,x"
+   },
+   {
+    "line": "ror $3456,x"
+   },
+   {
+    "line": "clb3 $12"
+   },
+   {
+    "line": "bra 2"
+   },
+   {
+    "line": "sta ($12,x)"
+   },
+   {
+    "line": "rrf $12"
+   },
+   {
+    "line": "bbs4 a, 2",
+    "divergence": "m740-bit-branch-a"
+   },
+   {
+    "line": "sty $12"
+   },
+   {
+    "line": "sta $12"
+   },
+   {
+    "line": "stx $12"
+   },
+   {
+    "line": "bbs4 $12, 3"
+   },
+   {
+    "line": "dey"
+   },
+   {
+    "line": "txa"
+   },
+   {
+    "line": "seb4 a"
+   },
+   {
+    "line": "sty $3456"
+   },
+   {
+    "line": "sta $3456"
+   },
+   {
+    "line": "stx $3456"
+   },
+   {
+    "line": "seb4 $12"
+   },
+   {
+    "line": "bcc 2"
+   },
+   {
+    "line": "sta ($12),y"
+   },
+   {
+    "line": "bbc4 a, 2",
+    "divergence": "m740-bit-branch-a"
+   },
+   {
+    "line": "sty $12,x"
+   },
+   {
+    "line": "sta $12,x"
+   },
+   {
+    "line": "stx $12,y"
+   },
+   {
+    "line": "bbc4 $12, 3"
+   },
+   {
+    "line": "tya"
+   },
+   {
+    "line": "sta $3456,y"
+   },
+   {
+    "line": "txs"
+   },
+   {
+    "line": "clb4 a"
+   },
+   {
+    "line": "sta $3456,x"
+   },
+   {
+    "line": "clb4 $12"
+   },
+   {
+    "line": "ldy #$12"
+   },
+   {
+    "line": "lda ($12,x)"
+   },
+   {
+    "line": "ldx #$12"
+   },
+   {
+    "line": "bbs5 a, 2",
+    "divergence": "m740-bit-branch-a"
+   },
+   {
+    "line": "ldy $12"
+   },
+   {
+    "line": "lda $12"
+   },
+   {
+    "line": "ldx $12"
+   },
+   {
+    "line": "bbs5 $12, 3"
+   },
+   {
+    "line": "tay"
+   },
+   {
+    "line": "lda #$12"
+   },
+   {
+    "line": "tax"
+   },
+   {
+    "line": "seb5 a"
+   },
+   {
+    "line": "ldy $3456"
+   },
+   {
+    "line": "lda $3456"
+   },
+   {
+    "line": "ldx $3456"
+   },
+   {
+    "line": "seb5 $12"
+   },
+   {
+    "line": "bcs 2"
+   },
+   {
+    "line": "lda ($12),y"
+   },
+   {
+    "line": "jmp ($12)"
+   },
+   {
+    "line": "bbc5 a, 2",
+    "divergence": "m740-bit-branch-a"
+   },
+   {
+    "line": "ldy $12,x"
+   },
+   {
+    "line": "lda $12,x"
+   },
+   {
+    "line": "ldx $12,y"
+   },
+   {
+    "line": "bbc5 $12, 3"
+   },
+   {
+    "line": "clv"
+   },
+   {
+    "line": "lda $3456,y"
+   },
+   {
+    "line": "tsx"
+   },
+   {
+    "line": "clb5 a"
+   },
+   {
+    "line": "ldy $3456,x"
+   },
+   {
+    "line": "lda $3456,x"
+   },
+   {
+    "line": "ldx $3456,y"
+   },
+   {
+    "line": "clb5 $12"
+   },
+   {
+    "line": "cpy #$12"
+   },
+   {
+    "line": "cmp ($12,x)"
+   },
+   {
+    "line": "wit"
+   },
+   {
+    "line": "bbs6 a, 2",
+    "divergence": "m740-bit-branch-a"
+   },
+   {
+    "line": "cpy $12"
+   },
+   {
+    "line": "cmp $12"
+   },
+   {
+    "line": "dec $12"
+   },
+   {
+    "line": "bbs6 $12, 3"
+   },
+   {
+    "line": "iny"
+   },
+   {
+    "line": "cmp #$12"
+   },
+   {
+    "line": "dex"
+   },
+   {
+    "line": "seb6 a"
+   },
+   {
+    "line": "cpy $3456"
+   },
+   {
+    "line": "cmp $3456"
+   },
+   {
+    "line": "dec $3456"
+   },
+   {
+    "line": "seb6 $12"
+   },
+   {
+    "line": "bne 2"
+   },
+   {
+    "line": "cmp ($12),y"
+   },
+   {
+    "line": "bbc6 a, 2",
+    "divergence": "m740-bit-branch-a"
+   },
+   {
+    "line": "cmp $12,x"
+   },
+   {
+    "line": "dec $12,x"
+   },
+   {
+    "line": "bbc6 $12, 3"
+   },
+   {
+    "line": "cld"
+   },
+   {
+    "line": "cmp $3456,y"
+   },
+   {
+    "line": "clb6 a"
+   },
+   {
+    "line": "cmp $3456,x"
+   },
+   {
+    "line": "dec $3456,x"
+   },
+   {
+    "line": "clb6 $12"
+   },
+   {
+    "line": "cpx #$12"
+   },
+   {
+    "line": "sbc ($12,x)"
+   },
+   {
+    "line": "div $12,x"
+   },
+   {
+    "line": "bbs7 a, 2",
+    "divergence": "m740-bit-branch-a"
+   },
+   {
+    "line": "cpx $12"
+   },
+   {
+    "line": "sbc $12"
+   },
+   {
+    "line": "inc $12"
+   },
+   {
+    "line": "bbs7 $12, 3"
+   },
+   {
+    "line": "inx"
+   },
+   {
+    "line": "sbc #$12"
+   },
+   {
+    "line": "nop"
+   },
+   {
+    "line": "seb7 a"
+   },
+   {
+    "line": "cpx $3456"
+   },
+   {
+    "line": "sbc $3456"
+   },
+   {
+    "line": "inc $3456"
+   },
+   {
+    "line": "seb7 $12"
+   },
+   {
+    "line": "beq 2"
+   },
+   {
+    "line": "sbc ($12),y"
+   },
+   {
+    "line": "bbc7 a, 2",
+    "divergence": "m740-bit-branch-a"
+   },
+   {
+    "line": "sbc $12,x"
+   },
+   {
+    "line": "inc $12,x"
+   },
+   {
+    "line": "bbc7 $12, 3"
+   },
+   {
+    "line": "sed"
+   },
+   {
+    "line": "sbc $3456,y"
+   },
+   {
+    "line": "clb7 a"
+   },
+   {
+    "line": "sbc $3456,x"
+   },
+   {
+    "line": "inc $3456,x"
+   },
+   {
+    "line": "clb7 $12"
+   }
+  ],
+  "SWEET16": [
+   {
+    "line": "set r0, $1234"
+   },
+   {
+    "line": "set r1, $1234"
+   },
+   {
+    "line": "set r2, $1234"
+   },
+   {
+    "line": "set r3, $1234"
+   },
+   {
+    "line": "set r4, $1234"
+   },
+   {
+    "line": "set r5, $1234"
+   },
+   {
+    "line": "set r6, $1234"
+   },
+   {
+    "line": "set r7, $1234"
+   },
+   {
+    "line": "set r8, $1234"
+   },
+   {
+    "line": "set r9, $1234"
+   },
+   {
+    "line": "set r10, $1234"
+   },
+   {
+    "line": "set r11, $1234"
+   },
+   {
+    "line": "set r12, $1234"
+   },
+   {
+    "line": "set r13, $1234"
+   },
+   {
+    "line": "set r14, $1234"
+   },
+   {
+    "line": "set r15, $1234"
+   },
+   {
+    "line": "ld r0"
+   },
+   {
+    "line": "ld r1"
+   },
+   {
+    "line": "ld r2"
+   },
+   {
+    "line": "ld r3"
+   },
+   {
+    "line": "ld r4"
+   },
+   {
+    "line": "ld r5"
+   },
+   {
+    "line": "ld r6"
+   },
+   {
+    "line": "ld r7"
+   },
+   {
+    "line": "ld r8"
+   },
+   {
+    "line": "ld r9"
+   },
+   {
+    "line": "ld r10"
+   },
+   {
+    "line": "ld r11"
+   },
+   {
+    "line": "ld r12"
+   },
+   {
+    "line": "ld r13"
+   },
+   {
+    "line": "ld r14"
+   },
+   {
+    "line": "ld r15"
+   },
+   {
+    "line": "st r0"
+   },
+   {
+    "line": "st r1"
+   },
+   {
+    "line": "st r2"
+   },
+   {
+    "line": "st r3"
+   },
+   {
+    "line": "st r4"
+   },
+   {
+    "line": "st r5"
+   },
+   {
+    "line": "st r6"
+   },
+   {
+    "line": "st r7"
+   },
+   {
+    "line": "st r8"
+   },
+   {
+    "line": "st r9"
+   },
+   {
+    "line": "st r10"
+   },
+   {
+    "line": "st r11"
+   },
+   {
+    "line": "st r12"
+   },
+   {
+    "line": "st r13"
+   },
+   {
+    "line": "st r14"
+   },
+   {
+    "line": "st r15"
+   },
+   {
+    "line": "ld @r0"
+   },
+   {
+    "line": "ld @r1"
+   },
+   {
+    "line": "ld @r2"
+   },
+   {
+    "line": "ld @r3"
+   },
+   {
+    "line": "ld @r4"
+   },
+   {
+    "line": "ld @r5"
+   },
+   {
+    "line": "ld @r6"
+   },
+   {
+    "line": "ld @r7"
+   },
+   {
+    "line": "ld @r8"
+   },
+   {
+    "line": "ld @r9"
+   },
+   {
+    "line": "ld @r10"
+   },
+   {
+    "line": "ld @r11"
+   },
+   {
+    "line": "ld @r12"
+   },
+   {
+    "line": "ld @r13"
+   },
+   {
+    "line": "ld @r14"
+   },
+   {
+    "line": "ld @r15"
+   },
+   {
+    "line": "st @r0"
+   },
+   {
+    "line": "st @r1"
+   },
+   {
+    "line": "st @r2"
+   },
+   {
+    "line": "st @r3"
+   },
+   {
+    "line": "st @r4"
+   },
+   {
+    "line": "st @r5"
+   },
+   {
+    "line": "st @r6"
+   },
+   {
+    "line": "st @r7"
+   },
+   {
+    "line": "st @r8"
+   },
+   {
+    "line": "st @r9"
+   },
+   {
+    "line": "st @r10"
+   },
+   {
+    "line": "st @r11"
+   },
+   {
+    "line": "st @r12"
+   },
+   {
+    "line": "st @r13"
+   },
+   {
+    "line": "st @r14"
+   },
+   {
+    "line": "st @r15"
+   },
+   {
+    "line": "ldd @r0"
+   },
+   {
+    "line": "ldd @r1"
+   },
+   {
+    "line": "ldd @r2"
+   },
+   {
+    "line": "ldd @r3"
+   },
+   {
+    "line": "ldd @r4"
+   },
+   {
+    "line": "ldd @r5"
+   },
+   {
+    "line": "ldd @r6"
+   },
+   {
+    "line": "ldd @r7"
+   },
+   {
+    "line": "ldd @r8"
+   },
+   {
+    "line": "ldd @r9"
+   },
+   {
+    "line": "ldd @r10"
+   },
+   {
+    "line": "ldd @r11"
+   },
+   {
+    "line": "ldd @r12"
+   },
+   {
+    "line": "ldd @r13"
+   },
+   {
+    "line": "ldd @r14"
+   },
+   {
+    "line": "ldd @r15"
+   },
+   {
+    "line": "std @r0"
+   },
+   {
+    "line": "std @r1"
+   },
+   {
+    "line": "std @r2"
+   },
+   {
+    "line": "std @r3"
+   },
+   {
+    "line": "std @r4"
+   },
+   {
+    "line": "std @r5"
+   },
+   {
+    "line": "std @r6"
+   },
+   {
+    "line": "std @r7"
+   },
+   {
+    "line": "std @r8"
+   },
+   {
+    "line": "std @r9"
+   },
+   {
+    "line": "std @r10"
+   },
+   {
+    "line": "std @r11"
+   },
+   {
+    "line": "std @r12"
+   },
+   {
+    "line": "std @r13"
+   },
+   {
+    "line": "std @r14"
+   },
+   {
+    "line": "std @r15"
+   },
+   {
+    "line": "pop @r0"
+   },
+   {
+    "line": "pop @r1"
+   },
+   {
+    "line": "pop @r2"
+   },
+   {
+    "line": "pop @r3"
+   },
+   {
+    "line": "pop @r4"
+   },
+   {
+    "line": "pop @r5"
+   },
+   {
+    "line": "pop @r6"
+   },
+   {
+    "line": "pop @r7"
+   },
+   {
+    "line": "pop @r8"
+   },
+   {
+    "line": "pop @r9"
+   },
+   {
+    "line": "pop @r10"
+   },
+   {
+    "line": "pop @r11"
+   },
+   {
+    "line": "pop @r12"
+   },
+   {
+    "line": "pop @r13"
+   },
+   {
+    "line": "pop @r14"
+   },
+   {
+    "line": "pop @r15"
+   },
+   {
+    "line": "stp @r0"
+   },
+   {
+    "line": "stp @r1"
+   },
+   {
+    "line": "stp @r2"
+   },
+   {
+    "line": "stp @r3"
+   },
+   {
+    "line": "stp @r4"
+   },
+   {
+    "line": "stp @r5"
+   },
+   {
+    "line": "stp @r6"
+   },
+   {
+    "line": "stp @r7"
+   },
+   {
+    "line": "stp @r8"
+   },
+   {
+    "line": "stp @r9"
+   },
+   {
+    "line": "stp @r10"
+   },
+   {
+    "line": "stp @r11"
+   },
+   {
+    "line": "stp @r12"
+   },
+   {
+    "line": "stp @r13"
+   },
+   {
+    "line": "stp @r14"
+   },
+   {
+    "line": "stp @r15"
+   },
+   {
+    "line": "add r0"
+   },
+   {
+    "line": "add r1"
+   },
+   {
+    "line": "add r2"
+   },
+   {
+    "line": "add r3"
+   },
+   {
+    "line": "add r4"
+   },
+   {
+    "line": "add r5"
+   },
+   {
+    "line": "add r6"
+   },
+   {
+    "line": "add r7"
+   },
+   {
+    "line": "add r8"
+   },
+   {
+    "line": "add r9"
+   },
+   {
+    "line": "add r10"
+   },
+   {
+    "line": "add r11"
+   },
+   {
+    "line": "add r12"
+   },
+   {
+    "line": "add r13"
+   },
+   {
+    "line": "add r14"
+   },
+   {
+    "line": "add r15"
+   },
+   {
+    "line": "sub r0"
+   },
+   {
+    "line": "sub r1"
+   },
+   {
+    "line": "sub r2"
+   },
+   {
+    "line": "sub r3"
+   },
+   {
+    "line": "sub r4"
+   },
+   {
+    "line": "sub r5"
+   },
+   {
+    "line": "sub r6"
+   },
+   {
+    "line": "sub r7"
+   },
+   {
+    "line": "sub r8"
+   },
+   {
+    "line": "sub r9"
+   },
+   {
+    "line": "sub r10"
+   },
+   {
+    "line": "sub r11"
+   },
+   {
+    "line": "sub r12"
+   },
+   {
+    "line": "sub r13"
+   },
+   {
+    "line": "sub r14"
+   },
+   {
+    "line": "sub r15"
+   },
+   {
+    "line": "popd @r0"
+   },
+   {
+    "line": "popd @r1"
+   },
+   {
+    "line": "popd @r2"
+   },
+   {
+    "line": "popd @r3"
+   },
+   {
+    "line": "popd @r4"
+   },
+   {
+    "line": "popd @r5"
+   },
+   {
+    "line": "popd @r6"
+   },
+   {
+    "line": "popd @r7"
+   },
+   {
+    "line": "popd @r8"
+   },
+   {
+    "line": "popd @r9"
+   },
+   {
+    "line": "popd @r10"
+   },
+   {
+    "line": "popd @r11"
+   },
+   {
+    "line": "popd @r12"
+   },
+   {
+    "line": "popd @r13"
+   },
+   {
+    "line": "popd @r14"
+   },
+   {
+    "line": "popd @r15"
+   },
+   {
+    "line": "cpr r0"
+   },
+   {
+    "line": "cpr r1"
+   },
+   {
+    "line": "cpr r2"
+   },
+   {
+    "line": "cpr r3"
+   },
+   {
+    "line": "cpr r4"
+   },
+   {
+    "line": "cpr r5"
+   },
+   {
+    "line": "cpr r6"
+   },
+   {
+    "line": "cpr r7"
+   },
+   {
+    "line": "cpr r8"
+   },
+   {
+    "line": "cpr r9"
+   },
+   {
+    "line": "cpr r10"
+   },
+   {
+    "line": "cpr r11"
+   },
+   {
+    "line": "cpr r12"
+   },
+   {
+    "line": "cpr r13"
+   },
+   {
+    "line": "cpr r14"
+   },
+   {
+    "line": "cpr r15"
+   },
+   {
+    "line": "inr r0"
+   },
+   {
+    "line": "inr r1"
+   },
+   {
+    "line": "inr r2"
+   },
+   {
+    "line": "inr r3"
+   },
+   {
+    "line": "inr r4"
+   },
+   {
+    "line": "inr r5"
+   },
+   {
+    "line": "inr r6"
+   },
+   {
+    "line": "inr r7"
+   },
+   {
+    "line": "inr r8"
+   },
+   {
+    "line": "inr r9"
+   },
+   {
+    "line": "inr r10"
+   },
+   {
+    "line": "inr r11"
+   },
+   {
+    "line": "inr r12"
+   },
+   {
+    "line": "inr r13"
+   },
+   {
+    "line": "inr r14"
+   },
+   {
+    "line": "inr r15"
+   },
+   {
+    "line": "dcr r0"
+   },
+   {
+    "line": "dcr r1"
+   },
+   {
+    "line": "dcr r2"
+   },
+   {
+    "line": "dcr r3"
+   },
+   {
+    "line": "dcr r4"
+   },
+   {
+    "line": "dcr r5"
+   },
+   {
+    "line": "dcr r6"
+   },
+   {
+    "line": "dcr r7"
+   },
+   {
+    "line": "dcr r8"
+   },
+   {
+    "line": "dcr r9"
+   },
+   {
+    "line": "dcr r10"
+   },
+   {
+    "line": "dcr r11"
+   },
+   {
+    "line": "dcr r12"
+   },
+   {
+    "line": "dcr r13"
+   },
+   {
+    "line": "dcr r14"
+   },
+   {
+    "line": "dcr r15"
+   },
+   {
+    "line": "rtn"
+   },
+   {
+    "line": "br 2"
+   },
+   {
+    "line": "bnc 2"
+   },
+   {
+    "line": "bc 2"
+   },
+   {
+    "line": "bp 2"
+   },
+   {
+    "line": "bm 2"
+   },
+   {
+    "line": "bz 2"
+   },
+   {
+    "line": "bnz 2"
+   },
+   {
+    "line": "bm1 2"
+   },
+   {
+    "line": "bnm1 2"
+   },
+   {
+    "line": "bk"
+   },
+   {
+    "line": "rs"
+   },
+   {
+    "line": "bs 3"
+   }
+  ]
+ }
+}
