@@ -38,6 +38,22 @@ rewrites `asl.w #1,d0` as `add.w d0,d0`; `-no-opt` does neither. We apply some
 and not others, so no single vasm invocation reproduces our bytes. The issue is
 closed as completed — it records the decision rather than tracking a fix.
 
+**`m740-inc-dec-a`, `m740-ldm-order` and `m740-bit-branch-a` (ca65's M740) —
+the 740 family manual decides.** Mitsubishi's and Renesas's *740 Family
+Software Manual*, in both its 1997 and 2006 editions, disagrees with ca65
+V2.19 in three places, and Asm198x follows the manual:
+
+- `INC A` is `$3A` and `DEC A` is `$1A`, the reverse of the 65C02's codes,
+  which ca65 uses;
+- `LDM #$nn,$zz` is `$3C nn zz`, the value before the address, where ca65
+  lays the address first;
+- an accumulator bit branch, `BBSn a,target` or `BBCn a,target`, is two bytes
+  and counts its displacement from the byte after it; ca65 counts from one
+  byte further, so its branches land a byte early.
+
+MAME's M740 core agrees with the manual on the first two. The manual is held
+in the reference library's `by-topic/cpu-m740/`.
+
 **`sprintf-c-width` (ca65) — `.sprintf` follows C.** ca65 V2.19 departs from
 C's `printf` in a few places: `%x` of a negative number, `%#x` of 0, which side
 `%s` and `%c` are padded on in a width, the `+` and space flags on an unsigned
