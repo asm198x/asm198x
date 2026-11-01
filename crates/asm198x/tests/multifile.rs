@@ -1708,9 +1708,8 @@ fn ca65_816_include_matches_the_flattened_source() {
 /// hooked only into the single-source parse works in `cargo test` and does
 /// nothing in the actual tool. It happened once already, to sjasmplus.
 ///
-/// A macro does **not** reach across the include boundary — each file expands
-/// on its own, which is a deliberate hold rather than a measured answer, so
-/// the second half of this test pins the hold.
+/// A macro reaches across the include boundary, as ca65's textual include
+/// gives it: one defined in the root expands inside the included file.
 #[test]
 fn ca65_816_macros_expand_in_every_included_file() {
     let loader = MemoryLoader::new().text("mac.s", ".macro ldav v\n lda #v\n.endmacro\n ldav 1\n");
@@ -1722,12 +1721,15 @@ fn ca65_816_macros_expand_in_every_included_file() {
         "both files expanded their own macros"
     );
 
-    // `two` is defined in the root and invoked inside the include: out of
-    // scope, so the invocation is never expanded and fails to parse.
+    // `two` is defined in the root and invoked inside the include.
     let loader = MemoryLoader::new().text("uses.s", " two\n");
     let src = ".macro two\n nop\n nop\n.endmacro\n .include \"uses.s\"\n";
-    assemble_ca65_816_files(src, "main.s", &loader)
-        .expect_err("a macro does not cross the include boundary");
+    let r = assemble_ca65_816_files(src, "main.s", &loader).expect("assembles");
+    assert_eq!(
+        r.bytes,
+        vec![0xEA, 0xEA],
+        "a macro crosses the include boundary"
+    );
 }
 
 /// Three-deep nesting, code at every level, in include order; `.INCLUDE` is

@@ -740,7 +740,11 @@ pub fn assemble_ca65_nes_lang198x_files_debug(
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
 pub fn assemble_ca65_816(source: &str) -> Result<AssemblyResult, AsmError> {
-    engine::assemble(source, &dialects::Ca65_816).map(AssemblyResult::from)
+    engine::assemble(
+        source,
+        &dialects::ca65_walk::Ca65Walk::flat_on(lang198x_ca65::Cpu::Wdc65816),
+    )
+    .map(AssemblyResult::from)
 }
 
 /// Assemble a **multi-file** ca65-65816 program (language-surface U4):
@@ -766,7 +770,12 @@ pub fn assemble_ca65_816_files(
     input_path: &str,
     loader: &dyn source::SourceLoader,
 ) -> Result<AssemblyResult, MultiFileError> {
-    assemble_files(&dialects::Ca65_816, source, input_path, loader)
+    assemble_files(
+        &dialects::ca65_walk::Ca65Walk::flat_on(lang198x_ca65::Cpu::Wdc65816),
+        source,
+        input_path,
+        loader,
+    )
 }
 
 /// Assemble ca65-syntax HuC6280 source into a flat little-endian binary, as
@@ -1694,7 +1703,9 @@ pub fn format_tms7000(source: &str) -> Result<String, AsmError> {
 /// # Errors
 /// Returns an [`AsmError`] on any parse failure.
 pub fn format_ca65_816(source: &str) -> Result<String, AsmError> {
-    format_ast(&dialects::Ca65_816, source)
+    let profile = lang198x_ca65::Profile::CA65_2_19_6502.with_cpu(lang198x_ca65::Cpu::Wdc65816);
+    lang198x_ca65::format(source, profile)
+        .map_err(|_| AsmError::new(0, "the source is too long to format"))
 }
 
 /// Reformat ca65-syntax HuC6280 source with Lang198x's ca65 formatter, as

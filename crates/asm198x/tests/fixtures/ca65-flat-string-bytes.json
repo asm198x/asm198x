@@ -10009,6 +10009,8 @@
     },
     {
       "name": "65816_utf8_%3s",
+      "divergence": "sprintf-c-width",
+      "walk_hex": "0620c3a907",
       "source": ".setcpu \"65816\"\n.byte 6\n.byte .sprintf(\"%3s\",\"é\")\n.byte 7\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -10045,6 +10047,8 @@
     },
     {
       "name": "65816_utf8_%3.1s",
+      "divergence": "sprintf-c-width",
+      "walk_hex": "062020c307",
       "source": ".setcpu \"65816\"\n.byte 6\n.byte .sprintf(\"%3.1s\",\"é\")\n.byte 7\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
