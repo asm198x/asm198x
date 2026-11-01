@@ -178,7 +178,7 @@ Added after v0.0.12. Earlier binaries answer none of the three spellings, so if
 |---|---|---|
 | `-o`, `--output <path>` | asm, fmt | Output path. `asm` defaults to the input with a `.bin` extension; `fmt` writes to stdout |
 | `-d`, `--dialect <name>` | all | Source syntax — see *Dialects* |
-| `--cpu`, `--target <name>` | all | CPU target where a dialect serves more than one (`z80`, `z80n`); with no `--dialect`, names a chip directly — see *Targets* |
+| `--cpu`, `--target <name>` | all | CPU target where a dialect serves more than one (`z80`, `z80n`, or any CPU ca65 names); with no `--dialect`, names a chip directly — see *Targets* |
 | `-I <dir>` | asm | Add an include-search directory. Repeatable; **order is search order** |
 | `--equ NAME=VALUE` | asm (pasmo/pasmonext) | Define a command-line constant before conditional assembly. Repeatable; matches Pasmo's spelling |
 | `--org <addr>` | disasm | Address of the first byte |
@@ -360,8 +360,9 @@ binary, so it cannot fall behind what `--dialect` does.
 
 ### Targets
 
-`--cpu` picks a CPU where a dialect serves more than one. Today that is Z80:
-`z80` (the pasmo default) and `z80n` (Spectrum Next, the pasmonext default).
+`--cpu` picks a CPU where a dialect serves more than one. For the Z80 dialects
+that is `z80` (the pasmo default) and `z80n` (Spectrum Next, the pasmonext
+default). For ca65 it is the CPU a program starts on, below.
 **Z80N opcodes follow the target, not the dialect** — `sjasmplus --cpu z80n`
 gets them, `pasmonext --cpu z80` does not.
 
@@ -382,7 +383,7 @@ The table below lists **initial CLI targets**. Dialect aliases from the
 | CLI dialect | Default CPU | Accepted CLI CPUs |
 |---|---|---|
 | `acme` | `6502` | `6502` |
-| `ca65` | `6502` | `6502` |
+| `ca65` | `6502` | `6502`, `6502x`, `6502dtv`, `65sc02`, `65c02`, `w65c02`, `65ce02`, `4510`, `45gs02`, `huc6280`, `m740`, `65816`, `sweet16` |
 | `65816` | `65816` | `65816` |
 | `huc6280` | `huc6280` | `huc6280` |
 | `vasm` | `68000` | `68000` |
@@ -413,9 +414,16 @@ are distinct CLI targets.
 These choices set the frontend's initial ISA. Source-level CPU directives retain
 their lexical meaning: for example, ACME `!cpu 65816` can enable instructions
 later in the source even with `--cpu 6502`. That does not make
-`--dialect acme --cpu 65816` a supported CLI combination. For the ca65-family
-65816 and HuC6280 frontends, select `--dialect 65816` and `--dialect huc6280`
-respectively, rather than combining those CPUs with `--dialect ca65`.
+`--dialect acme --cpu 65816` a supported CLI combination.
+
+`--dialect ca65` starts on any CPU ca65 V2.19 names, as `ca65 --cpu` does, and
+the source can still change CPU with `.setcpu` and the `.P*` commands. The
+program is linked as any ca65 program is: under `-C`'s configuration, or the
+NES curriculum's layout without one. A CPU only ca65 assembles, such as `m740`
+or `sweet16`, selects ca65 with no `--dialect`. `--dialect 65816` and
+`--dialect huc6280` are different: they write a flat binary with no linker.
+The `.debug198x` header names the CPU the program starts on. `disasm` reads the
+6502, 65816 and HuC6280 under `--dialect ca65`, and refuses the others.
 
 ## Exit status and diagnostics
 

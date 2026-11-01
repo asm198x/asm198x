@@ -15,9 +15,13 @@ mod recovery_cli;
 #[derive(Clone, Copy)]
 enum Assembler {
     Acme,
-    /// ca65 for the NES — assembled and linked to a `.nes` ROM, handled
-    /// separately from the flat-binary dialects.
-    Ca65,
+    /// ca65 — assembled and linked to a `.nes` ROM, or under a project's
+    /// own ld65 config with `-C`, handled separately from the flat-binary
+    /// dialects. `cpu` is the CPU a program starts on, as `ca65 --cpu` sets
+    /// it; the source can still change it with `.setcpu`.
+    Ca65 {
+        cpu: lang198x_ca65::Cpu,
+    },
     /// vasm Motorola-syntax 68000 — a flat big-endian code image (Stage 1),
     /// handled directly in `run` like ca65.
     Vasm,
@@ -75,6 +79,13 @@ impl Assembler {
             return Ok(cpu.unwrap_or(Self::Acme));
         };
         let assembler = Self::from_dialect(name)?;
+        // ca65 starts on any CPU it knows, as `ca65 --cpu` does, whatever
+        // dialect that name selects on its own.
+        if let (Self::Ca65 { .. }, Some(cpu)) =
+            (assembler, target.and_then(lang198x_ca65::Cpu::named))
+        {
+            return Ok(Self::Ca65 { cpu });
+        }
         if let (Some(cpu), Some(target)) = (cpu, target) {
             return match (assembler, cpu) {
                 (Self::Pasmo { .. }, Self::Pasmo { z80n } | Self::Sjasmplus { z80n }) => {
@@ -97,8 +108,13 @@ impl Assembler {
             "z80" => Ok(Self::Pasmo { z80n: false }),
             "z80n" | "next" => Ok(Self::Pasmo { z80n: true }),
             // Preserve the documented CPU-only dialect names and aliases as
-            // shorthand for that frontend's initial instruction set.
-            _ => Self::from_dialect(name).map_err(|_| format!("unknown CPU target `{name}`")),
+            // shorthand for that frontend's initial instruction set. A CPU
+            // only ca65 assembles, such as the M740, selects ca65 on it.
+            _ => Self::from_dialect(name).or_else(|_| {
+                lang198x_ca65::Cpu::named(name)
+                    .map(|cpu| Self::Ca65 { cpu })
+                    .ok_or_else(|| format!("unknown CPU target `{name}`"))
+            }),
         }
     }
 
@@ -109,7 +125,9 @@ impl Assembler {
         match key {
             // ACME is the default 6502 dialect (C64); ca65 targets the NES.
             "acme" => Ok(Self::Acme),
-            "ca65" => Ok(Self::Ca65),
+            "ca65" => Ok(Self::Ca65 {
+                cpu: lang198x_ca65::Cpu::Mos6502,
+            }),
             "vasm" => Ok(Self::Vasm),
             "lwasm" => Ok(Self::Lwasm),
             "65816" => Ok(Self::Ca65_816),
@@ -148,7 +166,7 @@ impl Assembler {
     fn identity(self) -> (&'static str, &'static str) {
         match self {
             Self::Acme => ("6502", "acme"),
-            Self::Ca65 => ("6502", "ca65"),
+            Self::Ca65 { cpu } => (ca65_cpu_id(cpu), "ca65"),
             Self::Vasm => ("68000", "vasm"),
             Self::Lwasm => ("6809", "lwasm"),
             Self::Ca65_816 => ("65816", "ca65"),
@@ -217,7 +235,7 @@ impl Assembler {
             Self::Sjasmplus { z80n: false } => Some(asm198x::assemble_sjasmplus_files),
             Self::Sjasmplus { z80n: true } => Some(asm198x::assemble_sjasmplus_next_files),
             // ca65 and vasm produce non-flat output and are handled in `run`.
-            Self::Ca65 | Self::Vasm => None,
+            Self::Ca65 { .. } | Self::Vasm => None,
         }
     }
 }
@@ -839,8 +857,27 @@ fn run(args: &[String]) -> Result<String, String> {
         let bytes = std::fs::read(input).map_err(|e| format!("cannot read {input}: {e}"))?;
         // Use the decoder for the resolved dialect and CPU.
         match assembler {
-            Assembler::Acme | Assembler::Ca65 => {
+            Assembler::Acme
+            | Assembler::Ca65 {
+                cpu: lang198x_ca65::Cpu::Mos6502,
+            } => {
                 print!("{}", asm198x::listing_6502(&bytes, narrow_origin?));
+            }
+            Assembler::Ca65 {
+                cpu: lang198x_ca65::Cpu::Wdc65816,
+            } => {
+                print!("{}", asm198x::listing_65816(&bytes, narrow_origin?));
+            }
+            Assembler::Ca65 {
+                cpu: lang198x_ca65::Cpu::HuC6280,
+            } => {
+                print!("{}", asm198x::listing_huc6280(&bytes, narrow_origin?));
+            }
+            Assembler::Ca65 { cpu } => {
+                return Err(format!(
+                    "no disassembler for ca65's `{}` yet",
+                    ca65_cpu_id(cpu)
+                ));
             }
             Assembler::Pasmo { z80n } | Assembler::Sjasmplus { z80n } => {
                 print!("{}", asm198x::listing_z80(&bytes, narrow_origin?, z80n));
@@ -957,7 +994,7 @@ fn run(args: &[String]) -> Result<String, String> {
     // Debug198x artifacts: every path emits them (flat U3, ca65 U4, vasm U5).
     // ca65 supplies the section byte map for listings; vasm still exposes only
     // the record-backed artifacts (`--debug`, `--sym`).
-    if linker_config.is_some() && !matches!(assembler, Assembler::Ca65) {
+    if linker_config.is_some() && !matches!(assembler, Assembler::Ca65 { .. }) {
         return Err(
             "`-C` selects a ca65 linker configuration; this dialect has no linker config".into(),
         );
@@ -996,7 +1033,10 @@ fn run(args: &[String]) -> Result<String, String> {
             Assembler::Lwasm => asm198x::format_lwasm(&source),
             Assembler::Acme => asm198x::format_acme(&source),
             Assembler::Vasm => asm198x::format_vasm(&source),
-            Assembler::Ca65 => asm198x::format_ca65(&source),
+            Assembler::Ca65 {
+                cpu: lang198x_ca65::Cpu::Mos6502,
+            } => asm198x::format_ca65(&source),
+            Assembler::Ca65 { cpu } => asm198x::format_ca65_on(&source, cpu.name()),
             // Every dialect now routes through the semantic AST, so `--fmt`
             // covers them all — no unsupported-dialect fallback remains.
         }
@@ -1129,7 +1169,7 @@ fn run(args: &[String]) -> Result<String, String> {
     // debug artifact requested, the debug-capturing entry returns the record
     // read out of layout (U4), its line records naming each statement's file —
     // same bytes by construction.
-    if let Assembler::Ca65 = assembler {
+    if let Assembler::Ca65 { cpu } = assembler {
         let fs = fs_loader(input, &include_dirs);
         let loader = RecordingLoader::new(&fs);
         // `-C` selects the project's own ld65 configuration (#483); absent,
@@ -1141,32 +1181,12 @@ fn run(args: &[String]) -> Result<String, String> {
             ),
             None => None,
         };
-        let (rom, info) = match (
-            &cfg,
-            debug.is_some() || sym.is_some() || listing.is_some() || listing_json.is_some(),
-        ) {
-            (Some(cfg), true) => {
-                let (rom, info) =
-                    asm198x::assemble_ca65_files_debug_with_config(&source, input, &loader, cfg)
-                        .map_err(|e| render_multi_error(input, &e))?;
-                (rom, Some(info))
-            }
-            (Some(cfg), false) => (
-                asm198x::assemble_ca65_files_with_config(&source, input, &loader, cfg)
-                    .map_err(|e| render_multi_error(input, &e))?,
-                None,
-            ),
-            (None, true) => {
-                let (rom, info) = asm198x::assemble_ca65_files_debug(&source, input, &loader)
-                    .map_err(|e| render_multi_error(input, &e))?;
-                (rom, Some(info))
-            }
-            (None, false) => (
-                asm198x::assemble_ca65_files(&source, input, &loader)
-                    .map_err(|e| render_multi_error(input, &e))?,
-                None,
-            ),
-        };
+        let wants_info =
+            debug.is_some() || sym.is_some() || listing.is_some() || listing_json.is_some();
+        let (rom, info) =
+            asm198x::assemble_ca65_files_on(&source, input, &loader, cpu.name(), cfg.as_deref())
+                .map_err(|e| render_multi_error(input, &e))?;
+        let info = wants_info.then_some(info);
         for warning in &rom.warnings {
             let file = rom
                 .files
@@ -2053,6 +2073,28 @@ fn write_map(
     Ok(format!("\nwrote {} (memory map)", path.display()))
 }
 
+/// The name a `.debug198x` header and the verdict corpus give a ca65 CPU:
+/// ca65's own name, in lower case.
+fn ca65_cpu_id(cpu: lang198x_ca65::Cpu) -> &'static str {
+    use lang198x_ca65::Cpu;
+    match cpu {
+        Cpu::Mos6502 => "6502",
+        Cpu::Nmos6502X => "6502x",
+        Cpu::Dtv6502 => "6502dtv",
+        Cpu::Mos65sc02 => "65sc02",
+        Cpu::Mos65c02 => "65c02",
+        Cpu::Wdc65c02 => "w65c02",
+        Cpu::Csg65ce02 => "65ce02",
+        Cpu::Csg4510 => "4510",
+        Cpu::Mega45gs02 => "45gs02",
+        Cpu::Wdc65816 => "65816",
+        Cpu::HuC6280 => "huc6280",
+        Cpu::M740 => "m740",
+        Cpu::Sweet16 => "sweet16",
+        other => other.name(),
+    }
+}
+
 fn usage() -> String {
     "asm198x — 198x family assembler\n\n\
      usage: asm198x [asm|disasm|fmt] [options] <input>\n\
@@ -2080,6 +2122,11 @@ fn usage() -> String {
      NES project: asm198x --dialect ca65 -C <project.cfg> <input> [-o <out.nes>]\n\
      \x20            (-C reads a bounded ld65 config; absent, the curriculum\n\
      \x20             NROM layout applies as before)\n\
+     ca65 CPU:    asm198x --dialect ca65 --cpu <cpu> [-C <project.cfg>] <input>\n\
+     \x20            (starts on any CPU ca65 names, as `ca65 --cpu` does:\n\
+     \x20             6502, 6502x, 6502dtv, 65sc02, 65c02, w65c02, 65ce02,\n\
+     \x20             4510, 45gs02, huc6280, m740, 65816, sweet16; a CPU only\n\
+     \x20             ca65 assembles selects ca65 without --dialect)\n\
      symbols:     asm198x --sym[=path] --sym-format=native|vice|nocash <input>\n\
      \x20            (native preserves --sym output; vice writes .vs monitor labels;\n\
      \x20             nocash writes .sym Game Boy bank:address labels)\n\
@@ -2266,30 +2313,17 @@ fn emit_json(
         // ca65 goes through its include-capable entries too (U5); a failure
         // carries the file table so the diagnostic's span can name an
         // included file.
-        Assembler::Ca65 if cfg.is_some() && debug_requested => {
-            asm198x::assemble_ca65_files_debug_with_config(
-                source,
-                input,
-                &loader,
-                cfg.as_deref().expect("config present"),
-            )
-            .map_err(|e| capture_failure(&mut failure_files, e))
-            .map(&mut capture)
-        }
-        Assembler::Ca65 if cfg.is_some() => asm198x::assemble_ca65_files_with_config(
-            source,
-            input,
-            &loader,
-            cfg.as_deref().expect("config present"),
-        )
-        .map_err(|e| capture_failure(&mut failure_files, e)),
-        Assembler::Ca65 if debug_requested => {
-            asm198x::assemble_ca65_files_debug(source, input, &loader)
+        Assembler::Ca65 { cpu } => {
+            asm198x::assemble_ca65_files_on(source, input, &loader, cpu.name(), cfg.as_deref())
                 .map_err(|e| capture_failure(&mut failure_files, e))
-                .map(&mut capture)
+                .map(|linked| {
+                    if debug_requested {
+                        capture(linked)
+                    } else {
+                        linked.0
+                    }
+                })
         }
-        Assembler::Ca65 => asm198x::assemble_ca65_files(source, input, &loader)
-            .map_err(|e| capture_failure(&mut failure_files, e)),
         // Every flat dialect goes through its multi-file entry (the same
         // table as the human path); ca65/vasm are the arms above.
         other => assemble_flat(other, source, input, &loader, definitions)

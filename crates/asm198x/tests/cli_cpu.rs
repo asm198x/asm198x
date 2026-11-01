@@ -269,3 +269,77 @@ fn published_cpu_matrix_and_all_aliases_match_the_cli() {
         }
     }
 }
+
+/// A flat ld65 configuration: `CODE` at 0, written as it is.
+const FLAT_CFG: &str = "MEMORY { ROM: start = $0000, size = $1000, fill = no, file = %O; }\n\
+                        SEGMENTS { CODE: load = ROM, type = ro; }\n";
+
+/// `--cpu` starts a ca65 program on that CPU, as `ca65 --cpu` does, and
+/// the debug sidecar's header names it.
+#[test]
+fn ca65_starts_on_the_cpu_named() {
+    // `INC A` is $3A on the M740, where the 6502 has no such instruction.
+    let scratch = Scratch::new(" inc a\n ldm $34,#$12\n");
+    std::fs::write(scratch.0.join("flat.cfg"), FLAT_CFG).expect("write config");
+    let run = |args: &[&str]| {
+        let mut all = args.to_vec();
+        all.extend(["-C", "flat.cfg", "input.asm", "-o", "out.bin", "--debug"]);
+        scratch.run(&all)
+    };
+    for args in [
+        &["--dialect", "ca65", "--cpu", "m740"][..],
+        &["--dialect", "ca65", "--cpu", "M740"][..],
+        // A CPU only ca65 assembles selects ca65 on its own.
+        &["--cpu", "m740"][..],
+    ] {
+        let out = run(args);
+        assert!(out.status.success(), "{args:?}: {out:?}");
+        let bytes = std::fs::read(scratch.0.join("out.bin")).expect("read image");
+        assert_eq!(bytes, [0x3A, 0x3C, 0x12, 0x34], "{args:?}");
+        let debug = std::fs::read_to_string(scratch.0.join("input.debug198x")).expect("sidecar");
+        assert!(debug.contains(r#""cpu":"m740""#), "{debug}");
+    }
+    // The same source on the default 6502 is ca65's error, not M740 bytes.
+    let out = run(&["--dialect", "ca65"]);
+    assert!(!out.status.success(), "{out:?}");
+    // JSON mode takes the same path.
+    let out = run(&["--cpu", "m740", "--message-format=json"]);
+    assert!(out.status.success(), "{out:?}");
+    let value: serde_json::Value = serde_json::from_slice(&out.stdout).expect("result JSON");
+    assert_eq!(value["bytes"], serde_json::json!([0x3A, 0x3C, 0x12, 0x34]));
+}
+
+/// SWEET 16 reads `@` as its indirect mark, so formatting needs the CPU too,
+/// and only the CPUs Asm198x has a disassembler for are disassembled.
+#[test]
+fn ca65_formats_and_disassembles_by_the_cpu_named() {
+    let scratch = Scratch::new(" set r1, $1234\n ld @r1\n rtn\n");
+    std::fs::write(scratch.0.join("flat.cfg"), FLAT_CFG).expect("write config");
+    let out = scratch.run(&[
+        "--cpu",
+        "sweet16",
+        "-C",
+        "flat.cfg",
+        "input.asm",
+        "-o",
+        "out.bin",
+    ]);
+    assert!(out.status.success(), "{out:?}");
+    let bytes = std::fs::read(scratch.0.join("out.bin")).expect("read image");
+    assert_eq!(bytes, [0x11, 0x34, 0x12, 0x41, 0x00]);
+
+    let out = scratch.run(&["fmt", "--cpu", "sweet16", "input.asm"]);
+    assert!(out.status.success(), "{out:?}");
+    let text = String::from_utf8(out.stdout).expect("utf-8");
+    assert!(text.contains("ld @r1"), "{text}");
+
+    let out = scratch.run(&["disasm", "--cpu", "sweet16", "out.bin"]);
+    assert!(!out.status.success(), "{out:?}");
+    let message = String::from_utf8(out.stderr).expect("stderr");
+    assert!(
+        message.contains("no disassembler for ca65's `sweet16`"),
+        "{message}"
+    );
+    let out = scratch.run(&["disasm", "--dialect", "ca65", "--cpu", "65816", "out.bin"]);
+    assert!(out.status.success(), "{out:?}");
+}

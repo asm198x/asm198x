@@ -253,6 +253,43 @@ pub fn assemble_ca65_files_debug_with_config(
     assemble_ca65_lang198x_files_debug_with_config(source, input_path, loader, cfg)
 }
 
+/// [`assemble_ca65_files_debug`] for a program that starts on `cpu`, as
+/// `ca65 --cpu` starts it: any CPU ca65 V2.19 names, such as `65c02`, `m740`
+/// or `sweet16`, in any case. `cfg` is a project's ld65 configuration, as
+/// [`assemble_ca65_files_debug_with_config`] takes it; without one, the NES
+/// curriculum's layout applies. The source can still change CPU with
+/// `.setcpu` and the `.P*` commands.
+///
+/// # Errors
+/// As [`assemble_ca65_files_debug_with_config`], plus `CPU not supported`,
+/// ca65's own error, for a name ca65 does not know.
+pub fn assemble_ca65_files_on(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+    cpu: &str,
+    cfg: Option<&str>,
+) -> Result<(AssemblyResult, debug198x::DebugInfo), MultiFileError> {
+    let fail = |error| MultiFileError {
+        error,
+        source_map: Box::new(new_source_map(input_path, source)),
+    };
+    let cpu = ca65_cpu(cpu).map_err(fail)?;
+    let walk = match cfg {
+        Some(cfg) => dialects::ca65_walk::Ca65Walk::with_layout(
+            dialects::ca65_layout::from_cfg(cfg).map_err(fail)?,
+        ),
+        None => dialects::ca65_walk::Ca65Walk::nes(),
+    };
+    assemble_ca65_walk_files(&walk.starting_on(cpu), source, input_path, loader)
+}
+
+/// The CPU ca65 calls `name`, or ca65's error for a name it does not know.
+fn ca65_cpu(name: &str) -> Result<lang198x_ca65::Cpu, AsmError> {
+    lang198x_ca65::Cpu::named(name)
+        .ok_or_else(|| AsmError::new(0, format!("CPU not supported: `{name}`")))
+}
+
 /// Assemble + link ca65 source, also returning the full [`debug198x::DebugInfo`]
 /// read out of layout (Debug198x U4, KTD4) — per-segment sections, symbols, and
 /// line spans at post-link CPU addresses. `source_path` names the source in the
@@ -281,6 +318,19 @@ pub fn assemble_ca65_debug(
 /// Returns an [`AsmError`] only for source too long to parse.
 pub fn format_ca65(source: &str) -> Result<String, AsmError> {
     lang198x_ca65::format(source, lang198x_ca65::Profile::CA65_2_19_6502)
+        .map_err(|_| AsmError::new(0, "the source is too long to format"))
+}
+
+/// [`format_ca65`] for source that starts on `cpu`, as
+/// [`assemble_ca65_files_on`] reads it. The CPU decides which words are
+/// mnemonics and registers, and on SWEET 16 what `@` means.
+///
+/// # Errors
+/// `CPU not supported` for a name ca65 does not know, or an [`AsmError`]
+/// for source too long to parse.
+pub fn format_ca65_on(source: &str, cpu: &str) -> Result<String, AsmError> {
+    let profile = lang198x_ca65::Profile::CA65_2_19_6502.with_cpu(ca65_cpu(cpu)?);
+    lang198x_ca65::format(source, profile)
         .map_err(|_| AsmError::new(0, "the source is too long to format"))
 }
 
@@ -557,7 +607,7 @@ pub fn assemble_ca65_nes_lang198x_debug(
     let assembly = engine::assemble(source, &walk)?;
     let (result, capture) = walk.linked_result(assembly);
     check_linked_budgets(&[("input", source)], capture.as_ref(), &result.areas)?;
-    let info = ca65_debug_info(capture, vec![source_path.to_owned()]);
+    let info = ca65_debug_info(capture, walk.cpu(), vec![source_path.to_owned()]);
     Ok((result, info))
 }
 
@@ -581,9 +631,11 @@ fn check_linked_budgets(
 }
 
 /// The debug record a linked ca65 assembly gives, for the files in
-/// `sources`.
+/// `sources`. Its header names the CPU the program starts on, in lower case,
+/// as ca65 spells it: `6502`, `65c02`, `m740`.
 fn ca65_debug_info(
     capture: Option<listing::DebugCaptureMulti>,
+    cpu: lang198x_ca65::Cpu,
     sources: Vec<String>,
 ) -> debug198x::DebugInfo {
     let capture = capture.unwrap_or(listing::DebugCaptureMulti {
@@ -594,7 +646,7 @@ fn ca65_debug_info(
         lines: Vec::new(),
         cycles: Vec::new(),
     });
-    listing::capture_debug_info_multi(capture, "6502", "ca65", sources)
+    listing::capture_debug_info_multi(capture, &cpu.name().to_ascii_lowercase(), "ca65", sources)
 }
 
 /// A multi-file program through the ca65 walk, linked by `walk`, with its
@@ -622,7 +674,7 @@ fn assemble_ca65_walk_files(
                 });
             }
             result.files = map.file_table();
-            let info = ca65_debug_info(capture, result.files.clone());
+            let info = ca65_debug_info(capture, walk.cpu(), result.files.clone());
             Ok((result, info))
         }
         Err(error) => Err(MultiFileError {
