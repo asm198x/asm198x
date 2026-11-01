@@ -23,7 +23,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use isa::m68k::{self, EaModes, Size, SizeEnc, Slot, ea};
 
-use super::ca65_flat::{self, DirectiveLine, FlatWalk, Resolution, WalkDirective, WalkSemantics};
+use super::flat_walk::{self, DirectiveLine, FlatWalk, Resolution, WalkDirective, WalkSemantics};
 use super::macros;
 use super::mos6502::{self, is_ident, split_data_items, split_first_word, string_literal};
 use crate::directives::{Category, Directive, Pattern, lookup};
@@ -1773,7 +1773,7 @@ pub(crate) fn parse_program(
     let mut w = Walker::default();
     // The shared cursor: it groups `if`/`rept` blocks and keeps every include
     // unresolved (KTD1), which is what `--fmt` needs.
-    ca65_flat::walk_source_expanded(&mut w, text, FileId(0))
+    flat_walk::walk_source_expanded(&mut w, text, FileId(0))
         .map_err(|e| macros::remap_lines(e, origins))?;
     let mut program = w.finish(text.lines().count() as u32);
     macros::place_nodes(&mut program.nodes, origins);
@@ -1807,7 +1807,7 @@ pub(crate) fn parse_program_multi(
     let root = map.contents(FileId(0)).unwrap_or_default().to_owned();
     let root_lines = root.lines().count() as u32;
     let mut stack = vec![FileId(0)];
-    ca65_flat::walk_file(
+    flat_walk::walk_file(
         &mut w,
         &root,
         FileId(0),
@@ -1921,8 +1921,8 @@ impl FlatWalk for Walker {
     /// The numeric forms compare against **zero**, `ifd`/`ifnd` test whether a
     /// symbol is defined — **not** `ifdef`, which vasm answers with `unknown
     /// mnemonic` — and both `endif` and `endc` close.
-    fn block_keyword(&self, code: &str) -> Option<ca65_flat::BlockKw> {
-        use ca65_flat::BlockKw;
+    fn block_keyword(&self, code: &str) -> Option<flat_walk::BlockKw> {
+        use flat_walk::BlockKw;
         let word = code.split_whitespace().next()?.to_ascii_lowercase();
         Some(match word.as_str() {
             "if" | "ifne" | "ifeq" | "ifgt" | "ifge" | "iflt" | "ifle" | "ifd" | "ifnd" | "ifb"
@@ -2048,7 +2048,7 @@ impl FlatWalk for Walker {
                 label: symbol,
                 source: rest.trim().to_string(),
                 span,
-                operand_span: ca65_flat::directive_operand_span(raw, rest, line, file),
+                operand_span: flat_walk::directive_operand_span(raw, rest, line, file),
                 trivia: Trivia {
                     leading: std::mem::take(&mut self.pending_leading),
                     trailing,
@@ -2190,7 +2190,7 @@ fn incbin_args(
 /// was wrong, never that the text was generated — which for generated code is
 /// most of the answer, because the failing line is nowhere in the file.
 fn stamp(e: AsmError, s: &Line) -> AsmError {
-    let mut e = ca65_flat::stamp_file(e, s.file);
+    let mut e = flat_walk::stamp_file(e, s.file);
     if !s.frames.is_empty()
         && let Some(span) = e.span.as_mut()
         && span.expansion_frames.is_empty()

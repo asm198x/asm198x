@@ -575,7 +575,7 @@ fn check_linked_budgets(
     let costs = capture.cycle_costs();
     for (i, source) in sources.iter().enumerate() {
         cycles::check_budgets(&[*source], &costs, capture.cycle_coverage, areas)
-            .map_err(|e| dialects::ca65_flat::stamp_file(e, span::FileId(i as u32)))?;
+            .map_err(|e| dialects::flat_walk::stamp_file(e, span::FileId(i as u32)))?;
     }
     Ok(())
 }

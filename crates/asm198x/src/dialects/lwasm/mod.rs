@@ -21,7 +21,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use isa::mos6809::{self, Kind};
 
-use super::ca65_flat::{self, DirectiveLine, FlatWalk, WalkDirective};
+use super::flat_walk::{self, DirectiveLine, FlatWalk, WalkDirective};
 use super::macros;
 use super::mos6502::{self, BytePrec, fold_const, split_first_word};
 use super::text;
@@ -198,7 +198,7 @@ pub(crate) fn parse_program(source: &str, mode: macros::Expand) -> Result<Progra
     let mut w = Walker::new();
     // The shared cursor: it groups `ifne`/`endc` blocks and keeps every include
     // unresolved (KTD1), which is what `--fmt` needs.
-    ca65_flat::walk_source_expanded(&mut w, text, FileId(0))
+    flat_walk::walk_source_expanded(&mut w, text, FileId(0))
         .map_err(|e| macros::remap_lines(e, origins))?;
     w.flush_trailing(text.lines().count() as u32);
     macros::place_nodes(&mut w.nodes, origins);
@@ -225,7 +225,7 @@ pub(crate) fn parse_program_multi(
     let mut w = Walker::new();
     let root = map.contents(FileId(0)).unwrap_or_default().to_owned();
     let mut stack = vec![FileId(0)];
-    ca65_flat::walk_file(
+    flat_walk::walk_file(
         &mut w,
         &root,
         FileId(0),
@@ -241,8 +241,8 @@ pub(crate) fn parse_program_multi(
 /// (then `-I`; no ancestor hops — a root-directory copy is *not* found from
 /// inside a subdirectory include) and the negative-offset-from-EOF
 /// `includebin` window.
-pub(crate) const SEMANTICS: ca65_flat::WalkSemantics = ca65_flat::WalkSemantics {
-    resolution: ca65_flat::Resolution::Requester,
+pub(crate) const SEMANTICS: flat_walk::WalkSemantics = flat_walk::WalkSemantics {
+    resolution: flat_walk::Resolution::Requester,
     window: slice_includebin,
     include_default_ext: None,
 };
@@ -478,8 +478,8 @@ impl FlatWalk for Walker {
     /// rather than a boolean test. Both `endc` **and** `endif` close, which is
     /// one closer more than any other dialect measured here.
     ///
-    fn block_keyword(&self, code: &str) -> Option<ca65_flat::BlockKw> {
-        use ca65_flat::BlockKw;
+    fn block_keyword(&self, code: &str) -> Option<flat_walk::BlockKw> {
+        use flat_walk::BlockKw;
         let word = code.split_whitespace().next()?.to_ascii_lowercase();
         Some(match word.as_str() {
             "if" | "ifne" | "ifeq" | "ifgt" | "ifge" | "iflt" | "ifle" | "ifdef" | "ifndef"
@@ -591,7 +591,7 @@ impl FlatWalk for Walker {
                 }),
                 source: rest.trim().to_string(),
                 span: Span::in_file(file, line as u32, 1),
-                operand_span: ca65_flat::directive_operand_span(raw, rest, line, file),
+                operand_span: flat_walk::directive_operand_span(raw, rest, line, file),
                 trivia: Trivia {
                     leading: std::mem::take(&mut self.pending_leading),
                     trailing,

@@ -12,7 +12,7 @@
 //! supplies its own helpers (its comment scanner, its number lexer for the
 //! `BINCLUDE` window arguments, its operation parse) and inherits the
 //! multi-file walk. The recursion driver itself is
-//! [`ca65_flat::walk_file`] with asl's probe-pinned [`WalkSemantics`].
+//! [`flat_walk::walk_file`] with asl's probe-pinned [`WalkSemantics`].
 //!
 //! **The probe-pinned asl semantics (KTD5):**
 //!
@@ -48,7 +48,7 @@
 
 use std::collections::BTreeMap;
 
-use super::ca65_flat::{self, DirectiveLine, FlatWalk, Resolution, WalkDirective, WalkSemantics};
+use super::flat_walk::{self, DirectiveLine, FlatWalk, Resolution, WalkDirective, WalkSemantics};
 use crate::ast::{Comment, Node, Program, Scope, Span, Symbol, Trivia};
 use crate::engine::{AsmError, Expr, Operation};
 use crate::source::{SourceLoader, SourceMap};
@@ -322,7 +322,7 @@ pub(crate) fn parse_single<C: AslChip>(chip: C, source: &str) -> Result<Program,
     let mut w = Walker::new(chip);
     for (i, raw) in source.lines().enumerate() {
         if let Some(d) = w.walk_line(raw, i + 1, FileId(0))? {
-            w.push_node(ca65_flat::unresolved_node(d));
+            w.push_node(flat_walk::unresolved_node(d));
         }
     }
     w.flush_trailing(source.lines().count() as u32);
@@ -350,7 +350,7 @@ pub(crate) fn parse_multi_files<C: AslChip>(
     let mut w = Walker::new(chip);
     let root = map.contents(FileId(0)).unwrap_or_default().to_owned();
     let mut stack = vec![FileId(0)];
-    ca65_flat::walk_file(&mut w, &root, FileId(0), map, loader, &mut stack, sem)?;
+    flat_walk::walk_file(&mut w, &root, FileId(0), map, loader, &mut stack, sem)?;
     Ok(Program { nodes: w.nodes })
 }
 
@@ -638,7 +638,7 @@ impl<C: AslChip> Walker<C> {
                 label: label.map(global_symbol),
                 source: rest.trim().to_string(),
                 span: Span::in_file(file, line as u32, 1),
-                operand_span: ca65_flat::directive_operand_span(raw, rest, line, file),
+                operand_span: flat_walk::directive_operand_span(raw, rest, line, file),
                 trivia: Trivia {
                     leading: std::mem::take(&mut self.pending_leading),
                     trailing,

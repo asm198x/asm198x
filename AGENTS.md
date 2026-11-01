@@ -35,7 +35,9 @@ The current implementation covers 8-bit and 16-bit CPU families used across the 
 
 Implemented ISA families include:
 
-- MOS 6502 family: 6502, 65816, HuC6280;
+- MOS 6502 family: 6502 and its ca65 relatives (6502X, 6502DTV, 65SC02,
+  65C02, W65C02, 65CE02, 4510, 45GS02), 65816, HuC6280, M740, and the SWEET16
+  pseudo-CPU;
 - Zilog / Intel lineage: Z80, Z80N, SM83, 8080, Z8000;
 - Motorola family: 6800, 6809, 68000;
 - microcontroller / early-console CPUs: CDP1802, MCS-48/8048 family, SC/MP, Fairchild F8, Signetics 2650, TMS7000;

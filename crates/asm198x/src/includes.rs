@@ -22,7 +22,7 @@
 //! stated here and held by the anchor tests in `tests/multifile.rs`.
 
 use crate::dialects;
-use crate::dialects::ca65_flat::{Resolution, WalkSemantics};
+use crate::dialects::flat_walk::{Resolution, WalkSemantics};
 
 /// Where a relative request is looked for first.
 ///
@@ -100,8 +100,8 @@ impl DialectIncludes {
 /// table reads in the order the rest of the documentation presents them.
 #[must_use]
 pub fn resolution() -> Vec<DialectIncludes> {
-    use dialects::{asl, ca65_flat, lwasm, rgbasm, vasm};
-    let ca65 = &ca65_flat::CA65_SEMANTICS;
+    use dialects::{asl, flat_walk, lwasm, rgbasm, vasm};
+    let ca65 = &flat_walk::CA65_SEMANTICS;
     vec![
         // acme's `!src` is resolved in `AcmeEval::lower` against the
         // requesting file's path; the Z80 walk does the same for `include`.
