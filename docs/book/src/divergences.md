@@ -13,15 +13,13 @@ instead. If you are deciding whether to move a project that already builds, what
 you need is not reassurance — it is to know what will change.
 
 <!-- generated: xtask divergences --markdown -->
-5 tracked differences across 8 recorded cases.
+3 tracked differences across 9 recorded cases.
 
 | Difference | CPU | Dialect | Reference tool | Cases |
 |---|---|---|---|---|
 | [`issue-110`](https://github.com/asm198x/asm198x/issues/110) | 68000 | vasm | vasmm68k_mot | 4 |
-| [`issue-820`](https://github.com/asm198x/asm198x/issues/820) | 65816 | ca65-816 | ca65 | 1 |
-| [`issue-895`](https://github.com/asm198x/asm198x/issues/895) | 65816 | ca65-816 | ca65 | 1 |
-| [`issue-928`](https://github.com/asm198x/asm198x/issues/928) | 65816 | ca65-816 | ca65 | 1 |
 | [`issue-984`](https://github.com/asm198x/asm198x/issues/984) | Z80N | pasmonext | pasmo | 1 |
+| `sprintf-c-width` | 65816 | ca65-816 | ca65 | 4 |
 <!-- /generated -->
 
 ## What each one is
@@ -40,15 +38,12 @@ rewrites `asl.w #1,d0` as `add.w d0,d0`; `-no-opt` does neither. We apply some
 and not others, so no single vasm invocation reproduces our bytes. The issue is
 closed as completed — it records the decision rather than tracking a fix.
 
-**`issue-761` to `issue-931` (ca65) — source ca65 V2.19 accepts and our ca65
-readers refuse or assemble differently.** Each is one of the open ca65 issues,
-recorded as a probe with ca65's own answer under a flat ld65 link: `.set`,
-labels on closing directives,
-`.sizeof`, qualified label definitions, generated register-spelt names,
-`.left` on a quoted list, macro arguments holding a function's comma, and source
-after `.end`; and, in the 65816 reader, `.if`, `.define` and `.const` inside a
-captured list. The old readers take no parity fixes while the new ca65 front end
-(`lang198x/ca65`) is built; it closes these. Each probe fails once it passes.
+**`sprintf-c-width` (ca65) — `.sprintf` follows C.** ca65 V2.19 departs from
+C's `printf` in a few places: `%x` of a negative number, `%#x` of 0, which side
+`%s` and `%c` are padded on in a width, the `+` and space flags on an unsigned
+conversion, and a width counted in bytes rather than characters. Lang198x's ca65
+front end, which every ca65 dialect here reads through, follows C, and these
+cases record ca65's own bytes beside ours.
 
 **`issue-984` — PasmoNext's `PUSH nn` on the Next, a reference bug we fix.**
 The Z80N's `PUSH nn` stores its immediate high byte first, as the Next's

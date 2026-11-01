@@ -25,8 +25,8 @@ use crate::engine::AsmError;
 /// One argument to a string function, after the pass has folded it.
 #[derive(Debug, Clone)]
 pub(crate) enum Arg {
-    /// Both the decoded contents and the original quoted spelling.
-    Text { cooked: String, spelling: String },
+    /// The decoded contents of a quoted string.
+    Text { cooked: String },
     /// Anything else, verbatim — a number, a symbol, an expression.
     Bare(String),
 }
@@ -40,14 +40,6 @@ impl Arg {
                 line,
                 format!("`{name}` takes a string here, and `{b}` is not one"),
             )),
-        }
-    }
-
-    /// Authored quoted spelling, including its quotes, before escape decoding.
-    pub(crate) fn literal_spelling(&self) -> Option<&str> {
-        match self {
-            Arg::Text { spelling, .. } => Some(spelling),
-            Arg::Bare(_) => None,
         }
     }
 
@@ -121,9 +113,6 @@ pub(crate) enum Folded {
     Text(String),
     /// A number, spliced back in as digits.
     Number(i64),
-    /// Text spliced back in **unquoted** — what ca65's `.ident` makes, where
-    /// the answer is a name for the parse to resolve and not a string.
-    Bare(String),
 }
 
 /// A dialect's string grammar.
@@ -502,7 +491,6 @@ fn fold_once<S: TextSyntax>(
                         let text = match folded {
                             Folded::Text(t) => format!("\"{}\"", escape(&t)),
                             Folded::Number(n) => n.to_string(),
-                            Folded::Bare(t) => t,
                         };
                         return Ok(Some(format!("{}{text}{}", &line[..i], &line[close + 1..])));
                     }
@@ -647,7 +635,6 @@ fn one_arg(text: &str) -> Arg {
     match trimmed.strip_prefix('"').and_then(|t| t.strip_suffix('"')) {
         Some(inner) => Arg::Text {
             cooked: unescape(inner),
-            spelling: trimmed.to_owned(),
         },
         _ => Arg::Bare(trimmed.to_string()),
     }
@@ -733,7 +720,7 @@ mod tests {
     }
 
     #[test]
-    fn quoted_arguments_keep_spelling_and_existing_cooked_values() {
+    fn quoted_arguments_keep_their_cooked_values() {
         for (source, cooked) in [
             (r#""a\b""#, r#"a\b"#),
             (r#""a\\b""#, r#"a\b"#),
@@ -742,12 +729,10 @@ mod tests {
             ("\"\"", ""),
         ] {
             let arg = one_arg(&format!("  {source}  "));
-            assert_eq!(arg.literal_spelling(), Some(source));
             assert_eq!(arg.text("test", 1).expect("quoted argument"), cooked);
             assert_eq!(arg.raw(), cooked);
         }
         let bare = one_arg("  VALUE + 1  ");
-        assert_eq!(bare.literal_spelling(), None);
         assert_eq!(bare.raw(), "VALUE + 1");
         assert!(bare.text("test", 1).is_err());
     }
@@ -756,7 +741,7 @@ mod tests {
     fn argument_splitting_preserves_quoted_commas_and_nested_source() {
         let args = split_args(r#""a,b", .concat("c", "d"), {x,y}"#);
         assert_eq!(args.len(), 3);
-        assert_eq!(args[0].literal_spelling(), Some(r#""a,b""#));
+        assert_eq!(args[0].text("test", 1).expect("quoted"), "a,b");
         assert_eq!(args[1].raw(), r#".concat("c", "d")"#);
         assert_eq!(args[2].raw(), "{x,y}");
     }
