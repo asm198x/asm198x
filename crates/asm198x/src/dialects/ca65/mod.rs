@@ -1180,11 +1180,12 @@ mod tests {
         let l = rom(".code\nhere: lda #1\n lda #.defined(here)\n");
         assert_eq!(&l[18..20], &[0xA9, 0x01]);
 
-        // A `.`-word we do not implement — with a plain argument, since a
-        // string literal fails earlier, in the tokenizer.
-        let err = assemble(".code\nV = 1\n lda #.bank(V)\n").expect_err("not implemented");
+        // `.bank` of a constant has no segment, as ld65 says. It sat here
+        // as a function we did not lower, until the link could answer it.
+        let err = assemble(".code\nV = 1\n lda #<.bank(V)\n").expect_err("no segment");
         assert!(
-            err.to_string().contains("is not lowered yet"),
+            err.to_string()
+                .contains("Argument of `.bank` isn't a label attached to a segment"),
             "got `{err}`"
         );
         // `.sizeof` *is* implemented, and refuses a name that declared no size

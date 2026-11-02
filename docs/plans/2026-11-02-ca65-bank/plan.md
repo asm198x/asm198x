@@ -1,6 +1,6 @@
 # Plan: ca65's `.bank`
 
-**Status:** Agreed 2026-11-02 as option 2.
+**Status:** Agreed 2026-11-02 as option 2, and built the same day.
 **Binding records:** `decisions/layouts-are-data.md` (the bounded ld65
 config reader grows by evidence), and 198x's
 [assembly source layer decision](https://github.com/stevehill1981/198x/blob/main/decisions/assembly-source-layer-moves-to-lang198x.md)
@@ -119,6 +119,19 @@ its release stays compatible.
   config beside the cases. They are recorded live from ca65 and ld65 by an
   ignored test, and replayed through the walk by a normal one, as
   `ca65-labelled-end.json` is.
+
+- **As built.** Three cases settled while building, each measured:
+  - An equate holding a `.bank` that nothing reads, such as `Z9 = .bank(5)`
+    alone, is accepted, because ld65 checks `.bank` only where a value is
+    written. The walk reports an equate's `.bank` error only if the equate is
+    read.
+  - `.bank` of a name never defined gives ca65's `Symbol is undefined`, not
+    a `.bank` error.
+  - With no link config at all, `.bank` is refused, because there are no
+    memory areas to ask.
+
+  The fixture holds 47 programs, accepted and refused, and every one
+  matches.
 
 ## Steps
 

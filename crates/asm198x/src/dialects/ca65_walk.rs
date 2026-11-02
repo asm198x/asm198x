@@ -293,6 +293,50 @@ struct Ran {
 }
 
 /// A segment the program has used.
+/// A `.bank` waiting for the link: its argument, with full names, the
+/// segment `*` was in, and where it was used.
+struct BankUse {
+    value: Expr,
+    here: Option<u32>,
+    at: Span,
+}
+
+/// The name the walk gives the `.bank` numbered `index`. It starts with a
+/// character no ca65 name can hold.
+fn bank_name(index: usize) -> String {
+    format!("\u{1}bank{index}")
+}
+
+/// The number of the `.bank` that `name` stands for, if it is one.
+fn bank_index(name: &str) -> Option<usize> {
+    name.strip_prefix("\u{1}bank")?.parse().ok()
+}
+
+/// Whether `value` reads `*`.
+fn contains_pc(value: &Expr) -> bool {
+    match value {
+        Expr::Pc => true,
+        Expr::Num(_) | Expr::Sym(_) => false,
+        Expr::Lo(e)
+        | Expr::Hi(e)
+        | Expr::Bank(e)
+        | Expr::Neg(e)
+        | Expr::BitNot(e)
+        | Expr::FixRound(e)
+        | Expr::TrailingZeros(e)
+        | Expr::LogNot(e) => contains_pc(e),
+        Expr::Bin(_, a, b) => contains_pc(a) || contains_pc(b),
+    }
+}
+
+/// Why ld65 refuses a `.bank`'s argument.
+enum BankArgument {
+    /// It uses a label other than once, plus or minus a constant.
+    TooComplex,
+    /// It names something never defined, which is reported as that.
+    Undefined,
+}
+
 struct Seg {
     /// Its number, in the order the program first used it.
     number: u32,
@@ -442,6 +486,10 @@ struct Walk<'f> {
     /// the function does not see it. They are recorded once the line is
     /// lowered or its condition decided.
     function_reads: Vec<(usize, String)>,
+    /// Each `.bank` lowered, which only the link can answer. Lowering is
+    /// given a name of the walk's own in its place, which no source can
+    /// spell, and the name is replaced by the bank once segments are known.
+    banks: RefCell<Vec<BankUse>>,
     /// Names bound at the end of the program.
     pending: Vec<Pending>,
     /// The segments the layout only reserves: `bss` and `zp`.
@@ -708,16 +756,43 @@ impl Walk<'_> {
         if let Err(error) = self.check_declarations() {
             self.errors.push(error);
         }
-        // A name ca65 defines itself is its value, for the engine.
+        // A name ca65 defines itself is its value, for the engine, and so
+        // is each `.bank` the program uses, once the link answers it.
+        let mut refused = Vec::new();
         for statement in &mut statements {
+            // ld65 answers `.bank` only where a value is written, so an
+            // equate holding one that nothing reads is never checked.
+            let unread = matches!(statement.op, Some(Operation::Equ(_) | Operation::Set(_)))
+                && statement
+                    .label
+                    .as_ref()
+                    .is_some_and(|label| !self.referenced.contains(label));
             if let Some(op) = statement.op.take() {
                 statement.op = Some(map_syms(op, &mut |name| {
+                    if let Some(index) = bank_index(&name) {
+                        return match self.bank_of(index, &linked, layout) {
+                            Ok(bank) => Expr::Num(bank),
+                            Err(error) => {
+                                if !unread {
+                                    refused.push((index, error));
+                                }
+                                Expr::Num(0)
+                            }
+                        };
+                    }
                     let full = linked.get(&name).cloned().unwrap_or(name);
                     match self.predefined(&full) {
                         Some(value) => Expr::Num(value),
                         None => Expr::Sym(full),
                     }
                 }));
+            }
+        }
+        // Each refusal once, at the `.bank` that made it.
+        let mut seen = HashSet::new();
+        for (index, error) in refused {
+            if seen.insert(index) {
+                self.errors.push(error);
             }
         }
         // Each name used but never defined, once, where it was first used.
@@ -1287,6 +1362,10 @@ impl Walk<'_> {
 
     /// How `name`, as written, is found here.
     fn lookup(&self, name: &str) -> Lookup {
+        // A `.bank` the walk named belongs to no scope.
+        if bank_index(name).is_some() {
+            return Lookup::Full(name.to_owned());
+        }
         if let Some(rest) = name.strip_prefix(':')
             && !rest.starts_with(':')
         {
@@ -1590,6 +1669,105 @@ impl Walk<'_> {
     /// Whether `name` has been read: before this line, or on it so far.
     fn was_read(&self, name: &str) -> bool {
         self.was_read_before(name, usize::MAX)
+    }
+
+    /// The bank the `.bank` numbered `index` gives, as ld65 works it out:
+    /// the `bank` attribute of the memory area its label's segment runs in.
+    fn bank_of(
+        &self,
+        index: usize,
+        linked: &HashMap<String, String>,
+        layout: Option<&Layout>,
+    ) -> Result<i64, AsmError> {
+        let banks = self.banks.borrow();
+        let Some(bank) = banks.get(index) else {
+            return Ok(0);
+        };
+        let refuse = |message: String| AsmError::at(bank.at.clone(), message);
+        let segment = match self.segment_of(&bank.value, bank.here, linked) {
+            Ok(Some(segment)) => segment,
+            Ok(None) => {
+                return Err(refuse(
+                    "Argument of `.bank` isn't a label attached to a segment".to_owned(),
+                ));
+            }
+            Err(BankArgument::TooComplex) => {
+                return Err(refuse("Argument of `.bank` is too complex".to_owned()));
+            }
+            Err(BankArgument::Undefined) => return Ok(0),
+        };
+        let name = self
+            .segments
+            .iter()
+            .find(|(_, seg)| seg.number == segment)
+            .map(|(name, _)| name.as_str())
+            .unwrap_or_default();
+        let Some(layout) = layout else {
+            return Err(refuse(
+                "`.bank` needs a link config whose memory areas have a `bank`".to_owned(),
+            ));
+        };
+        let area = layout
+            .segments
+            .iter()
+            .find(|def| def.name == name)
+            .and_then(|def| layout.areas.get(def.area));
+        match area {
+            Some(area) => area.bank.map(i64::from).ok_or_else(|| {
+                refuse(format!(
+                    "Memory area `{}` is referenced by `.bank`, but has no `bank` attribute",
+                    area.name
+                ))
+            }),
+            // Placement reports a segment the config does not place.
+            None => Ok(0),
+        }
+    }
+
+    /// The segment the one label in `value` is in, as ld65 reads `.bank`'s
+    /// argument: a label, `*` or a name bound to a label, plus or minus a
+    /// constant, and nothing else. `None` if there is no label.
+    fn segment_of(
+        &self,
+        value: &Expr,
+        here: Option<u32>,
+        linked: &HashMap<String, String>,
+    ) -> Result<Option<u32>, BankArgument> {
+        let of = |value: &Expr| self.segment_of(value, here, linked);
+        match value {
+            Expr::Num(_) => Ok(None),
+            Expr::Pc => Ok(here),
+            Expr::Sym(name) => {
+                let full = linked.get(name).unwrap_or(name);
+                match self.known(full) {
+                    Value::Placed { segment, .. } => Ok(Some(segment)),
+                    Value::Unknown => Err(BankArgument::Undefined),
+                    _ => Ok(None),
+                }
+            }
+            Expr::Bin(BinOp::Add, a, b) => match (of(a)?, of(b)?) {
+                (Some(_), Some(_)) => Err(BankArgument::TooComplex),
+                (one, other) => Ok(one.or(other)),
+            },
+            Expr::Bin(BinOp::Sub, a, b) => match of(b)? {
+                Some(_) => Err(BankArgument::TooComplex),
+                None => of(a),
+            },
+            // Any other use of a label is more than ld65 reads.
+            other => {
+                let mut labelled = false;
+                map_sym_expr(other.clone(), &mut |name| {
+                    let full = linked.get(&name).unwrap_or(&name);
+                    labelled |= matches!(self.known(full), Value::Placed { .. });
+                    Expr::Sym(name)
+                });
+                if labelled || contains_pc(other) {
+                    Err(BankArgument::TooComplex)
+                } else {
+                    Ok(None)
+                }
+            }
+        }
     }
 
     /// Records the names the line's token functions read, as uses.
@@ -2499,6 +2677,11 @@ impl Walk<'_> {
             if let Some(value) = self.predefined(full) {
                 return Value::Constant(value);
             }
+            // ca65 gives `.bank` the absolute size, and only the link its
+            // value.
+            if bank_index(full).is_some() {
+                return Value::Opaque(Size::Absolute);
+            }
             // An import's address is the linker's, of the size declared.
             return match self.declared.get(full) {
                 Some(declaration) if is_import(declaration.kind) => {
@@ -2743,6 +2926,24 @@ impl Known for Walk<'_> {
 
     fn is_referenced_before(&self, name: &str, finished: usize) -> bool {
         self.was_read_before(name, finished)
+    }
+
+    /// `.bank`, which the walk answers after the link: see [`bank_of`].
+    ///
+    /// [`bank_of`]: Walk::bank_of
+    fn bank(&self, value: &Expr) -> Option<Expr> {
+        let value = map_sym_expr(value.clone(), &mut |name| Expr::Sym(self.as_read(&name)));
+        let here = match self.pc() {
+            Value::Placed { segment, .. } => Some(segment),
+            _ => None,
+        };
+        let at = self
+            .here
+            .clone()
+            .unwrap_or_else(|| Span::in_file(FileId(0), 0, 0));
+        let mut banks = self.banks.borrow_mut();
+        banks.push(BankUse { value, here, at });
+        Some(Expr::Sym(bank_name(banks.len() - 1)))
     }
 
     fn read(&self, name: &str) {

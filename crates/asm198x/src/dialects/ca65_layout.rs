@@ -25,6 +25,9 @@ pub(crate) struct Area {
     /// `fill = yes` retains the area's entire capacity; otherwise only its
     /// packed initialized content and its preceding gaps contribute file bytes.
     pub(crate) fill_to_capacity: bool,
+    /// ld65 `bank =`: the number ca65's `.bank` gives a label whose segment
+    /// runs here. An area without one is an error for `.bank`, not 0.
+    pub(crate) bank: Option<u32>,
 }
 
 /// One segment definition: which area holds it, and the placement attributes
@@ -151,6 +154,7 @@ impl Layout {
             size,
             in_file,
             fill_to_capacity: true,
+            bank: None,
         };
         let seg = |name: &str, area: usize, start: Option<u32>| SegmentDef {
             name: name.to_string(),
@@ -372,9 +376,20 @@ pub(crate) fn from_cfg(text: &str) -> Result<Layout, AsmError> {
                     let mut in_file = false;
                     let mut fill = false;
                     let mut fillval = 0x00u8;
+                    let mut bank = None;
                     for (key, value) in attrs {
                         match key.as_str() {
                             "start" => start = Some(number(&value, &name)?),
+                            // ld65 refuses a second `bank` on one area.
+                            "bank" if bank.is_some() => {
+                                return Err(AsmError::new(
+                                    0,
+                                    format!(
+                                        "config: attribute `bank` on `{name}` is already defined"
+                                    ),
+                                ));
+                            }
+                            "bank" => bank = Some(number(&value, &name)?),
                             "size" => size = Some(number(&value, &name)?),
                             // ro/rw affect ld65's write diagnostics, not
                             // placement; accepted so real configs parse.
@@ -418,6 +433,7 @@ pub(crate) fn from_cfg(text: &str) -> Result<Layout, AsmError> {
                         size,
                         in_file,
                         fill_to_capacity: fill,
+                        bank,
                     });
                 }
             }
@@ -637,16 +653,40 @@ mod tests {
         assert!(r.seg("RODATA").expect("RODATA placed").cpu_addressable);
     }
 
-    /// The refusals hold their bound: an unknown block, an unknown attribute,
-    /// and an unknown fill mode all fail by name.
+    /// A memory area's `bank`, for ca65's `.bank`, is kept; an area without
+    /// one has none.
+    #[test]
+    fn a_bank_is_kept() {
+        let layout = from_cfg(
+            "MEMORY { P: start = $0, size = $10, bank = $12345; Q: start = $10, size = $10; }\n\
+             SEGMENTS { A: load = P; B: load = Q; }",
+        )
+        .expect("reads");
+        assert_eq!(layout.areas[0].bank, Some(0x12345));
+        assert_eq!(layout.areas[1].bank, None);
+    }
+
+    /// The refusals hold their bound: an unknown block, a second `bank`, a
+    /// `bank` that is not a number, and an unknown fill mode all fail by
+    /// name.
     #[test]
     fn out_of_bound_configs_are_refused_by_name() {
         let e = from_cfg("FEATURES { }\nSEGMENTS { A: load = X; }").expect_err("no FEATURES");
         assert!(e.message.contains("FEATURES"), "{}", e.message);
-        let e =
-            from_cfg("MEMORY { P: start = $0, size = $10, bank = 1; }\nSEGMENTS { A: load = P; }")
-                .expect_err("no bank attr");
-        assert!(e.message.contains("bank"), "{}", e.message);
+        let e = from_cfg(
+            "MEMORY { P: start = $0, size = $10, bank = 1, bank = 2; }\nSEGMENTS { A: load = P; }",
+        )
+        .expect_err("a second bank");
+        assert!(
+            e.message.contains("`bank` on `P` is already defined"),
+            "{}",
+            e.message
+        );
+        let e = from_cfg(
+            "MEMORY { P: start = $0, size = $10, bank = $1+2; }\nSEGMENTS { A: load = P; }",
+        )
+        .expect_err("an expression");
+        assert!(e.message.contains("is not a number"), "{}", e.message);
         let e =
             from_cfg("MEMORY { P: start = $0, size = $10, file = %O, fill = auto; }\nSEGMENTS { A: load = P; }")
                 .expect_err("unknown fill mode");
