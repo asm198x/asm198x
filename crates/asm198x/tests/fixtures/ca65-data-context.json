@@ -9257,8 +9257,6 @@
     },
     {
       "name": "sprintf_list_direct",
-      "walk_gap": "lang198x/ca65#52",
-      "walk_hex": "013201",
       "source": "VALUE=2\n.byte .ref(VALUE),.sprintf(\"%d\",VALUE),.ref(VALUE)\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -9293,8 +9291,6 @@
     },
     {
       "name": "sprintf_list_included",
-      "walk_gap": "lang198x/ca65#52",
-      "walk_hex": "013201",
       "source": ".include \"sprintf_list_included.inc\"\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -9329,8 +9325,6 @@
     },
     {
       "name": "sprintf_list_macro",
-      "walk_gap": "lang198x/ca65#52",
-      "walk_hex": "013201",
       "source": ".macro run\nVALUE=2\n.byte .ref(VALUE),.sprintf(\"%d\",VALUE),.ref(VALUE)\n.endmacro\nrun\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -9433,8 +9427,6 @@
     },
     {
       "name": "sprintf_inside_direct",
-      "walk_gap": "lang198x/ca65#52",
-      "walk_hex": "01303201",
       "source": "VALUE=2\n.byte .ref(VALUE),.sprintf(\"%d%d\",.ref(VALUE),VALUE),.ref(VALUE)\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -9469,8 +9461,6 @@
     },
     {
       "name": "sprintf_inside_included",
-      "walk_gap": "lang198x/ca65#52",
-      "walk_hex": "01303201",
       "source": ".include \"sprintf_inside_included.inc\"\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -9505,8 +9495,6 @@
     },
     {
       "name": "sprintf_inside_macro",
-      "walk_gap": "lang198x/ca65#52",
-      "walk_hex": "01303201",
       "source": ".macro run\nVALUE=2\n.byte .ref(VALUE),.sprintf(\"%d%d\",.ref(VALUE),VALUE),.ref(VALUE)\n.endmacro\nrun\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -9609,8 +9597,6 @@
     },
     {
       "name": "concat_nested_direct",
-      "walk_gap": "lang198x/ca65#52",
-      "walk_hex": "01783201",
       "source": "VALUE=2\n.byte .ref(VALUE),.concat(\"x\",.sprintf(\"%d\",VALUE)),.ref(VALUE)\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -9645,8 +9631,6 @@
     },
     {
       "name": "concat_nested_included",
-      "walk_gap": "lang198x/ca65#52",
-      "walk_hex": "01783201",
       "source": ".include \"concat_nested_included.inc\"\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -9681,8 +9665,6 @@
     },
     {
       "name": "concat_nested_macro",
-      "walk_gap": "lang198x/ca65#52",
-      "walk_hex": "01783201",
       "source": ".macro run\nVALUE=2\n.byte .ref(VALUE),.concat(\"x\",.sprintf(\"%d\",VALUE)),.ref(VALUE)\n.endmacro\nrun\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -9785,8 +9767,6 @@
     },
     {
       "name": "strlen_inside_direct",
-      "walk_gap": "lang198x/ca65#52",
-      "walk_hex": "0201",
       "source": "VALUE=2\n.byte .ref(VALUE)+.strlen(.sprintf(\"%d\",VALUE)),.ref(VALUE)\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -9821,8 +9801,6 @@
     },
     {
       "name": "strlen_inside_included",
-      "walk_gap": "lang198x/ca65#52",
-      "walk_hex": "0201",
       "source": ".include \"strlen_inside_included.inc\"\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -9857,8 +9835,6 @@
     },
     {
       "name": "strlen_inside_macro",
-      "walk_gap": "lang198x/ca65#52",
-      "walk_hex": "0201",
       "source": ".macro run\nVALUE=2\n.byte .ref(VALUE)+.strlen(.sprintf(\"%d\",VALUE)),.ref(VALUE)\n.endmacro\nrun\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -10471,8 +10447,6 @@
     },
     {
       "name": "current_string_direct",
-      "walk_gap": "lang198x/ca65#52",
-      "walk_hex": "3001",
       "source": "HERE: .byte .sprintf(\"%d\",.defined(HERE)),.const(HERE-HERE)\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -10507,8 +10481,6 @@
     },
     {
       "name": "current_string_included",
-      "walk_gap": "lang198x/ca65#52",
-      "walk_hex": "3001",
       "source": ".include \"current_string_included.inc\"\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -10543,8 +10515,6 @@
     },
     {
       "name": "current_string_macro",
-      "walk_gap": "lang198x/ca65#52",
-      "walk_hex": "3001",
       "source": ".macro run\nHERE: .byte .sprintf(\"%d\",.defined(HERE)),.const(HERE-HERE)\n.endmacro\nrun\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -13386,8 +13356,6 @@
     },
     {
       "name": "tokens_sprintf_direct",
-      "walk_gap": "lang198x/ca65#52",
-      "walk_hex": "010101",
       "source": "VALUE=2\n.byte .ref(VALUE),.tcount({.sprintf(\"%d\",VALUE)}),.ref(VALUE)\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -13422,8 +13390,6 @@
     },
     {
       "name": "tokens_sprintf_included",
-      "walk_gap": "lang198x/ca65#52",
-      "walk_hex": "010101",
       "source": ".include \"tokens_sprintf_included.inc\"\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -13458,8 +13424,6 @@
     },
     {
       "name": "tokens_sprintf_macro",
-      "walk_gap": "lang198x/ca65#52",
-      "walk_hex": "010101",
       "source": ".macro run\nVALUE=2\n.byte .ref(VALUE),.tcount({.sprintf(\"%d\",VALUE)}),.ref(VALUE)\n.endmacro\nrun\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -13562,8 +13526,6 @@
     },
     {
       "name": "tokens_concat_direct",
-      "walk_gap": "lang198x/ca65#52",
-      "walk_hex": "010101",
       "source": "VALUE=2\n.byte .ref(VALUE),.tcount({.concat(\"x\",.sprintf(\"%d\",VALUE))}),.ref(VALUE)\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -13598,8 +13560,6 @@
     },
     {
       "name": "tokens_concat_included",
-      "walk_gap": "lang198x/ca65#52",
-      "walk_hex": "010101",
       "source": ".include \"tokens_concat_included.inc\"\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -13634,8 +13594,6 @@
     },
     {
       "name": "tokens_concat_macro",
-      "walk_gap": "lang198x/ca65#52",
-      "walk_hex": "010101",
       "source": ".macro run\nVALUE=2\n.byte .ref(VALUE),.tcount({.concat(\"x\",.sprintf(\"%d\",VALUE))}),.ref(VALUE)\n.endmacro\nrun\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -16756,8 +16714,6 @@
     },
     {
       "name": "qualified_generated_order_direct",
-      "walk_gap": "lang198x/ca65#52",
-      "walk_hex": "010003000100",
       "source": ".scope outer\nVALUE1=3\n.endscope\nVALUE=2\n.word .ref(VALUE),outer::.ident(.sprintf(\"VALUE%d\",.const(VALUE))),.ref(VALUE)\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -16792,8 +16748,6 @@
     },
     {
       "name": "qualified_generated_order_included",
-      "walk_gap": "lang198x/ca65#52",
-      "walk_hex": "010003000100",
       "source": ".include \"qualified_generated_order_included.inc\"\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [
@@ -16828,8 +16782,6 @@
     },
     {
       "name": "qualified_generated_order_macro",
-      "walk_gap": "lang198x/ca65#52",
-      "walk_hex": "010003000100",
       "source": ".macro run\n.scope outer\nVALUE1=3\n.endscope\nVALUE=2\n.word .ref(VALUE),outer::.ident(.sprintf(\"VALUE%d\",.const(VALUE))),.ref(VALUE)\n.endmacro\nrun\n",
       "config": "MEMORY { MAIN:start=$1000,size=$7000,file=%O; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
       "native": [

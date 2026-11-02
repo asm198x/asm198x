@@ -20,7 +20,8 @@
 //! measured since: `BRK`'s signature byte and `.cpu` on every CPU, and on
 //! the 6502 `.version`, `.addrsize`, the character map, the `.dbg` lines a
 //! C compiler writes, `.null`, `.case`, scope address sizes, the `CPU_`
-//! constants and every macro package `.macpack` reads.
+//! constants, every macro package `.macpack` reads, and where on a line a
+//! token function's uses start to count for `.ref`.
 //!
 //! The live tests run ca65 V2.19 on each line under `.setcpu` and `.org 0`
 //! and records what it made. `verdict_replay` then checks every one through
@@ -152,7 +153,7 @@ fn the_measured_lines_cover_each_cpu() {
     // Every CPU but SWEET 16, which has no `BRK`.
     assert_eq!(cpus.len(), 12);
     let count = |cpu: &str| cpus[cpu].as_array().map_or(0, Vec::len);
-    assert_eq!(count("6502"), 62);
+    assert_eq!(count("6502"), 75);
     assert_eq!(count("65816"), 5);
 }
 
