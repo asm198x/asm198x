@@ -16,6 +16,10 @@
 //! bytes beside it; where ca65 does not know an instruction the manual has,
 //! the verdict records its refusal.
 //!
+//! `fixtures/ca65-measured-lines.json` holds lines that each check one rule
+//! measured since: `BRK`'s signature byte and `.cpu` on every CPU, and on
+//! the 6502 `.version`, `.addrsize` and the character map.
+//!
 //! The live tests run ca65 V2.19 on each line under `.setcpu` and `.org 0`
 //! and records what it made. `verdict_replay` then checks every one through
 //! the walk with no reference tools present.
@@ -132,12 +136,41 @@ fn the_manual_forms_cover_each_cpu() {
 #[test]
 #[ignore = "needs ca65 and ld65; run with --ignored to record the verdicts"]
 fn the_manual_forms_record_their_verdicts() {
+    record_lines(&manual_forms(), "manual form", "ca65-manual-forms");
+}
+
+fn measured_lines() -> serde_json::Value {
+    serde_json::from_str(include_str!("fixtures/ca65-measured-lines.json")).expect("fixture")
+}
+
+#[test]
+fn the_measured_lines_cover_each_cpu() {
+    let facts = measured_lines();
+    let cpus = facts["cpus"].as_object().expect("cpus");
+    // Every CPU but SWEET 16, which has no `BRK`.
+    assert_eq!(cpus.len(), 12);
+    let count = |cpu: &str| cpus[cpu].as_array().map_or(0, Vec::len);
+    assert_eq!(count("6502"), 18);
+    assert_eq!(count("65816"), 4);
+}
+
+/// `BRK`'s signature byte and `.cpu` on every CPU, and on the 6502 the
+/// functions and character map lowered since, measured on ca65 V2.19.
+#[test]
+#[ignore = "needs ca65 and ld65; run with --ignored to record the verdicts"]
+fn the_measured_lines_record_their_verdicts() {
+    record_lines(&measured_lines(), "measured line", "ca65-measured-lines");
+}
+
+/// Runs ca65 V2.19 on each line of `facts` under `.setcpu` and `.org 0`,
+/// links it flat, and records what it made as a probe named `prefix: line`.
+/// A line marked with a divergence records ca65's bytes beside its name.
+fn record_lines(facts: &serde_json::Value, prefix: &str, scratch: &str) {
     assert!(have("ca65") && have("ld65"), "ca65 and ld65 are required");
-    let tmp = support::scratch::dir("ca65-manual-forms");
+    let tmp = support::scratch::dir(scratch);
     let cfg = tmp.join("flat.cfg");
     fs::write(&cfg, support::verdicts::CA65_FLAT_CFG).expect("config");
     let mut recorder = support::verdicts::Recorder::new();
-    let facts = manual_forms();
     for (cpu, lines) in facts["cpus"].as_object().expect("cpus") {
         for entry in lines.as_array().expect("lines") {
             let line = entry["line"].as_str().expect("a line");
@@ -157,7 +190,7 @@ fn the_manual_forms_record_their_verdicts() {
                 cpu,
                 tool: "ca65",
                 dialect: "ca65",
-                case: format!("manual form: {line}"),
+                case: format!("{prefix}: {line}"),
                 source: &text,
             };
             if !assembled.status.success() {
