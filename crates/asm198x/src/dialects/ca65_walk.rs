@@ -57,8 +57,8 @@ use crate::directives::Category;
 use lang198x_ca65::ast::{Expr as SourceExpr, NameRef, View};
 use lang198x_ca65::expand::{ActiveLine, Expander, Host, Location, Reading};
 use lang198x_ca65::lower::{
-    self, Binary, CpuStack, Known, Record, RecordKind, Scope, Segment, Size, Value, Visibility,
-    Visible,
+    self, Binary, Charmap, CpuStack, Known, Record, RecordKind, Scope, Segment, Size, Value,
+    Visibility, Visible,
 };
 use lang198x_ca65::syntax::{self, DiagnosticKind, TextId, TextRange};
 
@@ -444,6 +444,10 @@ struct Walk<'f> {
     warnings: Vec<Warning>,
     /// How many CPUs `.pushcpu` has kept. ca65 keeps eight at most.
     cpus: usize,
+    /// The characters ca65's character map has changed, and the maps
+    /// `.pushcharmap` has kept, 16 at most.
+    charmap: HashMap<u8, u8>,
+    charmaps: Vec<HashMap<u8, u8>>,
     /// The records being read, innermost last.
     records: Vec<RecordFrame>,
     /// The errors found so far. ca65 reports each and carries on.
@@ -640,13 +644,16 @@ impl Walk<'_> {
             }
         }
         // ca65 warns at the last line it read.
-        if self.cpus > 0
-            && let Some(at) = &self.here
-        {
-            self.warnings.push(
-                Warning::new(at.line as usize, "CPU stack is not empty".to_owned())
-                    .in_file(at.file),
-            );
+        if let Some(at) = &self.here {
+            for (left, warning) in [
+                (self.cpus > 0, "CPU stack is not empty"),
+                (!self.charmaps.is_empty(), "Charmap stack is not empty"),
+            ] {
+                if left {
+                    self.warnings
+                        .push(Warning::new(at.line as usize, warning.to_owned()).in_file(at.file));
+                }
+            }
         }
         let last = self
             .here
@@ -866,7 +873,8 @@ impl Walk<'_> {
                         || lowered.segment.is_some()
                         || lowered.visibility.is_some()
                         || lowered.binary.is_some()
-                        || lowered.cpu.is_some();
+                        || lowered.cpu.is_some()
+                        || lowered.charmap.is_some();
                     if busy {
                         let message = match frame.kind {
                             RecordKind::Enum => "Expected an identifier",
@@ -971,6 +979,20 @@ impl Walk<'_> {
                 return Err(AsmError::at(at, "CPU stack is empty"));
             }
             Some(CpuStack::Pop) => self.cpus -= 1,
+            _ => {}
+        }
+        match lowered.charmap {
+            Some(Charmap::Set { index, value }) => {
+                self.charmap.insert(index, value);
+            }
+            Some(Charmap::Push) if self.charmaps.len() == 16 => {
+                return Err(AsmError::at(at, "Charmap stack overflow"));
+            }
+            Some(Charmap::Push) => self.charmaps.push(self.charmap.clone()),
+            Some(Charmap::Pop) => match self.charmaps.pop() {
+                Some(kept) => self.charmap = kept,
+                None => return Err(AsmError::at(at, "Charmap stack is empty")),
+            },
             _ => {}
         }
         Ok(())
@@ -2449,6 +2471,10 @@ impl Known for AtPc<'_, '_> {
     fn pc(&self) -> Value {
         self.pc
     }
+
+    fn translate(&self, character: u8) -> u8 {
+        self.walk.translate(character)
+    }
 }
 
 /// The walk, asked about names that are already full names, as the names
@@ -2483,9 +2509,18 @@ impl Known for FullNames<'_, '_> {
 
     /// The names were read when the equate was.
     fn read(&self, _: &str) {}
+
+    fn translate(&self, character: u8) -> u8 {
+        self.0.translate(character)
+    }
 }
 
 impl Known for Walk<'_> {
+    /// The byte the character map makes of `character` now.
+    fn translate(&self, character: u8) -> u8 {
+        self.charmap.get(&character).copied().unwrap_or(character)
+    }
+
     /// A plain name this scope has not defined is known by its address size
     /// only, from the innermost scope further out that has.
     fn name(&self, name: &str) -> Value {
@@ -2572,6 +2607,11 @@ impl Known for Walk<'_> {
 }
 
 impl Host for Walk<'_> {
+    /// The byte the character map makes of `character`, for `.strat`.
+    fn translate(&mut self, character: u8) -> u8 {
+        Known::translate(self, character)
+    }
+
     /// Where the line the expander acts on next is, for the problems its
     /// questions find.
     fn reading(&mut self, reading: &Reading) {

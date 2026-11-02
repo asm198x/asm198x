@@ -1,0 +1,187 @@
+{
+ "source": "Lines measured on ca65 V2.19 that each check one rule: BRK's signature byte and .cpu on every CPU but SWEET 16, which has no BRK; on the 6502, .version, .addrsize and the character map (.charmap, .pushcharmap, .popcharmap, .literal and what .sprintf converts); on the 65816, a COP with no signature byte. Each line is read under .setcpu and .org 0, and a line may run over several source lines. A line marked with a divergence is one where Asm198x does not follow ca65: `cop-signature`, where ca65 contradicts the 65816, and `sprintf-raw-flags`, where a second .sprintf on a line has its conversions translated because ca65 keeps the first one's flags.",
+ "cpus": {
+  "6502": [
+   {
+    "line": "brk $12"
+   },
+   {
+    "line": "brk #$12"
+   },
+   {
+    "line": ".word .cpu"
+   },
+   {
+    "line": ".word .version"
+   },
+   {
+    "line": "Z = $12\nAB = $1234\nF = $123456\nL: .byte .addrsize(Z), .addrsize(AB), .addrsize(F), .addrsize(L)\nQ = Z\n.byte .addrsize(Q)"
+   },
+   {
+    "line": ".byte .addrsize(later)\nlater = 1"
+   },
+   {
+    "line": ".charmap $41, $01\n.byte \"AB\", 'A'\nlda #'A'\n.asciiz \"A\"\n.word 'A'+1"
+   },
+   {
+    "line": ".charmap $41, $05\n.literal \"A\", $41, 'A'"
+   },
+   {
+    "line": ".charmap $41, $05\n.byte .strat(\"A\", 0), .lobyte('A')\n.if 'A' = 5\n.byte 9\n.endif"
+   },
+   {
+    "line": ".charmap $41, $01\n.pushcharmap\n.byte \"A\"\n.charmap $41, $02\n.byte \"A\"\n.popcharmap\n.byte \"A\""
+   },
+   {
+    "line": ".charmap $41, $05\n.charmap $78, $08\n.byte .sprintf(\"x%cy\", $41)"
+   },
+   {
+    "line": ".charmap $31, $09\n.byte .sprintf(\"%d\", 1)"
+   },
+   {
+    "line": ".charmap $41, $05\n.charmap $31, $09\n.byte .sprintf(\"%c\", $41), .sprintf(\"%d\", 1)",
+    "divergence": "sprintf-raw-flags"
+   },
+   {
+    "line": ".charmap $41, $05\n.byte .concat(.sprintf(\"%s\", \"A\"), \"A\")\n.asciiz .sprintf(\"A%sA\", \"A\")"
+   },
+   {
+    "line": ".popcharmap"
+   },
+   {
+    "line": ".charmap 65, 256"
+   },
+   {
+    "line": ".charmap 256, 1"
+   },
+   {
+    "line": ".charmap later, 1\nlater = $41"
+   }
+  ],
+  "6502X": [
+   {
+    "line": "brk $12"
+   },
+   {
+    "line": "brk #$12"
+   },
+   {
+    "line": ".word .cpu"
+   }
+  ],
+  "6502DTV": [
+   {
+    "line": "brk $12"
+   },
+   {
+    "line": "brk #$12"
+   },
+   {
+    "line": ".word .cpu"
+   }
+  ],
+  "65SC02": [
+   {
+    "line": "brk $12"
+   },
+   {
+    "line": "brk #$12"
+   },
+   {
+    "line": ".word .cpu"
+   }
+  ],
+  "65C02": [
+   {
+    "line": "brk $12"
+   },
+   {
+    "line": "brk #$12"
+   },
+   {
+    "line": ".word .cpu"
+   }
+  ],
+  "W65C02": [
+   {
+    "line": "brk $12"
+   },
+   {
+    "line": "brk #$12"
+   },
+   {
+    "line": ".word .cpu"
+   }
+  ],
+  "65CE02": [
+   {
+    "line": "brk $12"
+   },
+   {
+    "line": "brk #$12"
+   },
+   {
+    "line": ".word .cpu"
+   }
+  ],
+  "4510": [
+   {
+    "line": "brk $12"
+   },
+   {
+    "line": "brk #$12"
+   },
+   {
+    "line": ".word .cpu"
+   }
+  ],
+  "45GS02": [
+   {
+    "line": "brk $12"
+   },
+   {
+    "line": "brk #$12"
+   },
+   {
+    "line": ".word .cpu"
+   }
+  ],
+  "huc6280": [
+   {
+    "line": "brk $12"
+   },
+   {
+    "line": "brk #$12"
+   },
+   {
+    "line": ".word .cpu"
+   }
+  ],
+  "M740": [
+   {
+    "line": "brk $12"
+   },
+   {
+    "line": "brk #$12"
+   },
+   {
+    "line": ".word .cpu"
+   }
+  ],
+  "65816": [
+   {
+    "line": "brk $12"
+   },
+   {
+    "line": "brk #$12"
+   },
+   {
+    "line": ".word .cpu"
+   },
+   {
+    "line": "cop",
+    "divergence": "cop-signature"
+   }
+  ]
+ }
+}

@@ -567,14 +567,7 @@ pub const DIRECTIVES: &[Directive] = &[
         id: "unsupported-parse-options",
         pattern: Pattern::Sigilled {
             sigil: '.',
-            names: &[
-                "linecont",
-                "case",
-                "charmap",
-                "localchar",
-                "feature",
-                "null",
-            ],
+            names: &["linecont", "case", "localchar", "feature", "null"],
             required: true,
         },
         category: Category::KnownUnsupported,
@@ -1722,8 +1715,9 @@ two:\n\
     #[test]
     fn a_real_directive_is_told_apart_from_a_typo() {
         let err = |src: &str| super::assemble(src).expect_err(src).to_string();
-        // `.export` sat here, then `.condes`, each implemented in turn.
-        for d in [".charmap $41, $42", ".macpack cpu"] {
+        // `.export` sat here, then `.condes` and `.charmap`, each
+        // implemented in turn.
+        for d in [".localchar '?'", ".macpack cpu"] {
             let e = err(&format!("\t{d}\n"));
             assert!(
                 e.contains("is a real directive here"),

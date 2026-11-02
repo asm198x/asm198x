@@ -13,16 +13,18 @@ instead. If you are deciding whether to move a project that already builds, what
 you need is not reassurance — it is to know what will change.
 
 <!-- generated: xtask divergences --markdown -->
-6 tracked differences across 28 recorded cases.
+8 tracked differences across 30 recorded cases.
 
 | Difference | CPU | Dialect | Reference tool | Cases |
 |---|---|---|---|---|
+| `cop-signature` | 65816 | ca65 | ca65 | 1 |
 | [`issue-110`](https://github.com/asm198x/asm198x/issues/110) | 68000 | vasm | vasmm68k_mot | 4 |
 | [`issue-984`](https://github.com/asm198x/asm198x/issues/984) | Z80N | pasmonext | pasmo | 1 |
 | `m740-bit-branch-a` | M740 | ca65 | ca65 | 16 |
 | `m740-inc-dec-a` | M740 | ca65 | ca65 | 2 |
 | `m740-ldm-order` | M740 | ca65 | ca65 | 1 |
 | `sprintf-c-width` | 65816 | ca65-816 | ca65 | 4 |
+| `sprintf-raw-flags` | 6502 | ca65 | ca65 | 1 |
 <!-- /generated -->
 
 ## What each one is
@@ -63,6 +65,20 @@ C's `printf` in a few places: `%x` of a negative number, `%#x` of 0, which side
 conversion, and a width counted in bytes rather than characters. Lang198x's ca65
 front end, which every ca65 dialect here reads through, follows C, and these
 cases record ca65's own bytes beside ours.
+
+**`sprintf-raw-flags` (ca65) — what `.sprintf` converts stays raw.** ca65
+keeps, for each character of a string, whether the source wrote it, and its
+character map translates only those. What a `.sprintf` conversion writes is
+raw, so `.charmap` leaves it alone. But ca65 V2.19 keeps those flags from the
+first `.sprintf` on a line: a second one's conversions are translated, so
+`.byte .sprintf("%c", $41), .sprintf("%d", 1)` maps the `1` while
+`.byte .sprintf("%d", 1)` on its own does not. Asm198x leaves every
+conversion raw, wherever it is on the line.
+
+**`cop-signature` (ca65's 65816) — `COP` takes its signature byte.** ca65
+V2.19 writes a lone `$02` for `COP` with no operand. The 65816 reads the byte
+after `COP` as its signature whatever it is, so that `COP` runs into the next
+instruction. Asm198x refuses it and asks for the signature.
 
 **`issue-984` — PasmoNext's `PUSH nn` on the Next, a reference bug we fix.**
 The Z80N's `PUSH nn` stores its immediate high byte first, as the Next's
