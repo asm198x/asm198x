@@ -57,7 +57,7 @@ use crate::directives::Category;
 use lang198x_ca65::ast::{Expr as SourceExpr, NameRef, View};
 use lang198x_ca65::expand::{ActiveLine, Expander, Host, Location, Reading};
 use lang198x_ca65::lower::{
-    self, Binary, Charmap, CpuStack, Known, Record, RecordKind, Scope, Segment, Size, Value,
+    self, Binary, Charmap, CpuStack, Dbg, Known, Record, RecordKind, Scope, Segment, Size, Value,
     Visibility, Visible,
 };
 use lang198x_ca65::syntax::{self, DiagnosticKind, TextId, TextRange};
@@ -448,6 +448,13 @@ struct Walk<'f> {
     /// `.pushcharmap` has kept, 16 at most.
     charmap: HashMap<u8, u8>,
     charmaps: Vec<HashMap<u8, u8>>,
+    /// The files `.dbg file` added to ca65's file table.
+    dbg_files: HashSet<String>,
+    /// The `.proc` scopes a `.dbg func` describes, by full name.
+    dbg_functions: HashSet<String>,
+    /// Each `.dbg sym` that names a symbol: the scope it was in, the name,
+    /// and the line, checked at the end.
+    dbg_symbols: Vec<(String, String, Span)>,
     /// The records being read, innermost last.
     records: Vec<RecordFrame>,
     /// The errors found so far. ca65 reports each and carries on.
@@ -641,6 +648,17 @@ impl Walk<'_> {
             }
             if let Err(error) = self.read_line(expander, &line, sectioned, &mut statements) {
                 self.errors.push(error);
+            }
+        }
+        // ca65 looks for each symbol a `.dbg sym` names once the program
+        // is read, in the scope of the line and the scopes around it.
+        for (scope, name, at) in std::mem::take(&mut self.dbg_symbols) {
+            let found = outwards(&scope).any(|path| self.names.contains_key(&qualify(path, &name)));
+            if !found {
+                self.errors.push(AsmError::at(
+                    at,
+                    format!("Assembler symbol `{name}` not found"),
+                ));
             }
         }
         // ca65 warns at the last line it read.
@@ -874,7 +892,8 @@ impl Walk<'_> {
                         || lowered.visibility.is_some()
                         || lowered.binary.is_some()
                         || lowered.cpu.is_some()
-                        || lowered.charmap.is_some();
+                        || lowered.charmap.is_some()
+                        || lowered.dbg.is_some();
                     if busy {
                         let message = match frame.kind {
                             RecordKind::Enum => "Expected an identifier",
@@ -993,6 +1012,51 @@ impl Walk<'_> {
                 Some(kept) => self.charmap = kept,
                 None => return Err(AsmError::at(at, "Charmap stack is empty")),
             },
+            _ => {}
+        }
+        if let Some(dbg) = lowered.dbg {
+            self.debug_information(dbg, at)?;
+        }
+        Ok(())
+    }
+
+    /// Follows a `.dbg` line as ca65 V2.19's `dbginfo.c` does: the file
+    /// table, the `.proc` a function describes, and the symbols checked at
+    /// the end.
+    fn debug_information(&mut self, dbg: Dbg, at: Span) -> Result<(), AsmError> {
+        let refuse = |message: &str| Err(AsmError::at(at.clone(), message));
+        match dbg {
+            Dbg::File { name } => {
+                self.dbg_files.insert(name);
+            }
+            Dbg::Line { file } => {
+                let read = self.files.as_ref().is_some_and(|files| {
+                    self.read
+                        .iter()
+                        .any(|(id, _)| files.map.path(*id) == Some(file.as_str()))
+                });
+                if !read && !self.dbg_files.contains(&file) {
+                    return refuse(&format!("File name `{file}` not found in file table"));
+                }
+            }
+            Dbg::Func { asm_name } => match self.open.last() {
+                None => return refuse("Functions may not be used in the root scope"),
+                Some(frame) if !frame.procedure => {
+                    return refuse("Functions can only be tagged to .PROC scopes");
+                }
+                Some(frame) if self.dbg_functions.contains(&frame.path) => {
+                    return refuse("Only one HLL symbol per asm symbol is allowed");
+                }
+                Some(frame) if frame.name.as_deref() != Some(asm_name.as_str()) => {
+                    return refuse("Scope label and asm name for function must match");
+                }
+                Some(frame) => {
+                    self.dbg_functions.insert(frame.path.clone());
+                }
+            },
+            Dbg::Sym {
+                asm_name: Some(name),
+            } => self.dbg_symbols.push((self.path().to_owned(), name, at)),
             _ => {}
         }
         Ok(())
