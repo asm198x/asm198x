@@ -1,0 +1,288 @@
+{
+  "cases": [
+    {
+      "native": {
+        "hex": "4560"
+      },
+      "program": ".byte <.bank(l1)\n.segment \"B1\"\nl1: rts"
+    },
+    {
+      "native": {
+        "hex": "4523010003000000EA60"
+      },
+      "program": ".dword .bank(l1), .bank(h)\nh: nop\n.segment \"B1\"\nl1: rts"
+    },
+    {
+      "native": {
+        "refused": "Memory area ‘M2’ is referenced by .BANK(), but has no BANK attribute"
+      },
+      "program": ".dword .bank(l2)\n.segment \"B2\"\nl2: rts"
+    },
+    {
+      "native": {
+        "refused": "Range error in module ‘t.s’, line 1"
+      },
+      "program": ".word .bank(l1)\n.segment \"B1\"\nl1: rts"
+    },
+    {
+      "native": {
+        "hex": "0300EA"
+      },
+      "program": ".word .bank(h)\nh: nop"
+    },
+    {
+      "native": {
+        "hex": "4523010003000000462301008A46020060"
+      },
+      "program": ".dword .bank(l1+3), .bank(*), .bank(l1)+1, .bank(l1)*2\n.segment \"B1\"\nl1: rts"
+    },
+    {
+      "native": {
+        "hex": "4523010045230100452301004523010060"
+      },
+      "program": ".dword .bank(3+l1), .bank(l1-3), .bank((l1)), .bank(l1+K)\nK = 2\n.segment \"B1\"\nl1: rts"
+    },
+    {
+      "native": {
+        "refused": "Argument of .BANK() is too complex"
+      },
+      "program": ".segment \"B1\"\nl1: rts\nl2: rts\n.code\n.word .bank(l2-l1)"
+    },
+    {
+      "native": {
+        "refused": "Argument of .BANK() is too complex"
+      },
+      "program": ".segment \"B1\"\nl1: rts\n.code\nh: nop\n.word .bank(h+l1)"
+    },
+    {
+      "native": {
+        "refused": "Argument of .BANK() is too complex"
+      },
+      "program": ".segment \"B1\"\nl1: rts\n.code\n.word .bank(l1-h)\nh: nop"
+    },
+    {
+      "native": {
+        "refused": "Argument of .BANK() is too complex"
+      },
+      "program": ".word .bank(h-h+h)\nh: nop"
+    },
+    {
+      "native": {
+        "refused": "Argument of .BANK() is too complex"
+      },
+      "program": ".dword .bank(l1+l1-l1)\n.segment \"B1\"\nl1: rts"
+    },
+    {
+      "native": {
+        "refused": "Argument of .BANK() is too complex"
+      },
+      "program": ".dword .bank(-l1)\n.segment \"B1\"\nl1: rts"
+    },
+    {
+      "native": {
+        "refused": "Argument of .BANK() is too complex"
+      },
+      "program": ".dword .bank(<l1)\n.segment \"B1\"\nl1: rts"
+    },
+    {
+      "native": {
+        "refused": "Argument of .BANK() is too complex"
+      },
+      "program": ".dword .bank(l1*2)\n.segment \"B1\"\nl1: rts"
+    },
+    {
+      "native": {
+        "refused": "Argument of .BANK() is too complex"
+      },
+      "program": ".dword .bank(l1 .bitand $FF00)\n.segment \"B1\"\nl1: rts"
+    },
+    {
+      "native": {
+        "hex": "4523010060"
+      },
+      "program": "q = l1\n.dword .bank(q)\n.segment \"B1\"\nl1: rts"
+    },
+    {
+      "native": {
+        "hex": "604523010045230100"
+      },
+      "program": ".segment \"B1\"\nl1: rts\n.dword .bank(*), .bank(*+1)"
+    },
+    {
+      "native": {
+        "hex": "45230160"
+      },
+      "program": ".byte <.bank(l1), >.bank(l1), ^.bank(l1)\n.segment \"B1\"\nl1: rts"
+    },
+    {
+      "native": {
+        "hex": "03000300EA"
+      },
+      "program": ".word .BANK(h), .Bank(h)\nh: nop"
+    },
+    {
+      "native": {
+        "hex": "0300EA"
+      },
+      "program": ".word .bank (h)\nh: nop"
+    },
+    {
+      "native": {
+        "refused": "Expected ‘(’ but found ‘h’"
+      },
+      "program": ".word .bank h\nh: nop"
+    },
+    {
+      "native": {
+        "refused": "Argument of .BANK() isn't a label attached to a segment"
+      },
+      "program": ".byte .bank(5)"
+    },
+    {
+      "native": {
+        "refused": "Argument of .BANK() isn't a label attached to a segment"
+      },
+      "program": ".struct S\nm .byte\n.endstruct\n.word .bank(S::m)"
+    },
+    {
+      "native": {
+        "refused": "Range error (Address size 2 does not match fragment size 1)"
+      },
+      "program": ".byte .bank(h)\nh: nop"
+    },
+    {
+      "native": {
+        "refused": "Range error (Address size 2 does not match fragment size 1)"
+      },
+      "program": "lda #.bank(h)\nh: nop"
+    },
+    {
+      "native": {
+        "hex": "A903EA"
+      },
+      "program": "lda #<.bank(h)\nh: nop"
+    },
+    {
+      "native": {
+        "hex": "AD0300EA"
+      },
+      "program": "lda .bank(h)\nh: nop"
+    },
+    {
+      "native": {
+        "refused": "Constant expression expected"
+      },
+      "program": ".res .bank(h)\nh: nop"
+    },
+    {
+      "native": {
+        "refused": "Constant expression expected"
+      },
+      "program": ".if .bank(h)\n.endif\nh: nop"
+    },
+    {
+      "native": {
+        "refused": "Range error (Address size 2 does not match fragment size 1)"
+      },
+      "program": ".byte .bank(h) + 1\nh: nop"
+    },
+    {
+      "native": {
+        "refused": "Expected an expression but found ‘)’"
+      },
+      "program": ".byte .bank()"
+    },
+    {
+      "native": {
+        "refused": "Expected ‘)’ but found ‘,’"
+      },
+      "program": ".byte .bank(h, h)\nh: nop"
+    },
+    {
+      "native": {
+        "refused": "Symbol ‘undefinedname’ is undefined"
+      },
+      "program": ".word .bank(undefinedname)"
+    },
+    {
+      "native": {
+        "hex": "0300EA"
+      },
+      "program": ".word .bank(::h)\nh: nop"
+    },
+    {
+      "native": {
+        "hex": "600300"
+      },
+      "program": ".proc p\nrts\n.endproc\n.word .bank(p)"
+    },
+    {
+      "native": {
+        "hex": "EA"
+      },
+      "program": ".ifconst .bank(5)\n.endif\nnop"
+    },
+    {
+      "native": {
+        "hex": "452301004523010060"
+      },
+      "program": "Z9 = .bank(l1)\n.dword Z9, Z9\n.segment \"B1\"\nl1: rts"
+    },
+    {
+      "native": {
+        "refused": "Argument of .BANK() isn't a label attached to a segment"
+      },
+      "program": "Z9 = .bank(5)\n.dword Z9, Z9"
+    },
+    {
+      "native": {
+        "hex": "01000000"
+      },
+      "program": "Z9 = .bank(5)\n.dword 1"
+    },
+    {
+      "native": {
+        "refused": "Argument of .BANK() isn't a label attached to a segment"
+      },
+      "program": ".scope s\nZ9 = .bank(5)\n.endscope\n.dword s::Z9"
+    },
+    {
+      "native": {
+        "refused": "Argument of .BANK() isn't a label attached to a segment"
+      },
+      "program": "Z9 = .bank(5)\nZ8 = Z9\n.dword Z8"
+    },
+    {
+      "native": {
+        "hex": "0100000060"
+      },
+      "program": "Z9 = .bank(l1)\n.dword 1\n.segment \"B1\"\nl1: rts"
+    },
+    {
+      "native": {
+        "hex": "45230100"
+      },
+      "program": ".dword .bank(l1)\n.segment \"B1\"\nl1:"
+    },
+    {
+      "native": {
+        "refused": "Symbol ‘e’ is already an import"
+      },
+      "program": ".import e\n.export e\n.dword .bank(e)\n.segment \"B1\"\ne: rts"
+    },
+    {
+      "native": {
+        "hex": "4523010060"
+      },
+      "program": ".scope s\n.dword .bank(l1)\n.endscope\n.segment \"B1\"\nl1: rts"
+    },
+    {
+      "native": {
+        "hex": "45230100EA"
+      },
+      "program": ".dword .bank(fwd)\n.segment \"B1\"\nnop\nfwd = *"
+    }
+  ],
+  "config": "MEMORY {\n  M0: start = $0000, size = $100, file = %O, bank = 3;\n  M1: start = $8000, size = $100, file = %O, bank = $12345;\n  M2: start = $C000, size = $100, file = %O;\n}\nSEGMENTS {\n  CODE: load = M0, type = ro;\n  B1: load = M1, type = ro;\n  B2: load = M2, type = ro;\n}\n",
+  "source": "Programs measured on ca65 V2.19 and ld65 at 8d86ca7 that each check one rule of `.bank`: the bank attribute of the memory area a label's segment runs in. Each program is assembled by ca65 and linked by ld65 under `config`, whose areas carry bank 3, bank $12345 and no bank. `native` is what they made: the image's bytes, or the first line of the error that refused it."
+}
