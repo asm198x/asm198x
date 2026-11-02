@@ -36,6 +36,9 @@ fn the_walk_gives_ca65s_verdicts() {
         let ours = asm198x::assemble_ca65_lang198x(&key.source).map(|r| r.bytes);
         let matches = match &verdict.outcome {
             Outcome::Rejected { .. } => ours.is_err(),
+            // A named divergence is one where we do not follow ca65, so the
+            // walk must not give ca65's bytes.
+            Outcome::Divergence { .. } => ours.as_ref().ok() != verdict.outcome.bytes().as_ref(),
             outcome => ours.as_ref().ok() == outcome.bytes().as_ref(),
         };
         checked += 1;
