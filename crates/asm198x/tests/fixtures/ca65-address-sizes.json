@@ -1,0 +1,312 @@
+{
+  "cases": [
+    {
+      "native": {
+        "hex": "6000000022000000200000AD0000"
+      },
+      "program": ".p816\n.proc p: far\nrts\n.endproc\n.faraddr p\njsl p\njsr p\nlda p"
+    },
+    {
+      "native": {
+        "hex": "600000"
+      },
+      "program": ".p816\n.proc p: far\nrts\n.endproc\n.word p"
+    },
+    {
+      "native": {
+        "hex": "605C0000004C0000200000"
+      },
+      "program": ".p816\n.proc p: far\nrts\n.endproc\njml p\njmp p\njsr p"
+    },
+    {
+      "native": {
+        "hex": "6003"
+      },
+      "program": ".p816\n.proc p: far\nrts\n.endproc\n.byte .addrsize(p)"
+    },
+    {
+      "native": {
+        "hex": "EAAF000000"
+      },
+      "program": ".p816\n.proc p: far\nnop\nlda p\n.endproc"
+    },
+    {
+      "native": {
+        "hex": "EAAD00000203AD0000AD00000203"
+      },
+      "program": ".p816\n.proc p: far\nl: nop\nlda l\n.byte .addrsize(l), .addrsize(p)\n.endproc\nlda p::l\nlda p\n.byte .addrsize(p::l), .addrsize(p)"
+    },
+    {
+      "native": {
+        "hex": "EAAD0000AD0000AD00000201"
+      },
+      "program": ".p816\n.proc p: zp\nl: nop\nlda l\n.endproc\nlda p::l\nlda p\n.byte .addrsize(p::l), .addrsize(p)"
+    },
+    {
+      "native": {
+        "hex": "EAAD0000AD0000AD00000201"
+      },
+      "program": ".proc p: zp\nl: nop\nlda l\n.endproc\nlda p::l\nlda p\n.byte .addrsize(p::l), .addrsize(p)"
+    },
+    {
+      "native": {
+        "hex": "EAEAAD0100AD00000302"
+      },
+      "program": ".p816\n.proc p: far\nnop\n.endproc\n.proc q\nnop\n.endproc\nlda q\nlda p\n.byte .addrsize(p), .addrsize(q)"
+    },
+    {
+      "native": {
+        "hex": "EAAD0000AD00000202"
+      },
+      "program": ".p816\n.proc p: far\n.proc q\nl: nop\n.endproc\n.endproc\nlda p::q::l\nlda p::q\n.byte .addrsize(p::q::l), .addrsize(p::q)"
+    },
+    {
+      "native": {
+        "hex": "01"
+      },
+      "program": ".p816\n.proc p: far\nl = 5\n.byte .addrsize(l)\n.endproc"
+    },
+    {
+      "native": {
+        "hex": "EAAD00000202"
+      },
+      "program": ".p816\n.proc p: abs\nl: nop\n.endproc\nlda p::l\n.byte .addrsize(p::l), .addrsize(p)"
+    },
+    {
+      "native": {
+        "hex": "EA0000"
+      },
+      "program": ".p816\n.proc p: far\nl: nop\n.endproc\n.word p::l"
+    },
+    {
+      "native": {
+        "refused": "Range error (Address size 2 does not match fragment size 1)"
+      },
+      "program": ".p816\n.proc p: far\nl: nop\n.endproc\n.byte p::l"
+    },
+    {
+      "native": {
+        "hex": "EA4C0000200000"
+      },
+      "program": ".p816\n.proc p: far\nl: nop\n.endproc\njmp p::l\njsr p::l"
+    },
+    {
+      "native": {
+        "hex": "60"
+      },
+      "program": ".p816\n.smart\n.proc p: far\nrts\n.endproc"
+    },
+    {
+      "native": {
+        "hex": "AD0300EAAD0300"
+      },
+      "program": ".p816\nlda p\n.proc p: far\nnop\n.endproc\nlda p"
+    },
+    {
+      "native": {
+        "hex": "EAAF000000"
+      },
+      "program": ".p816\n.proc p: far\nnop\n.endproc\n.proc q\nlda p\n.endproc"
+    },
+    {
+      "native": {
+        "hex": "EAAD0000"
+      },
+      "program": ".p816\n.proc p: far\nnop\n.endproc\nlda ::p"
+    },
+    {
+      "native": {
+        "hex": "EAAD0000"
+      },
+      "program": ".p816\n.proc p: far\nnop\nlda ::p\n.endproc"
+    },
+    {
+      "native": {
+        "hex": "EAAD0000"
+      },
+      "program": ".p816\n.proc p: far\nnop\n.endproc\nlda p+0"
+    },
+    {
+      "native": {
+        "refused": "Range error (Address size 2 does not match fragment size 1)"
+      },
+      "program": ".p816\n.proc p: zp\nnop\nlda p\n.endproc"
+    },
+    {
+      "native": {
+        "refused": "Range error (Address size 2 does not match fragment size 1)"
+      },
+      "program": ".proc p: zp\nnop\nlda p\nlda ::p\n.endproc\nlda p"
+    },
+    {
+      "native": {
+        "hex": "EAAF000000"
+      },
+      "program": ".p816\n.proc p: far\nnop\n.endproc\n.scope t\nlda p\n.endscope"
+    },
+    {
+      "native": {
+        "hex": "EAAD000002"
+      },
+      "program": ".p816\n.proc p: far\nnop\n.endproc\nq = p\nlda q\n.byte .addrsize(q)"
+    },
+    {
+      "native": {
+        "hex": "EA03"
+      },
+      "program": ".p816\n.proc p: far\nnop\n.endproc\n.export p\n.byte .addrsize(p)"
+    },
+    {
+      "native": {
+        "hex": "EAAD0000AD000002"
+      },
+      "program": ".p816\n.scope sc: far\nl: nop\nlda l\n.endscope\nlda sc::l\n.byte .addrsize(sc::l)"
+    },
+    {
+      "native": {
+        "hex": "EAAD0000AD000002"
+      },
+      "program": ".p816\n.scope sc: zp\nl: nop\nlda l\n.endscope\nlda sc::l\n.byte .addrsize(sc::l)"
+    },
+    {
+      "native": {
+        "hex": "A51001"
+      },
+      "program": ".p816\n.scope sc: far\nl = $10\n.endscope\nlda sc::l\n.byte .addrsize(sc::l)"
+    },
+    {
+      "native": {
+        "hex": "EA"
+      },
+      "program": ".p816\n.scope: far\nnop\n.endscope"
+    },
+    {
+      "native": {
+        "hex": "EA03AF000000AD0000"
+      },
+      "program": ".p816\n.proc p: far\nnop\n.endproc\n.proc t\n.byte .addrsize(p)\nlda p\nlda ::p\n.endproc"
+    },
+    {
+      "native": {
+        "hex": "EAEAAD0100"
+      },
+      "program": ".p816\n.proc p: far\nnop\n.endproc\n.proc t\np: nop\nlda p\n.endproc"
+    },
+    {
+      "native": {
+        "refused": "Invalid address size specification for current CPU"
+      },
+      "program": ".p816\n.proc p: long\nnop\n.endproc"
+    },
+    {
+      "native": {
+        "refused": "Invalid address size specification for current CPU"
+      },
+      "program": ".proc p: far\nnop\n.endproc"
+    },
+    {
+      "native": {
+        "refused": "Expected an address size specifier but found ‘dp’"
+      },
+      "program": ".p816\n.proc p: dp\nnop\n.endproc"
+    },
+    {
+      "native": {
+        "hex": "EA01"
+      },
+      "program": ".proc p: direct\nnop\n.endproc\n.byte .addrsize(p)"
+    },
+    {
+      "native": {
+        "refused": "Range error (Address size 2 does not match fragment size 1)"
+      },
+      "program": ".proc p: zeropage\nnop\n.endproc\n.proc q\nlda p\n.endproc"
+    },
+    {
+      "native": {
+        "refused": "Range error (Address size 2 does not match fragment size 1)"
+      },
+      "program": "l: nop\nlda (l),y"
+    },
+    {
+      "native": {
+        "refused": "Range error (Address size 2 does not match fragment size 1)"
+      },
+      "program": "lda (l),y\nl: nop"
+    },
+    {
+      "native": {
+        "hex": "EABD0000"
+      },
+      "program": "l: nop\nlda l,x"
+    },
+    {
+      "native": {
+        "hex": "AD3412"
+      },
+      "program": "lda zz\nzz = $1234"
+    },
+    {
+      "native": {
+        "refused": "Range error (Address size 2 does not match fragment size 1)"
+      },
+      "program": ".p816\nlda [l]\nl: nop"
+    },
+    {
+      "native": {
+        "refused": "Range error (Address size 2 does not match fragment size 1)"
+      },
+      "program": ".p816\nl: nop\nlda (l,s),y"
+    },
+    {
+      "native": {
+        "refused": "Illegal addressing mode"
+      },
+      "program": "l: nop\nlda (l,x)"
+    },
+    {
+      "native": {
+        "refused": "Symbol ‘z’ is already an import"
+      },
+      "program": ".importzp z\n.exportzp z\nz = $10\nlda (z),y\nlda z,x"
+    },
+    {
+      "native": {
+        "refused": "Expected ‘end-of-line’ but found ‘z:’"
+      },
+      "program": ".zeropage\nz: .res 1\n.code\nlda (z),y\nlda z\nlda z,x"
+    },
+    {
+      "native": {
+        "hex": "EA7C0000"
+      },
+      "program": ".pc02\nl: nop\njmp (l,x)"
+    },
+    {
+      "native": {
+        "refused": "Illegal addressing mode"
+      },
+      "program": ".pc02\nl: nop\nlda (l)"
+    },
+    {
+      "native": {
+        "refused": "Range error (Address size 2 does not match fragment size 1)"
+      },
+      "program": ".setcpu \"65C02\"\nl: nop\nbbr0 l, l"
+    },
+    {
+      "native": {
+        "hex": "EA93010000"
+      },
+      "program": ".setcpu \"huc6280\"\nl: nop\ntst #1, l"
+    },
+    {
+      "native": {
+        "hex": "B110B510B610"
+      },
+      "program": "lda ($10),y\nlda $10,x\nldx $10,y"
+    }
+  ],
+  "config": "MEMORY { ROM: start = $0000, size = $1000, fill = no, file = %O; }\nSEGMENTS { CODE: load = ROM, type = ro; }\n",
+  "source": "Programs measured on ca65 V2.19 and ld65 at 8d86ca7 that each check how ca65 sizes an address it links: the size a `.proc` declares its name with, as in `.proc p: far` and `.proc p: zp`, which `.addrsize` and a scope inside size the name by, and the range check on a one-byte address operand, such as `lda (l),y` for a label in a two-byte segment. Each program is assembled by ca65 and linked by ld65 under `config`, a flat link at 0, without `.org`, which would make the labels constants. `native` is what they made: the image's bytes, or the first line of the error that refused it."
+}
