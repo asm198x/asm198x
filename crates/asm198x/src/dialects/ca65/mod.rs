@@ -558,16 +558,16 @@ pub const DIRECTIVES: &[Directive] = &[
         },
         category: Category::Operation,
     },
-    // The option words that change what the parse does, and so cannot be
-    // accepted and discarded: `.linecont +` turns on backslash continuation,
-    // `.case off` makes identifiers case-blind, `.charmap`/`.localchar`
-    // translate characters on the way out, and `.feature` switches syntax
-    // rules on one by one.
+    // The option words that change how the lines after them are read, and
+    // so cannot be accepted and discarded: `.linecont +` turns on backslash
+    // continuation, `.localchar` changes what starts a cheap local, and
+    // `.feature` switches syntax rules on one by one. `.case` and `.null`
+    // sat here; Lang198x reads them now, and refuses `.case off`.
     Directive {
         id: "unsupported-parse-options",
         pattern: Pattern::Sigilled {
             sigil: '.',
-            names: &["linecont", "case", "localchar", "feature", "null"],
+            names: &["linecont", "localchar", "feature"],
             required: true,
         },
         category: Category::KnownUnsupported,
