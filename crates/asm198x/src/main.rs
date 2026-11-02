@@ -863,21 +863,11 @@ fn run(args: &[String]) -> Result<String, String> {
             } => {
                 print!("{}", asm198x::listing_6502(&bytes, narrow_origin?));
             }
-            Assembler::Ca65 {
-                cpu: lang198x_ca65::Cpu::Wdc65816,
-            } => {
-                print!("{}", asm198x::listing_65816(&bytes, narrow_origin?));
-            }
-            Assembler::Ca65 {
-                cpu: lang198x_ca65::Cpu::HuC6280,
-            } => {
-                print!("{}", asm198x::listing_huc6280(&bytes, narrow_origin?));
-            }
+            // Every other CPU ca65 knows, written so ca65 reads it back.
             Assembler::Ca65 { cpu } => {
-                return Err(format!(
-                    "no disassembler for ca65's `{}` yet",
-                    ca65_cpu_id(cpu)
-                ));
+                let listing = asm198x::listing_ca65_on(&bytes, narrow_origin?, cpu.name())
+                    .map_err(|e| e.to_string())?;
+                print!("{listing}");
             }
             Assembler::Pasmo { z80n } | Assembler::Sjasmplus { z80n } => {
                 print!("{}", asm198x::listing_z80(&bytes, narrow_origin?, z80n));

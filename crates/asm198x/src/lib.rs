@@ -100,9 +100,9 @@ pub use recover::{RecoveryOptions, recover_6502};
 
 pub use isa_disasm::{
     Line, disassemble_1802, disassemble_2650, disassemble_6502, disassemble_6809, disassemble_8048,
-    disassemble_65816, disassemble_68000, disassemble_cp1610, disassemble_f8, disassemble_huc6280,
-    disassemble_i8080, disassemble_m6800, disassemble_pdp11, disassemble_scmp, disassemble_sm83,
-    disassemble_tms7000, disassemble_tms9900, disassemble_z80, disassemble_z8000,
+    disassemble_65816, disassemble_68000, disassemble_ca65, disassemble_cp1610, disassemble_f8,
+    disassemble_huc6280, disassemble_i8080, disassemble_m6800, disassemble_pdp11, disassemble_scmp,
+    disassemble_sm83, disassemble_tms7000, disassemble_tms9900, disassemble_z80, disassemble_z8000,
     disassemble_z8001, listing_1802, listing_2650, listing_6502, listing_6809, listing_8048,
     listing_65816, listing_68000, listing_cp1610, listing_f8, listing_huc6280, listing_i8080,
     listing_m6800, listing_pdp11, listing_scmp, listing_sm83, listing_tms7000, listing_tms9900,
@@ -282,6 +282,45 @@ pub fn assemble_ca65_files_on(
         None => dialects::ca65_walk::Ca65Walk::nes(),
     };
     assemble_ca65_walk_files(&walk.starting_on(cpu), source, input_path, loader)
+}
+
+/// Disassemble a flat binary loaded at `origin` for a program on `cpu`, as
+/// [`assemble_ca65_files_on`] names it, into ca65 source that assembles back
+/// to the same bytes: `.setcpu`, `.org`, then one instruction per line. The
+/// 65816 and HuC6280 use their own disassemblers; every other CPU uses
+/// [`disassemble_ca65`] over the instruction sets lowering uses. An
+/// instruction ca65 V2.19 does not know on that CPU, such as the DTV's `DCP`
+/// or the M740's `MUL`, is written as `.byte` with the instruction in a
+/// comment, so the listing still assembles.
+///
+/// # Errors
+/// `CPU not supported` for a name ca65 does not know.
+pub fn listing_ca65_on(code: &[u8], origin: u16, cpu: &str) -> Result<String, AsmError> {
+    let cpu = ca65_cpu(cpu)?;
+    let name = cpu.name().to_ascii_lowercase();
+    let mut listing = format!("        .setcpu \"{name}\"\n");
+    let lines = match cpu {
+        lang198x_ca65::Cpu::Wdc65816 => isa_disasm::disassemble_65816(code, origin),
+        lang198x_ca65::Cpu::HuC6280 => isa_disasm::disassemble_huc6280(code, origin),
+        _ => {
+            let (base, extension) = lang198x_ca65::lower::sets(cpu);
+            disassemble_ca65(code, origin, base, extension)
+        }
+    };
+    listing.push_str(&format!("        .org ${origin:04X}\n"));
+    for line in lines {
+        let mnemonic = line.text.split_whitespace().next().unwrap_or_default();
+        let text = if mnemonic.starts_with('.') || cpu.is_mnemonic(mnemonic) {
+            line.text
+        } else {
+            let bytes: Vec<String> = line.bytes.iter().map(|b| format!("${b:02X}")).collect();
+            format!(".byte {} ; {}", bytes.join(", "), line.text)
+        };
+        listing.push_str("        ");
+        listing.push_str(&text);
+        listing.push('\n');
+    }
+    Ok(listing)
 }
 
 /// The CPU ca65 calls `name`, or ca65's error for a name it does not know.

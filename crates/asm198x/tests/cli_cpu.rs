@@ -310,7 +310,7 @@ fn ca65_starts_on_the_cpu_named() {
 }
 
 /// SWEET 16 reads `@` as its indirect mark, so formatting needs the CPU too,
-/// and only the CPUs Asm198x has a disassembler for are disassembled.
+/// and `disasm` writes ca65 source for the CPU named.
 #[test]
 fn ca65_formats_and_disassembles_by_the_cpu_named() {
     let scratch = Scratch::new(" set r1, $1234\n ld @r1\n rtn\n");
@@ -334,11 +334,11 @@ fn ca65_formats_and_disassembles_by_the_cpu_named() {
     assert!(text.contains("ld @r1"), "{text}");
 
     let out = scratch.run(&["disasm", "--cpu", "sweet16", "out.bin"]);
-    assert!(!out.status.success(), "{out:?}");
-    let message = String::from_utf8(out.stderr).expect("stderr");
-    assert!(
-        message.contains("no disassembler for ca65's `sweet16`"),
-        "{message}"
+    assert!(out.status.success(), "{out:?}");
+    let listing = String::from_utf8(out.stdout).expect("utf-8");
+    assert_eq!(
+        listing,
+        "        .setcpu \"sweet16\"\n        .org $0000\n        set r1, $1234\n        ld @r1\n        rtn\n"
     );
     let out = scratch.run(&["disasm", "--dialect", "ca65", "--cpu", "65816", "out.bin"]);
     assert!(out.status.success(), "{out:?}");

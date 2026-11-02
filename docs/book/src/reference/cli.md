@@ -422,8 +422,11 @@ program is linked as any ca65 program is: under `-C`'s configuration, or the
 NES curriculum's layout without one. A CPU only ca65 assembles, such as `m740`
 or `sweet16`, selects ca65 with no `--dialect`. `--dialect 65816` and
 `--dialect huc6280` are different: they write a flat binary with no linker.
-The `.debug198x` header names the CPU the program starts on. `disasm` reads the
-6502, 65816 and HuC6280 under `--dialect ca65`, and refuses the others.
+The `.debug198x` header names the CPU the program starts on. `disasm` under
+ca65 writes source for the CPU named, beginning with `.setcpu`, that assembles
+back to the same bytes. An instruction ca65 does not know on that CPU, such as
+the DTV's `DCP` or the M740's `MUL`, is written as `.byte` with the instruction
+in a comment.
 
 ## Exit status and diagnostics
 
