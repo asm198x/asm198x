@@ -323,10 +323,10 @@ fn a_real_directive_reads_differently_from_a_typo() {
         // no `KnownUnsupported` word left to stand in — every ACME pseudo
         // opcode is either implemented or refused by ACME's own rule. The
         // invariant still holds; ACME just has nothing left to prove it with.
-        // `.export` sat here, then `.condes`, each implemented in turn: the
-        // walk checks what ld65 would of a constructor table. `.charmap`
-        // changes the bytes a string makes, which the walk does not yet.
-        ("ca65", "", ".charmap $41, $42", ".zzqq"),
+        // `.export` sat here, then `.condes` and `.charmap`, each
+        // implemented in turn. `.localchar` changes how the lines after it
+        // are read, which the walk does not yet.
+        ("ca65", "", ".localchar '?'", ".zzqq"),
         // `device` sat here, then `display`, `savebin` and `savetap` — each
         // implemented in turn. Every remaining `save*` writes a container of
         // its own and waits on that format (`multi-artifact-output.md`);
