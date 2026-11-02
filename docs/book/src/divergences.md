@@ -13,7 +13,7 @@ instead. If you are deciding whether to move a project that already builds, what
 you need is not reassurance — it is to know what will change.
 
 <!-- generated: xtask divergences --markdown -->
-8 tracked differences across 30 recorded cases.
+9 tracked differences across 31 recorded cases.
 
 | Difference | CPU | Dialect | Reference tool | Cases |
 |---|---|---|---|---|
@@ -23,6 +23,7 @@ you need is not reassurance — it is to know what will change.
 | `m740-bit-branch-a` | M740 | ca65 | ca65 | 16 |
 | `m740-inc-dec-a` | M740 | ca65 | ca65 | 2 |
 | `m740-ldm-order` | M740 | ca65 | ca65 | 1 |
+| `scrcode-cbm-expression` | 6502 | ca65 | ca65 | 1 |
 | `sprintf-c-width` | 65816 | ca65-816 | ca65 | 4 |
 | `sprintf-raw-flags` | 6502 | ca65 | ca65 | 1 |
 <!-- /generated -->
@@ -79,6 +80,15 @@ conversion raw, wherever it is on the line.
 V2.19 writes a lone `$02` for `COP` with no operand. The 65816 reads the byte
 after `COP` as its signature whatever it is, so that `COP` runs into the next
 instruction. Asm198x refuses it and asks for the signature.
+
+**`scrcode-cbm-expression` (ca65) — a screen code is the value's.** The
+`cbm` macro package's `scrcode` turns each argument into a C64 screen code.
+For a single number, character or name, ca65 V2.19 and Asm198x agree on all
+256 values. For some expressions, ca65's own package does not: `scrcode 1+1`
+writes `$02`, though `scrcode 2` writes `$82`, and `scrcode $41+0` is a range
+error, though `scrcode $41` writes `$01`. Asm198x's packages are written for
+it rather than copied from cc65, and they work out the screen code from the
+value of the whole expression.
 
 **`issue-984` — PasmoNext's `PUSH nn` on the Next, a reference bug we fix.**
 The Z80N's `PUSH nn` stores its immediate high byte first, as the Next's

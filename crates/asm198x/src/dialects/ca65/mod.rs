@@ -294,7 +294,7 @@ pub const DIRECTIVES: &[Directive] = &[
         pattern: Pattern::Sigilled {
             sigil: '.',
             names: &[
-                "code", "data", "bss", "rodata", "zeropage", "pushseg", "popseg",
+                "code", "data", "bss", "rodata", "zeropage", "null", "pushseg", "popseg",
             ],
             required: true,
         },
@@ -512,7 +512,8 @@ pub const DIRECTIVES: &[Directive] = &[
         },
         category: Category::Operation,
     },
-    // ca65's macro packages are not shipped here.
+    // Lang198x's expander reads a macro package in, from the packages
+    // Lang198x writes for ca65's `.macpack`.
     Directive {
         id: "macpack",
         pattern: Pattern::Sigilled {
@@ -520,7 +521,7 @@ pub const DIRECTIVES: &[Directive] = &[
             names: &["macpack"],
             required: true,
         },
-        category: Category::KnownUnsupported,
+        category: Category::Operation,
     },
     // conditionals over the assembler's own state
     Directive {
@@ -558,11 +559,22 @@ pub const DIRECTIVES: &[Directive] = &[
         },
         category: Category::Operation,
     },
+    // `.case on` is ca65's default, so Lang198x accepts it. It refuses
+    // `.case off`, which makes names ignore case, as not lowered yet.
+    Directive {
+        id: "case",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["case"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
     // The option words that change how the lines after them are read, and
     // so cannot be accepted and discarded: `.linecont +` turns on backslash
     // continuation, `.localchar` changes what starts a cheap local, and
     // `.feature` switches syntax rules on one by one. `.case` and `.null`
-    // sat here; Lang198x reads them now, and refuses `.case off`.
+    // sat here until Lang198x read them.
     Directive {
         id: "unsupported-parse-options",
         pattern: Pattern::Sigilled {
@@ -1715,9 +1727,9 @@ two:\n\
     #[test]
     fn a_real_directive_is_told_apart_from_a_typo() {
         let err = |src: &str| super::assemble(src).expect_err(src).to_string();
-        // `.export` sat here, then `.condes` and `.charmap`, each
-        // implemented in turn.
-        for d in [".localchar '?'", ".macpack cpu"] {
+        // `.export` sat here, then `.condes`, `.charmap` and `.macpack`,
+        // each implemented in turn.
+        for d in [".localchar '?'", ".linecont +"] {
             let e = err(&format!("\t{d}\n"));
             assert!(
                 e.contains("is a real directive here"),
@@ -2075,8 +2087,13 @@ two:\n\
              .byte $AA\n");
         assert_eq!(plain, noisy, "the listing words change no byte");
         // `.linecont +` and `.case off` change what the parse does, so they are
-        // a gap rather than something to discard.
-        for word in [".linecont +", ".case off", ".feature labels_without_colons"] {
+        // a gap rather than something to discard. Lang198x's front end names
+        // `.case off` itself.
+        let e = super::assemble(".segment \"CODE\"\n .case off\n")
+            .expect_err(".case off")
+            .to_string();
+        assert!(e.contains("is not lowered yet"), "got: {e}");
+        for word in [".linecont +", ".feature labels_without_colons"] {
             let e = super::assemble(&format!(".segment \"CODE\"\n {word}\n"))
                 .expect_err(word)
                 .to_string();
