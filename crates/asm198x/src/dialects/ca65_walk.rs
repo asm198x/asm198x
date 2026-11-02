@@ -436,6 +436,12 @@ struct Walk<'f> {
     asked: Vec<(String, Span)>,
     /// Names lowering has read, as written, since they were last recorded.
     reads: RefCell<Vec<String>>,
+    /// Names the line's token functions read, as written, each with how
+    /// many functions had finished when it was read. ca65 counts each as a
+    /// use from where the function sits on the line, so a `.ref` before
+    /// the function does not see it. They are recorded once the line is
+    /// lowered or its condition decided.
+    function_reads: Vec<(usize, String)>,
     /// Names bound at the end of the program.
     pending: Vec<Pending>,
     /// The segments the layout only reserves: `bss` and `zp`.
@@ -852,7 +858,7 @@ impl Walk<'_> {
             self.names.remove(full);
         }
         self.binding = None;
-        self.record_reads();
+        self.record_function_reads();
         let lowered = lowered.map_err(|diagnostic| {
             let span = syntax::Span::new(line.text(), diagnostic.range());
             let message = match diagnostic.kind() {
@@ -1583,9 +1589,47 @@ impl Walk<'_> {
 
     /// Whether `name` has been read: before this line, or on it so far.
     fn was_read(&self, name: &str) -> bool {
+        self.was_read_before(name, usize::MAX)
+    }
+
+    /// Records the names the line's token functions read, as uses.
+    fn record_function_reads(&mut self) {
+        let read = std::mem::take(&mut self.function_reads);
+        self.reads
+            .borrow_mut()
+            .extend(read.into_iter().map(|(_, name)| name));
+        self.record_reads();
+    }
+
+    /// The value of `lowered`, a condition or count, which ca65 needs now:
+    /// a constant expression. ca65 studies it as it does any value.
+    fn constant(&mut self, lowered: Result<Expr, syntax::Diagnostic>) -> Result<i64, String> {
+        let lowered = lowered.map_err(|d| d.message().to_owned())?;
+        let bound = map_sym_expr(lowered.clone(), &mut |name| Expr::Sym(self.as_read(&name)));
+        let at = self
+            .here
+            .clone()
+            .unwrap_or_else(|| Span::in_file(FileId(0), 0, 0));
+        if let Err(error) = self.study(&bound, &at) {
+            self.errors.push(error);
+        }
+        match lower::value(&lowered, &*self) {
+            Value::Constant(value) | Value::Measured { value, .. } => Ok(value),
+            _ => Err("Constant expression expected".to_owned()),
+        }
+    }
+
+    /// Whether `name` had been used by the time `finished` token functions
+    /// on the line had run: before the line, by lowering so far, or by one
+    /// of those functions.
+    fn was_read_before(&self, name: &str, finished: usize) -> bool {
         let read = |full: &str| {
             self.referenced.contains(full)
                 || self.reads.borrow().iter().any(|r| self.read_as(r) == full)
+                || self
+                    .function_reads
+                    .iter()
+                    .any(|(at, r)| *at < finished && self.read_as(r) == full)
         };
         match self.lookup(name) {
             Lookup::Full(full) => read(&full),
@@ -2697,6 +2741,10 @@ impl Known for Walk<'_> {
         self.was_read(name)
     }
 
+    fn is_referenced_before(&self, name: &str, finished: usize) -> bool {
+        self.was_read_before(name, finished)
+    }
+
     fn read(&self, name: &str) {
         self.reads.borrow_mut().push(name.to_owned());
     }
@@ -2711,6 +2759,9 @@ impl Host for Walk<'_> {
     /// Where the line the expander acts on next is, for the problems its
     /// questions find.
     fn reading(&mut self, reading: &Reading) {
+        // Uses a line's functions made that no lowering recorded, such as
+        // in a `.repeat`'s count, belong to the lines before this one.
+        self.record_function_reads();
         self.here = Some(self.reported(reading));
     }
 
@@ -2769,20 +2820,30 @@ impl Host for Walk<'_> {
     fn evaluate(&mut self, expr: &SourceExpr) -> Result<i64, String> {
         let lowered = lower::expression(expr, &*self);
         self.record_reads();
-        let lowered = lowered.map_err(|d| d.message().to_owned())?;
-        // ca65 studies a condition as it does any value.
-        let bound = map_sym_expr(lowered.clone(), &mut |name| Expr::Sym(self.as_read(&name)));
-        let at = self
-            .here
-            .clone()
-            .unwrap_or_else(|| Span::in_file(FileId(0), 0, 0));
-        if let Err(error) = self.study(&bound, &at) {
-            self.errors.push(error);
-        }
-        match lower::value(&lowered, &*self) {
-            Value::Constant(value) | Value::Measured { value, .. } => Ok(value),
-            _ => Err("Constant expression expected".to_owned()),
-        }
+        self.constant(lowered)
+    }
+
+    /// A value a token function needs. The names it reads are kept aside
+    /// until the line is lowered, so a `.ref` before the function on the
+    /// line does not count them.
+    fn evaluate_in_function(&mut self, expr: &SourceExpr, finished: usize) -> Result<i64, String> {
+        let lowered = lower::expression(expr, &*self);
+        let read = self.reads.take();
+        self.function_reads
+            .extend(read.into_iter().map(|name| (finished, name)));
+        self.constant(lowered)
+    }
+
+    /// A condition, whose `.ref`s count only the uses the line's token
+    /// functions made before them.
+    fn evaluate_condition(
+        &mut self,
+        expr: &SourceExpr,
+        finished: &lang198x_ca65::expand::Finished,
+    ) -> Result<i64, String> {
+        let lowered = lower::condition(expr, &*self, finished);
+        self.record_function_reads();
+        self.constant(lowered)
     }
 
     fn is_defined(&mut self, name: &NameRef) -> bool {

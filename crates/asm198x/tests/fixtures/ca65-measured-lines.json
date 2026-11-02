@@ -1,5 +1,5 @@
 {
- "source": "Lines measured on ca65 V2.19 that each check one rule: BRK's signature byte and .cpu on every CPU but SWEET 16, which has no BRK; on the 6502, .version, .addrsize, the character map (.charmap, .pushcharmap, .popcharmap, .literal and what .sprintf converts), the .dbg lines a C compiler writes, .null, .case, the address size of .proc and .scope, the CPU_ constants ca65 defines itself, and each macro package .macpack reads (generic, longbranch, cpu, cbm, apple2, atari and module); on the 65816, a COP with no signature byte and the CPU_ constants. Each line is read under .setcpu and .org 0, and a line may run over several source lines. A line marked with a divergence is one where Asm198x does not follow ca65: `cop-signature`, where ca65 contradicts the 65816; `sprintf-raw-flags`, where a second .sprintf on a line has its conversions translated because ca65 keeps the first one's flags; and `scrcode-cbm-expression`, where ca65's cbm package gives the wrong screen code for some expressions, such as 1+1.",
+ "source": "Lines measured on ca65 V2.19 that each check one rule: BRK's signature byte and .cpu on every CPU but SWEET 16, which has no BRK; on the 6502, .version, .addrsize, the character map (.charmap, .pushcharmap, .popcharmap, .literal and what .sprintf converts), the .dbg lines a C compiler writes, .null, .case, the address size of .proc and .scope, the CPU_ constants ca65 defines itself, each macro package .macpack reads (generic, longbranch, cpu, cbm, apple2, atari and module), and the order in which a token function's uses count for .ref and a line's label is defined; on the 65816, a COP with no signature byte and the CPU_ constants. Each line is read under .setcpu and .org 0, and a line may run over several source lines. A line marked with a divergence is one where Asm198x does not follow ca65: `cop-signature`, where ca65 contradicts the 65816; `sprintf-raw-flags`, where a second .sprintf on a line has its conversions translated because ca65 keeps the first one's flags; and `scrcode-cbm-expression`, where ca65's cbm package gives the wrong screen code for some expressions, such as 1+1.",
  "cpus": {
   "6502": [
    {
@@ -189,6 +189,45 @@
    },
    {
     "line": ".macpack GENERIC"
+   },
+   {
+    "line": "V = 2\n.byte .ref(V), .sprintf(\"%d\", V), .ref(V)"
+   },
+   {
+    "line": "V = 2\nW = 3\n.byte .sprintf(\"%d\", V), .ref(V), .ref(W), .sprintf(\"%d\", W), .ref(W)"
+   },
+   {
+    "line": "V = 2\n.byte V, .ref(V), .sprintf(\"%d\", V)"
+   },
+   {
+    "line": "V = 2\n.byte .sprintf(\"%d%d\", .ref(V), V), .ref(V)"
+   },
+   {
+    "line": "V = 2\n.byte .tcount({.ref(V) .sprintf(\"%d\", V)}), .ref(V)"
+   },
+   {
+    "line": "V = 2\n.byte .ref(V), .left(1, {V}), .ref(V)"
+   },
+   {
+    "line": "V = 2\n.byte .ref(V), .strlen(.string(V)), .ref(V)"
+   },
+   {
+    "line": ".byte .ref(U), .sprintf(\"%d\", .defined(U)), .ref(U)"
+   },
+   {
+    "line": "V = 2\n.if .ref(V) + V + .strlen(.sprintf(\"%d\", V)) = 3\n.byte 1\n.else\n.byte 2\n.endif"
+   },
+   {
+    "line": "V = 2\n.repeat .strlen(.sprintf(\"%d\", V))\nnop\n.endrepeat\n.byte .ref(V)"
+   },
+   {
+    "line": "H: .byte .sprintf(\"%d\", .defined(H)), .const(H-H)"
+   },
+   {
+    "line": ": .byte .sprintf(\"%d\", 1)\n.word :-"
+   },
+   {
+    "line": ".ident(\"q\"): .byte .defined(q)"
    }
   ],
   "6502X": [

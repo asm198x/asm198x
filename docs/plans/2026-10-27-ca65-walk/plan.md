@@ -130,9 +130,12 @@ walk's own bytes in `walk_hex`:
   that line (4 cases).
 - `sprintf-c-width`, above, for `%3s` of a UTF-8 string (2 cases).
 
-One gap is left, marked `walk_gap` with the walk's bytes so any change shows:
-a token function runs before the rest of its line is read
+One gap was left, marked `walk_gap` with the walk's bytes so any change
+showed: a token function ran before the rest of its line was read
 ([lang198x/ca65#52](https://github.com/lang198x/ca65/issues/52), 27 cases).
+It closed on 2026-11-02. The walk now keeps the uses a token function makes
+aside, so a `.ref` before the function does not see them, and a line's label
+is defined before its functions run. All 27 cases match ca65.
 
 These are refused or reported as unsupported, where ca65 accepts them:
 
