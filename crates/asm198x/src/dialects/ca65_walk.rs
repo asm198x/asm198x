@@ -490,6 +490,11 @@ struct Walk<'f> {
     /// given a name of the walk's own in its place, which no source can
     /// spell, and the name is replaced by the bank once segments are known.
     banks: RefCell<Vec<BankUse>>,
+    /// The address size a `.proc` declared its name with, by full name, as
+    /// in `.proc p: far`. ca65 keeps it apart from the size of the name's
+    /// value: `.addrsize` and a scope inside size the name by it, while
+    /// the scope that defines it sizes it by its value.
+    proc_sizes: HashMap<String, Size>,
     /// Names bound at the end of the program.
     pending: Vec<Pending>,
     /// The segments the layout only reserves: `bss` and `zp`.
@@ -841,6 +846,25 @@ impl Walk<'_> {
                 operands,
                 ..
             } => (operands.get(..1).unwrap_or(&[]), operands.get(1)),
+            // Any other one-byte address, such as a zero-page operand or
+            // `(zp),y`, which ca65 checks as it checks `.byte`.
+            Operation::Instruction {
+                mnemonic,
+                mode,
+                operands,
+            } => {
+                let (set, extension) = self.sets();
+                let Ok(form) = asm198x_ir::form(set, extension, mnemonic, mode, 0) else {
+                    return;
+                };
+                let narrow =
+                    form.operands.iter().zip(operands).filter(|(slot, _)| {
+                        slot.kind == isa::OperandKind::Address && slot.bytes == 1
+                    });
+                self.fits
+                    .extend(narrow.map(|(_, value)| (value.clone(), pc, at.clone(), Fit::Value)));
+                return;
+            }
             _ => return,
         };
         self.fits.extend(
@@ -2361,7 +2385,14 @@ impl Walk<'_> {
     fn change_scope(&mut self, change: Scope, at: &Span) -> Result<(), AsmError> {
         let refuse = |message: String| AsmError::at(at.clone(), message);
         match change {
-            Scope::Open { name, procedure } => {
+            Scope::Open {
+                name,
+                procedure,
+                size,
+            } => {
+                if let (Some(name), Some(size)) = (&name, size) {
+                    self.proc_sizes.insert(qualify(self.path(), name), size);
+                }
                 let path = match &name {
                     Some(name) => qualify(self.path(), name),
                     None => {
@@ -2656,17 +2687,21 @@ impl Walk<'_> {
         if path != self.path() {
             return None;
         }
-        outwards(path)
+        let outer = outwards(path)
             .skip(1)
-            .find_map(|outer| self.names.get(&qualify(outer, name)))
-            .map(|value| match value {
-                Value::Constant(value) => Size::of(*value),
-                Value::Address(size)
-                | Value::Opaque(size)
-                | Value::Placed { size, .. }
-                | Value::Measured { size, .. } => *size,
-                _ => Size::Absolute,
-            })
+            .map(|outer| qualify(outer, name))
+            .find(|full| self.names.contains_key(full))?;
+        if let Some(size) = self.proc_sizes.get(&outer) {
+            return Some(*size);
+        }
+        self.names.get(&outer).map(|value| match value {
+            Value::Constant(value) => Size::of(*value),
+            Value::Address(size)
+            | Value::Opaque(size)
+            | Value::Placed { size, .. }
+            | Value::Measured { size, .. } => *size,
+            _ => Size::Absolute,
+        })
     }
 
     /// What is known of the name whose full name is `full`. An equate whose
@@ -2866,7 +2901,11 @@ impl Known for Walk<'_> {
                 }
                 Some(full) if full == qualify(self.path(), &name) => self.known(&full),
                 // The name may yet be defined here, so ca65 folds it with
-                // nothing, and sizes it as the name further out.
+                // nothing, and sizes it as the name further out: by the
+                // size a `.proc` declared it with, or else by its value.
+                Some(full) if self.proc_sizes.contains_key(&full) => {
+                    Value::Opaque(self.proc_sizes[&full])
+                }
                 Some(full) => match self.known(&full) {
                     Value::Constant(value) => Value::Opaque(Size::of(value)),
                     Value::Address(size)
@@ -2926,6 +2965,15 @@ impl Known for Walk<'_> {
 
     fn is_referenced_before(&self, name: &str, finished: usize) -> bool {
         self.was_read_before(name, finished)
+    }
+
+    /// The size a `.proc` declared `name` with, for `.addrsize`.
+    fn address_size(&self, name: &str) -> Option<Size> {
+        let full = match self.lookup(name) {
+            Lookup::Full(full) => full,
+            Lookup::Plain(name) => self.defined(&name)?,
+        };
+        self.proc_sizes.get(&full).copied()
     }
 
     /// `.bank`, which the walk answers after the link: see [`bank_of`].
