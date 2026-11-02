@@ -18,7 +18,9 @@
 //!
 //! `fixtures/ca65-measured-lines.json` holds lines that each check one rule
 //! measured since: `BRK`'s signature byte and `.cpu` on every CPU, and on
-//! the 6502 `.version`, `.addrsize` and the character map.
+//! the 6502 `.version`, `.addrsize`, the character map, the `.dbg` lines a
+//! C compiler writes, `.null`, `.case`, scope address sizes, the `CPU_`
+//! constants and every macro package `.macpack` reads.
 //!
 //! The live tests run ca65 V2.19 on each line under `.setcpu` and `.org 0`
 //! and records what it made. `verdict_replay` then checks every one through
@@ -150,12 +152,13 @@ fn the_measured_lines_cover_each_cpu() {
     // Every CPU but SWEET 16, which has no `BRK`.
     assert_eq!(cpus.len(), 12);
     let count = |cpu: &str| cpus[cpu].as_array().map_or(0, Vec::len);
-    assert_eq!(count("6502"), 18);
-    assert_eq!(count("65816"), 4);
+    assert_eq!(count("6502"), 62);
+    assert_eq!(count("65816"), 5);
 }
 
 /// `BRK`'s signature byte and `.cpu` on every CPU, and on the 6502 the
-/// functions and character map lowered since, measured on ca65 V2.19.
+/// functions, character map, `.dbg` lines and macro packages lowered since,
+/// measured on ca65 V2.19.
 #[test]
 #[ignore = "needs ca65 and ld65; run with --ignored to record the verdicts"]
 fn the_measured_lines_record_their_verdicts() {

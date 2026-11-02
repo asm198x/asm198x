@@ -5,9 +5,9 @@ observation of a real reference assembler, not an expectation written
 by hand. Regenerate with `cargo xtask ledger`.
 
 - **Release:** `v0.0.73`
-- **Corpus hash:** `da72eb3157a4937b16deca7d1a8e21f8d82aa6fce3577595d8c57720c2e9632d`
+- **Corpus hash:** `98566a280d47f9287072ad02ca8b8cc0fac76f48ccc4158411812805ddf7457b`
 - **Pinned curriculum:** `f11698d0b51b3a6c1209cec3d649229aa35af97f` (2026-08-27)
-- **CPUs:** 33, holding 12377 verdict(s)
+- **CPUs:** 33, holding 12422 verdict(s)
 
 ## 1802
 
@@ -52,10 +52,11 @@ Form coverage: **151/151** (100.0%)
 | arbiter | version | verdicts |
 |---|---|---|
 | `acme` | This is ACME, release 0.97 ("Zem"), 1 Aug 2025 | curriculum 138, form 151, fuzz 100, probe 103 |
-| `ca65` | ca65 V2.19 - Git 8d86ca7 | curriculum 51, form 151, fuzz 100, probe 467 |
+| `ca65` | ca65 V2.19 - Git 8d86ca7 | curriculum 51, form 151, fuzz 100, probe 511 |
 
 Tracked divergences — differences we know about and check:
 
+- `scrcode-cbm-expression` — 1 case(s)
 - `sprintf-raw-flags` — 1 case(s)
 
 ## 6502DTV
@@ -80,7 +81,7 @@ Form coverage: **270/270** (100.0%)
 
 | arbiter | version | verdicts |
 |---|---|---|
-| `ca65` | ca65 V2.19 - Git 8d86ca7 | form 270, probe 74 |
+| `ca65` | ca65 V2.19 - Git 8d86ca7 | form 270, probe 75 |
 
 Tracked divergences — differences we know about and check:
 

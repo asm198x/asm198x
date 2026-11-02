@@ -1,5 +1,5 @@
 {
- "source": "Lines measured on ca65 V2.19 that each check one rule: BRK's signature byte and .cpu on every CPU but SWEET 16, which has no BRK; on the 6502, .version, .addrsize and the character map (.charmap, .pushcharmap, .popcharmap, .literal and what .sprintf converts); on the 65816, a COP with no signature byte. Each line is read under .setcpu and .org 0, and a line may run over several source lines. A line marked with a divergence is one where Asm198x does not follow ca65: `cop-signature`, where ca65 contradicts the 65816, and `sprintf-raw-flags`, where a second .sprintf on a line has its conversions translated because ca65 keeps the first one's flags.",
+ "source": "Lines measured on ca65 V2.19 that each check one rule: BRK's signature byte and .cpu on every CPU but SWEET 16, which has no BRK; on the 6502, .version, .addrsize, the character map (.charmap, .pushcharmap, .popcharmap, .literal and what .sprintf converts), the .dbg lines a C compiler writes, .null, .case, the address size of .proc and .scope, the CPU_ constants ca65 defines itself, and each macro package .macpack reads (generic, longbranch, cpu, cbm, apple2, atari and module); on the 65816, a COP with no signature byte and the CPU_ constants. Each line is read under .setcpu and .org 0, and a line may run over several source lines. A line marked with a divergence is one where Asm198x does not follow ca65: `cop-signature`, where ca65 contradicts the 65816; `sprintf-raw-flags`, where a second .sprintf on a line has its conversions translated because ca65 keeps the first one's flags; and `scrcode-cbm-expression`, where ca65's cbm package gives the wrong screen code for some expressions, such as 1+1.",
  "cpus": {
   "6502": [
    {
@@ -56,6 +56,139 @@
    },
    {
     "line": ".charmap later, 1\nlater = $41"
+   },
+   {
+    "line": ".dbg file, \"a.c\", 10, 0\n.dbg line, \"a.c\", 3\nnop\n.dbg line"
+   },
+   {
+    "line": ".dbg line, \"b.c\", 3"
+   },
+   {
+    "line": ".dbg file, \"a.c\", 10, 0\n.dbg line, \"a.c\", -1"
+   },
+   {
+    "line": ".proc _f: near\n.dbg func, \"f\", \"00\", extern, \"_f\"\nrts\n.endproc"
+   },
+   {
+    "line": ".dbg func, \"f\", \"00\", extern, \"_f\"\n_f: rts"
+   },
+   {
+    "line": ".dbg sym, \"x\", \"00\", extern, \"_x\"\n_x: .byte 1"
+   },
+   {
+    "line": ".dbg sym, \"x\", \"00\", extern, \"_x\""
+   },
+   {
+    "line": ".dbg sym, \"x\", \"00\", auto, -2"
+   },
+   {
+    "line": ".dbg sym, \"x\", \"0\", auto, 0"
+   },
+   {
+    "line": ".dbg sym, \"x\", \"0g\", auto, 0"
+   },
+   {
+    "line": ".dbg sym, \"x\", \"00\", nosuch, 0"
+   },
+   {
+    "line": ".null\n.code\nnop"
+   },
+   {
+    "line": ".case on\nx = 1\n.byte X"
+   },
+   {
+    "line": ".case +\n.case\nnop"
+   },
+   {
+    "line": ".proc p: abs\nrts\n.endproc\n.word p"
+   },
+   {
+    "line": ".scope s: absolute\nnop\n.endscope"
+   },
+   {
+    "line": ".proc p: far\n.endproc"
+   },
+   {
+    "line": ".proc p: long\n.endproc"
+   },
+   {
+    "line": ".proc p: dp\n.endproc"
+   },
+   {
+    "line": ".macpack generic\nadd #1\nsub ($10),y\nl: bge l\nblt l\nbgt l\nble l\nbnz l\nbze l"
+   },
+   {
+    "line": ".macpack generic\nadd 1, 2, 3"
+   },
+   {
+    "line": ".macpack longbranch\nl: nop\njeq l\njne $1000\njcs far\n.res 200\nfar: rts"
+   },
+   {
+    "line": ".macpack longbranch\njeq 1+2"
+   },
+   {
+    "line": ".macpack longbranch\njmi done\ndone: rts"
+   },
+   {
+    "line": ".macpack cpu\n.word CPU_6502, CPU_ISET_65816, CPU_65816"
+   },
+   {
+    "line": ".word CPU_6502, CPU_ISET_6502X, CPU_4510\n.if .cpu .bitand CPU_ISET_6502\n.byte 1\n.endif"
+   },
+   {
+    "line": "CPU_6502 = 1"
+   },
+   {
+    "line": ".import CPU_6502"
+   },
+   {
+    "line": ".export CPU_6502\n.byte .defined(CPU_6502)"
+   },
+   {
+    "line": ".scope s\nCPU_6502 = 3\n.byte CPU_6502, ::CPU_6502\n.endscope"
+   },
+   {
+    "line": ".macpack cbm\nscrcode \"Hello\", 1, 'a', $c1"
+   },
+   {
+    "line": ".macpack cbm\nscrcode 256"
+   },
+   {
+    "line": ".macpack cbm\nscrcode -1"
+   },
+   {
+    "divergence": "scrcode-cbm-expression",
+    "line": ".macpack cbm\nscrcode 1+1"
+   },
+   {
+    "line": ".macpack cbm\nscrcode (1)"
+   },
+   {
+    "line": ".macpack apple2\nscrcode \"AB\", 1, -1"
+   },
+   {
+    "line": ".macpack apple2\nscrcode 256"
+   },
+   {
+    "line": ".macpack atari\nscrcode \"Hello\", 1, $c1"
+   },
+   {
+    "line": ".macpack atari\nscrcode 1, 2, 3, 4, 5, 6, 7, 8, 9, 10"
+   },
+   {
+    "line": ".macpack module\nmodule_header m"
+   },
+   {
+    "line": "DYN_DRV = 0\n.macpack module\nmodule_header m\n.code\n.word m"
+   },
+   {
+    "line": ".macpack module\n.byte DYN_DRV"
+   },
+   {
+    "line": ".macpack nosuch"
+   },
+   {
+    "line": ".macpack GENERIC"
    }
   ],
   "6502X": [
@@ -181,6 +314,9 @@
    {
     "line": "cop",
     "divergence": "cop-signature"
+   },
+   {
+    "line": ".if .cpu .bitand CPU_ISET_65816\n.byte 1\n.endif\n.word CPU_65816"
    }
   ]
  }

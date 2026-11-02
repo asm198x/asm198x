@@ -702,20 +702,26 @@ impl Walk<'_> {
         if let Err(error) = self.check_declarations() {
             self.errors.push(error);
         }
-        if !linked.is_empty() {
-            for statement in &mut statements {
-                if let Some(op) = statement.op.take() {
-                    statement.op = Some(map_syms(op, &mut |name| {
-                        Expr::Sym(linked.get(&name).cloned().unwrap_or(name))
-                    }));
-                }
+        // A name ca65 defines itself is its value, for the engine.
+        for statement in &mut statements {
+            if let Some(op) = statement.op.take() {
+                statement.op = Some(map_syms(op, &mut |name| {
+                    let full = linked.get(&name).cloned().unwrap_or(name);
+                    match self.predefined(&full) {
+                        Some(value) => Expr::Num(value),
+                        None => Expr::Sym(full),
+                    }
+                }));
             }
         }
         // Each name used but never defined, once, where it was first used.
         let mut undefined = HashSet::new();
         for (name, at) in &self.asked {
             let full = linked.get(name).unwrap_or(name);
-            if !self.names.contains_key(full) && undefined.insert(full.clone()) {
+            if !self.names.contains_key(full)
+                && self.predefined(full).is_none()
+                && undefined.insert(full.clone())
+            {
                 self.errors.push(AsmError::at(
                     at.clone(),
                     format!("Symbol `{}` is undefined", as_written(name)),
@@ -1315,6 +1321,26 @@ impl Walk<'_> {
         outwards(self.path())
             .map(|path| qualify(path, name))
             .find(|full| self.names.contains_key(full) || self.imported(full))
+            .or_else(|| self.predefined(name).map(|_| name.to_owned()))
+    }
+
+    /// The value of `full` if it is one of the names ca65 defines before
+    /// the program starts, such as `CPU_6502`, and the program has not
+    /// given it a meaning of its own. Such a name lives in the outermost
+    /// scope. It is read, never kept with the program's names, so the
+    /// symbol outputs list only what the program defines.
+    fn predefined(&self, full: &str) -> Option<i64> {
+        if full.contains("::") || self.names.contains_key(full) || self.declared_import(full) {
+            return None;
+        }
+        lang198x_ca65::macpack::predefined(full)
+    }
+
+    /// Whether `full` is declared as an import.
+    fn declared_import(&self, full: &str) -> bool {
+        self.declared
+            .get(full)
+            .is_some_and(|declaration| is_import(declaration.kind))
     }
 
     /// Whether `full` is imported, and not defined here.
@@ -1407,16 +1433,6 @@ impl Walk<'_> {
             };
             let message = match self.missing_include.take() {
                 Some(why) if diagnostic.message().starts_with("there is no file `") => why,
-                // The expander reads `.macpack` itself, and ships no package.
-                _ if diagnostic
-                    .message()
-                    .starts_with("there is no macro package")
-                    || diagnostic.message().starts_with("`.macpack`") =>
-                {
-                    "`.macpack` is a real directive here and asm198x does not implement it \
-                     yet — the source is valid and the gap is ours"
-                        .to_owned()
-                }
                 _ => diagnostic.message().to_owned(),
             };
             self.errors.push(AsmError::at(site, message));
@@ -1603,12 +1619,15 @@ impl Walk<'_> {
     /// Whether `name` is defined so far.
     fn has(&self, name: &str) -> bool {
         match self.lookup(name) {
-            Lookup::Full(full) => self.names.contains_key(&full),
+            Lookup::Full(full) => {
+                self.names.contains_key(&full) || self.predefined(&full).is_some()
+            }
             // An import hides a name further out, as does a name used here
             // or being defined, though none of them is defined yet.
-            Lookup::Plain(name) => self
-                .innermost(&name)
-                .is_some_and(|full| self.names.contains_key(&full)),
+            Lookup::Plain(name) => match self.innermost(&name) {
+                Some(full) => self.names.contains_key(&full) || self.predefined(&full).is_some(),
+                None => self.predefined(&name).is_some(),
+            },
         }
     }
 
@@ -1767,7 +1786,9 @@ impl Walk<'_> {
         if let Some(label) = label {
             let value = value.unwrap_or_else(|| self.pc());
             let redefinable = matches!(op, Some(Operation::Set(_)));
-            if !redefinable && self.names.contains_key(label) {
+            if (!redefinable && self.names.contains_key(label))
+                || lang198x_ca65::macpack::predefined(label).is_some()
+            {
                 let label = as_written(label);
                 return Err(refuse(format!("Symbol `{label}` is already defined")));
             }
@@ -1885,7 +1906,7 @@ impl Walk<'_> {
             let written = name.size;
             let full = qualify(self.path(), &name.name);
             let name = name.name;
-            let defined = self.names.contains_key(&full);
+            let defined = self.names.contains_key(&full) || self.predefined(&full).is_some();
             let variable = self.variables.contains(&full);
             // A size not written is the segment's, for an import.
             let size = written.unwrap_or_else(|| self.segment_size());
@@ -2061,7 +2082,8 @@ impl Walk<'_> {
             let refuse = |message: String| AsmError::at(declaration.at.clone(), message);
             let defined = outwards(&declaration.path)
                 .map(|path| qualify(path, name))
-                .find(|full| self.names.contains_key(full));
+                .find(|full| self.names.contains_key(full))
+                .or_else(|| self.predefined(name).map(|_| name.clone()));
             match (declaration.kind, defined) {
                 (Visible::ForceImport, _) => {
                     return Err(refuse(format!("Unresolved external `{name}`")));
@@ -2364,6 +2386,8 @@ impl Walk<'_> {
                 .find(|full| self.names.contains_key(full) || self.imported(full))
             {
                 bound.insert(pending.here.clone(), full);
+            } else if self.predefined(&pending.name).is_some() {
+                bound.insert(pending.here.clone(), pending.name.clone());
             }
         }
         bound
@@ -2428,6 +2452,9 @@ impl Walk<'_> {
     /// the names it read.
     fn known(&self, full: &str) -> Value {
         let Some(&value) = self.names.get(full) else {
+            if let Some(value) = self.predefined(full) {
+                return Value::Constant(value);
+            }
             // An import's address is the linker's, of the size declared.
             return match self.declared.get(full) {
                 Some(declaration) if is_import(declaration.kind) => {
@@ -2564,7 +2591,7 @@ impl Known for FullNames<'_, '_> {
     }
 
     fn is_defined(&self, name: &str) -> bool {
-        self.0.names.contains_key(name)
+        self.0.names.contains_key(name) || self.0.predefined(name).is_some()
     }
 
     fn is_referenced(&self, name: &str) -> bool {
@@ -2583,6 +2610,11 @@ impl Known for Walk<'_> {
     /// The byte the character map makes of `character` now.
     fn translate(&self, character: u8) -> u8 {
         self.charmap.get(&character).copied().unwrap_or(character)
+    }
+
+    /// The CPU of the line read last, which a condition after it reads.
+    fn cpu(&self) -> lang198x_ca65::Cpu {
+        self.cpu.unwrap_or(self.profile.0.cpu())
     }
 
     /// A plain name this scope has not defined is known by its address size
