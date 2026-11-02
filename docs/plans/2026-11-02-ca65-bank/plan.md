@@ -1,6 +1,6 @@
 # Plan: ca65's `.bank`
 
-**Status:** Proposed 2026-11-02.
+**Status:** Agreed 2026-11-02 as option 2.
 **Binding records:** `decisions/layouts-are-data.md` (the bounded ld65
 config reader grows by evidence), and 198x's
 [assembly source layer decision](https://github.com/stevehill1981/198x/blob/main/decisions/assembly-source-layer-moves-to-lang198x.md)
@@ -87,7 +87,7 @@ So the rules are:
 they are. The one change to Lang198x is a `Known` method with a default, so
 its release stays compatible.
 
-## Settled, if option 2 is agreed
+## Settled
 
 - **The config reader takes `bank`.** A memory area may carry
   `bank = number`, which the reader keeps. A second `bank` on one area is
