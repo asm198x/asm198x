@@ -118,6 +118,25 @@ pub trait SourceLoader {
     /// target cannot be resolved or read.
     fn load_binary(&self, request: &str, from: Option<&str>) -> Result<Vec<u8>, LoadError>;
 
+    /// As [`load_text_at`](Self::load_text_at), but the file's bytes as
+    /// they are, for a dialect that reads source as bytes, as its reference
+    /// tool does. [`SourceMap::load`] calls this in a map made by
+    /// [`SourceMap::from_bytes`]. The default gives the UTF-8 bytes of
+    /// `load_text_at`'s text, so a loader that has only text gives what a
+    /// UTF-8 file holds; a loader that reads files overrides it.
+    ///
+    /// # Errors
+    /// As [`load_text`](Self::load_text).
+    fn load_bytes_at(
+        &self,
+        request: &str,
+        from: Option<&str>,
+        line: u32,
+    ) -> Result<(String, Vec<u8>), LoadError> {
+        self.load_text_at(request, from, line)
+            .map(|(canonical, text)| (canonical, text.into_bytes()))
+    }
+
     /// Resolve `request` to the exact canonical form
     /// [`load_text`](Self::load_text) would return, **without reading
     /// contents** where the loader has a cheaper path; `None` means the
@@ -208,6 +227,18 @@ impl SourceLoader for FsLoader {
         std::fs::read(&canonical).map_err(|e| LoadError::new(request, from, e.to_string()))
     }
 
+    fn load_bytes_at(
+        &self,
+        request: &str,
+        from: Option<&str>,
+        _line: u32,
+    ) -> Result<(String, Vec<u8>), LoadError> {
+        let canonical = self.resolve_canonical(request, from)?;
+        let bytes =
+            std::fs::read(&canonical).map_err(|e| LoadError::new(request, from, e.to_string()))?;
+        Ok((canonical.to_string_lossy().into_owned(), bytes))
+    }
+
     fn resolve_text(&self, request: &str, from: Option<&str>) -> Option<String> {
         // The same canonicalization `load_text` performs, minus the read —
         // the returned string must match its dedup key exactly.
@@ -224,6 +255,8 @@ impl SourceLoader for FsLoader {
 pub struct MemoryLoader {
     texts: HashMap<String, String>,
     binaries: HashMap<String, Vec<u8>>,
+    /// Source files given as bytes, which need not be UTF-8.
+    sources: HashMap<String, Vec<u8>>,
 }
 
 impl MemoryLoader {
@@ -247,14 +280,42 @@ impl MemoryLoader {
         self.binaries.insert(path.into(), bytes);
         self
     }
+
+    /// Register a source file under `path` as bytes, which need not be
+    /// UTF-8. A dialect that reads bytes reads them as they are; one that
+    /// reads text is refused if they are not UTF-8.
+    #[must_use]
+    pub fn source_bytes(mut self, path: impl Into<String>, bytes: Vec<u8>) -> Self {
+        self.sources.insert(path.into(), bytes);
+        self
+    }
 }
 
 impl SourceLoader for MemoryLoader {
     fn load_text(&self, request: &str, from: Option<&str>) -> Result<(String, String), LoadError> {
+        if let Some(bytes) = self.sources.get(request) {
+            let text = String::from_utf8(bytes.clone())
+                .map_err(|_| LoadError::new(request, from, "stream did not contain valid UTF-8"))?;
+            return Ok((request.to_owned(), text));
+        }
         self.texts
             .get(request)
             .map(|contents| (request.to_owned(), contents.clone()))
             .ok_or_else(|| LoadError::new(request, from, "file not found"))
+    }
+
+    fn load_bytes_at(
+        &self,
+        request: &str,
+        from: Option<&str>,
+        line: u32,
+    ) -> Result<(String, Vec<u8>), LoadError> {
+        match self.sources.get(request) {
+            Some(bytes) => Ok((request.to_owned(), bytes.clone())),
+            None => self
+                .load_text_at(request, from, line)
+                .map(|(canonical, text)| (canonical, text.into_bytes())),
+        }
     }
 
     fn load_binary(&self, request: &str, from: Option<&str>) -> Result<Vec<u8>, LoadError> {
@@ -267,7 +328,8 @@ impl SourceLoader for MemoryLoader {
     fn resolve_text(&self, request: &str, _from: Option<&str>) -> Option<String> {
         // Registered names are the canonical paths, exactly as `load_text`
         // returns them.
-        self.texts.contains_key(request).then(|| request.to_owned())
+        (self.texts.contains_key(request) || self.sources.contains_key(request))
+            .then(|| request.to_owned())
     }
 }
 
@@ -277,6 +339,8 @@ impl SourceLoader for MemoryLoader {
 struct SourceFile {
     path: String,
     contents: String,
+    /// The bytes it was read from, in a map that reads source as bytes.
+    bytes: Option<Vec<u8>>,
     /// The includer and the 1-based line of the include directive; the first
     /// inclusion wins when a deduped file is requested again.
     included_from: Option<(FileId, u32)>,
@@ -294,6 +358,9 @@ pub struct SourceMap {
     by_path: HashMap<String, FileId>,
     /// Optional synthetic definitions evaluated before the unchanged root.
     prelude: Option<FileId>,
+    /// Whether included files are read as bytes, as by
+    /// [`from_bytes`](Self::from_bytes).
+    reads_bytes: bool,
 }
 
 impl SourceMap {
@@ -308,11 +375,32 @@ impl SourceMap {
             files: vec![SourceFile {
                 path,
                 contents: contents.into(),
+                bytes: None,
                 included_from: None,
             }],
             by_path,
             prelude: None,
+            reads_bytes: false,
         }
+    }
+
+    /// A map holding the root input as `FileId(0)`, read from `bytes`, for
+    /// a dialect that reads source as bytes, as its reference tool does.
+    /// Every file it loads keeps its bytes, which [`bytes`](Self::bytes)
+    /// gives. Its [`contents`](Self::contents), which messages and listings
+    /// show, are the bytes read as UTF-8 when they are UTF-8, and otherwise
+    /// each byte as the Latin-1 character with the same number.
+    pub fn from_bytes(root_path: impl Into<String>, bytes: Vec<u8>) -> Self {
+        let mut map = Self::new(root_path, shown(&bytes));
+        map.files[0].bytes = Some(bytes);
+        map.reads_bytes = true;
+        map
+    }
+
+    /// The bytes file `id` was read from, in a map made by
+    /// [`from_bytes`](Self::from_bytes).
+    pub fn bytes(&self, id: FileId) -> Option<&[u8]> {
+        self.files.get(id.0 as usize)?.bytes.as_deref()
     }
 
     /// Register CLI definitions as source, not lines prepended to FileId(0).
@@ -323,6 +411,7 @@ impl SourceMap {
             self.files.push(SourceFile {
                 path: "<command-line --equ>".to_owned(),
                 contents: contents.to_owned(),
+                bytes: None,
                 included_from: None,
             });
             self.prelude = Some(id);
@@ -366,7 +455,13 @@ impl SourceMap {
         {
             return Ok(id);
         }
-        let (canonical, contents) = loader.load_text_at(request, from_path.as_deref(), line)?;
+        let (canonical, contents, bytes) = if self.reads_bytes {
+            let (canonical, bytes) = loader.load_bytes_at(request, from_path.as_deref(), line)?;
+            (canonical, shown(&bytes), Some(bytes))
+        } else {
+            let (canonical, contents) = loader.load_text_at(request, from_path.as_deref(), line)?;
+            (canonical, contents, None)
+        };
         if let Some(&id) = self.by_path.get(&canonical) {
             return Ok(id);
         }
@@ -375,6 +470,7 @@ impl SourceMap {
         self.files.push(SourceFile {
             path: canonical,
             contents,
+            bytes,
             included_from: Some((from, line)),
         });
         Ok(id)
@@ -428,4 +524,13 @@ impl SourceMap {
         }
         chain
     }
+}
+
+/// How source `bytes` are shown in messages and listings: as UTF-8 when
+/// they are, and otherwise each byte as the Latin-1 character with the same
+/// number, which is how Lang198x's decoder reads them.
+#[must_use]
+pub fn shown(bytes: &[u8]) -> String {
+    String::from_utf8(bytes.to_vec())
+        .unwrap_or_else(|_| bytes.iter().copied().map(char::from).collect())
 }

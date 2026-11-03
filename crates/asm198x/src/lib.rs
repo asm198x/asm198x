@@ -270,18 +270,69 @@ pub fn assemble_ca65_files_on(
     cpu: &str,
     cfg: Option<&str>,
 ) -> Result<(AssemblyResult, debug198x::DebugInfo), MultiFileError> {
-    let fail = |error| MultiFileError {
+    let walk = ca65_walk_on(cpu, cfg).map_err(|error| MultiFileError {
         error,
         source_map: Box::new(new_source_map(input_path, source)),
-    };
-    let cpu = ca65_cpu(cpu).map_err(fail)?;
+    })?;
+    assemble_ca65_walk_files(&walk, source, input_path, loader)
+}
+
+/// The ca65 walk starting on `cpu`, linked under `cfg`, or the NES
+/// curriculum's layout without one.
+fn ca65_walk_on(cpu: &str, cfg: Option<&str>) -> Result<dialects::ca65_walk::Ca65Walk, AsmError> {
+    let cpu = ca65_cpu(cpu)?;
     let walk = match cfg {
-        Some(cfg) => dialects::ca65_walk::Ca65Walk::with_layout(
-            dialects::ca65_layout::from_cfg(cfg).map_err(fail)?,
-        ),
+        Some(cfg) => {
+            dialects::ca65_walk::Ca65Walk::with_layout(dialects::ca65_layout::from_cfg(cfg)?)
+        }
         None => dialects::ca65_walk::Ca65Walk::nes(),
     };
-    assemble_ca65_walk_files(&walk.starting_on(cpu), source, input_path, loader)
+    Ok(walk.starting_on(cpu))
+}
+
+/// [`assemble_ca65_files_on`] for a program read from `bytes`, as ca65 reads
+/// source: as bytes, which need not be UTF-8. A string holds the bytes it
+/// was written with, so `"é"` is $E9 in a Latin-1 file and $C3 $A9 in a
+/// UTF-8 one, and included files are read as bytes too. Messages and
+/// listings show a file as UTF-8 when it is.
+///
+/// # Errors
+/// As [`assemble_ca65_files_on`].
+pub fn assemble_ca65_bytes_on(
+    bytes: &[u8],
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+    cpu: &str,
+    cfg: Option<&str>,
+) -> Result<(AssemblyResult, debug198x::DebugInfo), MultiFileError> {
+    let fail = |error| MultiFileError {
+        error,
+        source_map: Box::new(source::SourceMap::from_bytes(input_path, bytes.to_vec())),
+    };
+    let walk = ca65_walk_on(cpu, cfg).map_err(fail)?;
+    let map = source_map_from_bytes(&walk, input_path, bytes.to_vec()).map_err(fail)?;
+    assemble_ca65_walk_map(&walk, map, loader)
+}
+
+/// The source map for a root file at `input_path` read as `bytes`, as
+/// `dialect` reads source: as bytes, if it [reads bytes](dialect::Dialect::reads_bytes),
+/// and otherwise as UTF-8 text, which bytes that are not UTF-8 cannot be.
+fn source_map_from_bytes(
+    dialect: &dyn dialect::Dialect,
+    input_path: &str,
+    bytes: Vec<u8>,
+) -> Result<source::SourceMap, AsmError> {
+    let mut map = if dialect.reads_bytes() {
+        source::SourceMap::from_bytes(input_path, bytes)
+    } else {
+        let text = String::from_utf8(bytes)
+            .map_err(|_| AsmError::new(0, "stream did not contain valid UTF-8"))?;
+        source::SourceMap::new(input_path, text)
+    };
+    if let Ok(c) = std::fs::canonicalize(input_path) {
+        map.alias_root(c.to_string_lossy().into_owned());
+    }
+    Ok(map)
 }
 
 /// Disassemble a flat binary loaded at `origin` for a program on `cpu`, as
@@ -696,7 +747,15 @@ fn assemble_ca65_walk_files(
     input_path: &str,
     loader: &dyn source::SourceLoader,
 ) -> Result<(AssemblyResult, debug198x::DebugInfo), MultiFileError> {
-    let mut map = new_source_map(input_path, source);
+    assemble_ca65_walk_map(walk, new_source_map(input_path, source), loader)
+}
+
+/// The ca65 walk over the program whose root is `FileId(0)` in `map`.
+fn assemble_ca65_walk_map(
+    walk: &dialects::ca65_walk::Ca65Walk,
+    mut map: source::SourceMap,
+    loader: &dyn source::SourceLoader,
+) -> Result<(AssemblyResult, debug198x::DebugInfo), MultiFileError> {
     match engine::assemble_multi(&mut map, loader, walk) {
         Ok(assembly) => {
             let (mut result, capture) = walk.linked_result(assembly);

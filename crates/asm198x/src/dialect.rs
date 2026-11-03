@@ -74,6 +74,16 @@ pub(crate) trait Dialect {
         self.parse(source).map(|s| (s, Vec::new()))
     }
 
+    /// Whether this dialect reads source files as bytes, as its reference
+    /// tool does, rather than as UTF-8 text. Such a dialect's files may be
+    /// in any 8-bit character set, and a string holds the bytes it was
+    /// written with. An entry point that reads files reads them into a
+    /// [`SourceMap::from_bytes`] for it. The default is text, so a file that
+    /// is not UTF-8 is refused, as before.
+    fn reads_bytes(&self) -> bool {
+        false
+    }
+
     /// Parse a multi-file program (language-surface U2, KTD8): the root is
     /// `FileId(0)` in `map`, and an include-capable dialect resolves its
     /// include directives through `loader`, minting further ids in `map` as

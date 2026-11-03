@@ -342,6 +342,23 @@ impl asm198x::source::SourceLoader for RecordingLoader<'_> {
         Ok((canonical, contents))
     }
 
+    fn load_bytes_at(
+        &self,
+        request: &str,
+        from: Option<&str>,
+        line: u32,
+    ) -> Result<(String, Vec<u8>), asm198x::source::LoadError> {
+        let (canonical, bytes) = self.inner.load_bytes_at(request, from, line)?;
+        self.inputs.borrow_mut().push(PathBuf::from(&canonical));
+        self.log.borrow_mut().push(IncludeLoad {
+            canonical: canonical.clone(),
+            contents: asm198x::source::shown(&bytes),
+            from: from.map(str::to_owned),
+            line,
+        });
+        Ok((canonical, bytes))
+    }
+
     fn load_binary(
         &self,
         request: &str,
@@ -933,12 +950,24 @@ fn run(args: &[String]) -> Result<String, String> {
         ));
     }
 
-    let source = std::fs::read_to_string(input)
+    // ca65 reads source as bytes, so assembling it takes a file in any
+    // 8-bit character set, shown as UTF-8 when it is; every other path
+    // reads UTF-8 text.
+    let reads_bytes = matches!(assembler, Assembler::Ca65 { .. }) && !format;
+    let raw = std::fs::read(input)
         .map_err(|e| format!("cannot read {input}: {e}"))
+        .and_then(|raw| match String::from_utf8(raw.clone()) {
+            Ok(source) => Ok((raw, source)),
+            Err(_) if reads_bytes => Ok((raw.clone(), asm198x::source::shown(&raw))),
+            Err(_) => Err(format!(
+                "cannot read {input}: stream did not contain valid UTF-8"
+            )),
+        })
         .or_else(|message| match message_format {
-            MessageFormat::Json => emit_json_failure(message),
+            MessageFormat::Json => emit_json_failure(message).and_then(|_| Err(String::new())),
             MessageFormat::Human => Err(message),
         })?;
+    let (raw, source) = raw;
     if let Some(option) = pasmo_option
         && (!matches!(mode, Mode::Assemble) || !matches!(assembler, Assembler::Pasmo { .. }))
     {
@@ -1051,6 +1080,7 @@ fn run(args: &[String]) -> Result<String, String> {
             &assembler,
             input,
             &source,
+            &raw,
             &include_dirs,
             exe,
             (sna, prg, tape),
@@ -1174,7 +1204,7 @@ fn run(args: &[String]) -> Result<String, String> {
         let wants_info =
             debug.is_some() || sym.is_some() || listing.is_some() || listing_json.is_some();
         let (rom, info) =
-            asm198x::assemble_ca65_files_on(&source, input, &loader, cpu.name(), cfg.as_deref())
+            asm198x::assemble_ca65_bytes_on(&raw, input, &loader, cpu.name(), cfg.as_deref())
                 .map_err(|e| render_multi_error(input, &e))?;
         let info = wants_info.then_some(info);
         for warning in &rom.warnings {
@@ -2243,6 +2273,7 @@ fn emit_json(
     assembler: &Assembler,
     input: &str,
     source: &str,
+    raw: &[u8],
     include_dirs: &[PathBuf],
     exe: bool,
     (sna, prg, tape): (bool, bool, Option<(asm198x::TapeFormat, bool)>),
@@ -2304,7 +2335,7 @@ fn emit_json(
         // carries the file table so the diagnostic's span can name an
         // included file.
         Assembler::Ca65 { cpu } => {
-            asm198x::assemble_ca65_files_on(source, input, &loader, cpu.name(), cfg.as_deref())
+            asm198x::assemble_ca65_bytes_on(raw, input, &loader, cpu.name(), cfg.as_deref())
                 .map_err(|e| capture_failure(&mut failure_files, e))
                 .map(|linked| {
                     if debug_requested {
