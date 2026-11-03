@@ -411,10 +411,9 @@ pub const DIRECTIVES: &[Directive] = &[
     //
     // `.list off` does not suppress bytes, only listing lines; `.dbg` and
     // `.debuginfo` add records to the object file, which the binary output
-    // never carries; `.fileopt`/`.fopt` write an object-file comment. The two
-    // option words that are *not* here are the two that change what the parse
-    // does: `.linecont +` turns on backslash continuation, and `.case off`
-    // makes identifiers case-blind.
+    // never carries; `.fileopt`/`.fopt` write an object-file comment. The
+    // option words that change what the parse does, such as `.linecont +`
+    // and `.case off`, are not here: Lang198x reads the lines after them.
     Directive {
         id: "listing",
         pattern: Pattern::Sigilled {
@@ -560,30 +559,18 @@ pub const DIRECTIVES: &[Directive] = &[
         category: Category::Operation,
     },
     // `.case off` makes names ignore case, `.localchar` chooses what starts
-    // a cheap local, and `.feature` switches reading rules on one by one.
-    // Lang198x reads the lines after them accordingly, and refuses the
-    // features it does not read yet.
+    // a cheap local, `.linecont` joins lines and `.feature` switches reading
+    // rules on one by one. Lang198x reads the lines after them accordingly,
+    // and refuses the features it does not read yet. They sat in an
+    // `unsupported-parse-options` group, with `.null`, until it read them.
     Directive {
         id: "case",
         pattern: Pattern::Sigilled {
             sigil: '.',
-            names: &["case", "localchar", "feature"],
+            names: &["case", "localchar", "linecont", "feature"],
             required: true,
         },
         category: Category::Operation,
-    },
-    // The option word that changes how the lines after it are read, and so
-    // cannot be accepted and discarded: `.linecont +` turns on backslash
-    // continuation. `.case`, `.localchar`, `.feature` and `.null` sat here
-    // until Lang198x read them.
-    Directive {
-        id: "unsupported-parse-options",
-        pattern: Pattern::Sigilled {
-            sigil: '.',
-            names: &["linecont"],
-            required: true,
-        },
-        category: Category::KnownUnsupported,
     },
     // A word ca65's tokenizer knows and its parser accepts nowhere. Probed
     // against V2.18 at statement position, after a label, as a struct storage
@@ -1730,12 +1717,9 @@ two:\n\
     fn a_real_directive_is_told_apart_from_a_typo() {
         let err = |src: &str| super::assemble(src).expect_err(src).to_string();
         // `.export` sat here, then `.condes`, `.charmap`, `.macpack`,
-        // `.localchar` and `.feature`, each implemented in turn.
-        let e = err("\t.linecont +\n");
-        assert!(
-            e.contains("is a real directive here"),
-            "`.linecont` should name itself a real ca65 directive, got: {e}"
-        );
+        // `.localchar`, `.feature` and `.linecont`, each implemented in
+        // turn. ca65 has no directive left that this dialect knows and
+        // refuses, so only the typo half remains.
         assert!(
             err("\t.zzqq\n").contains("is not a control command ca65 knows"),
             "and a word ca65 does not have should say so"
@@ -2086,13 +2070,8 @@ two:\n\
              .list off\n .listbytes 4\n .pagelen 60\n .pagelength 60\n .dbg line\n\
              .byte $AA\n");
         assert_eq!(plain, noisy, "the listing words change no byte");
-        // `.linecont +` changes what the parse does, so it is a gap rather
-        // than something to discard, and so is a feature Lang198x does not
-        // read yet.
-        let e = super::assemble(".segment \"CODE\"\n .linecont +\n")
-            .expect_err(".linecont")
-            .to_string();
-        assert!(e.contains("is a real directive here"), "got: {e}");
+        // A feature Lang198x does not read yet changes what the parse does,
+        // so it is a gap rather than something to discard.
         let e = super::assemble(".segment \"CODE\"\n .feature labels_without_colons\n")
             .expect_err(".feature")
             .to_string();

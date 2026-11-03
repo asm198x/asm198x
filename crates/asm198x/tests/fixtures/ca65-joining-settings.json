@@ -1,0 +1,270 @@
+{
+  "cases": [
+    {
+      "native": {
+        "hex": "0102"
+      },
+      "program": ".linecont +\n.byte 1, \\\n2"
+    },
+    {
+      "native": {
+        "hex": "0102"
+      },
+      "program": ".linecont +\n.byte 1, \\   \n2"
+    },
+    {
+      "native": {
+        "refused": "EOL expected."
+      },
+      "program": ".linecont +\n.byte 1, \\ 3"
+    },
+    {
+      "native": {
+        "hex": "0102"
+      },
+      "program": ".linecont +\n.byte 1 ; c \\\n.byte 2"
+    },
+    {
+      "native": {
+        "refused": "Newline in string constant"
+      },
+      "program": ".linecont +\n.byte \"a\\\nb\""
+    },
+    {
+      "native": {
+        "hex": "A901"
+      },
+      "program": ".linecont +\nlda\\\n#1"
+    },
+    {
+      "native": {
+        "refused": "Expected ‘:’ after identifier to form a label but found ‘A’"
+      },
+      "program": ".linecont +\nld\\\na #1"
+    },
+    {
+      "native": {
+        "hex": "01"
+      },
+      "program": ".linecont +\n.byte 1\\"
+    },
+    {
+      "native": {
+        "hex": "0102"
+      },
+      "program": ".linecont\n.byte 1, \\\n2"
+    },
+    {
+      "native": {
+        "hex": "0102"
+      },
+      "program": ".linecont on\n.byte 1, \\\n2"
+    },
+    {
+      "native": {
+        "refused": "Invalid input character: 0x5C"
+      },
+      "program": ".linecont +\n.linecont -\n.byte 1, \\\n2"
+    },
+    {
+      "native": {
+        "refused": "Invalid input character: 0x5C"
+      },
+      "program": ".byte 1, \\\n2"
+    },
+    {
+      "native": {
+        "hex": "0102"
+      },
+      "program": ".feature line_continuations\n.byte 1, \\\n2"
+    },
+    {
+      "native": {
+        "refused": "Invalid input character: 0x5C"
+      },
+      "program": ".feature line_continuations +\n.feature line_continuations -\n.byte 1, \\\n2"
+    },
+    {
+      "native": {
+        "hex": "0102"
+      },
+      "program": ".linecont +\n.byte 1, \\\n\\\n2"
+    },
+    {
+      "native": {
+        "hex": "01"
+      },
+      "program": ".linecont +\nfoo: \\\n.byte 1"
+    },
+    {
+      "native": {
+        "hex": "0102"
+      },
+      "program": ".linecont +\n.macro m\n.byte 1, \\\n2\n.endmacro\n.linecont -\nm"
+    },
+    {
+      "native": {
+        "refused": "Invalid input character: 0x5C"
+      },
+      "program": ".macro m\n.byte 1, \\\n2\n.endmacro\n.linecont +\nm"
+    },
+    {
+      "native": {
+        "hex": "0102"
+      },
+      "program": ".linecont +\n.byte 1, \\\r\n2"
+    },
+    {
+      "native": {
+        "refused": "Expected ON or OFF but found ‘0’"
+      },
+      "program": ".linecont 0"
+    },
+    {
+      "native": {
+        "refused": "Invalid input character: 0x5C"
+      },
+      "program": ".if 0\n.linecont +\n.endif\n.byte 1, \\\n2"
+    },
+    {
+      "native": {
+        "refused": "Expected an expression but found ‘.LINECONT’"
+      },
+      "program": ".linecont +\n.byte 1, \\\n.linecont -\n.byte 2, \\\n3"
+    },
+    {
+      "native": {
+        "hex": "01020102"
+      },
+      "program": ".linecont +\n.repeat 2\n.byte 1, \\\n2\n.endrepeat"
+    },
+    {
+      "native": {
+        "hex": "0102"
+      },
+      "program": ".linecont +\n.define d 1, \\\n2\n.byte d"
+    },
+    {
+      "native": {
+        "hex": "0102"
+      },
+      "program": ".feature c_comments\n.byte 1 /* x */, 2"
+    },
+    {
+      "native": {
+        "hex": "0102"
+      },
+      "program": ".feature c_comments\n.byte 1, /* x\ny */ 2"
+    },
+    {
+      "native": {
+        "hex": "0102"
+      },
+      "program": ".feature c_comments\n.byte 1 /* a /* b */ , 2"
+    },
+    {
+      "native": {
+        "refused": "Expected an expression but found ‘/’"
+      },
+      "program": ".feature c_comments\n.byte 1 /* a */ */ 2"
+    },
+    {
+      "native": {
+        "hex": "2F2A02"
+      },
+      "program": ".feature c_comments\n.byte \"/*\", 2"
+    },
+    {
+      "native": {
+        "hex": "0102"
+      },
+      "program": ".feature c_comments\n.byte 1 ; /*\n.byte 2"
+    },
+    {
+      "native": {
+        "refused": "Unterminated comment"
+      },
+      "program": ".feature c_comments\n.byte 1 /* x"
+    },
+    {
+      "native": {
+        "hex": "02"
+      },
+      "program": ".feature c_comments\n.byte 4/2"
+    },
+    {
+      "native": {
+        "hex": "0102"
+      },
+      "program": ".feature c_comments\n.byte 1 /**/ , /***/ 2"
+    },
+    {
+      "native": {
+        "hex": "0102"
+      },
+      "program": ".feature c_comments\n.byte 1 /* x\n.byte 9\n */ , 2"
+    },
+    {
+      "native": {
+        "hex": "03"
+      },
+      "program": ".feature c_comments\n/* whole\nlines */\n.byte 3"
+    },
+    {
+      "native": {
+        "refused": "Expected ‘end-of-line’ but found ‘X’"
+      },
+      "program": ".byte 1 /* x */"
+    },
+    {
+      "native": {
+        "refused": "Expected ‘end-of-line’ but found ‘Y’"
+      },
+      "program": ".feature c_comments\n.byte 1 /* x */\n.feature c_comments -\n.byte 2 /* y */"
+    },
+    {
+      "native": {
+        "hex": "0102"
+      },
+      "program": ".feature c_comments\n.byte 1 /* \n.feature c_comments - */\n.byte 2"
+    },
+    {
+      "native": {
+        "hex": "0102"
+      },
+      "program": ".feature c_comments\n.macro m\n.byte 1 /* c */, 2\n.endmacro\n.feature c_comments -\nm"
+    },
+    {
+      "native": {
+        "hex": "0102"
+      },
+      "program": ".feature c_comments, line_continuations\n.byte 1, /* a */ \\\n2"
+    },
+    {
+      "native": {
+        "hex": "0102"
+      },
+      "program": ".feature c_comments\n.byte 1, /* a\n.endif */ 2"
+    },
+    {
+      "native": {
+        "hex": "CAD0FD"
+      },
+      "program": ".linecont +\nloop: dex\nbne \\\nloop"
+    },
+    {
+      "native": {
+        "hex": "CAD0FD"
+      },
+      "program": ".feature c_comments\nloop: /* back\n to here */ dex\nbne loop"
+    },
+    {
+      "native": {
+        "hex": "60200000"
+      },
+      "program": ".linecont +\n.proc p\nrts\n.endproc\njsr \\\np"
+    }
+  ],
+  "config": "MEMORY { ROM: start = $0000, size = $1000, fill = no, file = %O; }\nSEGMENTS { CODE: load = ROM, type = ro; }\n",
+  "source": "Programs measured on ca65 V2.19 and ld65 at 8d86ca7 that join lines: `.linecont` and the `line_continuations` feature, where a backslash at the end of a line joins it to the next, and the `c_comments` feature, where `/*` starts a comment that runs to `*/` across lines. Each program is assembled by ca65 and linked by ld65 under `config`, a flat link at 0. `native` is what they made: the image's bytes, or the first line of the error that refused it."
+}
