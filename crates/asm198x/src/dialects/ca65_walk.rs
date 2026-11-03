@@ -226,6 +226,11 @@ impl Dialect for Ca65Walk {
         Ok(self.keep(ran))
     }
 
+    /// ca65 reads source as bytes and copies a string's bytes as they are.
+    fn reads_bytes(&self) -> bool {
+        true
+    }
+
     fn equ_label_colon(&self) -> bool {
         false
     }
@@ -644,8 +649,18 @@ impl Walk<'_> {
     /// The program's statements, what the link `layout` describes made of
     /// them, if there is a layout, and what ca65 warned of.
     fn run(mut self, source: &str, layout: Option<&Layout>) -> Result<Ran, AsmError> {
-        let mut expander = Expander::new(source, self.profile.0)
-            .map_err(|_| AsmError::new(0, "the program is too long to parse"))?;
+        // A program read from bytes is read as ca65 reads it, so a string
+        // holds the bytes it was written with; text is read as its UTF-8
+        // bytes would be.
+        let bytes = self
+            .files
+            .as_ref()
+            .and_then(|files| files.map.bytes(FileId(0)));
+        let mut expander = match bytes {
+            Some(bytes) => Expander::from_bytes(bytes, self.profile.0),
+            None => Expander::new(source, self.profile.0),
+        }
+        .map_err(|_| AsmError::new(0, "the program is too long to parse"))?;
         self.read = vec![(FileId(0), None)];
         let result = self.read_lines(&mut expander, layout);
         // Recorded whether or not the program assembles, so a problem in an
@@ -3124,52 +3139,22 @@ impl Host for Walk<'_> {
     /// A file `.include` reads, looked for beside the file that asks and
     /// then beside each file that included it. A single file has none.
     fn include(&mut self, name: &str, from: syntax::FileId) -> Option<String> {
-        let from = usize::try_from(from.get()).ok()?;
-        let chain = self.chain(from);
-        let at = self
-            .here
-            .clone()
-            .unwrap_or_else(|| Span::in_file(FileId(0), 0, 0));
-        let Some(files) = self.files.as_mut() else {
-            self.errors.push(AsmError::at(
-                at,
-                format!(
-                    "cannot resolve `.include \"{name}\"` here — the single-source API \
-                     assembles one file; use the multi-file entry point (the CLI resolves \
-                     includes automatically)"
-                ),
-            ));
-            return Some(String::new());
-        };
-        let id = match load_include(
-            files.map,
-            files.loader,
-            name,
-            &chain,
-            0,
-            Resolution::AncestorChain,
-        ) {
-            Ok(id) => id,
-            Err(error) => {
-                // The loader says why, which the expander's report takes on.
-                self.missing_include = Some(error.to_string());
-                return None;
-            }
-        };
-        // ca65 has no check of its own and fails when it runs out of open
-        // files; a file that includes itself is refused at once instead.
-        if chain.contains(&id) {
-            let path = |file: &FileId| files.map.path(*file).unwrap_or("?").to_owned();
-            let cycle: Vec<String> = chain.iter().chain(std::iter::once(&id)).map(path).collect();
-            self.errors.push(AsmError::at(
-                at,
-                format!("include cycle: {}", cycle.join(" -> ")),
-            ));
-            return Some(String::new());
+        match self.include_file(name, from)? {
+            Some(id) => self.files.as_ref()?.map.contents(id).map(str::to_owned),
+            None => Some(String::new()),
         }
-        let text = files.map.contents(id)?.to_owned();
-        self.read.push((id, Some(from)));
-        Some(text)
+    }
+
+    /// The bytes of the file `.include` names, for a program read from
+    /// bytes: the bytes the file was read from, as ca65 reads it.
+    fn include_bytes(&mut self, name: &str, from: syntax::FileId) -> Option<Vec<u8>> {
+        let Some(id) = self.include_file(name, from)? else {
+            return Some(Vec::new());
+        };
+        let map = &self.files.as_ref()?.map;
+        map.bytes(id)
+            .map(<[u8]>::to_vec)
+            .or_else(|| map.contents(id).map(|text| text.as_bytes().to_vec()))
     }
 
     /// A condition or count, which ca65 needs now: a constant expression.
@@ -3213,6 +3198,60 @@ impl Host for Walk<'_> {
     /// `.ifconst`, which ca65 counts as a use of each name it reads.
     fn is_constant(&mut self, expr: &SourceExpr) -> bool {
         self.evaluate(expr).is_ok()
+    }
+}
+
+impl Walk<'_> {
+    /// Finds the file `.include` names, from the file `from`, and records
+    /// that it was read: `Some(Some(id))` for the file, `Some(None)` for
+    /// one read as empty after an error was reported, and `None` for a
+    /// file there is none of, which the expander reports.
+    fn include_file(&mut self, name: &str, from: syntax::FileId) -> Option<Option<FileId>> {
+        let from = usize::try_from(from.get()).ok()?;
+        let chain = self.chain(from);
+        let at = self
+            .here
+            .clone()
+            .unwrap_or_else(|| Span::in_file(FileId(0), 0, 0));
+        let Some(files) = self.files.as_mut() else {
+            self.errors.push(AsmError::at(
+                at,
+                format!(
+                    "cannot resolve `.include \"{name}\"` here — the single-source API \
+                     assembles one file; use the multi-file entry point (the CLI resolves \
+                     includes automatically)"
+                ),
+            ));
+            return Some(None);
+        };
+        let id = match load_include(
+            files.map,
+            files.loader,
+            name,
+            &chain,
+            0,
+            Resolution::AncestorChain,
+        ) {
+            Ok(id) => id,
+            Err(error) => {
+                // The loader says why, which the expander's report takes on.
+                self.missing_include = Some(error.to_string());
+                return None;
+            }
+        };
+        // ca65 has no check of its own and fails when it runs out of open
+        // files; a file that includes itself is refused at once instead.
+        if chain.contains(&id) {
+            let path = |file: &FileId| files.map.path(*file).unwrap_or("?").to_owned();
+            let cycle: Vec<String> = chain.iter().chain(std::iter::once(&id)).map(path).collect();
+            self.errors.push(AsmError::at(
+                at,
+                format!("include cycle: {}", cycle.join(" -> ")),
+            ));
+            return Some(None);
+        }
+        self.read.push((id, Some(from)));
+        Some(Some(id))
     }
 }
 
