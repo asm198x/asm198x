@@ -559,26 +559,28 @@ pub const DIRECTIVES: &[Directive] = &[
         },
         category: Category::Operation,
     },
-    // `.case off` makes names ignore case and `.localchar` chooses what
-    // starts a cheap local. Lang198x reads the lines after them accordingly.
+    // `.case off` makes names ignore case, `.localchar` chooses what starts
+    // a cheap local, and `.feature` switches reading rules on one by one.
+    // Lang198x reads the lines after them accordingly, and refuses the
+    // features it does not read yet.
     Directive {
         id: "case",
         pattern: Pattern::Sigilled {
             sigil: '.',
-            names: &["case", "localchar"],
+            names: &["case", "localchar", "feature"],
             required: true,
         },
         category: Category::Operation,
     },
-    // The option words that change how the lines after them are read, and
-    // so cannot be accepted and discarded: `.linecont +` turns on backslash
-    // continuation and `.feature` switches syntax rules on one by one.
-    // `.case`, `.localchar` and `.null` sat here until Lang198x read them.
+    // The option word that changes how the lines after it are read, and so
+    // cannot be accepted and discarded: `.linecont +` turns on backslash
+    // continuation. `.case`, `.localchar`, `.feature` and `.null` sat here
+    // until Lang198x read them.
     Directive {
         id: "unsupported-parse-options",
         pattern: Pattern::Sigilled {
             sigil: '.',
-            names: &["linecont", "feature"],
+            names: &["linecont"],
             required: true,
         },
         category: Category::KnownUnsupported,
@@ -1729,7 +1731,7 @@ two:\n\
         let err = |src: &str| super::assemble(src).expect_err(src).to_string();
         // `.export` sat here, then `.condes`, `.charmap` and `.macpack`,
         // each implemented in turn.
-        for d in [".feature c_comments", ".linecont +"] {
+        for d in [".linecont +"] {
             let e = err(&format!("\t{d}\n"));
             assert!(
                 e.contains("is a real directive here"),
@@ -2086,17 +2088,17 @@ two:\n\
              .list off\n .listbytes 4\n .pagelen 60\n .pagelength 60\n .dbg line\n\
              .byte $AA\n");
         assert_eq!(plain, noisy, "the listing words change no byte");
-        // `.linecont +` and `.feature` change what the parse does, so they
-        // are a gap rather than something to discard.
-        for word in [".linecont +", ".feature labels_without_colons"] {
-            let e = super::assemble(&format!(".segment \"CODE\"\n {word}\n"))
-                .expect_err(word)
-                .to_string();
-            assert!(
-                e.contains("is a real directive here"),
-                "`{word}` should read as our gap, got: {e}"
-            );
-        }
+        // `.linecont +` changes what the parse does, so it is a gap rather
+        // than something to discard, and so is a feature Lang198x does not
+        // read yet.
+        let e = super::assemble(".segment \"CODE\"\n .linecont +\n")
+            .expect_err(".linecont")
+            .to_string();
+        assert!(e.contains("is a real directive here"), "got: {e}");
+        let e = super::assemble(".segment \"CODE\"\n .feature labels_without_colons\n")
+            .expect_err(".feature")
+            .to_string();
+        assert!(e.contains("is not lowered yet"), "got: {e}");
     }
 
     /// A record declares constants and emits nothing; `.tag` is what emits.
