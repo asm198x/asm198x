@@ -171,7 +171,7 @@
       "native_debug": "version\tmajor=2,minor=0\ninfo\tcsym=0,file=1,lib=0,line=3,mod=1,scope=1,seg=6,span=3,sym=2,type=2\nfile\tid=0,name=\"input.s\",size=41,mtime=0x6AD62CFC,mod=0\nline\tid=0,file=0,line=2\nline\tid=1,file=0,line=4,span=1\nline\tid=2,file=0,line=3,span=0\nmod\tid=0,name=\"input.o\",file=0\nseg\tid=0,name=\"CODE\",start=0x001000,size=0x0003,addrsize=absolute,type=ro,oname=\"native.bin\",ooffs=0\nseg\tid=1,name=\"RODATA\",start=0x001003,size=0x0000,addrsize=absolute,type=ro,oname=\"native.bin\",ooffs=3\nseg\tid=2,name=\"BSS\",start=0x000020,size=0x0000,addrsize=absolute,type=rw\nseg\tid=3,name=\"DATA\",start=0x000000,size=0x0000,addrsize=absolute,type=rw\nseg\tid=4,name=\"ZEROPAGE\",start=0x000020,size=0x0000,addrsize=zeropage,type=rw\nseg\tid=5,name=\"NULL\",start=0x000000,size=0x0000,addrsize=absolute,type=rw\nspan\tid=0,seg=0,start=0,size=1,type=0\nspan\tid=1,seg=0,start=1,size=2,type=1\nspan\tid=2,seg=0,start=0,size=3\nscope\tid=0,name=\"\",mod=0,size=3,span=2\nsym\tid=0,name=\"@item\",addrsize=zeropage,size=1,parent=1,def=2,ref=1,val=0x20,type=lab\nsym\tid=1,name=\"head\",addrsize=zeropage,scope=0,def=0,val=0x20,type=lab\ntype\tid=0,val=\"800120\"\ntype\tid=1,val=\"800121\"\n",
       "native_listing": "ca65 V2.18 - N/A\nMain file   : input.s\nCurrent file: input.s\n\n000000r 1               .org $20\n000020  1               head:\n000020  1  07           @item:.byte 7\n000021  1  20 00        .word @item\n000021  1               \n",
       "symbol_values": {
-        "head@item": 32,
+        "head::@item": 32,
         "head": 32
       },
       "constant_values": {},
@@ -190,7 +190,7 @@
         }
       ],
       "symbol_definitions": {
-        "head@item": [
+        "head::@item": [
           {
             "file": "input.s",
             "line": 3
@@ -439,7 +439,7 @@
       "native_debug": "version\tmajor=2,minor=0\ninfo\tcsym=0,file=1,lib=0,line=3,mod=1,scope=1,seg=6,span=3,sym=2,type=2\nfile\tid=0,name=\"input.s\",size=43,mtime=0x6AD62CFC,mod=0\nline\tid=0,file=0,line=2\nline\tid=1,file=0,line=4,span=1\nline\tid=2,file=0,line=3,span=0\nmod\tid=0,name=\"input.o\",file=0\nseg\tid=0,name=\"CODE\",start=0x001000,size=0x0003,addrsize=absolute,type=ro,oname=\"native.bin\",ooffs=0\nseg\tid=1,name=\"RODATA\",start=0x001003,size=0x0000,addrsize=absolute,type=ro,oname=\"native.bin\",ooffs=3\nseg\tid=2,name=\"BSS\",start=0x000020,size=0x0000,addrsize=absolute,type=rw\nseg\tid=3,name=\"DATA\",start=0x000000,size=0x0000,addrsize=absolute,type=rw\nseg\tid=4,name=\"ZEROPAGE\",start=0x000020,size=0x0000,addrsize=zeropage,type=rw\nseg\tid=5,name=\"NULL\",start=0x000000,size=0x0000,addrsize=absolute,type=rw\nspan\tid=0,seg=0,start=0,size=1,type=0\nspan\tid=1,seg=0,start=1,size=2,type=1\nspan\tid=2,seg=0,start=0,size=3\nscope\tid=0,name=\"\",mod=0,size=3,span=2\nsym\tid=0,name=\"@item\",addrsize=absolute,size=1,parent=1,def=2,ref=1,val=0x1000,type=lab\nsym\tid=1,name=\"head\",addrsize=absolute,scope=0,def=0,val=0x1000,type=lab\ntype\tid=0,val=\"800120\"\ntype\tid=1,val=\"800121\"\n",
       "native_listing": "ca65 V2.18 - N/A\nMain file   : input.s\nCurrent file: input.s\n\n000000r 1               .org $1000\n001000  1               head:\n001000  1  07           @item:.byte 7\n001001  1  00 10        .word @item\n001001  1               \n",
       "symbol_values": {
-        "head@item": 4096,
+        "head::@item": 4096,
         "head": 4096
       },
       "constant_values": {},
@@ -458,7 +458,7 @@
         }
       ],
       "symbol_definitions": {
-        "head@item": [
+        "head::@item": [
           {
             "file": "input.s",
             "line": 3
@@ -707,7 +707,7 @@
       "native_debug": "version\tmajor=2,minor=0\ninfo\tcsym=0,file=1,lib=0,line=3,mod=1,scope=1,seg=6,span=3,sym=2,type=2\nfile\tid=0,name=\"input.s\",size=43,mtime=0x6AD62CFC,mod=0\nline\tid=0,file=0,line=2\nline\tid=1,file=0,line=4,span=1\nline\tid=2,file=0,line=3,span=0\nmod\tid=0,name=\"input.o\",file=0\nseg\tid=0,name=\"CODE\",start=0x001000,size=0x0003,addrsize=absolute,type=ro,oname=\"native.bin\",ooffs=0\nseg\tid=1,name=\"RODATA\",start=0x001003,size=0x0000,addrsize=absolute,type=ro,oname=\"native.bin\",ooffs=3\nseg\tid=2,name=\"BSS\",start=0x000020,size=0x0000,addrsize=absolute,type=rw\nseg\tid=3,name=\"DATA\",start=0x000000,size=0x0000,addrsize=absolute,type=rw\nseg\tid=4,name=\"ZEROPAGE\",start=0x000020,size=0x0000,addrsize=zeropage,type=rw\nseg\tid=5,name=\"NULL\",start=0x000000,size=0x0000,addrsize=absolute,type=rw\nspan\tid=0,seg=0,start=0,size=1,type=0\nspan\tid=1,seg=0,start=1,size=2,type=1\nspan\tid=2,seg=0,start=0,size=3\nscope\tid=0,name=\"\",mod=0,size=3,span=2\nsym\tid=0,name=\"@item\",addrsize=absolute,size=1,parent=1,def=2,ref=1,val=0x2000,type=lab\nsym\tid=1,name=\"head\",addrsize=absolute,scope=0,def=0,val=0x2000,type=lab\ntype\tid=0,val=\"800120\"\ntype\tid=1,val=\"800121\"\n",
       "native_listing": "ca65 V2.18 - N/A\nMain file   : input.s\nCurrent file: input.s\n\n000000r 1               .org $2000\n002000  1               head:\n002000  1  07           @item:.byte 7\n002001  1  00 20        .word @item\n002001  1               \n",
       "symbol_values": {
-        "head@item": 8192,
+        "head::@item": 8192,
         "head": 8192
       },
       "constant_values": {},
@@ -726,7 +726,7 @@
         }
       ],
       "symbol_definitions": {
-        "head@item": [
+        "head::@item": [
           {
             "file": "input.s",
             "line": 3
@@ -2270,9 +2270,9 @@
       "native_debug": "version\tmajor=2,minor=0\ninfo\tcsym=0,file=1,lib=0,line=5,mod=1,scope=1,seg=6,span=4,sym=4,type=2\nfile\tid=0,name=\"input.s\",size=66,mtime=0x6AD62CFC,mod=0\nline\tid=0,file=0,line=2\nline\tid=1,file=0,line=5,span=1\nline\tid=2,file=0,line=4\nline\tid=3,file=0,line=3,span=0\nline\tid=4,file=0,line=6,span=2\nmod\tid=0,name=\"input.o\",file=0\nseg\tid=0,name=\"CODE\",start=0x001000,size=0x0004,addrsize=absolute,type=ro,oname=\"native.bin\",ooffs=0\nseg\tid=1,name=\"RODATA\",start=0x001004,size=0x0000,addrsize=absolute,type=ro,oname=\"native.bin\",ooffs=4\nseg\tid=2,name=\"BSS\",start=0x000020,size=0x0000,addrsize=absolute,type=rw\nseg\tid=3,name=\"DATA\",start=0x000000,size=0x0000,addrsize=absolute,type=rw\nseg\tid=4,name=\"ZEROPAGE\",start=0x000020,size=0x0000,addrsize=zeropage,type=rw\nseg\tid=5,name=\"NULL\",start=0x000000,size=0x0000,addrsize=absolute,type=rw\nspan\tid=0,seg=0,start=0,size=1,type=0\nspan\tid=1,seg=0,start=1,size=1,type=0\nspan\tid=2,seg=0,start=2,size=2,type=1\nspan\tid=3,seg=0,start=0,size=4\nscope\tid=0,name=\"\",mod=0,size=4,span=3\nsym\tid=0,name=\"@item\",addrsize=absolute,size=1,parent=1,def=1,ref=4,val=0x2001,type=lab\nsym\tid=1,name=\"second\",addrsize=absolute,scope=0,def=2,val=0x2001,type=lab\nsym\tid=2,name=\"@item\",addrsize=absolute,size=1,parent=3,def=3,val=0x2000,type=lab\nsym\tid=3,name=\"first\",addrsize=absolute,scope=0,def=0,val=0x2000,type=lab\ntype\tid=0,val=\"800120\"\ntype\tid=1,val=\"800121\"\n",
       "native_listing": "ca65 V2.18 - N/A\nMain file   : input.s\nCurrent file: input.s\n\n000000r 1               .org $2000\n002000  1               first:\n002000  1  07           @item:.byte 7\n002001  1               second:\n002001  1  08           @item:.byte 8\n002002  1  01 20        .word @item\n002002  1               \n",
       "symbol_values": {
-        "second@item": 8193,
+        "second::@item": 8193,
         "second": 8193,
-        "first@item": 8192,
+        "first::@item": 8192,
         "first": 8192
       },
       "constant_values": {},
@@ -2297,7 +2297,7 @@
         }
       ],
       "symbol_definitions": {
-        "second@item": [
+        "second::@item": [
           {
             "file": "input.s",
             "line": 5
@@ -2309,7 +2309,7 @@
             "line": 4
           }
         ],
-        "first@item": [
+        "first::@item": [
           {
             "file": "input.s",
             "line": 3

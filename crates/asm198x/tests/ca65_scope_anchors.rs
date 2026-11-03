@@ -165,7 +165,7 @@ fn cheap_constant_debug_symbols_name_their_anchor() {
     assert!(
         symbols
             .iter()
-            .any(|r| r["t"] == "symbol" && r["name"] == "anchor@value" && r["value"] == 7)
+            .any(|r| r["t"] == "symbol" && r["name"] == "anchor::@value" && r["value"] == 7)
     );
     assert!(!symbols.iter().any(|r| {
         r["name"]

@@ -509,6 +509,30 @@
         "hex": "CAD0FD"
       },
       "program": ".feature dollar_in_identifiers\nloop$: dex\nbne loop$"
+    },
+    {
+      "native": {
+        "hex": "0201"
+      },
+      "program": ".feature at_in_identifiers\nfoo@bar = 2\nfoo:\n@bar = 1\n.byte foo@bar, @bar"
+    },
+    {
+      "native": {
+        "hex": "02"
+      },
+      "program": ".feature at_in_identifiers\nfoo:\n@bar = 1\nfoo@bar = 2\n.byte foo@bar"
+    },
+    {
+      "native": {
+        "refused": "Symbol ‘foo@bar’ is undefined"
+      },
+      "program": ".feature at_in_identifiers\nfoo:\n@bar = 3\n.byte foo@bar"
+    },
+    {
+      "native": {
+        "refused": "Symbol ‘@bar’ is undefined"
+      },
+      "program": ".feature at_in_identifiers\nfoo:\n@bar: .byte 1\nfoo@bar = 2\n.byte @bar"
     }
   ],
   "config": "MEMORY { ROM: start = $0000, size = $1000, fill = no, file = %O; }\nSEGMENTS { CODE: load = ROM, type = ro; }\n",
