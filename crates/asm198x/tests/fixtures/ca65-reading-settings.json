@@ -1,0 +1,282 @@
+{
+  "cases": [
+    {
+      "native": {
+        "hex": "010101"
+      },
+      "program": ".case off\nfoo = 1\n.byte FOO, Foo, foo"
+    },
+    {
+      "native": {
+        "refused": "Symbol ‘FOO’ is undefined"
+      },
+      "program": "Foo = 1\n.case off\n.byte FOO"
+    },
+    {
+      "native": {
+        "hex": "01"
+      },
+      "program": ".case off\nfoo = 1\n.case on\n.byte FOO"
+    },
+    {
+      "native": {
+        "refused": "Symbol ‘foo’ is undefined"
+      },
+      "program": ".case off\nfoo = 1\n.case on\n.byte foo"
+    },
+    {
+      "native": {
+        "hex": "02"
+      },
+      "program": ".case -\nab = 2\n.byte AB"
+    },
+    {
+      "native": {
+        "hex": "03"
+      },
+      "program": ".case off\n.macro m p\n.byte P\n.endmacro\nM 3"
+    },
+    {
+      "native": {
+        "refused": "Expected ‘:’ after identifier to form a label but found ‘end-of-line’"
+      },
+      "program": ".macro m\n.byte 1\n.endmacro\n.case off\nm"
+    },
+    {
+      "native": {
+        "hex": "04"
+      },
+      "program": ".case off\n.define d 4\n.byte D"
+    },
+    {
+      "native": {
+        "hex": "03"
+      },
+      "program": ".case off\n.byte .strlen(.string(abc))"
+    },
+    {
+      "native": {
+        "hex": "01"
+      },
+      "program": ".case off\n.byte .xmatch(abc, ABC)"
+    },
+    {
+      "native": {
+        "hex": "05"
+      },
+      "program": ".case off\n.ident(\"abc\") = 5\n.byte ABC"
+    },
+    {
+      "native": {
+        "hex": "6162"
+      },
+      "program": ".case off\n.byte \"ab\""
+    },
+    {
+      "native": {
+        "hex": "00"
+      },
+      "program": ".case off\nlab:\n@x: .byte <@X"
+    },
+    {
+      "native": {
+        "refused": "Expected ‘:’ after identifier to form a label but found ‘end-of-line’"
+      },
+      "program": ".macro m\n.byte q\n.endmacro\nq = 6\n.case off\nm"
+    },
+    {
+      "native": {
+        "hex": "07"
+      },
+      "program": ".case off\n.macro m\n.byte q\n.endmacro\nQ = 7\n.case on\nM"
+    },
+    {
+      "native": {
+        "refused": "Expected ON or OFF but found ‘0’"
+      },
+      "program": ".case 0"
+    },
+    {
+      "native": {
+        "hex": "08"
+      },
+      "program": ".case off\n.if 0\n.case on\n.endif\nfoo = 8\n.byte FOO"
+    },
+    {
+      "native": {
+        "hex": "00"
+      },
+      "program": ".localchar '?'\nlab:\n?x: .byte <?x"
+    },
+    {
+      "native": {
+        "refused": "Invalid input character: 0x40"
+      },
+      "program": ".localchar '?'\nlab:\n@x: .byte 1"
+    },
+    {
+      "native": {
+        "refused": "Invalid start character for locals"
+      },
+      "program": ".localchar '#'"
+    },
+    {
+      "native": {
+        "refused": "Expected a character constant but found ‘\"?\"’"
+      },
+      "program": ".localchar \"?\""
+    },
+    {
+      "native": {
+        "refused": "Expected a character constant but found ‘end-of-line’"
+      },
+      "program": ".localchar"
+    },
+    {
+      "native": {
+        "refused": "Expected ‘end-of-line’ but found ‘,’"
+      },
+      "program": ".localchar '?', 1"
+    },
+    {
+      "native": {
+        "hex": "00"
+      },
+      "program": ".localchar '?'\n?:\n.byte <?-"
+    },
+    {
+      "native": {
+        "hex": "00"
+      },
+      "program": ".localchar '?'\n.localchar '@'\nlab:\n@x: .byte <@x"
+    },
+    {
+      "native": {
+        "hex": "09"
+      },
+      "program": ".localchar '?'\n.ident(\"?x\") = 9\n.byte ?x"
+    },
+    {
+      "native": {
+        "refused": "Argument of .IDENT is not a valid identifier"
+      },
+      "program": ".localchar '?'\n.ident(\"@x\") = 9"
+    },
+    {
+      "native": {
+        "refused": "Invalid input character: 0x3F"
+      },
+      "program": ".macro m\n.byte <?x\n.endmacro\n.localchar '?'\nlab:\n?x: m"
+    },
+    {
+      "native": {
+        "refused": "Symbol ‘?x’ is undefined"
+      },
+      "program": ".localchar '?'\n.macro m\n.byte <?x\n.endmacro\n.localchar '@'\nlab:\n@x: m"
+    },
+    {
+      "native": {
+        "refused": "Invalid input character: 0x40"
+      },
+      "program": ".localchar '?'\nlab:\n?x:\n@x: .byte 1"
+    },
+    {
+      "native": {
+        "hex": "004C00004C0400"
+      },
+      "program": ".localchar '?'\nlab:\n?x: .byte <?x\njmp ?x\n.localchar '@'\nlab2:\n@x: jmp @x"
+    },
+    {
+      "native": {
+        "hex": "EA4C01004C0000"
+      },
+      "program": ".localchar '?'\nlab:\n?x: nop\nlab2:\n?x: jmp ?x\njmp lab"
+    },
+    {
+      "native": {
+        "hex": "EA4C00004C0100"
+      },
+      "program": ".localchar '?'\n?: nop\n?: jmp ?--\njmp ?-"
+    },
+    {
+      "native": {
+        "hex": "4C0000"
+      },
+      "program": ".localchar '?'\nlab:\n.macro m\n?x: jmp ?x\n.endmacro\nm"
+    },
+    {
+      "native": {
+        "hex": "604C0000"
+      },
+      "program": ".localchar '?'\n.proc p\nlab:\n?x: rts\n.endproc\njmp p::lab"
+    },
+    {
+      "native": {
+        "hex": "CAD0FD60200300"
+      },
+      "program": ".case off\nloop: dex\nbne LOOP\n.proc Inner\nrts\n.endproc\njsr INNER"
+    },
+    {
+      "native": {
+        "hex": "A901A901A901"
+      },
+      "program": ".case off\nfoo = 1\nlda #foo\nlda #Foo\nLDA #FOO"
+    },
+    {
+      "native": {
+        "hex": "0201"
+      },
+      "program": ".case off\n.struct Point\nxx .byte\nyy .byte\n.endstruct\n.byte .sizeof(POINT), point::YY"
+    },
+    {
+      "native": {
+        "hex": "02"
+      },
+      "program": ".case off\n.scope s\nv = 2\n.endscope\n.byte S::V"
+    },
+    {
+      "native": {
+        "hex": "4C0000"
+      },
+      "program": ".case off\nlab:\n@a: jmp @A"
+    },
+    {
+      "native": {
+        "hex": "02"
+      },
+      "program": ".case off\n.ifdef FOO\n.byte 1\n.endif\nfoo = 1\n.ifdef FOO\n.byte 2\n.endif"
+    },
+    {
+      "native": {
+        "hex": "0001"
+      },
+      "program": ".case off\n.repeat 2, i\n.byte I\n.endrepeat"
+    },
+    {
+      "native": {
+        "hex": "01"
+      },
+      "program": ".case off\n.enum e\nfirst\nsecond\n.endenum\n.byte E::SECOND"
+    },
+    {
+      "native": {
+        "refused": "Cannot open include file ‘GENERIC.mac’: No such file or directory"
+      },
+      "program": ".case off\n.macpack generic\nadd #1"
+    },
+    {
+      "native": {
+        "hex": "EA4C01004C00004C0100"
+      },
+      "program": "@: nop\n@: jmp @-\njmp @--\njmp :-"
+    },
+    {
+      "native": {
+        "hex": "4C0300EA"
+      },
+      "program": "jmp @+\n@: nop"
+    }
+  ],
+  "config": "MEMORY { ROM: start = $0000, size = $1000, fill = no, file = %O; }\nSEGMENTS { CODE: load = ROM, type = ro; }\n",
+  "source": "Programs measured on ca65 V2.19 and ld65 at 8d86ca7 that each check a setting that changes how names are read: `.case off`, which reads names in upper case, and `.localchar`, which chooses `@` or `?` to start a cheap local. Each program is assembled by ca65 and linked by ld65 under `config`, a flat link at 0, so labels are placed by the linker. `native` is what they made: the image's bytes, or the first line of the error that refused it."
+}

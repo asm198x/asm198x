@@ -559,27 +559,26 @@ pub const DIRECTIVES: &[Directive] = &[
         },
         category: Category::Operation,
     },
-    // `.case on` is ca65's default, so Lang198x accepts it. It refuses
-    // `.case off`, which makes names ignore case, as not lowered yet.
+    // `.case off` makes names ignore case and `.localchar` chooses what
+    // starts a cheap local. Lang198x reads the lines after them accordingly.
     Directive {
         id: "case",
         pattern: Pattern::Sigilled {
             sigil: '.',
-            names: &["case"],
+            names: &["case", "localchar"],
             required: true,
         },
         category: Category::Operation,
     },
     // The option words that change how the lines after them are read, and
     // so cannot be accepted and discarded: `.linecont +` turns on backslash
-    // continuation, `.localchar` changes what starts a cheap local, and
-    // `.feature` switches syntax rules on one by one. `.case` and `.null`
-    // sat here until Lang198x read them.
+    // continuation and `.feature` switches syntax rules on one by one.
+    // `.case`, `.localchar` and `.null` sat here until Lang198x read them.
     Directive {
         id: "unsupported-parse-options",
         pattern: Pattern::Sigilled {
             sigil: '.',
-            names: &["linecont", "localchar", "feature"],
+            names: &["linecont", "feature"],
             required: true,
         },
         category: Category::KnownUnsupported,
@@ -1730,7 +1729,7 @@ two:\n\
         let err = |src: &str| super::assemble(src).expect_err(src).to_string();
         // `.export` sat here, then `.condes`, `.charmap` and `.macpack`,
         // each implemented in turn.
-        for d in [".localchar '?'", ".linecont +"] {
+        for d in [".feature c_comments", ".linecont +"] {
             let e = err(&format!("\t{d}\n"));
             assert!(
                 e.contains("is a real directive here"),
@@ -2087,13 +2086,8 @@ two:\n\
              .list off\n .listbytes 4\n .pagelen 60\n .pagelength 60\n .dbg line\n\
              .byte $AA\n");
         assert_eq!(plain, noisy, "the listing words change no byte");
-        // `.linecont +` and `.case off` change what the parse does, so they are
-        // a gap rather than something to discard. Lang198x's front end names
-        // `.case off` itself.
-        let e = super::assemble(".segment \"CODE\"\n .case off\n")
-            .expect_err(".case off")
-            .to_string();
-        assert!(e.contains("is not lowered yet"), "got: {e}");
+        // `.linecont +` and `.feature` change what the parse does, so they
+        // are a gap rather than something to discard.
         for word in [".linecont +", ".feature labels_without_colons"] {
             let e = super::assemble(&format!(".segment \"CODE\"\n {word}\n"))
                 .expect_err(word)

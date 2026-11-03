@@ -102,4 +102,9 @@ Keep assemblers featherweight: no GUI, audio, emulator, or graphics dependencies
 - Read the relevant decision record before changing crate boundaries, ISA modelling, syntax compatibility, diagnostics, or external formats.
 - Do not copy facts from emulator implementations into `isa`; use primary references and cite upward.
 - Prefer existing dialect/encoding patterns over adding special cases.
+- Before building something for one assembler, look at how the family's other
+  assemblers do the same thing, and build it once where they share it, not
+  once per dialect. Lang198x's
+  [reading settings](https://github.com/lang198x/lang198x/blob/main/decisions/reading-settings.md)
+  record is an example.
 - Keep this front door current-state focused. Detailed CPU bring-up notes, dated milestones, and implementation history belong in decisions, plans, or commit history, not here.
