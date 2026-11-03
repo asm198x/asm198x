@@ -1729,15 +1729,13 @@ two:\n\
     #[test]
     fn a_real_directive_is_told_apart_from_a_typo() {
         let err = |src: &str| super::assemble(src).expect_err(src).to_string();
-        // `.export` sat here, then `.condes`, `.charmap` and `.macpack`,
-        // each implemented in turn.
-        for d in [".linecont +"] {
-            let e = err(&format!("\t{d}\n"));
-            assert!(
-                e.contains("is a real directive here"),
-                "`{d}` should name itself a real ca65 directive, got: {e}"
-            );
-        }
+        // `.export` sat here, then `.condes`, `.charmap`, `.macpack`,
+        // `.localchar` and `.feature`, each implemented in turn.
+        let e = err("\t.linecont +\n");
+        assert!(
+            e.contains("is a real directive here"),
+            "`.linecont` should name itself a real ca65 directive, got: {e}"
+        );
         assert!(
             err("\t.zzqq\n").contains("is not a control command ca65 knows"),
             "and a word ca65 does not have should say so"
