@@ -1,0 +1,516 @@
+{
+  "cases": [
+    {
+      "native": {
+        "hex": "01"
+      },
+      "program": ".feature at_in_identifiers\nfoo@bar = 1\n.byte foo@bar"
+    },
+    {
+      "native": {
+        "hex": "07"
+      },
+      "program": ".feature at_in_identifiers\nfoo@ = 7\n.byte foo@"
+    },
+    {
+      "native": {
+        "hex": "02"
+      },
+      "program": ".feature at_in_identifiers\nlab:\n@x@y = 2\n.byte @x@y"
+    },
+    {
+      "native": {
+        "refused": "Expected ‘:’ after identifier to form a label but found ‘@bar’"
+      },
+      "program": "foo@bar = 1"
+    },
+    {
+      "native": {
+        "refused": "Expected ‘:’ after identifier to form a label but found ‘@bar’"
+      },
+      "program": ".feature at_in_identifiers -\nfoo@bar = 1"
+    },
+    {
+      "native": {
+        "refused": "Expected ‘:’ after identifier to form a label but found ‘@bar’"
+      },
+      "program": ".feature at_in_identifiers off\nfoo@bar = 1"
+    },
+    {
+      "native": {
+        "hex": "01"
+      },
+      "program": ".feature at_in_identifiers on\nfoo@bar = 1\n.byte foo@bar"
+    },
+    {
+      "native": {
+        "hex": "01"
+      },
+      "program": ".feature AT_IN_IDENTIFIERS +\nfoo@bar = 1\n.byte foo@bar"
+    },
+    {
+      "native": {
+        "hex": "03"
+      },
+      "program": ".feature dollar_in_identifiers\nfoo$ = 3\n.byte foo$"
+    },
+    {
+      "native": {
+        "hex": "0310"
+      },
+      "program": ".feature dollar_in_identifiers\nfoo$1 = 3\n.byte foo$1, $10"
+    },
+    {
+      "native": {
+        "hex": "02"
+      },
+      "program": ".feature dollar_in_identifiers\nlab:\n@x$ = 2\n.byte @x$"
+    },
+    {
+      "native": {
+        "refused": "Hexadecimal digit expected"
+      },
+      "program": "foo$ = 3"
+    },
+    {
+      "native": {
+        "hex": "04"
+      },
+      "program": ".feature leading_dot_in_identifiers\n.foo = 4\n.byte .foo"
+    },
+    {
+      "native": {
+        "hex": "04"
+      },
+      "program": ".feature leading_dot_in_identifiers\n.FOO = 4\n.byte .foo"
+    },
+    {
+      "native": {
+        "hex": "05"
+      },
+      "program": ".feature leading_dot_in_identifiers\n.macro .mm\n.byte 5\n.endmacro\n.mm"
+    },
+    {
+      "native": {
+        "hex": "3406"
+      },
+      "program": ".feature leading_dot_in_identifiers\n.byte .lobyte($1234), 6"
+    },
+    {
+      "native": {
+        "hex": "02"
+      },
+      "program": ".feature leading_dot_in_identifiers\n.ifdef .foo\n.byte 1\n.endif\n.byte 2"
+    },
+    {
+      "native": {
+        "hex": "00"
+      },
+      "program": ".feature leading_dot_in_identifiers\n.byte .defined(.bogus)"
+    },
+    {
+      "native": {
+        "refused": "‘.FOO’ is not a recognized control command"
+      },
+      "program": ".foo = 4"
+    },
+    {
+      "native": {
+        "hex": "C300000034120000E8030000010000001200000012000000FFFFFFFF"
+      },
+      "program": ".feature underline_in_numbers\n.dword %1100_0011, $12_34, 1_000, 0_1, 1_2h, $1__2, 4_294_967_295"
+    },
+    {
+      "native": {
+        "refused": "Number may not end with underline"
+      },
+      "program": ".feature underline_in_numbers\n.byte 12_h"
+    },
+    {
+      "native": {
+        "refused": "Number may not end with underline"
+      },
+      "program": ".feature underline_in_numbers\n.byte $1_"
+    },
+    {
+      "native": {
+        "refused": "Number may not end with underline"
+      },
+      "program": ".feature underline_in_numbers\n.byte 0_"
+    },
+    {
+      "native": {
+        "refused": "Hexadecimal digit expected"
+      },
+      "program": ".feature underline_in_numbers\n.byte $_1"
+    },
+    {
+      "native": {
+        "refused": "Overflow in hexadecimal number"
+      },
+      "program": ".feature underline_in_numbers\n.dword $ffff_ffff_f"
+    },
+    {
+      "native": {
+        "refused": "Expected ‘end-of-line’ but found ‘_0’"
+      },
+      "program": ".byte 1_0"
+    },
+    {
+      "native": {
+        "hex": "0002"
+      },
+      "program": ".feature dollar_is_pc\n.byte $ - *, <($+2-*)"
+    },
+    {
+      "native": {
+        "hex": "10000A00"
+      },
+      "program": ".feature dollar_is_pc\n.word $10, $a"
+    },
+    {
+      "native": {
+        "hex": "000100"
+      },
+      "program": ".feature dollar_is_pc\n.byte .match($, *), .match($, $), .xmatch($, *)"
+    },
+    {
+      "native": {
+        "refused": "Expected ‘end-of-line’ but found ‘16’"
+      },
+      "program": ".feature dollar_is_pc\n.word $$10"
+    },
+    {
+      "native": {
+        "refused": "Expected ‘end-of-line’ but found ‘$’"
+      },
+      "program": ".feature dollar_is_pc\n.word 2 $ 3"
+    },
+    {
+      "native": {
+        "refused": "Expected ‘end-of-line’ but found ‘$’"
+      },
+      "program": ".feature dollar_is_pc\n$ = 5"
+    },
+    {
+      "native": {
+        "refused": "Hexadecimal digit expected"
+      },
+      "program": ".byte $ - *"
+    },
+    {
+      "native": {
+        "hex": "01"
+      },
+      "program": ".feature dollar_is_pc, dollar_in_identifiers\nx$ = 1\n.byte x$"
+    },
+    {
+      "native": {
+        "refused": "Expected ‘end-of-line’ but found ‘_1’"
+      },
+      "program": ".feature dollar_is_pc, underline_in_numbers\n.byte $_1"
+    },
+    {
+      "native": {
+        "refused": "Expected ‘end-of-line’ but found ‘@g’"
+      },
+      "program": ".feature at_in_identifiers\n.macro m\nf@g = 9\n.endmacro\n.feature at_in_identifiers -\nm\n.byte f@g"
+    },
+    {
+      "native": {
+        "refused": "Expected ‘end-of-line’ but found ‘@bar’"
+      },
+      "program": ".macro m\n.byte foo@bar\n.endmacro\n.feature at_in_identifiers\nfoo@bar = 1\nm"
+    },
+    {
+      "native": {
+        "refused": "Invalid feature: ‘bogus’"
+      },
+      "program": ".feature bogus"
+    },
+    {
+      "native": {
+        "refused": "Expected an identifier but found ‘end-of-line’"
+      },
+      "program": ".feature"
+    },
+    {
+      "native": {
+        "refused": "Expected an identifier but found ‘end-of-line’"
+      },
+      "program": ".feature at_in_identifiers +,"
+    },
+    {
+      "native": {
+        "refused": "Expected ON or OFF but found ‘1’"
+      },
+      "program": ".feature at_in_identifiers 1"
+    },
+    {
+      "native": {
+        "refused": "Expected ‘end-of-line’ but found ‘X’"
+      },
+      "program": ".feature at_in_identifiers + x"
+    },
+    {
+      "native": {
+        "refused": "Expected ‘:’ after identifier to form a label but found ‘@bar’"
+      },
+      "program": ".if 0\n.feature at_in_identifiers\n.endif\nfoo@bar = 1"
+    },
+    {
+      "native": {
+        "hex": "A961"
+      },
+      "program": ".feature loose_char_term\nlda #\"a\""
+    },
+    {
+      "native": {
+        "refused": "Expected an expression but found ‘\"a\"’"
+      },
+      "program": "lda #\"a\""
+    },
+    {
+      "native": {
+        "refused": "Expected ‘end-of-line’ but found ‘+’"
+      },
+      "program": ".feature loose_char_term\n.byte \"a\"+1"
+    },
+    {
+      "native": {
+        "hex": "6200"
+      },
+      "program": ".feature loose_char_term\n.word \"a\"+1"
+    },
+    {
+      "native": {
+        "hex": "61"
+      },
+      "program": ".feature loose_char_term\n.byte (\"a\")"
+    },
+    {
+      "native": {
+        "refused": "Expected an expression but found ‘\"ab\"’"
+      },
+      "program": ".feature loose_char_term\n.word \"ab\"+1"
+    },
+    {
+      "native": {
+        "refused": "Illegal character constant"
+      },
+      "program": ".feature loose_char_term\n.byte 'a\""
+    },
+    {
+      "native": {
+        "hex": "0001"
+      },
+      "program": ".feature loose_char_term\n.byte .match(\"a\", 'a'), .strlen(\"a\")"
+    },
+    {
+      "native": {
+        "hex": "61626362612262"
+      },
+      "program": ".feature loose_string_term\n.byte 'abc', 'a'+1, '', 'a\"b'"
+    },
+    {
+      "native": {
+        "hex": "030001"
+      },
+      "program": ".feature loose_string_term\n.byte .strlen('abc'), .match(\"a\", 'a'), .match('ab', \"ab\")"
+    },
+    {
+      "native": {
+        "refused": "Newline in string constant"
+      },
+      "program": ".feature loose_string_term\n.byte \"abc'"
+    },
+    {
+      "native": {
+        "hex": "A961"
+      },
+      "program": ".feature loose_string_term\nlda #'a'"
+    },
+    {
+      "native": {
+        "hex": "A961"
+      },
+      "program": ".feature missing_char_term\nlda #'a"
+    },
+    {
+      "native": {
+        "hex": "610262"
+      },
+      "program": ".feature missing_char_term\n.byte 'a, 2, 'b'"
+    },
+    {
+      "native": {
+        "refused": "Expected ‘end-of-line’ but found ‘b’"
+      },
+      "program": ".feature missing_char_term\n.byte 'ab"
+    },
+    {
+      "native": {
+        "refused": "Newline in string constant"
+      },
+      "program": ".feature missing_char_term\n.byte '"
+    },
+    {
+      "native": {
+        "refused": "Newline in string constant"
+      },
+      "program": ".feature missing_char_term, loose_string_term\n.byte 'a"
+    },
+    {
+      "native": {
+        "hex": "610A62090D0A5C222707081B0C0B3F"
+      },
+      "program": ".feature string_escapes\n.byte \"a\\nb\", \"\\t\\r\\n\\\\\\\"\\'\", \"\\a\\b\\e\\f\\v\\?\""
+    },
+    {
+      "native": {
+        "hex": "414A4A413400410061FF"
+      },
+      "program": ".feature string_escapes\n.byte \"\\x41\\x4a\\X4A\\x414\", \"\\0\\101\\0a\", \"\\xff\""
+    },
+    {
+      "native": {
+        "refused": "Unsupported escape sequence in string constant"
+      },
+      "program": ".feature string_escapes\n.byte \"\\x4\""
+    },
+    {
+      "native": {
+        "refused": "Unsupported escape sequence in string constant"
+      },
+      "program": ".feature string_escapes\n.byte \"\\q\""
+    },
+    {
+      "native": {
+        "refused": "Unsupported escape sequence in string constant"
+      },
+      "program": ".feature string_escapes\n.byte \"\\8\""
+    },
+    {
+      "native": {
+        "refused": "Octal character constant out of range"
+      },
+      "program": ".feature string_escapes\n.byte \"\\777\""
+    },
+    {
+      "native": {
+        "refused": "Newline in string constant"
+      },
+      "program": ".feature string_escapes\n.byte \"a\\\""
+    },
+    {
+      "native": {
+        "refused": "Illegal character constant"
+      },
+      "program": ".feature string_escapes\nlda #'\\''"
+    },
+    {
+      "native": {
+        "hex": "615C6E625C"
+      },
+      "program": ".byte \"a\\nb\", '\\'"
+    },
+    {
+      "native": {
+        "hex": "0301"
+      },
+      "program": ".feature string_escapes\n.byte .strlen(\"a\\nb\"), .match(\"\\n\", \"\\x0a\")"
+    },
+    {
+      "native": {
+        "hex": "610962"
+      },
+      "program": ".feature string_escapes\n.define s \"a\\tb\"\n.byte s"
+    },
+    {
+      "native": {
+        "hex": "785C6E79"
+      },
+      "program": ".macro m\n.byte \"x\\ny\"\n.endmacro\n.feature string_escapes\nm"
+    },
+    {
+      "native": {
+        "hex": "780A79"
+      },
+      "program": ".feature string_escapes\n.macro m\n.byte \"x\\ny\"\n.endmacro\n.feature string_escapes -\nm"
+    },
+    {
+      "native": {
+        "hex": "990A0A9999"
+      },
+      "program": ".feature string_escapes\n.charmap $0a, $99\n.byte \"\\n\\x0a\\12\", '\\n', '\\x0a'"
+    },
+    {
+      "native": {
+        "hex": "61276227"
+      },
+      "program": ".feature string_escapes, loose_string_term\n.byte 'a\\'b', '\\''"
+    },
+    {
+      "native": {
+        "hex": "A90A"
+      },
+      "program": ".feature string_escapes, loose_char_term\nlda #\"\\n\""
+    },
+    {
+      "native": {
+        "hex": "610A627C"
+      },
+      "program": ".feature string_escapes\n.byte .sprintf(\"%s|\", \"a\\nb\")"
+    },
+    {
+      "native": {
+        "hex": "78097900"
+      },
+      "program": ".feature string_escapes\n.asciiz \"x\\ty\""
+    },
+    {
+      "native": {
+        "hex": "0A"
+      },
+      "program": ".feature string_escapes\n.literal \"\\n\""
+    },
+    {
+      "native": {
+        "hex": "0A41"
+      },
+      "program": ".feature string_escapes\n.byte '\\n', '\\x41'"
+    },
+    {
+      "native": {
+        "hex": "00000400BD04004C0700"
+      },
+      "program": ".feature dollar_is_pc\n.word $, $+2\nlda $,x\njmp $"
+    },
+    {
+      "native": {
+        "hex": "0000"
+      },
+      "program": ".feature dollar_is_pc\nlab: .word lab - $"
+    },
+    {
+      "native": {
+        "hex": "4C0000"
+      },
+      "program": ".feature at_in_identifiers\nfoo@bar:\njmp foo@bar"
+    },
+    {
+      "native": {
+        "hex": "CAD0FD"
+      },
+      "program": ".feature leading_dot_in_identifiers\n.loop: dex\nbne .LOOP"
+    },
+    {
+      "native": {
+        "hex": "CAD0FD"
+      },
+      "program": ".feature dollar_in_identifiers\nloop$: dex\nbne loop$"
+    }
+  ],
+  "config": "MEMORY { ROM: start = $0000, size = $1000, fill = no, file = %O; }\nSEGMENTS { CODE: load = ROM, type = ro; }\n",
+  "source": "Programs measured on ca65 V2.19 and ld65 at 8d86ca7 that turn on the `.feature`s changing how tokens are read: `at_in_identifiers`, `dollar_in_identifiers`, `leading_dot_in_identifiers`, `underline_in_numbers`, `dollar_is_pc`, `string_escapes`, `loose_string_term`, `loose_char_term` and `missing_char_term`, with `.feature` lines ca65 refuses. Each program is assembled by ca65 and linked by ld65 under `config`, a flat link at 0. `native` is what they made: the image's bytes, or the first line of the error that refused it."
+}
