@@ -56,7 +56,7 @@ asm198x-ir = { path = "crates/asm198x-ir" }
 
 [workspace.package]
 edition = "2024"
-version = "0.0.73"
+version = "0.0.74"
 license = "GPL-2.0-or-later"
 repository = "https://github.com/asm198x/asm198x"
 # The Homebrew formula carries a homepage; without one `dist` warns and the

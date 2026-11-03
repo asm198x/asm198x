@@ -28,7 +28,7 @@ lua = ["dep:mlua"]
 [dependencies]
 # The front-end/back-end boundary: AST, statement stream, spans, source
 # loading and diagnostics.
-asm198x-ir = { path = "../asm198x-ir", version = "0.0.73" }
+asm198x-ir = { path = "../asm198x-ir", version = "0.0.74" }
 format198x-commodore-c64-prg = { workspace = true }
 format198x-sinclair-zx-spectrum-sna = { workspace = true }
 format198x-sinclair-zx-spectrum-tap = { workspace = true }

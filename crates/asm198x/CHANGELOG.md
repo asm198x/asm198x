@@ -7,6 +7,66 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.74](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.73...asm198x-v0.0.74) - 2026-11-03
+
+### Added
+
+- *(ca65)* read source files as bytes, as ca65 does
+- *(ca65)* follow org_per_seg, merge_scopes and far scopes in the walk
+- *(ca65)* join lines under .linecont and c_comments
+- *(ca65)* read the nine token features
+- *(ca65)* read names under .case off and .localchar
+- *(ca65)* size a .proc's name by its size, and check one-byte addresses
+- *(ca65)* resolve .bank from the link config's bank attributes
+- *(ca65)* ca65's macro packages and CPU_ constants in the walk
+- *(ca65)* follow ca65's .dbg file table and scopes
+- *(ca65)* keep ca65's character map, and record the new verdicts
+- *(disasm)* disassemble every CPU ca65 knows
+- *(cli)* start a ca65 program on the CPU --cpu names
+- *(ca65)* assemble the 65816 through the walk, and delete the old readers
+- *(ca65)* assemble and format the HuC6280 through the walk
+- *(ca65)* format ca65 source with Lang198x's formatter
+- *(ca65)* assemble the 4510 in the walk, and check branch distances
+- *(ca65)* carry on past errors in the engine, and stop at .fatal
+- *(ca65)* report every error, as ca65 does
+- *(ca65)* read records in the walk
+- *(ca65)* know the distance between two labels in the walk
+- *(ca65)* keep ca65's CPU stack and check its settings in the walk
+- *(ca65)* follow ca65 on `.reloc`, `.org` across segments and macro lines
+- *(ca65)* let the walk's equates read names defined further on
+- *(ca65)* warn in the walk as ca65 and ld65 do
+- *(ca65)* give the walk's link a debug record by segment
+
+### Dependencies
+
+- *(deps)* take lang198x-ca65 0.0.33 for reading source as bytes
+- *(deps)* take lang198x-ca65 0.0.32 for its meaning features
+- *(deps)* take lang198x-ca65 0.0.31 for its parsing features
+- *(deps)* take lang198x-ca65 0.0.30 for its joining settings
+- *(deps)* take lang198x-ca65 0.0.29 for its token features
+- *(deps)* take lang198x-ca65 0.0.27
+- *(deps)* take lang198x-ca65 0.0.26
+- *(deps)* take lang198x-ca65 0.0.25
+- *(deps)* take lang198x-ca65 0.0.24
+- *(deps)* take lang198x-ca65 0.0.23
+- *(deps)* take isa198x-disasm 0.1.11
+- *(deps)* take lang198x-ca65 0.0.22 and isa198x 0.1.10
+- *(deps)* take lang198x-ca65 0.0.21 and isa198x 0.1.9
+- *(deps)* take lang198x-ca65 0.0.20 and isa198x 0.1.8
+- *(deps)* take lang198x-ca65 0.0.19
+
+### Fixed
+
+- *(ca65)* name a cheap local as a member of its label
+- *(ca65)* count a token function's uses from where it sits on the line
+- *(ca65)* read SWEET 16 with its own instructions
+- *(ca65)* refuse the walk's unimplemented words as the surface declares
+- *(ca65)* report where ca65 does in the walk
+- *(ca65)* circles, fills and late names in the walk as ca65 V2.19 has them
+- *(ca65)* follow ca65 V2.19 in the walk on the gaps the switch found
+- *(ca65)* let an import in a scope hide a name further out
+- *(ca65)* refuse one-byte data that does not fit, as ca65 does
+
 ## [0.0.73](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.72...asm198x-v0.0.73) - 2026-10-27
 
 ### Added
