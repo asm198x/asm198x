@@ -67,3 +67,20 @@ including unsuccessful outcomes and bounded status/rate-limit/request-ID
 diagnostics, so failure can be retained before qualification starts. A successful
 acquisition is not qualification; source, receipt and archive checks remain
 mandatory. Response bodies and credentials are not acquisition evidence.
+
+## Pull requests qualify the Linux archives
+
+Since 2026-11-03, pull requests and pushes to `main` build and qualify the two
+Linux archives only. A release, and a manual run of the candidate workflow,
+still qualifies all five, and hosting still waits for every one of them, so no
+archive is published unqualified. The macOS and Windows checks moved because
+GitHub's runners for them were slow and scarce: on asm198x#1037 the Intel Mac
+job ran past its 30-minute limit after qualifying, and Windows took 20 minutes.
+Steve chose this, matching Emu198x, which already left macOS out of its pull
+request checks.
+
+What this costs: a change that breaks only the macOS or Windows build, or an
+archive's behaviour there, is found when a release is cut rather than when the
+change is merged. The release then stops before hosting, and the fix goes in
+as a normal pull request. The shared CI's macOS and Windows `cargo check` and
+the Lua job's macOS and Windows legs left pull requests at the same time.
