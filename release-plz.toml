@@ -44,10 +44,20 @@ commit_parsers = [
 # `asm198x` publishes and tags; the repository-only crates do neither.
 # `xtask` and `verdict-corpus` stay untagged: repository automation and test
 # infrastructure, with no consumer inside or outside this workspace.
+#
+# No semver check: cargo-semver-checks builds the crate in a workspace of its
+# own, without this one's `[patch.crates-io]`, so `asm198x` takes `asm198x-ir`
+# by path while `lang198x-ca65` takes it from crates.io. Two copies of one
+# crate cannot meet in a trait, so the check cannot build `asm198x` at all,
+# and failed every release run from 2026-11-02 until this. Publishing is
+# unaffected: there both resolve to the `asm198x-ir` just published. In 0.0.x
+# the version is a workspace checkpoint, not a semver claim
+# (decisions/release-cadence.md), so the check had nothing to protect.
 [[package]]
 name = "asm198x"
 publish = true
 git_release_enable = false
+semver_check = false
 
 # The front-end/back-end boundary `asm198x` depends on, so it must publish too.
 # Lockstep with `asm198x` while it lives here. Untagged: its tag would be
