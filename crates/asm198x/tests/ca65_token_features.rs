@@ -26,5 +26,5 @@ fn the_token_feature_programs_record_their_results() {
 /// refusal.
 #[test]
 fn every_token_feature_program_matches_ca65() {
-    assert_eq!(support::linked::replay(&facts()), 85);
+    assert_eq!(support::linked::replay(&facts()), 89);
 }

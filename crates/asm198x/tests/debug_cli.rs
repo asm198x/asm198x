@@ -615,7 +615,7 @@ reset:  lda #1\n\
     assert!(status.success());
     let sym = std::fs::read_to_string(src_path.with_extension("sym")).expect("read sym");
     assert_eq!(
-        sym, "reset = $8000\nreset@wait = $8002\n",
+        sym, "reset = $8000\nreset::@wait = $8002\n",
         "cheap label renders as source form; anonymous labels are positional, not symbols"
     );
 }

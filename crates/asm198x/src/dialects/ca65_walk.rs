@@ -1509,8 +1509,14 @@ impl Walk<'_> {
         }
         if name.starts_with(LOCAL_CHARS) {
             // A cheap local belongs to the label before it, whatever scope
-            // it is written in.
-            return Lookup::Full(format!("{}{name}", self.cheap));
+            // it is written in. It is named as a member of that label,
+            // `foo::@bar`, which no name in the source can be: under
+            // `at_in_identifiers`, `foo@bar` is a name of its own.
+            return Lookup::Full(if self.cheap.is_empty() {
+                name.to_owned()
+            } else {
+                format!("{}::{name}", self.cheap)
+            });
         }
         Lookup::Plain(name.to_owned())
     }
