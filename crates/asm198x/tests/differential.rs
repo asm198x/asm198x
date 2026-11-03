@@ -1239,7 +1239,7 @@ const PROBES: &[Probe] = &[
     ok ("ca65", "a space before a label's colon", "finish : .byte 7\n.word finish\n"),
     ok ("ca65", "a space before a colon after a mnemonic is refused", "lda : .byte 7\n"),
     ok ("ca65", ":= defines a constant", "VALUE :=7\n.byte VALUE\n"),
-    gap("ca65", ".set rebinds a symbol", "VALUE .set 7\nVALUE .set 8\n.byte VALUE\n", 761),
+    ok ("ca65", ".set rebinds a symbol", "VALUE .set 7\nVALUE .set 8\n.byte VALUE\n"),
     ok ("ca65", "a lookahead past a constructor is refused", "VALUE=2\n.byte VALUE .left(.ref(VALUE)+1,{+1})\n"),
     ok ("ca65", "a constructor before its constant is defined", ".byte .left(3,{VALUE,0}) .left(.ref(VALUE),{+1})\n"),
     ok ("ca65", "an unbalanced brace inside a captured list", "VALUE=7\n.byte .tcount({.match({1},{2})})\n"),
