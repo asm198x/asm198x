@@ -55,9 +55,13 @@ test('every declared release architecture has exactly one native qualification j
   const config = fs.readFileSync(path.join(__dirname, '../Cargo.toml'), 'utf8').replaceAll('\r\n', '\n');
   const declared = JSON.parse(config.match(/^targets = (\[.*\])$/m)[1]);
   const workflow = fs.readFileSync(path.join(__dirname, '../.github/workflows/test-linux-packages.yml'), 'utf8').replaceAll('\r\n', '\n');
-  const matrix = [...workflow.matchAll(/^            target: ([\w-]+)$/gm)].map(m => m[1]);
+  // The matrix picks a list by event: every target for a release or a manual
+  // run, the Linux targets alone for pull requests and pushes to main.
+  const [release, linuxOnly] = [...workflow.matchAll(/'(\[\{.*\}\])'/g)].map(m => JSON.parse(m[1]).map(entry => entry.target));
+  assert(workflow.includes("fromJSON((inputs.plan || github.event_name == 'workflow_dispatch')"));
   assert.deepEqual([...declared].sort(), [...targets].sort());
-  assert.deepEqual(matrix.sort(), [...targets].sort());
+  assert.deepEqual([...release].sort(), [...targets].sort());
+  assert.deepEqual([...linuxOnly].sort(), targets.filter(target => target.endsWith('-linux-gnu')).sort());
 });
 test('reusable workflow writes the exact supplied candidate plan as valid JSON', () => {
   const os = require('node:os');

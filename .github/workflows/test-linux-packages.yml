@@ -57,18 +57,15 @@ jobs:
     timeout-minutes: 30
     strategy:
       fail-fast: false
+      # A release (`plan`) or a manual run qualifies every target. Pull
+      # requests and pushes to main qualify the two Linux archives only:
+      # GitHub's macOS and Windows runners took up to 35 minutes a pull
+      # request, so those archives are qualified when a release is cut.
       matrix:
-        include:
-          - runner: ubuntu-22.04
-            target: x86_64-unknown-linux-gnu
-          - runner: ubuntu-22.04-arm
-            target: aarch64-unknown-linux-gnu
-          - runner: macos-latest
-            target: aarch64-apple-darwin
-          - runner: macos-15-intel
-            target: x86_64-apple-darwin
-          - runner: windows-latest
-            target: x86_64-pc-windows-msvc
+        include: >-
+          ${{ fromJSON((inputs.plan || github.event_name == 'workflow_dispatch')
+          && '[{"runner":"ubuntu-22.04","target":"x86_64-unknown-linux-gnu"},{"runner":"ubuntu-22.04-arm","target":"aarch64-unknown-linux-gnu"},{"runner":"macos-latest","target":"aarch64-apple-darwin"},{"runner":"macos-15-intel","target":"x86_64-apple-darwin"},{"runner":"windows-latest","target":"x86_64-pc-windows-msvc"}]'
+          || '[{"runner":"ubuntu-22.04","target":"x86_64-unknown-linux-gnu"},{"runner":"ubuntu-22.04-arm","target":"aarch64-unknown-linux-gnu"}]') }}
     runs-on: ${{ matrix.runner }}
     env:
       RELEASE_PLAN: ${{ inputs.plan }}

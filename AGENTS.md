@@ -99,6 +99,9 @@ Keep assemblers featherweight: no GUI, audio, emulator, or graphics dependencies
   [`decisions/branch-and-merge-workflow.md`](decisions/branch-and-merge-workflow.md).
   `main` requires pull requests and status checks; this convention also requires
   the complete current checks and native candidate qualification before merging.
+  Pull requests run on Linux only; macOS and Windows are built and qualified
+  when a release is cut
+  ([`release-candidate-qualification.md`](decisions/release-candidate-qualification.md)).
 - Read the relevant decision record before changing crate boundaries, ISA modelling, syntax compatibility, diagnostics, or external formats.
 - Do not copy facts from emulator implementations into `isa`; use primary references and cite upward.
 - Prefer existing dialect/encoding patterns over adding special cases.
