@@ -183,9 +183,9 @@ dependencies = [
 
 [[package]]
 name = "lang198x-ca65"
-version = "0.0.31"
+version = "0.0.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c6219b4321062c63f839c348ca1e40dc92ba319bf9f0ef0b641304e00861f200"
+checksum = "942370c7b91b7c4dd16aa1556240ef852e45c503fac070129d9a52bef34993ee"
 dependencies = [
  "asm198x-ir",
  "isa198x",
