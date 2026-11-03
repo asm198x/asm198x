@@ -2072,7 +2072,7 @@ two:\n\
         assert_eq!(plain, noisy, "the listing words change no byte");
         // A feature Lang198x does not read yet changes what the parse does,
         // so it is a gap rather than something to discard.
-        let e = super::assemble(".segment \"CODE\"\n .feature labels_without_colons\n")
+        let e = super::assemble(".segment \"CODE\"\n .feature org_per_seg\n")
             .expect_err(".feature")
             .to_string();
         assert!(e.contains("is not lowered yet"), "got: {e}");
