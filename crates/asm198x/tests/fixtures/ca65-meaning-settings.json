@@ -1,0 +1,666 @@
+{
+  "cases": [
+    {
+      "native": {
+        "refused": "Range error (300 not in [0..255])"
+      },
+      "program": ".byte 300"
+    },
+    {
+      "native": {
+        "hex": "2C"
+      },
+      "program": ".feature force_range\n.byte 300"
+    },
+    {
+      "native": {
+        "hex": "FFFF00"
+      },
+      "program": ".feature force_range\n.byte -1, $1ff, 256"
+    },
+    {
+      "native": {
+        "hex": "4523"
+      },
+      "program": ".feature force_range\n.word $12345"
+    },
+    {
+      "native": {
+        "refused": "Range error (74565 not in [0..65535])"
+      },
+      "program": ".word $12345"
+    },
+    {
+      "native": {
+        "hex": "2345"
+      },
+      "program": ".feature force_range\n.dbyt $12345"
+    },
+    {
+      "native": {
+        "refused": "Overflow in hexadecimal number"
+      },
+      "program": ".feature force_range\n.dword $123456789"
+    },
+    {
+      "native": {
+        "hex": "674523"
+      },
+      "program": ".feature force_range\n.faraddr $1234567"
+    },
+    {
+      "native": {
+        "refused": "Range error (19088743 not in [0..16777215])"
+      },
+      "program": ".faraddr $1234567"
+    },
+    {
+      "native": {
+        "hex": "4523"
+      },
+      "program": ".feature force_range\n.addr $12345"
+    },
+    {
+      "native": {
+        "refused": "Range error (74565 not in [0..65535])"
+      },
+      "program": ".addr $12345"
+    },
+    {
+      "native": {
+        "hex": "4523"
+      },
+      "program": ".p816\n.addr $12345"
+    },
+    {
+      "native": {
+        "refused": "Range error (300 not in [0..255])"
+      },
+      "program": "lda #300"
+    },
+    {
+      "native": {
+        "hex": "A92C"
+      },
+      "program": ".feature force_range\nlda #300"
+    },
+    {
+      "native": {
+        "hex": "A9FF"
+      },
+      "program": ".feature force_range\nlda #-1"
+    },
+    {
+      "native": {
+        "hex": "A2FF"
+      },
+      "program": ".feature force_range\nldx #$1ff"
+    },
+    {
+      "native": {
+        "hex": "A94523"
+      },
+      "program": ".p816\n.a16\n.feature force_range\nlda #$12345"
+    },
+    {
+      "native": {
+        "hex": "C2FF"
+      },
+      "program": ".p816\n.feature force_range\nrep #$1ff"
+    },
+    {
+      "native": {
+        "hex": "61622C"
+      },
+      "program": ".feature force_range\n.byte \"ab\", 300"
+    },
+    {
+      "native": {
+        "hex": "A934"
+      },
+      "program": ".feature force_range\nlda #<$1234"
+    },
+    {
+      "native": {
+        "hex": "34EA"
+      },
+      "program": ".feature force_range\n.byte lab\n.org $1234\nlab: nop"
+    },
+    {
+      "native": {
+        "refused": "Range error (300 not in [0..255])"
+      },
+      "program": ".feature force_range\n.feature force_range -\n.byte 300"
+    },
+    {
+      "native": {
+        "hex": "2C"
+      },
+      "program": ".feature force_range\n.lobytes 300"
+    },
+    {
+      "native": {
+        "refused": "Fill value is not in byte range"
+      },
+      "program": ".feature force_range\n.res 2, 300"
+    },
+    {
+      "native": {
+        "hex": "AD2C01"
+      },
+      "program": ".feature force_range\nlda 300"
+    },
+    {
+      "native": {
+        "hex": "7F"
+      },
+      "program": ".feature force_range\n.byte -129"
+    },
+    {
+      "native": {
+        "refused": "Range error (-129 not in [0..255])"
+      },
+      "program": ".byte -129"
+    },
+    {
+      "native": {
+        "refused": "Range error (-128 not in [0..255])"
+      },
+      "program": ".byte -128"
+    },
+    {
+      "native": {
+        "hex": "2C"
+      },
+      "program": ".feature force_range\n.byte v\nv = 300"
+    },
+    {
+      "native": {
+        "hex": "A92C"
+      },
+      "program": ".feature force_range\nlda #v\nv = 300"
+    },
+    {
+      "native": {
+        "refused": "Range error (300 not in [0..255])"
+      },
+      "program": ".byte v\nv = 300"
+    },
+    {
+      "native": {
+        "hex": "2C"
+      },
+      "program": ".lobytes 300"
+    },
+    {
+      "native": {
+        "hex": "FFFF"
+      },
+      "program": ".feature force_range\n.word -1"
+    },
+    {
+      "native": {
+        "hex": "FFFFFFFF"
+      },
+      "program": ".feature force_range\n.dword -1"
+    },
+    {
+      "native": {
+        "hex": "FFFF"
+      },
+      "program": ".feature force_range\n.dbyt -1"
+    },
+    {
+      "native": {
+        "hex": "010203"
+      },
+      "program": ".feature force_range\n.byte 1, 2\n.feature force_range -\n.byte 3"
+    },
+    {
+      "native": {
+        "hex": ""
+      },
+      "program": ".feature addrsize"
+    },
+    {
+      "native": {
+        "hex": ""
+      },
+      "program": ".feature addrsize -"
+    },
+    {
+      "native": {
+        "hex": ""
+      },
+      "program": ".feature force_range, addrsize"
+    },
+    {
+      "native": {
+        "hex": "A900A90000"
+      },
+      "program": ".feature force_range\n.p816\n.a8\nlda #$100\n.a16\nlda #$10000"
+    },
+    {
+      "native": {
+        "refused": "Range error (305419896 not in [0..16777215])"
+      },
+      "program": ".feature force_range\n.p816\nlda f:$12345678"
+    },
+    {
+      "native": {
+        "hex": "692C"
+      },
+      "program": ".feature force_range\nadc #300"
+    },
+    {
+      "native": {
+        "refused": "Illegal addressing mode"
+      },
+      "program": ".feature force_range\n.p816\npea $12345"
+    },
+    {
+      "native": {
+        "hex": "540000"
+      },
+      "program": ".feature force_range\n.p816\nmvn $1ff,$200"
+    },
+    {
+      "native": {
+        "hex": "C22CE22C"
+      },
+      "program": ".feature force_range\n.p816\nrep #300\nsep #300"
+    },
+    {
+      "native": {
+        "hex": "A24523A0FFFF"
+      },
+      "program": ".feature force_range\n.p816\n.i16\nldx #$12345\nldy #-1"
+    },
+    {
+      "native": {
+        "refused": "Range error (300 not in [0..255])"
+      },
+      "program": ".feature force_range\n.macro m\n.byte 300\n.endmacro\n.feature force_range -\nm"
+    },
+    {
+      "native": {
+        "refused": "Illegal addressing mode"
+      },
+      "program": ".p816\njsr $123456"
+    },
+    {
+      "native": {
+        "hex": "22563412"
+      },
+      "program": ".p816\n.feature long_jsr_jmp_rts\njsr $123456"
+    },
+    {
+      "native": {
+        "hex": "5C563412"
+      },
+      "program": ".p816\n.feature long_jsr_jmp_rts\njmp $123456"
+    },
+    {
+      "native": {
+        "refused": "Illegal addressing mode"
+      },
+      "program": ".p816\njmp $123456"
+    },
+    {
+      "native": {
+        "hex": "2034124C3412"
+      },
+      "program": ".p816\n.feature long_jsr_jmp_rts\njsr $1234\njmp $1234"
+    },
+    {
+      "native": {
+        "hex": "223412005C341200"
+      },
+      "program": ".p816\n.feature long_jsr_jmp_rts\njsr f:$1234\njmp f:$1234"
+    },
+    {
+      "native": {
+        "refused": "Illegal addressing mode"
+      },
+      "program": ".p816\njsr f:$1234"
+    },
+    {
+      "native": {
+        "refused": "Illegal addressing mode"
+      },
+      "program": ".p816\njmp f:$1234"
+    },
+    {
+      "native": {
+        "refused": "Range error (1193046 not in [0..65535])"
+      },
+      "program": ".p816\n.feature long_jsr_jmp_rts\njsr far\n.segment \"DATA\"\nfar = $123456"
+    },
+    {
+      "native": {
+        "hex": "60"
+      },
+      "program": ".p816\n.feature long_jsr_jmp_rts\nrts"
+    },
+    {
+      "native": {
+        "hex": "6B"
+      },
+      "program": ".p816\n.smart\n.feature long_jsr_jmp_rts\n.proc p: far\nrts\n.endproc"
+    },
+    {
+      "native": {
+        "hex": "60"
+      },
+      "program": ".p816\n.smart\n.proc p: far\nrts\n.endproc"
+    },
+    {
+      "native": {
+        "hex": "60"
+      },
+      "program": ".p816\n.feature long_jsr_jmp_rts\n.proc p: far\nrts\n.endproc"
+    },
+    {
+      "native": {
+        "hex": "60"
+      },
+      "program": ".p816\n.smart\n.feature long_jsr_jmp_rts\n.proc p\nrts\n.endproc"
+    },
+    {
+      "native": {
+        "hex": "60"
+      },
+      "program": ".p816\n.smart\n.feature long_jsr_jmp_rts\n.proc p: far\n.proc q\nrts\n.endproc\n.endproc"
+    },
+    {
+      "native": {
+        "refused": "Illegal addressing mode"
+      },
+      "program": ".feature long_jsr_jmp_rts\njsr $123456"
+    },
+    {
+      "native": {
+        "hex": "20341260"
+      },
+      "program": ".feature long_jsr_jmp_rts\njsr $1234\nrts"
+    },
+    {
+      "native": {
+        "hex": "4C3412"
+      },
+      "program": ".pc02\n.feature long_jsr_jmp_rts\njmp $1234"
+    },
+    {
+      "native": {
+        "hex": "6C3412DC34127C3412"
+      },
+      "program": ".p816\n.feature long_jsr_jmp_rts\njmp ($1234)\njmp [$1234]\njmp ($1234,x)"
+    },
+    {
+      "native": {
+        "hex": "FC3412"
+      },
+      "program": ".p816\n.feature long_jsr_jmp_rts\njsr ($1234,x)"
+    },
+    {
+      "native": {
+        "refused": "Illegal addressing mode"
+      },
+      "program": ".p816\n.feature long_jsr_jmp_rts\njsr a:$123456"
+    },
+    {
+      "native": {
+        "hex": "200000"
+      },
+      "program": ".p816\n.feature long_jsr_jmp_rts\nlab: jsr lab"
+    },
+    {
+      "native": {
+        "hex": "200300EA"
+      },
+      "program": ".p816\n.feature long_jsr_jmp_rts\njsr p\n.proc p: far\nnop\n.endproc"
+    },
+    {
+      "native": {
+        "hex": "200300EA"
+      },
+      "program": ".p816\njsr p\n.proc p: far\nnop\n.endproc"
+    },
+    {
+      "native": {
+        "hex": "6B60"
+      },
+      "program": ".p816\n.smart\n.feature long_jsr_jmp_rts\n.proc p: far\nrts\n.feature long_jsr_jmp_rts -\nrts\n.endproc"
+    },
+    {
+      "native": {
+        "hex": "60"
+      },
+      "program": ".p816\n.smart\n.feature long_jsr_jmp_rts\n.proc p: far\n.smart -\nrts\n.endproc"
+    },
+    {
+      "native": {
+        "hex": "EA2000004C0000"
+      },
+      "program": ".p816\n.feature long_jsr_jmp_rts\n.proc p: far\nnop\n.endproc\njsr p\njmp p"
+    },
+    {
+      "native": {
+        "hex": "EA200000"
+      },
+      "program": ".p816\n.proc p: far\nnop\n.endproc\njsr p"
+    },
+    {
+      "native": {
+        "hex": "00100210"
+      },
+      "program": ".org $1000\n.word *\n.segment \"DATA\"\n.word *"
+    },
+    {
+      "native": {
+        "hex": "00100200"
+      },
+      "program": ".feature org_per_seg\n.org $1000\n.word *\n.segment \"DATA\"\n.word *"
+    },
+    {
+      "native": {
+        "hex": "001002100400"
+      },
+      "program": ".feature org_per_seg\n.org $1000\n.word *\n.segment \"DATA\"\n.word *\n.code\n.word *"
+    },
+    {
+      "native": {
+        "hex": "001004100210"
+      },
+      "program": ".org $1000\n.word *\n.segment \"DATA\"\n.word *\n.code\n.word *"
+    },
+    {
+      "native": {
+        "hex": "0000020000200220"
+      },
+      "program": ".feature org_per_seg\n.segment \"DATA\"\n.org $2000\n.word *\n.code\n.word *\n.reloc\n.word *\n.segment \"DATA\"\n.word *"
+    },
+    {
+      "native": {
+        "hex": "00000200"
+      },
+      "program": ".org $1000\n.segment \"DATA\"\n.reloc\n.word *\n.code\n.word *"
+    },
+    {
+      "native": {
+        "hex": "00100200"
+      },
+      "program": ".feature org_per_seg\n.org $1000\n.segment \"DATA\"\n.reloc\n.word *\n.code\n.word *"
+    },
+    {
+      "native": {
+        "hex": "0000"
+      },
+      "program": ".feature org_per_seg\n.org $1000\n.feature org_per_seg -\n.segment \"DATA\"\n.word *"
+    },
+    {
+      "native": {
+        "hex": "0000"
+      },
+      "program": ".org $1000\n.feature org_per_seg\n.segment \"DATA\"\n.word *"
+    },
+    {
+      "native": {
+        "hex": "EA0110EA0120"
+      },
+      "program": ".feature org_per_seg\n.org $1000\nnop\n.segment \"DATA\"\n.org $2000\nnop\n.code\n.word *\n.segment \"DATA\"\n.word *"
+    },
+    {
+      "native": {
+        "refused": "Duplicate scope ‘s’"
+      },
+      "program": ".scope s\nv = 1\n.endscope\n.scope s\nw = 2\n.endscope\n.byte s::v, s::w"
+    },
+    {
+      "native": {
+        "hex": "0102"
+      },
+      "program": ".feature merge_scopes\n.scope s\nv = 1\n.endscope\n.scope s\nw = 2\n.endscope\n.byte s::v, s::w"
+    },
+    {
+      "native": {
+        "refused": "Symbol ‘v’ is already defined"
+      },
+      "program": ".feature merge_scopes\n.scope s\nv = 1\n.endscope\n.scope s\nv = 2\n.endscope"
+    },
+    {
+      "native": {
+        "refused": "Symbol ‘p’ is already defined"
+      },
+      "program": ".feature merge_scopes\n.proc p\nrts\n.endproc\n.proc p\nrts\n.endproc"
+    },
+    {
+      "native": {
+        "refused": "Duplicate scope ‘s’"
+      },
+      "program": ".feature merge_scopes\n.scope s\n.endscope\n.proc s\n.endproc"
+    },
+    {
+      "native": {
+        "refused": "Duplicate scope ‘s’"
+      },
+      "program": ".feature merge_scopes\n.proc s\n.endproc\n.scope s\n.endscope"
+    },
+    {
+      "native": {
+        "hex": "01"
+      },
+      "program": ".feature merge_scopes\n.scope s\nv = 1\n.endscope\n.scope s\n.byte v\n.endscope"
+    },
+    {
+      "native": {
+        "refused": "Duplicate scope ‘s’"
+      },
+      "program": ".feature merge_scopes\n.scope s\n.endscope\n.feature merge_scopes -\n.scope s\n.endscope"
+    },
+    {
+      "native": {
+        "hex": ""
+      },
+      "program": ".feature merge_scopes\n.scope\nv = 1\n.endscope\n.scope\nv = 2\n.endscope"
+    },
+    {
+      "native": {
+        "hex": "0102"
+      },
+      "program": ".feature merge_scopes\n.scope s\n.scope t\nv = 1\n.endscope\n.endscope\n.scope s\n.scope t\nw = 2\n.endscope\n.endscope\n.byte s::t::v, s::t::w"
+    },
+    {
+      "native": {
+        "hex": "EA4C0000"
+      },
+      "program": ".feature merge_scopes\n.scope s\nl: nop\n.endscope\n.scope s\njmp l\n.endscope"
+    },
+    {
+      "native": {
+        "hex": ""
+      },
+      "program": ".feature merge_scopes\n.scope s\n.endscope\n.scope s: zeropage\n.endscope"
+    },
+    {
+      "native": {
+        "refused": "Size of ‘s’ is unknown"
+      },
+      "program": ".feature merge_scopes\n.scope s\n.endscope\n.byte .sizeof(s)\n.scope s\nnop\n.endscope\n.byte .sizeof(s)"
+    },
+    {
+      "native": {
+        "hex": "EAEAEA03"
+      },
+      "program": ".feature merge_scopes\n.scope s\nnop\n.endscope\n.scope s\nnop\nnop\n.endscope\n.byte .sizeof(s)"
+    },
+    {
+      "native": {
+        "hex": "EA01EAEA"
+      },
+      "program": ".feature merge_scopes\n.scope s\nnop\n.endscope\n.byte .sizeof(s)\n.scope s\nnop\nnop\n.endscope"
+    },
+    {
+      "native": {
+        "hex": "EA01"
+      },
+      "program": ".feature merge_scopes\n.scope s\nnop\n.endscope\n.scope s\n.endscope\n.byte .sizeof(s)"
+    },
+    {
+      "native": {
+        "hex": "EA01"
+      },
+      "program": ".feature merge_scopes\n.scope s\n.endscope\n.scope s\nnop\n.endscope\n.byte .sizeof(s)"
+    },
+    {
+      "native": {
+        "hex": "EAEAEA01"
+      },
+      "program": ".feature merge_scopes\n.scope s\nnop\n.endscope\n.scope s\nnop\nnop\n.byte .sizeof(s)\n.endscope"
+    },
+    {
+      "native": {
+        "refused": "Symbol ‘@l’ is undefined"
+      },
+      "program": ".feature merge_scopes\n.scope s\n@l: nop\n.endscope\n.scope s\njmp @l\n.endscope"
+    },
+    {
+      "native": {
+        "hex": ""
+      },
+      "program": ".feature merge_scopes\n.scope s\n.endscope\n.scope t\n.endscope\n.scope s\n.endscope"
+    },
+    {
+      "native": {
+        "hex": ""
+      },
+      "program": ".feature merge_scopes\n.scope s\n.scope s\n.endscope\n.endscope"
+    },
+    {
+      "native": {
+        "refused": "Size of ‘s’ is unknown"
+      },
+      "program": ".scope s\n.endscope\n.byte .sizeof(s)"
+    },
+    {
+      "native": {
+        "refused": "Size of ‘p’ is unknown"
+      },
+      "program": ".proc p\n.endproc\n.byte .sizeof(p)"
+    },
+    {
+      "native": {
+        "hex": "00100200"
+      },
+      "program": ".feature org_per_seg\n.org $1000\n.word *\n.feature org_per_seg -\n.word *"
+    },
+    {
+      "native": {
+        "hex": "001002000210"
+      },
+      "program": ".org $1000\n.word *\n.feature org_per_seg\n.word *\n.feature org_per_seg -\n.word *"
+    }
+  ],
+  "config": "MEMORY { ROM: start = $0000, size = $10000, fill = no, file = %O; }\nSEGMENTS { CODE: load = ROM, type = ro; DATA: load = ROM, type = rw; }\n",
+  "source": "Programs measured on ca65 V2.19 and ld65 at 8d86ca7 under the four features that change what a line means: `force_range`, `org_per_seg`, `long_jsr_jmp_rts` and `merge_scopes`, and the deprecated `addrsize`. Each program is assembled by ca65 and linked by ld65 under `config`, a flat link at 0 with `CODE` and then `DATA`. `native` is what they made: the image's bytes, or the first line of the error that refused it."
+}

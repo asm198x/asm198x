@@ -344,6 +344,8 @@ struct Seg {
     size: Size,
     /// How many bytes it holds so far.
     length: i64,
+    /// Its own address under `org_per_seg`, while `.org` makes it known.
+    org: Option<i64>,
 }
 
 /// The address size ca65 gives one of its own segments, which a program
@@ -368,6 +370,8 @@ struct Frame {
     record: bool,
     /// How many bytes the program had made when it opened.
     start: i64,
+    /// The size it had before, if `merge_scopes` opened it again.
+    prior: i64,
 }
 
 impl RecordFrame {
@@ -471,6 +475,9 @@ struct Walk<'f> {
     scopes: HashMap<String, Option<i64>>,
     /// The open scopes, innermost last.
     open: Vec<Frame>,
+    /// The scopes a named `.scope` opened, by full name, which
+    /// `merge_scopes` lets the program open again.
+    plain_scopes: HashSet<String>,
     /// How many unnamed scopes have opened.
     unnamed_scopes: usize,
     /// Names read so far, for `.ifref`.
@@ -544,7 +551,11 @@ struct Walk<'f> {
     cpu: Option<lang198x_ca65::Cpu>,
     /// The address, while `.org` makes it known. ca65 keeps it across a
     /// change of segment, counting every segment's bytes, until `.reloc`.
-    org: Option<i64>,
+    /// Under `org_per_seg`, each segment keeps its own instead: see
+    /// [`Walk::org`].
+    shared_org: Option<i64>,
+    /// Whether `org_per_seg` is on, so each segment has its own `.org`.
+    org_per_segment: bool,
     /// A section the line being read opens in a linked program: at the
     /// address `.org` gave, or where the segment has got to after `.reloc`.
     opens: Option<Option<i64>>,
@@ -944,6 +955,13 @@ impl Walk<'_> {
         let at = self.error_site(expander, line.span());
         let made_at = self.statement_site(expander, line.span());
         self.here = Some(at.clone());
+        // `org_per_seg` chooses whose `.org` addresses count from.
+        let per_segment = line.mode().has(lang198x_ca65::Feature::OrgPerSeg);
+        if per_segment != self.org_per_segment {
+            let before = self.org();
+            self.org_per_segment = per_segment;
+            self.follow_org(before, statements, &made_at);
+        }
         self.binding = self.binds(line);
         self.cpu = Some(line.cpu());
         // ca65 defines a line's label before it reads the rest of the line,
@@ -1055,7 +1073,7 @@ impl Walk<'_> {
                 // Under `.org`, `*` is the line's address; lowering has
                 // already added each list item's offset to it.
                 for value in values_of(op) {
-                    if let Some((name, site)) = self.circle(value, self.org) {
+                    if let Some((name, site)) = self.circle(value, self.org()) {
                         return Err(circular(&name, site));
                     }
                 }
@@ -1097,7 +1115,8 @@ impl Walk<'_> {
         }
         self.sizes.extend(members);
         if let Some(change) = lowered.scope {
-            self.change_scope(change, &at)?;
+            let merge = line.mode().has(lang198x_ca65::Feature::MergeScopes);
+            self.change_scope(change, merge, &at)?;
         }
         if let Some(change) = lowered.segment {
             self.change_segment(change, sectioned, statements, &at)?;
@@ -1273,6 +1292,53 @@ impl Walk<'_> {
         }))
     }
 
+    /// The address `.org` gave, counted on to where the next byte goes, or
+    /// `None` where addresses are the segment's own. ca65 keeps one for
+    /// every segment, but under `org_per_seg` each segment has its own, as
+    /// its `segment.c` does.
+    fn org(&self) -> Option<i64> {
+        if self.org_per_segment {
+            self.segments.get(&self.segment).and_then(|seg| seg.org)
+        } else {
+            self.shared_org
+        }
+    }
+
+    /// The address [`Walk::org`] reads, to change.
+    fn org_mut(&mut self) -> &mut Option<i64> {
+        match self.segments.get_mut(&self.segment) {
+            Some(seg) if self.org_per_segment => &mut seg.org,
+            _ => &mut self.shared_org,
+        }
+    }
+
+    /// Follows the address changing other than by `.org` or `.reloc`: by
+    /// a change of segment, or of `org_per_seg`, which can leave addresses
+    /// counting from another `.org`, or from none. A linked program opens a
+    /// section where they now count from; a flat one starts or ends a
+    /// `PseudoPc` block.
+    fn follow_org(&mut self, before: Option<i64>, statements: &mut Vec<Statement>, at: &Span) {
+        let now = self.org();
+        if now == before {
+            return;
+        }
+        if self.linking {
+            self.open_section(now, statements, at);
+            return;
+        }
+        for _ in 0..std::mem::take(&mut self.pseudo) {
+            statements.push(statement(at, None, Some(Operation::PseudoPc(None))));
+        }
+        if let Some(address) = now {
+            statements.push(statement(
+                at,
+                None,
+                Some(Operation::PseudoPc(Some(Expr::Num(address)))),
+            ));
+            self.pseudo = 1;
+        }
+    }
+
     /// How far into the current segment the next byte goes.
     fn offset(&self) -> i64 {
         self.segments.get(&self.segment).map_or(0, |seg| seg.length)
@@ -1312,6 +1378,7 @@ impl Walk<'_> {
                         number,
                         size,
                         length: 0,
+                        org: None,
                     },
                 );
             }
@@ -1319,9 +1386,12 @@ impl Walk<'_> {
         if self.segment == name {
             return Ok(());
         }
+        let before = self.org();
         self.segment = name.to_owned();
         if sectioned {
-            self.open_section(self.org, statements, at);
+            self.open_section(self.org(), statements, at);
+        } else {
+            self.follow_org(before, statements, at);
         }
         Ok(())
     }
@@ -1936,7 +2006,7 @@ impl Walk<'_> {
     /// names are bound: a name whose definition comes back round to itself,
     /// and a division by zero it can work out.
     fn study(&self, value: &Expr, at: &Span) -> Result<(), AsmError> {
-        if let Some((name, site)) = self.circle(value, self.org) {
+        if let Some((name, site)) = self.circle(value, self.org()) {
             return Err(circular(&name, site));
         }
         let constant = |name: &str| match self.known(name) {
@@ -2085,7 +2155,7 @@ impl Walk<'_> {
                 if !(0..=0xFF_FFFF).contains(&value) {
                     return Err(refuse("Range error".to_owned()));
                 }
-                self.org = Some(value);
+                *self.org_mut() = Some(value);
                 // A linked program's sections carry their own addresses, so
                 // the address `.org` gives opens one. A flat program has no
                 // sections and moves only what addresses read as.
@@ -2099,7 +2169,7 @@ impl Walk<'_> {
             // `.reloc` ends what `.org` began: addresses count from where the
             // segment has got to again.
             Some(Operation::PseudoPc(None)) => {
-                if self.org.take().is_some() && self.linking {
+                if self.org_mut().take().is_some() && self.linking {
                     self.opens = Some(None);
                 }
                 self.after = vec![Operation::PseudoPc(None); std::mem::take(&mut self.pseudo)];
@@ -2136,7 +2206,7 @@ impl Walk<'_> {
         if let Some(op) = &op
             && !matches!(op, Operation::Equ(_) | Operation::Set(_))
         {
-            let pc = self.org.unwrap_or_else(|| self.offset());
+            let pc = self.org().unwrap_or_else(|| self.offset());
             let (set, extension) = self.sets();
             let next = next_pc(op, pc, set, extension, 1, at.line as usize)
                 .map_err(|error| refuse(error.message))?;
@@ -2144,8 +2214,8 @@ impl Walk<'_> {
             if let Some(seg) = self.segments.get_mut(&self.segment) {
                 seg.length += next - pc;
             }
-            if self.org.is_some() {
-                self.org = Some(next);
+            if let Some(org) = self.org_mut() {
+                *org = next;
             }
         }
         Ok(op)
@@ -2391,7 +2461,11 @@ impl Walk<'_> {
     }
 
     /// Opens or closes a scope.
-    fn change_scope(&mut self, change: Scope, at: &Span) -> Result<(), AsmError> {
+    /// Opens or closes a scope. With `merge`, the `merge_scopes` feature,
+    /// a named `.scope` may open one that a named `.scope` opened before,
+    /// as ca65's `SymEnterLevel` allows, and its size grows by what it
+    /// makes this time.
+    fn change_scope(&mut self, change: Scope, merge: bool, at: &Span) -> Result<(), AsmError> {
         let refuse = |message: String| AsmError::at(at.clone(), message);
         match change {
             Scope::Open {
@@ -2409,17 +2483,30 @@ impl Walk<'_> {
                         qualify(self.path(), &self.unnamed_scopes.to_string())
                     }
                 };
-                if self.scopes.contains_key(&path) {
-                    let name = name.as_deref().unwrap_or("");
-                    return Err(refuse(format!("Duplicate scope `{name}`")));
+                let plain = !procedure && name.is_some();
+                let prior = match self.scopes.get(&path) {
+                    None => {
+                        self.scopes.insert(path.clone(), None);
+                        0
+                    }
+                    Some(size) if merge && plain && self.plain_scopes.contains(&path) => {
+                        size.unwrap_or(0)
+                    }
+                    Some(_) => {
+                        let name = name.as_deref().unwrap_or("");
+                        return Err(refuse(format!("Duplicate scope `{name}`")));
+                    }
+                };
+                if plain {
+                    self.plain_scopes.insert(path.clone());
                 }
-                self.scopes.insert(path.clone(), None);
                 self.open.push(Frame {
                     path,
                     name,
                     procedure,
                     record: false,
                     start: self.made,
+                    prior,
                 });
             }
             Scope::Close { procedure } => {
@@ -2431,12 +2518,14 @@ impl Walk<'_> {
                     }
                 };
                 // ca65 defines the size of a scope that made bytes, and
-                // cheap locals then belong to that size's name.
+                // cheap locals then belong to that size's name. One that
+                // made none leaves its size unknown, or as it was before
+                // `merge_scopes` opened it again.
                 if self.made > frame.start {
                     self.cheap = format!("{}::.size", frame.path);
+                    self.scopes
+                        .insert(frame.path, Some(frame.prior + self.made - frame.start));
                 }
-                self.scopes
-                    .insert(frame.path, Some(self.made - frame.start));
             }
             _ => return Err(refuse("this change of scope is not supported".to_owned())),
         }
@@ -2487,6 +2576,7 @@ impl Walk<'_> {
                         procedure: false,
                         record: true,
                         start: self.made,
+                        prior: 0,
                     });
                 }
                 self.records.push(RecordFrame {
@@ -2932,7 +3022,7 @@ impl Known for Walk<'_> {
     /// it is. ca65 counts the bytes `.org` made, so labels on either side
     /// of `.org` and `.reloc` are still a known distance apart.
     fn pc(&self) -> Value {
-        match (self.org, self.segments.get(&self.segment)) {
+        match (self.org(), self.segments.get(&self.segment)) {
             (Some(pc), _) => Value::Constant(pc),
             (None, Some(seg)) => Value::Placed {
                 segment: seg.number,
@@ -2983,6 +3073,14 @@ impl Known for Walk<'_> {
             Lookup::Plain(name) => self.defined(&name)?,
         };
         self.proc_sizes.get(&full).copied()
+    }
+
+    /// Whether the innermost open scope was opened far, as by
+    /// `.proc p: far`.
+    fn in_far_scope(&self) -> bool {
+        self.open
+            .last()
+            .is_some_and(|frame| self.proc_sizes.get(&frame.path) == Some(&Size::Far))
     }
 
     /// `.bank`, which the walk answers after the link: see [`bank_of`].
