@@ -587,8 +587,13 @@ fn qualify(path: &str, name: &str) -> String {
 /// name, without the label it belongs to.
 fn as_written(full: &str) -> &str {
     let last = full.rsplit_once("::").map_or(full, |(_, last)| last);
-    last.find('@').map_or(full, |at| &last[at..])
+    last.find(LOCAL_CHARS).map_or(full, |at| &last[at..])
 }
+
+/// The characters that start a cheap local: `@`, or `?` after
+/// `.localchar '?'`. Lang198x reads a name under the character in force, so
+/// a name starting with either is a cheap local.
+const LOCAL_CHARS: [char; 2] = ['@', '?'];
 
 /// `path` and each scope around it, out to the top, innermost first.
 fn outwards(path: &str) -> impl Iterator<Item = &str> {
@@ -1390,8 +1395,12 @@ impl Walk<'_> {
         if bank_index(name).is_some() {
             return Lookup::Full(name.to_owned());
         }
-        if let Some(rest) = name.strip_prefix(':')
-            && !rest.starts_with(':')
+        // An unnamed label reference: `:-` or `:+`, or the same after the
+        // local character, as `@-` or `?+`.
+        if let Some(rest) = name.strip_prefix(':').or_else(|| {
+            name.strip_prefix(LOCAL_CHARS)
+                .filter(|rest| !rest.is_empty() && rest.chars().all(|c| "+-<>".contains(c)))
+        }) && !rest.starts_with(':')
         {
             let back = rest.chars().filter(|&c| c == '-').count();
             let forward = rest.chars().filter(|&c| c == '+').count();
@@ -1413,7 +1422,7 @@ impl Walk<'_> {
         if let Some((first, rest)) = name.split_once("::") {
             return Lookup::Full(format!("{}::{rest}", self.scope_named(first)));
         }
-        if name.starts_with('@') {
+        if name.starts_with(LOCAL_CHARS) {
             // A cheap local belongs to the label before it, whatever scope
             // it is written in.
             return Lookup::Full(format!("{}{name}", self.cheap));
@@ -1908,7 +1917,7 @@ impl Walk<'_> {
             Lookup::Full(full) => full,
             Lookup::Plain(name) => qualify(self.path(), &name),
         };
-        if !name.starts_with('@') {
+        if !name.starts_with(LOCAL_CHARS) {
             self.cheap.clone_from(&full);
         }
         full
