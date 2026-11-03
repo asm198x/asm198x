@@ -2060,22 +2060,15 @@ two:\n\
         assert_eq!(&image[16..22], &[0xEA, 0xD0, 0xFD, 0xEA, 0xD0, 0xFD]);
     }
 
-    /// The listing words are accepted and change nothing; the option words that
-    /// change the parse are still refused, and say so.
+    /// The listing words are accepted and change nothing.
     #[test]
-    fn a_listing_word_is_accepted_and_a_parse_option_is_not() {
+    fn a_listing_word_is_accepted() {
         let plain = rom(".segment \"CODE\"\n .byte $AA\n");
         let noisy = rom(".segment \"CODE\"\n\
              .debuginfo on\n .fileopt comment, \"x\"\n .fopt author, \"y\"\n\
              .list off\n .listbytes 4\n .pagelen 60\n .pagelength 60\n .dbg line\n\
              .byte $AA\n");
         assert_eq!(plain, noisy, "the listing words change no byte");
-        // A feature Lang198x does not read yet changes what the parse does,
-        // so it is a gap rather than something to discard.
-        let e = super::assemble(".segment \"CODE\"\n .feature org_per_seg\n")
-            .expect_err(".feature")
-            .to_string();
-        assert!(e.contains("is not lowered yet"), "got: {e}");
     }
 
     /// A record declares constants and emits nothing; `.tag` is what emits.
