@@ -1,0 +1,294 @@
+{
+  "cases": [
+    {
+      "native": {
+        "hex": "EA4C0010"
+      },
+      "program": ".feature labels_without_colons\n.org $1000\nfoo nop\njmp foo"
+    },
+    {
+      "native": {
+        "hex": "0010"
+      },
+      "program": ".feature labels_without_colons\n.org $1000\nfoo\n.word foo"
+    },
+    {
+      "native": {
+        "refused": "Expected ‘:’ after identifier to form a label but found ‘nop’"
+      },
+      "program": ".feature labels_without_colons\n foo nop"
+    },
+    {
+      "native": {
+        "hex": "010010"
+      },
+      "program": ".feature labels_without_colons\n.org $1000\nfoo .byte 1\n.word foo"
+    },
+    {
+      "native": {
+        "hex": "EA0010"
+      },
+      "program": ".feature labels_without_colons\n.org $1000\nlab\n@x nop\n.word @x"
+    },
+    {
+      "native": {
+        "hex": "EA01"
+      },
+      "program": ".feature labels_without_colons\nnop\n.byte 1"
+    },
+    {
+      "native": {
+        "hex": "03"
+      },
+      "program": ".feature labels_without_colons\nfoo = 3\n.byte foo"
+    },
+    {
+      "native": {
+        "hex": "EA0010"
+      },
+      "program": ".feature labels_without_colons\n.org $1000\nfoo nop ; c\n.word foo"
+    },
+    {
+      "native": {
+        "hex": "02"
+      },
+      "program": ".feature labels_without_colons\n.macro m\n.byte 2\n.endmacro\nm"
+    },
+    {
+      "native": {
+        "hex": "020010"
+      },
+      "program": ".feature labels_without_colons\n.macro m\n.byte 2\n.endmacro\n.org $1000\nfoo m\n.word foo"
+    },
+    {
+      "native": {
+        "refused": "Expected ‘end-of-line’ but found ‘bar’"
+      },
+      "program": ".feature labels_without_colons\nfoo bar nop"
+    },
+    {
+      "native": {
+        "hex": "EA0010"
+      },
+      "program": ".feature labels_without_colons\n.org $1000\n::foo nop\n.word foo"
+    },
+    {
+      "native": {
+        "refused": "Expected ‘:’ after identifier to form a label but found ‘nop’"
+      },
+      "program": "foo nop"
+    },
+    {
+      "native": {
+        "refused": "Expected ‘:’ after identifier to form a label but found ‘end-of-line’"
+      },
+      "program": ".feature labels_without_colons\nfoo\n.feature labels_without_colons -\nbar"
+    },
+    {
+      "native": {
+        "hex": "0010"
+      },
+      "program": ".feature labels_without_colons\n.macro m\nbar\n.endmacro\n.org $1000\nm\n.word bar"
+    },
+    {
+      "native": {
+        "hex": "B182A1826C3412"
+      },
+      "program": ".feature bracket_as_indirect\nlda [$82],y\nlda [$82,x]\njmp [$1234]"
+    },
+    {
+      "native": {
+        "hex": "B98200"
+      },
+      "program": ".feature bracket_as_indirect\nlda ($82),y"
+    },
+    {
+      "native": {
+        "hex": "A582"
+      },
+      "program": ".feature bracket_as_indirect\nlda ($82)"
+    },
+    {
+      "native": {
+        "hex": "A906"
+      },
+      "program": ".feature bracket_as_indirect\nlda #(1+2)*2"
+    },
+    {
+      "native": {
+        "hex": "B282"
+      },
+      "program": ".feature bracket_as_indirect\n.p816\nlda [$82]"
+    },
+    {
+      "native": {
+        "hex": "A782"
+      },
+      "program": ".p816\nlda [$82]"
+    },
+    {
+      "native": {
+        "refused": "Illegal addressing mode"
+      },
+      "program": ".feature bracket_as_indirect\njmp [$1234,x]"
+    },
+    {
+      "native": {
+        "hex": "B212"
+      },
+      "program": ".feature bracket_as_indirect\n.pc02\nlda [$12]"
+    },
+    {
+      "native": {
+        "hex": "7C3412"
+      },
+      "program": ".feature bracket_as_indirect\n.pc02\njmp [$1234,x]"
+    },
+    {
+      "native": {
+        "refused": "Expected an expression but found ‘[’"
+      },
+      "program": ".feature bracket_as_indirect\n.byte [1]"
+    },
+    {
+      "native": {
+        "hex": "B312"
+      },
+      "program": ".feature bracket_as_indirect\n.p816\nlda [$12,s],y"
+    },
+    {
+      "native": {
+        "refused": "Expected ‘]’ but found ‘end-of-line’"
+      },
+      "program": ".feature bracket_as_indirect\nlda [$82"
+    },
+    {
+      "native": {
+        "hex": "05"
+      },
+      "program": ".feature ubiquitous_idents\n.macro lda v\n.byte v\n.endmacro\nlda 5"
+    },
+    {
+      "native": {
+        "refused": "Cannot use an instruction as macro name"
+      },
+      "program": ".macro lda v\n.byte v\n.endmacro\nlda 5"
+    },
+    {
+      "native": {
+        "refused": "Expected an expression but found ‘=’"
+      },
+      "program": ".feature ubiquitous_idents\nlda = 5"
+    },
+    {
+      "native": {
+        "refused": "Expected an expression but found ‘:’"
+      },
+      "program": ".feature ubiquitous_idents\nlda: nop"
+    },
+    {
+      "native": {
+        "hex": "01"
+      },
+      "program": ".feature ubiquitous_idents\n.byte .ismnemonic(lda)"
+    },
+    {
+      "native": {
+        "hex": "00"
+      },
+      "program": ".feature ubiquitous_idents\n.macro lda\n.endmacro\n.byte .ismnemonic(lda)"
+    },
+    {
+      "native": {
+        "hex": "07"
+      },
+      "program": ".feature ubiquitous_idents\n.macro lda v\n.byte v\n.endmacro\nlab: lda 7"
+    },
+    {
+      "native": {
+        "hex": "A505"
+      },
+      "program": ".feature ubiquitous_idents\n.macro lda v\n.byte v\n.endmacro\n.feature ubiquitous_idents -\nlda 5"
+    },
+    {
+      "native": {
+        "hex": "09"
+      },
+      "program": ".feature ubiquitous_idents\n.define lda 9\n.byte lda"
+    },
+    {
+      "native": {
+        "refused": "Cannot use an instruction as macro name"
+      },
+      "program": ".define lda 9\n.byte lda"
+    },
+    {
+      "native": {
+        "hex": "A505"
+      },
+      "program": ".feature ubiquitous_idents\nlda 5"
+    },
+    {
+      "native": {
+        "hex": "0010"
+      },
+      "program": ".feature pc_assignment\n* = $1000\nlab: .word lab"
+    },
+    {
+      "native": {
+        "hex": "0010"
+      },
+      "program": ".feature pc_assignment\n*=$1000\n.word *"
+    },
+    {
+      "native": {
+        "hex": "0020"
+      },
+      "program": ".feature pc_assignment, dollar_is_pc\n$ = $2000\n.word $"
+    },
+    {
+      "native": {
+        "refused": "Expected ‘=’ but found ‘4096’"
+      },
+      "program": ".feature pc_assignment\n* $1000"
+    },
+    {
+      "native": {
+        "hex": "0210"
+      },
+      "program": ".feature pc_assignment\n* = $1000 + 2\n.word *"
+    },
+    {
+      "native": {
+        "hex": "00100220"
+      },
+      "program": ".feature pc_assignment\n* = $1000\nfoo: * = $2000\n.word foo, *"
+    },
+    {
+      "native": {
+        "refused": "Expected a mnemonic but found ‘*’"
+      },
+      "program": "* = $1000"
+    },
+    {
+      "native": {
+        "hex": "0010"
+      },
+      "program": ".feature pc_assignment\n *= $1000\n.word *"
+    },
+    {
+      "native": {
+        "refused": "Expected ‘=’ but found ‘:=’"
+      },
+      "program": ".feature pc_assignment\n* := $1000"
+    },
+    {
+      "native": {
+        "refused": "Expected a mnemonic but found ‘*’"
+      },
+      "program": ".feature pc_assignment\n* = $1000\n.feature pc_assignment -\n* = $2000"
+    }
+  ],
+  "config": "MEMORY { ROM: start = $0000, size = $1000, fill = no, file = %O; }\nSEGMENTS { CODE: load = ROM, type = ro; }\n",
+  "source": "Programs measured on ca65 V2.19 and ld65 at 8d86ca7 under the four features that change how a line is parsed: `labels_without_colons`, `bracket_as_indirect`, `pc_assignment` and `ubiquitous_idents`. Each program is assembled by ca65 and linked by ld65 under `config`, a flat link at 0. `native` is what they made: the image's bytes, or the first line of the error that refused it."
+}
