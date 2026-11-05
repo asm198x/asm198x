@@ -10,12 +10,13 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use super::super::macros;
 use super::super::mos6502;
+use super::force::{self, Force, ForceMap, ForceTerms};
 use super::{
     AcmeMacros, Anons, AsmError, Closer, Conditional, EvalContext, Expr, FileId, FmtCx,
-    MAX_INCLUDE_DEPTH, Operation, SourceLoader, SourceMap, Statement, Warning, anon_marker,
-    bake_set_vars, classify_conditional, close_brace, cpu_selector, eval_condition, fold_const,
-    is_ident, is_macro_head, parse_program_in, parse_set, parse_statement, parse_value, petscii,
-    screen_code, split_first_word, substitute_anon_refs,
+    MAX_INCLUDE_DEPTH, OperandForce, Operation, SourceLoader, SourceMap, Statement, Warning,
+    anon_marker, bake_set_vars, classify_conditional, close_brace, cpu_selector, eval_condition,
+    fold_const, is_ident, is_macro_head, parse_program_in, parse_set, parse_statement, parse_value,
+    petscii, screen_code, split_first_word, substitute_anon_refs,
 };
 
 // ---------------------------------------------------------------------------
@@ -38,6 +39,19 @@ pub(super) struct MultiCx<'a> {
 /// was waiting on.
 struct Oversize {
     expr: Expr,
+    /// The operand's Force Bits: one that turns out to force 16 bits or more
+    /// made absolute the right width after all.
+    terms: ForceTerms,
+    line: usize,
+    file: FileId,
+}
+
+/// An operand sized before every symbol it names was defined, so before its
+/// Force Bits were all known.
+struct LateForce {
+    terms: ForceTerms,
+    width: Force,
+    offers: [Option<&'static str>; 3],
     line: usize,
     file: FileId,
 }
@@ -141,6 +155,12 @@ pub(super) struct AcmeEval<'a> {
     env: BTreeMap<String, i64>,
     /// Names bound by `!set` (rebindable): each use is baked to its current value.
     set_names: BTreeSet<String>,
+    /// ACME's Force Bits for every symbol defined so far, `=` constants and
+    /// `!set` variables with their value's and labels with none. A symbol's
+    /// presence is what says it has been defined.
+    forces: ForceMap,
+    /// Operands whose Force Bits waited on a symbol defined later.
+    late_forces: Vec<LateForce>,
     /// Where the location counter stands, so a label can be bound to its
     /// address as it is defined — which is what lets a *backward* reference
     /// size to zero page (`decisions/acme-zero-page.md`).
@@ -201,6 +221,8 @@ impl<'a> AcmeEval<'a> {
             anons: Anons::default(),
             env: BTreeMap::new(),
             set_names: BTreeSet::new(),
+            forces: ForceMap::new(),
+            late_forces: Vec::new(),
             // No origin yet. ACME requires `*=` before code, so the first
             // origin sets this before anything can be sized.
             pc: None,
@@ -275,17 +297,47 @@ impl<'a> AcmeEval<'a> {
         Ok(())
     }
 
+    /// Finish the walk: resolve every anonymous-label reference, and check
+    /// each operand that was sized before all its Force Bits were known.
+    pub(super) fn finish(&self, out: &mut [Statement]) -> Result<(), AsmError> {
+        self.resolve_anon_refs(out)?;
+        self.check_late_forces()
+    }
+
     /// Resolve every anonymous-label *reference* placeholder left in the
     /// statement stream against the definitions collected during the walk —
     /// the deferred half of the spliced-order model (see [`Anons`]). Call
     /// after the evaluation walk completes.
-    pub(super) fn resolve_anon_refs(&self, out: &mut [Statement]) -> Result<(), AsmError> {
+    fn resolve_anon_refs(&self, out: &mut [Statement]) -> Result<(), AsmError> {
         for s in out.iter_mut() {
             if let Some(op) = s.op.take() {
                 s.op = Some(substitute_anon_refs(op, &self.anons, s.file, s.line)?);
             }
         }
         Ok(())
+    }
+
+    /// Check every operand sized while a symbol it names was undefined,
+    /// now that every symbol has its Force Bits.
+    fn check_late_forces(&self) -> Result<(), AsmError> {
+        for late in &self.late_forces {
+            let (found, _) = force::resolve(&late.terms, &self.forces);
+            if let Some(e) = force::late_force_error(late.width, late.offers, found, late.line) {
+                return Err(stamp_file(e, late.file));
+            }
+        }
+        Ok(())
+    }
+
+    /// Give `name` the Force Bits `terms` carry. A symbol defined again keeps
+    /// every force it had, as ACME's flags do.
+    fn define_force(&mut self, name: &str, terms: ForceTerms) {
+        match self.forces.get_mut(name) {
+            Some(had) => had.absorb(terms),
+            None => {
+                self.forces.insert(name.to_string(), terms);
+            }
+        }
     }
 
     /// The label a directive line binds, as a statement-ready name: an
@@ -551,6 +603,9 @@ impl crate::ast::CondEval for AcmeEval<'_> {
     fn bind_loop_var(&mut self, name: &str, value: i64, _line: u32) -> Result<(), AsmError> {
         self.env.insert(name.to_string(), value);
         self.set_names.insert(name.to_string());
+        // A loop variable carries no force, whatever its bounds were written
+        // as: `!for i, $0070, $0070 { lda i }` is `a5 70`.
+        self.forces.insert(name.to_string(), ForceTerms::default());
         Ok(())
     }
 
@@ -789,20 +844,27 @@ impl AcmeEval<'_> {
         // `!set name = expr` binds/rebinds a variable and emits nothing; later
         // uses are baked to this value. A `.name` is zone-scoped (probe zh6).
         if split_first_word(recon.trim()).0 == "!set" {
-            let (name, value) = parse_set(&self.anons, &self.zone, &self.env, &recon, line)
+            let (name, value, terms) = parse_set(&self.anons, &self.zone, &self.env, &recon, line)
                 .map_err(|e| stamp_file(e, file))?;
             let name = self.qualify_name(name);
+            // A variable's force is taken now, as its value is: a later
+            // `!set` of a symbol it names must not reach back. And it
+            // accumulates — `!set v = $0070` then `!set v = $70` still sizes
+            // `lda v` absolute.
+            let (now, _) = force::resolve(&terms, &self.forces);
+            self.define_force(&name, ForceTerms::fixed(now));
             self.env.insert(name.clone(), value);
             self.set_names.insert(name);
             return Ok(());
         }
 
-        let (label, mut op) = parse_statement(
+        let lowered = parse_statement(
             self.target,
             &self.anons,
             &self.zone,
             EvalContext {
                 symbols: &self.env,
+                forces: &self.forces,
                 pc: self.logical_pc(),
             },
             self.conv,
@@ -810,6 +872,7 @@ impl AcmeEval<'_> {
             line,
         )
         .map_err(|e| stamp_file(e, file))?;
+        let (label, mut op) = (lowered.label, lowered.op);
         if let Some(cpu) = cpu_selector(&recon) {
             self.target.ext = match cpu.as_str() {
                 "6502" => None,
@@ -838,6 +901,15 @@ impl AcmeEval<'_> {
         {
             self.env.insert(name.clone(), v);
         }
+        // A `=` constant keeps its value's Force Bits; a label has none.
+        if let Some(name) = &label {
+            let terms = if matches!(op, Some(Operation::Equ(_))) {
+                lowered.value_force
+            } else {
+                ForceTerms::default()
+            };
+            self.define_force(name, terms);
+        }
         // A plain label names the address the counter is standing on. Binding
         // it here — before the counter moves — is what makes a later reference
         // to it foldable, and so sizeable to zero page when it is low.
@@ -846,7 +918,8 @@ impl AcmeEval<'_> {
         {
             self.env.insert(name.clone(), pc);
         }
-        self.note_oversize(op.as_ref(), line, file);
+        self.note_oversize(op.as_ref(), lowered.operand.as_ref(), line, file);
+        self.note_late_force(lowered.operand, line, file);
         self.advance(op.as_ref(), line);
         if !(label.is_none() && op.is_none()) {
             out.push(Statement {
@@ -887,18 +960,28 @@ impl AcmeEval<'_> {
     /// Record an instruction that took an absolute form only because its
     /// operand could not be folded yet.
     ///
-    /// **A forced-absolute literal is never one of these**, and that is what
-    /// makes the test this cheap. ACME reads `$0000` as 16-bit whatever its
-    /// value, but a literal always folds — so an operand that does *not* fold
-    /// cannot be one. Unfoldable and forced-absolute are disjoint, and only
-    /// the first can turn out to have fitted.
-    fn note_oversize(&mut self, op: Option<&Operation>, line: usize, file: FileId) {
+    /// **A forced operand is never one of these.** ACME reads `$0000` as
+    /// 16-bit whatever its value, and so `$0000 + fwd` too: the width was the
+    /// Force Bits' choice, not a default for want of a value. Only an operand
+    /// the value was left to size can turn out to have fitted — and even then
+    /// not if a symbol defined later forces it wide, which
+    /// [`oversized_warnings`](Self::oversized_warnings) checks once it can.
+    fn note_oversize(
+        &mut self,
+        op: Option<&Operation>,
+        sizing: Option<&OperandForce>,
+        line: usize,
+        file: FileId,
+    ) {
         let Some(Operation::Instruction {
             mnemonic,
             mode,
             operands,
         }) = op
         else {
+            return;
+        };
+        let Some(sizing) = sizing.filter(|s| s.by_value) else {
             return;
         };
         let Some(index) = mode.strip_prefix("absolute") else {
@@ -918,6 +1001,24 @@ impl AcmeEval<'_> {
         }
         self.oversize.push(Oversize {
             expr: expr.clone(),
+            terms: sizing.terms.clone(),
+            line,
+            file,
+        });
+    }
+
+    /// Keep an operand whose Force Bits are not all known yet — it names a
+    /// symbol defined further on — to check once they are.
+    fn note_late_force(&mut self, sizing: Option<OperandForce>, line: usize, file: FileId) {
+        let Some(sizing) = sizing else { return };
+        let Some(width) = sizing.width else { return };
+        if force::resolve(&sizing.terms, &self.forces).1 {
+            return;
+        }
+        self.late_forces.push(LateForce {
+            terms: sizing.terms,
+            width,
+            offers: sizing.offers,
             line,
             file,
         });
@@ -934,6 +1035,7 @@ impl AcmeEval<'_> {
             .iter()
             .filter(|o| {
                 fold_const(&o.expr, &self.env, o.line).is_ok_and(|v| (0..=0xFF).contains(&v))
+                    && force::resolve(&o.terms, &self.forces).0 < Some(Force::Bits16)
             })
             .map(|o| {
                 Warning::new(o.line, "using oversized addressing mode".to_string()).in_file(o.file)

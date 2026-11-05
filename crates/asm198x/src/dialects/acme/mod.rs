@@ -65,7 +65,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use super::macros;
 use super::mos6502::{
     self, BytePrec, assignment_split, fold_const, is_ident, parse_number, split_data_items,
-    split_first_word, string_literal, top_level_rfind,
+    split_first_word, string_literal,
 };
 use crate::dialect::Dialect;
 use crate::directives::{Category, Directive, Pattern, lookup};
@@ -75,6 +75,8 @@ use crate::span::FileId;
 
 mod evaluate;
 use evaluate::{AcmeEval, AcmeTarget, ConvTable, MultiCx, strip_comment};
+mod force;
+use force::{Force, ForceMap, ForceTerms};
 mod scope;
 use scope::{Anons, anon_marker, anon_ref_placeholder, substitute_anon_refs};
 
@@ -128,7 +130,7 @@ impl Dialect for Acme {
         let mut eval = AcmeEval::new(self.instruction_set(), None);
         let mut out = Vec::new();
         crate::ast::evaluate(&mut eval, &program.nodes, true, &mut out)?;
-        eval.resolve_anon_refs(&mut out)?;
+        eval.finish(&mut out)?;
         Ok(out)
     }
 
@@ -140,7 +142,7 @@ impl Dialect for Acme {
         let mut eval = AcmeEval::new(self.instruction_set(), None);
         let mut out = Vec::new();
         crate::ast::evaluate(&mut eval, &program.nodes, true, &mut out)?;
-        eval.resolve_anon_refs(&mut out)?;
+        eval.finish(&mut out)?;
         let warnings = eval.oversized_warnings();
         Ok((out, warnings))
     }
@@ -170,7 +172,7 @@ impl Dialect for Acme {
         );
         let mut out = Vec::new();
         crate::ast::evaluate(&mut eval, &program.nodes, true, &mut out)?;
-        eval.resolve_anon_refs(&mut out)?;
+        eval.finish(&mut out)?;
         Ok(out)
     }
 
@@ -195,7 +197,7 @@ impl Dialect for Acme {
         );
         let mut out = Vec::new();
         crate::ast::evaluate(&mut eval, &program.nodes, true, &mut out)?;
-        eval.resolve_anon_refs(&mut out)?;
+        eval.finish(&mut out)?;
         let warnings = eval.oversized_warnings();
         Ok((out, warnings))
     }
@@ -1268,14 +1270,15 @@ fn classify_conditional(text: &str) -> Option<Conditional> {
     }
 }
 
-/// Parse `!set name = expr`, folding `expr` against the current `env`.
+/// Parse `!set name = expr`, folding `expr` against the current `env`, with
+/// the Force Bits of `expr`.
 fn parse_set(
     anons: &Anons,
     zone: &str,
     env: &BTreeMap<String, i64>,
     text: &str,
     line: usize,
-) -> Result<(String, i64), AsmError> {
+) -> Result<(String, i64, ForceTerms), AsmError> {
     let rest = split_first_word(text).1.trim();
     let eq =
         assignment_split(rest).ok_or_else(|| AsmError::new(line, "`!set` needs `name = value`"))?;
@@ -1283,8 +1286,9 @@ fn parse_set(
     if !is_ident(name) {
         return Err(AsmError::new(line, format!("invalid `!set` name `{name}`")));
     }
-    let value = fold_const(&parse_value(anons, zone, &rest[eq + 1..], line)?, env, line)?;
-    Ok((name.to_string(), value))
+    let value_text = &rest[eq + 1..];
+    let value = fold_const(&parse_value(anons, zone, value_text, line)?, env, line)?;
+    Ok((name.to_string(), value, force::scan(value_text, zone)))
 }
 
 /// Replace every reference to a `!set` variable in `op` with its current value,
@@ -1499,7 +1503,41 @@ fn strip_word_ci<'a>(text: &'a str, word: &str) -> Option<&'a str> {
 #[derive(Clone, Copy)]
 pub(super) struct EvalContext<'a> {
     symbols: &'a BTreeMap<String, i64>,
+    /// The Force Bits of every symbol defined so far.
+    forces: &'a ForceMap,
     pc: Option<i64>,
+}
+
+/// One lowered line, and what it tells the walk about ACME's Force Bits.
+struct Lowered {
+    label: Option<String>,
+    op: Option<Operation>,
+    /// The force a `=` definition gives its symbol: its value's.
+    value_force: ForceTerms,
+    /// How an instruction's operand was sized.
+    operand: Option<OperandForce>,
+}
+
+impl Lowered {
+    fn new(label: Option<String>, op: Option<Operation>) -> Self {
+        Lowered {
+            label,
+            op,
+            value_force: ForceTerms::default(),
+            operand: None,
+        }
+    }
+}
+
+/// An instruction operand's Force Bits, and the width the walk gave it — kept
+/// so that a symbol defined later can still be checked against that width.
+struct OperandForce {
+    terms: ForceTerms,
+    /// The width the operand took, when it had a choice to make.
+    width: Option<Force>,
+    offers: [Option<&'static str>; 3],
+    /// Whether the value decided the width, with no force to say otherwise.
+    by_value: bool,
 }
 
 fn parse_statement(
@@ -1510,14 +1548,14 @@ fn parse_statement(
     conv: ConvTable,
     code: &str,
     line: usize,
-) -> Result<(Option<String>, Option<Operation>), AsmError> {
+) -> Result<Lowered, AsmError> {
     let trimmed = code.trim();
 
     // `*= expr` (or `* = expr`) sets the program counter.
     if let Some(rest) = trimmed.strip_prefix('*') {
         let rest = rest.trim_start();
         if let Some(value) = rest.strip_prefix('=') {
-            return Ok((
+            return Ok(Lowered::new(
                 None,
                 Some(Operation::Org(parse_value(anons, zone, value, line)?)),
             ));
@@ -1531,10 +1569,12 @@ fn parse_statement(
         if !is_ident(name) {
             return Err(AsmError::new(line, format!("invalid symbol name `{name}`")));
         }
-        return Ok((
+        let mut lowered = Lowered::new(
             Some(name.to_string()),
             Some(Operation::Equ(parse_value(anons, zone, value, line)?)),
-        ));
+        );
+        lowered.value_force = force::scan(value, zone);
+        return Ok(lowered);
     }
 
     // Otherwise: an optional column-0 label, then a directive or instruction.
@@ -1567,10 +1607,14 @@ fn parse_statement(
             Some(v) => Some(Operation::Equ(parse_value(anons, zone, v, line)?)),
             None => None,
         };
-        return Ok((Some(name.to_string()), op));
+        let mut lowered = Lowered::new(Some(name.to_string()), op);
+        lowered.value_force = value.map(|v| force::scan(v, zone)).unwrap_or_default();
+        return Ok(lowered);
     }
-    let op = parse_op(target, anons, zone, context, conv, rest, line)?;
-    Ok((label, op))
+    let (op, operand) = parse_op(target, anons, zone, context, conv, rest, line)?;
+    let mut lowered = Lowered::new(label, op);
+    lowered.operand = operand;
+    Ok(lowered)
 }
 
 /// Split a column-0 label from the rest. A leading-whitespace line has no label.
@@ -1616,7 +1660,8 @@ fn split_label<'a>(
     Err(AsmError::new(line, format!("cannot parse `{trimmed}`")))
 }
 
-/// Parse the operation part (after any label): a `!` directive or an instruction.
+/// Parse the operation part (after any label): a `!` directive or an
+/// instruction, with how an instruction's operand was sized.
 fn parse_op(
     target: AcmeTarget,
     anons: &Anons,
@@ -1625,14 +1670,17 @@ fn parse_op(
     conv: ConvTable,
     rest: &str,
     line: usize,
-) -> Result<Option<Operation>, AsmError> {
+) -> Result<(Option<Operation>, Option<OperandForce>), AsmError> {
     if rest.is_empty() {
-        return Ok(None);
+        return Ok((None, None));
     }
     if let Some(directive) = rest.strip_prefix('!') {
-        return Ok(Some(parse_directive(
-            anons, zone, context, conv, directive, line,
-        )?));
+        return Ok((
+            Some(parse_directive(
+                anons, zone, context, conv, directive, line,
+            )?),
+            None,
+        ));
     }
     let (mnemonic, remainder) = split_first_word(rest);
     let mnemonic = mnemonic.to_ascii_uppercase();
@@ -1662,26 +1710,38 @@ fn parse_op(
                 format!("`{mnemonic}` needs a zero-page byte and a branch target"),
             ));
         }
-        return Ok(Some(Operation::Instruction {
-            mnemonic,
-            mode: "zeropage,relative",
-            operands: vec![
-                parse_value(anons, zone, parts[0], line)?,
-                parse_value(anons, zone, parts[1], line)?,
-            ],
-        }));
+        return Ok((
+            Some(Operation::Instruction {
+                mnemonic,
+                mode: "zeropage,relative",
+                operands: vec![
+                    parse_value(anons, zone, parts[0], line)?,
+                    parse_value(anons, zone, parts[1], line)?,
+                ],
+            }),
+            None,
+        ));
     }
-    let operand = mos6502::parse_operand(remainder, line, &|s, l| parse_value(anons, zone, s, l))?;
-    let force_abs = address_forces_absolute(remainder);
-    let (mode, mut operand) = mos6502::resolve_mode_in_sets(
-        target.set,
-        target.ext,
+    // The operand's own text, as the expression reader was handed it, is what
+    // its Force Bits are read from.
+    let text = std::cell::RefCell::new(String::new());
+    let operand = mos6502::parse_operand(remainder, line, &|s, l| {
+        text.replace(s.to_string());
+        parse_value(anons, zone, s, l)
+    })?;
+    let terms = force::scan(&text.borrow(), zone);
+    let (force, _) = force::resolve(&terms, context.forces);
+    let sizing = force::choose_mode(
+        target,
         &mnemonic,
         operand,
         context.symbols,
-        force_abs,
+        None,
+        force,
         line,
     )?;
+    let (mode, mut operand) = (sizing.mode, sizing.operand);
+    let mnemonic = sizing.renamed.map_or(mnemonic, str::to_string);
     // Unlike the 65816's 16-bit relative forms, 65CE02 long branches measure
     // from opcode+2 rather than from the end of the three-byte instruction.
     // The shared encoder measures from the end, so carry that one-byte bias in
@@ -1696,11 +1756,19 @@ fn parse_op(
             )
         });
     }
-    Ok(Some(Operation::Instruction {
-        mnemonic,
-        mode,
-        operands: operand.into_iter().collect(),
-    }))
+    Ok((
+        Some(Operation::Instruction {
+            mnemonic,
+            mode,
+            operands: operand.into_iter().collect(),
+        }),
+        Some(OperandForce {
+            terms,
+            width: sizing.width,
+            offers: sizing.offers,
+            by_value: sizing.by_value,
+        }),
+    ))
 }
 
 // ---------------------------------------------------------------------------
@@ -2696,20 +2764,6 @@ fn acme_number(tok: &str, line: usize) -> Result<i64, AsmError> {
     } else {
         parse_number(t, line)
     }
-}
-
-/// ACME sizes a hex literal by its written width: a `≥3`-digit hex address
-/// (`$0010`, `$0400`) is 16-bit, forcing absolute addressing even when the value
-/// is low. Detect that on the operand's address part (after stripping a trailing
-/// `,X`/`,Y` index); other forms decide by value.
-fn address_forces_absolute(operand: &str) -> bool {
-    let t = operand.trim();
-    let base = match top_level_rfind(t, ',') {
-        Some(c) => t[..c].trim(),
-        None => t,
-    };
-    base.strip_prefix('$')
-        .is_some_and(|hex| hex.len() >= 3 && hex.bytes().all(|b| b.is_ascii_hexdigit()))
 }
 
 // ---------------------------------------------------------------------------
@@ -4173,18 +4227,282 @@ mod tests {
         assert_eq!(asm("lda ($20,x)").expect("indx").bytes, vec![0xA1, 0x20]);
     }
 
+    // -----------------------------------------------------------------------
+    // ACME's Force Bits (`AddrModes.txt`; `decisions/acme-zero-page.md`).
+    // Every expectation is what `acme -f plain` 0.97 gave the same source at
+    // `*= $1000`, measured 2026-11-05.
+    // -----------------------------------------------------------------------
+
+    /// The bytes for `src`, assembled at `*= $1000`.
+    fn at_1000(src: &str) -> Vec<u8> {
+        asm(&format!("*= $1000\n{src}"))
+            .unwrap_or_else(|e| panic!("`{src}`: {e}"))
+            .bytes
+    }
+
+    /// The warnings for `src`, assembled at `*= $1000`.
+    fn warnings_at_1000(src: &str) -> usize {
+        asm(&format!("*= $1000\n{src}"))
+            .unwrap_or_else(|e| panic!("`{src}`: {e}"))
+            .warnings
+            .len()
+    }
+
+    /// ACME's "Number out of range" for `src`, assembled at `*= $1000`.
+    fn out_of_range(src: &str) {
+        let e = asm(&format!("*= $1000\n{src}")).expect_err(src).to_string();
+        assert!(e.contains("number out of range"), "`{src}`: {e}");
+    }
+
+    /// The rows of the plan's table: a force that used to be lost as soon as
+    /// the value passed through a symbol or an expression.
     #[test]
-    fn hex_width_forces_absolute() {
-        // `$10` is zero-page; `$0010` is 16-bit (absolute), matching acme — the
-        // value is the same but the written width differs.
-        assert_eq!(asm("lda $10").expect("zp").bytes, vec![0xA5, 0x10]);
-        assert_eq!(asm("lda $0010").expect("abs").bytes, vec![0xAD, 0x10, 0x00]);
+    fn a_force_survives_symbols_and_expressions() {
+        assert_eq!(at_1000("NR=$0070\n lda NR"), [0xAD, 0x70, 0x00]);
+        assert_eq!(at_1000(" lda $0070+0"), [0xAD, 0x70, 0x00]);
+        assert_eq!(at_1000(" lda %0000000001110000"), [0xAD, 0x70, 0x00]);
+        out_of_range("NR=$0070\n lda (NR),y");
+        out_of_range(" lda $00070");
+    }
+
+    /// Hex past 2 digits forces 16 bits and past 4 forces 24; binary's
+    /// thresholds are 8 and 16 digits, octal's 3 and 6. Decimal never forces.
+    #[test]
+    fn a_literals_written_width_forces_it() {
+        for (src, want) in [
+            (" lda $70", &[0xA5, 0x70][..]),
+            (" lda $070", &[0xAD, 0x70, 0x00]),
+            (" lda $0070", &[0xAD, 0x70, 0x00]),
+            (" sta $0000,x", &[0x9D, 0x00, 0x00]),
+            (" lda 0x0070", &[0xAD, 0x70, 0x00]),
+            (" lda %01110000", &[0xA5, 0x70]),
+            (" lda %001110000", &[0xAD, 0x70, 0x00]),
+            (" lda 0b0000000001110000", &[0xAD, 0x70, 0x00]),
+            (" lda &160", &[0xA5, 0x70]),
+            (" lda &0160", &[0xAD, 0x70, 0x00]),
+            (" lda &000160", &[0xAD, 0x70, 0x00]),
+            (" lda 0070", &[0xA5, 0x46]),
+        ] {
+            assert_eq!(at_1000(src), want, "`{src}`");
+        }
+        for src in [
+            " lda $00070",
+            " lda 0x00070",
+            " lda %00000000000000001",
+            " lda &0000160",
+            " jmp ($00070)",
+        ] {
+            out_of_range(src);
+        }
+    }
+
+    /// The digits force only while the value would fit the narrower width:
+    /// `$0100` is 16 bits by value and carries no force, so `$1000-$0fff`
+    /// sizes by its value, 1.
+    #[test]
+    fn a_literal_already_that_wide_carries_no_force() {
+        for (src, want) in [
+            (" lda $0100-$00ff", &[0xAD, 0x01, 0x00][..]),
+            (" lda $1000-$0fff", &[0xA5, 0x01]),
+            (" lda $10000-$ffff", &[0xA5, 0x01]),
+            (" lda %0000000011111111-%11111110", &[0xAD, 0x01, 0x00]),
+            (" lda %0000000100000000-%11111111", &[0xA5, 0x01]),
+            (" lda &0377-&376", &[0xAD, 0x01, 0x00]),
+            (" lda &0400-&377", &[0xA5, 0x01]),
+        ] {
+            assert_eq!(at_1000(src), want, "`{src}`");
+        }
+        out_of_range(" lda $00100-$100");
+        out_of_range(" lda $10000-$0ffff");
+    }
+
+    /// A symbol passes on the force of the expression that defined it, under
+    /// its zone and through a macro argument. A label and a loop variable
+    /// carry none.
+    #[test]
+    fn a_symbol_keeps_the_force_of_its_definition() {
+        for (src, want) in [
+            ("NR=$0070\nT=NR+1\n lda T", &[0xAD, 0x71, 0x00][..]),
+            ("!zone z\n.l = $0070\n lda .l", &[0xAD, 0x70, 0x00]),
+            (
+                "!macro m .a {\n lda .a\n}\nNR=$0070\n+m NR",
+                &[0xAD, 0x70, 0x00],
+            ),
+            ("!for i, $0070, $0070 {\n lda i\n}", &[0xA5, 0x70]),
+        ] {
+            assert_eq!(at_1000(src), want, "`{src}`");
+        }
         assert_eq!(
-            asm("sta $0000,x").expect("absx").bytes,
-            vec![0x9D, 0x00, 0x00]
+            asm("*= $0070\nlbl nop\n lda lbl").expect("label").bytes,
+            [0xEA, 0xA5, 0x70],
+            "a label set by the location counter carries no force"
         );
-        // Decimal and symbols still decide by value.
-        assert_eq!(asm("lda 16").expect("dec").bytes, vec![0xA5, 0x10]);
+    }
+
+    /// `!set` takes its value's force, and keeps it: forces accumulate as the
+    /// variable is set again.
+    #[test]
+    fn a_set_variable_accumulates_force() {
+        assert_eq!(
+            at_1000("!set V = $0070\n!set V = $70\n lda V"),
+            [0xAD, 0x70, 0x00]
+        );
+        assert_eq!(
+            at_1000("!set V = <$1270\n!set V = $70\n lda V"),
+            [0xA5, 0x70]
+        );
+        assert_eq!(
+            at_1000("!set V = $0070\n!set V = <$1270\n lda V"),
+            [0xAD, 0x70, 0x00]
+        );
+    }
+
+    /// Every operator but the comparisons passes its operands' forces on, and
+    /// the widest wins.
+    #[test]
+    fn the_widest_force_in_an_expression_wins() {
+        for src in [
+            " lda $0070-$0070+$70",
+            " lda -$0070+$e0",
+            " lda $0070 & $ff",
+            "T = $0070 * 1\n lda T",
+            "T = $00e0 / 2\n lda T",
+            "T = $0070 | 0\n lda T",
+            "T = $0070 xor 0\n lda T",
+            "T = $0070 << 0\n lda T",
+        ] {
+            assert_eq!(at_1000(src), [0xAD, 0x70, 0x00], "`{src}`");
+        }
+        assert_eq!(at_1000("T = $0002 ^ 2\n lda T"), [0xAD, 0x04, 0x00]);
+        assert_eq!(
+            at_1000("T = ($0070 = $70) * $70\n lda T"),
+            [0xA5, 0x70],
+            "a comparison's result carries no force"
+        );
+    }
+
+    /// `<`, `>` and `^` force 8 bits over everything they cover, and they
+    /// cover the whole expression to their right.
+    #[test]
+    fn byte_operators_force_8_bits_over_what_they_cover() {
+        for (src, want) in [
+            ("NR=$0070\n lda <NR+$0001", &[0xA5, 0x71][..]),
+            ("NR=$0070\n lda $0001+<NR", &[0xAD, 0x71, 0x00]),
+            ("NR=$0070\nT = (<NR)+$0001\n lda T", &[0xAD, 0x71, 0x00]),
+            ("NR=$0070\n lda >NR", &[0xA5, 0x00]),
+            ("NR=$0070\n lda ^NR", &[0xA5, 0x00]),
+            ("T = >$0070 + $0001\n lda T", &[0xA5, 0x00]),
+            ("T = $0001 + ^$123456\n lda T", &[0xAD, 0x13, 0x00]),
+            (" lda <FWD\nFWD=$1234", &[0xA5, 0x34]),
+        ] {
+            assert_eq!(at_1000(src), want, "`{src}`");
+        }
+    }
+
+    /// A force wider than every form the operand's shape has is "Number out of
+    /// range": immediates and the zero-page indirect forms take 8 bits only.
+    #[test]
+    fn a_force_wider_than_the_mode_is_number_out_of_range() {
+        for src in [
+            " lda #$0070",
+            " lda #$000",
+            " ldx #$0070",
+            "NR=$0070\n lda #NR",
+            " lda ($0070,x)",
+            " stx $0070,y",
+            "!cpu 65c02\n lda ($0070)",
+            "!cpu 65ce02\n lda ($0070),z",
+            "!cpu 65ce02\n phw #$00070",
+        ] {
+            out_of_range(src);
+        }
+        for (src, want) in [
+            (" lda #<$0070", &[0xA9, 0x70][..]),
+            (" ldx $0070,y", &[0xBE, 0x70, 0x00]),
+            ("!cpu 65ce02\n phw #$0070", &[0xF4, 0x70, 0x00]),
+        ] {
+            assert_eq!(at_1000(src), want, "`{src}`");
+        }
+    }
+
+    /// An 8-bit force where there is no zero-page form takes the next width
+    /// up: it asks for at least 8 bits, not exactly 8.
+    #[test]
+    fn an_8_bit_force_takes_the_next_width_up() {
+        for (src, want) in [
+            (" jmp <$1234", &[0x4C, 0x34, 0x00][..]),
+            (" jsr <$1234", &[0x20, 0x34, 0x00]),
+            (" lda <$1234,y", &[0xB9, 0x34, 0x00]),
+            (" jmp (<$1234)", &[0x6C, 0x34, 0x00]),
+        ] {
+            assert_eq!(at_1000(src), want, "`{src}`");
+        }
+    }
+
+    /// Data, branches and the zero-page-only bit instructions have no width
+    /// to choose, so a force means nothing to them.
+    #[test]
+    fn a_force_does_not_reach_data_branches_or_bit_instructions() {
+        for (src, want) in [
+            ("!byte $0070\n!word $00070", &[0x70, 0x70, 0x00][..]),
+            (" bne $01000", &[0xD0, 0xFE]),
+            ("!cpu r65c02\n rmb0 $0070", &[0x07, 0x70]),
+            ("!cpu r65c02\n bbr0 $0070,*", &[0x0F, 0x70, 0xFD]),
+        ] {
+            assert_eq!(at_1000(src), want, "`{src}`");
+        }
+    }
+
+    /// The 65816 has long forms, so a 24-bit force widens to them — `jsr`'s is
+    /// `jsl` — while an immediate there ignores the force altogether.
+    #[test]
+    fn the_65816_takes_a_24_bit_force_as_a_long_form() {
+        for (src, want) in [
+            (" lda $000070", &[0xAF, 0x70, 0x00, 0x00][..]),
+            (" lda $00070,x", &[0xBF, 0x70, 0x00, 0x00]),
+            (" jmp $000070", &[0x5C, 0x70, 0x00, 0x00]),
+            (" jsr $000070", &[0x22, 0x70, 0x00, 0x00]),
+            ("NR=$70\n lda $00001+<NR", &[0xAF, 0x71, 0x00, 0x00]),
+            (" lda <$1234,y", &[0xB9, 0x34, 0x00]),
+            (" lda #$0070", &[0xA9, 0x70]),
+            (" lda #$00070", &[0xA9, 0x70]),
+        ] {
+            assert_eq!(at_1000(&format!("!cpu 65816\n{src}")), want, "`{src}`");
+        }
+        out_of_range("!cpu 65816\n ldx $000070");
+        out_of_range("!cpu 65816\n lda ($0070),y");
+    }
+
+    /// A forward reference sizes absolute, as ACME's first pass does. Once
+    /// the symbol is defined its force still counts: a 16-bit one makes the
+    /// absolute form deliberate, so nothing is oversized, and one wider than
+    /// the form is "Number out of range".
+    #[test]
+    fn a_forward_symbols_force_counts_once_it_is_defined() {
+        for (src, want, warned) in [
+            (" lda NR\nNR=$0070", &[0xAD, 0x70, 0x00][..], 0),
+            (" lda NR\nNR=$70", &[0xAD, 0x70, 0x00], 1),
+            (" lda NR\nNR = <$1270", &[0xAD, 0x70, 0x00], 1),
+            (" lda $0070+FWD\nFWD=0", &[0xAD, 0x70, 0x00], 0),
+            (" lda NR,x\nNR=$0070", &[0xBD, 0x70, 0x00], 0),
+        ] {
+            assert_eq!(at_1000(src), want, "`{src}`");
+            assert_eq!(warnings_at_1000(src), warned, "`{src}`");
+        }
+        for src in [
+            " lda NR\nNR=$00070",
+            " lda #NR\nNR=$0070",
+            " lda (NR),y\nNR=$0070",
+            " lda NR,y\nNR=$00070",
+        ] {
+            out_of_range(src);
+        }
+        // ACME widens this to `af 70 00 00` after the fact; the walk has
+        // already sized it, and says the gap is ours rather than guess.
+        let e = asm("*= $1000\n!cpu 65816\n lda NR\nNR=$000070")
+            .expect_err("a late 24-bit force on the 65816")
+            .to_string();
+        assert!(e.contains("the gap is ours"), "{e}");
     }
 
     #[test]
@@ -5145,8 +5463,8 @@ mod tests {
         assert_eq!(
             warned("* = $0000\nlbl lda #5\n lda $0000\n"),
             0,
-            "a 4-digit literal is 16-bit by request — and always folds, which \
-             is what keeps it out of the candidate set"
+            "a 4-digit literal is 16-bit by request: its Force Bits chose the \
+             width, not a missing value"
         );
         assert_eq!(
             warned("* = $0000\nlbl lda #5\n lda lbl\n"),
