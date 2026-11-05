@@ -209,8 +209,10 @@ pub(super) fn place_floating_nonrom_sections(
 
 /// Give floating ROM0 sections RGBLINK's largest-first, first-fit layout.
 /// Pinned sections reserve their ranges first; floating sections are ordered
-/// by decreasing size (declaration order breaks ties), then each takes the
-/// lowest gap that can contain it.
+/// by decreasing size, then each takes the lowest gap that can contain it.
+/// Equal sizes go in reverse declaration order, as RGBLINK inserts each
+/// section ahead of the ones no bigger than it — the tie break the RAM
+/// regions above already use.
 pub(super) fn place_floating_rom0_sections(ops: &mut [Statement]) -> Result<(), AsmError> {
     #[derive(Clone, Copy)]
     struct Section {
@@ -271,7 +273,12 @@ pub(super) fn place_floating_rom0_sections(ops: &mut [Statement]) -> Result<(), 
         .filter(|s| s.at == crate::engine::Place::ByAddress && s.base.is_none())
         .map(|section| Ok((section, extent(ops, section, 0)?)))
         .collect::<Result<_, AsmError>>()?;
-    floating.sort_by_key(|(section, end)| (std::cmp::Reverse(*end), section.statement));
+    floating.sort_by_key(|(section, end)| {
+        (
+            std::cmp::Reverse(*end),
+            std::cmp::Reverse(section.statement),
+        )
+    });
 
     for (section, _) in floating {
         let mut base = 0;
