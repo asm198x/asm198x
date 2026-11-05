@@ -50,10 +50,10 @@ A **forward** reference genuinely is unknown, and stays absolute — which is
 what ACME does too, warning *"Using oversized addressing mode"* when the value
 later turns out to have fit. We now say the same: a channel arrived with
 `Dialect::parse_warned` (see
-[`forward-conditions-and-passes.md`](forward-conditions-and-passes.md)), and
-the candidates are cheap to spot — a forced-absolute literal always folds and a
-forward symbol never does, so the two sets are disjoint and only the second can
-turn out to have fitted.
+[`forward-conditions-and-passes.md`](forward-conditions-and-passes.md)). The
+candidates are the operands left to their value to size, whose value did not
+fold yet. An operand whose Force Bits chose absolute is never one, and nor is
+one whose forward symbol turns out to force 16 bits (see below).
 
 ## Giving up is the safe direction
 
@@ -66,6 +66,30 @@ sizes absolute — exactly what this dialect did everywhere before this change.
 That asymmetry is the point. **A counter that is only probably right is worse
 than no counter at all**: absolute is merely wider than it needed to be, while
 a wrong zero-page pick emits the wrong instruction.
+
+## Force Bits come first
+
+*Added 2026-11-05.*
+
+ACME gives a value **Force Bits** that choose its addressing width whatever
+the value is (`AddrModes.txt` in its documentation). They are decided before
+anything else in this record. A postfix on the mnemonic (`lda+2`) decides
+first, then the operand's Force Bits. Only an operand with neither is sized by
+its value from the tracked location counter. So `NR = $0070` then `lda NR` is
+`AD 70 00`, although `$70` fits a byte.
+
+The walk keeps each symbol's Force Bits beside its value. An `=` constant or a
+`!set` variable takes its value's, and a label or a loop variable has none. A
+leading-zero literal (`$0070`), a postfix on the definition (`NR+2 = $70`) and
+a byte operator (`<NR`) all set them. The rules were measured on ACME 0.97 and
+are written out once, in `crates/asm198x/src/dialects/acme/force.rs`.
+
+A forward reference still sizes absolute, as above. Its force is checked once
+every symbol is defined. A 16-bit force makes absolute the right width, so the
+instruction is not reported as oversized. A force wider than the form allows
+is "Number out of range", as ACME says. On the 65816, ACME widens such an
+instruction to a long form after the fact. The walk refuses it as our gap
+instead, because widening would move labels it has already bound.
 
 ## What this does not do
 
@@ -86,5 +110,8 @@ a wrong zero-page pick emits the wrong instruction.
 - *"Loop until the sizes settle, so forward references shrink too."* → ACME
   does not shrink them either; it warns and stays wide. Matching the reference
   is the goal, not being cleverer than it.
+- *"Size by value, then apply the force afterwards."* → No. The Force Bits
+  decide before the value does. A zero-page pick for a forced operand is the
+  wrong instruction, not a missed optimisation.
 
 [`engine::next_pc`]: ../crates/asm198x/src/engine.rs
