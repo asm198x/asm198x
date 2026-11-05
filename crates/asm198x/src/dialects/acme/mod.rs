@@ -2644,7 +2644,7 @@ fn parse_value(anons: &Anons, zone: &str, raw: &str, line: usize) -> Result<Expr
     let expr = mos6502::parse_expr(
         raw,
         line,
-        parse_number,
+        acme_number,
         mos6502::ExprOpts {
             logical: false,
             logical_not_tight: false,
@@ -2675,6 +2675,27 @@ fn parse_value(anons: &Anons, zone: &str, raw: &str, line: usize) -> Result<Expr
     } else {
         crate::ast::qualify_expr(expr, zone)
     })
+}
+
+/// ACME's number spellings, on top of the `$` hex, `%` binary, `'c'` and
+/// decimal forms the 6502 dialects share: `0x` hex, `0b` binary and `&` octal.
+/// The two letter prefixes are lower case only — ACME 0.97 answers `0X70` with
+/// "Unknown operator".
+fn acme_number(tok: &str, line: usize) -> Result<i64, AsmError> {
+    let t = tok.trim();
+    let digits = |body: &str, radix: u32| {
+        i64::from_str_radix(body, radix)
+            .map_err(|_| AsmError::new(line, format!("invalid number `{tok}`")))
+    };
+    if let Some(hex) = t.strip_prefix("0x") {
+        digits(hex, 16)
+    } else if let Some(bin) = t.strip_prefix("0b") {
+        digits(bin, 2)
+    } else if let Some(oct) = t.strip_prefix('&') {
+        digits(oct, 8)
+    } else {
+        parse_number(t, line)
+    }
 }
 
 /// ACME sizes a hex literal by its written width: a `≥3`-digit hex address
@@ -4190,6 +4211,41 @@ mod tests {
 
         let e = asm("!byte 7 % 0").expect_err("zero divisor");
         assert!(e.to_string().contains("modulo by zero"));
+    }
+
+    /// ACME's other number spellings, measured on 0.97: `!byte &17, 0x1f,
+    /// 0b0101` is `0f 1f 05`. `&` is octal only where a value may begin, so
+    /// `7 & &3` is an AND of two values; the letter prefixes are lower case
+    /// only (`0X1f` is "Unknown operator").
+    #[test]
+    fn octal_and_letter_prefixed_literals() {
+        assert_eq!(
+            asm("!byte &17, 0x1f, 0b0101").expect("spellings").bytes,
+            vec![0x0F, 0x1F, 0x05]
+        );
+        assert_eq!(
+            asm("!byte 7&3, 7 & &3, -&10, (&10)").expect("and").bytes,
+            vec![0x03, 0x03, 0xF8, 0x08]
+        );
+        asm("!byte 0X1f").expect_err("upper-case prefix");
+        asm("!byte &8").expect_err("not an octal digit");
+    }
+
+    /// `^` where a value may begin is ACME's bank byte, as loose as `<` and
+    /// `>`; after a value it stays exponentiation. Measured on 0.97:
+    /// `^$123456` is `12`, `^$123456+$010000` is `13`, `2^3` is `08`.
+    #[test]
+    fn a_leading_caret_is_the_bank_byte() {
+        assert_eq!(
+            asm("!byte ^$123456, ^$123456+$010000, 2^3")
+                .expect("bank byte")
+                .bytes,
+            vec![0x12, 0x13, 0x08]
+        );
+        assert_eq!(
+            asm("lda #^$123456").expect("immediate").bytes,
+            vec![0xA9, 0x12]
+        );
     }
 
     #[test]

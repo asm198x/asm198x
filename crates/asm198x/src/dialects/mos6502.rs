@@ -761,6 +761,23 @@ fn tokenize(
                     line,
                 )?));
             }
+            // ACME gives `&` the same two jobs `%` has: an octal prefix where a
+            // value may begin (`&17` is 15), and AND after a value. As above,
+            // `Caret::Power` is what identifies ACME's grammar.
+            '&' if !after_value
+                && opts.caret == Caret::Power
+                && chars.get(i + 1).is_some_and(|c| c.is_digit(8)) =>
+            {
+                let start = i;
+                i += 1;
+                while i < chars.len() && chars[i].is_ascii_alphanumeric() {
+                    i += 1;
+                }
+                tokens.push(Tok::Num(parse_number(
+                    &chars[start..i].iter().collect::<String>(),
+                    line,
+                )?));
+            }
             '&' => {
                 tokens.push(Tok::And);
                 i += 1;
@@ -1329,6 +1346,13 @@ impl ExprParser<'_> {
                 Some(Tok::Hi) => {
                     self.pos += 1;
                     return Ok(Expr::Hi(Box::new(self.expr()?)));
+                }
+                // ACME's bank byte. A `^` where a value may begin is a prefix
+                // as loose as `<` and `>` (`^$123456+$010000` is `$13`);
+                // after a value it is exponentiation.
+                Some(Tok::Pow) if self.caret == Caret::Power => {
+                    self.pos += 1;
+                    return Ok(Expr::Bank(Box::new(self.expr()?)));
                 }
                 _ => {}
             }
