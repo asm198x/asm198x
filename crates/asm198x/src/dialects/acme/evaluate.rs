@@ -161,6 +161,9 @@ pub(super) struct AcmeEval<'a> {
     forces: ForceMap,
     /// Operands whose Force Bits waited on a symbol defined later.
     late_forces: Vec<LateForce>,
+    /// Every symbol named so far, which a postfix on its definition comes too
+    /// late for.
+    used: BTreeSet<String>,
     /// Where the location counter stands, so a label can be bound to its
     /// address as it is defined — which is what lets a *backward* reference
     /// size to zero page (`decisions/acme-zero-page.md`).
@@ -223,6 +226,7 @@ impl<'a> AcmeEval<'a> {
             set_names: BTreeSet::new(),
             forces: ForceMap::new(),
             late_forces: Vec::new(),
+            used: BTreeSet::new(),
             // No origin yet. ACME requires `*=` before code, so the first
             // origin sets this before anything can be sized.
             pc: None,
@@ -325,6 +329,27 @@ impl<'a> AcmeEval<'a> {
             if let Some(e) = force::late_force_error(late.width, late.offers, found, late.line) {
                 return Err(stamp_file(e, late.file));
             }
+        }
+        Ok(())
+    }
+
+    /// ACME refuses a postfix on a definition of a symbol already used:
+    /// `lda S` then `S+1 = 5` is "Too late for postfix".
+    fn check_postfix_in_time(
+        &self,
+        name: &str,
+        postfixed: bool,
+        line: usize,
+        file: FileId,
+    ) -> Result<(), AsmError> {
+        if postfixed && self.used.contains(name) {
+            return Err(stamp_file(
+                AsmError::new(
+                    line,
+                    format!("too late for postfix: `{name}` was used before this definition"),
+                ),
+                file,
+            ));
         }
         Ok(())
     }
@@ -844,14 +869,15 @@ impl AcmeEval<'_> {
         // `!set name = expr` binds/rebinds a variable and emits nothing; later
         // uses are baked to this value. A `.name` is zone-scoped (probe zh6).
         if split_first_word(recon.trim()).0 == "!set" {
-            let (name, value, terms) = parse_set(&self.anons, &self.zone, &self.env, &recon, line)
+            let (name, value, set) = parse_set(&self.anons, &self.zone, &self.env, &recon, line)
                 .map_err(|e| stamp_file(e, file))?;
             let name = self.qualify_name(name);
+            self.check_postfix_in_time(&name, set.postfixed, line, file)?;
             // A variable's force is taken now, as its value is: a later
             // `!set` of a symbol it names must not reach back. And it
             // accumulates — `!set v = $0070` then `!set v = $70` still sizes
             // `lda v` absolute.
-            let (now, _) = force::resolve(&terms, &self.forces);
+            let (now, _) = force::resolve(&set.defines, &self.forces);
             self.define_force(&name, ForceTerms::fixed(now));
             self.env.insert(name.clone(), value);
             self.set_names.insert(name);
@@ -894,6 +920,12 @@ impl AcmeEval<'_> {
         // A `.name` definition qualifies into the current zone (U7); its
         // references were qualified by `parse_value`.
         let label = label.map(|n| self.qualify_name(n));
+        if let Some(name) = &label {
+            self.check_postfix_in_time(name, lowered.postfixed, line, file)?;
+        }
+        if let Some(op) = &op {
+            note_uses(op, &mut self.used);
+        }
         // Bake `!set` variables to their current value; real labels stay symbolic.
         let op = op.map(|o| bake_set_vars(o, &self.env, &self.set_names));
         if let (Some(name), Some(Operation::Equ(e))) = (&label, &op)
@@ -901,14 +933,10 @@ impl AcmeEval<'_> {
         {
             self.env.insert(name.clone(), v);
         }
-        // A `=` constant keeps its value's Force Bits; a label has none.
+        // A `=` constant keeps its value's Force Bits and a label has none,
+        // unless a postfix on the name says otherwise.
         if let Some(name) = &label {
-            let terms = if matches!(op, Some(Operation::Equ(_))) {
-                lowered.value_force
-            } else {
-                ForceTerms::default()
-            };
-            self.define_force(name, terms);
+            self.define_force(name, lowered.defines);
         }
         // A plain label names the address the counter is standing on. Binding
         // it here — before the counter moves — is what makes a later reference
@@ -1010,7 +1038,9 @@ impl AcmeEval<'_> {
     /// Keep an operand whose Force Bits are not all known yet — it names a
     /// symbol defined further on — to check once they are.
     fn note_late_force(&mut self, sizing: Option<OperandForce>, line: usize, file: FileId) {
-        let Some(sizing) = sizing else { return };
+        let Some(sizing) = sizing.filter(|s| !s.postfixed) else {
+            return;
+        };
         let Some(width) = sizing.width else { return };
         if force::resolve(&sizing.terms, &self.forces).1 {
             return;
@@ -1074,6 +1104,35 @@ impl AcmeEval<'_> {
         // ACME's 6502 is one byte per address unit, and it has no CPU where
         // that is not so.
         self.pc = crate::engine::next_pc(op, pc, self.target.set, self.target.ext, 1, line).ok();
+    }
+}
+
+/// Record every symbol `op` names.
+fn note_uses(op: &Operation, used: &mut BTreeSet<String>) {
+    fn walk(e: &Expr, used: &mut BTreeSet<String>) {
+        match e {
+            Expr::Sym(name) => {
+                used.insert(name.clone());
+            }
+            Expr::Lo(inner)
+            | Expr::Hi(inner)
+            | Expr::Bank(inner)
+            | Expr::Neg(inner)
+            | Expr::BitNot(inner)
+            | Expr::LogNot(inner) => walk(inner, used),
+            Expr::Bin(_, left, right) => {
+                walk(left, used);
+                walk(right, used);
+            }
+            _ => {}
+        }
+    }
+    match op {
+        Operation::Instruction { operands, .. }
+        | Operation::Bytes(operands)
+        | Operation::Words(operands) => operands.iter().for_each(|e| walk(e, used)),
+        Operation::Equ(e) | Operation::Org(e) => walk(e, used),
+        _ => {}
     }
 }
 

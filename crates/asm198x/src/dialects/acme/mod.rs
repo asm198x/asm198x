@@ -259,8 +259,9 @@ fn split_statements(line: &str) -> Vec<&str> {
             b'\'' if !in_str => in_char = !in_char,
             b'"' if !in_char => in_str = !in_str,
             b':' if !in_char && !in_str => {
-                let label_suffix =
-                    start == 0 && !line.starts_with([' ', '\t']) && is_ident(line[..i].trim());
+                let label_suffix = start == 0
+                    && !line.starts_with([' ', '\t'])
+                    && defined_name(&line[..i]).is_some();
                 if !label_suffix {
                     parts.push(&line[start..i]);
                     start = i + 1;
@@ -878,10 +879,11 @@ impl<'a> FmtCx<'a> {
             }
         }
 
-        // `name = expr` — a constant binding (a lone `=`), kept on the label line.
+        // `name = expr` — a constant binding (a lone `=`), kept on the label
+        // line, with any postfix on the name (`name+2 = expr`).
         if let Some(eq) = top_level_lone_eq(trimmed) {
             let name = trimmed[..eq].trim();
-            if is_ident(name) {
+            if defined_name(name).is_some() {
                 let src = format!("= {}", trimmed[eq + 1..].trim());
                 let span = self.patch(crate::ast::token_span(raw, &trimmed[eq + 1..], at_line));
                 return Ok(self.equ_node(span, name, src, leading, comment, line));
@@ -896,11 +898,14 @@ impl<'a> FmtCx<'a> {
                 return Ok(self.labeled_node(span, word, rest.trim(), leading, comment, line));
             }
             if let Some(name) = word.strip_suffix(':')
-                && is_ident(name)
+                && defined_name(name).is_some()
             {
                 return Ok(self.labeled_node(span, name, rest.trim(), leading, comment, line));
             }
-            if !word.starts_with('!') && !is_known_acme_mnemonic(self.set, word) && is_ident(word) {
+            if !word.starts_with('!')
+                && defined_name(word)
+                    .is_some_and(|(name, _)| !is_known_acme_mnemonic(self.set, name))
+            {
                 return Ok(self.labeled_node(span, word, rest.trim(), leading, comment, line));
             }
         }
@@ -1271,24 +1276,25 @@ fn classify_conditional(text: &str) -> Option<Conditional> {
 }
 
 /// Parse `!set name = expr`, folding `expr` against the current `env`, with
-/// the Force Bits of `expr`.
+/// the Force Bits it gives `name` (a postfix on `name`, else `expr`'s).
 fn parse_set(
     anons: &Anons,
     zone: &str,
     env: &BTreeMap<String, i64>,
     text: &str,
     line: usize,
-) -> Result<(String, i64, ForceTerms), AsmError> {
+) -> Result<(String, i64, Lowered), AsmError> {
     let rest = split_first_word(text).1.trim();
-    let eq =
-        assignment_split(rest).ok_or_else(|| AsmError::new(line, "`!set` needs `name = value`"))?;
-    let name = rest[..eq].trim();
-    if !is_ident(name) {
-        return Err(AsmError::new(line, format!("invalid `!set` name `{name}`")));
-    }
+    let eq = assignment_split(rest)
+        .or_else(|| postfixed_assignment(rest))
+        .ok_or_else(|| AsmError::new(line, "`!set` needs `name = value`"))?;
+    let written = rest[..eq].trim();
+    let (name, postfix) = defined_name(written)
+        .ok_or_else(|| AsmError::new(line, format!("invalid `!set` name `{written}`")))?;
     let value_text = &rest[eq + 1..];
     let value = fold_const(&parse_value(anons, zone, value_text, line)?, env, line)?;
-    Ok((name.to_string(), value, force::scan(value_text, zone)))
+    let forces = Lowered::new(None, None).defining(postfix, Some(force::scan(value_text, zone)));
+    Ok((name.to_string(), value, forces))
 }
 
 /// Replace every reference to a `!set` variable in `op` with its current value,
@@ -1512,8 +1518,12 @@ pub(super) struct EvalContext<'a> {
 struct Lowered {
     label: Option<String>,
     op: Option<Operation>,
-    /// The force a `=` definition gives its symbol: its value's.
-    value_force: ForceTerms,
+    /// The force the line gives the symbol it defines: a postfix on its name
+    /// if it has one, else a `=` value's, else none.
+    defines: ForceTerms,
+    /// Whether the defined name carried a postfix, which ACME refuses on a
+    /// symbol already used ("Too late for postfix").
+    postfixed: bool,
     /// How an instruction's operand was sized.
     operand: Option<OperandForce>,
 }
@@ -1523,10 +1533,40 @@ impl Lowered {
         Lowered {
             label,
             op,
-            value_force: ForceTerms::default(),
+            defines: ForceTerms::default(),
+            postfixed: false,
             operand: None,
         }
     }
+
+    /// The force a definition gives its symbol: the name's postfix replaces
+    /// the value's (`S+1 = $00fd` is 8 bits).
+    fn defining(mut self, postfix: Option<Force>, value: Option<ForceTerms>) -> Self {
+        self.postfixed = postfix.is_some();
+        self.defines = match postfix {
+            Some(f) => ForceTerms::fixed(Some(f)),
+            None => value.unwrap_or_default(),
+        };
+        self
+    }
+}
+
+/// A defined symbol's name and the force a postfix on it sets: `S` or `S+2`.
+fn defined_name(text: &str) -> Option<(&str, Option<Force>)> {
+    let text = text.trim();
+    if is_ident(text) {
+        return Some((text, None));
+    }
+    let (base, force) = force::split_postfix(text)?;
+    is_ident(base).then_some((base, Some(force)))
+}
+
+/// Where `name+2 = value` splits, which [`assignment_split`] does not read: it
+/// takes a name without a postfix only.
+fn postfixed_assignment(trimmed: &str) -> Option<usize> {
+    let eq = trimmed.find('=')?;
+    let doubled = trimmed.as_bytes().get(eq + 1) == Some(&b'=');
+    (!doubled && defined_name(&trimmed[..eq]).is_some_and(|(_, f)| f.is_some())).then_some(eq)
 }
 
 /// An instruction operand's Force Bits, and the width the walk gave it — kept
@@ -1538,6 +1578,9 @@ struct OperandForce {
     offers: [Option<&'static str>; 3],
     /// Whether the value decided the width, with no force to say otherwise.
     by_value: bool,
+    /// A postfix on the mnemonic chose the width, so nothing found later can
+    /// change it.
+    postfixed: bool,
 }
 
 fn parse_statement(
@@ -1562,23 +1605,30 @@ fn parse_statement(
         }
     }
 
-    // `name = expr` binds a symbol (a lone `=`, not `==`/`!=`/`<=`/`>=`).
-    if let Some(eq) = assignment_split(trimmed) {
-        let name = trimmed[..eq].trim();
+    // `name = expr` binds a symbol (a lone `=`, not `==`/`!=`/`<=`/`>=`), and
+    // `name+2 = expr` binds it with a postfix.
+    if let Some(eq) = assignment_split(trimmed).or_else(|| postfixed_assignment(trimmed)) {
+        let written = trimmed[..eq].trim();
         let value = trimmed[eq + 1..].trim();
-        if !is_ident(name) {
-            return Err(AsmError::new(line, format!("invalid symbol name `{name}`")));
-        }
-        let mut lowered = Lowered::new(
+        let (name, postfix) = defined_name(written)
+            .ok_or_else(|| AsmError::new(line, format!("invalid symbol name `{written}`")))?;
+        return Ok(Lowered::new(
             Some(name.to_string()),
             Some(Operation::Equ(parse_value(anons, zone, value, line)?)),
-        );
-        lowered.value_force = force::scan(value, zone);
-        return Ok(lowered);
+        )
+        .defining(postfix, Some(force::scan(value, zone))));
     }
 
     // Otherwise: an optional column-0 label, then a directive or instruction.
+    // A label may carry a postfix too (`lbl+2 nop`).
     let (label, rest) = split_label(target, anons, code, line)?;
+    let (label, label_postfix) = match label {
+        Some(written) => match defined_name(&written) {
+            Some((name, postfix)) => (Some(name.to_string()), postfix),
+            None => (Some(written), None),
+        },
+        None => (None, None),
+    };
     // `!addr`/`!address` names a symbol and marks it an address. The mark has
     // no effect on bytes — probed at every shape, `!addr foo = $10` selects
     // zero page exactly as `foo = $10` does — so what is left is the naming,
@@ -1596,23 +1646,21 @@ fn parse_statement(
             return Err(AsmError::new(line, "`!addr` takes no label of its own"));
         }
         let args = args.trim();
-        let (name, value) = match args.split_once('=') {
+        let (written, value) = match args.split_once('=') {
             Some((n, v)) => (n.trim(), Some(v.trim())),
             None => (args, None),
         };
-        if !is_ident(name) {
-            return Err(AsmError::new(line, format!("invalid symbol name `{name}`")));
-        }
+        let (name, postfix) = defined_name(written)
+            .ok_or_else(|| AsmError::new(line, format!("invalid symbol name `{written}`")))?;
         let op = match value {
             Some(v) => Some(Operation::Equ(parse_value(anons, zone, v, line)?)),
             None => None,
         };
-        let mut lowered = Lowered::new(Some(name.to_string()), op);
-        lowered.value_force = value.map(|v| force::scan(v, zone)).unwrap_or_default();
-        return Ok(lowered);
+        return Ok(Lowered::new(Some(name.to_string()), op)
+            .defining(postfix, value.map(|v| force::scan(v, zone))));
     }
     let (op, operand) = parse_op(target, anons, zone, context, conv, rest, line)?;
-    let mut lowered = Lowered::new(label, op);
+    let mut lowered = Lowered::new(label, op).defining(label_postfix, None);
     lowered.operand = operand;
     Ok(lowered)
 }
@@ -1641,20 +1689,27 @@ fn split_label<'a>(
         return Ok((Some(name), remainder));
     }
     if let Some(name) = word.strip_suffix(':') {
-        if !is_ident(name) {
+        if defined_name(name).is_none() {
             return Err(AsmError::new(line, format!("invalid label `{name}`")));
         }
         return Ok((Some(name.to_string()), remainder));
     }
+    let mnemonic = |w: &str| {
+        target.set.instruction(&w.to_ascii_uppercase()).is_some()
+            || target
+                .ext
+                .is_some_and(|set| set.instruction(&w.to_ascii_uppercase()).is_some())
+    };
+    // A mnemonic with a postfix, or with something after a `+` that
+    // `parse_op` will refuse as one.
     if word.starts_with('!')
-        || target.set.instruction(&word.to_ascii_uppercase()).is_some()
-        || target
-            .ext
-            .is_some_and(|set| set.instruction(&word.to_ascii_uppercase()).is_some())
+        || mnemonic(word)
+        || word.split_once('+').is_some_and(|(base, _)| mnemonic(base))
     {
         return Ok((None, trimmed));
     }
-    if is_ident(word) {
+    // A label, perhaps with a postfix, which the caller splits off.
+    if defined_name(word).is_some() {
         return Ok((Some(word.to_string()), remainder));
     }
     Err(AsmError::new(line, format!("cannot parse `{trimmed}`")))
@@ -1683,6 +1738,19 @@ fn parse_op(
         ));
     }
     let (mnemonic, remainder) = split_first_word(rest);
+    // `lda+2`: a postfix on the mnemonic sets the operand's width outright.
+    let (mnemonic, postfix) = match force::split_postfix(mnemonic) {
+        Some((base, postfix)) => (base, Some(postfix)),
+        None => (mnemonic, None),
+    };
+    if let Some((base, digits)) = mnemonic.split_once('+')
+        && is_known_acme_mnemonic(target.set, base)
+    {
+        return Err(AsmError::new(
+            line,
+            format!("illegal postfix `+{digits}`: ACME's are `+1`, `+2` and `+3`"),
+        ));
+    }
     let mnemonic = mnemonic.to_ascii_uppercase();
     if target.set.instruction(&mnemonic).is_none()
         && target
@@ -1703,6 +1771,12 @@ fn parse_op(
             .ext
             .is_some_and(|set| set.find_form(&mnemonic, "zeropage,relative").is_some())
     {
+        if postfix.is_some() {
+            return Err(AsmError::new(
+                line,
+                format!("`{mnemonic}` takes no postfix"),
+            ));
+        }
         let parts = mos6502::split_top_level(remainder, ',');
         if parts.len() != 2 {
             return Err(AsmError::new(
@@ -1736,7 +1810,7 @@ fn parse_op(
         &mnemonic,
         operand,
         context.symbols,
-        None,
+        postfix,
         force,
         line,
     )?;
@@ -1767,6 +1841,7 @@ fn parse_op(
             width: sizing.width,
             offers: sizing.offers,
             by_value: sizing.by_value,
+            postfixed: postfix.is_some(),
         }),
     ))
 }
@@ -4503,6 +4578,182 @@ mod tests {
             .expect_err("a late 24-bit force on the 65816")
             .to_string();
         assert!(e.contains("the gap is ours"), "{e}");
+    }
+
+    /// ACME's "CPU does not support this postfix for this mnemonic" for
+    /// `src`, assembled at `*= $1000`. The 2020 build of 0.97 called it
+    /// "Illegal combination of command and postfix".
+    fn illegal_postfix(src: &str) {
+        let e = asm(&format!("*= $1000\n{src}")).expect_err(src).to_string();
+        assert!(e.contains("does not support this postfix"), "`{src}`: {e}");
+    }
+
+    /// `+1`, `+2` or `+3` after a mnemonic sets the width outright, ahead of
+    /// any force the operand carries — so `lda+1 $0070` is zero page.
+    #[test]
+    fn a_mnemonic_postfix_sets_the_width() {
+        for (src, want) in [
+            (" lda+1 $70", &[0xA5, 0x70][..]),
+            (" lda+2 $70", &[0xAD, 0x70, 0x00]),
+            (" LDA+2 $70", &[0xAD, 0x70, 0x00]),
+            ("lda+2 $70", &[0xAD, 0x70, 0x00]),
+            (" lda+1 $0070", &[0xA5, 0x70]),
+            (" lda+2 $70,x", &[0xBD, 0x70, 0x00]),
+            (" lda+1 #$70", &[0xA9, 0x70]),
+            (" jmp+2 $70", &[0x4C, 0x70, 0x00]),
+            (" jmp+2 ($70)", &[0x6C, 0x70, 0x00]),
+            (" lda+1 FWD\nFWD=$70", &[0xA5, 0x70]),
+            (" lda+1 -1", &[0xA5, 0xFF]),
+            (" lda+1 -128", &[0xA5, 0x80]),
+            (" lda+2 -1", &[0xAD, 0xFF, 0xFF]),
+            ("S+3=$70\n lda+2 S", &[0xAD, 0x70, 0x00]),
+            ("S+2 = $70\n lda+1 S", &[0xA5, 0x70]),
+        ] {
+            assert_eq!(at_1000(src), want, "`{src}`");
+        }
+    }
+
+    /// A postfix must name a width the instruction has for that operand —
+    /// unlike a force, it does not settle for a wider one. A value too big
+    /// for the byte it asks for is "Number out of range".
+    #[test]
+    fn a_postfix_the_instruction_cannot_take_is_refused() {
+        for src in [
+            " lda+3 $70",
+            " lda+1 $70,y",
+            " lda+2 #$70",
+            " lda+2 ($70),y",
+            " jmp+1 $70",
+            " jsr+1 $70",
+            " stx+2 $70,y",
+            "!cpu 65ce02\n phw+1 #$70",
+        ] {
+            illegal_postfix(src);
+        }
+        for src in [
+            " lda+1 $1234",
+            " ldx+1 $1000,y",
+            " lda+1 -129",
+            " lda+1 256",
+        ] {
+            out_of_range(src);
+        }
+        // Known only once `FWD` is defined, so the engine's byte check is
+        // what refuses it, in its own words.
+        asm("*= $1000\n lda+1 FWD\nFWD=$170").expect_err("a forward value too big");
+        // ACME's "Illegal postfix": no width to name.
+        for src in [" lda+0 $70", " lda+4 $70", "lda+0 $70"] {
+            let e = asm(&format!("*= $1000\n{src}")).expect_err(src).to_string();
+            assert!(e.contains("illegal postfix"), "`{src}`: {e}");
+        }
+        // ACME's "Garbage data at end of statement": nothing to name one for.
+        for src in [
+            " nop+1",
+            " bne+1 *",
+            "!cpu r65c02\n rmb0+2 $70",
+            "!cpu r65c02\n bbr0+1 $70,*",
+        ] {
+            asm(&format!("*= $1000\n{src}")).expect_err(src);
+        }
+    }
+
+    /// A postfix on a symbol's name in its definition replaces the force its
+    /// value would give it, for `=`, `!set`, `!addr` and labels alike.
+    #[test]
+    fn a_definition_postfix_sets_the_symbols_force() {
+        for (src, want) in [
+            ("S+2 = $70\n lda S", &[0xAD, 0x70, 0x00][..]),
+            ("S+2=$70\n lda S", &[0xAD, 0x70, 0x00]),
+            ("S+1 = $0070\n lda S", &[0xA5, 0x70]),
+            ("S+2 = $70\nT = S\n lda T", &[0xAD, 0x70, 0x00]),
+            ("S+2 = $70\n lda <S", &[0xA5, 0x70]),
+            ("S+1 = $70\n lda #S", &[0xA9, 0x70]),
+            ("S+1 = $70\n lda (S),y", &[0xB1, 0x70]),
+            ("!set S+2 = $70\n lda S", &[0xAD, 0x70, 0x00]),
+            ("!set V+1 = $0070\n lda V", &[0xA5, 0x70]),
+            ("!addr S+2 = $70\n lda S", &[0xAD, 0x70, 0x00]),
+            ("!zone z\n.l+2 = $70\n lda .l", &[0xAD, 0x70, 0x00]),
+            ("S+1 = $70 : lda S", &[0xA5, 0x70]),
+        ] {
+            assert_eq!(at_1000(src), want, "`{src}`");
+        }
+        for (src, want) in [
+            (
+                "*= $0070\nlbl+2 nop\n lda lbl",
+                &[0xEA, 0xAD, 0x70, 0x00][..],
+            ),
+            ("*= $0070\nlbl+2: nop\n lda lbl", &[0xEA, 0xAD, 0x70, 0x00]),
+            ("*= $0070\nlbl+1\n lda lbl", &[0xA5, 0x70]),
+            ("*= $0070\n!addr ab+2\n lda ab", &[0xAD, 0x70, 0x00]),
+        ] {
+            assert_eq!(asm(src).expect(src).bytes, want, "`{src}`");
+        }
+        for src in [
+            "S+1 = $1234\n lda S",
+            "S+3 = $70\n lda S",
+            "S+2 = $70\n lda #S",
+        ] {
+            out_of_range(src);
+        }
+        // Written apart from the name it is ACME's "Syntax error".
+        asm("*= $1000\nS + 2 = $70\n lda S").expect_err("a spaced postfix");
+        assert_eq!(
+            at_1000("!cpu 65816\nS+3 = $70\n lda S\n sta S,x"),
+            [0xAF, 0x70, 0x00, 0x00, 0x9F, 0x70, 0x00, 0x00]
+        );
+    }
+
+    /// A symbol already used cannot take a postfix: ACME's "Too late for
+    /// postfix", whichever way the earlier use was written.
+    #[test]
+    fn a_postfix_after_a_use_is_too_late() {
+        for src in [
+            " lda NR\nNR+2 = $70",
+            "S=$70\n lda S\nS+2=$70",
+            "!byte S\nS+1 = 5",
+            " jmp lbl\nlbl+2 nop",
+        ] {
+            let e = asm(&format!("*= $1000\n{src}")).expect_err(src).to_string();
+            assert!(e.contains("too late for postfix"), "`{src}`: {e}");
+        }
+    }
+
+    /// The 65816 has the long forms `+3` asks for. A 16-bit immediate, which
+    /// `+2` asks for there, ACME assembles and this assembler does not yet.
+    #[test]
+    fn the_65816_takes_a_24_bit_postfix() {
+        for (src, want) in [
+            (" lda+3 $70", &[0xAF, 0x70, 0x00, 0x00][..]),
+            (" lda+3 $70,x", &[0xBF, 0x70, 0x00, 0x00]),
+            (" jmp+3 $70", &[0x5C, 0x70, 0x00, 0x00]),
+            (" jsr+3 $70", &[0x22, 0x70, 0x00, 0x00]),
+            (" lda+1 #$70", &[0xA9, 0x70]),
+        ] {
+            assert_eq!(at_1000(&format!("!cpu 65816\n{src}")), want, "`{src}`");
+        }
+        for src in [" lda+3 $70,y", " ldx+3 $70", " jmp+3 ($70)", " lda+3 #$70"] {
+            illegal_postfix(&format!("!cpu 65816\n{src}"));
+        }
+        let e = asm("*= $1000\n!cpu 65816\n lda+2 #$70")
+            .expect_err("a 16-bit immediate")
+            .to_string();
+        assert!(e.contains("the gap is ours"), "{e}");
+    }
+
+    /// Postfixes survive the formatter, and what it writes assembles to the
+    /// same bytes as ACME 0.97 gives the original.
+    #[test]
+    fn a_formatted_postfix_assembles_to_the_same_bytes() {
+        let src = "*= $0010\nS+2 = $70\nlbl+1\n  lda+2 S\n  lda+1 lbl,x\nx+2 nop\n\
+                   y+1: nop\n!set V+1 = $0070\n!addr Q+2 = $12\n lda Q\n lda V\n lda x\n lda y\n";
+        let want = [
+            0xAD, 0x70, 0x00, 0xB5, 0x10, 0xEA, 0xEA, 0xAD, 0x12, 0x00, 0xA5, 0x70, 0xAD, 0x15,
+            0x00, 0xA5, 0x16,
+        ];
+        assert_eq!(assemble_acme(src).expect("source").bytes, want);
+        let formatted = crate::format_acme(src).expect("formats");
+        assert_eq!(assemble_acme(&formatted).expect("formatted").bytes, want);
+        assert_eq!(crate::format_acme(&formatted).expect("again"), formatted);
     }
 
     #[test]

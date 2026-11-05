@@ -115,6 +115,20 @@ fn resolve_within(terms: &ForceTerms, map: &ForceMap, depth: usize) -> (Option<F
     (force, complete)
 }
 
+/// `name+1`, `name+2` or `name+3`: a mnemonic or a symbol's name carrying
+/// ACME's postfix, and the width it sets. The postfix is written against the
+/// name — `S + 2 = $70` is ACME's "Syntax error".
+pub(super) fn split_postfix(word: &str) -> Option<(&str, Force)> {
+    let (base, digit) = word.rsplit_once('+')?;
+    let force = match digit {
+        "1" => Force::Bits8,
+        "2" => Force::Bits16,
+        "3" => Force::Bits24,
+        _ => return None,
+    };
+    (!base.is_empty() && !base.ends_with(char::is_whitespace)).then_some((base, force))
+}
+
 // ---------------------------------------------------------------------------
 // Scanning an expression
 // ---------------------------------------------------------------------------
@@ -420,8 +434,8 @@ pub(super) fn choose_mode(
         OperandSyntax::Indexed(_, Index::X) => named(["zeropage,x", "absolute,x", "long,x"]),
         OperandSyntax::Indexed(_, Index::Y) => named(["zeropage,y", "absolute,y", ""]),
         OperandSyntax::None | OperandSyntax::Accumulator => {
-            if postfix.is_some() {
-                return Err(illegal_postfix(mnemonic, line));
+            if let Some(p) = postfix {
+                return Err(illegal_postfix(mnemonic, p, line));
             }
             return by_value(operand, [None; 3]);
         }
@@ -437,7 +451,7 @@ pub(super) fn choose_mode(
                          the 65816 and this assembler does not yet — the gap is ours"
                     ),
                 )),
-                Some(Force::Bits24) => Err(illegal_postfix(mnemonic, line)),
+                Some(Force::Bits24) => Err(illegal_postfix(mnemonic, Force::Bits24, line)),
             };
         }
         // Every other shape has exactly one mode, and the mode its width.
@@ -464,7 +478,7 @@ pub(super) fn choose_mode(
     let width = match (postfix, force) {
         (Some(p), _) => {
             if offers[p.index()].is_none() {
-                return Err(illegal_postfix(mnemonic, line));
+                return Err(illegal_postfix(mnemonic, p, line));
             }
             p
         }
@@ -543,11 +557,15 @@ fn sized(target: AcmeTarget, mnemonic: &str) -> bool {
         .any(|inst| inst.forms.iter().any(|f| !fixed(f.mode)))
 }
 
-fn illegal_postfix(mnemonic: &str, line: usize) -> AsmError {
+/// ACME 0.97 of 1 Aug 2025's words. The 2020 build said "Illegal
+/// combination of command and postfix" for the same refusal.
+fn illegal_postfix(mnemonic: &str, postfix: Force, line: usize) -> AsmError {
     AsmError::new(
         line,
         format!(
-            "illegal combination of command and postfix: `{mnemonic}` has no form that wide here"
+            "CPU does not support this postfix for this mnemonic: `{mnemonic}` has no {}-bit \
+             form for this operand",
+            postfix.bits()
         ),
     )
 }
