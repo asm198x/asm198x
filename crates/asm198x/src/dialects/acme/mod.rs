@@ -4500,15 +4500,19 @@ mod tests {
         }
     }
 
-    /// An 8-bit force where there is no zero-page form takes the next width
-    /// up: it asks for at least 8 bits, not exactly 8.
+    /// A force takes the narrowest form at least that wide: it asks for at
+    /// least 8 or 16 bits, not exactly. The 65816's `jsl` and `jml` have only
+    /// a long form, so even a byte operator gives 24 bits there.
     #[test]
-    fn an_8_bit_force_takes_the_next_width_up() {
+    fn a_force_takes_the_narrowest_form_at_least_that_wide() {
         for (src, want) in [
             (" jmp <$1234", &[0x4C, 0x34, 0x00][..]),
             (" jsr <$1234", &[0x20, 0x34, 0x00]),
             (" lda <$1234,y", &[0xB9, 0x34, 0x00]),
             (" jmp (<$1234)", &[0x6C, 0x34, 0x00]),
+            ("!cpu 65816\n jsl <$1234", &[0x22, 0x34, 0x00, 0x00]),
+            ("!cpu 65816\n jsl $0070", &[0x22, 0x70, 0x00, 0x00]),
+            ("!cpu 65816\n jml $0070", &[0x5C, 0x70, 0x00, 0x00]),
         ] {
             assert_eq!(at_1000(src), want, "`{src}`");
         }
