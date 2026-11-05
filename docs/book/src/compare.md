@@ -25,7 +25,7 @@ exactly which build of which assembler produced the bytes we compare with:
 <!-- generated: xtask compare --markdown -->
 | Reference tool | The version we measured against | Instruction sets | Verdicts |
 |---|---|---|---|
-| `acme` | This is ACME, release 0.97 ("Zem"), 1 Aug 2025 | 1 | 492 |
+| `acme` | This is ACME, release 0.97 ("Zem"), 1 Aug 2025 | 1 | 508 |
 | `asl` | Macro Assembler 1.42 Beta [Bld 311] | 14 | 3055 |
 | `ca65` | ca65 V2.19 - Git 8d86ca7 | 13 | 3782 |
 | `lwasm` | lwasm from lwtools 4.25 | 1 | 623 |
