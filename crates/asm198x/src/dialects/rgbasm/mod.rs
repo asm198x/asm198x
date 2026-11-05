@@ -2794,6 +2794,20 @@ mod tests {
         assert_eq!(out.bytes[0x150], 0x33);
     }
 
+    /// Equal-sized floating ROM0 sections go in reverse declaration order:
+    /// RGBDS 1.0.4 puts `r1` at $0000 and `r0` at $0010. Declaration order
+    /// swapped them.
+    #[test]
+    fn equal_floating_rom0_sections_place_in_reverse_declaration_order() {
+        let out = crate::assemble_rgbasm(
+            "SECTION \"r0\",ROM0\n ds 16,1\n\
+             SECTION \"r1\",ROM0\n ds 16,3\n",
+        )
+        .expect("assembles");
+        assert!(out.bytes[..0x10].iter().all(|&b| b == 3));
+        assert!(out.bytes[0x10..0x20].iter().all(|&b| b == 1));
+    }
+
     /// RAM sections bind addresses but are BSS: `rgblink` does not append
     /// their reservation bytes to a cartridge image.
     #[test]
