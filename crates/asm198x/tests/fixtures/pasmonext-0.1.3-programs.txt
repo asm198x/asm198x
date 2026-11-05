@@ -2832,3 +2832,50 @@ mm macro
  endif
 --- bytes 02
 --- symbols
+# Programs assembled by PasmoNext 0.1.3 with scripts/measure-pasmonext-programs.py.
+=== keyword_colon_halt
+ org 0
+halt:
+ db 7
+--- rejected End line expected but ':'found
+=== keyword_colon_nop
+ org 0
+nop:
+ db 7
+--- rejected End line expected but ':'found
+=== keyword_colon_jp
+ org 0
+jp:
+ db 7
+--- rejected Value expected but ':'found
+=== keyword_colon_org
+ org 0
+org:
+ db 7
+--- rejected Value expected but ':'found
+=== keyword_colon_equ
+ org 0
+equ:
+ db 7
+--- rejected EQU without label
+=== keyword_colon_after_label
+ org 0
+here: nop:
+ db 7
+--- rejected End line expected but ':'found
+=== keyword_colon_ret
+ org 0
+ret:
+ db 7
+--- bytes c907
+--- symbols
+=== macro_name_colon_is_label
+m1 macro
+ nop
+ endm
+ org 0
+m1:
+ db 7
+--- bytes 07
+--- symbols
+m1 0000
