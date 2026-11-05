@@ -17,6 +17,14 @@ const PROGRAMS_NOT_YET: &[(&str, &str)] = &[];
 /// path must do instead, its bytes or `None` for a rejection. One that stops
 /// deviating fails the test.
 const PROGRAMS_DEVIATING: &[(&str, &str, Option<&str>)] = &[
+    // PasmoNext's `ret` ignores any one word after it, so it assembles
+    // `ret 5` and `ret hl` as `ret`, and `ret:` too. Every other instruction
+    // or directive with a colon is an error there (asm198x#971).
+    (
+        "keyword_colon_ret",
+        "PasmoNext's `ret` ignores the colon after it, as it ignores any one word",
+        None,
+    ),
     (
         "org_ignores_rest",
         "PasmoNext never reads past ORG's operand, so `org 5 junk` drops `junk`",
