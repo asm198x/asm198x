@@ -85,9 +85,36 @@ fn gb_rom_pads_the_second_bank_with_ff_after_a_full_rom0() {
     assert!(rom[0x4000..].iter().all(|&byte| byte == 0xFF));
 }
 
+/// RGBLINK writes whole banks, so `rgbfix` always has a header to finish,
+/// even for a program that stops short of it.
+#[test]
+fn gb_rom_finishes_a_program_that_ends_before_its_header() {
+    let dir = scratch::dir("rgblink-layouts-short");
+    std::fs::write(dir.join("program.asm"), "SECTION \"a\", ROM0[$100]\n nop\n").expect("source");
+    let output = asm198x(
+        &dir,
+        &[
+            "--dialect",
+            "rgbasm",
+            "--gb-rom",
+            "program.asm",
+            "-o",
+            "out.gb",
+        ],
+    );
+    assert!(output.status.success(), "{}", stderr(&output));
+    let rom = std::fs::read(dir.join("out.gb")).expect("ROM");
+    assert_eq!(rom.len(), 0x8000);
+    assert_eq!(rom[0x104..0x108], [0xCE, 0xED, 0x66, 0x66], "logo");
+}
+
 /// Each probe exercises one RGBLINK rule. Every probe assembles under
 /// `rgbasm`; what RGBLINK does with it is the arbiter's answer.
 const PROBES: &[(&str, &str)] = &[
+    (
+        "a program that ends before the cartridge header",
+        "SECTION \"a\", ROM0[$100]\n nop\n",
+    ),
     (
         "ROM0 fills its bank exactly",
         "SECTION \"a\", ROM0[$150]\n ds $3eb0, 1\n",

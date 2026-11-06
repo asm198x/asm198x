@@ -1342,7 +1342,9 @@ fn run(args: &[String]) -> Result<String, String> {
         );
         (summary, out_path)
     } else if gb_rom {
-        let (image, overwrote_logo) = game_boy_rom(&assembly.bytes)?;
+        // rgbfix finishes what RGBLINK wrote: whole banks, so a program that
+        // ends before the $0100-$014F header still has one to fill in.
+        let (image, overwrote_logo) = game_boy_rom(&rgbasm_raw_image(&assembly.bytes))?;
         if overwrote_logo {
             eprintln!("asm198x: warning: overwrote a non-zero byte in the Nintendo logo");
         }
