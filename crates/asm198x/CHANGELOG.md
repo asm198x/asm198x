@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.76](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.75...asm198x-v0.0.76) - 2026-11-06
+
+### Fixed
+
+- *(vasm)* read * in dc and dcb as vasm does
+- *(vasm)* write the bytes vasm's default invocation writes
+- *(ca65)* treat a .mid start above 100 as 0, as ca65 does
+- *(ca65)* format .sprintf as ca65 does, not as C does
+
 ## [0.0.75](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.74...asm198x-v0.0.75) - 2026-11-06
 
 This release matches three reference assemblers more closely, including
