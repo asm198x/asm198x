@@ -5,7 +5,7 @@ observation of a real reference assembler, not an expectation written
 by hand. Regenerate with `cargo xtask ledger`.
 
 - **Release:** `v0.0.75`
-- **Corpus hash:** `e8849b7bcec94963bd05e9767d2217388edc97b9257275d1fa119adead3d4075`
+- **Corpus hash:** `001e5b8afe3cd77d11bf6bb6d220f854661b47f8ba40cf2a57d86b8e984fc73f`
 - **Pinned curriculum:** `d33e74f38e34c24f8143c372bddf5dd1bec072de` (2026-11-06)
 - **CPUs:** 33, holding 14562 verdict(s)
 
@@ -56,6 +56,7 @@ Form coverage: **151/151** (100.0%)
 
 Tracked divergences — differences we know about and check:
 
+- `scrcode-cbm-expression` — 1 case(s)
 - `sprintf-raw-flags` — 1 case(s)
 
 ## 6502DTV
