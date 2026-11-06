@@ -9,19 +9,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.0.75](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.74...asm198x-v0.0.75) - 2026-11-06
 
+This release matches three reference assemblers more closely, including
+refusing source they refuse. Two of the changes can stop source that 0.0.74
+built: see *Changed*.
+
+### Changed
+
+- **ACME: Force Bits choose an operand's width before its value does**
+  ([#1051](https://github.com/asm198x/asm198x/pull/1051)). A literal written
+  with leading zeros (`$0070`, `%0000000001110000`, `&0160`), any symbol
+  defined from one, and the `+1`/`+2`/`+3` postfixes set the addressing width
+  as ACME 0.97 does, through symbols and expressions. `<`, `>` and `^` force
+  eight bits. So `NR = $0070` then `lda NR` now gives `AD 70 00`, as in ACME,
+  where 0.0.74 wrote `A5 70`. Source that ACME refuses as "Number out of range",
+  such as `(NR),y` with a 16-bit force, is refused too.
+- **Game Boy: `--gb-rom` links as plain `rgblink` does** (breaking,
+  [#1053](https://github.com/asm198x/asm198x/pull/1053)). A ROM0 section must
+  fit `$0000`–`$3FFF` and a ROMX section `$4000`–`$7FFF`, refused with
+  rgblink's own messages. A program laid out as one flat 32 KB ROM0 now needs
+  `--tiny`.
+
 ### Added
 
-- *(rgbasm)* add --tiny to link a Game Boy ROM as rgblink -t does
-- *(acme)* take ACME's +1/+2/+3 postfixes on mnemonics and symbols
-- *(acme)* read octal, 0x and 0b literals and the ^ bank byte
+- **`--tiny`** links a Game Boy ROM as `rgblink -t` does: one flat 32 KB ROM,
+  with gaps padded with `$00`
+  ([#1053](https://github.com/asm198x/asm198x/pull/1053)).
+- **ACME literals and postfixes:** `&` octal, `0x` and `0b` literals, the `^`
+  bank-byte operator, and `+1`/`+2`/`+3` postfixes on mnemonics and symbol
+  definitions ([#1051](https://github.com/asm198x/asm198x/pull/1051)).
 
 ### Fixed
 
-- *(rgbasm)* finish a Game Boy ROM whose program stops before its header
-- *(rgbasm)* [**breaking**] refuse ROM sections that plain rgblink refuses
-- *(rgbasm)* place equal-sized floating ROM0 sections as rgblink does
-- *(acme)* carry ACME's Force Bits through symbols and expressions
-- refuse an instruction or directive followed by a colon in pasmo source
+- **pasmo and pasmonext:** an instruction or directive followed by a colon,
+  such as `halt:`, is refused as PasmoNext refuses it. Before, it assembled to
+  nothing ([#1050](https://github.com/asm198x/asm198x/pull/1050), through
+  lang198x-z80-asm 0.2.6).
+- **rgbasm:** equal-sized floating ROM0 sections are placed in rgblink's order,
+  and a program that stops before the header at `$0150` is finished as
+  rgblink and rgbfix finish it
+  ([#1053](https://github.com/asm198x/asm198x/pull/1053)).
 
 ## [0.0.74](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.73...asm198x-v0.0.74) - 2026-11-03
 
