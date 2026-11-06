@@ -2260,6 +2260,10 @@ const PROBES: &[Probe] = &[
         "\tmove.w 0(a0),d0\n\tmove.w (0,a1),d1\n\tmove.w d0,0(a2,d1.w)\n\tmovep.w 0(a0),d0\n"),
     ok ("vasm-bin", "forward equ immediates are optimised",
         "\tadd.l #N,d0\n\tmove.l #N,d1\n\tlea N(a0),a0\nN equ 4\n"),
+    // `*` in data: each `dc` item's own address, and one for all of a `dcb`.
+    ok ("vasm-bin", "dc reads * at each item and dcb at its start",
+        "\tnop\n\tdc.l *\n\tdc.w *,*\n\tdcb.w 2,*\n\tdc.b *-1,*\n"),
+    ok ("vasm-exe", "dc.l * is relocated", "\tsection c,code\n\tnop\n\tdc.l *\n"),
 
     // ---- ca65-816 / 65816 ---------------------------------------------------
     ok ("ca65-816", "imm / dp / long",   " lda #$12\n lda $12\n lda $123456\n"),

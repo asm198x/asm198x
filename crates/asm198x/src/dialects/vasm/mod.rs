@@ -618,9 +618,12 @@ fn assemble_core(
                     {
                         buf.relocs.push((buf.bytes.len() as u32, target));
                     }
+                    // `*` is each item's own address: `dc.w *,*` is two
+                    // different words.
+                    let here = buf.bytes.len() as i64;
                     push_sized(
                         &mut buf.bytes,
-                        eval(e, &syms, 0, s.line).map_err(stamp)?,
+                        eval(e, &syms, here, s.line).map_err(stamp)?,
                         *size,
                     );
                 }
@@ -631,7 +634,8 @@ fn assemble_core(
             }
             Stmt::Dcb(size, count, value) => {
                 let n = count_of(count, &syms, s.line).map_err(stamp)?;
-                let v = eval(value, &syms, 0, s.line).map_err(stamp)?;
+                // One value for every copy, so `*` is where the first lands.
+                let v = eval(value, &syms, buf.bytes.len() as i64, s.line).map_err(stamp)?;
                 for _ in 0..n {
                     push_sized(&mut buf.bytes, v, *size);
                 }
