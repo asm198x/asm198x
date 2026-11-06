@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.75](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.74...asm198x-v0.0.75) - 2026-11-06
+
+### Added
+
+- *(rgbasm)* add --tiny to link a Game Boy ROM as rgblink -t does
+- *(acme)* take ACME's +1/+2/+3 postfixes on mnemonics and symbols
+- *(acme)* read octal, 0x and 0b literals and the ^ bank byte
+
+### Fixed
+
+- *(rgbasm)* finish a Game Boy ROM whose program stops before its header
+- *(rgbasm)* [**breaking**] refuse ROM sections that plain rgblink refuses
+- *(rgbasm)* place equal-sized floating ROM0 sections as rgblink does
+- *(acme)* carry ACME's Force Bits through symbols and expressions
+- refuse an instruction or directive followed by a colon in pasmo source
+
 ## [0.0.74](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.73...asm198x-v0.0.74) - 2026-11-03
 
 ### Added
