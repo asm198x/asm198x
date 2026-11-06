@@ -7,6 +7,14 @@ position in the ROM file. These are different facts:
 - `SRAM[$A010], BANK[2]` has CPU address `$A010` and no bytes in the ROM.
 - `WRAMX[$D010], BANK[3]` has CPU address `$D010` and no bytes in the ROM.
 
+ROM sections stay in their regions as plain `rgblink` requires: ROM0 in
+`$0000-$3FFF` and ROMX in `$4000-$7FFF`. A section bigger than its region, a
+pinned address outside it, or a pinned section that runs past its end is
+refused with RGBLINK's own message, every one in declaration order. Floating
+ROM0 sections go largest first, equal sizes in reverse declaration order, each
+into the lowest gap that holds it; if one is left over, it is refused as
+`Unable to place "name" (ROM0 section) anywhere`.
+
 Floating non-ROM placement reserves occupied ranges within each bank, not
 across the whole region. Under the current bounded layout, an unqualified ROMX
 or WRAMX section uses bank 1; the other region types use bank 0. Automatic
