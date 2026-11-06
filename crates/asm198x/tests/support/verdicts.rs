@@ -225,8 +225,11 @@ pub fn assemble_probe(dialect: &str, body: &str) -> Option<Result<Vec<u8>, Strin
         "sjasmplus" => asm198x::assemble_sjasmplus(body),
         "z80n" => asm198x::assemble_sjasmplus_next(body),
         "lwasm" => asm198x::assemble_lwasm(body),
-        // `vasm` probes are recorded from `vasmm68k_mot -Fbin -no-opt`.
+        // `vasm` probes are recorded from `vasmm68k_mot -Fbin -no-opt`;
+        // `vasm-bin` and `vasm-exe` from its default, optimising invocation.
         "vasm" => asm198x::assemble_vasm_no_opt(body),
+        "vasm-bin" => asm198x::assemble_vasm(body),
+        "vasm-exe" => asm198x::assemble_vasm_exe(body),
         "ca65" => ca65_flat(body),
         "ca65-816" => asm198x::assemble_ca65_816(body),
         "rgbasm" | "rgbasm-banked" => asm198x::assemble_rgbasm(body),
@@ -253,7 +256,7 @@ pub fn format_probe(dialect: &str, body: &str) -> Option<Result<String, String>>
         "sjasmplus" => asm198x::format_sjasmplus(body),
         "z80n" => asm198x::format_sjasmplus_next(body),
         "lwasm" => asm198x::format_lwasm(body),
-        "vasm" => asm198x::format_vasm(body),
+        "vasm" | "vasm-bin" | "vasm-exe" => asm198x::format_vasm(body),
         "ca65-816" => asm198x::format_ca65_816(body),
         "rgbasm" => asm198x::format_rgbasm(body),
         _ => return None,
