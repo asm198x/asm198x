@@ -835,3 +835,77 @@ fn write_pin(root: &Path) {
     let pin = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/verdicts/code-samples.pin");
     let _ = fs::write(pin, format!("{sha}\n"));
 }
+
+/// #969's four pattern sources, which vasm's default optimisations made build
+/// to different bytes: each now builds to vasm's hunk executable, from its own
+/// folder with that folder on the include path, as the pattern library builds
+/// it.
+///
+/// Only where the checkout has the pattern library, which the pinned revision
+/// predates. The pattern-library verdicts hold the rest of it.
+#[test]
+#[ignore = "needs vasmm68k_mot and a Code198x checkout with the pattern library; run with --ignored"]
+fn the_969_pattern_sources_match_vasm() {
+    const SOURCES: &[&str] = &[
+        "commodore-amiga/patterns/assembly/rendering/bitmap-text/demo.asm",
+        "commodore-amiga/patterns/assembly/rendering/pixels-and-boxes/demo.asm",
+        "commodore-amiga/patterns/assembly/rendering/tile-map/demo.asm",
+        "commodore-amiga/patterns/assembly/rendering/tile-region/demo.asm",
+    ];
+    if !have("vasmm68k_mot") {
+        eprintln!("SKIP: `vasmm68k_mot` not on PATH");
+        return;
+    }
+    let Some(root) = code198x() else {
+        eprintln!("SKIP: no Code198x checkout");
+        return;
+    };
+    let tmp = support::scratch::dir("vasm-969");
+    let mut fails: Vec<String> = Vec::new();
+    let mut checked = 0;
+    for rel in SOURCES {
+        let file = root.join("code-samples").join(rel);
+        let (Some(dir), Some(name)) = (file.parent(), file.file_name()) else {
+            continue;
+        };
+        if !file.is_file() {
+            eprintln!("SKIP: {rel} is not in this checkout");
+            continue;
+        }
+        let theirs_path = tmp.join("ref.exe");
+        let ours_path = tmp.join("ours.exe");
+        let _ = fs::remove_file(&theirs_path);
+        let _ = fs::remove_file(&ours_path);
+        let mut vasm = Command::new("vasmm68k_mot");
+        vasm.args(["-Fhunkexe", "-kick1hunks", "-quiet", "-I"])
+            .arg(dir)
+            .arg("-o")
+            .arg(&theirs_path)
+            .arg(name);
+        let theirs = ref_bytes(dir, &theirs_path, vasm).and_then(|b| strip_hunk_symbols(&b));
+        let mut ours = Command::new(env!("CARGO_BIN_EXE_asm198x"));
+        ours.args(["--dialect", "vasm", "--exe", "-I"])
+            .arg(dir)
+            .arg(name)
+            .arg("-o")
+            .arg(&ours_path);
+        let ours = ref_bytes(dir, &ours_path, ours);
+        match (theirs, ours) {
+            (Some(t), Some(o)) if t == o => checked += 1,
+            (Some(t), Some(o)) => fails.push(format!(
+                "{rel}: we write {} bytes, vasm {}",
+                o.len(),
+                t.len()
+            )),
+            (None, _) => fails.push(format!("{rel}: vasm did not build it")),
+            (_, None) => fails.push(format!("{rel}: we did not build it")),
+        }
+    }
+    eprintln!("#969 pattern sources: {checked} match vasm");
+    assert!(
+        fails.is_empty(),
+        "{} of the #969 sources differ:\n  {}",
+        fails.len(),
+        fails.join("\n  ")
+    );
+}

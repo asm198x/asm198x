@@ -1258,7 +1258,12 @@ fn encodes_m68k_trap_movea_exg() {
         ("\ttrap\t#15\n", &[0x4E, 0x4F]),
         ("\tmovea.w\td0,a1\n", &[0x32, 0x40]),
         ("\tmovea.l\ta0,a1\n", &[0x22, 0x48]),
-        ("\tmovea.l\t#4,a0\n", &[0x20, 0x7C, 0x00, 0x00, 0x00, 0x04]),
+        // vasm holds a 16-bit `movea.l` immediate as `movea.w`.
+        ("\tmovea.l\t#4,a0\n", &[0x30, 0x7C, 0x00, 0x04]),
+        (
+            "\tmovea.l\t#$12345,a0\n",
+            &[0x20, 0x7C, 0x00, 0x01, 0x23, 0x45],
+        ),
         ("\texg\td0,d1\n", &[0xC1, 0x41]),
         ("\texg\ta0,a1\n", &[0xC1, 0x49]),
         ("\texg\td0,a1\n", &[0xC1, 0x89]),
@@ -1278,11 +1283,16 @@ fn encodes_m68k_trap_movea_exg() {
 fn encodes_m68k_control_registers() {
     let cases: &[(&str, &[u8])] = &[
         ("\tmove\td0,ccr\n", &[0x44, 0xC0]),
-        ("\tmove\t$1000,ccr\n", &[0x44, 0xF9, 0x00, 0x00, 0x10, 0x00]),
+        // vasm's default shortens an absolute address that fits 16 bits.
+        ("\tmove\t$1000,ccr\n", &[0x44, 0xF8, 0x10, 0x00]),
+        (
+            "\tmove\t$12000,ccr\n",
+            &[0x44, 0xF9, 0x00, 0x01, 0x20, 0x00],
+        ),
         ("\tmove\t#$12,ccr\n", &[0x44, 0xFC, 0x00, 0x12]),
         ("\tmove\td0,sr\n", &[0x46, 0xC0]),
         ("\tmove\tsr,d0\n", &[0x40, 0xC0]),
-        ("\tmove\tsr,$1000\n", &[0x40, 0xF9, 0x00, 0x00, 0x10, 0x00]),
+        ("\tmove\tsr,$1000\n", &[0x40, 0xF8, 0x10, 0x00]),
         ("\tmove\tusp,a0\n", &[0x4E, 0x68]),
         ("\tmove\ta3,usp\n", &[0x4E, 0x63]),
         ("\tandi\t#1,ccr\n", &[0x02, 0x3C, 0x00, 0x01]),
