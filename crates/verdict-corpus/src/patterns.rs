@@ -218,23 +218,6 @@ pub const KNOWN: &[(&str, &str)] = &[
         "bbc-micro/patterns/assembly/rendering/pre-shifted-sprites/demo.asm",
         "issue-968",
     ),
-    // `--exe` writes a different hunk executable from vasm 2.0f.
-    (
-        "commodore-amiga/patterns/assembly/rendering/bitmap-text/demo.asm",
-        "issue-969",
-    ),
-    (
-        "commodore-amiga/patterns/assembly/rendering/pixels-and-boxes/demo.asm",
-        "issue-969",
-    ),
-    (
-        "commodore-amiga/patterns/assembly/rendering/tile-map/demo.asm",
-        "issue-969",
-    ),
-    (
-        "commodore-amiga/patterns/assembly/rendering/tile-region/demo.asm",
-        "issue-969",
-    ),
 ];
 
 /// The issue tracking a known difference for `source`, relative to the
