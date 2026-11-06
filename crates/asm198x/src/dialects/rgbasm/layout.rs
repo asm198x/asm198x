@@ -6,6 +6,7 @@
 //! not a rewrite.
 
 use std::collections::BTreeMap;
+use std::ops::Range;
 
 use super::{AsmError, Node, Operation, Statement, section_name, section_origin};
 
@@ -52,38 +53,35 @@ pub(super) fn section_region_start(kind: &str) -> Option<i64> {
     })
 }
 
+/// What the source said about a section that its lowered statement no longer
+/// shows: its type, whether it pinned an address, and where it was declared.
+/// A floating ROMX section is lowered at `$4000` like a pinned one.
 #[derive(Clone)]
-pub(super) struct NonromMeta {
+pub(super) struct SectionMeta {
     kind: String,
     pinned: bool,
     declaration: usize,
 }
 
-pub(super) fn nonrom_section_meta(nodes: &[Node]) -> BTreeMap<String, NonromMeta> {
+pub(super) fn section_meta(nodes: &[Node]) -> BTreeMap<String, SectionMeta> {
     nodes
         .iter()
         .enumerate()
         .filter_map(|(declaration, node)| {
             let code = node.source.trim();
-            code.to_ascii_uppercase()
-                .starts_with("SECTION")
-                .then(|| {
-                    let kind = section_kind(code);
-                    (!matches!(kind.as_str(), "ROM0" | "ROMX")).then(|| {
-                        (
-                            section_name(code),
-                            NonromMeta {
-                                kind,
-                                pinned: section_origin(code, node.span.line as usize)
-                                    .ok()
-                                    .flatten()
-                                    .is_some(),
-                                declaration,
-                            },
-                        )
-                    })
-                })
-                .flatten()
+            code.to_ascii_uppercase().starts_with("SECTION").then(|| {
+                (
+                    section_name(code),
+                    SectionMeta {
+                        kind: section_kind(code),
+                        pinned: section_origin(code, node.span.line as usize)
+                            .ok()
+                            .flatten()
+                            .is_some(),
+                        declaration,
+                    },
+                )
+            })
         })
         .collect()
 }
@@ -105,7 +103,7 @@ fn section_region_end(kind: &str) -> Option<i64> {
 /// sections, so only their resolved addresses enter the cartridge image.
 pub(super) fn place_floating_nonrom_sections(
     ops: &mut [Statement],
-    meta: &BTreeMap<String, NonromMeta>,
+    meta: &BTreeMap<String, SectionMeta>,
 ) -> Result<(), AsmError> {
     #[derive(Clone, Copy)]
     struct Section {
@@ -207,6 +205,87 @@ pub(super) fn place_floating_nonrom_sections(
     Ok(())
 }
 
+/// The end of ROM0: plain RGBLINK keeps it to the first bank.
+const ROM0_END: i64 = BANK_SIZE;
+
+/// Where a section's body ends when the section starts at `base`.
+fn body_end(ops: &[Statement], body: Range<usize>, base: i64) -> Result<i64, AsmError> {
+    let mut pc = base;
+    for st in &ops[body] {
+        if let Some(op) = &st.op {
+            pc = crate::engine::next_pc(op, pc, &isa::sm83::SET, None, 1, st.line)
+                .map_err(|err| st.stamp(err))?;
+        }
+    }
+    Ok(pc)
+}
+
+/// RGBLINK's checks on each ROM section before it places any: a section
+/// bigger than its region, a pinned address outside the region, and a pinned
+/// section that runs past the region's end. ROM0 is `$0000-$3FFF` and ROMX
+/// `$4000-$7FFF`. Every failure is reported, in declaration order and in
+/// RGBLINK's words, as `rgblink` 1.0.4 does: `ROM0[$150]` followed by
+/// `ds $8000-@` gives both
+///
+/// ```text
+/// error: Section "a" is bigger than the max size for that type: $7eb0 > $4000
+/// error: Section "a"'s end address $8000 is greater than last address $4000
+/// ```
+///
+/// A pinned address outside the region is the only complaint about it;
+/// RGBLINK does not go on to measure where it ends.
+pub(super) fn check_rom_sections(
+    ops: &[Statement],
+    meta: &BTreeMap<String, SectionMeta>,
+) -> Result<(), AsmError> {
+    let starts: Vec<usize> = ops
+        .iter()
+        .enumerate()
+        .filter_map(|(i, st)| matches!(st.op, Some(Operation::Section { .. })).then_some(i))
+        .collect();
+    let mut errors = Vec::new();
+    for (n, &statement) in starts.iter().enumerate() {
+        let body = statement + 1..starts.get(n + 1).copied().unwrap_or(ops.len());
+        let Some(Operation::Section { name, base, at, .. }) = &ops[statement].op else {
+            continue;
+        };
+        let (first, end, pinned) = match at {
+            crate::engine::Place::ByAddress => (0, ROM0_END, *base),
+            crate::engine::Place::At(_) => (
+                ROMX_BASE,
+                ROMX_BASE + BANK_SIZE,
+                base.filter(|_| meta.get(name).is_some_and(|m| m.pinned)),
+            ),
+            _ => continue,
+        };
+        let st = &ops[statement];
+        let start = pinned.unwrap_or(first);
+        let size = body_end(ops, body, start)? - start;
+        if size > end - first {
+            errors.push(st.err(format!(
+                "Section \"{name}\" is bigger than the max size for that type: ${size:04x} > ${:04x}",
+                end - first
+            )));
+        }
+        if let Some(base) = pinned {
+            if base < first || base >= end {
+                errors.push(st.err(format!(
+                    "Section \"{name}\"'s fixed address ${base:04x} is outside of range \
+                     [${first:04x}; ${:04x}]",
+                    end - 1
+                )));
+            } else if base + size > end {
+                errors.push(st.err(format!(
+                    "Section \"{name}\"'s end address ${:04x} is greater than last address \
+                     ${end:04x}",
+                    base + size
+                )));
+            }
+        }
+    }
+    AsmError::gather(errors).map_or(Ok(()), Err)
+}
+
 /// Give floating ROM0 sections RGBLINK's largest-first, first-fit layout.
 /// Pinned sections reserve their ranges first; floating sections are ordered
 /// by decreasing size, then each takes the lowest gap that can contain it.
@@ -291,8 +370,16 @@ pub(super) fn place_floating_rom0_sections(ops: &mut [Statement]) -> Result<(), 
                 base = *used_end;
                 continue;
             }
-            if end > BANK_SIZE {
-                return Err(ops[section.statement].err("ROM0 sections exceed the 16 KiB bank"));
+            if end > ROM0_END {
+                // Each section fits on its own; [`check_rom_sections`] saw to
+                // that. Together they do not, and RGBLINK names the one left.
+                let name = match &ops[section.statement].op {
+                    Some(Operation::Section { name, .. }) => name.as_str(),
+                    _ => unreachable!("collected only section statements"),
+                };
+                return Err(ops[section.statement].err(format!(
+                    "Unable to place \"{name}\" (ROM0 section) anywhere"
+                )));
             }
             if let Some(Operation::Section { base: slot, .. }) = &mut ops[section.statement].op {
                 *slot = Some(base);

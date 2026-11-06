@@ -59,8 +59,9 @@ use crate::span::FileId;
 mod layout;
 mod project;
 use layout::{
-    BANK_SIZE, ROMX_BASE, nonrom_section_meta, place_floating_nonrom_sections,
-    place_floating_rom0_sections, section_default_base, section_kind, section_region_start,
+    BANK_SIZE, ROMX_BASE, check_rom_sections, place_floating_nonrom_sections,
+    place_floating_rom0_sections, section_default_base, section_kind, section_meta,
+    section_region_start,
 };
 use project::{RgbasmEval, initial_symbols};
 
@@ -109,7 +110,7 @@ impl Dialect for Rgbasm {
         // then lower to the engine's statement stream — byte-identical to the old
         // direct parse (AE1). Other CPUs stay on direct lowering (KTD6).
         let program = parse_program(source, macros::Expand::Yes)?;
-        let nonrom = nonrom_section_meta(&program.nodes);
+        let sections = section_meta(&program.nodes);
         let (consts, defined) = initial_symbols();
         let mut eval = RgbasmEval {
             set: self.instruction_set(),
@@ -122,8 +123,9 @@ impl Dialect for Rgbasm {
         crate::ast::evaluate(&mut eval, &program.nodes, true, &mut out)?;
         let banks = declared_banks(&out);
         resolve_banks(&mut out, &banks)?;
+        check_rom_sections(&out, &sections)?;
         place_floating_rom0_sections(&mut out)?;
-        place_floating_nonrom_sections(&mut out, &nonrom)?;
+        place_floating_nonrom_sections(&mut out, &sections)?;
         let starts = declared_section_starts(&out);
         resolve_starts(&mut out, &starts)?;
         Ok(out)
@@ -142,7 +144,7 @@ impl Dialect for Rgbasm {
         loader: &dyn SourceLoader,
     ) -> Result<Vec<Statement>, AsmError> {
         let program = parse_program_multi(map, loader)?;
-        let nonrom = nonrom_section_meta(&program.nodes);
+        let sections = section_meta(&program.nodes);
         let (consts, defined) = initial_symbols();
         let mut eval = RgbasmEval {
             set: self.instruction_set(),
@@ -155,8 +157,9 @@ impl Dialect for Rgbasm {
         crate::ast::evaluate(&mut eval, &program.nodes, true, &mut out)?;
         let banks = declared_banks(&out);
         resolve_banks(&mut out, &banks)?;
+        check_rom_sections(&out, &sections)?;
         place_floating_rom0_sections(&mut out)?;
-        place_floating_nonrom_sections(&mut out, &nonrom)?;
+        place_floating_nonrom_sections(&mut out, &sections)?;
         let starts = declared_section_starts(&out);
         resolve_starts(&mut out, &starts)?;
         Ok(out)
@@ -2806,6 +2809,81 @@ mod tests {
         .expect("assembles");
         assert!(out.bytes[..0x10].iter().all(|&b| b == 3));
         assert!(out.bytes[0x10..0x20].iter().all(|&b| b == 1));
+    }
+
+    /// Plain RGBLINK keeps ROM0 to `$0000-$3FFF` and ROMX to `$4000-$7FFF`
+    /// and refuses a section that leaves its region, giving every reason in
+    /// declaration order. Each message here is RGBDS 1.0.4's, measured.
+    #[test]
+    fn rom_sections_stay_in_their_regions_as_plain_rgblink_requires() {
+        let refusals = |source: &str| -> Vec<String> {
+            crate::assemble_rgbasm(source)
+                .expect_err(source)
+                .all()
+                .map(|e| e.message.clone())
+                .collect()
+        };
+        let full = crate::assemble_rgbasm("SECTION \"a\", ROM0[$150]\n ds $3eb0, 1\n")
+            .expect("ROM0 may fill its bank");
+        assert_eq!(full.bytes.len(), 0x4000);
+        for (source, reasons) in [
+            (
+                "SECTION \"a\", ROM0[$150]\n ds $3eb1, 1\n",
+                &["Section \"a\"'s end address $4001 is greater than last address $4000"][..],
+            ),
+            (
+                "SECTION \"a\", ROM0[$150]\n ds $8000-@, 0\n",
+                &[
+                    "Section \"a\" is bigger than the max size for that type: $7eb0 > $4000",
+                    "Section \"a\"'s end address $8000 is greater than last address $4000",
+                ],
+            ),
+            (
+                "SECTION \"a\", ROM0[$7fff]\n db 1, 2\n",
+                &["Section \"a\"'s fixed address $7fff is outside of range [$0000; $3fff]"],
+            ),
+            (
+                "SECTION \"a\", ROM0\n ds $4001, 1\n",
+                &["Section \"a\" is bigger than the max size for that type: $4001 > $4000"],
+            ),
+            (
+                "SECTION \"x\", ROM0[$4100]\n db 1\nSECTION \"y\", ROM0\n ds $4001, 1\n\
+                 SECTION \"z\", ROM0[$3fff]\n db 1, 2\n",
+                &[
+                    "Section \"x\"'s fixed address $4100 is outside of range [$0000; $3fff]",
+                    "Section \"y\" is bigger than the max size for that type: $4001 > $4000",
+                    "Section \"z\"'s end address $4001 is greater than last address $4000",
+                ],
+            ),
+            (
+                "SECTION \"b\", ROMX[$7fff]\n db 1, 2\n",
+                &["Section \"b\"'s end address $8001 is greater than last address $8000"],
+            ),
+        ] {
+            assert_eq!(refusals(source), reasons, "{source}");
+        }
+    }
+
+    /// Sections that each fit can still fail to fit together. RGBLINK places
+    /// the largest first and names the one it could not place.
+    #[test]
+    fn floating_rom0_sections_that_cannot_all_fit_name_the_one_left_over() {
+        for (source, left) in [
+            (
+                "SECTION \"a\", ROM0\n ds $3000, 1\nSECTION \"b\", ROM0\n ds $2000, 2\n",
+                "b",
+            ),
+            (
+                "SECTION \"p\", ROM0[$100]\n ds $10, 3\nSECTION \"a\", ROM0\n ds $3f00, 1\n",
+                "a",
+            ),
+        ] {
+            let error = crate::assemble_rgbasm(source).expect_err(source);
+            assert_eq!(
+                error.message,
+                format!("Unable to place \"{left}\" (ROM0 section) anywhere")
+            );
+        }
     }
 
     /// RAM sections bind addresses but are BSS: `rgblink` does not append
