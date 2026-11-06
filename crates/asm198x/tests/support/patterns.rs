@@ -1,9 +1,9 @@
 //! Pattern-library programs: how one is set up, keyed and built by Asm198x.
 //!
-//! Recording (the live curriculum suite), replay, and the PasmoNext gate all
-//! come through here, so they agree on the three things a pattern verdict
-//! depends on: the include path a source is built with, the include closure
-//! its key digests, and the Asm198x command its outcome is compared with.
+//! Recording (the live curriculum suite) and replay both come through here,
+//! so they agree on the three things a pattern verdict depends on: the
+//! include path a source is built with, the include closure its key digests,
+//! and the Asm198x command its outcome is compared with.
 //!
 //! The command is the CLI the curriculum's Makefiles run, not a library
 //! entry point, because the Game Boy ROM is finished by the CLI: `--gb-rom`

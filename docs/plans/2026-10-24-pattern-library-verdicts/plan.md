@@ -50,7 +50,18 @@ builds:
   Asm198x's built-in NROM config matches.
 - **lwasm** (Dragon 32): `lwasm --6809 --raw -I <pattern>`.
 - **vasm** (Amiga): `vasmm68k_mot -Fhunkexe -kick1hunks -nosym -quiet -I <pattern>`.
-- **rgbasm** (Game Boy): `rgbasm -I <pattern>`, `rgblink -t`, `rgbfix -v -p 0xFF`.
+- **rgbasm** (Game Boy): `rgbasm -I <pattern>`, plain `rgblink`, `rgbfix -v -p 0xFF`,
+  against `--gb-rom`.
+
+`patterns::SOURCE_TOOLS` gives a source a different build from its machine's:
+
+- **rgbasm, tiny:** eight Game Boy sources pin a ROM0 section at `$0150` and
+  pad it to `$8000`, which only `rgblink -t` links. Their reference links
+  with `-t`, against `--gb-rom --tiny` (variant `rgbasm-gb-rom-tiny`). The
+  live suite links every Game Boy source both ways and fails unless a source
+  is listed tiny exactly when plain `rgblink` refuses it and `-t` does not.
+- **acme:** the NES `rendering/tile-map` source is ACME source; the shared
+  tile-map build script picks `--dialect acme` from the 6502 CPU.
 
 Each command runs in the source's own folder, with the pattern folder given
 relative to it (`.`, or `..` from `mistakes/` and `verification/`), so a
@@ -79,10 +90,12 @@ scratch folder and add that folder to the include path.
    what the reference did (a digest, or a rejection). Where Asm198x's existing
    path differs, the source is listed in `patterns::KNOWN` with its issue, and
    the divergences page lists it.
-3. **Replay:** the existing path replays through the CLI, as the Makefiles
-   run it, because the Game Boy ROM is finished there (`--gb-rom`). The
-   Lang198x path replays Z80 pattern verdicts in the PasmoNext gate. A listed
-   difference must still differ, so a fix shows as an entry to remove.
+3. **Replay:** through the CLI, as the Makefiles run it, because the Game
+   Boy ROM is finished there (`--gb-rom`). The pasmo dialects read source
+   only through Lang198x's front end, so this is the PasmoNext path too. A
+   listed difference must still differ, so a fix shows as an entry to
+   remove. A verdict recorded under another variant than the table now gives
+   is not replayed.
 4. **Parity:** machines are enumerated from code-samples, not from the
    corpus, so a machine with sources and no verdicts fails the check. Pattern
    counts go in their own section, so the site's per-machine curriculum
@@ -96,8 +109,7 @@ scratch folder and add that folder to the include path.
   Makefile's dialect changed, it must fail.
 - **Recording is repeatable:** run twice, the corpus diff is empty.
 - **Replay is real:** in CI, the Replay job must reach every pattern verdict,
-  and every pattern source must have one, as the PasmoNext gate does since
-  asm198x#966.
+  and every pattern source must have one.
 
 ## Recording
 
