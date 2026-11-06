@@ -119,7 +119,8 @@ Each one needs a probe whose verdict is a divergence:
   C applies only to signed conversions (`sprintf-c-width`). On 2026-11-06
   it was changed to give ca65's bytes, since matching the reference is the
   point (#1040), and the divergence was retired.
-- `.mid` takes a start above 100 as given.
+- `.mid` took a start above 100 as given. On 2026-11-06 it was changed to
+  treat it as 0, as ca65's `FuncMid` does on purpose.
 
 Step 7 named three more, each marked `divergence` in the fixtures with the
 walk's own bytes in `walk_hex`:
