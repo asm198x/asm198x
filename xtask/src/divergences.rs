@@ -15,13 +15,10 @@
 //!
 //! # What this does not decide
 //!
-//! Whether a difference is a bug or a settled choice. `issue-110` is closed as
-//! completed: our 68000 output sits between vasm's optimising and
-//! non-optimising modes, deliberately, and no single vasm invocation reproduces
-//! it. `issue-93` is open. This generates what the corpus knows — which tool,
-//! which dialect, how many cases — and the prose around it says which is which,
-//! because a closed issue rendered as pending work would be a lie the corpus
-//! cannot catch.
+//! Whether a difference is a bug or a settled choice: the M740 entries follow
+//! the family manual where ca65 does not, by decision. This generates what the corpus knows — which tool, which dialect, how many
+//! cases — and the prose around it says which is which, because a closed issue
+//! rendered as pending work would be a lie the corpus cannot catch.
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;

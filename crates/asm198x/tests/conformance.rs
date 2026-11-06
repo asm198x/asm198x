@@ -1175,20 +1175,9 @@ struct SweepSpec<'a> {
     ///
     /// Where our own output differs from it, the chunk is recorded as a
     /// **divergence** tagged with the issue tracking that difference, rather
-    /// than as a plain fact. That is the only honest way to record the 68000:
-    /// its sweep runs vasm with `-no-opt` so opcodes compare literally, and we
-    /// sit between vasm's two configurations (#110) —
-    ///
-    /// | source | ours | vasm default | vasm `-no-opt` |
-    /// |---|---|---|---|
-    /// | `lea (a0),a0` | `41D0` | *deleted* | `41D0` |
-    /// | `asl.w #1,d0` | `E340` | `D040` | `E340` |
-    /// | `adda.w #$10,a0` | `41E8…` | `41E8…` | `D0FC…` |
-    ///
-    /// — so no invocation reproduces us. Recording the matching chunks as facts
-    /// and the differing ones as tracked divergences keeps the CPU covered,
-    /// pins the difference so it cannot drift unnoticed either way, and fails
-    /// the moment #110 is fixed, which is when the marker should go.
+    /// than as a plain fact. The 68000 sweep runs vasm with `-no-opt` so
+    /// opcodes compare literally, and replay pairs it with our own `-no-opt`
+    /// assembly (#110), so it expects no divergence.
     record_with: Option<&'a Reassemble<'a>>,
     skip: &'a dyn Fn(&str) -> bool,
 }
@@ -1402,7 +1391,7 @@ fn spec_sweep_matches_reference() {
         checked += sweep(
             SweepSpec {
                 name: "68000",
-                divergence: Some(110),
+                divergence: None,
                 tool: "vasmm68k_mot",
                 dialect: "vasm",
                 disasm: &|b, o| asm198x::disassemble_68000(b, o),
@@ -1972,9 +1961,10 @@ fn differential_fuzz_bytewise() {
                 "6809" => asm198x::listing_6809(bytes, oa as u16),
                 _ => asm198x::listing_68000(bytes, oa),
             };
+            // The reference runs with `-no-opt`, and so do we.
             let ours = match cpu.name {
                 "6809" => asm198x::assemble_lwasm(&text).map(|a| a.bytes).ok(),
-                _ => asm198x::assemble_vasm(&text).map(|a| a.bytes).ok(),
+                _ => asm198x::assemble_vasm_no_opt(&text).map(|a| a.bytes).ok(),
             };
             ours.as_deref() == Some(bytes)
         };
@@ -2015,7 +2005,7 @@ fn differential_fuzz_bytewise() {
             // Our assembler must reproduce the bytes (self-consistency).
             let ours = match cpu.name {
                 "6809" => asm198x::assemble_lwasm(&text).map(|a| a.bytes),
-                _ => asm198x::assemble_vasm(&text).map(|a| a.bytes),
+                _ => asm198x::assemble_vasm_no_opt(&text).map(|a| a.bytes),
             };
             match ours {
                 Ok(o) if o == blob => {}
@@ -2968,21 +2958,15 @@ fn spec_rows_match_reference_68000() {
     //
     // The distinction matters, because this audit does not run our assembler:
     // it encodes the row, disassembles it, and asks vasm what that source is
-    // worth. The spec side of these two rows is correct and is still checked
-    // below. What differs is what `asm198x` does with the same source, which
-    // only `verdict_replay` sees — so the verdict is recorded as a divergence
-    // here, and that test is what stops the marker outliving the difference.
+    // worth. The spec side of a tracked row is still checked below. What
+    // differs is what `asm198x` does with the same source, which only
+    // `verdict_replay` sees — so the verdict is recorded as a divergence here,
+    // and that test is what stops the marker outliving the difference.
     //
-    // Both are issue #110's third row. `add.w #64,a2` assembles to `lea
-    // 64(a2),a2` here, and to `adda.w` under the `-no-opt` this audit pins
-    // vasm to — but to `lea`, byte for byte, under the default invocation a
-    // developer actually uses. The same table's other two rows go the other
-    // way, which is why no single vasm invocation reproduces our output and
-    // why the difference is tracked rather than fixed.
-    const TRACKED: &[(&str, &str, &str)] = &[
-        ("ADD", "#imm,An", "issue-110"),
-        ("SUB", "#imm,An", "issue-110"),
-    ];
+    // None today. This audit pins vasm to `-no-opt`, and replay checks it
+    // against our own `-no-opt` assembly, so `add.w #64,a2` is `adda.w` on
+    // both sides (#110).
+    const TRACKED: &[(&str, &str, &str)] = &[];
 
     for ex in isa::m68k::exemplars() {
         let m = ex.row.mnemonic;

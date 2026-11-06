@@ -436,6 +436,22 @@ pub fn assemble_vasm(source: &str) -> Result<AssemblyResult, AsmError> {
     dialects::vasm::assemble(source).map(AssemblyResult::image)
 }
 
+/// As [`assemble_vasm`], with vasm's optimiser off — matching
+/// `vasmm68k_mot -Fbin -no-opt`.
+///
+/// Hidden: it is the counterpart of the verdicts recorded with `-no-opt`.
+/// The form audit, the opcode sweep, the byte-wise fuzz and the probes ask
+/// vasm for literal encodings, so replay must ask the same question of us
+/// (#110). Nothing on the command line turns vasm's optimiser off: the
+/// dialect refuses `opt`, and has no `-no-opt`.
+///
+/// # Errors
+/// As [`assemble_vasm`].
+#[doc(hidden)]
+pub fn assemble_vasm_no_opt(source: &str) -> Result<AssemblyResult, AsmError> {
+    dialects::vasm::assemble_with(source, false).map(AssemblyResult::image)
+}
+
 /// As [`assemble_vasm`], but also returns any non-fatal [`Warning`]s raised
 /// while assembling (e.g. an out-of-range immediate to CCR/SR, which vasm warns
 /// on but still encodes). The returned bytes are identical to [`assemble_vasm`];
