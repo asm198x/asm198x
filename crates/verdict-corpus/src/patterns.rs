@@ -209,60 +209,7 @@ pub const DIALECT_FROM_BUILD_SCRIPT: &[&str] = &["oric-atmos", "spectravideo-svi
 /// Replay fails on a difference not listed here, and on a listed source that
 /// now matches, so the list only describes differences that exist.
 pub const KNOWN: &[(&str, &str)] = &[
-    // The acme dialect accepts what ACME 0.97 rejects.
-    (
-        "acorn-electron/patterns/assembly/rendering/tile-region/demo.asm",
-        "issue-967",
-    ),
-    (
-        "atari-2600/patterns/assembly/framework/turn-loop/demo.asm",
-        "issue-967",
-    ),
-    (
-        "atari-5200/patterns/assembly/framework/turn-loop/demo.asm",
-        "issue-967",
-    ),
-    (
-        "atari-7800/patterns/assembly/framework/turn-loop/demo.asm",
-        "issue-967",
-    ),
-    (
-        "atari-800xl/patterns/assembly/framework/turn-loop/demo.asm",
-        "issue-967",
-    ),
-    (
-        "bbc-micro/patterns/assembly/rendering/bitmap-text/demo.asm",
-        "issue-967",
-    ),
-    (
-        "bbc-micro/patterns/assembly/rendering/geometry/demo.asm",
-        "issue-967",
-    ),
-    (
-        "bbc-micro/patterns/assembly/rendering/pixels-and-boxes/demo.asm",
-        "issue-967",
-    ),
-    (
-        "commodore-pet/patterns/assembly/rendering/fixed-characters/demo.asm",
-        "issue-967",
-    ),
-    (
-        "commodore-pet/patterns/assembly/rendering/tile-region/demo.asm",
-        "issue-967",
-    ),
-    (
-        "commodore-vic-20/patterns/assembly/rendering/custom-glyphs/demo.asm",
-        "issue-967",
-    ),
-    (
-        "commodore-vic-20/patterns/assembly/rendering/tile-region/demo.asm",
-        "issue-967",
-    ),
     // The acme dialect writes different bytes from ACME 0.97.
-    (
-        "atari-2600/patterns/assembly/rendering/tile-map/demo.asm",
-        "issue-968",
-    ),
     (
         "bbc-micro/patterns/assembly/rendering/clipped-sprites/demo.asm",
         "issue-968",
@@ -287,32 +234,6 @@ pub const KNOWN: &[(&str, &str)] = &[
     (
         "commodore-amiga/patterns/assembly/rendering/tile-region/demo.asm",
         "issue-969",
-    ),
-    // `--gb-rom` pads differently from rgblink and rgbfix.
-    (
-        "nintendo-game-boy/patterns/assembly/rendering/custom-glyphs/demo.asm",
-        "issue-970",
-    ),
-    (
-        "nintendo-game-boy/patterns/assembly/rendering/tile-map/demo.asm",
-        "issue-970",
-    ),
-    (
-        "nintendo-game-boy/patterns/assembly/rendering/tile-region/demo.asm",
-        "issue-970",
-    ),
-    // The pasmonext dialect accepts what PasmoNext 0.1.3 rejects.
-    (
-        "mattel-aquarius/patterns/assembly/rendering/tile-region/demo.asm",
-        "issue-971",
-    ),
-    (
-        "sega-game-gear/patterns/assembly/rendering/custom-glyphs/demo.asm",
-        "issue-971",
-    ),
-    (
-        "sega-master-system/patterns/assembly/rendering/custom-glyphs/demo.asm",
-        "issue-971",
     ),
 ];
 
