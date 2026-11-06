@@ -62,11 +62,13 @@ in the reference library's `by-topic/cpu-m740/`.
 **`sprintf-raw-flags` (ca65) — what `.sprintf` converts stays raw.** ca65
 keeps, for each character of a string, whether the source wrote it, and its
 character map translates only those. What a `.sprintf` conversion writes is
-raw, so `.charmap` leaves it alone. But ca65 V2.19 keeps those flags from the
-first `.sprintf` on a line: a second one's conversions are translated, so
-`.byte .sprintf("%c", $41), .sprintf("%d", 1)` maps the `1` while
-`.byte .sprintf("%d", 1)` on its own does not. Asm198x leaves every
-conversion raw, wherever it is on the line.
+meant to be raw, so `.charmap` leaves it alone. But ca65 V2.19 never sets
+those flags for a conversion: `SB_VPrintf` writes the characters and leaves
+the flags as whatever the newly allocated memory held. Fresh memory is
+usually zero, so the conversions stay raw; memory reused from an earlier
+`.sprintf` is not, so `.byte .sprintf("%c", $41), .sprintf("%d", 1)` maps
+the `1` while `.byte .sprintf("%d", 1)` on its own does not. That is a read
+of uninitialised memory, a bug, so Asm198x leaves every conversion raw.
 
 **`cop-signature` (ca65's 65816) — `COP` takes its signature byte.** ca65
 V2.19 writes a lone `$02` for `COP` with no operand. The 65816 reads the byte
