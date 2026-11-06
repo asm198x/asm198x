@@ -13,7 +13,7 @@ instead. If you are deciding whether to move a project that already builds, what
 you need is not reassurance — it is to know what will change.
 
 <!-- generated: xtask divergences --markdown -->
-7 tracked differences across 24 recorded cases.
+8 tracked differences across 25 recorded cases.
 
 | Difference | CPU | Dialect | Reference tool | Cases |
 |---|---|---|---|---|
@@ -23,6 +23,7 @@ you need is not reassurance — it is to know what will change.
 | `m740-bit-branch-a` | M740 | ca65 | ca65 | 16 |
 | `m740-inc-dec-a` | M740 | ca65 | ca65 | 2 |
 | `m740-ldm-order` | M740 | ca65 | ca65 | 1 |
+| `scrcode-cbm-expression` | 6502 | ca65 | ca65 | 1 |
 | `sprintf-raw-flags` | 6502 | ca65 | ca65 | 1 |
 <!-- /generated -->
 
