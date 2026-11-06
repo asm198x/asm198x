@@ -29,8 +29,12 @@ pub enum Tool {
     Lwasm,
     /// vasm's Motorola 68000 assembler, as a Kickstart 1.x hunk executable.
     Vasm,
-    /// rgbasm, linked by `rgblink -t` and finished by `rgbfix -v -p 0xFF`.
+    /// rgbasm, linked by plain `rgblink` and finished by `rgbfix -v -p 0xFF`.
     Rgbasm,
+    /// rgbasm, linked by `rgblink -t` and finished by `rgbfix -v -p 0xFF`:
+    /// one ROM bank of 32 KiB rather than two of 16. Asm198x's counterpart is
+    /// `--gb-rom --tiny`.
+    RgbasmTiny,
 }
 
 impl Tool {
@@ -43,7 +47,7 @@ impl Tool {
             Self::Ca65 => "ca65",
             Self::Lwasm => "lwasm",
             Self::Vasm => "vasm",
-            Self::Rgbasm => "rgbasm",
+            Self::Rgbasm | Self::RgbasmTiny => "rgbasm",
         }
     }
 
@@ -60,6 +64,7 @@ impl Tool {
             Self::Lwasm => "lwasm",
             Self::Vasm => "vasm-exe",
             Self::Rgbasm => "rgbasm-gb-rom",
+            Self::RgbasmTiny => "rgbasm-gb-rom-tiny",
         }
     }
 
@@ -73,6 +78,7 @@ impl Tool {
             Self::Lwasm,
             Self::Vasm,
             Self::Rgbasm,
+            Self::RgbasmTiny,
         ]
         .into_iter()
         .find(|t| t.variant() == variant)
@@ -87,7 +93,7 @@ impl Tool {
             Self::Acme | Self::Ca65 => "6502",
             Self::Lwasm => "6809",
             Self::Vasm => "68000",
-            Self::Rgbasm => "sm83",
+            Self::Rgbasm | Self::RgbasmTiny => "sm83",
         }
     }
 
@@ -100,7 +106,7 @@ impl Tool {
             Self::Ca65 => "ca65",
             Self::Lwasm => "lwasm",
             Self::Vasm => "vasmm68k_mot",
-            Self::Rgbasm => "rgbasm",
+            Self::Rgbasm | Self::RgbasmTiny => "rgbasm",
         }
     }
 }
@@ -137,6 +143,56 @@ pub const BUILDS: &[(&str, Tool)] = &[
     ("sord-m5", Tool::Pasmo),
     ("spectravideo-svi-328", Tool::Pasmo),
     ("tatung-einstein", Tool::Pasmo),
+];
+
+/// Sources built with a different tool from the rest of their machine's.
+/// Paths are relative to the `code-samples` checkout.
+///
+/// Each entry must name a source in the checkout and a tool other than its
+/// machine's, so the list holds nothing a [`BUILDS`] entry already says.
+pub const SOURCE_TOOLS: &[(&str, Tool)] = &[
+    // ACME source on a ca65 machine: the shared tile-map build script picks
+    // `--dialect acme` from the 6502 CPU, whatever the machine.
+    (
+        "nintendo-entertainment-system/patterns/assembly/rendering/tile-map/demo.asm",
+        Tool::Acme,
+    ),
+    // A ROM0 section pinned at $0150 and padded to $8000, which only
+    // `rgblink -t` links. The live suite checks each Game Boy source both
+    // ways, so a source is here exactly when plain `rgblink` refuses it and
+    // `rgblink -t` does not.
+    (
+        "nintendo-game-boy/patterns/assembly/capabilities/input-drawing-sound/demo.asm",
+        Tool::RgbasmTiny,
+    ),
+    (
+        "nintendo-game-boy/patterns/assembly/framework/command-loop/customise.asm",
+        Tool::RgbasmTiny,
+    ),
+    (
+        "nintendo-game-boy/patterns/assembly/framework/command-loop/demo.asm",
+        Tool::RgbasmTiny,
+    ),
+    (
+        "nintendo-game-boy/patterns/assembly/framework/command-loop/mistakes/reset-each-command.asm",
+        Tool::RgbasmTiny,
+    ),
+    (
+        "nintendo-game-boy/patterns/assembly/framework/input-loop/demo.asm",
+        Tool::RgbasmTiny,
+    ),
+    (
+        "nintendo-game-boy/patterns/assembly/input/read-action/demo.asm",
+        Tool::RgbasmTiny,
+    ),
+    (
+        "nintendo-game-boy/patterns/assembly/input/read-action/mistakes/no-edge.asm",
+        Tool::RgbasmTiny,
+    ),
+    (
+        "nintendo-game-boy/patterns/assembly/input/read-action/mistakes/no-sound.asm",
+        Tool::RgbasmTiny,
+    ),
 ];
 
 /// Machines whose pattern Makefiles never name a dialect: each hands its
@@ -277,6 +333,17 @@ pub fn tool(machine: &str) -> Option<Tool> {
         .iter()
         .find(|(slug, _)| *slug == machine)
         .map(|(_, tool)| *tool)
+}
+
+/// The tool that arbitrates `source`, relative to the `code-samples`
+/// checkout: its entry in [`SOURCE_TOOLS`], or else its machine's.
+#[must_use]
+pub fn source_tool(source: &str) -> Option<Tool> {
+    SOURCE_TOOLS
+        .iter()
+        .find(|(path, _)| *path == source)
+        .map(|(_, tool)| *tool)
+        .or_else(|| tool(source.split('/').next().unwrap_or_default()))
 }
 
 /// The NES pattern sources link with a game unit's layout, which is the NROM
@@ -486,6 +553,27 @@ pub fn table_problems(code_samples: &Path) -> Vec<String> {
             ));
         }
     }
+    out.extend(source_tools_problems(code_samples, SOURCE_TOOLS));
+    out
+}
+
+/// What is wrong with `list`, a [`SOURCE_TOOLS`]: a source not in the
+/// checkout, or one given the tool its machine already has.
+fn source_tools_problems(code_samples: &Path, list: &[(&str, Tool)]) -> Vec<String> {
+    let mut out = Vec::new();
+    for (source, source_tool) in list {
+        if !code_samples.join(source).is_file() {
+            out.push(format!(
+                "SOURCE_TOOLS names {source}, which is not in the checkout"
+            ));
+        }
+        let machine = source.split('/').next().unwrap_or_default();
+        if tool(machine) == Some(*source_tool) {
+            out.push(format!(
+                "SOURCE_TOOLS gives {source} its machine's own tool, so take it off the list"
+            ));
+        }
+    }
     out
 }
 
@@ -557,9 +645,31 @@ mod tests {
 
     #[test]
     fn every_variant_names_one_tool() {
-        for (_, tool) in BUILDS {
+        for (_, tool) in BUILDS.iter().chain(SOURCE_TOOLS) {
             assert_eq!(Tool::from_variant(tool.variant()), Some(*tool));
         }
+    }
+
+    #[test]
+    fn a_listed_source_overrides_its_machine() {
+        let tile_map =
+            "nintendo-entertainment-system/patterns/assembly/rendering/tile-map/demo.asm";
+        assert_eq!(source_tool(tile_map), Some(Tool::Acme));
+        assert_eq!(
+            source_tool(
+                "nintendo-entertainment-system/patterns/assembly/audio/square-wave/demo.asm"
+            ),
+            Some(Tool::Ca65)
+        );
+        assert_eq!(
+            source_tool("nintendo-game-boy/patterns/assembly/input/read-action/demo.asm"),
+            Some(Tool::RgbasmTiny)
+        );
+        assert_eq!(
+            source_tool("nintendo-game-boy/patterns/assembly/rendering/tile-map/demo.asm"),
+            Some(Tool::Rgbasm)
+        );
+        assert_eq!(source_tool("unknown-machine/patterns/assembly/a.asm"), None);
     }
 
     /// The check fails each way it claims to.
@@ -593,6 +703,31 @@ mod tests {
         assert!(
             problems.contains("bbc-micro is in the table but has no pattern sources"),
             "{problems}"
+        );
+        assert!(
+            problems.contains(
+                "SOURCE_TOOLS names nintendo-game-boy/patterns/assembly/input/read-action/demo.asm, \
+                 which is not in the checkout"
+            ),
+            "{problems}"
+        );
+        let _ = fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn a_source_given_its_machines_tool_is_reported() {
+        let root = tree("source-tools");
+        put(&root, "msx/patterns/assembly/a/demo.asm", "");
+        let problems =
+            source_tools_problems(&root, &[("msx/patterns/assembly/a/demo.asm", Tool::Pasmo)])
+                .join("\n");
+        assert!(
+            problems.contains("gives msx/patterns/assembly/a/demo.asm its machine's own tool"),
+            "{problems}"
+        );
+        assert!(
+            source_tools_problems(&root, &[("msx/patterns/assembly/a/demo.asm", Tool::Acme)])
+                .is_empty()
         );
         let _ = fs::remove_dir_all(&root);
     }

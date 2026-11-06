@@ -652,11 +652,14 @@ fn pattern_library_matches_its_reference_tools() {
             Tool::Ca65 => &["ca65", "ld65"],
             Tool::Lwasm => &["lwasm"],
             Tool::Vasm => &["vasmm68k_mot"],
-            Tool::Rgbasm => &["rgbasm", "rgblink", "rgbfix"],
+            Tool::Rgbasm | Tool::RgbasmTiny => &["rgbasm", "rgblink", "rgbfix"],
         };
         if !needs.iter().all(|t| have(t)) {
             skipped.insert(needs.join("/"));
             continue;
+        }
+        if let Some(problem) = game_boy_link_problem(&job, &work) {
+            fails.push(problem);
         }
         let outcome = match pattern_reference(&job, &root, &work) {
             Ok(Ok(bytes)) => verdict_corpus::Outcome::Digest {
@@ -712,6 +715,64 @@ fn pattern_library_matches_its_reference_tools() {
         checked > 0 || !skipped.is_empty(),
         "no pattern sources found"
     );
+}
+
+/// Whether a Game Boy source is linked the way it must be: with `rgblink -t`
+/// exactly when plain `rgblink` refuses it and `-t` does not. `None` when it
+/// is, or when the source is not a Game Boy one; otherwise what to change in
+/// `verdict_corpus::patterns::SOURCE_TOOLS`.
+///
+/// A source listed plain that only `-t` links would otherwise record a
+/// rejection that Asm198x's plain `--gb-rom` matches, and pass while checking
+/// nothing; one listed tiny that plain `rgblink` links needs no `-t`.
+fn game_boy_link_problem(job: &support::patterns::Job, tmp: &Path) -> Option<String> {
+    use verdict_corpus::patterns::Tool;
+
+    if !matches!(job.tool, Tool::Rgbasm | Tool::RgbasmTiny) {
+        return None;
+    }
+    let obj = tmp.join("ref-link-probe.o");
+    let out = tmp.join("ref-link-probe.gb");
+    let run = |cmd: &mut Command| {
+        cmd.current_dir(&job.dir)
+            .output()
+            .map(|o| o.status.success())
+            .map_err(|e| format!("{}: cannot run {:?}: {e}", job.relpath, cmd.get_program()))
+    };
+    let mut asm = Command::new("rgbasm");
+    for dir in job.include_dirs() {
+        asm.arg("-I").arg(dir);
+    }
+    asm.arg("-o").arg(&obj).arg(&job.name);
+    let linked = |tiny: bool| {
+        let mut link = Command::new("rgblink");
+        if tiny {
+            link.arg("-t");
+        }
+        run(link.arg("-o").arg(&out).arg(&obj))
+    };
+    let needs_tiny = match run(&mut asm) {
+        // rgbasm refusing it is the verdict's business, not the link's.
+        Ok(false) => return None,
+        Ok(true) => match (linked(false), linked(true)) {
+            (Ok(plain), Ok(tiny)) => !plain && tiny,
+            (Err(e), _) | (_, Err(e)) => return Some(e),
+        },
+        Err(e) => return Some(e),
+    };
+    match (needs_tiny, job.tool == Tool::RgbasmTiny) {
+        (true, false) => Some(format!(
+            "{}: plain rgblink refuses it and rgblink -t links it, so list it in \
+             verdict_corpus::patterns::SOURCE_TOOLS as RgbasmTiny",
+            job.relpath
+        )),
+        (false, true) => Some(format!(
+            "{}: listed as RgbasmTiny, but it does not need rgblink -t, so take it off \
+             verdict_corpus::patterns::SOURCE_TOOLS",
+            job.relpath
+        )),
+        _ => None,
+    }
 }
 
 /// Build a pattern source with its reference tool, in its own folder.
@@ -777,12 +838,15 @@ fn pattern_reference(
             cmd.arg("-o").arg(&out).arg(&job.name);
             steps.push(cmd);
         }
-        Tool::Rgbasm => {
+        Tool::Rgbasm | Tool::RgbasmTiny => {
             let mut asm = Command::new("rgbasm");
             with_includes(&mut asm);
             asm.arg("-o").arg(&obj).arg(&job.name);
             let mut link = Command::new("rgblink");
-            link.arg("-t").arg("-o").arg(&out).arg(&obj);
+            if job.tool == Tool::RgbasmTiny {
+                link.arg("-t");
+            }
+            link.arg("-o").arg(&out).arg(&obj);
             let mut fix = Command::new("rgbfix");
             fix.args(["-v", "-p", "0xFF"]).arg(&out);
             steps.extend([asm, link, fix]);

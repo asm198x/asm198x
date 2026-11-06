@@ -654,6 +654,16 @@ fn replay_pattern(cpu: &str, key: &str, outcome: &Outcome, report: &mut ReplayRe
             return;
         }
     };
+    // A verdict from another build of the source (another tool, or the other
+    // Game Boy link) says nothing about the command the table now gives it.
+    if job.tool.variant() != variant {
+        report.unreplayable += 1;
+        report.patterns_unreached.push(format!(
+            "{relpath}: recorded as {variant}, but the table now builds it as {}",
+            job.tool.variant()
+        ));
+        return;
+    }
     match job.closure_digest(&root) {
         Ok(now) if now == closure => {}
         Ok(_) => {
