@@ -1,7 +1,8 @@
 //! `--gb-rom` links a Game Boy ROM as plain `rgblink` does and finishes it as
 //! `rgbfix -v -p 0xFF` does (#970). Plain RGBLINK keeps ROM0 to
 //! `$0000-$3FFF`, so a ROM0 section that runs past it is refused, in
-//! RGBLINK's words, rather than linked into the next bank.
+//! RGBLINK's words, rather than linked into the next bank. `--gb-rom --tiny`
+//! links as `rgblink -t` instead: one unbanked 32 KiB ROM.
 
 use std::path::Path;
 use std::process::{Command, Output};
@@ -83,6 +84,71 @@ fn gb_rom_pads_the_second_bank_with_ff_after_a_full_rom0() {
     assert_eq!(rom.len(), 0x8000);
     assert!(rom[0x150..0x4000].iter().all(|&byte| byte == 0x11));
     assert!(rom[0x4000..].iter().all(|&byte| byte == 0xFF));
+}
+
+#[test]
+fn tiny_gb_rom_links_rom0_to_32k_and_leaves_gaps_zero() {
+    let dir = scratch::dir("rgblink-layouts-tiny");
+    for (source, filled) in [
+        (PAST_THE_BANK, 0x8000),
+        (
+            "SECTION \"Program\", ROM0[$150]\n ds $4000-@, $11\n",
+            0x4000,
+        ),
+    ] {
+        std::fs::write(dir.join("program.asm"), source).expect("source");
+        let output = asm198x(
+            &dir,
+            &[
+                "--dialect",
+                "rgbasm",
+                "--gb-rom",
+                "--tiny",
+                "program.asm",
+                "-o",
+                "out.gb",
+            ],
+        );
+        assert!(output.status.success(), "{}", stderr(&output));
+        let rom = std::fs::read(dir.join("out.gb")).expect("ROM");
+        assert_eq!(rom.len(), 0x8000);
+        assert!(rom[filled..].iter().all(|&byte| byte == 0), "{source}");
+    }
+}
+
+#[test]
+fn tiny_is_refused_without_gb_rom() {
+    let dir = scratch::dir("rgblink-layouts-tiny-alone");
+    std::fs::write(dir.join("program.asm"), PAST_THE_BANK).expect("source");
+    let alone = asm198x(
+        &dir,
+        &[
+            "--dialect",
+            "rgbasm",
+            "--tiny",
+            "program.asm",
+            "-o",
+            "out.gb",
+        ],
+    );
+    assert!(!alone.status.success());
+    assert!(
+        stderr(&alone)
+            .contains("`--tiny` links a Game Boy ROM as `rgblink -t` does, so it needs `--gb-rom`"),
+        "{}",
+        stderr(&alone)
+    );
+    assert!(!dir.join("out.gb").exists());
+    let formatting = asm198x(
+        &dir,
+        &["fmt", "--dialect", "rgbasm", "--tiny", "program.asm"],
+    );
+    assert!(!formatting.status.success());
+    assert!(
+        stderr(&formatting).contains("container output options apply to assembly"),
+        "{}",
+        stderr(&formatting)
+    );
 }
 
 /// RGBLINK writes whole banks, so `rgbfix` always has a header to finish,
@@ -298,19 +364,21 @@ fn gb_rom_matches_rgblink_then_rgbfix() {
     }
     let dir = scratch::dir("rgblink-layouts-reference");
     let mut failures = Vec::new();
-    let mut refusals = 0;
-    for (name, source) in PROBES {
-        std::fs::write(dir.join("probe.asm"), source).expect("probe");
-        let reference = reference(&dir, &[]);
-        refusals += usize::from(matches!(reference, Outcome::Refused(_)));
-        if let Err(why) = agree(&reference, &ours(&dir, &[])) {
-            failures.push(format!("{name}: {why}"));
+    for (link, flags) in [(&[][..], &[][..]), (&["-t"][..], &["--tiny"][..])] {
+        let mut refusals = 0;
+        for (name, source) in PROBES {
+            std::fs::write(dir.join("probe.asm"), source).expect("probe");
+            let reference = reference(&dir, link);
+            refusals += usize::from(matches!(reference, Outcome::Refused(_)));
+            if let Err(why) = agree(&reference, &ours(&dir, flags)) {
+                failures.push(format!("rgblink {link:?}, {name}: {why}"));
+            }
         }
+        // The probes must test both answers, or agreement proves nothing.
+        assert!(
+            refusals > 0 && refusals < PROBES.len(),
+            "rgblink {link:?}: {refusals} refusals"
+        );
     }
-    // The probes must test both answers, or agreement proves nothing.
-    assert!(
-        refusals > 0 && refusals < PROBES.len(),
-        "{refusals} refusals"
-    );
     assert!(failures.is_empty(), "{}", failures.join("\n"));
 }

@@ -972,7 +972,8 @@ pub fn assemble_ca65_huc6280_files(
 /// Assemble rgbasm-syntax SM83 (Game Boy) source into a flat binary at the
 /// section's origin — the RGBDS dialect over [`isa::sm83`]. Covers the full
 /// documented instruction set, `SECTION`/`db`/`dw`/`ds`/`EQU`, and `.local`
-/// labels. Matches `rgbasm`/`rgblink` for the emitted bytes. Single-source:
+/// labels. Matches `rgbasm` and plain `rgblink` for the emitted bytes;
+/// [`assemble_rgbasm_files_with`] links as `rgblink -t`. Single-source:
 /// an `INCLUDE`/`INCBIN` directive is an error here — use
 /// [`assemble_rgbasm_files`] for a multi-file program.
 ///
@@ -980,7 +981,7 @@ pub fn assemble_ca65_huc6280_files(
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
 pub fn assemble_rgbasm(source: &str) -> Result<AssemblyResult, AsmError> {
-    engine::assemble(source, &dialects::Rgbasm).map(AssemblyResult::from)
+    engine::assemble(source, &dialects::Rgbasm::default()).map(AssemblyResult::from)
 }
 
 /// Assemble a **multi-file** rgbasm program (language-surface U4): `source`
@@ -1009,7 +1010,35 @@ pub fn assemble_rgbasm_files(
     input_path: &str,
     loader: &dyn source::SourceLoader,
 ) -> Result<AssemblyResult, MultiFileError> {
-    assemble_files(&dialects::Rgbasm, source, input_path, loader)
+    assemble_files(&dialects::Rgbasm::default(), source, input_path, loader)
+}
+
+/// RGBLINK's options that change where a section may go, for
+/// [`assemble_rgbasm_files_with`]: `-t` (`--tiny`).
+pub use dialects::rgbasm::Options as RgblinkOptions;
+
+/// Assemble a multi-file rgbasm program, as [`assemble_rgbasm_files`], linked
+/// as `rgblink` links it under `options`. With
+/// [`tiny`](RgblinkOptions::tiny), ROM0 runs to `$7FFF` and ROMX sections in
+/// bank 1 join it, as `rgblink -t` links them; `bytes` stays the linked
+/// program without RGBLINK's trailing zero fill, which always runs to 32 KiB.
+///
+/// # Errors
+/// As [`assemble_rgbasm_files`], including a section `rgblink -t` refuses.
+pub fn assemble_rgbasm_files_with(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+    options: &RgblinkOptions,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(
+        &dialects::Rgbasm {
+            options: options.clone(),
+        },
+        source,
+        input_path,
+        loader,
+    )
 }
 
 /// Assemble Intel-syntax 8080 source into a flat binary at the `org` — the
@@ -1958,7 +1987,7 @@ pub fn format_scmp(source: &str) -> Result<String, AsmError> {
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse failure.
 pub fn format_rgbasm(source: &str) -> Result<String, AsmError> {
-    format_ast(&dialects::Rgbasm, source)
+    format_ast(&dialects::Rgbasm::default(), source)
 }
 
 /// Format lwasm (Motorola 6809) source (`asm198x fmt --cpu 6809`): parse into the

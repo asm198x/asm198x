@@ -205,8 +205,37 @@ pub(super) fn place_floating_nonrom_sections(
     Ok(())
 }
 
-/// The end of ROM0: plain RGBLINK keeps it to the first bank.
-const ROM0_END: i64 = BANK_SIZE;
+/// The end of ROM0: plain RGBLINK keeps it to the first bank, and
+/// `rgblink -t` gives it the whole 32 KiB.
+pub(super) fn rom0_end(tiny: bool) -> i64 {
+    if tiny { 2 * BANK_SIZE } else { BANK_SIZE }
+}
+
+/// `rgblink -t` has no banks: each ROMX section becomes a ROM0 section in
+/// bank 0, placed by address, and floating unless it pinned one. A floating
+/// one then joins ROM0's own layout — RGBDS 1.0.4 links `SECTION "b", ROMX`
+/// after a three-byte ROM0 section at `$0003`, and `BANK("b")` is 0. RGBLINK
+/// converts only a section in bank 1, the one it gets when it names none; one
+/// in another bank stays ROMX for [`check_rom_sections`] to refuse.
+pub(super) fn join_romx_to_rom0(ops: &mut [Statement], meta: &BTreeMap<String, SectionMeta>) {
+    for st in ops.iter_mut() {
+        if let Some(Operation::Section {
+            name,
+            base,
+            at,
+            bank,
+        }) = &mut st.op
+            && matches!(at, crate::engine::Place::At(_))
+            && *bank == Some(1)
+        {
+            if !meta.get(name.as_str()).is_some_and(|m| m.pinned) {
+                *base = None;
+            }
+            *at = crate::engine::Place::ByAddress;
+            *bank = Some(0);
+        }
+    }
+}
 
 /// Where a section's body ends when the section starts at `base`.
 fn body_end(ops: &[Statement], body: Range<usize>, base: i64) -> Result<i64, AsmError> {
@@ -234,9 +263,13 @@ fn body_end(ops: &[Statement], body: Range<usize>, base: i64) -> Result<i64, Asm
 ///
 /// A pinned address outside the region is the only complaint about it;
 /// RGBLINK does not go on to measure where it ends.
+///
+/// Under `tiny` (`rgblink -t`), ROM0 runs to `$7FFF`, and a ROMX section
+/// still standing after [`join_romx_to_rom0`] named a bank other than 1.
 pub(super) fn check_rom_sections(
     ops: &[Statement],
     meta: &BTreeMap<String, SectionMeta>,
+    tiny: bool,
 ) -> Result<(), AsmError> {
     let starts: Vec<usize> = ops
         .iter()
@@ -250,7 +283,14 @@ pub(super) fn check_rom_sections(
             continue;
         };
         let (first, end, pinned) = match at {
-            crate::engine::Place::ByAddress => (0, ROM0_END, *base),
+            crate::engine::Place::ByAddress => (0, rom0_end(tiny), *base),
+            crate::engine::Place::At(_) if tiny => {
+                errors.push(ops[statement].err(format!(
+                    "Section \"{name}\" has type `ROMX`, which must be in bank 1 (if any) \
+                     with option '-t'"
+                )));
+                continue;
+            }
             crate::engine::Place::At(_) => (
                 ROMX_BASE,
                 ROMX_BASE + BANK_SIZE,
@@ -292,7 +332,10 @@ pub(super) fn check_rom_sections(
 /// Equal sizes go in reverse declaration order, as RGBLINK inserts each
 /// section ahead of the ones no bigger than it — the tie break the RAM
 /// regions above already use.
-pub(super) fn place_floating_rom0_sections(ops: &mut [Statement]) -> Result<(), AsmError> {
+pub(super) fn place_floating_rom0_sections(
+    ops: &mut [Statement],
+    region_end: i64,
+) -> Result<(), AsmError> {
     #[derive(Clone, Copy)]
     struct Section {
         statement: usize,
@@ -370,7 +413,7 @@ pub(super) fn place_floating_rom0_sections(ops: &mut [Statement]) -> Result<(), 
                 base = *used_end;
                 continue;
             }
-            if end > ROM0_END {
+            if end > region_end {
                 // Each section fits on its own; [`check_rom_sections`] saw to
                 // that. Together they do not, and RGBLINK names the one left.
                 let name = match &ops[section.statement].op {

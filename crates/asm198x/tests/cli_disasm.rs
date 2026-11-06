@@ -48,6 +48,7 @@ fn unsupported_disassembly_options_fail_before_reading_or_writing_files() {
         &["--exe"],
         &["--hunkexe"],
         &["--gb-rom"],
+        &["--tiny"],
         &["-C", "missing.cfg"],
         &["--outprefix", "missing-prefix/"],
         &["--outprefix=missing-prefix/"],

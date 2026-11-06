@@ -15,6 +15,13 @@ ROM0 sections go largest first, equal sizes in reverse declaration order, each
 into the lowest gap that holds it; if one is left over, it is refused as
 `Unable to place "name" (ROM0 section) anywhere`.
 
+`--gb-rom --tiny` (the library's `RgblinkOptions { tiny: true }`) links as
+`rgblink -t` does: one unbanked 32 KiB ROM. ROM0 runs to `$7FFF`. Each ROMX
+section becomes a ROM0 section in bank 0, floating unless it pinned an address,
+so `BANK("name")` is 0 and a floating one takes its turn in ROM0's layout. A
+ROMX section in any bank but 1 is refused. The ROM is always 32 KiB, its gaps
+`$00`, before `rgbfix -v -p 0xFF` finishes it.
+
 Floating non-ROM placement reserves occupied ranges within each bank, not
 across the whole region. Under the current bounded layout, an unqualified ROMX
 or WRAMX section uses bank 1; the other region types use bank 0. Automatic
