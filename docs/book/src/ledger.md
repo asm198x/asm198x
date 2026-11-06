@@ -5,9 +5,9 @@ observation of a real reference assembler, not an expectation written
 by hand. Regenerate with `cargo xtask ledger`.
 
 - **Release:** `v0.0.75`
-- **Corpus hash:** `86bab6b4f1a0a3bb3042a704a5f6cf9e2a8c051b7aac67f4dabf5e037f47c0e8`
+- **Corpus hash:** `e8849b7bcec94963bd05e9767d2217388edc97b9257275d1fa119adead3d4075`
 - **Pinned curriculum:** `d33e74f38e34c24f8143c372bddf5dd1bec072de` (2026-11-06)
-- **CPUs:** 33, holding 12818 verdict(s)
+- **CPUs:** 33, holding 14562 verdict(s)
 
 ## 1802
 
@@ -51,12 +51,11 @@ Form coverage: **151/151** (100.0%)
 
 | arbiter | version | verdicts |
 |---|---|---|
-| `acme` | This is ACME, release 0.97 ("Zem"), 1 Aug 2025 | curriculum 138, form 151, fuzz 100, pattern 95, probe 119 |
-| `ca65` | ca65 V2.19 - Git 8d86ca7 | curriculum 51, form 151, fuzz 100, pattern 8, probe 524 |
+| `acme` | This is ACME, release 0.97 ("Zem"), 1 Aug 2025 | curriculum 138, form 151, fuzz 100, pattern 542, probe 119 |
+| `ca65` | ca65 V2.19 - Git 8d86ca7 | curriculum 51, form 151, fuzz 100, pattern 434, probe 524 |
 
 Tracked divergences — differences we know about and check:
 
-- `scrcode-cbm-expression` — 1 case(s)
 - `sprintf-raw-flags` — 1 case(s)
 
 ## 6502DTV
@@ -127,7 +126,7 @@ Form coverage: **838/838** (100.0%)
 
 | arbiter | version | verdicts |
 |---|---|---|
-| `vasmm68k_mot` | vasm 2.0f (c) in 2002-2026 Volker Barthelmann | curriculum 106, form 838, fuzz 91, pattern 14, probe 143, sweep-chunk 160 |
+| `vasmm68k_mot` | vasm 2.0f (c) in 2002-2026 Volker Barthelmann | curriculum 106, form 838, fuzz 91, pattern 442, probe 143, sweep-chunk 160 |
 
 No tracked divergences.
 
@@ -137,7 +136,7 @@ Form coverage: **277/280** (98.9%)
 
 | arbiter | version | verdicts |
 |---|---|---|
-| `lwasm` | lwasm from lwtools 4.25 | form 277, fuzz 198, pattern 23, probe 50, sweep-chunk 98 |
+| `lwasm` | lwasm from lwtools 4.25 | form 277, fuzz 198, pattern 29, probe 50, sweep-chunk 98 |
 
 No tracked divergences.
 
@@ -273,7 +272,7 @@ Form coverage: **796/796** (100.0%)
 
 | arbiter | version | verdicts |
 |---|---|---|
-| `pasmo` | PasmoNext v0.1.3 (PC) (C) 2004-2005 Julian Albo | curriculum 161, form 796, fuzz 200, pattern 152, probe 73 |
+| `pasmo` | PasmoNext v0.1.3 (PC) (C) 2004-2005 Julian Albo | curriculum 161, form 796, fuzz 200, pattern 589, probe 73 |
 | `sjasmplus` | SjASMPlus Z80 Cross-Assembler v1.24.0 (https://github.com/z00m128/sjasmplus) | curriculum 161, form 796, fuzz 100, probe 189 |
 
 No tracked divergences.

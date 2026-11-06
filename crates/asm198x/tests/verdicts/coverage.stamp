@@ -31,24 +31,34 @@ Z8001	271/271	100.0%
 # suites have no denominator that ought to exist).
 # 1802	form=255
 # 2650	form=245
-# 6502	curriculum=189 form=302 fuzz=200 probe=204
-# 65816	form=270 probe=70
+# 4510	probe=264
+# 45GS02	probe=339
+# 6502	curriculum=189 form=302 fuzz=200 pattern=976 probe=643
+# 6502DTV	probe=190
+# 6502X	probe=221
+# 65816	form=270 probe=75
+# 65C02	probe=213
+# 65CE02	probe=264
+# 65SC02	probe=181
 # 6800	form=197
-# 68000	curriculum=106 form=838 fuzz=91 probe=79 sweep-chunk=160
-# 6809	form=277 fuzz=198 probe=50 sweep-chunk=98
+# 68000	curriculum=106 form=838 fuzz=91 pattern=442 probe=143 sweep-chunk=160
+# 6809	form=277 fuzz=198 pattern=29 probe=50 sweep-chunk=98
 # 8039	form=210
 # 8048	form=214
 # 8080	form=244
 # CP1610	form=30 sweep-chunk=50
 # F8	form=253
+# M740	probe=234
 # PDP-11	form=96 sweep-chunk=78
 # SC/MP	form=121
 # SM83	probe=59
+# SWEET16	probe=253
 # TMS7000	form=203
 # TMS9900	form=69 sweep-chunk=56
-# Z80	curriculum=322 form=1592 fuzz=300 probe=262
+# W65C02	probe=215
+# Z80	curriculum=322 form=1592 fuzz=300 pattern=589 probe=262
 # Z8000	form=271 sweep-chunk=96
 # Z8001	form=271 sweep-chunk=96
 # Z80N	form=60 fuzz=100 probe=10
-# huc6280	form=234
-# sm83	form=504
+# huc6280	form=234 probe=3
+# sm83	form=504 pattern=11
