@@ -30,7 +30,7 @@ and its line in `identities` change together.
 | `lwasm` | the release tarball, from `https://www.lwtools.ca` (**https**: plain http looks like a dead host) |
 | `rgbasm`, `rgblink`, `rgbfix` | a release tag |
 | `sjasmplus` | a release tag |
-| `vasmm68k_mot` | none: upstream serves one always-current `vasm.tar.gz` |
+| `vasmm68k_mot` | the Internet Archive's capture of upstream's `vasm.tar.gz`, checked by digest (`VASM_URL`, `VASM_SHA256`): upstream keeps only an always-current tarball |
 | `pasmo` (PasmoNext) | a commit: the fork has no tags |
 
 **How the source is obtained can change the version line.** cc65's tools put
@@ -39,10 +39,13 @@ their build provenance in it: from a git checkout ca65 reports
 reports `V2.18`). The Dockerfile builds from a checkout and passes `BUILD_ID`
 explicitly, so the line names the pinned commit with a fixed-length hash.
 
-**vasm has no pin available**, so the image builds whatever upstream currently
-serves and `verify-arbiters` decides. When vasm releases again, the image stops
-building until `identities` is updated, which turns an unannounced upstream
-change into a reviewed bump rather than a silent one.
+**vasm is pinned through the Internet Archive.** Upstream
+(`sun.hasenbraten.de/vasm`) keeps no versioned archives, so its tarball URL
+cannot be pinned. To bump vasm, have the Archive capture upstream's current
+`vasm.tar.gz` (`https://web.archive.org/save/<url>`), then set `VASM_URL` to
+the capture's `id_` URL, which serves the original bytes, and `VASM_SHA256`
+to their digest. A vasm release no longer stops the image building, so watch
+upstream for releases as for the other tools.
 
 `asl`'s version line carries no architecture (the triple prints on the next
 line), so arm64 and amd64 builds answer identically.

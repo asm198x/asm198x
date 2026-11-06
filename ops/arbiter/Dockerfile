@@ -76,16 +76,17 @@ RUN git clone --depth 1 --recursive --branch v1.24.0 \
     && install -m 0755 /tmp/sj/sjasmplus /usr/local/bin/ \
     && rm -rf /tmp/sj
 
-# --- vasm (current release) --------------------------------------------------
-# The one tool here with no pin available. Upstream serves a single
-# `vasm.tar.gz` that is always the current release and keeps no versioned
-# archives (2.0f, July 2026, when this was written).
-#
-# So this fetches current and lets `verify-arbiters` decide. When upstream
-# releases again the identity check fails and the image will not build, which
-# is the point: an upstream release becomes a reviewed bump rather than a
-# silent one.
-RUN curl -fsSL http://sun.hasenbraten.de/vasm/release/vasm.tar.gz -o /tmp/vasm.tar.gz \
+# --- vasm --------------------------------------------------------------------
+# Upstream (sun.hasenbraten.de) serves one `vasm.tar.gz` that is always the
+# current release and keeps no versioned archives, so its URL cannot be pinned,
+# and the build fails whenever that host is down. The Internet Archive's
+# capture of that URL is a fixed copy of upstream's own bytes, so it is the pin,
+# checked by digest. This one is 2.0f, captured on 2026-09-03. It is slow to
+# download, but the image is rarely rebuilt.
+ARG VASM_URL=https://web.archive.org/web/20260903181732id_/http://sun.hasenbraten.de/vasm/release/vasm.tar.gz
+ARG VASM_SHA256=c84b2de1cbb87831795fe64a85c5d9a7002a766e3a7c30b0a2d7d5e99d878f49
+RUN curl -fsSL --retry 5 --retry-all-errors "${VASM_URL}" -o /tmp/vasm.tar.gz \
+    && echo "${VASM_SHA256}  /tmp/vasm.tar.gz" | sha256sum -c - \
     && mkdir -p /tmp/vasm && tar -xzf /tmp/vasm.tar.gz -C /tmp/vasm --strip-components=1 \
     && make -C /tmp/vasm CPU=m68k SYNTAX=mot -j"$(nproc)" \
     && install -m 0755 /tmp/vasm/vasmm68k_mot /usr/local/bin/ \
