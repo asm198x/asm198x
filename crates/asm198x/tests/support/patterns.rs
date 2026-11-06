@@ -56,9 +56,10 @@ impl Job {
         let in_samples = relpath
             .strip_prefix("code-samples/")
             .ok_or_else(|| format!("{relpath} is not in code-samples"))?;
-        let machine = in_samples.split('/').next().unwrap_or_default();
-        let tool = patterns::tool(machine)
-            .ok_or_else(|| format!("{machine} has no entry in the pattern table"))?;
+        let tool = patterns::source_tool(in_samples).ok_or_else(|| {
+            let machine = in_samples.split('/').next().unwrap_or_default();
+            format!("{machine} has no entry in the pattern table")
+        })?;
         let dir = source.parent().unwrap_or(Path::new(".")).to_path_buf();
         let name = source
             .file_name()
@@ -143,6 +144,12 @@ impl Job {
             Tool::Lwasm => asm198x::assemble_lwasm_files(&text, &self.name, &loader),
             Tool::Vasm => asm198x::assemble_vasm_exe_files(&text, &self.name, &loader),
             Tool::Rgbasm => asm198x::assemble_rgbasm_files(&text, &self.name, &loader),
+            Tool::RgbasmTiny => asm198x::assemble_rgbasm_files_with(
+                &text,
+                &self.name,
+                &loader,
+                &asm198x::RgblinkOptions { tiny: true },
+            ),
         };
         let root = root
             .canonicalize()
@@ -186,6 +193,7 @@ impl Job {
             Tool::Pasmo => cmd.args(["--dialect", "pasmonext"]),
             Tool::Vasm => cmd.args(["--dialect", "vasm", "--exe"]),
             Tool::Rgbasm => cmd.args(["--dialect", "rgbasm", "--gb-rom"]),
+            Tool::RgbasmTiny => cmd.args(["--dialect", "rgbasm", "--gb-rom", "--tiny"]),
             tool => cmd.args(["--dialect", tool.dialect()]),
         };
         for dir in self.include_dirs() {
