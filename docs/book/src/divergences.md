@@ -13,7 +13,7 @@ instead. If you are deciding whether to move a project that already builds, what
 you need is not reassurance — it is to know what will change.
 
 <!-- generated: xtask divergences --markdown -->
-9 tracked differences across 31 recorded cases.
+8 tracked differences across 27 recorded cases.
 
 | Difference | CPU | Dialect | Reference tool | Cases |
 |---|---|---|---|---|
@@ -24,7 +24,6 @@ you need is not reassurance — it is to know what will change.
 | `m740-inc-dec-a` | M740 | ca65 | ca65 | 2 |
 | `m740-ldm-order` | M740 | ca65 | ca65 | 1 |
 | `scrcode-cbm-expression` | 6502 | ca65 | ca65 | 1 |
-| `sprintf-c-width` | 65816 | ca65-816 | ca65 | 4 |
 | `sprintf-raw-flags` | 6502 | ca65 | ca65 | 1 |
 <!-- /generated -->
 
@@ -59,13 +58,6 @@ V2.19 in three places, and Asm198x follows the manual:
 
 MAME's M740 core agrees with the manual on the first two. The manual is held
 in the reference library's `by-topic/cpu-m740/`.
-
-**`sprintf-c-width` (ca65) — `.sprintf` follows C.** ca65 V2.19 departs from
-C's `printf` in a few places: `%x` of a negative number, `%#x` of 0, which side
-`%s` and `%c` are padded on in a width, the `+` and space flags on an unsigned
-conversion, and a width counted in bytes rather than characters. Lang198x's ca65
-front end, which every ca65 dialect here reads through, follows C, and these
-cases record ca65's own bytes beside ours.
 
 **`sprintf-raw-flags` (ca65) — what `.sprintf` converts stays raw.** ca65
 keeps, for each character of a string, whether the source wrote it, and its

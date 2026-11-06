@@ -114,9 +114,11 @@ Each one needs a probe whose verdict is a divergence:
 - `.exitmacro` inside a repeat inside a macro leaves at once.
 - `.end` inside a repeat ends the program, where ca65 fails an internal
   check.
-- `.sprintf` follows C for `%x` of a negative number, `%#x` of 0, the
+- `.sprintf` followed C for `%x` of a negative number, `%#x` of 0, the
   alignment of `%c` and `%s` in a width, and the `+` and space flags, which
-  C applies only to signed conversions (`sprintf-c-width` in the fixtures).
+  C applies only to signed conversions (`sprintf-c-width`). On 2026-11-06
+  it was changed to give ca65's bytes, since matching the reference is the
+  point (#1040), and the divergence was retired.
 - `.mid` takes a start above 100 as given.
 
 Step 7 named three more, each marked `divergence` in the fixtures with the
@@ -128,7 +130,8 @@ walk's own bytes in `walk_hex`:
 - `define-alias-end`: `.end` reached through a `.define` stops reading at
   once, as `.end` does; ca65 still runs the token functions after it on
   that line (4 cases).
-- `sprintf-c-width`, above, for `%3s` of a UTF-8 string (2 cases).
+- `sprintf-c-width`, above, for `%3s` of a UTF-8 string (2 cases), retired
+  on 2026-11-06.
 
 One gap was left, marked `walk_gap` with the walk's bytes so any change
 showed: a token function ran before the rest of its line was read
