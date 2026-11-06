@@ -94,8 +94,10 @@ fn tool(dialect: &str) -> &'static str {
         "z80n" => "sjasmplus",
         "lwasm" => "lwasm",
         "vasm" => "vasmm68k_mot",
-        // The 68000 multipass path (U6): the flat (-Fbin) and hunk-exe legs.
-        "vasm-exe" => "vasmm68k_mot",
+        // vasm's default invocation, optimiser on (#969): a flat binary, and
+        // the hunk executable the Amiga curriculum builds. The multi-file
+        // probes (U6) use `vasm-exe` too.
+        "vasm-bin" | "vasm-exe" => "vasmm68k_mot",
         "ca65-816" => "ca65",
         // The main ca65 reader, linked flat (lang198x docs/plans/ca65-front-end.md).
         "ca65" => "ca65",
@@ -241,6 +243,21 @@ fn reference_bytes(
             run(vec![c])?;
             fs::read(&out).ok()
         }
+        // The default invocation, optimiser on. The hunk executable is written
+        // without vasm's symbol table, which Asm198x never writes.
+        "vasm-bin" | "vasm-exe" => {
+            let src = tmp.join("ref.s");
+            fs::write(&src, body).ok()?;
+            let mut c = Command::new("vasmm68k_mot");
+            if dialect == "vasm-bin" {
+                c.arg("-Fbin");
+            } else {
+                c.args(["-Fhunkexe", "-kick1hunks", "-nosym"]);
+            }
+            c.args(["-quiet", "-o"]).arg(&out).arg(&src);
+            run(vec![c])?;
+            fs::read(&out).ok()
+        }
         // rgbasm assembles to an object file that rgblink turns into a binary,
         // like ca65/ld65 below. `-x` keeps the image unpadded so the bytes are
         // the program's and not a ROM's trailing fill.
@@ -319,7 +336,7 @@ fn probe_cpu(dialect: &str) -> &'static str {
         "pasmo" | "sjasmplus" => "Z80",
         "z80n" => "Z80N",
         "lwasm" => "6809",
-        "vasm" => "68000",
+        "vasm" | "vasm-bin" | "vasm-exe" => "68000",
         "ca65-816" => "65816",
         "ca65" => "6502",
         "rgbasm" | "rgbasm-banked" => "SM83",
@@ -2131,6 +2148,118 @@ const PROBES: &[Probe] = &[
     ok ("vasm", "abs size suffix .w",    " move.w $1234.w,d0\n"),
     ok ("vasm", "abs size suffix .l",    " move.l $12345678.l,d0\n"),
     ok ("vasm", "abs .l forces long",    " move.w $1234.l,d0\n"),
+
+    // ---- vasm's default optimisations (#969) --------------------------------
+    // `vasm-bin` is `vasmm68k_mot -Fbin` and `vasm-exe` the hunk executable,
+    // both with vasm's optimiser on. Code before any `section` is in vasm's
+    // implicit `org 0` section in a flat binary, so its labels are absolute;
+    // in a hunk executable, and after a `section`, they are relocatable.
+    // #969's table.
+    ok ("vasm-bin", "abs.l that fits 16 bits is abs.w", "\tmove.w d0,$0100\n"),
+    ok ("vasm-bin", "move.l 4,a6 reads ExecBase as abs.w", "\tmove.l 4,a6\n"),
+    ok ("vasm-bin", "$ffff8000 sign-extends to abs.w", "\tmove.w $ffff8000,d0\n"),
+    ok ("vasm-bin", "an equ address is abs.w", "X equ $100\n\tmove.w d0,X\n"),
+    ok ("vasm-bin", "lea of a small address", "\tlea $100,a0\n"),
+    ok ("vasm-bin", "bra to the next instruction is deleted", "\tbra l\nl:\tnop\n"),
+    ok ("vasm-bin", "bra.s to the next instruction becomes lea (a6),a6", "\tbra.s l\nl:\tnop\n"),
+    ok ("vasm-bin", "jmp to a label in the org section is abs.w", "\tjmp l\nl:\tnop\n"),
+    ok ("vasm-bin", "bra over one instruction is short", "\tbra l\n\tnop\nl:\tnop\n"),
+    ok ("vasm-bin", "a custom-chip address stays abs.l", "\tmove.w d0,$dff180\n"),
+    // Absolute addresses, at the edges of 16 bits.
+    ok ("vasm-bin", "abs.w holds -32768..32767",
+        "\tmove.w d0,$7fff\n\tmove.w d0,$8000\n\tmove.w d0,$ffff8000\n\tmove.w d0,$ffff7fff\n\tmove.w d0,$ffff\n\tmove.w d0,-1\n"),
+    ok ("vasm-bin", "a written size is kept", "\tmove.w d0,$100.l\n\tmove.w d0,$100.w\n"),
+    ok ("vasm-bin", "both operands of a move", "\tmove.w $100,$200\n"),
+    ok ("vasm-bin", "an absolute past abs.w is PC-relative in the org section",
+        "\tlea $8000,a0\n\tlea $8002,a1\n"),
+    ok ("vasm-bin", "a forward equ address", "\tmove.w d0,A\n\tlea A,a0\nA equ $100\n"),
+    ok ("vasm-bin", "labels in the org section are absolute immediates",
+        "\tmove.l #l,d0\n\tadd.l #l,d1\n\tcmp.l #0,d2\nl:\tnop\n"),
+    ok ("vasm-bin", "a label before any section is in the org section",
+        "start:\n\tsection c,code\n\tnop\n\tlea start,a0\n"),
+    ok ("vasm-exe", "a label before any section opens a hunk of its own",
+        "start:\n\tsection c,code\n\tnop\n\tlea start,a0\n"),
+    // Relocatable against absolute in a hunk executable.
+    ok ("vasm-exe", "absolute addresses shorten in a hunk too",
+        "\tsection c,code\n\tmove.l 4,a6\n\tmove.w d0,$dff180\n\tlea $100,a0\n\trts\n"),
+    ok ("vasm-exe", "a label is PC-relative as a source and abs.l as a destination",
+        "\tsection c,code\n\tmove.w d0,v\n\tmove.w v,d1\n\tlea v,a0\n\trts\nv:\tdc.w 0\n"),
+    ok ("vasm-exe", "a label in another section stays abs.l",
+        "\tsection c,code\n\tlea d,a0\n\tmove.w d,d0\n\tsection dd,data\nd:\tdc.w 1\n"),
+    ok ("vasm-exe", "an immediate holding a label is not optimised",
+        "\tsection c,code\n\tadd.l #v,d0\n\tmove.l #v,d1\n\tcmp.l #v,d2\nv:\tnop\n"),
+    ok ("vasm-exe", "an equ of a forward label is relocatable",
+        "\tsection c,code\nX equ v\n\tlea X,a0\n\tmove.l #X,d0\nv:\tnop\n"),
+    ok ("vasm-exe", "movea.l of a label is lea, then PC-relative",
+        "\tsection c,code\n\tmovea.l #l,a0\n\tmove.l #l,a1\nl:\tnop\n"),
+    // Branches: sized from the word form, then from their own last size.
+    ok ("vasm-bin", "a forward branch 126 bytes away is short",
+        "\tbra l\n\tds.b 126\nl:\tnop\n"),
+    ok ("vasm-bin", "a forward branch 128 bytes away is a word",
+        "\tbra l\n\tds.b 128\nl:\tnop\n"),
+    ok ("vasm-bin", "a backward branch to -128 is short",
+        "l:\tnop\n\tds.b 124\n\tbra l\n"),
+    ok ("vasm-bin", "a backward branch to -130 is a word",
+        "l:\tnop\n\tds.b 126\n\tbra l\n"),
+    ok ("vasm-bin", "bcc sizes like bra", "\tbeq l\n\tds.b 126\nl:\tnop\n\tbne l\n"),
+    ok ("vasm-bin", "bcc to the next instruction is deleted", "\tbeq l\nl:\tnop\n"),
+    ok ("vasm-bin", "bsr to the next instruction is a word", "\tbsr l\nl:\tnop\n"),
+    ok ("vasm-bin", "a written bra.w is kept", "\tbra.w l\nl:\tnop\n\tbra.w l\n"),
+    ok ("vasm-bin", "a written bra.s is kept", "\tbra.s l\n\tnop\nl:\tnop\n"),
+    ok ("vasm-bin", "a branch shrinks once another brings it in range",
+        "\tbra l\n\tbeq m\n\tds.b 122\nm:\tnop\nl:\tnop\n"),
+    ok ("vasm-exe", "branches in a hunk", "\tsection c,code\n\tbra l\n\tbne l\nl:\tbra l\n"),
+    // jmp and jsr to a label in their own section.
+    ok ("vasm-exe", "jmp to a near label is bra.s", "\tsection c,code\n\tjmp l\n\tnop\nl:\tnop\n"),
+    ok ("vasm-exe", "jsr to a near label is bsr.s", "\tsection c,code\n\tjsr l\n\trts\nl:\trts\n"),
+    ok ("vasm-exe", "jmp to the next instruction is deleted", "\tsection c,code\n\tjmp l\nl:\tnop\n"),
+    ok ("vasm-exe", "jsr to the next instruction is bsr.w", "\tsection c,code\n\tjsr l\nl:\tnop\n"),
+    ok ("vasm-exe", "a backward jmp to -128 is bra.s",
+        "\tsection c,code\nl:\tnop\n\tds.b 124\n\tjmp l\n"),
+    ok ("vasm-exe", "a backward jmp to -130 is bra.w",
+        "\tsection c,code\nl:\tnop\n\tds.b 126\n\tjmp l\n"),
+    ok ("vasm-exe", "a forward jmp 124 bytes away is bra.s",
+        "\tsection c,code\n\tjmp l\n\tds.b 124\nl:\tnop\n"),
+    ok ("vasm-exe", "a forward jmp 126 bytes away is bra.w",
+        "\tsection c,code\n\tjmp l\n\tds.b 126\nl:\tnop\n"),
+    ok ("vasm-exe", "jmp to another section stays a jmp",
+        "\tsection c,code\n\tjmp e\n\tjsr e\n\tsection d,code\ne:\tnop\n"),
+    ok ("vasm-exe", "a written jmp size or (pc) is kept",
+        "\tsection c,code\n\tjmp l.l\n\tjmp l(pc)\n\tjmp (a0)\nl:\tnop\n"),
+    // Instructions.
+    ok ("vasm-bin", "move.l #x,Dn is moveq in -128..127",
+        "\tmove.l #127,d0\n\tmove.l #-128,d1\n\tmove.l #128,d2\n\tmove.l #-129,d3\n\tmove.l #$ffffffff,d4\n\tmove.w #1,d5\n\tmove.l #1,(a0)\n"),
+    ok ("vasm-bin", "move.l of an even byte is moveq and add",
+        "\tmove.l #200,d0\n\tmove.l #254,d1\n\tmove.l #255,d2\n\tmove.l #256,d3\n\tmove.l #-130,d4\n\tmove.l #-256,d5\n\tmove.l #-258,d6\n\tmove.l #201,d7\n"),
+    ok ("vasm-bin", "move.l of a high word is moveq and swap",
+        "\tmove.l #$10000,d0\n\tmove.l #$7f0000,d1\n\tmove.l #$800000,d2\n\tmove.l #$ff80ffff,d3\n\tmove.l #$fffeffff,d4\n\tmove.l #$ffff0000,d5\n\tmove.l #$12340000,d6\n"),
+    ok ("vasm-bin", "moves into an address register",
+        "\tmove.l #0,a0\n\tmovea.w #0,a1\n\tmove.l #$1234,a2\n\tmove.l #$8000,a3\n\tmovea.l #-1,a4\n\tmove.w #5,a5\n"),
+    ok ("vasm-bin", "movem of address registers becomes move",
+        "\tmovem.l (a0)+,a1\n\tmovem.l (a0)+,a1/a2\n\tmovem.l (a1)+,a1/a2\n\tmovem.w (a0),a3\n\tmovem.l d0,-(a7)\n\tmovem.l (a0)+,d1\n\tmovem.l 4(a0),a1/a2\n\tmovem.l (a0)+,a1-a3\n\tmovem.l (a1)+,a1\n"),
+    ok ("vasm-bin", "clr.l Dn is moveq #0", "\tclr.l d3\n\tclr.w d3\n\tclr.l (a0)\n"),
+    ok ("vasm-bin", "and of every bit at its size is tst",
+        "\tandi.b #$ff,d0\n\tandi.b #-1,d0\n\tand.w #$ffff,d1\n\tandi.l #$ffffffff,(a0)\n\tandi.l #-1,d2\n\tand.w #0,d3\n\tandi.w #$ff,d4\n"),
+    ok ("vasm-bin", "or, ori and eori of zero are tst",
+        "\tor.w #0,d0\n\tori.b #0,(a0)\n\teori.l #0,d1\n\teor.w #0,d2\n\tori #0,ccr\n"),
+    ok ("vasm-bin", "eori of every bit is not",
+        "\teori.b #$ff,d0\n\teori.w #-1,d1\n\teori.l #$ffffffff,d2\n\teori.b #-1,(a0)\n\teor.w #$ffff,d3\n\teori.w #$fffe,d4\n"),
+    ok ("vasm-bin", "add and sub of an immediate",
+        "\tadd.w #1,d0\n\tadd.l #8,(a0)\n\tsub.b #8,d1\n\tadd.w #9,d2\n\tadd.w #0,d3\n\taddi.w #1,d4\n\tsubi.l #3,(a1)\n"),
+    ok ("vasm-bin", "adda and suba of an immediate",
+        "\tadda.w #0,a0\n\tsuba.l #0,a1\n\tadda.w #-3,a2\n\tsuba.w #-5,a3\n\tadda.l #$7fff,a4\n\tadda.l #$8000,a5\n\tsuba.w #$8000,a6\n\tadd.w #4,a0\n\tsub.l #8,a1\n"),
+    ok ("vasm-bin", "lea of a register's own address",
+        "\tlea (a0),a0\n\tlea 0(a1),a1\n\tlea 4(a2),a2\n\tlea -8(a3),a3\n\tlea 9(a4),a4\n\tlea 4(a2),a3\n\tlea 0,a5\n"),
+    ok ("vasm-bin", "lea past 16 bits is movea and adda",
+        "\tlea 70000(a0),a1\n\tlea 70000(a0),a0\n\tlea -40000(a2),a3\n"),
+    ok ("vasm-bin", "cmp of zero is tst except into An",
+        "\tcmp.w #0,d0\n\tcmpi.b #0,(a0)\n\tcmp.l #0,a1\n\tcmpa.w #0,a2\n\tcmp.l #5,a3\n\tcmpa.l #$12345,a4\n"),
+    ok ("vasm-bin", "asl #1 is add",
+        "\tasl.w #1,d0\n\tasl.l #1,d1\n\tasl.b #2,d2\n\tlsl.w #1,d3\n\tasl.w d1,d4\n\tasl (a0)\n"),
+    ok ("vasm-bin", "a zero displacement is dropped",
+        "\tmove.w 0(a0),d0\n\tmove.w (0,a1),d1\n\tmove.w d0,0(a2,d1.w)\n\tmovep.w 0(a0),d0\n"),
+    ok ("vasm-bin", "forward equ immediates are optimised",
+        "\tadd.l #N,d0\n\tmove.l #N,d1\n\tlea N(a0),a0\nN equ 4\n"),
 
     // ---- ca65-816 / 65816 ---------------------------------------------------
     ok ("ca65-816", "imm / dp / long",   " lda #$12\n lda $12\n lda $123456\n"),
