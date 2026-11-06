@@ -1238,8 +1238,7 @@ const PROBES: &[Probe] = &[
     ok ("vasm", "macro defined keyword-first",
         " macro nop2\n nop\n endm\n nop2\n"),
     // `\@` numbers the expansion, so `spin\@` is a fresh label each time. The
-    // bodies below take the label's *address* rather than branching to it:
-    // vasm's branch sizing under `-no-opt` is #110's business, not macros'.
+    // bodies below take the label's *address*, which is all they need.
     ok ("vasm", "the \\@ counter makes a label unique per expansion",
         "mk\tmacro\nspin\\@ nop\n move.l #spin\\@,d0\n endm\n mk\n mk\n"),
     ok ("vasm", "several \\@ names in one body stay distinct",

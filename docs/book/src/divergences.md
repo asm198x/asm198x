@@ -13,12 +13,11 @@ instead. If you are deciding whether to move a project that already builds, what
 you need is not reassurance — it is to know what will change.
 
 <!-- generated: xtask divergences --markdown -->
-8 tracked differences across 27 recorded cases.
+7 tracked differences across 23 recorded cases.
 
 | Difference | CPU | Dialect | Reference tool | Cases |
 |---|---|---|---|---|
 | `cop-signature` | 65816 | ca65 | ca65 | 1 |
-| [`issue-110`](https://github.com/asm198x/asm198x/issues/110) | 68000 | vasm | vasmm68k_mot | 4 |
 | [`issue-984`](https://github.com/asm198x/asm198x/issues/984) | Z80N | pasmonext | pasmo | 1 |
 | `m740-bit-branch-a` | M740 | ca65 | ca65 | 16 |
 | `m740-inc-dec-a` | M740 | ca65 | ca65 | 2 |
@@ -36,12 +35,6 @@ separator form.
 **`issue-99` — conditions on forward-referenced symbols.** sjasmplus resolves
 `IF` against a label defined later in the file, which needs more passes than we
 currently make.
-
-**`issue-110` — 68000 optimisation, and this one is settled.** Our output sits
-between vasm's two modes. vasm's default deletes `lea (a0),a0` entirely and
-rewrites `asl.w #1,d0` as `add.w d0,d0`; `-no-opt` does neither. We apply some
-and not others, so no single vasm invocation reproduces our bytes. The issue is
-closed as completed — it records the decision rather than tracking a fix.
 
 **`m740-inc-dec-a`, `m740-ldm-order` and `m740-bit-branch-a` (ca65's M740) —
 the 740 family manual decides.** Mitsubishi's and Renesas's *740 Family

@@ -168,7 +168,11 @@ fn lower<'a>(
         return ("EORI", Cow::Borrowed(operands), None);
     }
     if !ctx.optimize {
-        return (mnemonic, Cow::Borrowed(operands), None);
+        return (
+            immediate_form(mnemonic, operands),
+            Cow::Borrowed(operands),
+            None,
+        );
     }
     // lea d(An),An with a small offset → addq/subq #d,An (a long).
     if mnemonic == "LEA"
@@ -230,27 +234,35 @@ fn lower<'a>(
             return ("LEA", Cow::Owned(vec![mem, Opnd::AReg(*n)]), None);
         }
     }
-    // add/sub/cmp #imm,<memory> → the immediate-form instruction (addi/subi/
-    // cmpi). vasm uses the shorter `<ea>,Dn` form with an immediate EA for a Dn
-    // destination (handled by normal form selection), and adda/lea for An, so
-    // this alias only fires for a genuine memory destination. (No `eval` needed —
-    // it is a structural rewrite, so it also covers a forward immediate.)
+    (
+        immediate_form(mnemonic, operands),
+        Cow::Borrowed(operands),
+        None,
+    )
+}
+
+/// `add`/`sub`/`cmp`/`and`/`or` of an immediate into memory are the
+/// immediate instructions (`addi`, `subi`, `cmpi`, `andi`, `ori`).
+///
+/// This is vasm's choice of form, not an optimisation, so it holds under
+/// `-no-opt` too: `add.w #64,(a2)` is `$0652` either way. A data-register
+/// destination keeps the `<ea>,Dn` form with an immediate source, and an
+/// address register the `adda` form, so only a genuine memory destination is
+/// renamed. Structural, so a forward immediate is covered too.
+fn immediate_form<'a>(mnemonic: &'a str, operands: &[Opnd]) -> &'a str {
     if let [Opnd::Imm(_), dest] = operands
         && !matches!(dest, Opnd::DReg(_) | Opnd::AReg(_) | Opnd::Imm(_))
     {
-        match mnemonic {
-            "ADD" => return ("ADDI", Cow::Borrowed(operands), None),
-            "SUB" => return ("SUBI", Cow::Borrowed(operands), None),
-            "CMP" => return ("CMPI", Cow::Borrowed(operands), None),
-            // and/or of an immediate into memory: no Dn operand, so the
-            // immediate form. (For a Dn destination the immediate is a valid
-            // source EA — the plain and/or form — so this excludes it.)
-            "AND" => return ("ANDI", Cow::Borrowed(operands), None),
-            "OR" => return ("ORI", Cow::Borrowed(operands), None),
-            _ => {}
-        }
+        return match mnemonic {
+            "ADD" => "ADDI",
+            "SUB" => "SUBI",
+            "CMP" => "CMPI",
+            "AND" => "ANDI",
+            "OR" => "ORI",
+            other => other,
+        };
     }
-    (mnemonic, Cow::Borrowed(operands), None)
+    mnemonic
 }
 
 /// Whether a `d16(An)` operand (mode 5) has a displacement that resolves to

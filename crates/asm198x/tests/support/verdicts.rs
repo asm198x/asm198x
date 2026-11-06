@@ -169,7 +169,9 @@ pub fn assemble_form(cpu: &str, dialect: &str, source: &str) -> Option<Result<Ve
         ("ca65", "huc6280") => asm198x::assemble_ca65_huc6280(source),
         ("rgbasm", _) => asm198x::assemble_rgbasm(source),
         ("lwasm", _) => asm198x::assemble_lwasm(source),
-        ("vasm", _) => asm198x::assemble_vasm(source),
+        // Recorded from `vasmm68k_mot -Fbin -no-opt`, so checked with our
+        // optimiser off too: the audit is about literal encodings (#110).
+        ("vasm", _) => asm198x::assemble_vasm_no_opt(source),
         ("asl", "8080") => asm198x::assemble_i8080(source),
         ("asl", "6800") => asm198x::assemble_m6800(source),
         ("asl", "1802") => asm198x::assemble_1802(source),
@@ -223,7 +225,8 @@ pub fn assemble_probe(dialect: &str, body: &str) -> Option<Result<Vec<u8>, Strin
         "sjasmplus" => asm198x::assemble_sjasmplus(body),
         "z80n" => asm198x::assemble_sjasmplus_next(body),
         "lwasm" => asm198x::assemble_lwasm(body),
-        "vasm" => asm198x::assemble_vasm(body),
+        // `vasm` probes are recorded from `vasmm68k_mot -Fbin -no-opt`.
+        "vasm" => asm198x::assemble_vasm_no_opt(body),
         "ca65" => ca65_flat(body),
         "ca65-816" => asm198x::assemble_ca65_816(body),
         "rgbasm" | "rgbasm-banked" => asm198x::assemble_rgbasm(body),
