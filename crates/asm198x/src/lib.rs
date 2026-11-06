@@ -2173,26 +2173,27 @@ mod tests {
         );
     }
 
-    /// Parameters are positional, and unchecked in both directions.
+    /// Parameters are positional, and unchecked in both directions. (vasm's
+    /// optimiser makes each `move.l` a `moveq`.)
     #[test]
     fn vasm_parameters_are_positional_and_unchecked() {
         assert_eq!(
             assemble_vasm("ldav\tmacro\n move.l #\\1,d0\n endm\n ldav 5\n")
                 .expect("one")
                 .bytes,
-            vec![0x20, 0x3C, 0x00, 0x00, 0x00, 0x05]
+            vec![0x70, 0x05]
         );
         assert_eq!(
             assemble_vasm("ldav\tmacro\n move.l #\\1,d0\n move.l #\\2,d1\n endm\n ldav 5,7\n")
                 .expect("two")
                 .bytes,
-            vec![0x20, 0x3C, 0, 0, 0, 5, 0x22, 0x3C, 0, 0, 0, 7]
+            vec![0x70, 0x05, 0x72, 0x07]
         );
         assert_eq!(
             assemble_vasm("ldav\tmacro\n move.l #\\1,d0\n endm\n ldav 5,9\n")
                 .expect("extras dropped")
                 .bytes,
-            vec![0x20, 0x3C, 0x00, 0x00, 0x00, 0x05]
+            vec![0x70, 0x05]
         );
         assert!(
             assemble_vasm("ldav\tmacro\n move.l #\\1,d0\n move.l #\\2,d1\n endm\n ldav 5\n")
@@ -2208,9 +2209,9 @@ mod tests {
     /// nothing by spelling: a plain label in a body is global and the second
     /// expansion gets `label <spin> redefined`.
     ///
-    /// The bodies take each label's *address* rather than branching to it. Our
-    /// backward branch sizing differs from vasm's under `-no-opt` (#110), which
-    /// would swamp what this test is actually about.
+    /// The bodies take each label's *address*. With no `section`, a flat
+    /// binary's labels are absolute, so vasm's optimiser makes each `move.l` a
+    /// `moveq` of it.
     ///
     /// The counterpart is asserted too: a *plain* label in a body collides on
     /// the second expansion, which is the whole reason `\@` exists. It could
@@ -2222,15 +2223,13 @@ mod tests {
             assemble_vasm("mk\tmacro\nspin\\@ nop\n move.l #spin\\@,d0\n endm\n mk\n mk\n")
                 .expect("two expansions")
                 .bytes,
-            vec![
-                0x4E, 0x71, 0x20, 0x3C, 0, 0, 0, 0, 0x4E, 0x71, 0x20, 0x3C, 0, 0, 0, 8
-            ]
+            vec![0x4E, 0x71, 0x70, 0x00, 0x4E, 0x71, 0x70, 0x04]
         );
         // Two expansions, two distinct labels: the second `move.l` takes the
-        // address of its own `spin`, eight bytes on, not the first one's.
+        // address of its own `spin`, four bytes on, not the first one's.
         let one = assemble_vasm("mk\tmacro\nspin\\@ nop\n move.l #spin\\@,d0\n endm\n mk\n")
             .expect("one expansion");
-        assert_eq!(one.bytes.len(), 8, "one expansion is half of two");
+        assert_eq!(one.bytes.len(), 4, "one expansion is half of two");
         // And without the counter the two expansions collide, which is what
         // makes it necessary — vasm answers `label <spin> redefined` (#126).
         assert!(

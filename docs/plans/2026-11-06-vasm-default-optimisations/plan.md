@@ -1,6 +1,6 @@
 # Plan: vasm's default optimisations, applied exactly
 
-**Status:** Proposed 2026-11-06.
+**Status:** Proposed and built 2026-11-06. See "Outcome" below.
 **Binding records:** `decisions/reference-parity-goal.md` (match the
 reference, don't improve on it), `decisions/syntax-stance.md`,
 `decisions/ast-native-payload-for-multipass-cisc.md` (vasm keeps its
@@ -172,3 +172,35 @@ next starts.
   no command-line switch for them, so nothing can turn them on.
 - Syntax the dialect does not parse yet: a written displacement size
   (`0.w(a0)`), and the one-operand register shift (`asl d0`).
+
+## Outcome
+
+Built as planned, with steps 3 to 5 in one commit: vasm's pass loop changes
+how branches size, so the symbol table, the concrete-instruction encoder and
+the rules could not land apart without a commit whose bytes matched neither
+the old behaviour nor vasm's.
+
+- **The 62 probes** were recorded against vasm 2.0f built from the arbiter's
+  tarball. 44 differed before the change and none after.
+- **The Amiga pattern library at code-samples `d33e74f3`:** all 442 sources
+  build to vasm 2.0f's hunk executable, the 335 listed in #969 among them.
+  103 did before.
+- **The curriculum's 106 vasm digests and every `-no-opt` verdict** replay
+  unchanged.
+- **A label before any `section`** opens vasm's default section: `org 0` in a
+  flat binary, an empty code hunk in an executable. Found by the probes, and
+  fixed with the rest because it decides whether a label is absolute.
+- **`ds` with a forward count** now sizes as vasm's first pass does, instead of
+  being refused, because the pass loop reads symbols the way vasm does.
+
+Two approximations, neither reachable by ordinary source:
+
+- vasm re-resolves only the sections that read a moved section's labels; we
+  walk every section again until all of them settle at their first walk. A
+  settled section is a fixed point, so the extra walks change nothing.
+- vasm leaves `RESOLVE_WARN` set for the rest of a section's final pass once
+  one instruction has changed size more than five times after the first 200
+  passes; we set it per instruction.
+
+vasm prints the "branch out of range changed to jmp" warning once where several
+branches are translated; we warn for each. The bytes are the same.

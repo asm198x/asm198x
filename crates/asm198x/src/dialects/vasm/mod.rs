@@ -8,26 +8,24 @@
 //! Three output paths, each byte-identical to the matching `vasmm68k_mot`
 //! invocation across the Amiga curriculum:
 //! - [`assemble_with`]`(.., false)` — `-no-opt` flat binary.
-//! - [`assemble`] — `-Fbin` (optimizer on): short-branch relaxation,
-//!   PC-relative addressing for same-section labels, `addq`/`subq`, the
-//!   `add #d,An`↔`lea`↔`addq` rewrites, zero-displacement dropping, and
-//!   `cmp #0`→`tst`.
+//! - [`assemble`] — `-Fbin`, optimizer on: vasm's default 68000
+//!   optimisations, exactly that set, settled over vasm's passes (#969;
+//!   [`optimize`] and [`resolve`]).
 //! - [`assemble_exe`] — `-Fhunkexe -kick1hunks`: the multi-section hunk
 //!   executable (header, code/data/bss hunks, reloc32 tables), matching the
 //!   loadable image and omitting vasm's debug symbol table.
 //!
 //! See `decisions/syntax-stance.md`.
 
-use std::borrow::Cow;
 use std::collections::{BTreeMap, BTreeSet};
 
-use isa::m68k::{self, EaModes, Size, SizeEnc, Slot, ea};
+use isa::m68k::{self, Size, SizeEnc, Slot, ea};
 
 use super::flat_walk::{self, DirectiveLine, FlatWalk, Resolution, WalkDirective, WalkSemantics};
 use super::macros;
 use super::mos6502::{self, is_ident, split_data_items, split_first_word, string_literal};
 use crate::directives::{Category, Directive, Pattern, lookup};
-use crate::engine::{AsmError, BinOp, Expr, Warning};
+use crate::engine::{AsmError, Expr, Warning};
 use crate::listing::{DebugCapture, DebugCaptureMulti};
 use crate::source::{SourceLoader, SourceMap};
 use crate::span::FileId;
@@ -36,6 +34,10 @@ mod project;
 use project::{REPTN, lines_from_program};
 mod hunk;
 use hunk::{HunkKind, MemFlag, Reloc, SecOut, serialize_hunkexe};
+mod optimize;
+use optimize::Concrete;
+mod resolve;
+use resolve::{Base, Syms};
 
 /// vasm's probe-pinned multi-file semantics (language-surface U6, KTD5;
 /// `vasmm68k_mot` 2.0b): relative `include`/`incbin` requests anchor at the
@@ -86,8 +88,26 @@ fn vasm_incbin_window(
 /// Evaluate an expression against bound symbols, with `*` (the location
 /// counter) resolving to `here`. A thin PC-aware wrapper over the shared
 /// [`Expr::eval_with`].
-fn eval(e: &Expr, consts: &BTreeMap<String, i64>, here: i64, line: usize) -> Result<i64, AsmError> {
-    e.eval_with(&|s| consts.get(s).copied(), Some(here), line)
+fn eval(e: &Expr, syms: &impl Lookup, here: i64, line: usize) -> Result<i64, AsmError> {
+    e.eval_with(&|s| syms.lookup(s), Some(here), line)
+}
+
+/// A table an expression's symbols are read from: a finished map, or vasm's
+/// symbols as they stand at a point of a pass.
+trait Lookup {
+    fn lookup(&self, name: &str) -> Option<i64>;
+}
+
+impl Lookup for BTreeMap<String, i64> {
+    fn lookup(&self, name: &str) -> Option<i64> {
+        self.get(name).copied()
+    }
+}
+
+impl Lookup for Syms {
+    fn lookup(&self, name: &str) -> Option<i64> {
+        self.value(name)
+    }
 }
 
 /// The address-register spellings of `add`/`sub`/`cmp`. The spec encodes their
@@ -129,118 +149,6 @@ fn unknown_or_unmatched(mnemonic: &str, line: usize) -> AsmError {
     }
 }
 
-/// Apply vasm's instruction-rewriting optimizations, returning the effective
-/// mnemonic and operands. Both rest only on the (constant) immediate, so they
-/// stay stable across relaxation rounds.
-///
-/// - `add`/`sub` of a small immediate (1..=8) → the quick form `addq`/`subq`.
-/// - `add.l`/`sub.l` of a 16-bit immediate into an address register →
-///   `lea d16(An),An`, two bytes shorter than `adda.l #imm`.
-/// - `lea d8(An),An` with a small offset → `addq`/`subq` (the reverse), which
-///   is shorter still. The `Option<Size>` is a size override for that case
-///   (`lea` is sizeless but the `addq` it becomes is a long).
-fn lower<'a>(
-    mnemonic: &'a str,
-    size: Option<Size>,
-    operands: &'a [Opnd],
-    ctx: &Ctx,
-    consts: &BTreeMap<String, i64>,
-) -> (&'a str, Cow<'a, [Opnd]>, Option<Size>) {
-    let mnemonic = canonical_condition_alias(mnemonic);
-    // adda/suba/cmpa are the address-register-destination spellings of add/sub/
-    // cmp; the spec encodes those forms under the base mnemonic (form selection
-    // picks the An-destination form). Alias them when the destination is an An,
-    // as vasm requires — `adda d0,d1` stays unknown, matching vasm's rejection.
-    let mnemonic = match (mnemonic, operands.last()) {
-        ("ADDA", Some(Opnd::AReg(_))) => "ADD",
-        ("SUBA", Some(Opnd::AReg(_))) => "SUB",
-        ("CMPA", Some(Opnd::AReg(_))) => "CMP",
-        _ => mnemonic,
-    };
-    // eor #imm,<ea> is always eori: unlike and/or (whose source can be an
-    // immediate EA), eor's source is always a data register, so there is no
-    // eor-immediate encoding. Holds for a Dn *or* memory destination (not An),
-    // and regardless of optimization — it is a requirement, not an optimization.
-    if let [Opnd::Imm(_), dest] = operands
-        && mnemonic == "EOR"
-        && !matches!(dest, Opnd::AReg(_) | Opnd::Imm(_))
-    {
-        return ("EORI", Cow::Borrowed(operands), None);
-    }
-    if !ctx.optimize {
-        return (
-            immediate_form(mnemonic, operands),
-            Cow::Borrowed(operands),
-            None,
-        );
-    }
-    // lea d(An),An with a small offset → addq/subq #d,An (a long).
-    if mnemonic == "LEA"
-        && let [
-            Opnd::Mem {
-                mode: 5,
-                reg,
-                disp: Some(e),
-                ..
-            },
-            Opnd::AReg(n),
-        ] = operands
-        && reg == n
-        && let Ok(v) = eval(e, consts, 0, 0)
-    {
-        if (1..=8).contains(&v) {
-            let ops = vec![Opnd::Imm(e.clone()), Opnd::AReg(*n)];
-            return ("ADDQ", Cow::Owned(ops), Some(Size::L));
-        }
-        if (-8..=-1).contains(&v) {
-            let ops = vec![Opnd::Imm(Expr::Neg(Box::new(e.clone()))), Opnd::AReg(*n)];
-            return ("SUBQ", Cow::Owned(ops), Some(Size::L));
-        }
-    }
-    if let [Opnd::Imm(e), dest] = operands
-        && let Ok(v) = eval(e, consts, 0, 0)
-    {
-        // cmp #0,<ea> → tst <ea> (comparing against zero is a test; drops the
-        // immediate word). Not for An, which tst can't address on the 68000.
-        if mnemonic == "CMP" && v == 0 && !matches!(dest, Opnd::AReg(_) | Opnd::Imm(_)) {
-            return ("TST", Cow::Owned(vec![dest.clone()]), None);
-        }
-        // add/sub of 1..=8 → the quick form.
-        if (1..=8).contains(&v) && !matches!(dest, Opnd::Imm(_)) {
-            match mnemonic {
-                "ADD" => return ("ADDQ", Cow::Borrowed(operands), None),
-                "SUB" => return ("SUBQ", Cow::Borrowed(operands), None),
-                _ => {}
-            }
-        }
-        // add/sub #d16,An → lea d16(An),An (subtraction negates the offset).
-        // vasm prefers `lea` whenever the offset fits a word — always shorter
-        // than `adda.l`, and the same size as (but preferred over) `adda.w`.
-        if !matches!(size, Some(Size::B))
-            && let Opnd::AReg(n) = dest
-            && let Some(disp_expr) = match mnemonic {
-                "ADD" => Some(e.clone()),
-                "SUB" => Some(Expr::Neg(Box::new(e.clone()))),
-                _ => None,
-            }
-            && i16::try_from(if mnemonic == "SUB" { -v } else { v }).is_ok()
-        {
-            let mem = Opnd::Mem {
-                mode: 5,
-                reg: *n,
-                bit: ea::DI,
-                disp: Some(disp_expr),
-            };
-            return ("LEA", Cow::Owned(vec![mem, Opnd::AReg(*n)]), None);
-        }
-    }
-    (
-        immediate_form(mnemonic, operands),
-        Cow::Borrowed(operands),
-        None,
-    )
-}
-
 /// `add`/`sub`/`cmp`/`and`/`or` of an immediate into memory are the
 /// immediate instructions (`addi`, `subi`, `cmpi`, `andi`, `ori`).
 ///
@@ -265,23 +173,8 @@ fn immediate_form<'a>(mnemonic: &'a str, operands: &[Opnd]) -> &'a str {
     mnemonic
 }
 
-/// Whether a `d16(An)` operand (mode 5) has a displacement that resolves to
-/// zero — which the optimizer drops, shortening it to plain `(An)` (mode 2).
-fn drops_zero_disp(
-    mode: u8,
-    disp: &Option<Expr>,
-    ctx: &Ctx,
-    consts: &BTreeMap<String, i64>,
-) -> bool {
-    ctx.optimize
-        && mode == 5
-        && disp
-            .as_ref()
-            .is_some_and(|e| eval(e, consts, 0, 0).is_ok_and(|v| v == 0))
-}
-
 /// Assemble Motorola-syntax 68000 source into a flat big-endian code image with
-/// the optimizer on — matching `vasm -Fbin`'s default (Stage 2).
+/// the optimizer on — matching `vasm -Fbin`'s default.
 ///
 /// # Errors
 /// Returns an [`AsmError`] on any parse, range, or symbol-resolution failure, or
@@ -301,6 +194,7 @@ pub(crate) fn assemble_warned(source: &str) -> Result<(Vec<u8>, Vec<Warning>), A
     let (sections, _) = assemble_core(
         &parse_program(source, macros::Expand::Yes)?,
         true,
+        Output::Flat,
         &mut warnings,
     )?;
     let bytes = flatten_sections(&sections)?;
@@ -325,7 +219,7 @@ pub(crate) fn assemble_warned_multi(
     // Read before assembling: it is a request about where the bytes go, not a
     // fact about what they are.
     let named = requested_output(&program);
-    let (sections, mut capture) = assemble_core(&program, true, &mut warnings)?;
+    let (sections, mut capture) = assemble_core(&program, true, Output::Flat, &mut warnings)?;
     let bytes = flatten_sections(&sections)?;
     rebase_flat_capture(&sections, &mut capture);
     Ok((bytes, warnings, capture, named))
@@ -342,8 +236,12 @@ pub(crate) fn assemble_exe_multi(
     loader: &dyn SourceLoader,
 ) -> Result<(Vec<u8>, Vec<Warning>, DebugCaptureMulti), AsmError> {
     let mut warnings = Vec::new();
-    let (sections, capture) =
-        assemble_core(&parse_program_multi(map, loader)?, true, &mut warnings)?;
+    let (sections, capture) = assemble_core(
+        &parse_program_multi(map, loader)?,
+        true,
+        Output::Hunks,
+        &mut warnings,
+    )?;
     Ok((serialize_hunkexe(&sections), warnings, capture))
 }
 
@@ -362,8 +260,8 @@ fn rebase_flat_capture(sections: &[SecOut], capture: &mut DebugCaptureMulti) {
     }
 }
 
-/// Assemble with the optimizer either on (Stage 2, matches `vasm -Fbin`) or off
-/// (Stage 1, matches `vasm -no-opt`), to a flat binary.
+/// Assemble with the optimizer either on (matches `vasm -Fbin`) or off
+/// (matches `vasm -Fbin -no-opt`), to a flat binary.
 ///
 /// # Errors
 /// Returns an [`AsmError`] on any parse/range/symbol failure, or if more than one
@@ -373,6 +271,7 @@ pub(crate) fn assemble_with(source: &str, optimize: bool) -> Result<Vec<u8>, Asm
     let (sections, _) = assemble_core(
         &parse_program(source, macros::Expand::Yes)?,
         optimize,
+        Output::Flat,
         &mut warnings,
     )?;
     flatten_sections(&sections)
@@ -422,6 +321,7 @@ pub(crate) fn assemble_exe(source: &str) -> Result<Vec<u8>, AsmError> {
     let (sections, _) = assemble_core(
         &parse_program(source, macros::Expand::Yes)?,
         true,
+        Output::Hunks,
         &mut warnings,
     )?;
     Ok(serialize_hunkexe(&sections))
@@ -439,6 +339,7 @@ pub(crate) fn assemble_warned_with_debug(
     let (sections, mut capture) = assemble_core(
         &parse_program(source, macros::Expand::Yes)?,
         true,
+        Output::Flat,
         &mut warnings,
     )?;
     let bytes = flatten_sections(&sections)?;
@@ -459,31 +360,12 @@ pub(crate) fn assemble_exe_with_debug(source: &str) -> Result<(Vec<u8>, DebugCap
     let (sections, capture) = assemble_core(
         &parse_program(source, macros::Expand::Yes)?,
         true,
+        Output::Hunks,
         &mut warnings,
     )?;
     Ok((serialize_hunkexe(&sections), capture.into_single()))
 }
 
-/// Optimization context shared down the encode/size paths.
-struct Ctx {
-    reloc: BTreeSet<String>,
-    /// Section index each relocatable label belongs to, for PC-relative gating
-    /// (same-section only) and relocation bucketing.
-    sec_of: BTreeMap<String, usize>,
-    optimize: bool,
-}
-
-/// Assemble a parsed [`Program`](crate::ast::Program) into per-section byte
-/// buffers with their relocations — the shared core behind both the flat and
-/// the hunk-executable serializers, and behind both the single-source and
-/// multi-file entries (one body, so their bytes can never drift). Also returns
-/// the debug read-out (Debug198x U5, multi-file since language-surface U6):
-/// section table, `(section, offset)` symbols, and per-statement line spans
-/// carrying each statement's file, all **section-relative** with no fabricated
-/// absolutes (KTD7 — the reader's `BaseMap` owns rebasing to loaded hunk
-/// addresses). The capture is strictly passive: it observes emission and never
-/// branches on it. Errors and warnings are stamped with the owning statement's
-/// file, so a failure inside an included file names that file.
 /// What a multi-file flat assemble yields: the bytes, any advisories, the
 /// debug capture, and the file the source named for itself with `output`.
 type FlatMulti = (Vec<u8>, Vec<Warning>, DebugCaptureMulti, Option<String>);
@@ -505,9 +387,55 @@ pub(crate) fn requested_output(program: &crate::ast::Program) -> Option<String> 
     })
 }
 
+/// Which file a program is assembled to. It decides what code before any
+/// `section` is: in a flat binary, vasm's implicit `org 0` section, whose
+/// labels are absolute; in a hunk executable, a relocatable code hunk.
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum Output {
+    Flat,
+    Hunks,
+}
+
+/// The passes vasm makes before it resizes only one instruction a pass
+/// (`FASTOPTPHASE`), and the size changes after which an instruction's
+/// branch is held at its larger size (`MAXSIZECHANGES`).
+const FAST_PASSES: u32 = 200;
+const MAX_SIZE_CHANGES: u32 = 5;
+/// vasm's `MAXPASSES`: a section still moving after this many walks never
+/// settles.
+const MAX_PASSES: u32 = 1500;
+
+/// What the passes remember about each statement between them.
+struct Sizes {
+    /// Its size last pass (vasm's `atom->lastsize`).
+    atom: Vec<i64>,
+    /// An instruction's own last size, which its branch and `jmp` sizing
+    /// read (vasm's `last_size`); -1 before it is first sized.
+    last: Vec<i32>,
+    /// How often it has changed size since the fast passes ended.
+    changes: Vec<u32>,
+}
+
+/// Assemble a parsed [`Program`](crate::ast::Program) into per-section byte
+/// buffers with their relocations — the shared core behind both the flat and
+/// the hunk-executable serializers, and behind both the single-source and
+/// multi-file entries (one body, so their bytes can never drift). Also returns
+/// the debug read-out (Debug198x U5, multi-file since language-surface U6):
+/// section table, `(section, offset)` symbols, and per-statement line spans
+/// carrying each statement's file, all **section-relative** with no fabricated
+/// absolutes (KTD7 — the reader's `BaseMap` owns rebasing to loaded hunk
+/// addresses). The capture is strictly passive: it observes emission and never
+/// branches on it. Errors and warnings are stamped with the owning statement's
+/// file, so a failure inside an included file names that file.
+///
+/// Sizes are settled as vasm settles them (#969): each statement is sized as
+/// the source is read, with forward references undefined, and then each
+/// section is walked again until no label moves and no size changes.
+/// `optimize` is vasm's optimiser: off is `-no-opt`.
 fn assemble_core(
     program: &crate::ast::Program,
     optimize: bool,
+    output: Output,
     warnings: &mut Vec<Warning>,
 ) -> Result<(Vec<SecOut>, DebugCaptureMulti), AsmError> {
     // The AST is the single front-end IR: the parse built the source-preserving
@@ -517,8 +445,10 @@ fn assemble_core(
     let stmts = lines_from_program(program)?;
 
     // Assign every statement to a section. A `section` directive opens one;
-    // bytes emitted before any directive fall into an implicit code section.
+    // a label or bytes before any directive open an implicit code section,
+    // which in a flat binary is vasm's absolute `org 0`.
     let mut sec_meta: Vec<(String, HunkKind, MemFlag)> = Vec::new();
+    let mut absolute: Vec<bool> = Vec::new();
     let mut named_sections: BTreeMap<String, usize> = BTreeMap::new();
     let mut sec_idx: Vec<usize> = Vec::with_capacity(stmts.len());
     let mut cur: Option<usize> = None;
@@ -528,81 +458,86 @@ fn assemble_core(
             cur = named_sections.get(&key).copied().or_else(|| {
                 let index = sec_meta.len();
                 sec_meta.push((name.clone(), *kind, *flag));
+                absolute.push(false);
                 named_sections.insert(key, index);
                 Some(index)
             });
-        } else if cur.is_none() && stmt_emits(&s.kind) {
+        } else if cur.is_none() && opens_default_section(s) {
             sec_meta.push(("code".to_string(), HunkKind::Code, MemFlag::Any));
+            absolute.push(output == Output::Flat);
             cur = Some(0);
         }
         sec_idx.push(cur.unwrap_or(0));
     }
     if sec_meta.is_empty() {
         sec_meta.push(("code".to_string(), HunkKind::Code, MemFlag::Any));
+        absolute.push(output == Output::Flat);
     }
     let nsec = sec_meta.len();
 
     check_redefinitions(&stmts)?;
 
-    // Relocatable symbols and the section each lives in.
-    let mut reloc: BTreeSet<String> = BTreeSet::new();
-    let mut sec_of: BTreeMap<String, usize> = BTreeMap::new();
-    for (i, s) in stmts.iter().enumerate() {
-        if !matches!(s.kind, Stmt::Equ(..))
-            && let Some(label) = &s.label
-        {
-            reloc.insert(label.clone());
-            sec_of.insert(label.clone(), sec_idx[i]);
-        }
-    }
-    let ctx = Ctx {
-        reloc,
-        sec_of,
-        optimize,
+    let mut syms = Syms::new(absolute);
+    let mut sizes = Sizes {
+        atom: vec![0; stmts.len()],
+        last: vec![-1; stmts.len()],
+        changes: vec![0; stmts.len()],
     };
 
-    // Branch relaxation: relaxable branches start short and grow to word form
-    // when their (intra-section) displacement won't fit a byte. Grow-only, so it
-    // converges. Grows are deferred to a clone so the running per-section pc
-    // tracks `consts` within a round.
-    let mut word_branch = vec![false; stmts.len()];
-    loop {
-        let (consts, _) = layout(&stmts, &sec_idx, nsec, &ctx, &word_branch)?;
-        let mut next = word_branch.clone();
-        let mut pc = vec![0i64; nsec];
-        for (i, s) in stmts.iter().enumerate() {
-            if matches!(s.kind, Stmt::Equ(..) | Stmt::Section(..)) {
+    // As the source is read: labels and `equ`s are defined where they stand,
+    // so a forward reference is undefined.
+    let mut pc = vec![0i64; nsec];
+    for (i, s) in stmts.iter().enumerate() {
+        let sec = sec_idx[i];
+        match &s.kind {
+            Stmt::Section(..) => continue,
+            Stmt::Equ(name, e) => {
+                syms.place_equ(name, e, sec, pc[sec]);
                 continue;
             }
-            let sec = sec_idx[i];
-            if let Some((pad, _)) = s
-                .kind
-                .pad_at(pc[sec], &consts, s.line)
-                .map_err(|e| stamp(e, s))?
-            {
-                pc[sec] += pad;
-            }
-            if ctx.optimize
-                && !word_branch[i]
-                && let Some(target) = relaxable_branch_target(&s.kind)
-            {
-                let disp = eval(target, &consts, pc[sec], s.line).map_err(|e| stamp(e, s))?
-                    - (pc[sec] + 2);
-                if disp == 0 || i8::try_from(disp).is_err() {
-                    next[i] = true;
-                }
-            }
-            pc[sec] += stmt_size(&s.kind, &ctx, &consts, sec, word_branch[i], s.line)
-                .map_err(|e| stamp(e, s))? as i64;
+            _ => {}
         }
-        if next == word_branch {
+        pc[sec] += pad_before(s, pc[sec], &syms)?;
+        if let Some(label) = &s.label {
+            syms.place_label(label, sec, pc[sec]);
+        }
+        let size = size_of(s, sec, pc[sec], &syms, optimize, &mut sizes.last[i], false)?;
+        sizes.atom[i] = size;
+        pc[sec] += size;
+    }
+
+    // Then each section until it settles. A section only changes another
+    // through label differences, so the rounds stop once every section
+    // settled at its first pass.
+    let by_section: Vec<Vec<usize>> = (0..nsec)
+        .map(|sec| {
+            (0..stmts.len())
+                .filter(|&i| sec_idx[i] == sec && !matches!(stmts[i].kind, Stmt::Section(..)))
+                .collect()
+        })
+        .collect();
+    let mut rounds = 0;
+    loop {
+        let mut settled = true;
+        for (sec, members) in by_section.iter().enumerate() {
+            let name = &sec_meta[sec].0;
+            if resolve_section(&stmts, members, sec, name, &mut syms, &mut sizes, optimize)? > 1 {
+                settled = false;
+            }
+        }
+        if settled {
             break;
         }
-        word_branch = next;
+        rounds += 1;
+        if rounds > MAX_PASSES {
+            return Err(AsmError::new(
+                0,
+                "cannot resolve the sections, maximum number of passes reached",
+            ));
+        }
     }
 
     // Emit each section's bytes and relocations.
-    let (consts, _) = layout(&stmts, &sec_idx, nsec, &ctx, &word_branch)?;
     let mut out: Vec<SecOut> = sec_meta
         .iter()
         .map(|(_, kind, flag)| SecOut {
@@ -621,7 +556,7 @@ fn assemble_core(
         let buf = &mut out[sec];
         if let Some((pad, fill)) = s
             .kind
-            .pad_at(buf.bytes.len() as i64, &consts, s.line)
+            .pad_at(buf.bytes.len() as i64, &syms, s.line)
             .map_err(stamp)?
         {
             buf.bytes.extend(fill.bytes(pad));
@@ -654,7 +589,7 @@ fn assemble_core(
                     // (87 for `xdef`, 62 for `global`). The warning is its
                     // classification of the same failure, so only the refusal
                     // is reproduced.
-                    if !consts.contains_key(name) {
+                    if syms.value(name).is_none() {
                         return Err(stamp(AsmError::new(
                             s.line,
                             format!("undefined symbol `{name}`"),
@@ -663,7 +598,7 @@ fn assemble_core(
                 }
             }
             Stmt::Assert(cond, message) => {
-                if eval(cond, &consts, buf.bytes.len() as i64, s.line).map_err(stamp)? == 0 {
+                if eval(cond, &syms, buf.bytes.len() as i64, s.line).map_err(stamp)? == 0 {
                     return Err(stamp(AsmError::new(
                         s.line,
                         format!("assertion failed: {message}"),
@@ -679,25 +614,24 @@ fn assemble_core(
                     // instruction. Data tables of pointers into another hunk
                     // (e.g. flock's `vehtab: dc.l tractx …`) rely on this.
                     if size.bytes() == 4
-                        && let Some(target) =
-                            reloc_sym(e, &ctx.reloc).and_then(|s| ctx.sec_of.get(s).copied())
+                        && let Base::Rel(target) = syms.base(e, sec)
                     {
                         buf.relocs.push((buf.bytes.len() as u32, target));
                     }
                     push_sized(
                         &mut buf.bytes,
-                        eval(e, &consts, 0, s.line).map_err(stamp)?,
+                        eval(e, &syms, 0, s.line).map_err(stamp)?,
                         *size,
                     );
                 }
             }
             Stmt::Ds(size, count) => {
-                let n = count_of(count, &consts, s.line).map_err(stamp)?;
+                let n = count_of(count, &syms, s.line).map_err(stamp)?;
                 buf.bytes.resize(buf.bytes.len() + n * size.bytes(), 0);
             }
             Stmt::Dcb(size, count, value) => {
-                let n = count_of(count, &consts, s.line).map_err(stamp)?;
-                let v = eval(value, &consts, 0, s.line).map_err(stamp)?;
+                let n = count_of(count, &syms, s.line).map_err(stamp)?;
+                let v = eval(value, &syms, 0, s.line).map_err(stamp)?;
                 for _ in 0..n {
                     push_sized(&mut buf.bytes, v, *size);
                 }
@@ -708,17 +642,40 @@ fn assemble_core(
                 operands,
             } => {
                 let here = buf.bytes.len() as i64;
-                let size = branch_size(ctx.optimize, &s.kind, size, word_branch[i]);
                 let before = warnings.len();
-                let (bytes, relocs) = encode(
-                    mnemonic, size, operands, &ctx, &consts, sec, here, s.line, warnings,
+                let env = optimize::Env {
+                    syms: &syms,
+                    sec,
+                    optimize,
+                    line: s.line,
+                };
+                let settled = optimize::optimize(
+                    mnemonic,
+                    *size,
+                    operands,
+                    &env,
+                    here,
+                    sizes.last[i],
+                    sizes.changes[i] > MAX_SIZE_CHANGES,
+                    Some(warnings),
                 )
                 .map_err(stamp)?;
+                for c in &settled.insns {
+                    let at = buf.bytes.len() as i64;
+                    let (bytes, relocs) =
+                        encode(c, &syms, sec, at, s.line, warnings).map_err(stamp)?;
+                    buf.bytes.extend_from_slice(&bytes);
+                    buf.relocs.extend(relocs);
+                }
                 for w in &mut warnings[before..] {
                     w.file = s.file;
                 }
-                buf.bytes.extend_from_slice(&bytes);
-                buf.relocs.extend(relocs);
+                if buf.bytes.len() as i64 - here != sizes.atom[i] {
+                    return Err(stamp(AsmError::new(
+                        s.line,
+                        "internal: an instruction's size moved after layout",
+                    )));
+                }
             }
         }
         let emitted = out[sec].bytes.len() - span_start;
@@ -736,6 +693,7 @@ fn assemble_core(
     // The debug read-out's symbols: every label at its `(section, offset)`
     // placement (the final layout's value is the section-relative offset,
     // aligns included), and every `equ` as a constant.
+    let consts = syms.values();
     let mut dbg_symbols: Vec<debug198x::Symbol> = Vec::new();
     for (i, s) in stmts.iter().enumerate() {
         let Some(label) = &s.label else { continue };
@@ -785,15 +743,160 @@ fn assemble_core(
     ))
 }
 
-/// The single relocatable symbol of a degree-1 address expression (`label`,
-/// `label+n`, `label-n`) — the target whose hunk a relocation points into.
-fn reloc_sym<'a>(e: &'a Expr, reloc: &BTreeSet<String>) -> Option<&'a str> {
-    match e {
-        Expr::Sym(s) if reloc.contains(s) => Some(s),
-        Expr::Bin(BinOp::Add, l, r) => reloc_sym(l, reloc).or_else(|| reloc_sym(r, reloc)),
-        Expr::Bin(BinOp::Sub, l, _) => reloc_sym(l, reloc),
-        _ => None,
+/// Walk one section again and again until it settles, as vasm's
+/// `resolve_section` does, and answer how many walks that took.
+///
+/// A label takes its new place as the walk reaches it. For the first
+/// [`FAST_PASSES`] walks every statement is sized afresh (more, while nothing
+/// grows); after that, once anything moves in a walk, the rest of that walk
+/// keeps its sizes, and a statement that keeps changing size is sized with
+/// vasm's `RESOLVE_WARN` set.
+fn resolve_section(
+    stmts: &[Line],
+    members: &[usize],
+    sec: usize,
+    name: &str,
+    syms: &mut Syms,
+    sizes: &mut Sizes,
+    optimize: bool,
+) -> Result<u32, AsmError> {
+    let mut fast = FAST_PASSES;
+    let mut pass = 0;
+    loop {
+        pass += 1;
+        if pass >= MAX_PASSES {
+            return Err(AsmError::new(
+                0,
+                format!("cannot resolve section `{name}`, maximum number of passes reached"),
+            ));
+        }
+        let mut done = true;
+        let mut extend_fast = pass <= fast;
+        let mut pc = 0i64;
+        for &i in members {
+            let s = &stmts[i];
+            if let Stmt::Equ(name, e) = &s.kind {
+                // `*` in an `equ` is a label where the `equ` stands.
+                if syms.place_equ(name, e, sec, pc) && reads_location(e) {
+                    done = false;
+                }
+                continue;
+            }
+            pc += pad_before(s, pc, syms)?;
+            if let Some(label) = &s.label
+                && syms.place_label(label, sec, pc)
+            {
+                done = false;
+            }
+            if pass > fast && !done && matches!(s.kind, Stmt::Insn { .. }) {
+                pc += sizes.atom[i];
+                continue;
+            }
+            let warn = sizes.changes[i] > MAX_SIZE_CHANGES;
+            let size = size_of(s, sec, pc, syms, optimize, &mut sizes.last[i], warn)?;
+            if size != sizes.atom[i] {
+                done = false;
+                if pass > fast {
+                    sizes.changes[i] += 1;
+                } else if size > sizes.atom[i] {
+                    extend_fast = false;
+                }
+                sizes.atom[i] = size;
+            }
+            pc += size;
+        }
+        if extend_fast {
+            fast += 1;
+        }
+        if done {
+            return Ok(pass);
+        }
     }
+}
+
+/// Whether an expression reads the location counter.
+fn reads_location(e: &Expr) -> bool {
+    match e {
+        Expr::Pc => true,
+        Expr::Num(_) | Expr::Sym(_) => false,
+        Expr::Lo(x)
+        | Expr::Hi(x)
+        | Expr::Bank(x)
+        | Expr::Neg(x)
+        | Expr::BitNot(x)
+        | Expr::FixRound(x)
+        | Expr::TrailingZeros(x)
+        | Expr::LogNot(x) => reads_location(x),
+        Expr::Bin(_, l, r) => reads_location(l) || reads_location(r),
+    }
+}
+
+/// The padding a statement takes before it, at `at`.
+fn pad_before(s: &Line, at: i64, syms: &Syms) -> Result<i64, AsmError> {
+    Ok(s.kind
+        .pad_at(at, syms, s.line)
+        .map_err(|e| stamp(e, s))?
+        .map_or(0, |(pad, _)| pad))
+}
+
+/// A statement's size at `pc`, with the symbols as they stand. An instruction
+/// goes through vasm's optimiser, which reads and updates its `last` size.
+fn size_of(
+    s: &Line,
+    sec: usize,
+    pc: i64,
+    syms: &Syms,
+    optimize: bool,
+    last: &mut i32,
+    resolve_warn: bool,
+) -> Result<i64, AsmError> {
+    Ok(match &s.kind {
+        Stmt::Insn {
+            mnemonic,
+            size,
+            operands,
+        } => {
+            let env = optimize::Env {
+                syms,
+                sec,
+                optimize,
+                line: s.line,
+            };
+            let settled = optimize::optimize(
+                mnemonic,
+                *size,
+                operands,
+                &env,
+                pc,
+                *last,
+                resolve_warn,
+                None,
+            )
+            .map_err(|e| stamp(e, s))?;
+            let mut n = 0;
+            for c in &settled.insns {
+                n += concrete_size(c, s.line).map_err(|e| stamp(e, s))?;
+            }
+            if !settled.retain_last_size {
+                *last = n as i32;
+            }
+            n
+        }
+        // A count not known yet sizes as nothing, as vasm's first pass does.
+        Stmt::Ds(size, count) | Stmt::Dcb(size, count, _) => match eval(count, syms, 0, s.line) {
+            Ok(v) if v >= 0 => v * size.bytes() as i64,
+            Ok(v) => {
+                return Err(stamp(
+                    AsmError::new(s.line, format!("negative repeat count {v}")),
+                    s,
+                ));
+            }
+            Err(_) => 0,
+        },
+        Stmt::Dc(size, items) => (items.len() * size.bytes()) as i64,
+        Stmt::Raw(payload) => payload.len() as i64,
+        _ => 0,
+    })
 }
 
 /// Whether a statement contributes bytes to its section (so it forces an
@@ -805,6 +908,13 @@ fn stmt_emits(kind: &Stmt) -> bool {
     )
 }
 
+/// Whether a statement before any `section` opens vasm's default one: one
+/// that emits, or a label, which vasm places in a section of its own even
+/// with nothing after it (an empty code hunk, or a label at 0 in `org 0`).
+fn opens_default_section(s: &Line) -> bool {
+    stmt_emits(&s.kind) || (s.label.is_some() && !matches!(s.kind, Stmt::Equ(..)))
+}
+
 /// Refuse a name defined twice (#126).
 ///
 /// vasm has no rebindable form here — no `set` — so every label and every
@@ -814,8 +924,8 @@ fn stmt_emits(kind: &Stmt) -> bool {
 /// carried through, because which one a reader gets tells them which
 /// definition the reference thought was the odd one.
 ///
-/// This is its own pass rather than a check inside [`layout`], which re-runs
-/// per relaxation round and would report the same collision once a round.
+/// This is its own pass rather than a check inside the layout passes, which
+/// walk each section many times and would report the same collision each walk.
 ///
 /// The direction matters. Every other gap closed for the 1.0 bar was source
 /// the reference takes and we refused; this is the reverse, and worse for it —
@@ -852,101 +962,25 @@ fn check_redefinitions(stmts: &[Line]) -> Result<(), AsmError> {
     Ok(())
 }
 
-/// Walk every statement and bind labels and `equ` constants to their
-/// offset-within-section, given the current branch-size decisions. Returns the
-/// symbol→offset map and each section's total byte length. Re-run per relaxation
-/// round.
-fn layout(
-    stmts: &[Line],
-    sec_idx: &[usize],
-    nsec: usize,
-    ctx: &Ctx,
-    word_branch: &[bool],
-) -> Result<(BTreeMap<String, i64>, Vec<i64>), AsmError> {
-    let mut consts: BTreeMap<String, i64> = BTreeMap::new();
-    let mut pc = vec![0i64; nsec];
-    for (i, s) in stmts.iter().enumerate() {
-        if let Stmt::Equ(name, e) = &s.kind {
-            // PC-aware: `len equ *-buffer` resolves `*` to the current location.
-            if let Ok(v) = eval(e, &consts, pc[sec_idx[i]], s.line) {
-                consts.insert(name.clone(), v);
-            }
-            continue;
-        }
-        let sec = sec_idx[i];
-        if let Some((pad, _)) = s
-            .kind
-            .pad_at(pc[sec], &consts, s.line)
-            .map_err(|e| stamp(e, s))?
-        {
-            pc[sec] += pad;
-        }
-        if let Some(label) = &s.label {
-            consts.insert(label.clone(), pc[sec]);
-        }
-        pc[sec] += stmt_size(&s.kind, ctx, &consts, sec, word_branch[i], s.line)
-            .map_err(|e| stamp(e, s))? as i64;
-    }
-    Ok((consts, pc))
-}
-
-/// The effective size of a statement's branch. With the optimizer on, a
-/// relaxable branch (including a bare `bra`/`bsr`/`bcc`, which vasm shortens) is
-/// short by default and word once grown. With it off, every branch keeps its
-/// written size — a bare branch stays word, matching `-no-opt`.
-fn branch_size(optimize: bool, kind: &Stmt, written: &Option<Size>, grown: bool) -> Option<Size> {
-    if optimize && relaxable_branch_target(kind).is_some() {
-        if grown { Some(Size::W) } else { Some(Size::B) }
-    } else {
-        *written
-    }
-}
-
-/// The branch-target expression of a relaxable branch (BRA/BSR/Bcc, not forced
-/// to `.w`), or `None` if the statement isn't one. DBcc has no short form, so it
-/// never relaxes.
-fn relaxable_branch_target(kind: &Stmt) -> Option<&Expr> {
-    let Stmt::Insn {
-        mnemonic,
-        size,
-        operands,
-    } = kind
-    else {
-        return None;
-    };
-    if matches!(size, Some(Size::W | Size::L)) {
-        return None; // explicitly forced to word/long
-    }
-    let insn = m68k::SET.instruction(canonical_condition_alias(mnemonic))?;
-    let form = match_form(insn, operands)?;
-    if !form.operands.iter().any(|s| matches!(s, Slot::BranchW)) {
-        return None;
-    }
-    operands.iter().find_map(|o| match o {
-        Opnd::Abs(e) => Some(e),
-        _ => None,
-    })
-}
-
 // ---------------------------------------------------------------------------
 // Encoding
 // ---------------------------------------------------------------------------
 
-#[allow(clippy::too_many_arguments)]
+/// Encode one settled instruction at `here`: its bytes, and the 32-bit
+/// relocations among them. Every addressing mode is already chosen
+/// ([`optimize::optimize`]), so this only lays out what it is given; an
+/// unsized absolute is `(xxx).L`.
 fn encode(
-    mnemonic: &str,
-    size: Option<Size>,
-    operands: &[Opnd],
-    ctx: &Ctx,
-    consts: &BTreeMap<String, i64>,
+    c: &Concrete,
+    syms: &Syms,
     cur_sec: usize,
     here: i64,
     line: usize,
     warnings: &mut Vec<Warning>,
 ) -> Result<(Vec<u8>, Vec<Reloc>), AsmError> {
-    let (mnemonic, operands, size_override) = lower(mnemonic, size, operands, ctx, consts);
-    let operands = operands.as_ref();
-    let size = size_override.or(size);
+    let mnemonic = c.mnemonic.as_str();
+    let operands = c.operands.as_slice();
+    let size = c.size;
     let insn = m68k::SET
         .instruction(mnemonic)
         .ok_or_else(|| unknown_or_unmatched(mnemonic, line))?;
@@ -992,7 +1026,7 @@ fn encode(
                 word |= u16::from(*reg) << shift;
             }
             (Slot::Quick8, Opnd::Imm(e)) => {
-                let v = eval(e, consts, here, line)?;
+                let v = eval(e, syms, here, line)?;
                 // `moveq` holds a signed byte; vasm warns (not errors) beyond a
                 // byte and keeps the low 8 bits.
                 if !(-128..=255).contains(&v) {
@@ -1009,11 +1043,11 @@ fn encode(
                 },
             ) => {
                 word |= u16::from(*reg);
-                let v = eval(e, consts, here, line)?;
+                let v = eval(e, syms, here, line)?;
                 ext.extend_from_slice(&(v as i16).to_be_bytes());
             }
             (Slot::Vec4, Opnd::Imm(e)) => {
-                let v = eval(e, consts, here, line)?;
+                let v = eval(e, syms, here, line)?;
                 // A trap vector is 4 bits (0..15); vasm warns (not errors) beyond
                 // and lets the value spill into the low byte of the opcode word.
                 if !(0..=15).contains(&v) {
@@ -1022,7 +1056,7 @@ fn encode(
                 word |= (v as u16) & 0xFF;
             }
             (Slot::Quick3 { shift }, Opnd::Imm(e)) => {
-                let v = eval(e, consts, here, line)?;
+                let v = eval(e, syms, here, line)?;
                 // `addq`/`subq` count is 1..8 (8 encodes as 000); vasm warns (not
                 // errors) outside that and keeps the low 3 bits.
                 if !(1..=8).contains(&v) {
@@ -1031,7 +1065,7 @@ fn encode(
                 word |= u16::from((v & 7) as u8) << shift;
             }
             (Slot::ImmWord, Opnd::Imm(e)) => {
-                let v = eval(e, consts, here, line)?;
+                let v = eval(e, syms, here, line)?;
                 // `#imm,CCR` (byte) / `#imm,SR` (word) carry the operand in a
                 // word extension. An out-of-range immediate isn't fatal — vasm
                 // emits the low half and warns (2037). Mirror that advisory; the
@@ -1046,7 +1080,7 @@ fn encode(
                 ext.extend_from_slice(&(v as u16).to_be_bytes());
             }
             (Slot::ImmSized, Opnd::Imm(e)) => {
-                let v = eval(e, consts, here, line)?;
+                let v = eval(e, syms, here, line)?;
                 // An out-of-range immediate isn't fatal in vasm — it warns and
                 // keeps the low `size` bytes. A byte immediate normally rides
                 // zero-extended in one word (`#-1` -> `00ff`); when it overflows
@@ -1070,14 +1104,13 @@ fn encode(
             // Already emitted, ahead of the loop, so that it lands
             // immediately after the opcode word.
             (Slot::RegList, _) => {}
-            (Slot::Ea { shift, dest, modes }, _) => {
+            (Slot::Ea { shift, dest, .. }, _) => {
                 // PC-relative displacement, when chosen, is measured from this
                 // operand's own extension word (after the opcode and any prior
                 // operand's extension words).
                 let pc_ext = here + 2 + ext.len() as i64;
-                let (field6, words, reloc) = resolve_ea(
-                    op, sz, *dest, *modes, ctx, consts, cur_sec, pc_ext, here, line, warnings,
-                )?;
+                let (field6, words, reloc) =
+                    resolve_ea(op, sz, *dest, syms, cur_sec, pc_ext, here, line, warnings)?;
                 word |= field6 << shift;
                 if let Some(target_sec) = reloc {
                     relocs.push((pc_ext as u32, target_sec));
@@ -1086,7 +1119,7 @@ fn encode(
                 ext.extend_from_slice(&words);
             }
             (Slot::BranchW | Slot::DispW, Opnd::Abs(e)) => {
-                branch = Some(eval(e, consts, here, line)?)
+                branch = Some(eval(e, syms, here, line)?)
             }
             // `match_form` guarantees shapes fit, so other pairings can't occur.
             _ => return Err(AsmError::new(line, "internal: operand/slot mismatch")),
@@ -1223,9 +1256,7 @@ fn resolve_ea(
     op: &Opnd,
     sz: Size,
     dest: bool,
-    modes: EaModes,
-    ctx: &Ctx,
-    consts: &BTreeMap<String, i64>,
+    syms: &Syms,
     cur_sec: usize,
     pc_ext: i64,
     here: i64,
@@ -1245,13 +1276,9 @@ fn resolve_ea(
         Opnd::Mem {
             mode, reg, disp, ..
         } => {
-            // vasm drops a zero `d16(An)` displacement, shortening it to `(An)`.
-            if drops_zero_disp(*mode, disp, ctx, consts) {
-                return Ok((field(2, u16::from(*reg)), vec![], None));
-            }
             let mut ext = Vec::new();
             if let Some(e) = disp {
-                let raw = eval(e, consts, here, line)?;
+                let raw = eval(e, syms, here, line)?;
                 // `n(pc)`/`label(pc)` (mode 7) name the *target*, not the stored
                 // displacement: the displacement is `target - pc` (vasm treats a
                 // constant the same way as a label). An `d16(An)` displacement is
@@ -1270,7 +1297,7 @@ fn resolve_ea(
             long,
             bit,
         } => {
-            let raw = eval(disp, consts, here, line)?;
+            let raw = eval(disp, syms, here, line)?;
             // `d8(PC,Xn)` names the *target*, exactly as `d16(PC)` does above:
             // what is stored is `target - pc`. Only the base-register form
             // takes its displacement literally.
@@ -1291,39 +1318,22 @@ fn resolve_ea(
             };
             (field(mode, eareg), word.to_be_bytes().to_vec(), None)
         }
-        Opnd::Abs(e) => {
-            let v = eval(e, consts, here, line)?;
-            let target = reloc_sym(e, &ctx.reloc).and_then(|s| ctx.sec_of.get(s).copied());
-            // A relocatable label in the same section, in a slot that accepts
-            // PC-relative addressing, becomes `(d16,PC)` — shorter than (xxx).L
-            // and position-independent (vasm's preference). Cross-section refs
-            // can't be PC-relative (the hunks load independently), so they stay
-            // (xxx).L with a relocation.
-            if ctx.optimize && modes.allows(ea::PCD) && target == Some(cur_sec) {
-                let disp = v - pc_ext;
-                let d16 = i16::try_from(disp).map_err(|_| {
-                    AsmError::new(
-                        line,
-                        format!("PC-relative displacement {disp} out of range"),
-                    )
-                })?;
-                return Ok((field(7, 2), d16.to_be_bytes().to_vec(), None)); // (d16,PC)
-            }
-            // Otherwise (xxx).L; a relocatable target needs a relocation.
-            (field(7, 1), (v as u32).to_be_bytes().to_vec(), target)
+        // An unsized absolute is `(xxx).L`: the optimiser has already made it
+        // `(xxx).W` or `(d16,PC)` where vasm would.
+        Opnd::Abs(e) | Opnd::AbsL(e) => {
+            let v = eval(e, syms, here, line)?;
+            (
+                field(7, 1),
+                (v as u32).to_be_bytes().to_vec(),
+                relocation(e, syms, cur_sec),
+            )
         }
-        // Explicit `.w`/`.l` size forces — no auto-sizing or PC-relative rewrite.
         Opnd::AbsW(e) => {
-            let v = eval(e, consts, here, line)?;
+            let v = eval(e, syms, here, line)?;
             (field(7, 0), (v as u16).to_be_bytes().to_vec(), None)
         }
-        Opnd::AbsL(e) => {
-            let v = eval(e, consts, here, line)?;
-            let target = reloc_sym(e, &ctx.reloc).and_then(|s| ctx.sec_of.get(s).copied());
-            (field(7, 1), (v as u32).to_be_bytes().to_vec(), target)
-        }
         Opnd::Imm(e) => {
-            let v = eval(e, consts, here, line)?;
+            let v = eval(e, syms, here, line)?;
             // Out-of-range isn't fatal in vasm — it warns and keeps the low
             // `size` bytes. A byte immediate rides zero-extended in one word
             // (`#-1` -> `00ff`); when it overflows a byte, vasm keeps the raw
@@ -1346,7 +1356,7 @@ fn resolve_ea(
             // A long immediate holding a relocatable address (`move.l #label,…`)
             // stores the in-hunk offset and gets relocated at load time.
             let reloc = if matches!(sz, Size::L) {
-                reloc_sym(e, &ctx.reloc).and_then(|s| ctx.sec_of.get(s).copied())
+                relocation(e, syms, cur_sec)
             } else {
                 None
             };
@@ -1356,6 +1366,15 @@ fn resolve_ea(
             return Err(AsmError::new(line, "internal: non-EA operand used as EA"));
         }
     })
+}
+
+/// The section a 32-bit value is relocated into: the one its label is in,
+/// unless it is absolute.
+fn relocation(e: &Expr, syms: &Syms, cur_sec: usize) -> Option<usize> {
+    match syms.base(e, cur_sec) {
+        Base::Rel(sec) => Some(sec),
+        _ => None,
+    }
 }
 
 fn size_bits(enc: SizeEnc, size: Size) -> u16 {
@@ -1391,99 +1410,57 @@ fn push_sized(out: &mut Vec<u8>, v: i64, size: DataSize) {
 // Sizing (pass 1) — extension-word counts are fixed by operand shape and size
 // ---------------------------------------------------------------------------
 
-/// The byte length of one statement, given the optimizer context and whether a
-/// relaxable branch here has grown to its word form.
-fn stmt_size(
-    kind: &Stmt,
-    ctx: &Ctx,
-    consts: &BTreeMap<String, i64>,
-    cur_sec: usize,
-    word_branch: bool,
-    line: usize,
-) -> Result<usize, AsmError> {
-    Ok(match kind {
-        Stmt::Empty
-        | Stmt::End
-        | Stmt::Equ(..)
-        | Stmt::Even
-        | Stmt::Section(..)
-        | Stmt::Align(_)
-        | Stmt::Cnop(..)
-        | Stmt::Fail(_)
-        | Stmt::Output(_)
-        | Stmt::Assert(..)
-        | Stmt::Echo(_)
-        | Stmt::Nothing
-        | Stmt::Visible(_) => 0,
-        Stmt::Raw(payload) => payload.len(),
-        Stmt::Dc(size, items) => items.len() * size.bytes(),
-        Stmt::Ds(size, count) | Stmt::Dcb(size, count, _) => {
-            count_of(count, consts, line)? * size.bytes()
-        }
-        Stmt::Insn {
-            mnemonic,
-            size,
-            operands,
-        } => {
-            let (mnemonic, operands, size_override) = lower(mnemonic, *size, operands, ctx, consts);
-            let operands = operands.as_ref();
-            let written = size_override.or(*size);
-            let insn = m68k::SET
-                .instruction(mnemonic)
-                .ok_or_else(|| unknown_or_unmatched(mnemonic, line))?;
-            let form = match_form(insn, operands).ok_or_else(|| {
-                AsmError::new(line, format!("`{mnemonic}` has no form for those operands"))
-            })?;
-            let eff = branch_size(ctx.optimize, kind, &written, word_branch);
-            let sz = eff.unwrap_or(Size::W);
-            // Opcode word, plus each slot's extension words (a Quick8 immediate
-            // rides in the opcode, so it adds nothing).
-            let mut bytes = 2;
-            for (slot, op) in form.operands.iter().zip(operands) {
-                bytes += match slot {
-                    Slot::Dn { .. }
-                    | Slot::An { .. }
-                    | Slot::AddrIndirect { .. }
-                    | Slot::Quick8
-                    | Slot::Vec4
-                    | Slot::Ccr
-                    | Slot::Sr
-                    | Slot::Usp
-                    | Slot::Quick3 { .. } => 0,
-                    // A `.s`/`.b` branch packs its displacement in the opcode
-                    // word; the word form adds a 16-bit extension word.
-                    Slot::BranchW if matches!(eff, Some(Size::B)) => 0,
-                    // A long immediate needs two extension words; byte/word, one.
-                    Slot::ImmSized if matches!(sz, Size::L) => 4,
-                    Slot::BranchW
-                    | Slot::DispW
-                    | Slot::ImmWord
-                    | Slot::RegList
-                    | Slot::ImmSized
-                    | Slot::MovepDisp => 2,
-                    Slot::Ea { modes, .. } => ea_ext_len(op, sz, *modes, ctx, consts, cur_sec),
-                };
-            }
-            bytes
-        }
-    })
+/// The byte length of a settled instruction — what [`encode`] lays out for
+/// it, counted from its form and operands alone.
+fn concrete_size(c: &Concrete, line: usize) -> Result<i64, AsmError> {
+    let insn = m68k::SET
+        .instruction(&c.mnemonic)
+        .ok_or_else(|| unknown_or_unmatched(&c.mnemonic, line))?;
+    let form = match_form(insn, &c.operands).ok_or_else(|| {
+        AsmError::new(
+            line,
+            format!("`{}` has no form for those operands", c.mnemonic),
+        )
+    })?;
+    let sz = c.size.unwrap_or(Size::W);
+    // Opcode word, plus each slot's extension words (a Quick8 immediate rides
+    // in the opcode, so it adds nothing).
+    let mut bytes = 2;
+    for (slot, op) in form.operands.iter().zip(&c.operands) {
+        bytes += match slot {
+            Slot::Dn { .. }
+            | Slot::An { .. }
+            | Slot::AddrIndirect { .. }
+            | Slot::Quick8
+            | Slot::Vec4
+            | Slot::Ccr
+            | Slot::Sr
+            | Slot::Usp
+            | Slot::Quick3 { .. } => 0,
+            // A `.s`/`.b` branch packs its displacement in the opcode word;
+            // the word form adds a 16-bit extension word.
+            Slot::BranchW if c.size == Some(Size::B) => 0,
+            // A long immediate needs two extension words; byte/word, one.
+            Slot::ImmSized if matches!(sz, Size::L) => 4,
+            Slot::BranchW
+            | Slot::DispW
+            | Slot::ImmWord
+            | Slot::RegList
+            | Slot::ImmSized
+            | Slot::MovepDisp => 2,
+            Slot::Ea { .. } => ea_ext_len(op, sz),
+        };
+    }
+    Ok(bytes)
 }
 
 /// Extension-word byte count an operand contributes as an effective address —
 /// must match [`resolve_ea`] exactly so the layout and emit passes agree.
-fn ea_ext_len(
-    op: &Opnd,
-    sz: Size,
-    modes: EaModes,
-    ctx: &Ctx,
-    consts: &BTreeMap<String, i64>,
-    cur_sec: usize,
-) -> usize {
+fn ea_ext_len(op: &Opnd, sz: Size) -> i64 {
     match op {
         Opnd::DReg(_) | Opnd::AReg(_) => 0,
-        Opnd::Mem { mode, disp, .. } => {
-            // A dropped zero `d16(An)` displacement contributes no extension word.
-            if disp.is_some() && !drops_zero_disp(*mode, disp, ctx, consts) {
+        Opnd::Mem { disp, .. } => {
+            if disp.is_some() {
                 2
             } else {
                 0
@@ -1491,20 +1468,8 @@ fn ea_ext_len(
         }
         // The brief index extension word.
         Opnd::Idx { .. } => 2,
-        // A same-section relocatable label in a PC-capable slot becomes `(d16,PC)`
-        // (2 bytes); otherwise (xxx).L (4 bytes). Must mirror `resolve_ea`.
-        Opnd::Abs(e) => {
-            let same_sec = reloc_sym(e, &ctx.reloc)
-                .and_then(|s| ctx.sec_of.get(s))
-                .is_some_and(|s| *s == cur_sec);
-            if ctx.optimize && modes.allows(ea::PCD) && same_sec {
-                2
-            } else {
-                4
-            }
-        }
+        Opnd::Abs(_) | Opnd::AbsL(_) => 4,
         Opnd::AbsW(_) => 2,
-        Opnd::AbsL(_) => 4,
         Opnd::Imm(_) => {
             if matches!(sz, Size::L) {
                 4
@@ -1657,7 +1622,7 @@ impl Stmt {
     fn pad_at(
         &self,
         at: i64,
-        consts: &BTreeMap<String, i64>,
+        consts: &impl Lookup,
         line: usize,
     ) -> Result<Option<(i64, PadFill)>, AsmError> {
         Ok(match self {
@@ -1708,7 +1673,7 @@ impl PadFill {
 }
 
 /// Fold `align`'s exponent and turn it into the boundary it names.
-fn align_boundary(e: &Expr, consts: &BTreeMap<String, i64>, line: usize) -> Result<i64, AsmError> {
+fn align_boundary(e: &Expr, consts: &impl Lookup, line: usize) -> Result<i64, AsmError> {
     let exp = eval(e, consts, 0, line)?;
     if !(0..=30).contains(&exp) {
         return Err(AsmError::new(
@@ -3074,7 +3039,7 @@ fn parse_dcb(sz: &str, args: &str, line: usize) -> Result<Stmt, AsmError> {
 }
 
 /// Evaluate a `ds`/`dcb` repeat count against the pass-1 symbol table.
-fn count_of(e: &Expr, consts: &BTreeMap<String, i64>, line: usize) -> Result<usize, AsmError> {
+fn count_of(e: &Expr, consts: &impl Lookup, line: usize) -> Result<usize, AsmError> {
     match eval(e, consts, 0, line)? {
         v if v >= 0 => Ok(v as usize),
         v => Err(AsmError::new(line, format!("negative repeat count {v}"))),
@@ -4156,7 +4121,9 @@ mod directive_surface {
             crate::assemble_vasm(&source).expect_err("vasm rejects this size");
         }
 
-        let bytes = crate::assemble_vasm("\tblo.b target\ntarget:\tnop\n")
+        // Not a branch to the next instruction: vasm turns a short one into
+        // `lea (a6),a6`.
+        let bytes = crate::assemble_vasm("\tblo.b target\n\tnop\ntarget:\tnop\n")
             .expect("alias")
             .bytes;
         let listing = crate::listing_68000(&bytes, 0);
