@@ -51,7 +51,16 @@ RUN mkdir -p /tmp/cc65 && cd /tmp/cc65 \
     && git fetch -q --depth 1 origin "${CC65_REV}" && git checkout -q FETCH_HEAD \
     && make -C /tmp/cc65 -j"$(nproc)" BUILD_ID="Git $(echo "${CC65_REV}" | cut -c1-7)" \
     && install -m 0755 /tmp/cc65/bin/ca65 /tmp/cc65/bin/ld65 /usr/local/bin/ \
+    && cp -R /tmp/cc65/asminc /usr/local/asminc \
     && rm -rf /tmp/cc65
+# `.macpack` reads its packages from `asminc/`, which ca65 finds beside the
+# directory holding its binary: `/usr/local/bin/ca65` looks in
+# `/usr/local/asminc`. Without it every `.macpack` is refused, so the build
+# fails here rather than recording those refusals as ca65's verdicts.
+RUN for pack in generic cbm atari cpu; do \
+        printf '.macpack %s\n' "$pack" > /tmp/mp.s && ca65 /tmp/mp.s -o /tmp/mp.o || exit 1; \
+    done \
+    && rm /tmp/mp.s /tmp/mp.o
 
 # --- lwtools 4.25 ------------------------------------------------------------
 RUN curl -fsSL https://www.lwtools.ca/releases/lwtools/lwtools-4.25.tar.gz -o /tmp/lw.tar.gz \
