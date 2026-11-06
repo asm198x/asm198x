@@ -59,14 +59,27 @@ use crate::span::FileId;
 mod layout;
 mod project;
 use layout::{
-    BANK_SIZE, ROMX_BASE, check_rom_sections, place_floating_nonrom_sections,
-    place_floating_rom0_sections, section_default_base, section_kind, section_meta,
+    BANK_SIZE, ROMX_BASE, check_rom_sections, join_romx_to_rom0, place_floating_nonrom_sections,
+    place_floating_rom0_sections, rom0_end, section_default_base, section_kind, section_meta,
     section_region_start,
 };
 use project::{RgbasmEval, initial_symbols};
 
-/// The rgbasm (SM83) dialect.
-pub(crate) struct Rgbasm;
+/// RGBLINK's options that change where a section may go. The dialect links
+/// as `rgblink` does, so these are the linker's options, not `rgbasm`'s.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct Options {
+    /// `-t` (`--tiny`): link one unbanked 32 KiB ROM. ROM0 runs from `$0000`
+    /// to `$7FFF`, and each ROMX section joins it as a ROM0 section, which
+    /// `-t` allows only in bank 1. Plain `rgblink` keeps ROM0 to `$3FFF`.
+    pub tiny: bool,
+}
+
+/// The rgbasm (SM83) dialect, linked as `rgblink` links it under `options`.
+#[derive(Default)]
+pub(crate) struct Rgbasm {
+    pub(crate) options: Options,
+}
 
 impl Dialect for Rgbasm {
     /// Every instruction lowers by form; the only piece-encoded emissions
@@ -121,10 +134,13 @@ impl Dialect for Rgbasm {
         };
         let mut out = Vec::new();
         crate::ast::evaluate(&mut eval, &program.nodes, true, &mut out)?;
+        if self.options.tiny {
+            join_romx_to_rom0(&mut out, &sections);
+        }
         let banks = declared_banks(&out);
         resolve_banks(&mut out, &banks)?;
-        check_rom_sections(&out, &sections)?;
-        place_floating_rom0_sections(&mut out)?;
+        check_rom_sections(&out, &sections, self.options.tiny)?;
+        place_floating_rom0_sections(&mut out, rom0_end(self.options.tiny))?;
         place_floating_nonrom_sections(&mut out, &sections)?;
         let starts = declared_section_starts(&out);
         resolve_starts(&mut out, &starts)?;
@@ -155,10 +171,13 @@ impl Dialect for Rgbasm {
         };
         let mut out = Vec::new();
         crate::ast::evaluate(&mut eval, &program.nodes, true, &mut out)?;
+        if self.options.tiny {
+            join_romx_to_rom0(&mut out, &sections);
+        }
         let banks = declared_banks(&out);
         resolve_banks(&mut out, &banks)?;
-        check_rom_sections(&out, &sections)?;
-        place_floating_rom0_sections(&mut out)?;
+        check_rom_sections(&out, &sections, self.options.tiny)?;
+        place_floating_rom0_sections(&mut out, rom0_end(self.options.tiny))?;
         place_floating_nonrom_sections(&mut out, &sections)?;
         let starts = declared_section_starts(&out);
         resolve_starts(&mut out, &starts)?;
@@ -2883,6 +2902,72 @@ mod tests {
                 error.message,
                 format!("Unable to place \"{left}\" (ROM0 section) anywhere")
             );
+        }
+    }
+
+    /// `rgblink -t` links one unbanked 32 KiB ROM, measured against RGBDS
+    /// 1.0.4: ROM0 runs to `$7FFF`, a ROMX section joins ROM0 in bank 0 and
+    /// takes its turn in ROM0's layout, and one in any bank but 1 is refused.
+    #[test]
+    fn tiny_links_one_unbanked_32k_rom() {
+        let tiny = |source: &str| {
+            crate::assemble_rgbasm_files_with(
+                source,
+                "main.asm",
+                &crate::source::MemoryLoader::new(),
+                &crate::RgblinkOptions { tiny: true },
+            )
+        };
+        let full = tiny("SECTION \"a\", ROM0[$150]\n ds $8000-@, 1\n").expect("ROM0 to $7FFF");
+        assert_eq!(full.bytes.len(), 0x8000);
+        assert_eq!(full.bytes[0x7FFF], 1);
+
+        let floating = tiny(
+            "SECTION \"a\", ROM0[0]\n db BANK(\"b\")\n dw Lb\nSECTION \"b\", ROMX\nLb: db $bb\n",
+        )
+        .expect("floating ROMX");
+        assert_eq!(floating.bytes, [0x00, 0x03, 0x00, 0xBB]);
+        assert_eq!(floating.symbols["Lb"], 3);
+        assert_eq!(floating.debug.symbol_banks["Lb"], 0);
+
+        let pinned = tiny(
+            "SECTION \"a\", ROM0[0]\n db BANK(\"b\")\nSECTION \"b\", ROMX[$4000], BANK[1]\nLb: db $bb\n",
+        )
+        .expect("pinned ROMX");
+        assert_eq!(pinned.bytes.len(), 0x8000);
+        assert_eq!(pinned.bytes[0], 0);
+        assert_eq!(pinned.bytes[0x4000], 0xBB);
+        assert_eq!(pinned.debug.symbol_banks["Lb"], 0);
+
+        let ties = tiny(
+            "SECTION \"r0\", ROM0\n ds 16, 1\nSECTION \"rx\", ROMX\n ds 16, 2\n\
+             SECTION \"r1\", ROM0\n ds 16, 3\n",
+        )
+        .expect("equal sizes");
+        assert_eq!(
+            [ties.bytes[0x00], ties.bytes[0x10], ties.bytes[0x20]],
+            [3, 2, 1]
+        );
+
+        for (source, reasons) in [
+            (
+                "SECTION \"a\", ROM0[$7fff]\n db 1, 2\n",
+                &["Section \"a\"'s end address $8001 is greater than last address $8000"][..],
+            ),
+            (
+                "SECTION \"q\", ROMX, BANK[3]\n db 1\nSECTION \"p\", ROM0[$4100]\n db 1\n",
+                &[
+                    "Section \"q\" has type `ROMX`, which must be in bank 1 (if any) with option '-t'",
+                ],
+            ),
+            (
+                "SECTION \"a\", ROM0\n ds $7000, 1\nSECTION \"b\", ROMX\n ds $1001, 2\n",
+                &["Unable to place \"b\" (ROM0 section) anywhere"],
+            ),
+        ] {
+            let error = tiny(source).expect_err(source).error;
+            let said: Vec<String> = error.all().map(|e| e.message.clone()).collect();
+            assert_eq!(said, reasons, "{source}");
         }
     }
 

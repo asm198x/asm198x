@@ -248,11 +248,13 @@ fn assemble_flat(
     input: &str,
     loader: &dyn asm198x::source::SourceLoader,
     options: &asm198x::PasmoNextOptions,
+    rgblink: &asm198x::RgblinkOptions,
 ) -> Result<asm198x::AssemblyResult, asm198x::MultiFileError> {
     match assembler {
         Assembler::Pasmo { z80n } => {
             asm198x::assemble_pasmo_files_with(source, input, loader, *z80n, options)
         }
+        Assembler::Rgbasm => asm198x::assemble_rgbasm_files_with(source, input, loader, rgblink),
         other => {
             let entry = other
                 .multi_entry()
@@ -521,6 +523,17 @@ fn rgbasm_raw_image(bytes: &[u8]) -> Vec<u8> {
     image
 }
 
+/// The 32 KiB ROM `rgblink -t` always writes: the linked program, then `$00`
+/// to the end. There are no banks to pad, so `rgbfix -p` adds nothing after it.
+fn rgbasm_tiny_image(bytes: &[u8]) -> Result<Vec<u8>, String> {
+    if bytes.len() > 0x8000 {
+        return Err("a `--tiny` Game Boy ROM must fit in 32 KiB".into());
+    }
+    let mut image = bytes.to_vec();
+    image.resize(0x8000, 0);
+    Ok(image)
+}
+
 /// Which operation the invocation asks for. Named as a subcommand
 /// (`asm198x disasm …`), git/cargo style, per
 /// `decisions/packaging-and-cpu-roadmap.md`.
@@ -620,6 +633,8 @@ fn run(args: &[String]) -> Result<String, String> {
     let mut sna = false;
     let mut prg = false;
     let mut gb_rom = false;
+    // `--tiny` links the `--gb-rom` cartridge as `rgblink -t` does.
+    let mut tiny = false;
     // `--tap`/`--tzx` frame the program for tape; the `bas` spellings put
     // pasmo's auto-run BASIC loader in front of it.
     let mut tape: Option<(asm198x::TapeFormat, bool)> = None;
@@ -767,6 +782,7 @@ fn run(args: &[String]) -> Result<String, String> {
             "--sna" => sna = true,
             "--prg" => prg = true,
             "--gb-rom" => gb_rom = true,
+            "--tiny" => tiny = true,
             "--tap" => tape = Some((asm198x::TapeFormat::Tap, false)),
             "--tapbas" => tape = Some((asm198x::TapeFormat::Tap, true)),
             "--tzx" => tape = Some((asm198x::TapeFormat::Tzx, false)),
@@ -802,7 +818,7 @@ fn run(args: &[String]) -> Result<String, String> {
         for (present, option) in [
             (output.is_some(), "-o/--output"),
             (
-                exe || sna || prg || tape.is_some() || gb_rom,
+                exe || sna || prg || tape.is_some() || gb_rom || tiny,
                 "container output",
             ),
             (linker_config.is_some(), "-C"),
@@ -820,7 +836,7 @@ fn run(args: &[String]) -> Result<String, String> {
     if sym_format != asm198x::SymbolFormat::Native && sym.is_none() {
         return Err("`--sym-format` requires `--sym[=path]`".into());
     }
-    if format && (exe || sna || prg || tape.is_some() || gb_rom) {
+    if format && (exe || sna || prg || tape.is_some() || gb_rom || tiny) {
         return Err("container output options apply to assembly, not `fmt`".into());
     }
     if format && linker_config.is_some() {
@@ -976,6 +992,11 @@ fn run(args: &[String]) -> Result<String, String> {
         ));
     }
     let definitions = &pasmo_options;
+    if tiny && !gb_rom {
+        return Err(
+            "`--tiny` links a Game Boy ROM as `rgblink -t` does, so it needs `--gb-rom`".into(),
+        );
+    }
     if gb_rom && !matches!(assembler, Assembler::Rgbasm) {
         return Err("`--gb-rom` is only for the Game Boy dialect (rgbasm)".into());
     }
@@ -1265,7 +1286,8 @@ fn run(args: &[String]) -> Result<String, String> {
     // `--listing` on a multi-file program can splice the files (U9); the
     // resolution behaviour is the wrapped filesystem loader's, unchanged.
     let recorder = RecordingLoader::new(&loader);
-    let assembly = assemble_flat(&assembler, &source, input, &recorder, definitions)
+    let rgblink = asm198x::RgblinkOptions { tiny };
+    let assembly = assemble_flat(&assembler, &source, input, &recorder, definitions, &rgblink)
         .map_err(|e| render_multi_error(input, &e))?;
     for w in &assembly.warnings {
         // A warning inside an included file names that file (the multi-file
@@ -1343,8 +1365,14 @@ fn run(args: &[String]) -> Result<String, String> {
         (summary, out_path)
     } else if gb_rom {
         // rgbfix finishes what RGBLINK wrote: whole banks, so a program that
-        // ends before the $0100-$014F header still has one to fill in.
-        let (image, overwrote_logo) = game_boy_rom(&rgbasm_raw_image(&assembly.bytes))?;
+        // ends before the $0100-$014F header still has one to fill in. Under
+        // `-t` that is always one 32 KiB ROM.
+        let linked = if tiny {
+            rgbasm_tiny_image(&assembly.bytes)?
+        } else {
+            rgbasm_raw_image(&assembly.bytes)
+        };
+        let (image, overwrote_logo) = game_boy_rom(&linked)?;
         if overwrote_logo {
             eprintln!("asm198x: warning: overwrote a non-zero byte in the Nintendo logo");
         }
@@ -2136,8 +2164,11 @@ fn usage() -> String {
      \x20             for its RANDOMIZE USR line)\n\
      C64 program: asm198x --dialect acme --prg <input> [-o <out.prg>]\n\
      \x20            (prepends the 2-byte load address)\n\
-     Game Boy ROM: asm198x --dialect rgbasm --gb-rom <input> [-o <out.gb>]\n\
-     \x20            (RGBLINK-compatible layout, padding and header checksums)\n\
+     Game Boy ROM: asm198x --dialect rgbasm --gb-rom [--tiny] <input> [-o <out.gb>]\n\
+     \x20            (links as rgblink does, then finishes as rgbfix -v -p 0xFF:\n\
+     \x20             ROM0 is $0000-$3FFF and the ROM pads with $FF to a power\n\
+     \x20             of two; --tiny links as rgblink -t instead: one 32 KiB\n\
+     \x20             ROM0 at $0000-$7FFF that ROMX joins, its gaps left $00)\n\
      convert:     asm198x convert --from pasmo --to sjasmplus <input> [-o <out>]\n\
      \x20            (parse-and-re-emit dialect conversion, same CPU; output is\n\
      \x20             written only when both sides assemble byte-identically)\n\
@@ -2349,8 +2380,16 @@ fn emit_json(
         }
         // Every flat dialect goes through its multi-file entry (the same
         // table as the human path); ca65/vasm are the arms above.
-        other => assemble_flat(other, source, input, &loader, definitions)
-            .map_err(|e| capture_failure(&mut failure_files, e)),
+        other => assemble_flat(
+            other,
+            source,
+            input,
+            &loader,
+            definitions,
+            // `--tiny` needs `--gb-rom`, which JSON output does not take yet.
+            &asm198x::RgblinkOptions::default(),
+        )
+        .map_err(|e| capture_failure(&mut failure_files, e)),
     };
     // An explicit container is an artifact request even without `-o`. Plain
     // JSON queries retain their existing no-file default. Reporting must not
@@ -2608,6 +2647,16 @@ mod tests {
         let (ours, overwrote_logo) = game_boy_rom(&image).expect("finalise probe ROM");
         assert!(overwrote_logo);
         assert_eq!(ours, reference);
+    }
+
+    #[test]
+    fn rgbasm_tiny_images_are_always_32k_of_zero_fill() {
+        let image = rgbasm_tiny_image(&[0xAA; 0x101]).expect("fits");
+        assert_eq!(image.len(), 0x8000);
+        assert_eq!(image[0x100], 0xAA);
+        assert!(image[0x101..].iter().all(|&byte| byte == 0));
+        assert_eq!(rgbasm_tiny_image(&[]).expect("empty").len(), 0x8000);
+        assert!(rgbasm_tiny_image(&vec![0; 0x8001]).is_err());
     }
 
     #[test]
