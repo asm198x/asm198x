@@ -9,12 +9,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.0.76](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.75...asm198x-v0.0.76) - 2026-11-06
 
+The vasm dialect now writes the bytes vasm itself writes, and two ca65
+functions match ca65. This is also the first release since 0.0.74 with
+downloadable binaries and a Homebrew formula: the 0.0.75 build stopped after
+crates.io (see *Fixed*).
+
+### Changed
+
+- **vasm: 68000 source is optimised exactly as `vasmm68k_mot` 2.0f optimises
+  it by default** ([#1059](https://github.com/asm198x/asm198x/pull/1059)).
+  Absolute addresses shorten to `abs.w`, same-section labels are reached
+  PC-relative, `jmp`/`jsr` become `bra`/`bsr`, and the `moveq`, `movem`, `lea`,
+  `add`/`sub`, `cmp` and `asl` rewrites apply, all as vasm's manual and backend
+  define them. Branches size the way vasm's pass loop sizes them, and only
+  absolute values are optimised, so a small section offset no longer turns
+  `add.l #label,d0` into `addq`. The same source can give different bytes from
+  0.0.75; they are now vasm's. All 442 Amiga sources in Code198x's pattern
+  library build to vasm's hunk executable, where 103 did before.
+
 ### Fixed
 
-- *(vasm)* read * in dc and dcb as vasm does
-- *(vasm)* write the bytes vasm's default invocation writes
-- *(ca65)* treat a .mid start above 100 as 0, as ca65 does
-- *(ca65)* format .sprintf as ca65 does, not as C does
+- **vasm:** a label before any `section` opens vasm's default section, `ds`
+  takes a forward count, an `equ` of a forward label is relocated, and `*` in
+  `dc` and `dcb` reads the address vasm reads
+  ([#1059](https://github.com/asm198x/asm198x/pull/1059)).
+- **ca65: `.sprintf` formats as ca65 does, not as C's `printf` does**
+  ([#1056](https://github.com/asm198x/asm198x/pull/1056), through
+  lang198x-ca65 0.0.34). `%x` is signed, `+` and a space mark unsigned
+  conversions, `%#x` of 0 is `0x0`, and `%s` and `%c` pad on the right.
+- **ca65:** `.mid` with a start below 0 or above 100 starts at 0, as ca65
+  does, so `.mid(200, 1, {7})` gives `07`
+  ([#1058](https://github.com/asm198x/asm198x/pull/1058), through
+  lang198x-ca65 0.0.35).
+- **Release binaries for Apple Silicon build again**
+  ([#1055](https://github.com/asm198x/asm198x/pull/1055)). GitHub retired the
+  `macos-14` runner, which cancelled the 0.0.75 build before its GitHub
+  release, archives and Homebrew formula.
+
+### Documentation
+
+- **The book's comparison figures now include Code198x's pattern library**
+  ([#972](https://github.com/asm198x/asm198x/pull/972)): 2,047 sources on 30
+  machines, each with a verdict from its machine's reference assembler. Two
+  BBC Micro sources still differ from ACME and are listed on the divergences
+  page under [#968](https://github.com/asm198x/asm198x/issues/968).
 
 ## [0.0.75](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.74...asm198x-v0.0.75) - 2026-11-06
 
