@@ -228,7 +228,7 @@ impl From<Assembly> for AssemblyResult {
             start: a.start,
             warnings: a.warnings,
             debug: a.debug,
-            section_debug: Vec::new(),
+            section_debug: a.section_debug,
             diagnostics: Vec::new(),
             files: Vec::new(),
             requested_output: a.requested_output,

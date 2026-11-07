@@ -259,6 +259,19 @@ pub(crate) trait Dialect {
         1
     }
 
+    /// Whether the result describes each section this dialect opens, with its
+    /// CPU base and its place in the image, in
+    /// [`AssemblyResult::section_debug`](crate::AssemblyResult::section_debug).
+    ///
+    /// A dialect whose sections have addresses of their own answers `true`, so
+    /// its debug sidecar, symbols and listings place each label and line at
+    /// the address the CPU sees: a Game Boy section pinned at `$0100` holds
+    /// its first label at `$0100`, not at offset 0. Every flat dialect is one
+    /// section and answers `false`.
+    fn sections_reach_the_result(&self) -> bool {
+        false
+    }
+
     /// Where this dialect's image begins, when its container fixes that rather
     /// than the program's own lowest section.
     ///

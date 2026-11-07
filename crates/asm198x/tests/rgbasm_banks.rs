@@ -144,11 +144,85 @@ fn matches_rgblink_bytes_and_every_symbol_bank() {
             result.debug.symbol_banks[name],
             u32::from_str_radix(bank, 16).expect("bank")
         );
-        assert_eq!(
-            result.symbols[name],
-            i64::from_str_radix(address, 16).expect("address")
-        );
+        let address = u64::from_str_radix(address, 16).expect("address");
+        assert_eq!(result.symbols[name], address as i64);
+        assert_eq!(sidecar_addresses(&result)[name], address, "sidecar {name}");
         count += 1;
     }
     assert_eq!(count, result.debug.symbol_banks.len());
+}
+
+/// Each label's address as the Debug198x sidecar places it: its section's
+/// base plus its offset.
+fn sidecar_addresses(result: &asm198x::AssemblyResult) -> std::collections::BTreeMap<String, u64> {
+    let info = asm198x::debug_info(result, "sm83", "rgbasm", "input.asm");
+    info.symbols
+        .iter()
+        .filter_map(|symbol| match symbol.kind {
+            asm198x::debug198x::SymbolKind::Label {
+                section, offset, ..
+            } => {
+                let base = info.sections.iter().find(|s| s.id == section)?.base?;
+                Some((symbol.name.clone(), base + offset))
+            }
+            _ => None,
+        })
+        .collect()
+}
+
+/// A section pinned away from `$0000`, a floating one, banked ROM and RAM.
+const PLACED: &str = "SECTION \"c\", ROM0[$100]\nLab: nop\nMid: nop\nSECTION \"f\", ROM0\nFl: db 1\nSECTION \"x\", ROMX, BANK[2]\nXa: db 2\nXb: dw Xa\nSECTION \"w\", WRAM0\nWv: ds 4\nWn: ds 1\nDEF K EQU 5\n";
+
+/// The sidecar, `--sym` and the resolved symbols are three views of one
+/// address, so they must agree (#1054). Before, the sidecar and `--sym` gave
+/// `Lab` its offset in its section, `$0000`.
+#[test]
+fn every_view_of_a_label_gives_the_address_the_cpu_sees() {
+    let result = assemble_rgbasm(PLACED).expect("assembly");
+    let placed = sidecar_addresses(&result);
+    assert_eq!(placed.len(), 7);
+    for (name, address) in &placed {
+        assert_eq!(result.symbols[name], *address as i64, "{name}");
+    }
+    assert_eq!(placed["Lab"], 0x100);
+    assert_eq!(placed["Xb"], 0x4001);
+    assert_eq!(placed["Wn"], 0xC004);
+    let sym = asm198x::render_sym(&asm198x::debug_info(&result, "sm83", "rgbasm", "input.asm"));
+    assert!(sym.contains("Lab = $0100\n"), "{sym}");
+    assert!(sym.contains("K = $0005\n"), "{sym}");
+}
+
+/// A line record names the address its bytes were assembled at, and the
+/// section says where those bytes sit in the ROM.
+#[test]
+fn line_records_point_at_their_bytes() {
+    let result = assemble_rgbasm(PLACED).expect("assembly");
+    let info = asm198x::debug_info(&result, "sm83", "rgbasm", "input.asm");
+    for line in &info.lines {
+        let section = result
+            .section_debug
+            .iter()
+            .find(|s| s.section.id == line.section)
+            .expect("line's section");
+        let Some(file_offset) = section.file_offset else {
+            continue;
+        };
+        let at = (file_offset + line.offset) as usize;
+        let expected: &[u8] = match line.line {
+            2 | 3 => &[0x00],
+            5 => &[0x01],
+            7 => &[0x02],
+            8 => &[0x00, 0x40],
+            other => panic!("unexpected line {other}"),
+        };
+        assert_eq!(
+            &result.bytes[at..at + expected.len()],
+            expected,
+            "line {}",
+            line.line
+        );
+    }
+    let lab = info.lines.iter().find(|l| l.line == 2).expect("line 2");
+    let base = info.sections[lab.section as usize].base.expect("base");
+    assert_eq!(base + lab.offset, 0x100);
 }

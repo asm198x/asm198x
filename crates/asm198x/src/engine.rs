@@ -96,6 +96,10 @@ pub struct Assembly {
     /// one entry per section statement, in the order the program opened
     /// them. Empty for a flat program.
     pub(crate) sections: Vec<SectionRecord>,
+    /// The sections again, placed, for a dialect whose result carries them
+    /// ([`Dialect::sections_reach_the_result`]): each one's CPU base and
+    /// where it sits in `bytes`. Empty for every other dialect.
+    pub(crate) section_debug: Vec<crate::contract::SectionDebug>,
 }
 
 /// One section's slice of [`Assembly::debug`]: each symbol, line and
@@ -109,6 +113,36 @@ pub(crate) struct SectionRecord {
     /// The bytes of a section the image has no place for, such as RAM,
     /// which a toolchain may still want to look at. Empty for the others.
     pub(crate) discarded: Vec<u8>,
+    /// The address the CPU sees the section at.
+    pub(crate) base: i64,
+    /// Where its bytes sit in the image.
+    pub(crate) at: Place,
+    /// How many bytes it put in the image.
+    pub(crate) len: usize,
+}
+
+/// A section as the walk closes it: its name, where its records start in the
+/// debug record, and its placement.
+struct Opened {
+    name: String,
+    mark: Mark,
+    discarded: Vec<u8>,
+    base: i64,
+    at: Place,
+    len: usize,
+}
+
+impl Opened {
+    fn close(name: String, mark: Mark, base: i64, at: Place, bytes: &[u8]) -> Self {
+        Self {
+            name,
+            mark,
+            discarded: discarded_bytes(at, bytes),
+            base,
+            at,
+            len: bytes.len(),
+        }
+    }
 }
 
 /// The engine's slice of a `.debug198x` record: typed symbols and line→address
@@ -216,15 +250,19 @@ impl DebugData {
 
     /// The records split at each section's mark: a section holds what was
     /// made from its mark to the next section's.
-    fn split(&self, opened: Vec<(String, Mark, Vec<u8>)>) -> Vec<SectionRecord> {
-        let mut ends: Vec<Mark> = opened.iter().skip(1).map(|next| next.1).collect();
+    fn split(&self, opened: Vec<Opened>) -> Vec<SectionRecord> {
+        let mut ends: Vec<Mark> = opened.iter().skip(1).map(|next| next.mark).collect();
         ends.push(self.mark());
         opened
             .into_iter()
             .zip(ends)
-            .map(|((name, from, discarded), to)| SectionRecord {
-                name,
-                discarded,
+            .map(|(section, to)| (section.mark, section, to))
+            .map(|(from, section, to)| SectionRecord {
+                name: section.name,
+                discarded: section.discarded,
+                base: section.base,
+                at: section.at,
+                len: section.len,
                 debug: DebugData {
                     symbols: self.symbols[from.symbols..to.symbols].to_vec(),
                     lines: self.lines[from.lines..to.lines].to_vec(),
@@ -584,6 +622,82 @@ pub(crate) fn lay_out(
         image.resize(size, gap_fill);
     }
     Ok((origin, image))
+}
+
+/// Each section a program opened, as its result describes it: the CPU base,
+/// where its bytes sit in the image, and the labels, lines and timing made in
+/// it, with offsets from that base.
+///
+/// A section's place in the image is the one [`lay_out`] gave it: its own
+/// `at` where it has one and otherwise its address, counted from where the
+/// image begins. A `Next` section follows the one before it, and a discarded
+/// one has no place. What came before the first section statement is left
+/// out when it holds no label or line. Constants have no section, so they
+/// stay in the flat record.
+fn placed_sections(
+    records: &[SectionRecord],
+    image_base: Option<i64>,
+    addr_unit: i64,
+) -> Vec<crate::contract::SectionDebug> {
+    let placed = |r: &SectionRecord| match r.at {
+        Place::At(n) => Some(n),
+        Place::ByAddress => Some(r.base),
+        Place::Next | Place::Discard => None,
+    };
+    let first = image_base
+        .or_else(|| {
+            records
+                .iter()
+                .filter(|r| r.len > 0)
+                .filter_map(placed)
+                .min()
+        })
+        .unwrap_or(0);
+    let mut sections = Vec::new();
+    let mut previous: Option<(Option<u64>, usize)> = None;
+    for record in records {
+        let file_offset = match record.at {
+            Place::Next => previous.and_then(|(at, len)| at.map(|at| at + len as u64)),
+            _ => placed(record).and_then(|at| u64::try_from((at - first) * addr_unit).ok()),
+        };
+        previous = Some((file_offset, record.len));
+        let id = sections.len() as debug198x::SectionId;
+        let symbols: Vec<debug198x::Symbol> = record
+            .debug
+            .symbols
+            .iter()
+            .filter(|s| !matches!(s.kind, debug198x::SymbolKind::Const { .. }))
+            .cloned()
+            .map(|mut symbol| {
+                if let debug198x::SymbolKind::Label { section, .. }
+                | debug198x::SymbolKind::Entry { section, .. } = &mut symbol.kind
+                {
+                    *section = id;
+                }
+                symbol
+            })
+            .collect();
+        if record.name.is_empty() && symbols.is_empty() && record.debug.lines.is_empty() {
+            continue;
+        }
+        sections.push(crate::contract::SectionDebug {
+            section: debug198x::Section {
+                id,
+                name: record.name.clone(),
+                base: u64::try_from(record.base).ok(),
+                space: None,
+            },
+            file_offset,
+            debug: DebugData {
+                symbols,
+                lines: record.debug.lines.clone(),
+                cycles: record.debug.cycles.clone(),
+                cycle_coverage: record.debug.cycle_coverage,
+                ..DebugData::default()
+            },
+        });
+    }
+    sections
 }
 
 /// One section's placed bytes, closed off when the next section opens.
@@ -1114,7 +1228,7 @@ fn assemble_once(
     };
     // Each section a section statement closed: its name, where its records
     // start in `debug`, and its bytes if the image has no place for them.
-    let mut opened: Vec<(String, Mark, Vec<u8>)> = Vec::new();
+    let mut opened: Vec<Opened> = Vec::new();
     let fill_has_lines = dialect.fill_has_lines();
     let address_limit = 1i64 << dialect.address_bits();
     let mut debug_mark = Mark::default();
@@ -1220,8 +1334,13 @@ fn assemble_once(
                 // written-range trims and the 64K check all measure within
                 // this section rather than across the image.
                 if base.is_some() || *at == Place::Next {
-                    let discarded = discarded_bytes(section_at, &bytes);
-                    opened.push((section_name.clone(), debug_mark, discarded));
+                    opened.push(Opened::close(
+                        section_name.clone(),
+                        debug_mark,
+                        origin,
+                        section_at,
+                        &bytes,
+                    ));
                     debug_mark = debug.mark();
                     runs.push(Run {
                         name: std::mem::take(&mut section_name),
@@ -2147,8 +2266,13 @@ fn assemble_once(
     // Lay the sections into one image. Only a dialect that opened a section
     // reaches this; the flat path below is unchanged for the other twenty.
     if !runs.is_empty() {
-        let discarded = discarded_bytes(section_at, &bytes);
-        opened.push((section_name.clone(), debug_mark, discarded));
+        opened.push(Opened::close(
+            section_name.clone(),
+            debug_mark,
+            origin,
+            section_at,
+            &bytes,
+        ));
         runs.push(Run {
             name: section_name,
             base: origin,
@@ -2185,8 +2309,14 @@ fn assemble_once(
             }
         }
         let sections = debug.split(opened);
+        let section_debug = if dialect.sections_reach_the_result() {
+            placed_sections(&sections, dialect.image_base(), addr_unit)
+        } else {
+            Vec::new()
+        };
         return Ok(Assembly {
             sections,
+            section_debug,
             requested_output,
             requested_symbols,
             artifacts,
@@ -2271,6 +2401,7 @@ fn assemble_once(
     );
     Ok(Assembly {
         sections: Vec::new(),
+        section_debug: Vec::new(),
         requested_output,
         requested_symbols,
         artifacts,
