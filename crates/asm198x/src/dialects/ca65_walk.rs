@@ -468,8 +468,6 @@ struct Walk<'f> {
     /// Each equate whose value was not known when it was defined, by its
     /// full name, with the names it reads bound.
     equates: HashMap<String, Expr>,
-    /// The equates being worked out, so one that reads itself stops.
-    evaluating: RefCell<HashSet<String>>,
     /// Every equate's value, with the names it reads bound, and where it
     /// was defined, for the circles ca65 finds as it reads a value.
     definitions: HashMap<String, (Expr, Span)>,
@@ -2828,6 +2826,53 @@ impl Walk<'_> {
     /// value was not known when it was defined is worked out again, from
     /// the names it read.
     fn known(&self, full: &str) -> Value {
+        if !self.names.contains_key(full) || !self.equates.contains_key(full) {
+            return self.initial_value(full);
+        }
+        // Each deferred name may depend on another deferred name. Keep that
+        // dependency walk on the heap: a real program's alias depth must not
+        // become the process's call-stack depth (notably on Windows).
+        let mut pending = vec![(full.to_owned(), false)];
+        let mut active = HashSet::new();
+        let mut values = HashMap::new();
+        while let Some((name, finish)) = pending.pop() {
+            if finish {
+                if let Some(expr) = self.equates.get(&name) {
+                    let value = lower::value(expr, &FullNames(self, &values));
+                    values.insert(name.clone(), value);
+                }
+                active.remove(&name);
+                continue;
+            }
+            if values.contains_key(&name) || active.contains(&name) {
+                continue;
+            }
+            let Some(expr) = self
+                .equates
+                .get(&name)
+                .filter(|_| self.names.contains_key(&name))
+            else {
+                values.insert(name.clone(), self.initial_value(&name));
+                continue;
+            };
+            active.insert(name.clone());
+            pending.push((name, true));
+            let mut reads = Vec::new();
+            map_sym_expr(expr.clone(), &mut |name| {
+                reads.push(name.clone());
+                Expr::Sym(name)
+            });
+            pending.extend(reads.into_iter().rev().map(|name| (name, false)));
+        }
+        values
+            .get(full)
+            .copied()
+            .unwrap_or_else(|| self.initial_value(full))
+    }
+
+    /// The value already recorded for a name, before following its equate.
+    /// An active cycle reads this value, as the recursive evaluator did.
+    fn initial_value(&self, full: &str) -> Value {
         let Some(&value) = self.names.get(full) else {
             if let Some(value) = self.predefined(full) {
                 return Value::Constant(value);
@@ -2858,15 +2903,7 @@ impl Walk<'_> {
                 _ => Value::Unknown,
             };
         };
-        let Some(expr) = self.equates.get(full) else {
-            return value;
-        };
-        if !self.evaluating.borrow_mut().insert(full.to_owned()) {
-            return value;
-        }
-        let now = lower::value(expr, &FullNames(self));
-        self.evaluating.borrow_mut().remove(full);
-        now
+        value
     }
 }
 
@@ -2952,11 +2989,14 @@ impl Known for AtPc<'_, '_> {
 
 /// The walk, asked about names that are already full names, as the names
 /// an equate read are once they are bound.
-struct FullNames<'w, 'f>(&'w Walk<'f>);
+struct FullNames<'w, 'f>(&'w Walk<'f>, &'w HashMap<String, Value>);
 
 impl Known for FullNames<'_, '_> {
     fn name(&self, name: &str) -> Value {
-        self.0.known(name)
+        self.1
+            .get(name)
+            .copied()
+            .unwrap_or_else(|| self.0.initial_value(name))
     }
 
     fn pc(&self) -> Value {

@@ -6,11 +6,14 @@ use std::time::{Duration, Instant};
 mod scratch;
 
 fn run(root: &Path, args: &[&str]) -> Output {
+    capture(root, Command::new(env!("CARGO_BIN_EXE_asm198x")).args(args))
+}
+
+fn capture(root: &Path, command: &mut Command) -> Output {
     let stdout = root.join("cli.stdout");
     let stderr = root.join("cli.stderr");
-    let mut child = Command::new(env!("CARGO_BIN_EXE_asm198x"))
+    let mut child = command
         .current_dir(root)
-        .args(args)
         .stdout(Stdio::from(
             std::fs::File::create(&stdout).expect("stdout log"),
         ))
@@ -27,7 +30,7 @@ fn run(root: &Path, args: &[&str]) -> Output {
         if Instant::now() >= deadline {
             child.kill().expect("kill timed-out CLI");
             child.wait().expect("reap timed-out CLI");
-            panic!("CLI failed to complete within five seconds: {args:?}");
+            panic!("process failed to complete within five seconds: {command:?}");
         }
         std::thread::sleep(Duration::from_millis(10));
     }
@@ -45,6 +48,79 @@ fn shape(root: &Path) -> Vec<serde_json::Value> {
         .map(|line| serde_json::from_str::<serde_json::Value>(line).expect("debug record"))
         .filter(|row| row["t"] == "symbol" || row["t"] == "section")
         .collect()
+}
+
+/// Run in a subprocess: an overflow aborts rather than unwinding, so it
+/// must fail this test without taking down the other fixture checks.
+#[test]
+fn long_forward_aliases_fit_a_small_stack_and_still_refuse_cycles() {
+    const CHILD: &str = "ASM198X_CA65_ALIAS_STACK_CHILD";
+    if std::env::var_os(CHILD).is_some() {
+        let facts: serde_json::Value =
+            serde_json::from_str(include_str!("fixtures/ca65-deferred-aliases.json"))
+                .expect("native fixture");
+        let fact = facts["cases"]
+            .as_array()
+            .expect("cases")
+            .iter()
+            .find(|fact| fact["name"] == "long_forward_chain")
+            .expect("long chain");
+        let source = fact["source"].as_str().expect("source").to_owned();
+        let config = fact["config"].as_str().expect("config").to_owned();
+        std::thread::Builder::new()
+            .stack_size(1024 * 1024)
+            .spawn(move || {
+                let assemble = |source: &str| {
+                    asm198x::assemble_ca65_files_with_config(
+                        source,
+                        "input.s",
+                        &asm198x::source::MemoryLoader::new(),
+                        &config,
+                    )
+                };
+                assert_eq!(assemble(&source).expect("native chain").bytes, [0x34]);
+                // The alias traversal must handle expressions as well as copies.
+                let expressions = source
+                    .lines()
+                    .map(|line| {
+                        if line.starts_with("LINK_") {
+                            format!("{line}+0\n")
+                        } else {
+                            format!("{line}\n")
+                        }
+                    })
+                    .collect::<String>();
+                assert_eq!(
+                    assemble(&expressions).expect("expression chain").bytes,
+                    [0x34]
+                );
+                let cycle = source.replace("LINK_500=$34", "LINK_500=LINK_0");
+                assert!(
+                    assemble(&cycle).is_err(),
+                    "a circular chain cannot assemble"
+                );
+            })
+            .expect("small-stack thread")
+            .join()
+            .expect("small-stack assembly");
+        return;
+    }
+    let root = scratch::dir("ca65-alias-small-stack");
+    let output = capture(
+        &root,
+        Command::new(std::env::current_exe().expect("test executable"))
+            .args([
+                "--exact",
+                "long_forward_aliases_fit_a_small_stack_and_still_refuse_cycles",
+                "--nocapture",
+            ])
+            .env(CHILD, "1"),
+    );
+    assert!(output.status.success(), "{output:?}");
+    assert!(
+        String::from_utf8_lossy(&output.stdout).contains("1 passed"),
+        "{output:?}"
+    );
 }
 
 #[test]
