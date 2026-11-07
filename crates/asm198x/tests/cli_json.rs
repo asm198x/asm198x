@@ -436,7 +436,14 @@ fn json_save_artifacts_match_human_files_and_report_resolved_writes() {
                     "Note",
                     "not an advisory warning"
                 );
-                assert!(result.warnings[0].message.ends_with(relative));
+                assert!(
+                    result.warnings[0]
+                        .message
+                        .replace('\\', "/")
+                        .ends_with(relative),
+                    "{}",
+                    result.warnings[0].message
+                );
                 assert!(
                     !src.with_extension("bin").exists(),
                     "SAVE doesn't request a default primary image"
