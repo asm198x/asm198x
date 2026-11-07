@@ -468,7 +468,9 @@ fn routine_budgets_cross_logical_spans_and_preserve_outputs_on_failure() {
             );
             if name == "included_cycle" {
                 assert!(
-                    String::from_utf8_lossy(&fail.stderr).contains("sub/cycles.inc:6:"),
+                    String::from_utf8_lossy(&fail.stderr)
+                        .replace('\\', "/")
+                        .contains("sub/cycles.inc:6:"),
                     "{fail:?}"
                 );
                 assert_eq!(
