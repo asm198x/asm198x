@@ -2282,8 +2282,13 @@ fn a_tool_killed_by_a_signal_is_not_a_verdict() {
         c.arg("-c").arg("kill -9 $$");
         vec![c]
     });
+    let expected_reason = if cfg!(unix) {
+        "killed by a signal"
+    } else {
+        "without saying why"
+    };
     assert!(
-        matches!(&outcome, RefOutcome::NonVerdict { reason } if reason.contains("signal")),
+        matches!(&outcome, RefOutcome::NonVerdict { reason } if reason.contains(expected_reason)),
         "{outcome:?}"
     );
 }
