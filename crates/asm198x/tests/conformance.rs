@@ -100,7 +100,7 @@ fn ref_outcome(
         };
     }
     for mut cmd in build(&src, &out) {
-        let finished = match cmd.current_dir(tmp).output() {
+        let finished = match support::run::output(cmd.current_dir(tmp), text) {
             Ok(o) => o,
             Err(e) => {
                 return RefOutcome::NonVerdict {

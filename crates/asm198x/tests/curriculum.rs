@@ -99,7 +99,8 @@ fn label(file: &Path) -> String {
 
 /// Run a reference command in `tmp` and return the bytes it wrote to `out`.
 fn ref_bytes(tmp: &Path, out: &Path, mut build: Command) -> Option<Vec<u8>> {
-    let status = build.current_dir(tmp).output().ok()?;
+    let status =
+        support::run::output(build.current_dir(tmp), "the files on its command line").ok()?;
     if !status.status.success() {
         return None;
     }
@@ -291,9 +292,7 @@ fn curriculum_is_byte_identical() {
             let rom = tmp.join("ref.nes");
             let mut ca = Command::new("ca65");
             ca.arg(file).arg("-o").arg(&obj);
-            let assembled = ca
-                .current_dir(&tmp)
-                .output()
+            let assembled = support::run::output(ca.current_dir(&tmp), &file.display().to_string())
                 .map(|o| o.status.success())
                 .unwrap_or(false);
             let mut ld = Command::new("ld65");
@@ -547,15 +546,17 @@ fn curriculum_is_byte_identical() {
             let obj = tmp.join("ref816.o");
             let bin = tmp.join("ref816.bin");
             fs::write(&asm, src).expect("write 65816 source");
-            let assembled = Command::new("ca65")
-                .args(["--cpu", "65816"])
-                .arg(&asm)
-                .arg("-o")
-                .arg(&obj)
-                .current_dir(&tmp)
-                .output()
-                .map(|o| o.status.success())
-                .unwrap_or(false);
+            let assembled = support::run::output(
+                Command::new("ca65")
+                    .args(["--cpu", "65816"])
+                    .arg(&asm)
+                    .arg("-o")
+                    .arg(&obj)
+                    .current_dir(&tmp),
+                src,
+            )
+            .map(|o| o.status.success())
+            .unwrap_or(false);
             let mut ld = Command::new("ld65");
             ld.arg("-C").arg(&cfg).arg(&obj).arg("-o").arg(&bin);
             match (assembled, ref_bytes(&tmp, &bin, ld)) {
@@ -734,8 +735,7 @@ fn game_boy_link_problem(job: &support::patterns::Job, tmp: &Path) -> Option<Str
     let obj = tmp.join("ref-link-probe.o");
     let out = tmp.join("ref-link-probe.gb");
     let run = |cmd: &mut Command| {
-        cmd.current_dir(&job.dir)
-            .output()
+        support::run::output(cmd.current_dir(&job.dir), &job.relpath)
             .map(|o| o.status.success())
             .map_err(|e| format!("{}: cannot run {:?}: {e}", job.relpath, cmd.get_program()))
     };
@@ -853,9 +853,7 @@ fn pattern_reference(
         }
     }
     for mut step in steps {
-        let output = step
-            .current_dir(&job.dir)
-            .output()
+        let output = support::run::output(step.current_dir(&job.dir), &job.relpath)
             .map_err(|e| format!("cannot run {:?}: {e}", step.get_program()))?;
         match output.status.code() {
             Some(0) => {}

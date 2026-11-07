@@ -182,7 +182,7 @@ fn reference_bytes(
     let _ = fs::remove_file(&out);
     let run = |cmds: Vec<Command>| -> Option<()> {
         for mut c in cmds {
-            let finished = c.current_dir(tmp).output().ok()?;
+            let finished = support::run::output(c.current_dir(tmp), body).ok()?;
             if !finished.status.success() {
                 *rejection.borrow_mut() = rejection_of(tmp, &finished);
                 return None;
@@ -2308,7 +2308,7 @@ fn word_bitwise_spellings_stay_dialect_specific() {
                 .arg(format!("--raw={}", out.display()))
                 .arg(&src);
         }
-        let result = command.output().expect("run reference");
+        let result = support::run::output(&mut command, source).expect("run reference");
         assert!(!result.status.success(), "{dialect} accepted {source}");
         assert!(
             ours(dialect, source).is_none(),
@@ -3721,10 +3721,9 @@ fn multi_file_source_matches_reference() {
         };
         let mut reference_failed = None;
         for mut c in commands {
-            let run = c
-                .current_dir(&dir)
-                .output()
-                .expect("run the reference tool");
+            let run =
+                support::run::output(c.current_dir(&dir), &dir.join(root).display().to_string())
+                    .expect("run the reference tool");
             if !run.status.success() {
                 reference_failed = Some(String::from_utf8_lossy(&run.stderr).into_owned());
                 break;
