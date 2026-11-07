@@ -1509,6 +1509,9 @@ fn strip_word_ci<'a>(text: &'a str, word: &str) -> Option<&'a str> {
 #[derive(Clone, Copy)]
 pub(super) struct EvalContext<'a> {
     symbols: &'a BTreeMap<String, i64>,
+    /// Symbols read before they were defined. Their values never size an
+    /// operand; see [`force::choose_mode`].
+    tainted: &'a BTreeSet<String>,
     /// The Force Bits of every symbol defined so far.
     forces: &'a ForceMap,
     pc: Option<i64>,
@@ -1805,11 +1808,13 @@ fn parse_op(
     })?;
     let terms = force::scan(&text.borrow(), zone);
     let (force, _) = force::resolve(&terms, context.forces);
+    let tainted = terms.symbols.iter().any(|s| context.tainted.contains(s));
     let sizing = force::choose_mode(
         target,
         &mnemonic,
         operand,
         context.symbols,
+        tainted,
         postfix,
         force,
         line,
@@ -5730,6 +5735,66 @@ mod tests {
             warned("* = $0000\n lda fwd,y\nfwd lda #5\n"),
             0,
             "`lda abs,y` has no zero-page form: the width was the CPU's call"
+        );
+    }
+
+    /// A symbol read before it is defined stays tainted (ACME's
+    /// `NUMBER_EVER_UNDEFINED`), so every later operand that names it sizes
+    /// absolute, after its definition too, and warns. A symbol defined from a
+    /// tainted one is tainted, outside a byte operator. Each row is ACME
+    /// 0.97's output for the same source (#968).
+    #[test]
+    fn a_symbol_read_before_its_definition_sizes_absolute_everywhere() {
+        for (src, want, warned) in [
+            (
+                " sta p\np = $70\n lda p",
+                &[0x8D, 0x70, 0x00, 0xAD, 0x70, 0x00][..],
+                2,
+            ),
+            (
+                " sta p\np = $70\nq = p+1\n lda q",
+                &[0x8D, 0x70, 0x00, 0xAD, 0x71, 0x00],
+                2,
+            ),
+            (
+                " sta p\np = $70\n!set v = p\n lda v",
+                &[0x8D, 0x70, 0x00, 0xAD, 0x70, 0x00],
+                2,
+            ),
+            (" !byte p\np = $70\n lda p", &[0x70, 0xAD, 0x70, 0x00], 1),
+            (
+                " sta p\np = $70\n lda p,x",
+                &[0x8D, 0x70, 0x00, 0xBD, 0x70, 0x00],
+                2,
+            ),
+            // A byte operator gives a value that fits a byte, taint or not.
+            (
+                " sta p\np = $70\n lda <p",
+                &[0x8D, 0x70, 0x00, 0xA5, 0x70],
+                1,
+            ),
+            (
+                " sta p\np = $70\nq = <p\n lda q",
+                &[0x8D, 0x70, 0x00, 0xA5, 0x70],
+                1,
+            ),
+            // Never read before its definition, so its value decides.
+            (" p = $70\n lda p", &[0xA5, 0x70], 0),
+        ] {
+            assert_eq!(at_1000(src), want, "`{src}`");
+            assert_eq!(warnings_at_1000(src), warned, "`{src}`");
+        }
+    }
+
+    /// An instruction with only one width takes it, whatever the value and
+    /// whether it is known yet: STX has no absolute,y, so a forward or
+    /// tainted operand is still `stx zp,y`, as in ACME 0.97.
+    #[test]
+    fn an_instruction_with_one_width_takes_it() {
+        assert_eq!(at_1000(" stx p,y\np = $70"), [0x96, 0x70]);
+        assert_eq!(
+            at_1000(" sta p\np = $70\n stx p,y"),
+            [0x8D, 0x70, 0x00, 0x96, 0x70]
         );
     }
 }

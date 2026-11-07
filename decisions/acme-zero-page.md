@@ -91,6 +91,39 @@ is "Number out of range", as ACME says. On the 65816, ACME widens such an
 instruction to a long form after the fact. The walk refuses it as our gap
 instead, because widening would move labels it has already bound.
 
+## A symbol read before its definition stays absolute
+
+*Added 2026-11-07, for #968.*
+
+"A forward reference stays absolute" is narrower than what ACME does. ACME
+taints a symbol the first time it is read before it is defined
+(`NUMBER_EVER_UNDEFINED` in its `alu.c`), and nothing clears the taint. In
+the 0.97 dialect an operand that names a tainted symbol sizes absolute
+wherever it is, after the definition too, and warns "Using oversized
+addressing mode" when the value fits a byte (`calc_arg_size` in `mnemo.c`):
+
+```asm
+        sta p       ; forward: 8D 70 00
+p = $70
+        lda p       ; after the definition, still AD 70 00
+```
+
+So the walk keeps a tainted set beside `env`. A symbol joins it when a
+statement reads it with no value yet, and when it is defined, by `=` or
+`!set`, from an expression that names a tainted symbol outside a byte
+operator. A byte operator gives a value ACME knows fits a byte
+(`NUMBER_FITS_BYTE`), so `lda <p` and a symbol defined as `<p` still size to
+zero page. Force Bits still decide first. Only an operand left to its value
+is affected.
+
+**An instruction with one width takes it.** When nothing forces a width and
+the instruction offers only one, ACME uses that one whatever the value is or
+whether it is known yet. STX has no absolute,y, so a forward or tainted
+`stx p,y` is `96 70`.
+
+ACME prints a warning once per pass where its value was already known, so it
+can name the same line twice. We name each line once.
+
 ## What this does not do
 
 - It does not make the walk a layout pass. It computes no image, resolves no
@@ -113,5 +146,8 @@ instead, because widening would move labels it has already bound.
 - *"Size by value, then apply the force afterwards."* → No. The Force Bits
   decide before the value does. A zero-page pick for a forced operand is the
   wrong instruction, not a missed optimisation.
+- *"The symbol is defined by now, so its value can decide."* → Not if it was
+  read before its definition. ACME's taint outlives the definition, and
+  sizing it to zero page moves every label after it.
 
 [`engine::next_pc`]: ../crates/asm198x/src/engine.rs

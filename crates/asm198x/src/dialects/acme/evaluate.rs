@@ -164,6 +164,11 @@ pub(super) struct AcmeEval<'a> {
     /// Every symbol named so far, which a postfix on its definition comes too
     /// late for.
     used: BTreeSet<String>,
+    /// Symbols read before they were defined, and symbols defined from an
+    /// expression that names one outside a byte operator. ACME calls this
+    /// `NUMBER_EVER_UNDEFINED`, and nothing ever clears it: such a symbol
+    /// sizes every operand that names it absolute, wherever the operand is.
+    tainted: BTreeSet<String>,
     /// Where the location counter stands, so a label can be bound to its
     /// address as it is defined — which is what lets a *backward* reference
     /// size to zero page (`decisions/acme-zero-page.md`).
@@ -227,6 +232,7 @@ impl<'a> AcmeEval<'a> {
             forces: ForceMap::new(),
             late_forces: Vec::new(),
             used: BTreeSet::new(),
+            tainted: BTreeSet::new(),
             // No origin yet. ACME requires `*=` before code, so the first
             // origin sets this before anything can be sized.
             pc: None,
@@ -878,6 +884,9 @@ impl AcmeEval<'_> {
             // accumulates — `!set v = $0070` then `!set v = $70` still sizes
             // `lda v` absolute.
             let (now, _) = force::resolve(&set.defines, &self.forces);
+            if set.defines.symbols.iter().any(|s| self.tainted.contains(s)) {
+                self.tainted.insert(name.clone());
+            }
             self.define_force(&name, ForceTerms::fixed(now));
             self.env.insert(name.clone(), value);
             self.set_names.insert(name);
@@ -890,6 +899,7 @@ impl AcmeEval<'_> {
             &self.zone,
             EvalContext {
                 symbols: &self.env,
+                tainted: &self.tainted,
                 forces: &self.forces,
                 pc: self.logical_pc(),
             },
@@ -924,7 +934,27 @@ impl AcmeEval<'_> {
             self.check_postfix_in_time(name, lowered.postfixed, line, file)?;
         }
         if let Some(op) = &op {
-            note_uses(op, &mut self.used);
+            let mut read = BTreeSet::new();
+            note_uses(op, &mut read);
+            // A symbol with no value yet is read undefined, which taints it.
+            // A plain label is defined before its own line's operand is read,
+            // as ACME does it.
+            let defining = label.as_ref().filter(|_| !matches!(op, Operation::Equ(_)));
+            for name in read {
+                if !self.env.contains_key(&name) && defining != Some(&name) {
+                    self.tainted.insert(name.clone());
+                }
+                self.used.insert(name);
+            }
+        }
+        if let (Some(name), Some(Operation::Equ(_))) = (&label, &op)
+            && lowered
+                .defines
+                .symbols
+                .iter()
+                .any(|s| self.tainted.contains(s))
+        {
+            self.tainted.insert(name.clone());
         }
         // Bake `!set` variables to their current value; real labels stay symbolic.
         let op = op.map(|o| bake_set_vars(o, &self.env, &self.set_names));
@@ -1016,7 +1046,12 @@ impl AcmeEval<'_> {
             return;
         };
         let [expr] = operands.as_slice() else { return };
-        if fold_const(expr, &self.env, line).is_ok() {
+        let tainted = sizing
+            .terms
+            .symbols
+            .iter()
+            .any(|s| self.tainted.contains(s));
+        if !tainted && fold_const(expr, &self.env, line).is_ok() {
             return;
         }
         // Only where a zero-page form existed to be chosen: `lda abs,y` has
