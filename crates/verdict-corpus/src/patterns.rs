@@ -511,20 +511,11 @@ mod tests {
         put(&root, "m/patterns/assembly/a/mistakes/late.asm", "");
         put(&root, "m/patterns/assembly/a/routine.inc", "");
         put(&root, "m/patterns/assembly/a/build/selected.asm", "");
-        let found: Vec<String> = sources(&root.join("m"))
-            .iter()
-            .map(|p| {
-                p.strip_prefix(&root)
-                    .expect("under root")
-                    .to_string_lossy()
-                    .into_owned()
-            })
-            .collect();
         assert_eq!(
-            found,
+            sources(&root.join("m")),
             [
-                "m/patterns/assembly/a/demo.asm",
-                "m/patterns/assembly/a/mistakes/late.asm"
+                root.join("m/patterns/assembly/a/demo.asm"),
+                root.join("m/patterns/assembly/a/mistakes/late.asm")
             ]
         );
         let _ = fs::remove_dir_all(&root);
