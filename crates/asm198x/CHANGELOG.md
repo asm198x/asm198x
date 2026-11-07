@@ -10,9 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.76](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.75...asm198x-v0.0.76) - 2026-11-06
 
 The vasm dialect now writes the bytes vasm itself writes, and two ca65
-functions match ca65. This is also the first release since 0.0.74 with
-downloadable binaries and a Homebrew formula: the 0.0.75 build stopped after
-crates.io (see *Fixed*).
+functions match ca65.
 
 ### Changed
 
@@ -41,10 +39,9 @@ crates.io (see *Fixed*).
   does, so `.mid(200, 1, {7})` gives `07`
   ([#1058](https://github.com/asm198x/asm198x/pull/1058), through
   lang198x-ca65 0.0.35).
-- **Release binaries for Apple Silicon build again**
+- **Release binaries for Apple Silicon build on `macos-15`**
   ([#1055](https://github.com/asm198x/asm198x/pull/1055)). GitHub retired the
-  `macos-14` runner, which cancelled the 0.0.75 build before its GitHub
-  release, archives and Homebrew formula.
+  `macos-14` runner, which cancelled the first 0.0.75 release build.
 
 ### Documentation
 
