@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.77](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.76...asm198x-v0.0.77) - 2026-11-07
+
+### Fixed
+
+- **ACME:** keep absolute addressing for a symbol first read before its
+  definition, including later uses after its value is known, as ACME 0.97
+  does. Both remaining BBC Micro sprite patterns now produce ACME's bytes.
+- **RGBASM:** write CPU addresses for labels and source lines in `--sym`,
+  `--debug` and listings. These outputs previously used section offsets,
+  so tools consuming them could point at the wrong address.
+
 ## [0.0.76](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.75...asm198x-v0.0.76) - 2026-11-06
 
 The vasm dialect now writes the bytes vasm itself writes, and two ca65
