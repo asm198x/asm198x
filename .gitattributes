@@ -49,3 +49,7 @@ docs/book/search.json text eol=lf
 
 # Delimited PasmoNext records retain exact third-pass metadata at case ends.
 crates/asm198x/tests/fixtures/pasmonext-0.1.3-programs.txt text eol=lf
+
+# Retained ecosystem evidence hashes these exact manifest and adapter bytes.
+ecosystem/corpus.json text eol=lf
+ecosystem/adapters/cc65-opcodes.cfg text eol=lf
