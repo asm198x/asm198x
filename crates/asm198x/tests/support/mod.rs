@@ -3,6 +3,7 @@
 
 pub mod linked;
 pub mod patterns;
+pub mod run;
 pub mod scratch;
 pub mod tool_identity;
 pub mod verdicts;

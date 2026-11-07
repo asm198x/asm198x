@@ -41,21 +41,20 @@ pub fn record(mut facts: serde_json::Value, path: &str, scratch: &str) {
         let (src, obj, bin) = (tmp.join("t.s"), tmp.join("t.o"), tmp.join("t.bin"));
         fs::write(&src, &program).expect("source");
         let _ = fs::remove_file(&bin);
-        let assembled = Command::new("ca65")
-            .arg(&src)
-            .arg("-o")
-            .arg(&obj)
-            .output()
-            .expect("ca65");
+        let assembled =
+            super::run::output(Command::new("ca65").arg(&src).arg("-o").arg(&obj), &program)
+                .expect("ca65");
         let native = if assembled.status.success() {
-            let linked = Command::new("ld65")
-                .arg("-C")
-                .arg(&cfg)
-                .arg(&obj)
-                .arg("-o")
-                .arg(&bin)
-                .output()
-                .expect("ld65");
+            let linked = super::run::output(
+                Command::new("ld65")
+                    .arg("-C")
+                    .arg(&cfg)
+                    .arg(&obj)
+                    .arg("-o")
+                    .arg(&bin),
+                &program,
+            )
+            .expect("ld65");
             if linked.status.success() {
                 serde_json::json!({ "hex": verdict_corpus::encode_hex(&fs::read(&bin).expect("image")) })
             } else {
