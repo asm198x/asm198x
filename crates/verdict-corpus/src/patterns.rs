@@ -208,17 +208,7 @@ pub const DIALECT_FROM_BUILD_SCRIPT: &[&str] = &["oric-atmos", "spectravideo-svi
 ///
 /// Replay fails on a difference not listed here, and on a listed source that
 /// now matches, so the list only describes differences that exist.
-pub const KNOWN: &[(&str, &str)] = &[
-    // The acme dialect writes different bytes from ACME 0.97.
-    (
-        "bbc-micro/patterns/assembly/rendering/clipped-sprites/demo.asm",
-        "issue-968",
-    ),
-    (
-        "bbc-micro/patterns/assembly/rendering/pre-shifted-sprites/demo.asm",
-        "issue-968",
-    ),
-];
+pub const KNOWN: &[(&str, &str)] = &[];
 
 /// The issue tracking a known difference for `source`, relative to the
 /// `code-samples` checkout.

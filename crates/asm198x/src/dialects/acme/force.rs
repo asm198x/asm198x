@@ -373,12 +373,15 @@ pub(super) struct Sizing {
 /// instruction has. Failing that, the operand's force picks the narrowest
 /// width at least that wide, and "Number out of range" when there is none.
 /// With neither, the value decides, as `decisions/acme-zero-page.md`
-/// describes.
+/// describes — unless the operand is `tainted`: it names a symbol that was
+/// read before it was defined, so its value is not allowed to decide.
+#[allow(clippy::too_many_arguments)]
 pub(super) fn choose_mode(
     target: AcmeTarget,
     mnemonic: &str,
     operand: OperandSyntax,
     env: &BTreeMap<String, i64>,
+    tainted: bool,
     postfix: Option<Force>,
     force: Option<Force>,
     line: usize,
@@ -389,22 +392,27 @@ pub(super) fn choose_mode(
                 .ext
                 .is_some_and(|set| set.find_form(mnemonic, mode).is_some())
     };
-    let by_value =
-        |operand: OperandSyntax, offers: [Option<&'static str>; 3]| -> Result<Sizing, AsmError> {
-            let (mode, operand) = mos6502::resolve_mode_in_sets(
-                target.set, target.ext, mnemonic, operand, env, false, line,
-            )?;
-            Ok(Sizing {
-                mode,
-                operand,
-                width: Force::ALL
-                    .into_iter()
-                    .find(|f| offers[f.index()] == Some(mode)),
-                offers,
-                by_value: true,
-                renamed: None,
-            })
-        };
+    let by_value_in = |operand: OperandSyntax,
+                       offers: [Option<&'static str>; 3],
+                       env: &BTreeMap<String, i64>|
+     -> Result<Sizing, AsmError> {
+        let (mode, operand) = mos6502::resolve_mode_in_sets(
+            target.set, target.ext, mnemonic, operand, env, false, line,
+        )?;
+        Ok(Sizing {
+            mode,
+            operand,
+            width: Force::ALL
+                .into_iter()
+                .find(|f| offers[f.index()] == Some(mode)),
+            offers,
+            by_value: true,
+            renamed: None,
+        })
+    };
+    let by_value = |operand: OperandSyntax, offers: [Option<&'static str>; 3]| {
+        by_value_in(operand, offers, env)
+    };
     let is_65816 = target.ext.is_some_and(|set| set.has_mnemonic("XCE"));
 
     // Branches, implied instructions and the zero-page bit instructions have
@@ -475,7 +483,20 @@ pub(super) fn choose_mode(
         }
     };
 
+    // ACME's own rule when nothing forces a width: an instruction with only
+    // one width takes it, whatever the value is or whether it is known yet.
+    // So `stx p,y` is `96 70` with `p` defined later: STX has no absolute,y.
+    let only = {
+        let mut widths = Force::ALL
+            .into_iter()
+            .filter(|w| offers[w.index()].is_some());
+        match (widths.next(), widths.next()) {
+            (Some(w), None) => Some(w),
+            _ => None,
+        }
+    };
     let width = match (postfix, force) {
+        (None, None) if let Some(w) = only => w,
         (Some(p), _) => {
             if offers[p.index()].is_none() {
                 return Err(illegal_postfix(mnemonic, p, line));
@@ -496,6 +517,12 @@ pub(super) fn choose_mode(
                     ),
                 )
             })?,
+        // ACME's NUMBER_EVER_UNDEFINED: a symbol read before it was defined
+        // stays tainted for the rest of the assembly, and a tainted operand
+        // takes the form it would take if its value were still unknown. So
+        // `lda p` after `sta p` and `p = $70` is `AD 70 00`, with ACME's
+        // oversized-mode warning.
+        (None, None) if tainted => return by_value_in(operand, offers, &BTreeMap::new()),
         (None, None) => return by_value(operand, offers),
     };
     let Some(mode) = offers[width.index()] else {
