@@ -102,6 +102,12 @@ impl Dialect for Rgbasm {
         Some(0)
     }
 
+    /// RGBLINK places every section at an address of its own, and its symbol
+    /// file names each label there.
+    fn sections_reach_the_result(&self) -> bool {
+        true
+    }
+
     /// A Game Boy ROM is a whole number of $4000 banks: `rgblink` writes
     /// `(highest bank + 1) * $4000` bytes, with no rounding to a power of two
     /// (three banks give 49152, six give 98304 — both probe-pinned).

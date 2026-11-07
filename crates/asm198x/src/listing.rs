@@ -38,6 +38,9 @@ pub fn debug_info(
     } else {
         result.files.clone()
     };
+    if !result.section_debug.is_empty() {
+        return sectioned_debug_info(result, cpu, dialect, sources);
+    }
 
     // A dialect whose toolchain reserves rather than materialises drops a
     // leading gap from the image, so `origin` sits above where the source's own
@@ -94,6 +97,58 @@ pub fn debug_info(
                 length: l.length,
             })
             .collect(),
+    }
+}
+
+/// [`debug_info`] for a result that describes its sections: one Debug198x
+/// section per [`AssemblyResult::section_debug`] record, at its own base.
+/// Constants come first, in the order the program made them, and then each
+/// section's labels.
+fn sectioned_debug_info(
+    result: &AssemblyResult,
+    cpu: &str,
+    dialect: &str,
+    sources: Vec<String>,
+) -> debug198x::DebugInfo {
+    let constants = result
+        .debug
+        .symbols
+        .iter()
+        .filter(|s| matches!(s.kind, debug198x::SymbolKind::Const { .. }))
+        .cloned();
+    let labels = result
+        .section_debug
+        .iter()
+        .flat_map(|s| s.debug.symbols.iter().cloned());
+    let lines = result
+        .section_debug
+        .iter()
+        .flat_map(|s| {
+            s.debug.lines.iter().map(|l| debug198x::LineSpan {
+                file: path_in(&sources, l.file),
+                line: l.line,
+                section: s.section.id,
+                offset: l.offset,
+                length: l.length,
+            })
+        })
+        .collect();
+    debug198x::DebugInfo {
+        header: debug198x::Header {
+            tool: "asm198x".to_string(),
+            tool_version: env!("CARGO_PKG_VERSION").to_string(),
+            cpu: cpu.to_string(),
+            dialect: dialect.to_string(),
+            sources,
+            ..debug198x::Header::default()
+        },
+        sections: result
+            .section_debug
+            .iter()
+            .map(|s| s.section.clone())
+            .collect(),
+        symbols: constants.chain(labels).collect(),
+        lines,
     }
 }
 
