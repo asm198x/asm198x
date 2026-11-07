@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.77](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.76...asm198x-v0.0.77) - 2026-11-07
+
+### Fixed
+
+- *(acme)* size a symbol read before its definition absolute everywhere, as ACME does
+- *(rgbasm)* give labels and lines their CPU addresses in --sym, --debug and listings
+
 ## [0.0.76](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.75...asm198x-v0.0.76) - 2026-11-06
 
 The vasm dialect now writes the bytes vasm itself writes, and two ca65
