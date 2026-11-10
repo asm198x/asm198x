@@ -10,6 +10,14 @@ set -uo pipefail
 
 ids="${1:-/usr/local/share/asm198x/identities}"
 fail=0
+checked=0
+
+# A file that cannot be read would leave the loop below with nothing to check,
+# and "nothing failed" would read as every tool matching.
+if [ ! -r "$ids" ]; then
+  printf 'cannot read the identities file %s\n' "$ids" >&2
+  exit 1
+fi
 
 probe() {
   case "$1" in
@@ -20,6 +28,7 @@ probe() {
 
 while IFS=$'\t' read -r tool want; do
   case "$tool" in ''|\#*) continue ;; esac
+  checked=$((checked + 1))
   if ! command -v "$tool" >/dev/null 2>&1; then
     printf '  MISSING   %s\n' "$tool"
     [ -n "${GITHUB_ACTIONS:-}" ] && printf '::error title=arbiter identity::%s is missing\n' "$tool"
@@ -44,6 +53,11 @@ while IFS=$'\t' read -r tool want; do
     fail=1
   fi
 done < "$ids"
+
+if [ "$checked" -eq 0 ]; then
+  printf '%s names no tools, so there is nothing to verify\n' "$ids" >&2
+  exit 1
+fi
 
 if [ "$fail" -ne 0 ]; then
   echo
