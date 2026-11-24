@@ -680,22 +680,62 @@ fn split_comment(line: &str) -> (&str, Option<&str>) {
     (code, comment)
 }
 
-/// Strip a comment: a `*` as the first non-blank character makes the whole line
-/// a comment (lwasm convention), and a `;` outside a string starts one anywhere.
+/// Strip a comment: a leading `*` marks the whole line, and a `;` outside
+/// literals starts an inline comment. The FCC family chooses its delimiter
+/// from the operand, so read past that string before looking for `;`.
 fn strip_comment(line: &str) -> &str {
     if line.trim_start().starts_with('*') {
         return "";
     }
-    let bytes = line.as_bytes();
-    let mut in_str = false;
-    for (i, &b) in bytes.iter().enumerate() {
-        match b {
-            b'"' => in_str = !in_str,
-            b';' if !in_str => return &line[..i],
-            _ => {}
+    let operation = if line.starts_with([' ', '\t']) {
+        line
+    } else {
+        split_first_word(line).1
+    };
+    let (mnemonic, operand) = split_first_word(operation);
+    let from = if ["fcc", "fcn", "fcz", "fcs"]
+        .iter()
+        .any(|word| mnemonic.eq_ignore_ascii_case(word))
+        && let Some((_, end)) = delimited_string(operand)
+    {
+        // The operand is the trimmed suffix. A comment can itself look
+        // like an FCC statement, so check before the operand as well.
+        let start = line.trim_end().len() - operand.len();
+        if let Some(i) = line[..start].find(';') {
+            return &line[..i];
         }
-    }
-    line
+        start + end
+    } else {
+        0
+    };
+    unquoted_chars(&line[from..])
+        .find(|&(_, c)| c == ';')
+        .map_or(line, |(i, _)| &line[..from + i])
+}
+
+/// Yield character positions outside double quotes and the single-character
+/// forms the expression reader already accepts. A bare apostrophe does not
+/// open an arbitrary string here; FCC's delimiter is handled separately.
+fn unquoted_chars(text: &str) -> impl Iterator<Item = (usize, char)> {
+    let mut chars = text.char_indices();
+    let mut quoted = false;
+    std::iter::from_fn(move || {
+        loop {
+            let (i, ch) = chars.next()?;
+            if ch == '"' {
+                quoted = !quoted;
+            } else if !quoted {
+                if ch == '\'' {
+                    let mut after = chars.clone();
+                    if matches!((after.next(), after.next()), (Some(_), Some((_, '\'')))) {
+                        chars = after;
+                        continue;
+                    }
+                }
+                return Some((i, ch));
+            }
+        }
+    })
 }
 
 /// Split a column-0 label from the rest of the line. A line beginning with
@@ -2162,20 +2202,26 @@ fn parse_general_string(raw: &str, line: usize) -> Result<String, AsmError> {
     Ok(out)
 }
 
+/// A self-delimited FCC string's contents and the byte after its closing
+/// delimiter. Both comment stripping and string parsing use the same bounds.
+fn delimited_string(text: &str) -> Option<(&str, usize)> {
+    let delimiter = text.chars().next()?;
+    let start = delimiter.len_utf8();
+    let close = start + text[start..].find(delimiter)?;
+    Some((&text[start..close], close + start))
+}
+
 /// `fcc`/`fcn`/`fcz`/`fcs` — a string with a self-chosen delimiter (`"text"`,
 /// `/text/`, …): one byte per character, up to the closing delimiter, then
 /// whatever `end` marks the end with.
 fn parse_fcc(operand: &str, line: usize, end: StringEnd) -> Result<Operation, AsmError> {
     let t = operand.trim();
-    let delim = t
-        .chars()
-        .next()
-        .ok_or_else(|| AsmError::new(line, "`fcc` needs a string"))?;
-    let rest = &t[delim.len_utf8()..];
-    let close = rest
-        .find(delim)
-        .ok_or_else(|| AsmError::new(line, "unterminated `fcc` string"))?;
-    let mut bytes: Vec<u8> = rest[..close].bytes().collect();
+    if t.is_empty() {
+        return Err(AsmError::new(line, "`fcc` needs a string"));
+    }
+    let (text, _) =
+        delimited_string(t).ok_or_else(|| AsmError::new(line, "unterminated `fcc` string"))?;
+    let mut bytes: Vec<u8> = text.bytes().collect();
     match end {
         StringEnd::Bare => {}
         StringEnd::Nul => bytes.push(0),
@@ -2219,10 +2265,22 @@ fn list(operand: &str, line: usize) -> Result<Vec<Expr>, AsmError> {
     if operand.trim().is_empty() {
         return Err(AsmError::new(line, "directive needs at least one value"));
     }
-    mos6502::split_top_level(operand, ',')
-        .iter()
-        .map(|p| value(p, line))
-        .collect()
+    let mut values = Vec::new();
+    let mut start = 0;
+    let mut depth = 0;
+    for (i, ch) in unquoted_chars(operand) {
+        match ch {
+            '(' => depth += 1,
+            ')' => depth -= 1,
+            ',' if depth == 0 => {
+                values.push(value(operand[start..i].trim(), line)?);
+                start = i + 1;
+            }
+            _ => {}
+        }
+    }
+    values.push(value(operand[start..].trim(), line)?);
+    Ok(values)
 }
 
 /// Parse one 6809 value expression. `$hex`/`%bin`/decimal numbers, symbols, `*`
