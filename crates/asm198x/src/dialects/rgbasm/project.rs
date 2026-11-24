@@ -52,6 +52,23 @@ pub(super) fn initial_symbols() -> (BTreeMap<String, i64>, BTreeSet<String>) {
     (consts, defined)
 }
 
+/// RGBDS v1.0.4 lexes these SM83 registers and conditions as keywords, not
+/// plain label tokens. A leading dot is part of the name, so locals are
+/// unaffected. This is a label check, not a broader keyword lexer.
+fn check_label(name: &str, node: &Node) -> Result<(), AsmError> {
+    const WORDS: &[&str] = &[
+        "a", "b", "c", "d", "e", "h", "l", "af", "bc", "de", "hl", "sp", "hld", "hli", "nz", "z",
+        "nc",
+    ];
+    if WORDS.iter().any(|word| name.eq_ignore_ascii_case(word)) {
+        return Err(AsmError::at(
+            node.span.clone(),
+            format!("`{name}` is reserved as a register or condition name in rgbasm"),
+        ));
+    }
+    Ok(())
+}
+
 type LoweredRs = Option<(Option<String>, Option<Operation>)>;
 
 impl crate::ast::CondEval for RgbasmEval {
@@ -86,6 +103,9 @@ impl crate::ast::CondEval for RgbasmEval {
     fn lower(&mut self, node: &Node, out: &mut Vec<Statement>) -> Result<(), AsmError> {
         let line = node.span.line as usize;
         if let Some((label, args)) = pc_ds_parts(&node.source) {
+            if let Some(name) = label {
+                check_label(name.trim_end_matches(':'), node)?;
+            }
             let op = parse_live_ds(args, &self.consts, line)?;
             let label = label.map(|name| {
                 if name.starts_with('.') && !self.global.is_empty() {
@@ -119,6 +139,13 @@ impl crate::ast::CondEval for RgbasmEval {
                 extension_set: None,
             });
             return Ok(());
+        }
+        // Check live labels here: RGBDS skips an untaken branch without
+        // asking whether its source is valid, and both source paths lower here.
+        if let Some(sym) = &node.label
+            && !matches!(node.item, Some(crate::ast::Item::Equ(_)))
+        {
+            check_label(&sym.name, node)?;
         }
         if let Some(sym) = node.label.as_ref()
             && !sym.name.starts_with('.')

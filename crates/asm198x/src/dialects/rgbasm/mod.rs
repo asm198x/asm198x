@@ -3249,7 +3249,7 @@ mod tests {
         assert_eq!(bytes(" jp hl\n"), vec![0xE9]);
         // Backward conditional + unconditional jr to a label at origin 0.
         assert_eq!(
-            bytes("SECTION \"c\", ROM0[$0]\nl:\n jr nz, l\n jr l\n"),
+            bytes("SECTION \"c\", ROM0[$0]\nloop:\n jr nz, loop\n jr loop\n"),
             vec![0x20, 0xFE, 0x18, 0xFC]
         );
     }
