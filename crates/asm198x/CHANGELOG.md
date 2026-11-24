@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.78](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.77...asm198x-v0.0.78) - 2026-11-24
+
+### Fixed
+
+- *(lwasm)* preserve punctuation inside quoted data
+- *(rgbasm)* reject register and condition words as labels
+
 ## [0.0.77](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.76...asm198x-v0.0.77) - 2026-11-07
 
 ### Fixed
