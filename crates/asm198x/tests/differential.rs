@@ -2026,7 +2026,7 @@ const PROBES: &[Probe] = &[
          SECTION \"p\",ROMX,BANK[1]\ninp: db $11\n\
          SECTION \"q\",ROMX,BANK[3]\ninq: db $33\n"),
     // rgbds 1.0.4 refuses a register name (any case) as a label: "syntax
-    // error, unexpected a". Recorded as that rejection; we still accept it.
+    // error, unexpected a". The live rejection matrix is in rgbasm_labels.rs.
     ok ("rgbasm", "a register name is not a label",
         "SECTION \"s\",ROM0[0]\na: db 1\n"),
     // Sections are placed by address, not by the order they were written.
