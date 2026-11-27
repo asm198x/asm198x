@@ -296,12 +296,19 @@ pub(crate) fn check_budgets(
                     ));
                 }
             }
-            let cost = costs.iter().find(|c| c.name == label).ok_or_else(|| {
+            let mut matches = costs.iter().filter(|c| c.name == label);
+            let cost = matches.next().ok_or_else(|| {
                 AsmError::new(
                     line,
                     format!("`cycles({label})` names no label with instructions in this program"),
                 )
             })?;
+            if matches.next().is_some() {
+                return Err(AsmError::new(
+                    line,
+                    format!("`cycles({label})` matches more than one instruction-bearing label"),
+                ));
+            }
             let max = cost.max.ok_or_else(|| AsmError::new(line, format!(
                 "cannot check `cycles({label})`: the routine contains an unbounded wait;                  its minimum of {} cycles cannot prove a ceiling", cost.min
             )))?;
@@ -339,11 +346,14 @@ fn parse_budget(directive: &str) -> Option<Budget> {
     };
     let (name, rest) = rest.split_once(')')?;
     let name = name.trim();
-    if name.is_empty()
-        || !name
-            .chars()
-            .all(|c| c.is_alphanumeric() || c == '_' || c == '.' || c == ' ')
-    {
+    let name_char = |c: char| c.is_alphanumeric() || c == '_' || c == '.';
+    let valid_name = if kind == "cycles" && name.contains(':') {
+        name.split("::")
+            .all(|part| !part.is_empty() && part.chars().all(name_char))
+    } else {
+        !name.is_empty() && name.chars().all(|c| name_char(c) || c == ' ')
+    };
+    if !valid_name {
         return None;
     }
     let n = rest.trim_start().strip_prefix(op)?.trim();
