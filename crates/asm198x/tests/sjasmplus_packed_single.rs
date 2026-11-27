@@ -108,6 +108,146 @@ fn native_single_quotes_and_empty_lists_follow_their_context() {
 }
 
 #[test]
+fn quoted_data_advisories_follow_native_decoded_length_and_context() {
+    let cases: &[(&str, &[u8], &[&str])] = &[
+        (r#" db "",1"#, &[1], &["Empty string:"]),
+        (" db '',2", &[2], &["Empty string:"]),
+        (r#" dw 1+("")"#, &[1, 0], &["Empty string literal"]),
+        (r#" dd """#, &[0; 4], &["Empty string literal"]),
+        (" dd ''", &[0; 4], &["Empty string literal"]),
+        (
+            r#" dd "\0abcd""#,
+            b"dcba",
+            &["String literal truncated to 0x61626364"],
+        ),
+        (
+            r#" dw "\0\0\0ab""#,
+            b"ba",
+            &["String literal truncated to 0x6162"],
+        ),
+        (r#" dd "a\ncd""#, b"dc\na", &[]),
+        (
+            r#" dd "a\ncdx""#,
+            b"xdc\n",
+            &["String literal truncated to 0xA636478"],
+        ),
+        (
+            " dd 'abcde'",
+            b"edcb",
+            &["String literal truncated to 0x62636465"],
+        ),
+        (
+            r#" dd 1+("abcde")"#,
+            b"fdcb",
+            &["String literal truncated to 0x62636465"],
+        ),
+        (
+            r#" dw "abcde""#,
+            b"ed",
+            &[
+                "String literal truncated to 0x62636465",
+                "truncated to a word",
+            ],
+        ),
+        (
+            r#" d24 "ABCDE""#,
+            b"EDC",
+            &[
+                "String literal truncated to 0x42434445",
+                "truncated to 3 byte(s)",
+            ],
+        ),
+        (r#" db "abcde""#, b"abcde", &[]),
+        (" dd 0", &[0; 4], &[]),
+    ];
+    // Captured with SjASMPlus 1.21.0, revision 13da016b, using --raw.
+    for &(directive, bytes, advisories) in cases {
+        let source = format!(" org $8000\n{directive}\n");
+        for assemble in [
+            asm198x::assemble_sjasmplus,
+            asm198x::assemble_sjasmplus_next,
+        ] {
+            let result = assemble(&source).expect("native acceptance");
+            assert_eq!(result.bytes, bytes, "{directive}");
+            assert_eq!(
+                result.warnings.len(),
+                advisories.len(),
+                "{directive}: {:?}",
+                result.warnings
+            );
+            for (warning, advisory) in result.warnings.iter().zip(advisories) {
+                assert_eq!(warning.line, 2, "{directive}");
+                assert!(warning.message.contains(advisory), "{warning:?}");
+            }
+        }
+    }
+    assert!(asm198x::assemble_sjasmplus(" db \"\"\n").is_err());
+}
+
+#[test]
+fn quoted_data_warnings_name_the_include_and_follow_the_final_pass() {
+    let root = scratch::dir("quoted-data-warning-location");
+    std::fs::write(
+        root.join("input.asm"),
+        " org $8000\n include \"quoted.inc\"\n",
+    )
+    .expect("root");
+    std::fs::write(
+        root.join("quoted.inc"),
+        " IF target\n dd ''\n ELSE\n dd \"abcde\"\n ENDIF\ntarget: nop\n dd \"ABCDE\"\n",
+    )
+    .expect("include");
+    for mode in ["human", "json"] {
+        let output = run(
+            &root,
+            &[
+                "--dialect",
+                "sjasmplus",
+                &format!("--message-format={mode}"),
+                "input.asm",
+            ],
+        );
+        assert!(output.status.success(), "{output:?}");
+        if mode == "json" {
+            let result: asm198x::AssemblyResult =
+                serde_json::from_slice(&output.stdout).expect("JSON");
+            let warnings: Vec<_> = result
+                .warnings
+                .iter()
+                .filter(|w| {
+                    w.message.starts_with("Empty string literal")
+                        || w.message.starts_with("String literal truncated")
+                })
+                .collect();
+            assert_eq!(warnings.len(), 2, "{:?}", result.warnings);
+            for (warning, (line, message)) in warnings
+                .into_iter()
+                .zip([(2, "Empty string literal"), (7, "String literal truncated")])
+            {
+                assert_eq!(warning.line, line);
+                assert!(warning.message.starts_with(message));
+                assert!(result.files[warning.file.0 as usize].ends_with("quoted.inc"));
+            }
+        } else {
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            assert!(
+                stderr.contains("quoted.inc: line 2: warning: Empty string literal"),
+                "{stderr}"
+            );
+            assert!(
+                stderr.contains("quoted.inc: line 7: warning: String literal truncated"),
+                "{stderr}"
+            );
+            assert_eq!(
+                stderr.matches("String literal truncated").count(),
+                1,
+                "{stderr}"
+            );
+        }
+    }
+}
+
+#[test]
 fn invalid_included_quotes_and_empty_lists_preserve_outputs_and_source() {
     let root = scratch::dir("sjasmplus-packed-single-preserve");
     let source = " org $8000\n include \"definitions.inc\"\n";

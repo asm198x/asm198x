@@ -377,6 +377,7 @@ pub(crate) trait Z80Syntax {
         args: &str,
         line: usize,
         consts: &BTreeMap<String, i64>,
+        _warnings: &mut Vec<Warning>,
     ) -> Result<Option<Operation>, AsmError>
     where
         Self: Sized,
@@ -1558,6 +1559,7 @@ struct SjasmEval<'a, S: Z80Syntax> {
     lua_memory: Option<(usize, Vec<u8>)>,
     #[cfg(feature = "lua")]
     lua_macro_arguments: Vec<BTreeMap<String, String>>,
+    directive_warnings: Vec<Warning>,
     syntax: &'a S,
     set: &'static isa::InstructionSet,
     ext: Option<&'static isa::InstructionSet>,
@@ -1633,6 +1635,7 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
             lua_memory: None,
             #[cfg(feature = "lua")]
             lua_macro_arguments: Vec::new(),
+            directive_warnings: Vec::new(),
             syntax,
             set,
             ext,
@@ -2236,7 +2239,20 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
         } else if self.syntax.is_reserve(word) {
             Some(self.lower_reserve(args, line)?)
         } else {
-            parse_op(self.syntax, self.set, self.ext, rest, line, &self.consts)?
+            let first_warning = self.directive_warnings.len();
+            let op = parse_op(
+                self.syntax,
+                self.set,
+                self.ext,
+                rest,
+                line,
+                &self.consts,
+                &mut self.directive_warnings,
+            )?;
+            for warning in &mut self.directive_warnings[first_warning..] {
+                warning.file = file;
+            }
+            op
         };
         if let Some(Operation::SymbolMap { name, .. }) = &mut op
             && name.is_empty()
@@ -3353,6 +3369,7 @@ fn run_passes<'a, S: Z80Syntax>(
             // between passes, and raising it on each would say it three times.
             warnings.extend(eval.unclosed_module());
             if !reached_forward && !reached_lua {
+                warnings.append(&mut eval.directive_warnings);
                 return Ok((result, warnings));
             }
         }
@@ -3362,6 +3379,7 @@ fn run_passes<'a, S: Z80Syntax>(
             lua = eval.lua;
         }
         if pass == PASSES {
+            warnings.append(&mut eval.directive_warnings);
             // A label that still moved between the last two passes never
             // settled, and the bytes below it describe a layout no pass
             // agreed with. The reference says so rather than failing, and
@@ -3926,6 +3944,7 @@ fn parse_op<S: Z80Syntax>(
     rest: &str,
     line: usize,
     consts: &BTreeMap<String, i64>,
+    warnings: &mut Vec<Warning>,
 ) -> Result<Option<Operation>, AsmError> {
     if rest.is_empty() {
         return Ok(None);
@@ -3952,7 +3971,7 @@ fn parse_op<S: Z80Syntax>(
         }));
     }
     if syntax.is_directive(word) {
-        return syntax.parse_directive(word, args, line, consts);
+        return syntax.parse_directive(word, args, line, consts, warnings);
     }
     // A directive this dialect declares and does not implement. Refusing it as
     // an unknown mnemonic would tell the reader their source is invalid, when
@@ -4590,7 +4609,17 @@ pub(crate) fn parse_value<S: Z80Syntax>(
     raw: &str,
     line: usize,
 ) -> Result<Expr, AsmError> {
-    let tokens = tokenize(syntax, raw, line)?;
+    parse_value_with_quotes(syntax, raw, line, |token| syntax.parse_number(token, line))
+}
+
+/// Parse a value with a caller-provided parser for quoted numeric literals.
+pub(crate) fn parse_value_with_quotes<S: Z80Syntax>(
+    syntax: &S,
+    raw: &str,
+    line: usize,
+    quoted_number: impl FnMut(&str) -> Result<i64, AsmError>,
+) -> Result<Expr, AsmError> {
+    let tokens = tokenize_impl(syntax, raw, line, false, quoted_number)?;
     if tokens.is_empty() {
         return Err(AsmError::new(line, "expected a value"));
     }
@@ -4683,14 +4712,18 @@ pub(crate) fn numeric_separator(text: &str, at: usize) -> bool {
 
 /// Lex an operand expression (see [`tokenize_impl`]).
 fn tokenize<S: Z80Syntax>(syntax: &S, raw: &str, line: usize) -> Result<Vec<Tok>, AsmError> {
-    tokenize_impl(syntax, raw, line, false)
+    tokenize_impl(syntax, raw, line, false, |token| {
+        syntax.parse_number(token, line)
+    })
 }
 
 /// Lex a keyword `IF` condition: the operand lexer plus the condition
 /// operators (`=`/`==`/`!=`/`<`/`>`/`<=`/`>=`/`&&`/`||`/`!`) the reference's
 /// conditions accept (probes p2/p45).
 fn tokenize_cond<S: Z80Syntax>(syntax: &S, raw: &str, line: usize) -> Result<Vec<Tok>, AsmError> {
-    tokenize_impl(syntax, raw, line, true)
+    tokenize_impl(syntax, raw, line, true, |token| {
+        syntax.parse_number(token, line)
+    })
 }
 
 /// Lex an expression. The number *extent* (a `$`/`%`/`#`/digit start then an
@@ -4702,6 +4735,7 @@ fn tokenize_impl<S: Z80Syntax>(
     raw: &str,
     line: usize,
     cond: bool,
+    mut quoted_number: impl FnMut(&str) -> Result<i64, AsmError>,
 ) -> Result<Vec<Tok>, AsmError> {
     let chars: Vec<char> = raw.chars().collect();
     // Inside a condition every comparison spelling is admitted, as it always
@@ -4879,7 +4913,7 @@ fn tokenize_impl<S: Z80Syntax>(
                     return Err(AsmError::new(line, "unterminated double-quoted literal"));
                 }
                 let token: String = chars[start..i].iter().collect();
-                tokens.push(Tok::Num(syntax.parse_number(&token, line)?));
+                tokens.push(Tok::Num(quoted_number(&token)?));
             }
             '\'' if syntax.sjasmplus_expressions() => {
                 let start = i;
@@ -4901,7 +4935,7 @@ fn tokenize_impl<S: Z80Syntax>(
                     return Err(AsmError::new(line, "unterminated single-quoted literal"));
                 }
                 let token: String = chars[start..i].iter().collect();
-                tokens.push(Tok::Num(syntax.parse_number(&token, line)?));
+                tokens.push(Tok::Num(quoted_number(&token)?));
             }
             '\'' => {
                 if i + 2 < chars.len() && chars[i + 1] != '\'' && chars[i + 2] == '\'' {
