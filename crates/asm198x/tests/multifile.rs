@@ -1071,6 +1071,80 @@ fn cli_assembles_an_incbin() {
 // (KTD5).
 // ===========================================================================
 
+#[test]
+fn acme_cli_uses_working_directory_then_ordered_include_dirs() {
+    let dir = temp_tree("acme-working-directory");
+    for child in ["src", "lib", "first", "second"] {
+        std::fs::create_dir_all(dir.join(child)).expect("create source directories");
+    }
+    let write = |path: &str, contents: &str| {
+        std::fs::write(dir.join(path), contents).expect("write source file");
+    };
+    write("src/main.a", "*=$1000\n!source \"lib/nested.a\"\n");
+    write(
+        "lib/nested.a",
+        "!src \"pick.a\"\n!source \"fallback.a\"\n!bin \"data.bin\"\n",
+    );
+    write("pick.a", "!byte 1\n");
+    write("lib/pick.a", "!byte 2\n");
+    write("first/pick.a", "!byte 3\n");
+    write("first/fallback.a", "!byte 4\n");
+    write("second/fallback.a", "!byte 5\n");
+    std::fs::write(dir.join("data.bin"), [6]).expect("write cwd binary");
+    std::fs::write(dir.join("lib/data.bin"), [7]).expect("write adjacent binary");
+
+    let run = |mode: &str| {
+        bin()
+            .current_dir(&dir)
+            .args([
+                "--dialect",
+                "acme",
+                "--message-format",
+                mode,
+                "-I",
+                "first",
+                "-I",
+                "second",
+                "-o",
+                "out.bin",
+                "src/main.a",
+            ])
+            .output()
+            .expect("run assembler")
+    };
+    for mode in ["human", "json"] {
+        let output = run(mode);
+        assert!(output.status.success(), "{output:?}");
+        assert_eq!(
+            std::fs::read(dir.join("out.bin")).expect("assembled output"),
+            [1, 4, 6]
+        );
+    }
+
+    write("lib/nested.a", "!source \"adjacent.a\"\n");
+    write("lib/adjacent.a", "!byte 8\n");
+    let human = run("human");
+    assert!(!human.status.success(), "{human:?}");
+    let stderr = String::from_utf8_lossy(&human.stderr);
+    assert!(stderr.contains("nested.a:1:"), "{stderr}");
+    assert!(stderr.contains("cannot load `adjacent.a`"), "{stderr}");
+    let json = run("json");
+    assert!(!json.status.success(), "{json:?}");
+    let diagnostics: Vec<serde_json::Value> =
+        serde_json::from_slice(&json.stdout).expect("JSON diagnostics");
+    assert!(
+        diagnostics[0]["span"]["path"]
+            .as_str()
+            .expect("diagnostic source path")
+            .ends_with("nested.a")
+    );
+    assert_eq!(diagnostics[0]["span"]["line"], 1);
+    assert_eq!(
+        std::fs::read(dir.join("out.bin")).expect("preserved output"),
+        [1, 4, 6]
+    );
+}
+
 /// AE1's mechanism for acme: a two-file program assembles byte-identical to
 /// its flattened equivalent, and the result's file table lists both files in
 /// `FileId` order (KTD2).
@@ -1643,6 +1717,7 @@ fn cli_acme_error_in_include_carries_an_included_from_note() {
     std::fs::write(&main, "* = $1000\n        !src \"bad.a\"\n").expect("write main");
     std::fs::write(dir.join("bad.a"), "        frob $10\n").expect("write include");
     let run = bin()
+        .current_dir(&dir)
         .args(["--dialect", "acme"])
         .arg(&main)
         .output()

@@ -3,10 +3,9 @@
 //! A multi-file project's first surprise is that a relative request does not
 //! mean the same thing in every dialect. ca65 walks back up the chain of
 //! includers; vasm and RGBDS anchor every request at the root input's
-//! directory however deep the request; acme, lwasm, sjasmplus and the
-//! asl-syntax chips look in the requesting file's own directory and nowhere
-//! else. The references genuinely diverge, and each of ours is pinned against
-//! the real tool.
+//! directory however deep the request; ACME uses the process working
+//! directory. lwasm, sjasmplus and the asl-syntax chips look in the requesting
+//! file's own directory. Each anchor is pinned against its reference tool.
 //!
 //! That is worth documenting and could not be, because the facts lived in
 //! `pub(crate)` consts scattered across the dialects. This is the accessor a
@@ -17,9 +16,8 @@
 //! **Derived where it can be, tested where it cannot.** Most dialects hand a
 //! `WalkSemantics` const to the
 //! shared walk, and those rows are read straight off it, so the table and the
-//! behaviour are one fact. acme and the Z80 pair resolve inside their own
-//! walks against the requesting file, with no const to read; their rows are
-//! stated here and held by the anchor tests in `tests/multifile.rs`.
+//! behaviour are one fact. The ACME CLI loader and the Z80 pair use their own
+//! paths. Their rows are held by the anchor tests in `tests/multifile.rs`.
 
 use crate::dialects;
 use crate::dialects::flat_walk::{Resolution, WalkSemantics};
@@ -38,6 +36,8 @@ pub enum Anchor {
     AncestorChain,
     /// The root input's directory, for every request however deep.
     Root,
+    /// The working directory of the command, for every request.
+    WorkingDirectory,
     /// The dialect does not read includes at all.
     None,
 }
@@ -58,6 +58,7 @@ impl Anchor {
             Self::Requester => "The including file's own directory",
             Self::AncestorChain => "The including file's directory, then each enclosing includer's",
             Self::Root => "The root input's directory, however deep the request",
+            Self::WorkingDirectory => "The process working directory",
             Self::None => "No include",
         }
     }
@@ -103,10 +104,11 @@ pub fn resolution() -> Vec<DialectIncludes> {
     use dialects::{asl, flat_walk, lwasm, rgbasm, vasm};
     let ca65 = &flat_walk::CA65_SEMANTICS;
     vec![
-        // acme's `!src` is resolved in `AcmeEval::lower` against the
-        // requesting file's path; the Z80 walk does the same for `include`.
-        // Neither has a semantics const, so both are stated and tested.
-        DialectIncludes::requester("acme"),
+        DialectIncludes {
+            dialect: "acme",
+            anchor: Anchor::WorkingDirectory,
+            default_extension: None,
+        },
         DialectIncludes::from("ca65", ca65),
         DialectIncludes::from("65816", ca65),
         DialectIncludes::from("huc6280", ca65),
@@ -183,7 +185,7 @@ mod tests {
         assert_eq!(anchor("vasm"), Anchor::Root);
         assert_eq!(anchor("rgbasm"), Anchor::Root);
         assert_eq!(anchor("lwasm"), Anchor::Requester);
-        assert_eq!(anchor("acme"), Anchor::Requester);
+        assert_eq!(anchor("acme"), Anchor::WorkingDirectory);
         assert_eq!(anchor("pasmo"), Anchor::Requester);
         assert_eq!(anchor("sjasmplus"), Anchor::Requester);
         assert_eq!(anchor("8080"), Anchor::Requester);

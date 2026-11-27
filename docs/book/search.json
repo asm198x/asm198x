@@ -869,7 +869,7 @@
       "slug": "reference/dialects/acme"
     },
     {
-      "context": "A relative request is looked for in the including file's own directory, then in the -I search directories in the order they were given.",
+      "context": "A relative request is looked for in the process working directory, then in the -I search directories in the order they were given.",
       "heading": "Projects in more than one file",
       "page": "acme",
       "slug": "reference/dialects/acme"

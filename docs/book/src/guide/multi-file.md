@@ -21,7 +21,7 @@ either.
 <!-- generated: xtask includes --anchors -->
 | Dialect | Looked for in | A request with no extension |
 |---|---|---|
-| `acme` | The including file's own directory | taken as spelled |
+| `acme` | The process working directory | taken as spelled |
 | `ca65` | The including file's directory, then each enclosing includer's | taken as spelled |
 | `65816` | The including file's directory, then each enclosing includer's | taken as spelled |
 | `huc6280` | The including file's directory, then each enclosing includer's | taken as spelled |

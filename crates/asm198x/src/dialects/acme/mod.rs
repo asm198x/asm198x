@@ -24,15 +24,11 @@
 //! rejected; a forward `+` reference never matches a definition on its own
 //! line, while a backward `-` reference does.
 //!
-//! One deliberate deviation, on our own CLI surface rather than the
-//! directive's semantics: acme resolves a quoted relative `!src`/`!bin`
-//! against the **process working directory** only (then `-I`), never the
-//! including file's directory. Our loader never consults the process cwd
-//! (the [`crate::source::FsLoader`] contract); it anchors at the requesting
-//! file's directory first, then the `-I` dirs — identical in the canonical
-//! run-from-the-project-directory layout. The `<file>` library spelling
-//! (acme: the `ACME` environment variable only) resolves through the same
-//! loader order instead.
+//! The CLI resolves a relative `!src`/`!bin` against the **process working
+//! directory**, then `-I`, as native ACME does for quoted paths (#967).
+//! The `<file>` library spelling uses the same loader order here. Native
+//! ACME uses its `ACME` environment variable for that spelling. Library
+//! callers supply the loader and control its search policy.
 //!
 //! Local labels are **zone-scoped** (language-surface U7, probe-pinned against
 //! acme 0.97): a leading-`.` name is local to the current `!zone`, and zones
