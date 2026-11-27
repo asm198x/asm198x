@@ -276,6 +276,18 @@ type MultiEntry = fn(
 /// path (the input with the artifact's extension), `Some(Some(p))` = explicit.
 type ArtifactPath = Option<Option<PathBuf>>;
 
+#[derive(Clone, Copy)]
+struct SourceWrites<'a> {
+    enabled: bool,
+    prefix: Option<&'a Path>,
+}
+
+impl SourceWrites<'_> {
+    fn artifacts(self, result: &asm198x::AssemblyResult) -> &[asm198x::Artifact] {
+        if self.enabled { &result.artifacts } else { &[] }
+    }
+}
+
 /// One recorded include load: what `--listing` needs to splice an included
 /// file into the multi-file listing — its canonical path (the file-table key),
 /// its text, and the include point (requesting file + directive line).
@@ -666,6 +678,7 @@ fn run(args: &[String]) -> Result<String, String> {
     // directives". It is the reference conceding the host gets a say over
     // source-named writes without changing the language.
     let mut outprefix: Option<PathBuf> = None;
+    let mut no_save = false;
     let mut i = 0;
     while i < args.len() {
         match args[i].as_str() {
@@ -687,6 +700,7 @@ fn run(args: &[String]) -> Result<String, String> {
             f if f.starts_with("--sym=") => {
                 sym = Some(Some(PathBuf::from(&f["--sym=".len()..])));
             }
+            "--no-save" => no_save = true,
             "--outprefix" => {
                 i += 1;
                 let path = args.get(i).ok_or("`--outprefix` needs a path")?;
@@ -823,6 +837,7 @@ fn run(args: &[String]) -> Result<String, String> {
             ),
             (linker_config.is_some(), "-C"),
             (outprefix.is_some(), "--outprefix"),
+            (no_save, "--no-save"),
             (!include_dirs.is_empty(), "-I"),
             (pasmo_option.is_some(), pasmo_option.unwrap_or("--equ")),
             (message_format_explicit, "--message-format"),
@@ -844,6 +859,9 @@ fn run(args: &[String]) -> Result<String, String> {
     }
     if format && outprefix.is_some() {
         return Err("`--outprefix` is an assembly option, not valid with `fmt`".into());
+    }
+    if format && no_save {
+        return Err("`--no-save` is an assembly option, not valid with `fmt`".into());
     }
     if format && origin.is_some() {
         return Err("`--org` is a disassembly option, not valid with `fmt`".into());
@@ -1092,6 +1110,11 @@ fn run(args: &[String]) -> Result<String, String> {
         return Ok(format!("formatted {input} -> stdout"));
     }
 
+    let source_writes = SourceWrites {
+        enabled: !no_save,
+        prefix: outprefix.as_deref(),
+    };
+
     // `--message-format=json`: emit the machine-consumable result (or its
     // diagnostics) as JSON on stdout, for any dialect, instead of the human
     // summary (U4). Byte output to `-o` still happens; only the reporting format
@@ -1106,7 +1129,7 @@ fn run(args: &[String]) -> Result<String, String> {
             exe,
             (sna, prg, tape),
             output.as_deref(),
-            outprefix.as_deref(),
+            source_writes,
             (&debug, &sym, &listing, &listing_json, &map_report),
             sym_format,
             linker_config.as_deref(),
@@ -1162,7 +1185,7 @@ fn run(args: &[String]) -> Result<String, String> {
         // wins — `decisions/source-named-output-files.md`, the same three
         // rules ACME's `!to` follows.
         let out_path = match (&output, &result.requested_output) {
-            (None, Some(req)) => source_named_path(input, &req.path)?,
+            (None, Some(req)) if source_writes.enabled => source_named_path(input, &req.path)?,
             _ => output
                 .unwrap_or_else(|| Path::new(input).with_extension(if exe { "" } else { "bin" })),
         };
@@ -1171,14 +1194,18 @@ fn run(args: &[String]) -> Result<String, String> {
             Some(&out_path),
             &result,
             &loader.inputs.borrow(),
-            outprefix.as_deref(),
+            source_writes,
             [&debug, &sym, &listing, &listing_json, &map_report],
             sym_format,
         )?;
         std::fs::write(&out_path, &result.bytes)
             .map_err(|e| format!("cannot write {}: {e}", out_path.display()))?;
-        let artifact_notes =
-            write_artifacts(&result.artifacts, &out_path, outprefix.as_deref())?.join("");
+        let artifact_notes = write_artifacts(
+            source_writes.artifacts(&result),
+            &out_path,
+            source_writes.prefix,
+        )?
+        .join("");
         let debug_notes = match &info {
             Some(info) => write_debug_artifacts(
                 input,
@@ -1244,7 +1271,7 @@ fn run(args: &[String]) -> Result<String, String> {
             Some(&out_path),
             &rom,
             &loader.inputs.borrow(),
-            outprefix.as_deref(),
+            source_writes,
             [&debug, &sym, &listing, &listing_json, &map_report],
             sym_format,
         )?;
@@ -1306,7 +1333,7 @@ fn run(args: &[String]) -> Result<String, String> {
             Some(image),
             &assembly,
             &recorder.inputs.borrow(),
-            outprefix.as_deref(),
+            source_writes,
             [&debug, &sym, &listing, &listing_json, &map_report],
             sym_format,
         )
@@ -1397,7 +1424,7 @@ fn run(args: &[String]) -> Result<String, String> {
         let linked =
             matches!(assembler, Assembler::Rgbasm).then(|| rgbasm_raw_image(&assembly.bytes));
         let (out_path, image) = match (&output, &assembly.requested_output) {
-            (None, Some(req)) => {
+            (None, Some(req)) if source_writes.enabled => {
                 let path = source_named_path(input, &req.path)?;
                 framed = frame_output(&assembly, req.format);
                 (path, framed.as_slice())
@@ -1421,14 +1448,20 @@ fn run(args: &[String]) -> Result<String, String> {
         );
         (summary, out_path)
     };
-    let artifact_notes =
-        write_artifacts(&assembly.artifacts, &image_path, outprefix.as_deref())?.join("");
+    let artifact_notes = write_artifacts(
+        source_writes.artifacts(&assembly),
+        &image_path,
+        source_writes.prefix,
+    )?
+    .join("");
 
     // ACME's `!symbollist` names a symbol dump, on the same terms as `!to`:
     // a request the flag overrides. `--sym` in any form counts as the name
     // already chosen, so this only applies when none was given.
     let sym = match (&sym, &assembly.requested_symbols) {
-        (None, Some(named)) => Some(Some(source_named_path(input, named)?)),
+        (None, Some(named)) if source_writes.enabled => {
+            Some(Some(source_named_path(input, named)?))
+        }
         _ => sym,
     };
 
@@ -1714,7 +1747,7 @@ fn preflight_outputs(
     image: Option<&Path>,
     assembly: &asm198x::AssemblyResult,
     consumed_inputs: &[PathBuf],
-    outprefix: Option<&Path>,
+    source_writes: SourceWrites<'_>,
     [debug, sym, listing, listing_json, map]: [&ArtifactPath; 5],
     sym_format: asm198x::SymbolFormat,
 ) -> Result<(), String> {
@@ -1735,9 +1768,12 @@ fn preflight_outputs(
         preflight_destination(image)?;
     }
     let default_image = Path::new(input).with_extension("bin");
-    for artifact in &assembly.artifacts {
-        let destination =
-            artifact_destination(&artifact.name, image.unwrap_or(&default_image), outprefix);
+    for artifact in source_writes.artifacts(assembly) {
+        let destination = artifact_destination(
+            &artifact.name,
+            image.unwrap_or(&default_image),
+            source_writes.prefix,
+        );
         preflight_destination(&destination)?;
         for source in
             std::iter::once(Path::new(input)).chain(consumed_inputs.iter().map(PathBuf::as_path))
@@ -1761,7 +1797,9 @@ fn preflight_outputs(
         }
     }
     let requested_sym = match (sym, &assembly.requested_symbols) {
-        (None, Some(named)) => Some(Some(source_named_path(input, named)?)),
+        (None, Some(named)) if source_writes.enabled => {
+            Some(Some(source_named_path(input, named)?))
+        }
         _ => None,
     };
     let sym = if sym.is_some() { sym } else { &requested_sym };
@@ -1799,11 +1837,11 @@ fn preflight_outputs(
                     ));
                 }
             }
-            for artifact in &assembly.artifacts {
+            for artifact in source_writes.artifacts(assembly) {
                 let artifact_path = artifact_destination(
                     &artifact.name,
                     image.unwrap_or(&default_image),
-                    outprefix,
+                    source_writes.prefix,
                 );
                 if output_collides(&destination, &artifact_path)? {
                     return Err(format!(
@@ -2180,6 +2218,7 @@ fn usage() -> String {
      \x20             6502, 6502x, 6502dtv, 65sc02, 65c02, w65c02, 65ce02,\n\
      \x20             4510, 45gs02, huc6280, m740, 65816, sweet16; a CPU only\n\
      \x20             ca65 assembles selects ca65 without --dialect)\n\
+     source outputs: --no-save skips output files requested by source directives\n\
      symbols:     asm198x --sym[=path] --sym-format=native|vice|nocash <input>\n\
      \x20            (native preserves --sym output; vice writes .vs monitor labels;\n\
      \x20             nocash writes .sym Game Boy bank:address labels)\n\
@@ -2311,7 +2350,7 @@ fn emit_json(
     exe: bool,
     (sna, prg, tape): (bool, bool, Option<(asm198x::TapeFormat, bool)>),
     output: Option<&Path>,
-    outprefix: Option<&Path>,
+    source_writes: SourceWrites<'_>,
     (debug, sym, listing, listing_json, map): (
         &ArtifactPath,
         &ArtifactPath,
@@ -2434,7 +2473,7 @@ fn emit_json(
             // a container flag. Resolve it only when the CLI chose no image,
             // using the same path constraints and framing as human mode.
             let (requested_output, source_image) = match (output, &assembly.requested_output) {
-                (None, Some(request)) => (
+                (None, Some(request)) if source_writes.enabled => (
                     Some(source_named_path(input, &request.path)?),
                     Some(frame_output(&assembly, request.format)),
                 ),
@@ -2443,7 +2482,9 @@ fn emit_json(
             let output = output.or(requested_output.as_deref());
             // `--sym` in any form wins over a source's `!symbollist`.
             let requested_sym = match (sym, &assembly.requested_symbols) {
-                (None, Some(named)) => Some(Some(source_named_path(input, named)?)),
+                (None, Some(named)) if source_writes.enabled => {
+                    Some(Some(source_named_path(input, named)?))
+                }
                 _ => None,
             };
             let sym = if sym.is_some() { sym } else { &requested_sym };
@@ -2452,7 +2493,7 @@ fn emit_json(
                 output,
                 &assembly,
                 &loader.inputs.borrow(),
-                outprefix,
+                source_writes,
                 [debug, sym, listing, listing_json, map],
                 sym_format,
             )?;
@@ -2470,9 +2511,9 @@ fn emit_json(
             // image. The default output directory is still beside the input.
             let default_image = Path::new(input).with_extension("bin");
             let artifact_notes = write_artifacts(
-                &assembly.artifacts,
+                source_writes.artifacts(&assembly),
                 output.unwrap_or(&default_image),
-                outprefix,
+                source_writes.prefix,
             )?;
             assembly.warnings.extend(
                 artifact_notes
