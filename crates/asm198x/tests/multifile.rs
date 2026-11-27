@@ -1115,7 +1115,10 @@ fn acme_cli_uses_working_directory_then_ordered_include_dirs() {
     for mode in ["human", "json"] {
         let output = run(mode);
         assert!(output.status.success(), "{output:?}");
-        assert_eq!(std::fs::read(dir.join("out.bin")).unwrap(), [1, 4, 6]);
+        assert_eq!(
+            std::fs::read(dir.join("out.bin")).expect("assembled output"),
+            [1, 4, 6]
+        );
     }
 
     write("lib/nested.a", "!source \"adjacent.a\"\n");
@@ -1132,11 +1135,14 @@ fn acme_cli_uses_working_directory_then_ordered_include_dirs() {
     assert!(
         diagnostics[0]["span"]["path"]
             .as_str()
-            .unwrap()
+            .expect("diagnostic source path")
             .ends_with("nested.a")
     );
     assert_eq!(diagnostics[0]["span"]["line"], 1);
-    assert_eq!(std::fs::read(dir.join("out.bin")).unwrap(), [1, 4, 6]);
+    assert_eq!(
+        std::fs::read(dir.join("out.bin")).expect("preserved output"),
+        [1, 4, 6]
+    );
 }
 
 /// AE1's mechanism for acme: a two-file program assembles byte-identical to
