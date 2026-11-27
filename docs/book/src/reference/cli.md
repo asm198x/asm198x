@@ -461,6 +461,12 @@ resolved destination; these informational notes are not advisory warnings.
 request writes no file. A failed write returns a non-zero exit status; files
 written earlier in that invocation can remain.
 
+Use `--no-save` to skip files requested by source directives in either mode.
+JSON still includes the requested names and artifact bytes. Explicit CLI
+outputs and normal human-mode defaults still apply. To inspect the result
+without writing assembly outputs, use `--message-format=json --no-save`
+without output options.
+
 SjASMPlus `SAVENEX OPEN`, `CORE`, `AUTO` and `CLOSE` produce a separate NEX
 V1.2 executable from `DEVICE ZXSPECTRUMNEXT` memory. `AUTO` saves nonzero banks
 as they stand when that command is reached; `CLOSE` finalizes the header.

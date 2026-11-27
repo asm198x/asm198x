@@ -368,6 +368,121 @@ fn human_io_failures_keep_terminal_messages() {
 }
 
 #[test]
+fn no_save_keeps_artifact_descriptions_and_skips_destination_checks() {
+    let dir = NativeOutputDir::new("no-save-artifacts");
+    let src = dir.0.join("program.s");
+    std::fs::write(
+        &src,
+        " DEVICE ZXSPECTRUM48\n ORG $8000\n db 42\n SAVEBIN \"old.bin\",$8000,1\n SAVEBIN \"explicit.sym\",$8000,1\n SAVEBIN \"missing/new.bin\",$8000,1\n END $8000\n",
+    )
+    .expect("source");
+    std::fs::write(dir.0.join("old.bin"), b"keep").expect("previous artifact");
+
+    for mode in ["json", "human"] {
+        let output = bin()
+            .current_dir(&dir.0)
+            .args([
+                "--dialect",
+                "sjasmplus",
+                &format!("--message-format={mode}"),
+                "--no-save",
+                "--sym=explicit.sym",
+                "-o",
+                "image.bin",
+            ])
+            .arg(&src)
+            .output()
+            .expect("assemble");
+        assert!(
+            output.status.success(),
+            "{mode}: {}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+        assert_eq!(std::fs::read(dir.0.join("image.bin")).expect("image"), [42]);
+        assert!(dir.0.join("explicit.sym").is_file());
+        assert_eq!(
+            std::fs::read(dir.0.join("old.bin")).expect("artifact"),
+            b"keep"
+        );
+        assert!(!dir.0.join("missing").exists());
+        if mode == "json" {
+            let result: AssemblyResult = serde_json::from_slice(&output.stdout).expect("JSON");
+            assert_eq!(result.artifacts.len(), 3);
+            assert_eq!(result.artifacts[0].name, "old.bin");
+            assert_eq!(result.artifacts[0].bytes, [42]);
+            assert!(result.warnings.is_empty());
+        }
+    }
+}
+
+#[test]
+fn no_save_skips_source_named_images_and_symbols_in_both_modes() {
+    let dir = NativeOutputDir::new("no-save-source-names");
+    for (tag, dialect, source, executable, named_output) in [
+        (
+            "acme",
+            "acme",
+            "!to \"named.bin\",plain\n!symbollist \"named.sym\"\n*=$1000\nrts\n",
+            false,
+            Some("named.bin"),
+        ),
+        (
+            "vasm",
+            "vasm",
+            " output \"named.bin\"\n rts\n",
+            false,
+            Some("named.bin"),
+        ),
+        ("hunk", "vasm", " rts\n", true, None),
+    ] {
+        let cwd = dir.0.join(tag);
+        std::fs::create_dir(&cwd).expect("dialect directory");
+        std::fs::write(cwd.join("program.s"), source).expect("source");
+        for mode in ["json", "human"] {
+            let mut command = bin();
+            command.current_dir(&cwd).args([
+                "--dialect",
+                dialect,
+                &format!("--message-format={mode}"),
+                "--no-save",
+                "program.s",
+            ]);
+            if executable {
+                command.arg("--exe");
+            }
+            let output = command.output().expect("assemble");
+            assert!(
+                output.status.success(),
+                "{tag}/{mode}: {}",
+                String::from_utf8_lossy(&output.stderr)
+            );
+            assert!(!cwd.join("named.bin").exists());
+            assert!(!cwd.join("named.sym").exists());
+            if mode == "json" {
+                let result: AssemblyResult = serde_json::from_slice(&output.stdout).expect("JSON");
+                assert_eq!(
+                    result
+                        .requested_output
+                        .as_ref()
+                        .map(|request| request.path.as_str()),
+                    named_output
+                );
+                assert_eq!(
+                    result.requested_symbols.as_deref(),
+                    (dialect == "acme").then_some("named.sym")
+                );
+                assert_eq!(std::fs::read_dir(&cwd).expect("outputs").count(), 1);
+            } else {
+                assert!(
+                    cwd.join(if executable { "program" } else { "program.bin" })
+                        .is_file()
+                );
+            }
+        }
+    }
+}
+
+#[test]
 fn json_save_artifacts_match_human_files_and_report_resolved_writes() {
     for (tag, explicit_output, prefix, container) in [
         ("default", false, false, false),
