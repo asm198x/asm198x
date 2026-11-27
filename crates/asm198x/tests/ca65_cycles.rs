@@ -90,6 +90,25 @@ fn all_native_entries_check_the_same_budget_without_changing_bytes() {
 }
 
 #[test]
+fn cycle_budgets_accept_the_listing_name_of_a_scoped_label() {
+    let source = ".org $2000\n.proc outer\nroutine: nop\n.endproc\n";
+    let budget = |label, limit| format!("{source}; asm198x: cycles({label}) <= {limit}\n");
+    let result = assemble_ca65(&budget("outer::routine", 2)).expect("two-cycle scoped budget");
+    let baseline = assemble_ca65(source).expect("unbudgeted scoped label");
+    assert!(result.bytes == baseline.bytes, "budget changed the output");
+    let error = assemble_ca65(&budget("outer::routine", 1)).expect_err("over scoped budget");
+    assert_eq!(error.code, Code::CycleBudgetExceeded);
+    assert!(error.message.contains("2 worst case"));
+
+    let unknown = assemble_ca65(&budget("other::routine", 2)).expect_err("unknown scoped label");
+    assert!(unknown.message.contains("names no label with instructions"));
+    for malformed in ["outer:routine", "outer::::routine", "outer::", "::routine"] {
+        let error = assemble_ca65(&budget(malformed, 2)).expect_err("malformed scoped label");
+        assert!(error.message.contains("malformed asm198x assertion"));
+    }
+}
+
+#[test]
 fn resolved_modes_and_conditional_penalties_come_from_the_spec() {
     // Zero-page LDA (3), absolute-X LDA (4/5), BNE (2/4), RTS (6).
     let src = ".segment \"ZEROPAGE\"\nzp: .res 1\n.segment \"CODE\"\nstart: lda zp\n lda $1234,x\n bne start\n rts\n; asm198x: cycles(start) <= 18\n";
