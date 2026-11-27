@@ -48,7 +48,7 @@ use crate::dialect::{Dialect, Oversize};
 use crate::dialects::macros::{self, Expand};
 use crate::dialects::z80::{self, Z80Syntax};
 use crate::directives::{Category, Directive, Pattern};
-use crate::engine::{AsmError, Expr, Operation, Statement};
+use crate::engine::{AsmError, Expr, Operation, Statement, Warning};
 use crate::source::{SourceLoader, SourceMap};
 
 /// The sjasmplus Z80 dialect. `z80n` selects the target instruction set
@@ -881,6 +881,7 @@ impl Z80Syntax for SjasmplusSyntax {
         args: &str,
         line: usize,
         consts: &BTreeMap<String, i64>,
+        warnings: &mut Vec<Warning>,
     ) -> Result<Option<Operation>, AsmError> {
         let word = undot(word);
         if word.eq_ignore_ascii_case("align") {
@@ -1021,27 +1022,37 @@ impl Z80Syntax for SjasmplusSyntax {
         let lower = word.to_ascii_lowercase();
         match lower.as_str() {
             "db" | "defb" | "defm" | "dm" | "byte" => {
-                return Ok(Some(Operation::Bytes(flat(data_items(args, line, true)?))));
+                return Ok(Some(Operation::Bytes(flat(data_items(
+                    args, line, true, warnings,
+                )?))));
             }
             "dw" | "defw" | "word" => {
                 return Ok(Some(Operation::Words(packed(data_items(
-                    args, line, false,
+                    args, line, false, warnings,
                 )?))));
             }
             "dword" | "dd" | "defd" => {
-                return Ok(Some(wide(packed(data_items(args, line, false)?), 4)));
+                return Ok(Some(wide(
+                    packed(data_items(args, line, false, warnings)?),
+                    4,
+                )));
             }
-            "d24" => return Ok(Some(wide(packed(data_items(args, line, false)?), 3))),
+            "d24" => {
+                return Ok(Some(wide(
+                    packed(data_items(args, line, false, warnings)?),
+                    3,
+                )));
+            }
             // `dz` terminates with a zero; `dc` sets bit 7 on the last
             // character of each string and leaves numbers alone.
             "dz" => {
-                let mut bytes = flat(data_items(args, line, true)?);
+                let mut bytes = flat(data_items(args, line, true, warnings)?);
                 bytes.push(Expr::Num(0));
                 return Ok(Some(Operation::Bytes(bytes)));
             }
             "dc" => {
                 return Ok(Some(Operation::Bytes(marked(data_items(
-                    args, line, true,
+                    args, line, true, warnings,
                 )?))));
             }
             "dh" | "hex" | "defh" => {
@@ -1054,7 +1065,7 @@ impl Z80Syntax for SjasmplusSyntax {
             "abyte" | "abytec" | "abytez" => {
                 let (offset, rest) = crate::dialects::mos6502::split_first_word(args.trim());
                 let offset = z80::parse_value(self, offset, line)?;
-                let items = data_items(rest, line, true)?;
+                let items = data_items(rest, line, true, warnings)?;
                 let mut bytes = if lower == "abytec" {
                     marked(items)
                 } else {
@@ -1143,12 +1154,12 @@ impl Z80Syntax for SjasmplusSyntax {
             if end != t.len() {
                 return Err(bad());
             }
-            return Ok(i64::from(pack_bytes(bytes) as i32));
+            return Ok(i64::from(pack_bytes(&bytes) as i32));
         }
         // A double-quoted string is a value too, packed the same way, with
         // its escapes decoded: `ld b,"a"` is 06 61 (probed, #986).
         if t.starts_with('"') {
-            return Ok(i64::from(pack_bytes(decoded_string(t, line)?) as i32));
+            return Ok(i64::from(pack_bytes(&decoded_string(t, line)?) as i32));
         }
         // Validate separators in the actual digit body, after selecting its
         // radix. Removing quotes first would wrongly accept `0'xff` or `10'h`.
@@ -1228,7 +1239,12 @@ fn single_quoted(piece: &str, line: usize) -> Result<(Vec<u8>, usize), AsmError>
     Err(AsmError::new(line, "unterminated single-quoted literal"))
 }
 
-fn data_items(rest: &str, line: usize, byte_context: bool) -> Result<Vec<DataItem>, AsmError> {
+fn data_items(
+    rest: &str,
+    line: usize,
+    byte_context: bool,
+    warnings: &mut Vec<Warning>,
+) -> Result<Vec<DataItem>, AsmError> {
     let rest = rest.trim();
     if rest.is_empty() {
         return Err(AsmError::new(line, "directive needs at least one value"));
@@ -1263,43 +1279,38 @@ fn data_items(rest: &str, line: usize, byte_context: bool) -> Result<Vec<DataIte
     let items = pieces
         .into_iter()
         .map(|piece| {
-            if piece.starts_with('"') {
-                // A string followed by an operator is a value where the
-                // directive takes one: `db "a"+1` is $62 and `dw "a"+1` is
-                // $0062, but `db "ab"+1` is refused (probed, #986).
-                let (bytes, end) = double_quoted(piece, line)?;
-                if piece[end..].trim().is_empty() {
-                    Ok(DataItem::String(bytes))
-                } else if !byte_context || bytes.len() == 1 {
-                    Ok(DataItem::Value(z80::parse_value(
-                        &SjasmplusSyntax,
-                        piece,
-                        line,
-                    )?))
-                } else {
-                    Err(AsmError::new(line, "unexpected tokens after quoted data"))
-                }
-            } else if byte_context && piece.starts_with('\'') {
-                let (bytes, end) = single_quoted(piece, line)?;
-                if bytes.len() != 1 {
-                    if !piece[end..].trim().is_empty() {
-                        return Err(AsmError::new(line, "unexpected tokens after quoted data"));
+            let quoted = match piece.as_bytes().first() {
+                Some(b'"') => Some(double_quoted(piece, line)?),
+                Some(b'\'') if byte_context => Some(single_quoted(piece, line)?),
+                _ => None,
+            };
+            if let Some((bytes, end)) = quoted {
+                let bare = piece[end..].trim().is_empty();
+                let apostrophe_scalar = piece.starts_with('\'') && bytes.len() == 1;
+                if bare && !apostrophe_scalar {
+                    if byte_context {
+                        if bytes.is_empty() {
+                            warnings.push(Warning::new(line, format!("Empty string: {piece}")));
+                        }
+                    } else {
+                        warn_packed_literal(&bytes, piece, line, warnings);
                     }
-                    Ok(DataItem::String(bytes))
-                } else {
-                    Ok(DataItem::Value(z80::parse_value(
-                        &SjasmplusSyntax,
-                        piece,
-                        line,
-                    )?))
+                    return Ok(DataItem::String(bytes));
                 }
-            } else {
-                Ok(DataItem::Value(z80::parse_value(
-                    &SjasmplusSyntax,
-                    piece,
-                    line,
-                )?))
+                if byte_context && bytes.len() != 1 {
+                    return Err(AsmError::new(line, "unexpected tokens after quoted data"));
+                }
             }
+            z80::parse_value_with_quotes(&SjasmplusSyntax, piece, line, |token| {
+                let bytes = if token.starts_with('\'') {
+                    single_quoted(token, line)?.0
+                } else {
+                    decoded_string(token, line)?
+                };
+                warn_packed_literal(&bytes, token, line, warnings);
+                Ok(i64::from(pack_bytes(&bytes) as i32))
+            })
+            .map(DataItem::Value)
         })
         .collect::<Result<Vec<_>, AsmError>>()?;
     if byte_context
@@ -1625,15 +1636,30 @@ fn packed(items: Vec<DataItem>) -> Vec<Expr> {
     items
         .into_iter()
         .map(|item| match item {
-            DataItem::String(bytes) => Expr::Num(i64::from(pack_bytes(bytes))),
+            DataItem::String(bytes) => Expr::Num(i64::from(pack_bytes(&bytes))),
             DataItem::Value(value) => value,
         })
         .collect()
 }
 
-fn pack_bytes(bytes: Vec<u8>) -> u32 {
+// SjASMPlus 1.21.0 GetCharConst tests the decoded byte count, even
+// when leading NULs leave the numeric value in range.
+fn warn_packed_literal(bytes: &[u8], literal: &str, line: usize, warnings: &mut Vec<Warning>) {
+    let message = match bytes.len() {
+        0 => format!("Empty string literal converted to value 0!: {literal}"),
+        5.. => format!(
+            "String literal truncated to 0x{:X}: {literal}",
+            pack_bytes(bytes)
+        ),
+        _ => return,
+    };
+    warnings.push(Warning::new(line, message));
+}
+
+fn pack_bytes(bytes: &[u8]) -> u32 {
     bytes
-        .into_iter()
+        .iter()
+        .copied()
         .fold(0u32, |value, byte| value.wrapping_shl(8) | u32::from(byte))
 }
 
