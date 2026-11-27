@@ -1124,7 +1124,7 @@ fn run(args: &[String]) -> Result<String, String> {
     // section-relative record with per-file line spans — same bytes by
     // construction.
     if let Assembler::Vasm = assembler {
-        let fs = fs_loader(input, &include_dirs);
+        let fs = fs_loader(assembler, input, &include_dirs);
         let loader = RecordingLoader::new(&fs);
         let debug_requested = debug.is_some() || sym.is_some();
         let (result, info) = if exe && debug_requested {
@@ -1211,7 +1211,7 @@ fn run(args: &[String]) -> Result<String, String> {
     // read out of layout (U4), its line records naming each statement's file —
     // same bytes by construction.
     if let Assembler::Ca65 { cpu } = assembler {
-        let fs = fs_loader(input, &include_dirs);
+        let fs = fs_loader(assembler, input, &include_dirs);
         let loader = RecordingLoader::new(&fs);
         // `-C` selects the project's own ld65 configuration (#483); absent,
         // the curriculum default applies exactly as before.
@@ -1277,11 +1277,11 @@ fn run(args: &[String]) -> Result<String, String> {
 
     // Every flat dialect assembles through its multi-file entry (U2–U4 — the
     // z80 family, acme, the ca65-flat family, rgbasm, lwasm, and the twelve
-    // asl chips), with the input's directory + the `-I` dirs wired into a
+    // asl chips), with the dialect's search anchor + the `-I` dirs wired into a
     // filesystem loader; a failure renders with the real file table and the
     // include-graph notes. Only the non-flat ca65/vasm paths (handled above)
     // sit outside the table.
-    let loader = fs_loader(input, &include_dirs);
+    let loader = fs_loader(assembler, input, &include_dirs);
     // The recorder keeps each include's contents + include point so a
     // `--listing` on a multi-file program can splice the files (U9); the
     // resolution behaviour is the wrapped filesystem loader's, unchanged.
@@ -2018,10 +2018,17 @@ fn render_multi_error(input: &str, e: &asm198x::MultiFileError) -> String {
         .join("\n")
 }
 
-/// The filesystem loader for an include-capable run: anchored at the input's
-/// directory, searching the repeatable `-I` dirs in command-line order (U2,
-/// KTD8).
-fn fs_loader(input: &str, include_dirs: &[PathBuf]) -> asm198x::source::FsLoader {
+/// A filesystem loader with the CLI's dialect-specific anchor and `-I` order.
+fn fs_loader(
+    assembler: Assembler,
+    input: &str,
+    include_dirs: &[PathBuf],
+) -> asm198x::source::FsLoader {
+    if matches!(assembler, Assembler::Acme) {
+        // Native ACME searches the working directory for both !source and
+        // !binary, even when the requesting file is in a subdirectory (#967).
+        return asm198x::source::FsLoader::with_fixed_base(".", include_dirs.to_vec());
+    }
     let base = Path::new(input)
         .parent()
         .filter(|p| !p.as_os_str().is_empty())
@@ -2343,7 +2350,7 @@ fn emit_json(
     // One filesystem loader for every route, wrapped in the include recorder
     // so flat listings splice includes and native ca65 rows show included
     // source. vasm rejects listings upstream and ignores the recording.
-    let fs = fs_loader(input, include_dirs);
+    let fs = fs_loader(*assembler, input, include_dirs);
     let loader = RecordingLoader::new(&fs);
     if let Some(path) = linker_config {
         loader.inputs.borrow_mut().push(path.to_path_buf());

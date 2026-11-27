@@ -163,13 +163,14 @@ pub trait SourceLoader {
 /// the reference does **not** fall back to the root's directory for nested
 /// includes. Two deliberate deviations from the reference, both on our own
 /// CLI surface rather than the directive's semantics: the process working
-/// directory is never searched (sjasmplus tries it last — an unpredictable
+/// directory is not an extra fallback (sjasmplus tries it last — an unpredictable
 /// dependency on where the tool was launched), and our repeatable `-I` keeps
 /// first-listed-wins order (sjasmplus's `-i` gives *later* flags priority).
 pub struct FsLoader {
-    /// The root input's directory — the search anchor for root-level requests.
+    /// The fallback base, or the anchor for all requests when fixed.
     base: PathBuf,
-    /// Ordered `-I` search directories, tried after the requester's directory.
+    fixed_base: bool,
+    /// Ordered `-I` search directories, tried after the anchor.
     search: Vec<PathBuf>,
 }
 
@@ -179,7 +180,17 @@ impl FsLoader {
     pub fn new(base: impl Into<PathBuf>, search: Vec<PathBuf>) -> Self {
         Self {
             base: base.into(),
+            fixed_base: false,
             search,
+        }
+    }
+
+    /// Use `base` for every relative request, followed by the search dirs.
+    /// The requesting path still identifies the source of a failed request.
+    pub fn with_fixed_base(base: impl Into<PathBuf>, search: Vec<PathBuf>) -> Self {
+        Self {
+            fixed_base: true,
+            ..Self::new(base, search)
         }
     }
 
@@ -194,13 +205,14 @@ impl FsLoader {
         // Includes are keyed by canonical (absolute) paths, so a nested
         // request always has a real parent; a bare root spelling (`main.s`)
         // has an empty one and anchors at `base` instead.
-        let from_dir = from
+        let anchor = from
+            .filter(|_| !self.fixed_base)
             .map(Path::new)
             .and_then(Path::parent)
             .filter(|dir| !dir.as_os_str().is_empty())
-            .map_or_else(|| self.base.clone(), Path::to_path_buf);
-        std::iter::once(from_dir)
-            .chain(self.search.iter().cloned())
+            .unwrap_or(&self.base);
+        std::iter::once(anchor)
+            .chain(self.search.iter().map(PathBuf::as_path))
             .map(|dir| dir.join(req))
             .find(|candidate| candidate.exists())
     }

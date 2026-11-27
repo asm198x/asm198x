@@ -51,7 +51,7 @@ Instruction mnemonics are not listed here — they come from the instruction-set
 
 ## Projects in more than one file
 
-A relative request is looked for in **the including file's own directory**, then in the `-I` search directories in the order they were given.
+A relative request is looked for in **the process working directory**, then in the `-I` search directories in the order they were given.
 
 The anchor is pinned against this dialect's own reference assembler, and the dialects genuinely disagree — [Projects in more than one file](../../guide/multi-file.md) has the comparison.
 
