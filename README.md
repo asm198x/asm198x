@@ -100,6 +100,26 @@ cargo test         # unit tests — featherweight, no GUI/graphics deps
 cargo test --test curriculum -- --ignored --nocapture
 ```
 
+## Check Vault assembly examples
+
+Run the editorial sweep from an Asm198x checkout.
+
+```sh
+cargo xtask vault-lint ../code198x-website/src/content/vault/techniques
+```
+
+Explicit fence labels such as `z80` and `68000` select the assembler family.
+Generic `asm` fences use the entry's `platforms` list when present. The sweep
+supplies a temporary origin or section, keeps placeholder lines in the source
+line map, and retries missing simple global symbols with zero-valued stubs.
+The summary distinguishes fragments that assembled with stubs, warnings and
+skipped assembly fences. Assembly success only checks the fragment's syntax
+and operands under those assumptions.
+
+Warnings name the source line and each dialect tried. They are editorial
+leads and leave the command successful. Missing or unreadable input fails the
+command. The sweep reads the checkout and emits no assembled files.
+
 ## Licence
 
 GPL-2.0-or-later, matching the family.

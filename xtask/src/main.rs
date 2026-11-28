@@ -24,6 +24,7 @@ mod nav;
 mod parity;
 mod search;
 mod surface;
+mod vault_lint;
 
 use std::path::PathBuf;
 use std::process::ExitCode;
@@ -33,6 +34,7 @@ fn main() -> ExitCode {
     match args.first().map(String::as_str) {
         Some("coverage") => run_coverage(&args[1..]),
         Some("parity") => run_parity(&args[1..]),
+        Some("vault-lint") => vault_lint::run(&args[1..]),
         Some("grow") => grow::run(&repo(), args.get(1).map(String::as_str)),
         Some("ecosystem") => ecosystem::run(&repo(), &args[1..]),
         Some("corpus") => run_corpus(&args[1..]),
@@ -137,6 +139,7 @@ fn usage() -> String {
      \x20 corpus --check      fail if a verdict file is not in canonical form\n\
      \x20 corpus --write      rewrite every verdict file canonically\n\
      \x20 grow [filter]       arbitrate with the reference tools (needs them)\n\
+     \x20 vault-lint <dir>    report editorial diagnostics for Vault assembly fences\n\
      \x20 ecosystem check     validate the real-world source manifest\n\
      \x20 ecosystem list      list admitted projects and build targets\n\
      \x20 ecosystem fetch <dir> [id]  fetch and verify pinned source trees\n\
